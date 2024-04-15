@@ -31,6 +31,24 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>9.0</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>9.0</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\ThirdParty\SCPSL\Assembly-CSharp.dll</HintPath>
@@ -82,19 +100,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\Extensions\ItemExtensions.cs" />
-    <Compile Include="API\Features\CustomItem.cs" />
-    <Compile Include="API\Serializable\SerializableCustomItem.cs" />
-    <Compile Include="API\UncomplicatedCustomItemsAPI.cs" />
-    <Compile Include="Commands\Admin\Create.cs" />
-    <Compile Include="Commands\Parent.cs" />
-    <Compile Include="Commands\PlayerCommand.cs" />
-    <Compile Include="Commands\User\Read.cs" />
-    <Compile Include="Commands\User\Use.cs" />
+    <Compile Include="API\Events.cs" />
+    <Compile Include="API\Features\CustomItemHandler.cs" />
+    <Compile Include="API\Manager.cs" />
+    <Compile Include="Commands\UCIUse.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Elements\CustomItem.cs" />
+    <Compile Include="Elements\Response.cs" />
+    <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Events\Internal\Player.cs" />
+    <Compile Include="Helper\Helper.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Interfaces\ICustomItem.cs" />
+    <Compile Include="Interfaces\IResponse.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

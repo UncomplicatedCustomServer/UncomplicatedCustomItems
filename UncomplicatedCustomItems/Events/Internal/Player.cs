@@ -1,33 +1,25 @@
 ﻿using Exiled.Events.EventArgs.Player;
-using UncomplicatedCustomItems.API.Extensions;
-using EventSource = Exiled.Events.Handlers.Player;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
-    internal static class Player
+    internal class Player
     {
-        public static void Register()
+        public void OnItemDropping(DroppingItemEventArgs Dropping)
         {
-            EventSource.UsingItem += CancelUsingCustomItemOnUsingItem;
+            Dropping.IsAllowed = Helper.Helper.HandleItemEvent(ItemEvents.Drop, Dropping, Dropping.Player);
         }
 
-        public static void Unregister()
+        public void OnItemUsing(UsingItemEventArgs Using)
         {
-            EventSource.UsingItem -= CancelUsingCustomItemOnUsingItem;
+            Using.IsAllowed = Helper.Helper.HandleItemEvent(ItemEvents.Drop, Using, Using.Player);
         }
 
-        /// <summary>
-        /// Cancel using if it is custom item
-        /// </summary>
-        /// <param name="ev"></param>
-        public static void CancelUsingCustomItemOnUsingItem(UsingItemEventArgs ev)
+        public void OnItemPickup(ItemAddedEventArgs PickingUp)
         {
-            if (!ev.IsAllowed)
+            if (!Helper.Helper.HandleItemEvent(ItemEvents.Drop, PickingUp, PickingUp.Player))
             {
-                return;
+                PickingUp.Player.DropItem(PickingUp.Item);
             }
-
-            ev.IsAllowed = !ev.Item.IsCustomItem();
         }
     }
 }
