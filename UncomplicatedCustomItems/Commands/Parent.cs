@@ -9,12 +9,9 @@ using UncomplicatedCustomItems.Commands.User;
 namespace UncomplicatedCustomItems.Commands
 {
     [CommandHandler(typeof(ClientCommandHandler))]
-    public class Parent : ParentCommand
+    public class Parent : ParentCommandBase
     {
-        public Parent()
-        {
-            LoadGeneratedCommands();
-        }
+        public Parent() : base() { }
 
         public override string Command => "uci";
 
@@ -22,32 +19,11 @@ namespace UncomplicatedCustomItems.Commands
 
         public override string Description => "Parent command";
 
-        private StringBuilder _message;
-
-        ~Parent()
+        public override PlayerCommandBase[] Children { get; } = new PlayerCommandBase[]
         {
-            StringBuilderPool.Pool.Return(_message);
-        }
-
-        public override void LoadGeneratedCommands()
-        {
-            RegisterCommand(new Read());
-            RegisterCommand(new Use());
-            RegisterCommand(new Create());
-
-            _message = StringBuilderPool.Pool.Get(AllCommands.Count());
-
-            foreach (var command in AllCommands)
-            {
-                _message.AppendLine($"{command.Command} - {command.Description}");
-            }
-        }
-
-        protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
-        {
-            response = _message.ToString();
-
-            return true;
-        }
+            new Read(),
+            new Use(),
+            new Create()
+        };
     }
 }

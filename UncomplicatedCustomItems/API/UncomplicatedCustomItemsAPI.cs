@@ -10,19 +10,19 @@ namespace UncomplicatedCustomItems.API
     {
         public UncomplicatedCustomItemsAPI()
         {
-            _items = new List<CustomItem>();
+            _items = new List<CustomThing>();
         }
 
-        private List<CustomItem> _items;
+        private List<CustomThing> _items;
 
         /// <summary>
         /// Add custom item to inventory
         /// </summary>
         /// <param name="player"></param>
         /// <param name="customItem"></param>
-        public void Add(CustomItem customItem)
+        public void Add(CustomThing customThing)
         {
-            _items.Add(customItem);
+            _items.Add(customThing);
         }
 
         /// <summary>
@@ -30,9 +30,9 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="player"></param>
         /// <param name="customItem"></param>
-        public void Remove(CustomItem customItem)
+        public void Remove(CustomThing customThing)
         {
-            _items.Remove(customItem);
+            _items.Remove(customThing);
         }
 
         /// <summary>
@@ -42,18 +42,18 @@ namespace UncomplicatedCustomItems.API
         /// <param name="serial"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public bool TryGet(ushort serial, out CustomItem result)
+        public bool TryGet(ushort serial, out CustomThing result)
         {
-            var customItem = Get(serial);
+            var customThing = Get(serial);
 
-            if (customItem is null)
+            if (customThing is null)
             {
                 result = null;
 
                 return false;
             }
 
-            result = customItem;
+            result = customThing;
 
             return true;
         }
@@ -64,7 +64,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="player"></param>
         /// <param name="serial"></param>
         /// <returns></returns>
-        public CustomItem Get(ushort serial)
+        public CustomThing Get(ushort serial)
         {
             return _items.FirstOrDefault(customItem => customItem.Item.Serial == serial); 
         }

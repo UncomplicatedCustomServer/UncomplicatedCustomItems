@@ -83,12 +83,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Extensions\ItemExtensions.cs" />
+    <Compile Include="API\Features\CustomWeapon.cs" />
     <Compile Include="API\Features\CustomItem.cs" />
+    <Compile Include="API\Features\Data\WeaponInfo.cs" />
+    <Compile Include="API\Features\CustomThing.cs" />
+    <Compile Include="API\Serializable\SerializableThing.cs" />
+    <Compile Include="API\Serializable\SerializableCustomWeapon.cs" />
     <Compile Include="API\Serializable\SerializableCustomItem.cs" />
     <Compile Include="API\UncomplicatedCustomItemsAPI.cs" />
     <Compile Include="Commands\Admin\Create.cs" />
+    <Compile Include="Commands\Enums\ThingType.cs" />
     <Compile Include="Commands\Parent.cs" />
-    <Compile Include="Commands\PlayerCommand.cs" />
+    <Compile Include="Commands\ParentCommandBase.cs" />
+    <Compile Include="Commands\PlayerCommandBase.cs" />
     <Compile Include="Commands\User\Read.cs" />
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />

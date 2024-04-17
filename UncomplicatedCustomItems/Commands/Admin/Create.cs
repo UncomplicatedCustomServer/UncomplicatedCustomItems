@@ -1,11 +1,13 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
 using System;
+using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.Commands.Enums;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
-    public class Create : PlayerCommand
+    public class Create : PlayerCommandBase
     {
         public override string Command => "create";
 
@@ -15,19 +17,19 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public override bool Execute(ArraySegment<string> arguments, Player player, out string response)
         {
-            if (arguments.Count == 0 || !int.TryParse(arguments.Array[2], out var result))
+            if (arguments.Count < 2 || !int.TryParse(arguments.Array[2], out var result))
             {
                 response = "You must enter the custom item id";
                 return false;
             }
 
-            if (!Plugin.Instance.Config.CustomItems.TryGetValue(result, out var value))
+            if (!Enum.TryParse(arguments.Array[3], true, out ThingType type))
             {
-                response = $"Unknown custom item with {result} id";
+                response = $"Unknown type with {arguments.Array[3]} name";
                 return false;
             }
 
-           value.Create(player).Spawn();
+            CustomThing.Create(player, type, result).Spawn();
 
             response = "Created";
             return true;

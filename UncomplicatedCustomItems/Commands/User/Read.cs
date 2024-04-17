@@ -3,7 +3,7 @@ using System;
 
 namespace UncomplicatedCustomItems.Commands.User
 {
-    public class Read : PlayerCommand
+    public class Read : PlayerCommandBase
     {
         public override string Command => "read";
 

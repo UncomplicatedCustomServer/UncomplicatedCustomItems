@@ -1,5 +1,7 @@
-﻿using Exiled.Events.EventArgs.Player;
+﻿using Exiled.API.Features.Items;
+using Exiled.Events.EventArgs.Player;
 using UncomplicatedCustomItems.API.Extensions;
+using UncomplicatedCustomItems.API.Features;
 using EventSource = Exiled.Events.Handlers.Player;
 
 namespace UncomplicatedCustomItems.Events.Internal
@@ -9,11 +11,33 @@ namespace UncomplicatedCustomItems.Events.Internal
         public static void Register()
         {
             EventSource.UsingItem += CancelUsingCustomItemOnUsingItem;
+            EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
         }
 
         public static void Unregister()
         {
             EventSource.UsingItem -= CancelUsingCustomItemOnUsingItem;
+            EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
+        }
+
+        public static void SetDamageFromCustomWeaponOnHurting(HurtingEventArgs ev)
+        {
+            if (ev.DamageHandler.Type is not Exiled.API.Enums.DamageType.Firearm)
+            {
+                return;
+            }
+
+            if (ev.Attacker.CurrentItem is not Firearm)
+            {
+                return;
+            }
+
+            if (!Plugin.API.TryGet(ev.Attacker.CurrentItem.Serial, out var result) || result is not CustomWeapon customWeapon)
+            {
+                return;
+            }
+
+            ev.DamageHandler.Damage = customWeapon.Info.Damage;
         }
 
         /// <summary>

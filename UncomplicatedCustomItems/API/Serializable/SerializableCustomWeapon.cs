@@ -1,13 +1,12 @@
 ﻿using Exiled.API.Features;
 using System.ComponentModel;
-using System.Runtime.Serialization;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Serializable.Interfaces;
+using UncomplicatedCustomItems.API.Features.Data;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Serializable
 {
-    public class SerializableCustomItem : SerializableThing<CustomItem>
+    public class SerializableCustomWeapon : Interfaces.SerializableThing<CustomWeapon>
     {
         [Description("Name")]
         public override string Name { get; set; }
@@ -24,20 +23,17 @@ namespace UncomplicatedCustomItems.API.Serializable
         [Description("Scale")]
         public Vector3 Scale { get; set; }
 
-        [Description("Command to execute")]
-        public string Command { get; set; }
-
-        [Description("Use response")]
-        public string Response { get; set; }
+        [Description("Weapon info")]
+        public WeaponInfo Info { get; set; }
 
         /// <summary>
         /// Return custom item by serializable 
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public override CustomItem Create(Player player)
+        public override CustomWeapon Create(Player player)
         {
-            return new CustomItem(player, this);
+            return new CustomWeapon(player, this);
         }
     }
 }

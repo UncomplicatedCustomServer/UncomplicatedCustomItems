@@ -3,7 +3,7 @@ using Exiled.API.Features;
 using System;
 namespace UncomplicatedCustomItems.Commands
 {
-    public abstract class PlayerCommand : ICommand
+    public abstract class PlayerCommandBase : ICommand
     {
         public abstract string Command { get; }
 

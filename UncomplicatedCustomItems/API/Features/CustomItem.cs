@@ -1,16 +1,14 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using UncomplicatedCustomItems.API.Serializable;
-using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
 {
-    public class CustomItem
+    public class CustomItem : CustomThing
     {
-        public CustomItem(Player player, int id, SerializableCustomItem serializableCustomItem)
+        public CustomItem(Player player, SerializableCustomItem serializableCustomItem)
         {
             Name = serializableCustomItem.Name;
-            Id = id;
             Description = serializableCustomItem.Description;
             Command = serializableCustomItem.Command;
             Response = serializableCustomItem.Response;
@@ -19,21 +17,19 @@ namespace UncomplicatedCustomItems.API.Features
             _serializable = serializableCustomItem;
         }
 
-        public string Name { get; }
+        public override string Name { get; }
 
-        public string Description { get; }
+        public override string Description { get; }
 
-        public int Id { get; }
+        public override Item Item { get; protected set; }
 
         public Player Player { get; }
-
-        public Item Item { get; private set; }
 
         public string Response { get; }
 
         public string Command { get; }
 
-        private SerializableCustomItem _serializable;
+        private readonly SerializableCustomItem _serializable;
 
         /// <summary>
         /// Execute command if it is not null, after it message response
@@ -51,7 +47,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Spawn custom item in hand
         /// </summary>
-        public void Spawn()
+        public override void Spawn()
         {
             Item = Item.Create(_serializable.Model, Player);
             Item.Scale = _serializable.Scale;
