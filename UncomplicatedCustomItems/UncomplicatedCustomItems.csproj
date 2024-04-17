@@ -33,37 +33,37 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\ThirdParty\SCPSL\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\ThirdParty\SCPSL\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="CommandSystem.Core">
-      <HintPath>..\ThirdParty\SCPSL\CommandSystem.Core.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\CommandSystem.Core.dll</HintPath>
     </Reference>
     <Reference Include="Exiled.API">
-      <HintPath>..\ThirdParty\Exiled\Exiled.API.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Exiled.API.dll</HintPath>
     </Reference>
     <Reference Include="Exiled.Events">
-      <HintPath>..\ThirdParty\Exiled\Exiled.Events.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Exiled.Events.dll</HintPath>
     </Reference>
     <Reference Include="Exiled.Permissions">
-      <HintPath>..\ThirdParty\Exiled\Exiled.Permissions.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Exiled.Permissions.dll</HintPath>
     </Reference>
     <Reference Include="Mirror">
-      <HintPath>..\ThirdParty\Other\Mirror.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Mirror.dll</HintPath>
     </Reference>
     <Reference Include="NorthwoodLib">
-      <HintPath>..\ThirdParty\SCPSL\NorthwoodLib.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
     </Reference>
     <Reference Include="PluginAPI">
-      <HintPath>..\ThirdParty\SCPSL\PluginAPI.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\PluginAPI.dll</HintPath>
     </Reference>
     <Reference Include="SCPSLAudioApi">
-      <HintPath>..\ThirdParty\Other\SCPSLAudioApi.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\SCPSLAudioApi.dll</HintPath>
     </Reference>
     <Reference Include="SemanticVersioning">
-      <HintPath>..\ThirdParty\Other\SemanticVersioning.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\SemanticVersioning.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -75,10 +75,10 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\ThirdParty\UnityEngine\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\ThirdParty\UnityEngine\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
