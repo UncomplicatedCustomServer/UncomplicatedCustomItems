@@ -12,12 +12,24 @@ namespace UncomplicatedCustomItems.Events.Internal
         {
             EventSource.UsingItem += CancelUsingCustomItemOnUsingItem;
             EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
+            EventSource.ItemAdded += ShowItemInfoOnItemAdded;
         }
 
         public static void Unregister()
         {
             EventSource.UsingItem -= CancelUsingCustomItemOnUsingItem;
             EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
+            EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
+        }
+
+        public static void ShowItemInfoOnItemAdded(ItemAddedEventArgs ev)
+        {
+            if (!Plugin.API.TryGet(ev.Item.Serial, out var result))
+            {
+                return;
+            }
+
+            ev.Player.ShowHint(result.Name);
         }
 
         public static void SetDamageFromCustomWeaponOnHurting(HurtingEventArgs ev)
