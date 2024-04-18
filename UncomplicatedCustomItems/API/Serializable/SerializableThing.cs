@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using Exiled.API.Features.Spawn;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.Data;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Serializable
@@ -26,6 +28,9 @@ namespace UncomplicatedCustomItems.API.Serializable
 
         [Description("Scale")]
         public Vector3 Scale { get; set; }
+
+        [Description("Spawn properties")]
+        public ItemSpawnPoint SpawnPoint { get; set; }
 
         public abstract CustomThing Create(Player player);
     }

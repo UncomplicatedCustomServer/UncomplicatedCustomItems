@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
+using Exiled.Events.Handlers;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Data;
@@ -23,7 +24,11 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
         }
 
-        public static void ShowItemInfoOnItemAdded(ItemAddedEventArgs ev)
+        /// <summary>
+        /// Show item name if it is custom item
+        /// </summary>
+        /// <param name="ev"></param>
+        private static void ShowItemInfoOnItemAdded(ItemAddedEventArgs ev)
         {
             if (!Plugin.API.TryGet(ev.Item.Serial, out var result))
             {
@@ -33,7 +38,11 @@ namespace UncomplicatedCustomItems.Events.Internal
             ev.Player.ShowHint(result.Name);
         }
 
-        public static void SetDamageFromCustomWeaponOnHurting(HurtingEventArgs ev)
+        /// <summary>
+        /// Set damage if weapon is custom item
+        /// </summary>
+        /// <param name="ev"></param>
+        private static void SetDamageFromCustomWeaponOnHurting(HurtingEventArgs ev)
         {
             if (ev.DamageHandler.Type is not Exiled.API.Enums.DamageType.Firearm)
             {
@@ -57,7 +66,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// Cancel using if it is custom item
         /// </summary>
         /// <param name="ev"></param>
-        public static void CancelUsingCustomItemOnUsingItem(UsingItemEventArgs ev)
+        private static void CancelUsingCustomItemOnUsingItem(UsingItemEventArgs ev)
         {
             if (!ev.IsAllowed)
             {

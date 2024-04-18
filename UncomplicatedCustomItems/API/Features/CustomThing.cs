@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Items;
+using Exiled.API.Features.Pickups;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features.Data;
 using UncomplicatedCustomItems.API.Serializable;
 using UncomplicatedCustomItems.Commands.Enums;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -29,7 +31,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public ThingInfo Info { get; }
 
-        public Player Player { get; protected set; }
+        public Player Player { get; internal set; }
 
         public Item Item { get; protected set; }
 
@@ -38,13 +40,20 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Spawn custom item in hand
         /// </summary>
-        public void Spawn()
+        public void Spawn(Vector3 position = default)
         {
             Item = Item.Create(Serializable.Model, Player);
             Item.Scale = Serializable.Scale;
             Info.Set(Item);
 
-            Player.CurrentItem = Item;
+            if (Player is not null)
+            {
+                Player.CurrentItem = Item;
+            }
+            else
+            {
+                Item.CreatePickup(position, Quaternion.identity, true).IsLocked = true;
+            }
 
             Plugin.API.Add(this);
         }

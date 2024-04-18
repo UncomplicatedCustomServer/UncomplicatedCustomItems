@@ -88,6 +88,7 @@
     <Compile Include="API\Features\CustomItem.cs" />
     <Compile Include="API\Features\Data\ArmorInfo.cs" />
     <Compile Include="API\Features\Data\ItemInfo.cs" />
+    <Compile Include="API\Features\Data\ItemSpawnPoint.cs" />
     <Compile Include="API\Features\Data\ThingInfo.cs" />
     <Compile Include="API\Features\Data\WeaponInfo.cs" />
     <Compile Include="API\Features\CustomThing.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Events\Internal\Player.cs" />
+    <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

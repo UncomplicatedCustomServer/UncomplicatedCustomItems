@@ -1,4 +1,5 @@
-﻿using Exiled.API.Interfaces;
+﻿using Exiled.API.Features.Spawn;
+using Exiled.API.Interfaces;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UncomplicatedCustomItems.API.Features.Data;
@@ -30,6 +31,13 @@ namespace UncomplicatedCustomItems
                     {
                         BodyProtection = 99,
                         HeadProtection = 99
+                    },
+                    SpawnPoint = new ItemSpawnPoint()
+                    {
+                        Location = Exiled.API.Enums.SpawnLocationType.Inside914,
+                        Chance = 100,
+                        Position = Vector3.one,
+                        Name = "Chipi chapa"
                     }
                 }
             }
