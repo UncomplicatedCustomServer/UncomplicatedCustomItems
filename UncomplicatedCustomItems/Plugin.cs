@@ -16,8 +16,6 @@ namespace UncomplicatedCustomItems
 
         public override Version Version { get; } = new(1, 2, 5);
 
-        private static Config _config;
-
         public override void OnEnabled()
         {
             Instance = this;

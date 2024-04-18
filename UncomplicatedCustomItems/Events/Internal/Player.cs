@@ -15,6 +15,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.UsingItem += CancelUsingCustomItemOnUsingItem;
             EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
+            EventSource.ItemRemoved += SetPlayerNullOnItemRemoved;
         }
 
         public static void Unregister()
@@ -22,6 +23,17 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.UsingItem -= CancelUsingCustomItemOnUsingItem;
             EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
+            EventSource.ItemRemoved -= SetPlayerNullOnItemRemoved;
+        }
+
+        private static void SetPlayerNullOnItemRemoved(ItemRemovedEventArgs ev)
+        {
+            if (!Plugin.API.TryGet(ev.Item.Serial, out var result))
+            {
+                return;
+            }
+
+            result.Player = null;
         }
 
         /// <summary>
@@ -35,7 +47,11 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
             }
 
-            ev.Player.ShowHint(result.Name);
+            var player = ev.Player;
+
+            player.ShowHint(result.Name);
+
+            result.Player = player;
         }
 
         /// <summary>
