@@ -7,24 +7,21 @@ using System.Threading.Tasks;
 
 namespace UncomplicatedCustomItems.API.Features.Data
 {
-    public class WeaponInfo : ThingInfo
+    public class ArmorInfo : ThingInfo
     {
-        public float Damage { get; set; }
+        public int HeadProtection { get; set; }
 
-        public float FireRate { get; set; }
-
-        public byte MaxAmmo { get; set; }
+        public int BodyProtection { get; set; }
 
         public override void Set(Item item)
         {
-            if (item is not Firearm firearm)
+            if (item is not Armor armor)
             {
                 return;
             }
 
-            firearm.FireRate = FireRate;
-            firearm.MaxAmmo = MaxAmmo;
-            firearm.Ammo = firearm.MaxAmmo;
+            armor.HelmetEfficacy = HeadProtection;
+            armor.VestEfficacy = BodyProtection;
         }
     }
 }

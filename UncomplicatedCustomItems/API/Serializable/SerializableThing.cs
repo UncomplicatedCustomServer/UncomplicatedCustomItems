@@ -1,21 +1,32 @@
 ﻿using Exiled.API.Features;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features;
+using UnityEngine;
 
-namespace UncomplicatedCustomItems.API.Serializable.Interfaces
+namespace UncomplicatedCustomItems.API.Serializable
 {
-    public abstract class SerializableThing<T> where T : CustomThing
+    public abstract class SerializableThing
     {
-        public abstract string Name { get; set; }
+        [Description("Name")]
+        public string Name { get; set; }
 
-        public abstract string Description { get; set; }
+        [Description("Description")]
+        public string Description { get; set; }
 
-        public abstract int Id { get; set; }
+        [Description("Use response")]
+        public int Id { get; set; }
 
-        public abstract T Create(Player player);
+        [Description("Model")]
+        public ItemType Model { get; set; }
+
+        [Description("Scale")]
+        public Vector3 Scale { get; set; }
+
+        public abstract CustomThing Create(Player player);
     }
 }

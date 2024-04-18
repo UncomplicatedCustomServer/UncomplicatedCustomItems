@@ -15,14 +15,14 @@ namespace UncomplicatedCustomItems.Commands
             LoadGeneratedCommands();
         }
 
-        public abstract PlayerCommandBase[] Children { get; }
-
-        private StringBuilder _message;
-
         ~ParentCommandBase()
         {
             StringBuilderPool.Pool.Return(_message);
         }
+
+        public abstract PlayerCommandBase[] Children { get; }
+
+        private StringBuilder _message;
 
         public override void LoadGeneratedCommands()
         {
@@ -30,7 +30,7 @@ namespace UncomplicatedCustomItems.Commands
 
             foreach (var child in Children)
             {
-                _message.Append($"{child.Command} - {child.Description}");
+                _message.AppendLine($"{child.Command} - {child.Description}");
                 RegisterCommand(child);
             }
         }

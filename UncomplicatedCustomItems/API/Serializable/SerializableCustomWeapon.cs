@@ -6,23 +6,8 @@ using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Serializable
 {
-    public class SerializableCustomWeapon : Interfaces.SerializableThing<CustomWeapon>
+    public class SerializableCustomWeapon : SerializableThing
     {
-        [Description("Name")]
-        public override string Name { get; set; }
-
-        [Description("Description")]
-        public override string Description { get; set; }
-
-        [Description("Use response")]
-        public override int Id { get; set; }
-
-        [Description("Model")]
-        public ItemType Model { get; set; }
-
-        [Description("Scale")]
-        public Vector3 Scale { get; set; }
-
         [Description("Weapon info")]
         public WeaponInfo Info { get; set; }
 
@@ -31,9 +16,6 @@ namespace UncomplicatedCustomItems.API.Serializable
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public override CustomWeapon Create(Player player)
-        {
-            return new CustomWeapon(player, this);
-        }
+        public override CustomThing Create(Player player) => new CustomWeapon(player, Info, this);
     }
 }

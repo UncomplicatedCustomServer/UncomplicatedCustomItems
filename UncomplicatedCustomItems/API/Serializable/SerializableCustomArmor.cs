@@ -7,16 +7,16 @@ using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Serializable
 {
-    public class SerializableCustomItem : SerializableThing
+    public class SerializableCustomArmor : SerializableThing
     {
         [Description("Info")]
-        public ItemInfo Info { get; set; }
+        public ArmorInfo Info { get; set; }
 
         /// <summary>
         /// Return custom item by serializable 
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public override CustomThing Create(Player player) => new CustomItem(player, Info, this);
+        public override CustomThing Create(Player player) => new CustomArmor(player, Info, this);
     }
 }

@@ -2,6 +2,7 @@
 using Exiled.Events.EventArgs.Player;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.Data;
 using EventSource = Exiled.Events.Handlers.Player;
 
 namespace UncomplicatedCustomItems.Events.Internal
@@ -49,7 +50,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
             }
 
-            ev.DamageHandler.Damage = customWeapon.Info.Damage;
+            ev.DamageHandler.Damage = (customWeapon.Info as WeaponInfo).Damage;
         }
 
         /// <summary>

@@ -83,10 +83,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Extensions\ItemExtensions.cs" />
+    <Compile Include="API\Features\CustomArmor.cs" />
     <Compile Include="API\Features\CustomWeapon.cs" />
     <Compile Include="API\Features\CustomItem.cs" />
+    <Compile Include="API\Features\Data\ArmorInfo.cs" />
+    <Compile Include="API\Features\Data\ItemInfo.cs" />
+    <Compile Include="API\Features\Data\ThingInfo.cs" />
     <Compile Include="API\Features\Data\WeaponInfo.cs" />
     <Compile Include="API\Features\CustomThing.cs" />
+    <Compile Include="API\Serializable\SerializableCustomArmor.cs" />
     <Compile Include="API\Serializable\SerializableThing.cs" />
     <Compile Include="API\Serializable\SerializableCustomWeapon.cs" />
     <Compile Include="API\Serializable\SerializableCustomItem.cs" />

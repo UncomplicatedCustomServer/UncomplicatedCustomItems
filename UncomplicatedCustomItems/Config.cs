@@ -15,6 +15,26 @@ namespace UncomplicatedCustomItems
         [Description("Is debug or not")]
         public bool Debug { get; set; }
 
+        [Description("List of custom armors")]
+        public Dictionary<int, SerializableCustomArmor> CustomArmors { get; set; } = new Dictionary<int, SerializableCustomArmor>()
+        {
+            {
+                0, 
+                new SerializableCustomArmor()
+                {
+                    Name = "Very heavy armor",
+                    Description = "Very heavy armor",
+                    Id = 0,
+                    Model = ItemType.ArmorHeavy,
+                    Info = new ArmorInfo()
+                    {
+                        BodyProtection = 99,
+                        HeadProtection = 99
+                    }
+                }
+            }
+        };
+
         [Description("List of custom weapons")]
         public Dictionary<int, SerializableCustomWeapon> CustomWeapons { get; set; } = new Dictionary<int, SerializableCustomWeapon>()
         {
@@ -49,8 +69,11 @@ namespace UncomplicatedCustomItems
                     Id = 0,
                     Model = ItemType.KeycardGuard,
                     Scale = new Vector3(1, 0.1f, 1),
-                    Command = string.Empty,
-                    Response = "Hello, welcome to UncomplicatedCustomItems by SpGerg!"
+                    Info = new ItemInfo()
+                    {
+                        Command = string.Empty,
+                        Response = "Hello, welcome to UncomplicatedCustomItems by SpGerg!"
+                    }
                 }
             },
             {
@@ -62,21 +85,11 @@ namespace UncomplicatedCustomItems
                     Id = 1,
                     Model = ItemType.KeycardChaosInsurgency,
                     Scale = new Vector3(1, 1, 1),
-                    Command = "/SERVER_EVENT DETONATION_INSTANT",
-                    Response = "Flashbacks..."
-                }
-            },
-            {
-                2,
-                new SerializableCustomItem()
-                {
-                    Name = "Detonator",
-                    Description = "Boom.... lol",
-                    Id = 2,
-                    Model = ItemType.SCP207,
-                    Scale = new Vector3(1, 1, 1),
-                    Command = "/SERVER_EVENT DETONATION_INSTANT",
-                    Response = "Flashbacks..."
+                    Info = new ItemInfo()
+                    {
+                        Command = "/SERVER_EVENT DETONATION_INSTANT",
+                        Response = "Flashbacks..."
+                    }
                 }
             }
         };
