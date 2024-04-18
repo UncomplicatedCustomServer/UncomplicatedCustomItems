@@ -1,9 +1,6 @@
 ﻿using Exiled.API.Features;
-using Exiled.API.Features.Items;
-using MEC;
 using UncomplicatedCustomItems.API.Features.Data;
 using UncomplicatedCustomItems.API.Serializable;
-using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
 {

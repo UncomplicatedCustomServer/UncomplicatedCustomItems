@@ -1,5 +1,4 @@
 ﻿using Exiled.API.Features;
-using Exiled.API.Features.Items;
 using UncomplicatedCustomItems.API.Features.Data;
 using UncomplicatedCustomItems.API.Serializable;
 

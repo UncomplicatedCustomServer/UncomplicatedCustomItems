@@ -1,16 +1,6 @@
 ﻿using Exiled.API.Extensions;
-using Exiled.API.Features;
-using Exiled.API.Features.Spawn;
-using MEC;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Serializable;
-using UnityEngine;
 using EventSource = Exiled.Events.Handlers.Server;
 
 namespace UncomplicatedCustomItems.Events.Internal

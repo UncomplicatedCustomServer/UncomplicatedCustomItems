@@ -1,6 +1,5 @@
 ﻿using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
-using Exiled.Events.Handlers;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Data;

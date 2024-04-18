@@ -1,12 +1,5 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Items;
-using Exiled.API.Features.Pickups;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features.Data;
 using UncomplicatedCustomItems.API.Serializable;
 using UncomplicatedCustomItems.Commands.Enums;

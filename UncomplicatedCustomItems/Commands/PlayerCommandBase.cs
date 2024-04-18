@@ -1,6 +1,7 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
 using System;
+
 namespace UncomplicatedCustomItems.Commands
 {
     public abstract class PlayerCommandBase : ICommand

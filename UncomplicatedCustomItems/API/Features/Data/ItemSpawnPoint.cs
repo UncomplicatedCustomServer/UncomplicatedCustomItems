@@ -1,10 +1,5 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features.Spawn;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features.Data
