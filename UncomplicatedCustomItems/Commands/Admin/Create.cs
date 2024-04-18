@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
         {
             if (arguments.Count < 2 || !int.TryParse(arguments.Array[2], out var result))
             {
-                response = "You must enter the custom item id";
+                response = "You must enter the custom item id or item type";
                 return false;
             }
 
