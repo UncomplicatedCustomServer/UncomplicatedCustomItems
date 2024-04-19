@@ -51,6 +51,13 @@ namespace UncomplicatedCustomItems.API.Features
             Plugin.API.Add(this);
         }
 
+        /// <summary>
+        /// Create custom item by thing type
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="thingType"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static CustomThing Create(Player player, ThingType thingType, int id)
         {
             switch (thingType)
