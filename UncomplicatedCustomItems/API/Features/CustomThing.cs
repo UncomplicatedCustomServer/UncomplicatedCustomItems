@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.API.Features
             }
             else
             {
-                Item.CreatePickup(position, Quaternion.identity, true).IsLocked = true;
+                Item.CreatePickup(position, Quaternion.identity, true);
             }
 
             Plugin.API.Add(this);
@@ -61,6 +61,8 @@ namespace UncomplicatedCustomItems.API.Features
                     return Plugin.Instance.Config.CustomWeapons[id].Create(player);
                 case ThingType.Armor:
                     return Plugin.Instance.Config.CustomArmors[id].Create(player);
+                case ThingType.Keycard:
+                    return Plugin.Instance.Config.CustomKeycards[id].Create(player);
                 default:
                     break;
             }

@@ -25,6 +25,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             SpawnCustomItemsList(Plugin.Instance.Config.CustomItems.Values);
             SpawnCustomItemsList(Plugin.Instance.Config.CustomArmors.Values);
             SpawnCustomItemsList(Plugin.Instance.Config.CustomWeapons.Values);
+            SpawnCustomItemsList(Plugin.Instance.Config.CustomKeycards.Values);
         }
 
         /// <summary>

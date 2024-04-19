@@ -4,6 +4,7 @@
     {
         Item,
         Weapon,
-        Armor
+        Armor,
+        Keycard
     }
 }

@@ -15,6 +15,30 @@ namespace UncomplicatedCustomItems
         [Description("Is debug or not")]
         public bool Debug { get; set; }
 
+        public Dictionary<int, SerializableCustomKeycard> CustomKeycards { get; set; } = new Dictionary<int, SerializableCustomKeycard>()
+        {
+            {
+                0,
+                new SerializableCustomKeycard()
+                {
+                    Name = "Exiled keycard staff",
+                    Description = "Useless card",
+                    Id = 0,
+                    Model = ItemType.KeycardFacilityManager,
+                    Scale = Vector3.one,
+                    SpawnPoint = new ItemSpawnPoint()
+                    {
+                        Position = Vector3.zero,
+                        Location = Exiled.API.Enums.SpawnLocationType.InsideLczWc
+                    },
+                    Info = new KeycardInfo()
+                    {
+                        Permissions = Exiled.API.Enums.KeycardPermissions.Checkpoints
+                    }
+                }
+            }
+        };
+
         [Description("List of custom armors")]
         public Dictionary<int, SerializableCustomArmor> CustomArmors { get; set; } = new Dictionary<int, SerializableCustomArmor>()
         {
