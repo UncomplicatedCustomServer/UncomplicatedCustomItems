@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
 
-        public override Version Version { get; } = new(1, 2, 5);
+        public override Version Version { get; } = new(1, 3, 1);
 
         public override void OnEnabled()
         {
