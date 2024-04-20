@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
-    internal interface IWeaponData : IData
+    public interface IWeaponData : IData
     {
         public abstract float Damage { get; set; }
 

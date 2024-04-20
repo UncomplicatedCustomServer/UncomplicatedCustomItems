@@ -10,7 +10,7 @@ using UnityEngine;
 #nullable enable
 namespace UncomplicatedCustomItems.Elements
 {
-    public class CustomItem : ICustomItem
+    internal class CustomItem : ICustomItem
     {
         /// <summary>
         /// The unique Id of the Custom Item. Can't be <= 0

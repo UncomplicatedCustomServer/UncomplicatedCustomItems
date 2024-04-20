@@ -1,6 +1,6 @@
 ﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
-    internal interface IArmorData : IData
+    public interface IArmorData : IData
     {
         public abstract int HeadProtection { get; set; }
 

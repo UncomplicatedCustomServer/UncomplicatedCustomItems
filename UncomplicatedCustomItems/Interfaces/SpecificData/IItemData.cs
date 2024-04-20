@@ -3,7 +3,7 @@
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
 #nullable enable
-    internal interface IItemData : IData
+    public interface IItemData : IData
     {
         public abstract ItemEvents Event { get; set; }
 

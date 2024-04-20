@@ -2,7 +2,7 @@
 
 namespace UncomplicatedCustomItems.Elements
 {
-    public class Response : IResponse
+    internal class Response : IResponse
     {
         public string ConsoleMessage { get; set; } = "An example response";
 

@@ -4,7 +4,7 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
 {
 #nullable enable
 
-    public class ItemData : IItemData
+    internal class ItemData : IItemData
     {
         /// <summary>
         /// The <see cref="ItemEvents"/> of the object
