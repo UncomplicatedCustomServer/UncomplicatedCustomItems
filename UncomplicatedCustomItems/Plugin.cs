@@ -8,18 +8,15 @@ namespace UncomplicatedCustomItems
     {
         public static Plugin Instance { get; private set; }
 
-        public static UncomplicatedCustomItemsAPI API { get; private set; }
-
-        public override string Author => "SpGergo & FoxWorno";
+        public override string Author => "SpGerg & FoxWorn";
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
 
-        public override Version Version { get; } = new(1, 3, 1);
+        public override Version Version { get; } = new(1, 5, 0);
 
         public override void OnEnabled()
         {
             Instance = this;
-            API = new UncomplicatedCustomItemsAPI();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
@@ -37,6 +34,8 @@ namespace UncomplicatedCustomItems
         {
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
+
+            Instance = null;
 
             base.OnDisabled();
         }

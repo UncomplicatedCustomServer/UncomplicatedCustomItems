@@ -1,8 +1,8 @@
 ﻿using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
-using UncomplicatedCustomItems.API.Extensions;
+using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Data;
+using UncomplicatedCustomItems.Interfaces.SpecificData;
 using EventSource = Exiled.Events.Handlers.Player;
 
 namespace UncomplicatedCustomItems.Events.Internal
@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.UsingItem += CancelUsingCustomItemOnUsingItem;
             EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
-            EventSource.ItemRemoved += SetPlayerNullOnItemRemoved;
+            EventSource.DroppedItem += DroppedItemEvent;
         }
 
         public static void Unregister()
@@ -22,17 +22,15 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.UsingItem -= CancelUsingCustomItemOnUsingItem;
             EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
-            EventSource.ItemRemoved -= SetPlayerNullOnItemRemoved;
+            EventSource.DroppedItem -= DroppedItemEvent;
         }
 
-        private static void SetPlayerNullOnItemRemoved(ItemRemovedEventArgs ev)
+        private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
-            if (!Plugin.API.TryGet(ev.Item.Serial, out var result))
+            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
             {
-                return;
+                Item.OnDrop(ev);
             }
-
-            result.Player = null;
         }
 
         /// <summary>
@@ -41,16 +39,11 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// <param name="ev"></param>
         private static void ShowItemInfoOnItemAdded(ItemAddedEventArgs ev)
         {
-            if (!Plugin.API.TryGet(ev.Item.Serial, out var result))
+            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
             {
-                return;
+                Item.HandlePickedUpDisplayHint();
+                Item.OnPickup(ev);
             }
-
-            var player = ev.Player;
-
-            player.ShowHint(result.Name);
-
-            result.Player = player;
         }
 
         /// <summary>
@@ -69,12 +62,22 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
             }
 
-            if (!Plugin.API.TryGet(ev.Attacker.CurrentItem.Serial, out var result) || result is not CustomWeapon customWeapon)
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
             {
                 return;
             }
 
-            ev.DamageHandler.Damage = (customWeapon.Info as WeaponInfo).Damage;
+            if (Item.CustomItem.CustomItemType != CustomItemType.Weapon)
+            {
+                return;
+            }
+
+            if (Item.CustomItem.CustomData is not IWeaponData WeaponData)
+            {
+                return;
+            }
+
+            ev.DamageHandler.Damage = WeaponData.Damage;
         }
 
         /// <summary>
@@ -88,7 +91,11 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
             }
 
-            ev.IsAllowed = !ev.Item.IsCustomItem();
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
+            {
+                ev.IsAllowed = false;
+                Item.HandleEvent(ev.Player, ItemEvents.Use);
+            }
         }
     }
 }
