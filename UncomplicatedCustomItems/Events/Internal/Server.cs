@@ -36,21 +36,22 @@ namespace UncomplicatedCustomItems.Events.Internal
         {
             foreach (var customItem in customThings)
             {
-                if (customItem.SpawnPoint is null || customItem.SpawnPoint.Chance == 0)
+                foreach (var spawnPoint in customItem.SpawnPoint)
                 {
-                    continue;
-                }
+                    if (customItem.SpawnPoint is null || spawnPoint.Chance == 0)
+                    {
+                        continue;
+                    }
 
-                var spawnPoint = customItem.SpawnPoint;
+                    var chance = UnityEngine.Random.Range(0, 100);
 
-                var chance = UnityEngine.Random.Range(0, 100);
+                    if (spawnPoint.Chance != 100 && spawnPoint.Chance > chance)
+                    {
+                        continue;
+                    }
 
-                if (spawnPoint.Chance != 100 && spawnPoint.Chance > chance)
-                {
-                    continue;
-                }
-
-                customItem.Create(null).Spawn(spawnPoint.Location.GetPosition() + spawnPoint.Position);
+                    customItem.Create(null).Spawn(spawnPoint.Location.GetPosition() + spawnPoint.Position);
+                }            
             }
         }
     }

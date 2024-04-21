@@ -26,10 +26,13 @@ namespace UncomplicatedCustomItems
                     Id = 0,
                     Model = ItemType.KeycardFacilityManager,
                     Scale = Vector3.one,
-                    SpawnPoint = new ItemSpawnPoint()
+                    SpawnPoint = new[]
                     {
-                        Position = Vector3.zero,
-                        Location = Exiled.API.Enums.SpawnLocationType.InsideLczWc
+                        new ItemSpawnPoint()
+                        {
+                            Position = Vector3.zero,
+                            Location = Exiled.API.Enums.SpawnLocationType.InsideLczWc
+                        },
                     },
                     Info = new KeycardInfo()
                     {
@@ -55,13 +58,15 @@ namespace UncomplicatedCustomItems
                         BodyProtection = 99,
                         HeadProtection = 99
                     },
-                    SpawnPoint = new ItemSpawnPoint()
-                    {
-                        Location = Exiled.API.Enums.SpawnLocationType.Inside914,
-                        Chance = 100,
-                        Position = Vector3.one,
-                        Name = "Chipi chapa"
-                    }
+                    SpawnPoint = new[] {
+                        new ItemSpawnPoint()
+                        {
+                            Location = Exiled.API.Enums.SpawnLocationType.Inside914,
+                            Chance = 100,
+                            Position = Vector3.one,
+                            Name = "Chipi chapa"
+                        }
+                    },
                 }
             }
         };

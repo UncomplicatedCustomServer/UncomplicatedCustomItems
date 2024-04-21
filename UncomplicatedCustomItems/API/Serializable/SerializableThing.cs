@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems.API.Serializable
         public Vector3 Scale { get; set; }
 
         [Description("Spawn properties")]
-        public ItemSpawnPoint SpawnPoint { get; set; }
+        public ItemSpawnPoint[] SpawnPoint { get; set; }
 
         public abstract CustomThing Create(Player player);
     }
