@@ -15,6 +15,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
             EventSource.DroppedItem += DroppedItemEvent;
+            EventSource.ChangedItem += ChangeItemInHand;
         }
 
         public static void Unregister()
@@ -23,6 +24,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
             EventSource.DroppedItem -= DroppedItemEvent;
+            EventSource.ChangedItem -= ChangeItemInHand;
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
@@ -39,10 +41,10 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// <param name="ev"></param>
         private static void ShowItemInfoOnItemAdded(ItemAddedEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
             {
-                Item.HandlePickedUpDisplayHint();
                 Item.OnPickup(ev);
+                Item.HandlePickedUpDisplayHint();
             }
         }
 
@@ -96,6 +98,16 @@ namespace UncomplicatedCustomItems.Events.Internal
                 ev.IsAllowed = false;
                 Item.HandleEvent(ev.Player, ItemEvents.Use);
             }
+        }
+
+        private static void ChangeItemInHand(ChangedItemEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
+            {
+                return;
+            }
+
+            Item.HandleSelectedDisplayHint();
         }
     }
 }

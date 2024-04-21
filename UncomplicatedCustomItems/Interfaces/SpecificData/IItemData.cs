@@ -9,8 +9,14 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
 
         public abstract string? Command { get; set; }
 
-        public abstract Response? Response { get; set; }
+        public abstract string ConsoleMessage { get; set; }
 
-        public abstract bool EventsEnabled { get; set; }
+        public abstract string BroadcastMessage { get; set; }
+
+        public abstract ushort BroadcastDuration { get; set; }
+
+        public abstract string HintMessage { get; set; }
+
+        public abstract float HintDuration { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
+﻿using UncomplicatedCustomItems.Elements.SpecificData;
+
+namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
     public interface IArmorData : IData
     {

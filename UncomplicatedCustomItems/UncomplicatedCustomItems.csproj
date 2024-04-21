@@ -107,6 +107,9 @@
     <Reference Include="netstandard">
       <HintPath>..\..\..\..\Downloads\Master\netstandard.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="NorthwoodLib, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EXILED.8.8.1\lib\net48\NorthwoodLib.dll</HintPath>
     </Reference>
@@ -391,7 +394,10 @@
     <Compile Include="API\Features\SummonedCustomItem.cs" />
     <Compile Include="API\Manager.cs" />
     <Compile Include="API\Utilities.cs" />
+    <Compile Include="API\YAMLCaster.cs" />
+    <Compile Include="Commands\Admin\List.cs" />
     <Compile Include="Commands\Admin\Summon.cs" />
+    <Compile Include="Commands\Admin\Summoned.cs" />
     <Compile Include="Commands\Parent.cs" />
     <Compile Include="Commands\ParentCommandBase.cs" />
     <Compile Include="Commands\PlayerCommandBase.cs" />
@@ -399,17 +405,17 @@
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Elements\CustomItem.cs" />
-    <Compile Include="Elements\Response.cs" />
     <Compile Include="Elements\SpecificData\ArmorData.cs" />
+    <Compile Include="Elements\SpecificData\Data.cs" />
     <Compile Include="Elements\SpecificData\ItemData.cs" />
     <Compile Include="Elements\SpecificData\WeaponData.cs" />
     <Compile Include="Elements\SpecificData\KeycardData.cs" />
+    <Compile Include="Elements\YAMLCustomItem.cs" />
     <Compile Include="Enums\CustomItemType.cs" />
     <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
-    <Compile Include="Interfaces\IResponse.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />
     <Compile Include="Interfaces\SpecificData\IData.cs" />
     <Compile Include="Interfaces\SpecificData\IItemData.cs" />
@@ -419,6 +425,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

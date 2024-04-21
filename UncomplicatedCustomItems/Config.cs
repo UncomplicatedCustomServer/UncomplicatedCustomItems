@@ -1,6 +1,7 @@
 ﻿using Exiled.API.Interfaces;
 using System.Collections.Generic;
 using System.ComponentModel;
+using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
 using UncomplicatedCustomItems.Elements.SpecificData;
 using UnityEngine;
@@ -10,28 +11,31 @@ namespace UncomplicatedCustomItems
     public class Config : IConfig
     {
         [Description("Is enabled or not")]
-        public bool IsEnabled { get; set; }
+        public bool IsEnabled { get; set; } = true;
 
         [Description("Do enable the developer (debug) mode?")]
-        public bool Debug { get; set; }
+        public bool Debug { get; set; } = true;
         [Description("A list of custom items")]
-        public List<CustomItem> CustomItems { get; set; } = new()
+        public List<YAMLCustomItem> CustomItems { get; set; } = new()
         {
-            new(),
             new()
             {
-                Id = 1,
+                CustomData = YAMLCaster.Encode(new ItemData()
+                {
+                    Event = ItemEvents.Command,
+                    Command = "/SERVER_EVENT DETONATION_INSTANT",
+                    ConsoleMessage = "UHUHUHUH!"
+                })
+            },
+            new()
+            {
+                Id = 2,
                 Name = "MagicWeapon",
                 Description = "A magic weapon with an incredible firerate",
                 Item = ItemType.GunCOM18,
                 CustomItemType = CustomItemType.Weapon,
                 Scale = Vector3.one,
-                CustomData = new WeaponData()
-                {
-                    FireRate = 0.1f,
-                    Damage = 10.5f,
-                    MaxAmmo = 100
-                }
+                CustomData = YAMLCaster.Encode(new WeaponData())
             }
         };
         [Description("The hint message that will appear every time that you pick up a custom item. %name% is the item's name, %desc% is the item's description")]

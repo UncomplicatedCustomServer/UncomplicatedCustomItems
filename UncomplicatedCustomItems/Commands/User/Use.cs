@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.Commands.User
 
         public override bool Execute(ArraySegment<string> arguments, Player player, out string response)
         {
-            if (player.CurrentItem is null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item) || Item.CustomItem.CustomItemType == CustomItemType.Item)
+            if (player.CurrentItem is null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item) || Item.CustomItem.CustomItemType != CustomItemType.Item)
             {
                 response = "You must hold the custom item!";
                 return false;
@@ -23,7 +23,7 @@ namespace UncomplicatedCustomItems.Commands.User
 
             Item.HandleEvent(player, ItemEvents.Command);
 
-            response = "";
+            response = $"Item {Item.CustomItem.Name} successfully used!";
             return true;
         }
     }

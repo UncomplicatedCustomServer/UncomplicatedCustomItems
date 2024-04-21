@@ -4,7 +4,7 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
 {
 #nullable enable
 
-    internal class ItemData : IItemData
+    public class ItemData : Data, IItemData
     {
         /// <summary>
         /// The <see cref="ItemEvents"/> of the object
@@ -17,13 +17,28 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         public string? Command { get; set; } = null;
 
         /// <summary>
-        /// The <see cref="Elements.Response"/> that will be executed when the <see cref="ItemEvents"/> will be fired
+        /// The message that will be sent inside the console when the <see cref="ItemEvents"/> will be fired
         /// </summary>
-        public Response? Response { get; set; } = new();
+        public string ConsoleMessage { get; set; } = "A funny message for the console";
 
         /// <summary>
-        /// Can this item's events be used from APIs by third parties?
+        /// The message that will be sent as broadcast when the <see cref="ItemEvents"/> will be fired
         /// </summary>
-        public bool EventsEnabled { get; set; } = true;
+        public string BroadcastMessage { get; set; } = "The broadcast uuhh!!!";
+
+        /// <summary>
+        /// The broadcast duration
+        /// </summary>
+        public ushort BroadcastDuration { get; set; } = 3;
+
+        /// <summary>
+        /// The message that will be sent as hint when the <see cref="ItemEvents"/> will be fired
+        /// </summary>
+        public string HintMessage { get; set; } = "Yamato is a femboy";
+
+        /// <summary>
+        /// The hint duration
+        /// </summary>
+        public float HintDuration { get; set; } = 2.3f;
     }
 }

@@ -3,5 +3,6 @@
     Item,
     Keycard,
     Armor,
-    Weapon
+    Weapon,
+    Medical
 }

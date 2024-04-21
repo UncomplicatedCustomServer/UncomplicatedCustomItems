@@ -1,7 +1,9 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Extensions;
+using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.Elements.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using ExiledItem = Exiled.API.Features.Items.Item;
@@ -13,79 +15,80 @@ namespace UncomplicatedCustomItems.API
         /// <summary>
         /// Check if a <see cref="ICustomItem"/> is valid and can be registered
         /// </summary>
-        /// <param name="Item"></param>
-        /// <param name="Error"></param>
-        /// <returns><see cref="false"/> if there's any problem. Every error will be outputted with <paramref name="Error"/></returns>
-        public static bool CustomItemValidator(ICustomItem Item, out string Error)
+        /// <param name="item"></param>
+        /// <param name="error"></param>
+        /// <returns><see cref="false"/> if there's any problem. Every error will be outputted with <paramref name="error"/></returns>
+        public static bool CustomItemValidator(ICustomItem item, out string error)
         {
-            if (Manager.Items.ContainsKey(Item.Id))
+            if (Manager.Items.ContainsKey(item.Id))
             {
-                Error = $"There's already another ICustomItem registered with the same Id ({Item.Id})!";
+                error = $"There's already another ICustomItem registered with the same Id ({item.Id})!";
                 return false;
             }
 
-            switch (Item.CustomItemType)
+            
+            switch (item.CustomItemType)
             {
                 case CustomItemType.Item:
-                    if (Item.CustomData is not IItemData)
+                    if (item.CustomData is not IItemData)
                     {
-                        Error = "The item has been flagged as 'Item' but the CustomData class is not 'IItemData'";
+                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'IItemData', found '{item.CustomData.GetType().Name}'";
                         return false;
                     }
 
                     break;
 
                 case CustomItemType.Weapon:
-                    if (Item.CustomData is not IWeaponData)
+                    if (item.CustomData is not IWeaponData)
                     {
-                        Error = "The item has been flagged as 'Weapon' but the CustomData class is not 'IWeaponData'";
+                        error = $"The item has been flagged as 'Weapon' but the CustomData class is not 'IWeaponData', found '{item.CustomData.GetType().Name}'";
                         return false;
                     }
 
-                    if (ExiledItem.Create(Item.Item) is not Firearm)
+                    if (!item.Item.IsWeapon())
                     {
-                        Error = $"The item has been flagged as 'Weapon' but the item {Item.Item} is not a weapon in the game!";
+                        error = $"The item has been flagged as 'Weapon' but the item {item.Item} is not a weapon in the game!";
                         return false;
                     }
 
                     break;
 
                 case CustomItemType.Keycard:
-                    if (Item.CustomData is not IKeycardData)
+                    if (item.CustomData is not IKeycardData)
                     {
-                        Error = "The item has been flagged as 'Keycard' but the CustomData class is not 'IKeycardData'";
+                        error = $"The item has been flagged as 'Keycard' but the CustomData class is not 'IKeycardData', found '{item.CustomData.GetType().Name}'";
                         return false;
                     }
 
-                    if (ExiledItem.Create(Item.Item) is not Keycard)
+                    if (!item.Item.IsKeycard())
                     {
-                        Error = $"The item has been flagged as 'Keycard' but the item {Item.Item} is not a keycard in the game!";
+                        error = $"The item has been flagged as 'Keycard' but the item {item.Item} is not a keycard in the game!";
                         return false;
                     }
 
                     break;
 
                 case CustomItemType.Armor:
-                    if (Item.CustomData is not IArmorData)
+                    if (item.CustomData is not IArmorData)
                     {
-                        Error = "The item has been flagged as 'Armor' but the CustomData class is not 'IArmorData'";
+                        error = $"The item has been flagged as 'Armor' but the CustomData class is not 'IArmorData', found '{item.CustomData.GetType().Name}'";
                         return false;
                     }
 
-                    if (ExiledItem.Create(Item.Item) is not Armor)
+                    if (!item.Item.IsArmor())
                     {
-                        Error = $"The item has been flagged as 'Armor' but the item {Item.Item} is not a armor in the game!";
+                        error = $"The item has been flagged as 'Armor' but the item {item.Item} is not a armor in the game!";
                         return false;
                     }
 
                     break;
 
                 default:
-                    Error = "Unknown error? Uhm please report it on our discord server!";
+                    error = "Unknown error? Uhm please report it on our discord server!";
                     return false;
             }
 
-            Error = "";
+            error = "";
             return true;
         }
 
@@ -93,46 +96,46 @@ namespace UncomplicatedCustomItems.API
         /// Check if a <see cref="ICustomItem"/> is valid and can be registered.
         /// Does not return the error as text!
         /// </summary>
-        /// <param name="Item"></param>
+        /// <param name="item"></param>
         /// <returns><see cref="false"/> if there's any problem.</returns>
-        public bool CustomItemValidator(ICustomItem Item)
+        public bool CustomItemValidator(ICustomItem item)
         {
-            return CustomItemValidator(Item, out _);
+            return CustomItemValidator(item, out _);
         }
 
         /// <summary>
         /// Parse a <see cref="IResponse"/> object as response to a player
         /// </summary>
-        /// <param name="Player"></param>
-        /// <param name="Response"></param>
-        public static void ParseResponse(Player Player, IResponse Response)
+        /// <param name="player"></param>
+        /// <param name="response"></param>
+        public static void ParseResponse(Player player, IItemData response)
         {
-            if (Response.ConsoleMessage is not null && Response.ConsoleMessage.Length > 1) // FUCK 1 char messages!
+            if (response.ConsoleMessage is not null && response.ConsoleMessage.Length > 1) // FUCK 1 char messages!
             {
-                Player.SendConsoleMessage(Response.ConsoleMessage, string.Empty);
+                player.SendConsoleMessage(response.ConsoleMessage, string.Empty);
             }
 
-            if (Response.BroadcastMessage.Length > 1 && Response.BroadcastDuration > 0)
+            if (response.BroadcastMessage.Length > 1 && response.BroadcastDuration > 0)
             {
-                Player.Broadcast(Response.BroadcastDuration, Response.BroadcastMessage);
+                player.Broadcast(response.BroadcastDuration, response.BroadcastMessage);
             }
 
-            if (Response.HintMessage.Length > 1 && Response.HintDuration > 0)
+            if (response.HintMessage.Length > 1 && response.HintDuration > 0)
             {
-                Player.ShowHint(Response.HintMessage, Response.HintDuration);
+                player.ShowHint(response.HintMessage, response.HintDuration);
             }
         }
 
         /// <summary>
         /// Try to get a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
-        /// <param name="Serial"></param>
-        /// <param name="Item"></param>
+        /// <param name="serial"></param>
+        /// <param name="item"></param>
         /// <returns><see cref="true"/> if succeeded</returns>
-        public static bool TryGetSummonedCustomItem(ushort Serial, out SummonedCustomItem Item)
+        public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem item)
         {
-            Item = Manager.SummonedItems.Where(item => item.Serial == Serial).FirstOrDefault();
-            if (Item == default)
+            item = Manager.SummonedItems.Where(item => item.Serial == serial).FirstOrDefault();
+            if (item == default)
             {
                 return false;
             }
@@ -142,11 +145,11 @@ namespace UncomplicatedCustomItems.API
         /// <summary>
         /// Get a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
-        /// <param name="Serial"></param>
+        /// <param name="serial"></param>
         /// <returns><see cref="SummonedCustomItem"/> if succeeded, <see cref="default"/> if not</returns>
-        public static SummonedCustomItem GetSummonedCustomItem(ushort Serial)
+        public static SummonedCustomItem GetSummonedCustomItem(ushort serial)
         {
-            if (!TryGetSummonedCustomItem(Serial, out SummonedCustomItem Item))
+            if (!TryGetSummonedCustomItem(serial, out SummonedCustomItem Item))
             {
                 return default;
             }
@@ -156,24 +159,49 @@ namespace UncomplicatedCustomItems.API
         /// <summary>
         /// Check if an item is a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
-        /// <param name="Serial"></param>
+        /// <param name="serial"></param>
         /// <returns><see cref="true"/> if it is</returns>
-        public static bool IsSummonedCustomItem(ushort Serial)
+        public static bool IsSummonedCustomItem(ushort serial)
         {
-            return Manager.SummonedItems.Where(item => item.Serial == Serial).Count() > 0;
+            return Manager.SummonedItems.Where(item => item.Serial == serial).Count() > 0;
         }
 
         /// <summary>
-        /// Summon a <see cref="ICustomItem"/> as a <see cref="SummonedCustomItem"/>
+        /// Try to get a <see cref="ICustomItem"/> by it's Id
         /// </summary>
-        /// <param name="Item"></param>
-        /// <param name="Player"></param>
-        /// <returns>The <see cref="SummonedCustomItem"/> class</returns>
-        public static SummonedCustomItem Summon(ICustomItem Item, Player Player)
+        /// <param name="id"></param>
+        /// <param name="item"></param>
+        /// <returns><see cref="true"/> if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
+        public static bool TryGetCustomItem(uint id, out ICustomItem item)
         {
-            SummonedCustomItem SummonedCustomItem = SummonedCustomItem.Summon(Item, Player);
-            Manager.SummonedItems.Add(SummonedCustomItem);
-            return SummonedCustomItem;
+            item = default;
+            if (Manager.Items.ContainsKey(id))
+            {
+                item = Manager.Items[id];
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Get a <see cref="ICustomItem"/> by it's Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns><see cref="ICustomItem"/> if it exists, otherwhise a <see cref="default"/> will be returned</returns>
+        public static ICustomItem GetCustomItem(uint id)
+        {
+            TryGetCustomItem(id, out ICustomItem Item);
+            return Item;
+        }
+
+        /// <summary>
+        /// Check if the given Id is already registered as a <see cref="ICustomItem"/>
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static bool IsCustomItem(uint id)
+        {
+            return Manager.Items.ContainsKey(id);
         }
     }
 }

@@ -3,7 +3,7 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.Elements.SpecificData
 {
-    internal class KeycardData : IKeycardData
+    public class KeycardData : Data, IKeycardData
     {
         public KeycardPermissions Permissions { get; set; } = KeycardPermissions.Checkpoints;
     }

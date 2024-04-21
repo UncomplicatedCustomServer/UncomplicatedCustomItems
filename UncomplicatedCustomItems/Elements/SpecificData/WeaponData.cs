@@ -2,7 +2,7 @@
 
 namespace UncomplicatedCustomItems.Elements.SpecificData
 {
-    internal class WeaponData : IWeaponData
+    public class WeaponData : Data, IWeaponData
     {
         /// <summary>
         /// The damage of the ammo. Negative to heal

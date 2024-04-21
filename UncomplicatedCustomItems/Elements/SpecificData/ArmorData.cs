@@ -7,7 +7,7 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.Elements.SpecificData
 {
-    internal class ArmorData : IArmorData
+    public class ArmorData : Data, IArmorData
     {
         /// <summary>
         /// The armor's Head Protection value

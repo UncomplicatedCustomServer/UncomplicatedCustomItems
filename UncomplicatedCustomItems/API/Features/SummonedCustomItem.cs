@@ -51,7 +51,8 @@ namespace UncomplicatedCustomItems.API.Features
         {
             CustomItem = customItem;
             Owner = owner;
-            Item = Item.Create(customItem.Item, owner);
+            Item = Item.Create(customItem.Item);
+            owner.AddItem(Item);
             Serial = Item.Serial;
             IsPickup = false;
             Pickup = null;
@@ -96,14 +97,15 @@ namespace UncomplicatedCustomItems.API.Features
         /// <returns>The <see cref="SummonedCustomItem"/> class of the summoned item</returns>
         public static SummonedCustomItem Summon(ICustomItem customItem, Player owner)
         {
-            return new(customItem, owner);
+            SummonedCustomItem Item = new(customItem, owner);
+            Manager.SummonedItems.Add(Item);
+            return Item;
         }
 
         internal void SetProperties()
         {
             if (Item is not null)
             {
-                Item.Scale = CustomItem.Scale;
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Item:
@@ -135,39 +137,39 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
-        internal void OnPickup(ItemAddedEventArgs PickedUp)
+        internal void OnPickup(ItemAddedEventArgs pickedUp)
         {
             IsPickup = false;
             Pickup = null;
-            Item = PickedUp.Item;
-            Owner = PickedUp.Player;
+            Item = pickedUp.Item;
+            Owner = pickedUp.Player;
             SetProperties();
             Serial = Item.Serial;
-            HandleEvent(PickedUp.Player, ItemEvents.Pickup);
+            HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
 
-        internal void OnDrop(DroppedItemEventArgs Dropped)
+        internal void OnDrop(DroppedItemEventArgs dropped)
         {
             IsPickup = true;
-            Pickup = Dropped.Pickup;
+            Pickup = dropped.Pickup;
             Item = null;
             Owner = null;
             SetProperties();
             Serial = Pickup.Serial;
-            HandleEvent(Dropped.Player, ItemEvents.Drop);
+            HandleEvent(dropped.Player, ItemEvents.Drop);
         }
 
-        internal void HandleEvent(Player Player, ItemEvents Event) 
+        internal void HandleEvent(Player player, ItemEvents itemevent) 
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == Event)
+            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemevent)
             {
-
+                Log.Debug($"Firing events for item {CustomItem.Name}");
                 if (((IItemData)CustomItem.CustomData).Command is not null && ((IItemData)CustomItem.CustomData).Command.Length > 2)
                 {
-                    Server.ExecuteCommand(((IItemData)CustomItem.CustomData).Command.Replace("%id%", Player.Id.ToString()), Player.Sender);
+                    Server.ExecuteCommand(((IItemData)CustomItem.CustomData).Command.Replace("%id%", player.Id.ToString()), player.Sender);
                 }
 
-                Utilities.ParseResponse(Player, ((IItemData)CustomItem.CustomData).Response);
+                Utilities.ParseResponse(player, (IItemData)CustomItem.CustomData);
             }
         }
 
@@ -175,7 +177,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (Plugin.Instance.Config.SelectedMessage.Length > 1)
             {
-                Owner.ShowHint(Plugin.Instance.Config.SelectedMessage, Plugin.Instance.Config.SelectedMessageDuration);
+                Owner.ShowHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
             }
         }
 
@@ -183,7 +185,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (Plugin.Instance.Config.PickedUpMessage.Length > 1)
             {
-                Owner.ShowHint(Plugin.Instance.Config.PickedUpMessage, Plugin.Instance.Config.PickedUpMessageDuration);
+                Owner.ShowHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
             }
         }
 

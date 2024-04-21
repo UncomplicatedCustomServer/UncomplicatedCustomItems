@@ -17,38 +17,39 @@ namespace UncomplicatedCustomItems.API
         /// <summary>
         /// Register a new <see cref="ICustomItem"/> inside the plugin
         /// </summary>
-        /// <param name="Item"></param>
-        public static void Register(ICustomItem Item)
+        /// <param name="item"></param>
+        public static void Register(ICustomItem item)
         {
-            if (!Utilities.CustomItemValidator(Item, out string Error))
+            if (!Utilities.CustomItemValidator(item, out string Error))
             {
-                Log.Warn($"Unable to register the ICustomItem with the Id {Item.Id} and name {Item.Name}:\n{Error}");
+                Log.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{Error}\nError code: 0x029");
                 return;
             }
-            Items.Add(Item.Id, Item);
+            Items.Add(item.Id, item);
+            Log.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
         /// <summary>
         /// Unregister a <see cref="ICustomItem"/> from the plugin by it's class
         /// </summary>
-        /// <param name="Item"></param>
-        public static void Unregister(ICustomItem Item)
+        /// <param name="item"></param>
+        public static void Unregister(ICustomItem item)
         {
-            if (Items.ContainsKey(Item.Id))
+            if (Items.ContainsKey(item.Id))
             {
-                Items.Remove(Item.Id);
+                Items.Remove(item.Id);
             }
         }
 
         /// <summary>
         /// Unregister a <see cref="ICustomItem"/> from the plugin by it's Id
         /// </summary>
-        /// <param name="Item"></param>
-        public static void Unregister(uint Item)
+        /// <param name="item"></param>
+        public static void Unregister(uint item)
         {
-            if (Items.ContainsKey(Item))
+            if (Items.ContainsKey(item))
             {
-                Items.Remove(Item);
+                Items.Remove(item);
             }
         }
     }
