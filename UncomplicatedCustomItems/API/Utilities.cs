@@ -10,7 +10,7 @@ using ExiledItem = Exiled.API.Features.Items.Item;
 
 namespace UncomplicatedCustomItems.API
 {
-    public class Utilities
+    public static class Utilities
     {
         /// <summary>
         /// Check if a <see cref="ICustomItem"/> is valid and can be registered
@@ -98,7 +98,7 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="item"></param>
         /// <returns><see cref="false"/> if there's any problem.</returns>
-        public bool CustomItemValidator(ICustomItem item)
+        public static bool CustomItemValidator(ICustomItem item)
         {
             return CustomItemValidator(item, out _);
         }

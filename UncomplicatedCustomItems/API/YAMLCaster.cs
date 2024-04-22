@@ -15,7 +15,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace UncomplicatedCustomItems.API
 {
-    internal class YAMLCaster
+    internal static class YAMLCaster
     {
         /// <summary>
         /// As YAML is a big shit, serialize <see cref="Data"/> elements into manageable Dictionaries for YAML

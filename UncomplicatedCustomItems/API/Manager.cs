@@ -9,7 +9,7 @@ using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.API
 {
-    public class Manager
+    public static class Manager
     {
         internal static Dictionary<uint, ICustomItem> Items = new();
         internal static List<SummonedCustomItem> SummonedItems = new();
