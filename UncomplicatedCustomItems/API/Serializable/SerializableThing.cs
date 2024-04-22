@@ -26,6 +26,11 @@ namespace UncomplicatedCustomItems.API.Serializable
         [Description("Spawn properties")]
         public ItemSpawnPoint[] SpawnPoint { get; set; }
 
+        /// <summary>
+        /// Return copy of custom item
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
         public abstract CustomThing Create(Player player);
     }
 }

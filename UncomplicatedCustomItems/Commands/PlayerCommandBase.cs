@@ -20,7 +20,7 @@ namespace UncomplicatedCustomItems.Commands
 
             if (player is null)
             {
-                response = "You must be in a game!";
+                response = "You must be in the game!";
                 return false;
             }
 

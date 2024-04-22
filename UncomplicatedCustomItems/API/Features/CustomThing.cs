@@ -31,7 +31,7 @@ namespace UncomplicatedCustomItems.API.Features
         protected SerializableThing Serializable { get; }
 
         /// <summary>
-        /// Spawn custom item in hand
+        /// Spawn custom item in hand if player is not null.
         /// </summary>
         public void Spawn(Vector3 position = default)
         {
@@ -39,7 +39,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item.Scale = Serializable.Scale;
             Info.Set(Item);
 
-            if (Player is not null)
+            if (Player is not null && position == default)
             {
                 Player.CurrentItem = Item;
             }

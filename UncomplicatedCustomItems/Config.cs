@@ -15,6 +15,7 @@ namespace UncomplicatedCustomItems
         [Description("Is debug or not")]
         public bool Debug { get; set; }
 
+        [Description("List of custom keycards")]
         public Dictionary<int, SerializableCustomKeycard> CustomKeycards { get; set; } = new Dictionary<int, SerializableCustomKeycard>()
         {
             {
