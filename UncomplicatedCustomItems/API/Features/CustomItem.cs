@@ -18,6 +18,13 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public void Execute()
         {
+            Player.SendConsoleMessage(_itemInfo.Response, string.Empty);
+
+            if (_itemInfo.Commands is null)
+            {
+                return;
+            }
+
             foreach (var command in _itemInfo.Commands)
             {
                 if (command is not null && command != string.Empty)
@@ -25,8 +32,6 @@ namespace UncomplicatedCustomItems.API.Features
                     Server.ExecuteCommand(command.Replace("%id%", Player.Id.ToString()), Player.Sender);
                 }
             }
-
-            Player.SendConsoleMessage(_itemInfo.Response, string.Empty);
         }
     }
 }
