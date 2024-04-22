@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using System;
+using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.User
@@ -14,15 +15,15 @@ namespace UncomplicatedCustomItems.Commands.User
 
         public override bool Execute(ArraySegment<string> arguments, Player player, out string response)
         {
-            if (player.CurrentItem is null || !Plugin.API.TryGet(player.CurrentItem.Serial, out var result) || result is not CustomItem customItem)
+            if (player.CurrentItem is null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item) || Item.CustomItem.CustomItemType != CustomItemType.Item)
             {
                 response = "You must hold the custom item!";
                 return false;
             }
 
-            customItem.Execute();
+            Item.HandleEvent(player, ItemEvents.Command);
 
-            response = "Used";
+            response = $"Item {Item.CustomItem.Name} successfully used!";
             return true;
         }
     }

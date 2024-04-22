@@ -1,6 +1,8 @@
 ﻿using Exiled.API.Features;
 using System;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.Elements;
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems
 {
@@ -8,24 +10,26 @@ namespace UncomplicatedCustomItems
     {
         public static Plugin Instance { get; private set; }
 
-        public static UncomplicatedCustomItemsAPI API { get; private set; }
-
-        public override string Author => "SpGergo & FoxWorno";
+        public override string Author => "SpGerg & FoxWorn";
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
 
-        public override Version Version { get; } = new(1, 3, 1);
+        public override Version Version { get; } = new(1, 5, 0); 
 
         public override void OnEnabled()
         {
             Instance = this;
-            API = new UncomplicatedCustomItemsAPI();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
             Log.Info("        by SpGerg & FoxWorn");
             Log.Info("===========================================");
             Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+
+            foreach (YAMLCustomItem Item in Config.CustomItems)
+            {
+                Manager.Register(YAMLCaster.Converter(Item));
+            }
 
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
@@ -37,6 +41,8 @@ namespace UncomplicatedCustomItems
         {
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
+
+            Instance = null;
 
             base.OnDisabled();
         }

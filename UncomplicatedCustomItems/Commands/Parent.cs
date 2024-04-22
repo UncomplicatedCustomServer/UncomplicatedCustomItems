@@ -19,7 +19,9 @@ namespace UncomplicatedCustomItems.Commands
         {
             new Read(),
             new Use(),
-            new Create()
+            new Summon(),
+            new List(),
+            new Summoned()
         };
     }
 }
