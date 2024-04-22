@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using Exiled.Permissions.Extensions;
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
@@ -15,6 +16,12 @@ namespace UncomplicatedCustomItems.Commands.User
 
         public override bool Execute(ArraySegment<string> arguments, Player player, out string response)
         {
+            if (!player.CheckPermission("uci.read"))
+            {
+                response = "Sorry but you don't have the permission to use that command!";
+                return false;
+            }
+
             if (player.CurrentItem is null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
             {
                 response = "You must hold the custom item!";

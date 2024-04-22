@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
+using Exiled.Permissions.Extensions;
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
@@ -17,6 +18,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public override bool Execute(ArraySegment<string> arguments, Player player, out string response)
         {
+            if (!player.CheckPermission("uci.summon"))
+            {
+                response = "Sorry but you don't have the permission to use that command!";
+                return false;
+            }
+
             if (arguments.Count < 1)
             {
                 response = $"No argument(s) found!\nSyntax: .ucr summon <CustomItem Id> (Player Id)";
