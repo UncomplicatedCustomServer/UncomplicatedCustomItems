@@ -7,6 +7,8 @@ using System.Threading;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 
+// Spgerg is a furry ehehe
+
 namespace UncomplicatedCustomItems.API
 {
     public static class Manager
