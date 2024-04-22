@@ -107,7 +107,7 @@ namespace UncomplicatedCustomItems
                     Scale = new Vector3(1, 0.1f, 1),
                     Info = new ItemInfo()
                     {
-                        Command = string.Empty,
+                        Commands = new string[0],
                         Response = "Hello, welcome to UncomplicatedCustomItems by SpGerg!"
                     }
                 }
@@ -123,7 +123,10 @@ namespace UncomplicatedCustomItems
                     Scale = new Vector3(1, 1, 1),
                     Info = new ItemInfo()
                     {
-                        Command = "/SERVER_EVENT DETONATION_INSTANT",
+                        Commands = new []
+                        {
+                            "/SERVER_EVENT DETONATION_INSTANT"
+                        },
                         Response = "Flashbacks..."
                     }
                 }

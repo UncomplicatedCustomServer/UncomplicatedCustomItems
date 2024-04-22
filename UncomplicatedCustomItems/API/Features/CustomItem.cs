@@ -11,8 +11,6 @@ namespace UncomplicatedCustomItems.API.Features
             _itemInfo = itemInfo;
         }
 
-        private string Сommand => _itemInfo.Command;
-
         private readonly ItemInfo _itemInfo;
 
         /// <summary>
@@ -20,9 +18,12 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public void Execute()
         {
-            if (Сommand is not null && Сommand != string.Empty)
+            foreach (var command in _itemInfo.Commands)
             {
-                Server.ExecuteCommand(Сommand.Replace("%id%", Player.Id.ToString()), Player.Sender);
+                if (command is not null && command != string.Empty)
+                {
+                    Server.ExecuteCommand(command.Replace("%id%", Player.Id.ToString()), Player.Sender);
+                }
             }
 
             Player.SendConsoleMessage(_itemInfo.Response, string.Empty);
