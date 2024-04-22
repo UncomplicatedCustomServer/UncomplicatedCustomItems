@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
+using Exiled.Permissions.Extensions;
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
@@ -18,6 +19,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public override bool Execute(ArraySegment<string> arguments, Player player, out string response)
         {
+            if (!player.CheckPermission("uci.summoned"))
+            {
+                response = "Sorry but you don't have the permission to use that command!";
+                return false;
+            }
+
             response = "List of every registered custom Items:\n\n Serial | Id | Status |    Name   | Owner";
 
             foreach (SummonedCustomItem Item in Manager.SummonedItems)
