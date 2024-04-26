@@ -3,5 +3,6 @@
     Command,
     Pickup,
     Drop,
-    Use
+    Use,
+    Noclip
 }

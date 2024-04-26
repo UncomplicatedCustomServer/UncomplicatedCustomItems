@@ -1,6 +1,8 @@
-﻿using Exiled.API.Features.Items;
+﻿using Exiled.API.Features;
+using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
+using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
@@ -17,6 +19,8 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
             EventSource.DroppedItem += DroppedItemEvent;
             EventSource.ChangedItem += ChangeItemInHand;
+            EventSource.UsingItemCompleted += OnItemUsingCompleted;
+            EventSource.TogglingNoClip += NoclipButton;
         }
 
         public static void Unregister()
@@ -26,6 +30,8 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
             EventSource.DroppedItem -= DroppedItemEvent;
             EventSource.ChangedItem -= ChangeItemInHand;
+            EventSource.UsingItemCompleted -= OnItemUsingCompleted;
+            EventSource.TogglingNoClip -= NoclipButton;
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
@@ -83,6 +89,16 @@ namespace UncomplicatedCustomItems.Events.Internal
             ev.DamageHandler.Damage = WeaponData.Damage;
         }
 
+        private static void OnItemUsingCompleted(UsingItemCompletedEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
+            {
+                return;
+            }
+
+            Item?.HandleEvent(ev.Player, ItemEvents.Use);
+        }
+
         /// <summary>
         /// Cancel using if it is custom item
         /// </summary>
@@ -93,22 +109,36 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 return;
             }
-
-            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
-            {
-                ev.IsAllowed = false;
-                Item.HandleEvent(ev.Player, ItemEvents.Use);
-            }
         }
 
         private static void ChangeItemInHand(ChangedItemEventArgs ev)
         {
+            if (ev.Player.CurrentItem is null)
+            {
+                return;
+            }
+
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
             {
                 return;
             }
 
-            Item.HandleSelectedDisplayHint();
+            Item?.HandleSelectedDisplayHint();
+        }
+
+        private static void NoclipButton(TogglingNoClipEventArgs ev)
+        {
+            if (ev.Player.CurrentItem is null)
+            {
+                return;
+            }
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
+            {
+                return;
+            }
+
+            Item?.HandleEvent(ev.Player, ItemEvents.Noclip);
         }
     }
 }

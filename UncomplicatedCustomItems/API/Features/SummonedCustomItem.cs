@@ -3,6 +3,7 @@ using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
 using PluginAPI.Commands;
+using System.Runtime.Remoting.Messaging;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
@@ -56,6 +57,7 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Item.Serial;
             IsPickup = false;
             Pickup = null;
+            SetProperties();
         }
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Pickup.Serial;
             IsPickup = true;
             Item = null;
+            SetProperties();
         }
 
         /// <summary>
@@ -87,6 +90,7 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = Pickup.CreateAndSpawn(customItem.Item, position, rotation);
             IsPickup = true;
             Serial = Pickup.Serial;
+            SetProperties();
         }
 
         /// <summary>
@@ -98,6 +102,13 @@ namespace UncomplicatedCustomItems.API.Features
         public static SummonedCustomItem Summon(ICustomItem customItem, Player owner)
         {
             SummonedCustomItem Item = new(customItem, owner);
+            Manager.SummonedItems.Add(Item);
+            return Item;
+        }
+
+        public static SummonedCustomItem Summon(ICustomItem customItem, Vector3 position, Quaternion rotation = new())
+        {
+            SummonedCustomItem Item = new(customItem, position, rotation);
             Manager.SummonedItems.Add(Item);
             return Item;
         }
@@ -122,6 +133,8 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Weapon:
+                        Log.Debug("Updating weapon data");
+                        ((Firearm)Item).Ammo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
                         ((Firearm)Item).MaxAmmo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
                         ((Firearm)Item).FireRate = ((IWeaponData)CustomItem.CustomData).FireRate;
                         break;

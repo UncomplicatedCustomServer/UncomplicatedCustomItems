@@ -1,8 +1,12 @@
-﻿using Exiled.API.Extensions;
+﻿using Exiled.API.Enums;
+using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
+using Exiled.API.Features.Pickups;
+using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.Elements;
 using UncomplicatedCustomItems.Elements.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
@@ -202,6 +206,68 @@ namespace UncomplicatedCustomItems.API
         public static bool IsCustomItem(uint id)
         {
             return Manager.Items.ContainsKey(id);
+        }
+
+        internal static void SummonCustomItem(ICustomItem CustomItem)
+        {
+            ISpawn Spawn = CustomItem.Spawn;
+
+            if (Spawn.Coords.Count() > 0)
+            {
+                SummonedCustomItem.Summon(CustomItem, Spawn.Coords.RandomItem());
+                return;
+            }
+
+            else if (Spawn.Rooms.Count() > 0)
+            {
+                RoomType Room = Spawn.Rooms.RandomItem();
+                if (Spawn.ReplaceExistingPickup)
+                {
+                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
+
+                    if (Spawn.ForceItem)
+                    {
+                        FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
+                    }
+
+                    if (FilteredPickups.Count() > 0)
+                    {
+                        Pickup Pickup = FilteredPickups.RandomItem();
+                        SummonedCustomItem.Summon(CustomItem, Pickup.Position, Pickup.Rotation);
+                        Pickup.Destroy();
+                    }
+                    return;
+                }
+                else
+                {
+                    SummonedCustomItem.Summon(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
+                }
+            }
+            else if (Spawn.Zones.Count() > 0)
+            {
+                ZoneType Zone = Spawn.Zones.RandomItem();
+                if (Spawn.ReplaceExistingPickup)
+                {
+                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
+
+                    if (Spawn.ForceItem)
+                    {
+                        FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
+                    }
+
+                    if (FilteredPickups.Count() > 0)
+                    {
+                        Pickup Pickup = FilteredPickups.RandomItem();
+                        SummonedCustomItem.Summon(CustomItem, Pickup.Position, Pickup.Rotation);
+                        Pickup.Destroy();
+                    }
+                    return;
+                }
+                else
+                {
+                    SummonedCustomItem.Summon(CustomItem, Room.List.Where(room => room.Zone == Zone).ToList().RandomItem().Position);
+                }
+            }
         }
     }
 }

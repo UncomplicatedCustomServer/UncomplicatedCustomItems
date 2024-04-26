@@ -405,6 +405,7 @@
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Elements\CustomItem.cs" />
+    <Compile Include="Elements\Spawn.cs" />
     <Compile Include="Elements\SpecificData\ArmorData.cs" />
     <Compile Include="Elements\SpecificData\Data.cs" />
     <Compile Include="Elements\SpecificData\ItemData.cs" />
@@ -416,6 +417,7 @@
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
+    <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />
     <Compile Include="Interfaces\SpecificData\IData.cs" />
     <Compile Include="Interfaces\SpecificData\IItemData.cs" />
