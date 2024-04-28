@@ -7,7 +7,7 @@ using System.Threading;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 
-// Spgerg is a furry ehehe
+// Spgerg is a furry ehehe, foxworn too! hehehe
 
 namespace UncomplicatedCustomItems.API
 {
@@ -22,9 +22,9 @@ namespace UncomplicatedCustomItems.API
         /// <param name="item"></param>
         public static void Register(ICustomItem item)
         {
-            if (!Utilities.CustomItemValidator(item, out string Error))
+            if (!Utilities.CustomItemValidator(item, out string error))
             {
-                Log.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{Error}\nError code: 0x029");
+                Log.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
                 return;
             }
             Items.Add(item.Id, item);

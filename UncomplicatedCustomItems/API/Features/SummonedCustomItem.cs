@@ -190,7 +190,7 @@ namespace UncomplicatedCustomItems.API.Features
                     }
                 }
 
-                Utilities.ParseResponse(player, (IItemData)CustomItem.CustomData);
+                Utilities.ParseResponse(player, Data);
             }
         }
 
