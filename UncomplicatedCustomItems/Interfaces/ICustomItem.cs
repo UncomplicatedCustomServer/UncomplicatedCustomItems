@@ -1,5 +1,4 @@
-﻿using UncomplicatedCustomItems.Elements.SpecificData;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.Interfaces

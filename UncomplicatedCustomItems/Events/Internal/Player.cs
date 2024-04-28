@@ -1,8 +1,5 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Items;
-using Exiled.API.Features.Pickups;
+﻿using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
-using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;

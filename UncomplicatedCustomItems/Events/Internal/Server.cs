@@ -1,10 +1,4 @@
-﻿using Exiled.API.Enums;
-using Exiled.API.Features.Pickups;
-using Exiled.CustomItems;
-using System.Collections.Generic;
-using System.Linq;
-using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Features;
+﻿using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces;
 using EventSource = Exiled.Events.Handlers.Server;
 

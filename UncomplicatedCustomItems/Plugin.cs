@@ -2,7 +2,6 @@
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
-using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems
 {

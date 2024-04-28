@@ -1,6 +1,4 @@
-﻿using UncomplicatedCustomItems.Elements;
-
-namespace UncomplicatedCustomItems.Interfaces.SpecificData
+﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
 #nullable enable
     public interface IItemData : IData
