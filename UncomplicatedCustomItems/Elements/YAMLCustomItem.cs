@@ -19,6 +19,8 @@ namespace UncomplicatedCustomItems.Elements
 
         public Vector3 Scale { get; set; } = Vector3.one;
 
+        public Spawn Spawn { get; set; } = new();
+
         public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
 
         public Dictionary<string, string> CustomData { get; set; } = YAMLCaster.Encode(new ItemData());

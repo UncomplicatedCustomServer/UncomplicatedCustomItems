@@ -18,6 +18,8 @@ namespace UncomplicatedCustomItems.Interfaces
 
         public abstract Vector3 Scale { get; set; }
 
+        public abstract ISpawn Spawn { get; set; }
+
         public abstract CustomItemType CustomItemType { get; set; }
 
         public abstract IData CustomData { get; set; }

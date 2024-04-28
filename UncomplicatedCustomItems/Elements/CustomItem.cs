@@ -48,6 +48,12 @@ namespace UncomplicatedCustomItems.Elements
         public Vector3 Scale { get; set; } = Vector3.one;
 
         /// <summary>
+        /// The <see cref="Elements.Spawn"/> settings for the item
+        /// </summary>
+        [Description("The spawn settings for the item")]
+        public ISpawn Spawn { get; set; } = new Spawn();
+
+        /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item
         /// </summary>
         public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;

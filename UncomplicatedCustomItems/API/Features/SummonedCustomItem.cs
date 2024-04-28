@@ -3,6 +3,7 @@ using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
 using PluginAPI.Commands;
+using System.Runtime.Remoting.Messaging;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
@@ -56,6 +57,7 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Item.Serial;
             IsPickup = false;
             Pickup = null;
+            SetProperties();
         }
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Pickup.Serial;
             IsPickup = true;
             Item = null;
+            SetProperties();
         }
 
         /// <summary>
@@ -87,6 +90,7 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = Pickup.CreateAndSpawn(customItem.Item, position, rotation);
             IsPickup = true;
             Serial = Pickup.Serial;
+            SetProperties();
         }
 
         /// <summary>
@@ -98,6 +102,13 @@ namespace UncomplicatedCustomItems.API.Features
         public static SummonedCustomItem Summon(ICustomItem customItem, Player owner)
         {
             SummonedCustomItem Item = new(customItem, owner);
+            Manager.SummonedItems.Add(Item);
+            return Item;
+        }
+
+        public static SummonedCustomItem Summon(ICustomItem customItem, Vector3 position, Quaternion rotation = new())
+        {
+            SummonedCustomItem Item = new(customItem, position, rotation);
             Manager.SummonedItems.Add(Item);
             return Item;
         }
@@ -122,6 +133,8 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Weapon:
+                        Log.Debug("Updating weapon data");
+                        ((Firearm)Item).Ammo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
                         ((Firearm)Item).MaxAmmo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
                         ((Firearm)Item).FireRate = ((IWeaponData)CustomItem.CustomData).FireRate;
                         break;
@@ -161,16 +174,23 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal void HandleEvent(Player player, ItemEvents itemEvent) 
         {
-            var itemData = CustomItem.CustomData as IItemData;
-            if (CustomItem.CustomItemType == CustomItemType.Item && itemData.Event == itemEvent)
+            if (CustomItem.CustomItemType == CustomItemType.Item && CustomItem.CustomData is ICustomItem && ((IItemData)CustomItem.CustomData).Event == itemEvent)
             {
+                IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
-                if (itemData.Command is not null && itemData.Command.Length > 2)
+                if (Data.Command is not null && Data.Command.Length > 2)
                 {
-                    Server.ExecuteCommand(itemData.Command.Replace("%id%", player.Id.ToString()), player.Sender);
+                    if (!Data.Command.Contains("P:"))
+                    {
+                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()));
+                    } 
+                    else
+                    {
+                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
+                    }
                 }
 
-                Utilities.ParseResponse(player, itemData);
+                Utilities.ParseResponse(player, Data);
             }
         }
 
