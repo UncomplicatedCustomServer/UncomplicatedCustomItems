@@ -7,7 +7,7 @@ using System.Threading;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 
-// Spgerg is a furry ehehe
+// Spgerg is a furry ehehe, foxworn too! hehehe
 
 namespace UncomplicatedCustomItems.API
 {
