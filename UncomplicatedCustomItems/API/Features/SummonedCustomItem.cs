@@ -161,15 +161,16 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal void HandleEvent(Player player, ItemEvents itemEvent) 
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemEvent)
+            var itemData = CustomItem.CustomData as IItemData;
+            if (CustomItem.CustomItemType == CustomItemType.Item && itemData.Event == itemEvent)
             {
                 Log.Debug($"Firing events for item {CustomItem.Name}");
-                if (((IItemData)CustomItem.CustomData).Command is not null && ((IItemData)CustomItem.CustomData).Command.Length > 2)
+                if (itemData.Command is not null && itemData.Command.Length > 2)
                 {
-                    Server.ExecuteCommand(((IItemData)CustomItem.CustomData).Command.Replace("%id%", player.Id.ToString()), player.Sender);
+                    Server.ExecuteCommand(itemData.Command.Replace("%id%", player.Id.ToString()), player.Sender);
                 }
 
-                Utilities.ParseResponse(player, (IItemData)CustomItem.CustomData);
+                Utilities.ParseResponse(player, itemData);
             }
         }
 
