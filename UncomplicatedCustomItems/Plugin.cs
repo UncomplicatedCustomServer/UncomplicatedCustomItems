@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using HarmonyLib;
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
@@ -14,11 +15,16 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
 
-        public override Version Version { get; } = new(1, 5, 0); 
+        public override Version Version { get; } = new(1, 5, 0);
+
+        private Harmony _harmony;
 
         public override void OnEnabled()
         {
             Instance = this;
+
+            _harmony = new Harmony($"com.ucs.uci-{DateTime.Now}");
+            _harmony.PatchAll();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
