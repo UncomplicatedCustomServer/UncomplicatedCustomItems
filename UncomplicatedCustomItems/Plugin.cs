@@ -1,4 +1,5 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Enums;
+using Exiled.API.Features;
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
@@ -7,13 +8,19 @@ namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public static Plugin Instance { get; private set; }
+        public override string Name => "UncomplicatedCustomItems";
+
+        public override string Prefix => "uci";
 
         public override string Author => "SpGerg & FoxWorn";
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
 
-        public override Version Version { get; } = new(1, 5, 0); 
+        public override Version Version { get; } = new(2, 0, 0);
+
+        public override PluginPriority Priority => PluginPriority.First;
+
+        public static Plugin Instance { get; private set; }
 
         public override void OnEnabled()
         {
