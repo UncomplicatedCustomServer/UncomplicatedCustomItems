@@ -1,5 +1,6 @@
 using Exiled.API.Enums;
 using Exiled.API.Features;
+using HarmonyLib;
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
@@ -22,9 +23,14 @@ namespace UncomplicatedCustomItems
 
         public static Plugin Instance { get; private set; }
 
+        private Harmony _harmony;
+
         public override void OnEnabled()
         {
             Instance = this;
+
+            _harmony = new Harmony($"com.ucs.uci-{DateTime.Now}");
+            _harmony.PatchAll();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");

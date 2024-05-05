@@ -13,7 +13,6 @@ namespace UncomplicatedCustomItems.Events.Internal
     {
         public static void Register()
         {
-            EventSource.UsingItem += OnUsingItem;
             EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
             EventSource.DroppedItem += DroppedItemEvent;
@@ -24,7 +23,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         public static void Unregister()
         {
-            EventSource.UsingItem -= OnUsingItem;
             EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
             EventSource.DroppedItem -= DroppedItemEvent;
@@ -95,35 +93,37 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
             }
 
-            Item?.HandleEvent(ev.Player, ItemEvents.Use);
-        }
-
-        private static void OnUsingItem(UsingItemEventArgs ev)
-        {
-            if (ev.Item is not null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
+            if (Item is null)
             {
-                if (Item.CustomItem.CustomItemType is CustomItemType.Medikit)
+                // Non si sa mai
+                return;
+            }
+
+            if (Item.CustomItem.CustomItemType is CustomItemType.Medikit)
+            {
+                // Do the medikit thing
+                if (Item.CustomItem.CustomData is not IMedikitData Data)
                 {
-                    // Do the medikit thing
-                    if (Item.CustomItem.CustomData is not IMedikitData Data)
-                    {
-                        return;
-                    }
-                    ev.IsAllowed = false;
-                    ev.Player.Heal(Data.Health, Data.MoreThanMax);
-                    Item.Destroy();
+                    return;
                 }
-                else if (Item.CustomItem.CustomItemType is CustomItemType.Painkillers)
+                ev.IsAllowed = false;
+                ev.Player.Heal(Data.Health, Data.MoreThanMax);
+                Item.Destroy();
+            }
+            else if (Item.CustomItem.CustomItemType is CustomItemType.Painkillers)
+            {
+                // Do the painkillers thing
+                if (Item.CustomItem.CustomData is not IPainkillersData Data)
                 {
-                    // Do the painkillers thing
-                    if (Item.CustomItem.CustomData is not IPainkillersData Data)
-                    {
-                        return;
-                    }
-                    ev.IsAllowed = false;
-                    Timing.RunCoroutine(Utilities.PainkillersCoroutine(ev.Player, Data));
-                    Item.Destroy();
+                    return;
                 }
+                ev.IsAllowed = false;
+                Timing.RunCoroutine(Utilities.PainkillersCoroutine(ev.Player, Data));
+                Item.Destroy();
+            } 
+            else if (Item.CustomItem.CustomItemType is CustomItemType.Item)
+            {
+                Item.HandleEvent(ev.Player, ItemEvents.Use);
             }
         }
 

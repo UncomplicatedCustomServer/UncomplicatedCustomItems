@@ -118,7 +118,7 @@ namespace UncomplicatedCustomItems
                 {
                     TickHeal = 1f,
                     TickTime = 0.1f,
-                    TimeBeforeStartHealing = 7.5f,
+                    TimeBeforeStartHealing = 10f,
                     TotalHealing = 50f
                 })
             }

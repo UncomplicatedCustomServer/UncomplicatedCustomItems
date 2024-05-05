@@ -53,9 +53,6 @@
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\Downloads\Master(1)\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\Downloads\Master(1)\Assembly-CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\..\Downloads\Master(1)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
