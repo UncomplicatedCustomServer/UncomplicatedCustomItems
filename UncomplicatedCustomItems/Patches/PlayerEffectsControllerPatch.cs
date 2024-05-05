@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems.Patches
     [HarmonyPatch(typeof(PlayerEffectsController), nameof(PlayerEffectsController.UseMedicalItem))]
     public class PlayerEffectsControllerPatch
     {
-        private static bool Prefix(PlayerEffectsController __instance, ItemBase itemBase)
+        private static bool Prefix(PlayerEffectsController __instance, ItemBase item)
         {
             var customItem = Utilities.GetCustomItem(itemBase.ItemSerial);
 
