@@ -118,48 +118,66 @@ namespace UncomplicatedCustomItems.API.Features
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
-                        ((Keycard)Item).Permissions = ((IKeycardData)CustomItem.CustomData).Permissions;
+                        Keycard Keycard = Item as Keycard;
+                        IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
+
+                        Keycard.Permissions = KeycardData.Permissions;
                         break;
 
                     case CustomItemType.Armor:
-                        ((Armor)Item).HelmetEfficacy = ((IArmorData)CustomItem.CustomData).HeadProtection;
-                        ((Armor)Item).RemoveExcessOnDrop = ((IArmorData)CustomItem.CustomData).RemoveExcessOnDrop;
-                        ((Armor)Item).StaminaUseMultiplier = ((IArmorData)CustomItem.CustomData).StaminaUseMultiplier;
+                        Armor Armor = Item as Armor;
+                        IArmorData ArmorData = CustomItem.CustomData as IArmorData;
+
+                        Armor.HelmetEfficacy = ArmorData.HeadProtection;
+                        Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
+                        Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
                         break;
 
                     case CustomItemType.Weapon:
-                        ((Firearm)Item).Ammo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
-                        ((Firearm)Item).MaxAmmo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
-                        ((Firearm)Item).FireRate = ((IWeaponData)CustomItem.CustomData).FireRate;
+                        Firearm Firearm = Item as Firearm;
+                        IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+
+                        Firearm.Ammo = WeaponData.MaxAmmo;
+                        Firearm.MaxAmmo = WeaponData.MaxAmmo;
+                        Firearm.FireRate = WeaponData.FireRate;
                         break;
 
                     case CustomItemType.Jailbird:
-                        ((Jailbird)Item).TotalDamageDealt = ((IJailbirdData)CustomItem.CustomData).TotalDamageDealt;
-                        ((Jailbird)Item).TotalCharges = ((IJailbirdData)CustomItem.CustomData).TotalCharges;
-                        ((Jailbird)Item).Radius = ((IJailbirdData)CustomItem.CustomData).Radius;
-                        ((Jailbird)Item).ChargeDamage = ((IJailbirdData)CustomItem.CustomData).ChargeDamage;
-                        ((Jailbird)Item).MeleeDamage = ((IJailbirdData)CustomItem.CustomData).MeleeDamage;
-                        ((Jailbird)Item).FlashDuration = ((IJailbirdData)CustomItem.CustomData).FlashDuration;
+                        Jailbird Jailbird = Item as Jailbird;
+                        IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
+
+                        Jailbird.TotalDamageDealt = JailbirdData.TotalDamageDealt;
+                        Jailbird.TotalCharges = JailbirdData.TotalCharges;
+                        Jailbird.Radius = JailbirdData.Radius;
+                        Jailbird.ChargeDamage = JailbirdData.ChargeDamage;
+                        Jailbird.MeleeDamage = JailbirdData.MeleeDamage;
+                        Jailbird.FlashDuration = JailbirdData.FlashDuration;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
-                        ((ExplosiveGrenade)Item).MaxRadius = ((IExplosiveGrenadeData)CustomItem.CustomData).MaxRadius;
-                        ((ExplosiveGrenade)Item).PinPullTime = ((IExplosiveGrenadeData)CustomItem.CustomData).PinPullTime;
-                        ((ExplosiveGrenade)Item).ScpDamageMultiplier = ((IExplosiveGrenadeData)CustomItem.CustomData).ScpDamageMultiplier;
-                        ((ExplosiveGrenade)Item).ConcussDuration = ((IExplosiveGrenadeData)CustomItem.CustomData).ConcussDuration;
-                        ((ExplosiveGrenade)Item).BurnDuration = ((IExplosiveGrenadeData) CustomItem.CustomData).BurnDuration;
-                        ((ExplosiveGrenade)Item).DeafenDuration = ((IExplosiveGrenadeData)CustomItem.CustomData).DeafenDuration;
-                        ((ExplosiveGrenade)Item).FuseTime = ((IExplosiveGrenadeData)CustomItem.CustomData).FuseTime;
-                        ((ExplosiveGrenade)Item).Repickable = ((IExplosiveGrenadeData)CustomItem.CustomData).Repickable;
+                        ExplosiveGrenade ExplosiveGrenade = Item as ExplosiveGrenade;
+                        IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+
+                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        ExplosiveGrenade.PinPullTime = ExplosiveGrenadeData.PinPullTime;
+                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        ExplosiveGrenade.ConcussDuration = ExplosiveGrenadeData.ConcussDuration;
+                        ExplosiveGrenade.BurnDuration = ExplosiveGrenadeData.BurnDuration;
+                        ExplosiveGrenade.DeafenDuration = ExplosiveGrenadeData.DeafenDuration;
+                        ExplosiveGrenade.FuseTime = ExplosiveGrenadeData.FuseTime;
+                        ExplosiveGrenade.Repickable = ExplosiveGrenadeData.Repickable;
                         break;
 
                     case CustomItemType.FlashGrenade:
-                        ((FlashGrenade)Item).PinPullTime = ((IFlashGrenadeData)CustomItem.CustomData).PinPullTime;
-                        ((FlashGrenade)Item).Repickable = ((IFlashGrenadeData)CustomItem.CustomData).Repickable;
-                        ((FlashGrenade)Item).MinimalDurationEffect = ((IFlashGrenadeData)CustomItem.CustomData).MinimalDurationEffect;
-                        ((FlashGrenade)Item).AdditionalBlindedEffect = ((IFlashGrenadeData)CustomItem.CustomData).AdditionalBlindedEffect;
-                        ((FlashGrenade)Item).SurfaceDistanceIntensifier = ((IFlashGrenadeData)CustomItem.CustomData).SurfaceDistanceIntensifier;
-                        ((FlashGrenade)Item).FuseTime = ((IFlashGrenadeData)CustomItem.CustomData).FuseTime;
+                        FlashGrenade FlashGrenade = Item as FlashGrenade;
+                        IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
+
+                        FlashGrenade.PinPullTime = FlashGrenadeData.PinPullTime;
+                        FlashGrenade.Repickable = FlashGrenadeData.Repickable;
+                        FlashGrenade.MinimalDurationEffect = FlashGrenadeData.MinimalDurationEffect;
+                        FlashGrenade.AdditionalBlindedEffect = FlashGrenadeData.AdditionalBlindedEffect;
+                        FlashGrenade.SurfaceDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        FlashGrenade.FuseTime = FlashGrenadeData.FuseTime;
                         break;
 
                     default:
