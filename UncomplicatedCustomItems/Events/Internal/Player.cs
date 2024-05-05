@@ -1,6 +1,6 @@
 ﻿using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
-using JetBrains.Annotations;
+using InventorySystem.Items.Usables;
 using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
