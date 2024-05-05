@@ -117,9 +117,6 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 switch (CustomItem.CustomItemType)
                 {
-                    case CustomItemType.Item:
-                        break;
-
                     case CustomItemType.Keycard:
                         ((Keycard)Item).Permissions = ((IKeycardData)CustomItem.CustomData).Permissions;
                         break;
@@ -131,10 +128,38 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Weapon:
-                        Log.Debug("Updating weapon data");
                         ((Firearm)Item).Ammo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
                         ((Firearm)Item).MaxAmmo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
                         ((Firearm)Item).FireRate = ((IWeaponData)CustomItem.CustomData).FireRate;
+                        break;
+
+                    case CustomItemType.Jailbird:
+                        ((Jailbird)Item).TotalDamageDealt = ((IJailbirdData)CustomItem.CustomData).TotalDamageDealt;
+                        ((Jailbird)Item).TotalCharges = ((IJailbirdData)CustomItem.CustomData).TotalCharges;
+                        ((Jailbird)Item).Radius = ((IJailbirdData)CustomItem.CustomData).Radius;
+                        ((Jailbird)Item).ChargeDamage = ((IJailbirdData)CustomItem.CustomData).ChargeDamage;
+                        ((Jailbird)Item).MeleeDamage = ((IJailbirdData)CustomItem.CustomData).MeleeDamage;
+                        ((Jailbird)Item).FlashDuration = ((IJailbirdData)CustomItem.CustomData).FlashDuration;
+                        break;
+
+                    case CustomItemType.ExplosiveGrenade:
+                        ((ExplosiveGrenade)Item).MaxRadius = ((IExplosiveGrenadeData)CustomItem.CustomData).MaxRadius;
+                        ((ExplosiveGrenade)Item).PinPullTime = ((IExplosiveGrenadeData)CustomItem.CustomData).PinPullTime;
+                        ((ExplosiveGrenade)Item).ScpDamageMultiplier = ((IExplosiveGrenadeData)CustomItem.CustomData).ScpDamageMultiplier;
+                        ((ExplosiveGrenade)Item).ConcussDuration = ((IExplosiveGrenadeData)CustomItem.CustomData).ConcussDuration;
+                        ((ExplosiveGrenade)Item).BurnDuration = ((IExplosiveGrenadeData) CustomItem.CustomData).BurnDuration;
+                        ((ExplosiveGrenade)Item).DeafenDuration = ((IExplosiveGrenadeData)CustomItem.CustomData).DeafenDuration;
+                        ((ExplosiveGrenade)Item).FuseTime = ((IExplosiveGrenadeData)CustomItem.CustomData).FuseTime;
+                        ((ExplosiveGrenade)Item).Repickable = ((IExplosiveGrenadeData)CustomItem.CustomData).Repickable;
+                        break;
+
+                    case CustomItemType.FlashGrenade:
+                        ((FlashGrenade)Item).PinPullTime = ((IFlashGrenadeData)CustomItem.CustomData).PinPullTime;
+                        ((FlashGrenade)Item).Repickable = ((IFlashGrenadeData)CustomItem.CustomData).Repickable;
+                        ((FlashGrenade)Item).MinimalDurationEffect = ((IFlashGrenadeData)CustomItem.CustomData).MinimalDurationEffect;
+                        ((FlashGrenade)Item).AdditionalBlindedEffect = ((IFlashGrenadeData)CustomItem.CustomData).AdditionalBlindedEffect;
+                        ((FlashGrenade)Item).SurfaceDistanceIntensifier = ((IFlashGrenadeData)CustomItem.CustomData).SurfaceDistanceIntensifier;
+                        ((FlashGrenade)Item).FuseTime = ((IFlashGrenadeData)CustomItem.CustomData).FuseTime;
                         break;
 
                     default:
@@ -189,6 +214,12 @@ namespace UncomplicatedCustomItems.API.Features
                 }
 
                 Utilities.ParseResponse(player, Data);
+
+                // Now we can destry the item if we have been told to do it
+                if (Data.DestroyAfterUse)
+                {
+                    Destroy();
+                }
             }
         }
 

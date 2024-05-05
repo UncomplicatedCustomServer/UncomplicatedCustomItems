@@ -1,5 +1,7 @@
 ﻿using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
+using JetBrains.Annotations;
+using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
@@ -11,7 +13,7 @@ namespace UncomplicatedCustomItems.Events.Internal
     {
         public static void Register()
         {
-            EventSource.UsingItem += CancelUsingCustomItemOnUsingItem;
+            EventSource.UsingItem += OnUsingItem;
             EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
             EventSource.DroppedItem += DroppedItemEvent;
@@ -22,7 +24,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         public static void Unregister()
         {
-            EventSource.UsingItem -= CancelUsingCustomItemOnUsingItem;
+            EventSource.UsingItem -= OnUsingItem;
             EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
             EventSource.DroppedItem -= DroppedItemEvent;
@@ -96,15 +98,32 @@ namespace UncomplicatedCustomItems.Events.Internal
             Item?.HandleEvent(ev.Player, ItemEvents.Use);
         }
 
-        /// <summary>
-        /// Cancel using if it is custom item
-        /// </summary>
-        /// <param name="ev"></param>
-        private static void CancelUsingCustomItemOnUsingItem(UsingItemEventArgs ev)
+        private static void OnUsingItem(UsingItemEventArgs ev)
         {
-            if (!ev.IsAllowed)
+            if (ev.Item is not null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
             {
-                return;
+                if (Item.CustomItem.CustomItemType is CustomItemType.Medikit)
+                {
+                    // Do the medikit thing
+                    if (Item.CustomItem.CustomData is not IMedikitData Data)
+                    {
+                        return;
+                    }
+                    ev.IsAllowed = false;
+                    ev.Player.Heal(Data.Health, Data.MoreThanMax);
+                    Item.Destroy();
+                }
+                else if (Item.CustomItem.CustomItemType is CustomItemType.Painkillers)
+                {
+                    // Do the painkillers thing
+                    if (Item.CustomItem.CustomData is not IPainkillersData Data)
+                    {
+                        return;
+                    }
+                    ev.IsAllowed = false;
+                    Timing.RunCoroutine(Utilities.PainkillersCoroutine(ev.Player, Data));
+                    Item.Destroy();
+                }
             }
         }
 

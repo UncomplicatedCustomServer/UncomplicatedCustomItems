@@ -16,5 +16,7 @@
         public abstract string HintMessage { get; set; }
 
         public abstract float HintDuration { get; set; }
+
+        public abstract bool DestroyAfterUse { get; set; }
     }
 }

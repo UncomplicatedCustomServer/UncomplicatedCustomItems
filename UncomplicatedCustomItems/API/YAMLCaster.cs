@@ -75,6 +75,11 @@ namespace UncomplicatedCustomItems.API
                 CustomItemType.Keycard => (Data)Decode(new KeycardData(), data),
                 CustomItemType.Armor => (Data)Decode(new ArmorData(), data),
                 CustomItemType.Weapon => (Data)Decode(new WeaponData(), data),
+                CustomItemType.Medikit => (Data)Decode(new MedikitData(), data),
+                CustomItemType.Painkillers => (Data)Decode(new PainkillersData(), data),
+                CustomItemType.Jailbird => (Data)Decode(new JailbirdData(), data),
+                CustomItemType.ExplosiveGrenade => (Data)Decode(new ExplosiveGrenadeData(), data),
+                CustomItemType.FlashGrenade => (Data)Decode(new FlashGrenadeData(), data),
                 _ => new(),
             };
         }
@@ -99,7 +104,7 @@ namespace UncomplicatedCustomItems.API
                 if (!data.ContainsKey(snakeCaseStrategy.GetPropertyName(Property.Name, false)))
                 {
                     ExpectedKey = snakeCaseStrategy.GetPropertyName(Property.Name, false);
-                    KeyList = String.Join(", ", data.Keys);
+                    KeyList = string.Join(", ", data.Keys);
                     return false;
                 }
             }
