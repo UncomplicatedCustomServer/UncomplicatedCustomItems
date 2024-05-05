@@ -453,6 +453,7 @@
     <Compile Include="Interfaces\SpecificData\IMedikitData.cs" />
     <Compile Include="Interfaces\SpecificData\IPainkillersData.cs" />
     <Compile Include="Interfaces\SpecificData\IWeaponData.cs" />
+    <Compile Include="Patches\PlayerEffectsControllerPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -460,5 +461,6 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
