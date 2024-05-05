@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
 
-        public override Version Version { get; } = new(1, 5, 0);
+        public override Version Version { get; } = new(2, 0, 0);
 
         private Harmony _harmony;
 
