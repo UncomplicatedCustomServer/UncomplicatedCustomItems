@@ -1,15 +1,16 @@
-﻿using Exiled.API.Features;
-using HarmonyLib;
+using Exiled.API.Enums;
+using Exiled.API.Features;
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
-using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public static Plugin Instance { get; private set; }
+        public override string Name => "UncomplicatedCustomItems";
+
+        public override string Prefix => "uci";
 
         public override string Author => "SpGerg & FoxWorn";
 
@@ -17,14 +18,13 @@ namespace UncomplicatedCustomItems
 
         public override Version Version { get; } = new(2, 0, 0);
 
-        private Harmony _harmony;
+        public override PluginPriority Priority => PluginPriority.First;
+
+        public static Plugin Instance { get; private set; }
 
         public override void OnEnabled()
         {
             Instance = this;
-
-            _harmony = new Harmony($"com.ucs.uci-{DateTime.Now}");
-            _harmony.PatchAll();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");

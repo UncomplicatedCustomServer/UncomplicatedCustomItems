@@ -1,16 +1,13 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
+using MEC;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Elements;
-using UncomplicatedCustomItems.Elements.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
-using ExiledItem = Exiled.API.Features.Items.Item;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -34,7 +31,7 @@ namespace UncomplicatedCustomItems.API
             switch (item.CustomItemType)
             {
                 case CustomItemType.Item:
-                    if (item.CustomData is not null)
+                    if (item.CustomData is null)
                     {
                         error = $"The item has been flagged as 'Item' but the CustomData class is not 'IData', found '{item.CustomData.GetType().Name}'";
                         return false;
@@ -82,6 +79,81 @@ namespace UncomplicatedCustomItems.API
                     if (!item.Item.IsArmor())
                     {
                         error = $"The item has been flagged as 'Armor' but the item {item.Item} is not a armor in the game!";
+                        return false;
+                    }
+
+                    break;
+
+                case CustomItemType.ExplosiveGrenade:
+                    if (item.CustomData is not IExplosiveGrenadeData)
+                    {
+                        error = $"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'IExplosiveGrenadeData', found '{item.CustomData.GetType().Name}'";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.GrenadeHE)
+                    {
+                        error = $"The Item has been flagged as 'ExplosiveGrenade' but the item {item.Item} is not a GrenadeHE";
+                        return false;
+                    }
+
+                    break;
+
+                case CustomItemType.FlashGrenade:
+                    if (item.CustomData is not IFlashGrenadeData)
+                    {
+                        error = $"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'IFlashGrenadeData', found '{item.CustomData.GetType().Name}'";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.GrenadeFlash)
+                    {
+                        error = $"The Item has been flagged as 'FlashGrenade' but the item {item.Item} is not a GrenadeFlash";
+                        return false;
+                    }
+
+                    break;
+
+                case CustomItemType.Jailbird:
+                    if (item.CustomData is not IJailbirdData)
+                    {
+                        error = $"The item has been flagged as 'Jailbird' but the CustomData class is not 'IJailbirdData', found '{item.CustomData.GetType().Name}'";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.Jailbird)
+                    {
+                        error = $"The Item has been flagged as 'Jailbird' but the item {item.Item} is not a Jailbird";
+                        return false;
+                    }
+
+                    break;
+
+                case CustomItemType.Medikit:
+                    if (item.CustomData is not IMedikitData)
+                    {
+                        error = $"The item has been flagged as 'Medikit' but the CustomData class is not 'IMedikitData', found '{item.CustomData.GetType().Name}'";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.Medkit)
+                    {
+                        error = $"The Item has been flagged as 'Medikit' but the item {item.Item} is not a Medikit";
+                        return false;
+                    }
+
+                    break;
+
+                case CustomItemType.Painkillers:
+                    if (item.CustomData is not IPainkillersData)
+                    {
+                        error = $"The item has been flagged as 'Painkillers' but the CustomData class is not 'IPainkillersData', found '{item.CustomData.GetType().Name}'";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.Painkillers)
+                    {
+                        error = $"The Item has been flagged as 'Painkillers' but the item {item.Item} is not a Painkillers";
                         return false;
                     }
 
@@ -267,6 +339,18 @@ namespace UncomplicatedCustomItems.API
                 {
                     SummonedCustomItem.Summon(CustomItem, Room.List.Where(room => room.Zone == Zone).ToList().RandomItem().Position);
                 }
+            }
+        }
+
+        internal static IEnumerator<float> PainkillersCoroutine(Player player, IPainkillersData Data)
+        {
+            float TotalHealed = 0;
+            yield return Timing.WaitForSeconds(Data.TimeBeforeStartHealing);
+            while (TotalHealed < Data.TotalHealing && player.IsAlive)
+            {
+                player.Heal(Data.TickHeal);
+                TotalHealed += Data.TickHeal;
+                yield return Timing.WaitForSeconds(Data.TickTime);
             }
         }
     }

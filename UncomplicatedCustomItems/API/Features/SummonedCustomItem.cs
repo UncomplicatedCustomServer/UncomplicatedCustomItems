@@ -2,8 +2,7 @@
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
-using PluginAPI.Commands;
-using System.Runtime.Remoting.Messaging;
+using InventorySystem.Items.Usables;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
@@ -119,24 +118,67 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 switch (CustomItem.CustomItemType)
                 {
-                    case CustomItemType.Item:
-                        break;
-
                     case CustomItemType.Keycard:
-                        ((Keycard)Item).Permissions = ((IKeycardData)CustomItem.CustomData).Permissions;
+                        Keycard Keycard = Item as Keycard;
+                        IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
+
+                        Keycard.Permissions = KeycardData.Permissions;
                         break;
 
                     case CustomItemType.Armor:
-                        ((Armor)Item).HelmetEfficacy = ((IArmorData)CustomItem.CustomData).HeadProtection;
-                        ((Armor)Item).RemoveExcessOnDrop = ((IArmorData)CustomItem.CustomData).RemoveExcessOnDrop;
-                        ((Armor)Item).StaminaUseMultiplier = ((IArmorData)CustomItem.CustomData).StaminaUseMultiplier;
+                        Armor Armor = Item as Armor;
+                        IArmorData ArmorData = CustomItem.CustomData as IArmorData;
+
+                        Armor.HelmetEfficacy = ArmorData.HeadProtection;
+                        Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
+                        Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
                         break;
 
                     case CustomItemType.Weapon:
-                        Log.Debug("Updating weapon data");
-                        ((Firearm)Item).Ammo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
-                        ((Firearm)Item).MaxAmmo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
-                        ((Firearm)Item).FireRate = ((IWeaponData)CustomItem.CustomData).FireRate;
+                        Firearm Firearm = Item as Firearm;
+                        IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+
+                        Firearm.Ammo = WeaponData.MaxAmmo;
+                        Firearm.MaxAmmo = WeaponData.MaxAmmo;
+                        Firearm.FireRate = WeaponData.FireRate;
+                        break;
+
+                    case CustomItemType.Jailbird:
+                        Jailbird Jailbird = Item as Jailbird;
+                        IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
+
+                        Jailbird.TotalDamageDealt = JailbirdData.TotalDamageDealt;
+                        Jailbird.TotalCharges = JailbirdData.TotalCharges;
+                        Jailbird.Radius = JailbirdData.Radius;
+                        Jailbird.ChargeDamage = JailbirdData.ChargeDamage;
+                        Jailbird.MeleeDamage = JailbirdData.MeleeDamage;
+                        Jailbird.FlashDuration = JailbirdData.FlashDuration;
+                        break;
+
+                    case CustomItemType.ExplosiveGrenade:
+                        ExplosiveGrenade ExplosiveGrenade = Item as ExplosiveGrenade;
+                        IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+
+                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        ExplosiveGrenade.PinPullTime = ExplosiveGrenadeData.PinPullTime;
+                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        ExplosiveGrenade.ConcussDuration = ExplosiveGrenadeData.ConcussDuration;
+                        ExplosiveGrenade.BurnDuration = ExplosiveGrenadeData.BurnDuration;
+                        ExplosiveGrenade.DeafenDuration = ExplosiveGrenadeData.DeafenDuration;
+                        ExplosiveGrenade.FuseTime = ExplosiveGrenadeData.FuseTime;
+                        ExplosiveGrenade.Repickable = ExplosiveGrenadeData.Repickable;
+                        break;
+
+                    case CustomItemType.FlashGrenade:
+                        FlashGrenade FlashGrenade = Item as FlashGrenade;
+                        IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
+
+                        FlashGrenade.PinPullTime = FlashGrenadeData.PinPullTime;
+                        FlashGrenade.Repickable = FlashGrenadeData.Repickable;
+                        FlashGrenade.MinimalDurationEffect = FlashGrenadeData.MinimalDurationEffect;
+                        FlashGrenade.AdditionalBlindedEffect = FlashGrenadeData.AdditionalBlindedEffect;
+                        FlashGrenade.SurfaceDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        FlashGrenade.FuseTime = FlashGrenadeData.FuseTime;
                         break;
 
                     default:
@@ -191,6 +233,12 @@ namespace UncomplicatedCustomItems.API.Features
                 }
 
                 Utilities.ParseResponse(player, Data);
+
+                // Now we can destry the item if we have been told to do it
+                if (Data.DestroyAfterUse)
+                {
+                    Destroy();
+                }
             }
         }
 

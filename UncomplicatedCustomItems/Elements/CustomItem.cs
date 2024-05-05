@@ -1,7 +1,4 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Pickups;
-using System.ComponentModel;
-using UncomplicatedCustomItems.API.Features;
+﻿using System.ComponentModel;
 using UncomplicatedCustomItems.Elements.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
