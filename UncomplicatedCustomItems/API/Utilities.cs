@@ -178,6 +178,7 @@ namespace UncomplicatedCustomItems.API
         /// <returns><see cref="true"/> if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
         public static bool TryGetCustomItem(uint id, out ICustomItem item)
         {
+            //foxworn is furry, hehehehehehehehehehe
             if (Manager.Items.TryGetValue(id, out item))
             {
                 return true;
