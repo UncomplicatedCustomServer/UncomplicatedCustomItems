@@ -14,28 +14,28 @@ namespace UncomplicatedCustomItems.Patches
     [HarmonyPatch(typeof(PlayerEffectsController), nameof(PlayerEffectsController.UseMedicalItem))]
     public class PlayerEffectsControllerPatch
     {
-        private static bool Prefix(PlayerEffectsController __instance, ItemBase itemBase)
+        private static bool Prefix(PlayerEffectsController __instance, ItemBase item)
         {
-            var customItem = Utilities.GetCustomItem(itemBase.ItemSerial);
+            var customItem = Utilities.GetCustomItem(item.ItemSerial);
 
             if (customItem is null)
             {
                 return true;
             }
 
-            if (itemBase.ItemTypeId is not ItemType.Painkillers or ItemType.Medkit)
+            if (item.ItemTypeId is not ItemType.Painkillers or ItemType.Medkit)
             {
                 return true;
             }
 
-            if (itemBase.ItemTypeId is ItemType.Medkit)
+            if (item.ItemTypeId is ItemType.Medkit)
             {
                 //65 is amount of medkit health
-                itemBase.Owner.playerStats.GetModule<HealthStat>().CurValue -= 65;
+                item.Owner.playerStats.GetModule<HealthStat>().CurValue -= 65;
             }
             else
             {
-                var handler = UsableItemsController.GetHandler(itemBase.Owner);
+                var handler = UsableItemsController.GetHandler(item.Owner);
 
                 handler.ActiveRegenerations.RemoveAt(handler.ActiveRegenerations.Count - 1);
             }
