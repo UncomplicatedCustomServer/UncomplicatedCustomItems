@@ -1,8 +1,4 @@
-﻿using CameraShaking;
-using Exiled.API.Structs;
-using System.Collections.Generic;
-
-namespace UncomplicatedCustomItems.Interfaces.SpecificData
+﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
     public interface IWeaponData : IData
     {

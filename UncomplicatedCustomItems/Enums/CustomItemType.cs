@@ -4,5 +4,9 @@
     Keycard,
     Armor,
     Weapon,
-    Medical
+    Medikit,
+    Painkillers,
+    Jailbird,
+    ExplosiveGrenade,
+    FlashGrenade
 }

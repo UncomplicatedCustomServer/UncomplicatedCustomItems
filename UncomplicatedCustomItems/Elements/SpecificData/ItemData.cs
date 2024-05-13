@@ -40,5 +40,10 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         /// The hint duration
         /// </summary>
         public float HintDuration { get; set; } = 2.3f;
+
+        /// <summary>
+        /// Do destry the item after the use?
+        /// </summary>
+        public bool DestroyAfterUse { get; set; } = false;
     }
 }

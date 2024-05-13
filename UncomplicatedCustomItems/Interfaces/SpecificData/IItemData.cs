@@ -1,6 +1,4 @@
-﻿using UncomplicatedCustomItems.Elements;
-
-namespace UncomplicatedCustomItems.Interfaces.SpecificData
+﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
 #nullable enable
     public interface IItemData : IData
@@ -18,5 +16,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract string HintMessage { get; set; }
 
         public abstract float HintDuration { get; set; }
+
+        public abstract bool DestroyAfterUse { get; set; }
     }
 }

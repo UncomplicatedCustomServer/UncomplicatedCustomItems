@@ -4,7 +4,6 @@ using Exiled.Permissions.Extensions;
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
