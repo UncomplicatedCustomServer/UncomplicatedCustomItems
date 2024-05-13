@@ -119,6 +119,9 @@
     <Reference Include="SemanticVersioning">
       <HintPath>..\..\..\..\Downloads\Master(1)\SemanticVersioning.dll</HintPath>
     </Reference>
+    <Reference Include="SemanticVersioning, Version=2.0.2.0, Culture=neutral, PublicKeyToken=a89bb7dc6f7a145c, processorArchitecture=MSIL">
+      <HintPath>..\packages\SemanticVersioning.2.0.2\lib\net45\SemanticVersioning.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -406,6 +409,9 @@
     <Reference Include="zxing">
       <HintPath>..\..\..\..\Downloads\Master(1)\zxing.dll</HintPath>
     </Reference>
+    <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\EXILED.8.8.1\lib\net48\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Features\SummonedCustomItem.cs" />
@@ -450,6 +456,7 @@
     <Compile Include="Interfaces\SpecificData\IMedikitData.cs" />
     <Compile Include="Interfaces\SpecificData\IPainkillersData.cs" />
     <Compile Include="Interfaces\SpecificData\IWeaponData.cs" />
+    <Compile Include="Managers\HttpManager.cs" />
     <Compile Include="Patches\PlayerEffectsControllerPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

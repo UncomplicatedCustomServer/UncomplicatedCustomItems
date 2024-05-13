@@ -2,6 +2,7 @@ using Exiled.API.Enums;
 using Exiled.API.Features;
 using HarmonyLib;
 using System;
+using System.IO;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
 
@@ -17,7 +18,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
 
-        public override Version Version { get; } = new(2, 0, 0);
+        public override Version Version { get; } = new(2, 0, 1);
 
         public override PluginPriority Priority => PluginPriority.First;
 
@@ -31,6 +32,12 @@ namespace UncomplicatedCustomItems
 
             _harmony = new Harmony($"com.ucs.uci-{DateTime.Now}");
             _harmony.PatchAll();
+
+            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
+            {   
+                Managers.HttpManager httpManager = new Managers.HttpManager("uci");
+                httpManager.Start();
+            }
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
