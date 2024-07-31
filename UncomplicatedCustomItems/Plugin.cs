@@ -1,10 +1,11 @@
 using Exiled.API.Enums;
 using Exiled.API.Features;
-using HarmonyLib;
 using System;
+using HarmonyLib;
 using System.IO;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
+using UncomplicatedCustomItems.Managers;
 
 namespace UncomplicatedCustomItems
 {
@@ -26,18 +27,22 @@ namespace UncomplicatedCustomItems
 
         private Harmony _harmony;
 
+        internal HttpManager HttpManager;
+
         public override void OnEnabled()
         {
             Instance = this;
 
-            _harmony = new Harmony($"com.ucs.uci-{DateTime.Now}");
+            _harmony = new("com.ucs.uci");
             _harmony.PatchAll();
 
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
             {   
-                Managers.HttpManager httpManager = new Managers.HttpManager("uci");
-                httpManager.Start();
+                HttpManager = new("uci", uint.MaxValue);
+                HttpManager.Start();
             }
+
+            LogManager.History.Clear();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
@@ -60,6 +65,11 @@ namespace UncomplicatedCustomItems
         {
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
+
+            HttpManager.Stop();
+
+            _harmony.UnpatchAll();
+            _harmony = null;
 
             Instance = null;
 
