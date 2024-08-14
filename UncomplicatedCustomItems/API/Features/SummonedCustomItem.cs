@@ -139,7 +139,7 @@ namespace UncomplicatedCustomItems.API.Features
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
 
                         Firearm.Ammo = WeaponData.MaxAmmo;
-                        Firearm.MaxAmmo = WeaponData.MaxAmmo;
+                        // Firearm.MaxAmmo = WeaponData.MaxAmmo;
                         Firearm.FireRate = WeaponData.FireRate;
                         break;
 
@@ -224,11 +224,11 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     if (!Data.Command.Contains("P:"))
                     {
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()));
+                        Server.RunCommand(Data.Command.Replace("%id%", player.Id.ToString()));
                     } 
                     else
                     {
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
+                        Server.RunCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
                     }
                 }
 

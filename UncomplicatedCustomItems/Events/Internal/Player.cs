@@ -1,8 +1,11 @@
-﻿using Exiled.API.Features.Items;
+﻿using Exiled.API.Extensions;
+using Exiled.API.Features;
+using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Map;
 using Exiled.Events.EventArgs.Player;
 using InventorySystem.Items.Usables;
 using MEC;
+using PlayerRoles;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
