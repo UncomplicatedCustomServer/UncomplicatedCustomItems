@@ -131,5 +131,7 @@ namespace UncomplicatedCustomItems
         public string SelectedMessage { get; set; } = "You have picked up a %name% who's a %desc%";
         [Description("The duration of that hint")]
         public float SelectedMessageDuration { get; set; } = 3f;
+
+        public bool DoEnableAdminMessages { get; set; } = true;
     }
 }
