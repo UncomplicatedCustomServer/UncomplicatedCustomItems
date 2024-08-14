@@ -21,7 +21,7 @@ namespace UncomplicatedCustomItems.API
         /// <returns><see cref="false"/> if there's any problem. Every error will be outputted with <paramref name="error"/></returns>
         public static bool CustomItemValidator(ICustomItem item, out string error)
         {
-            if (Manager.Items.ContainsKey(item.Id))
+            if (CustomItem.CustomItems.ContainsKey(item.Id))
             {
                 error = $"There's already another ICustomItem registered with the same Id ({item.Id})!";
                 return false;
@@ -159,6 +159,21 @@ namespace UncomplicatedCustomItems.API
 
                     break;
 
+                case CustomItemType.Adrenaline:
+                    if (item.CustomData is not IAdrenalineData)
+                    {
+                        error = $"The item has been flagged as 'Adrenaline' but the CustomData class is not 'IAdrenalineData', found '{item.CustomData.GetType().Name}'";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.Adrenaline)
+                    {
+                        error = $"The Item has been flagged as 'Adrenaline' but the item {item.Item} is not a Adrenaline";
+                        return false;
+                    }
+
+                    break;
+
                 default:
                     error = "Unknown error? Uhm please report it on our discord server!";
                     return false;
@@ -208,39 +223,21 @@ namespace UncomplicatedCustomItems.API
         /// <param name="serial"></param>
         /// <param name="item"></param>
         /// <returns><see cref="true"/> if succeeded</returns>
-        public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem item)
-        {
-            item = Manager.SummonedItems.Where(item => item.Serial == serial).FirstOrDefault();
-            if (item == default)
-            {
-                return false;
-            }
-            return true;
-        }
+        public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem item) => SummonedCustomItem.TryGet(serial, out item);
 
         /// <summary>
         /// Get a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
         /// <param name="serial"></param>
         /// <returns><see cref="SummonedCustomItem"/> if succeeded, <see cref="default"/> if not</returns>
-        public static SummonedCustomItem GetSummonedCustomItem(ushort serial)
-        {
-            if (!TryGetSummonedCustomItem(serial, out SummonedCustomItem Item))
-            {
-                return default;
-            }
-            return Item;
-        }
+        public static SummonedCustomItem GetSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial);
 
         /// <summary>
         /// Check if an item is a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
         /// <param name="serial"></param>
         /// <returns><see cref="true"/> if it is</returns>
-        public static bool IsSummonedCustomItem(ushort serial)
-        {
-            return Manager.SummonedItems.Where(item => item.Serial == serial).Count() > 0;
-        }
+        public static bool IsSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial) is not null;
 
         /// <summary>
         /// Try to get a <see cref="ICustomItem"/> by it's Id
@@ -248,45 +245,33 @@ namespace UncomplicatedCustomItems.API
         /// <param name="id"></param>
         /// <param name="item"></param>
         /// <returns><see cref="true"/> if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
-        public static bool TryGetCustomItem(uint id, out ICustomItem item)
-        {
-            //foxworn is furry, hehehehehehehehehehe
-            if (Manager.Items.TryGetValue(id, out item))
-            {
-                return true;
-            }
-
-            return false;
-        }
+        public static bool TryGetCustomItem(uint id, out ICustomItem item) => CustomItem.CustomItems.TryGetValue(id, out item);
 
         /// <summary>
         /// Get a <see cref="ICustomItem"/> by it's Id
         /// </summary>
         /// <param name="id"></param>
         /// <returns><see cref="ICustomItem"/> if it exists, otherwhise a <see cref="default"/> will be returned</returns>
-        public static ICustomItem GetCustomItem(uint id)
-        {
-            TryGetCustomItem(id, out ICustomItem Item);
-            return Item;
-        }
+        public static ICustomItem GetCustomItem(uint id) => CustomItem.CustomItems[id];
 
         /// <summary>
         /// Check if the given Id is already registered as a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static bool IsCustomItem(uint id)
-        {
-            return Manager.Items.ContainsKey(id);
-        }
+        public static bool IsCustomItem(uint id) => CustomItem.CustomItems.ContainsKey(id);
 
+        /// <summary>
+        /// Summon a CustomItem
+        /// </summary>
+        /// <param name="CustomItem"></param>
         internal static void SummonCustomItem(ICustomItem CustomItem)
         {
             ISpawn Spawn = CustomItem.Spawn;
 
             if (Spawn.Coords.Count() > 0)
             {
-                SummonedCustomItem.Summon(CustomItem, Spawn.Coords.RandomItem());
+                new SummonedCustomItem(CustomItem, Spawn.Coords.RandomItem());
                 return;
             }
 
@@ -298,22 +283,15 @@ namespace UncomplicatedCustomItems.API
                     List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
                     if (Spawn.ForceItem)
-                    {
                         FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
-                    }
 
                     if (FilteredPickups.Count() > 0)
-                    {
-                        Pickup Pickup = FilteredPickups.RandomItem();
-                        SummonedCustomItem.Summon(CustomItem, Pickup.Position, Pickup.Rotation);
-                        Pickup.Destroy();
-                    }
+                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
+
                     return;
                 }
                 else
-                {
-                    SummonedCustomItem.Summon(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
-                }
+                    new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
             }
             else if (Spawn.Zones.Count() > 0)
             {
@@ -323,25 +301,27 @@ namespace UncomplicatedCustomItems.API
                     List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
                     if (Spawn.ForceItem)
-                    {
                         FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
-                    }
 
                     if (FilteredPickups.Count() > 0)
                     {
-                        Pickup Pickup = FilteredPickups.RandomItem();
-                        SummonedCustomItem.Summon(CustomItem, Pickup.Position, Pickup.Rotation);
-                        Pickup.Destroy();
+                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
                     }
                     return;
                 }
                 else
                 {
-                    SummonedCustomItem.Summon(CustomItem, Room.List.Where(room => room.Zone == Zone).ToList().RandomItem().Position);
+                    new SummonedCustomItem(CustomItem, Room.List.Where(room => room.Zone == Zone).ToList().RandomItem().Position);
                 }
             }
         }
 
+        /// <summary>
+        /// Reproduce the SCP:SL painkillers healing process but with custom things :)
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="Data"></param>
+        /// <returns></returns>
         internal static IEnumerator<float> PainkillersCoroutine(Player player, IPainkillersData Data)
         {
             float TotalHealed = 0;

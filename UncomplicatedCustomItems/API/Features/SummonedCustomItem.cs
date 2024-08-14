@@ -2,6 +2,9 @@
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
+using MEC;
+using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
@@ -10,6 +13,21 @@ namespace UncomplicatedCustomItems.API.Features
 {
     public class SummonedCustomItem
     {
+        /// <summary>
+        /// Gets the list of every active SummonedCustomItem
+        /// </summary>
+        public static List<SummonedCustomItem> List { get; } = new();
+
+        /// <summary>
+        /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
+        /// </summary>
+        private static readonly List<CustomItemType> _managedItems = new()
+        {
+            CustomItemType.Painkillers,
+            CustomItemType.Medikit,
+            CustomItemType.Adrenaline
+        };
+
         /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
         /// </summary>
@@ -39,82 +57,65 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Check if this item is a pickup
         /// </summary>
-        public bool IsPickup { get; internal set; }
+        public bool IsPickup => Pickup is not null;
 
         /// <summary>
-        /// Summon the <see cref="ICustomItem"/> inside the inventory of a player
+        /// Create a new instance of <see cref="SummonedCustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
         /// <param name="owner"></param>
-        public SummonedCustomItem(ICustomItem customItem, Player owner)
+        public SummonedCustomItem(ICustomItem customItem, Player owner, Item item, Pickup pickup)
         {
             CustomItem = customItem;
             Owner = owner;
-            Item = Item.Create(customItem.Item);
-            owner.AddItem(Item);
-            Serial = Item.Serial;
-            IsPickup = false;
-            Pickup = null;
+            Item = item;
+            Serial = item is not null ? item.Serial : pickup.Serial;
+            Pickup = pickup;
             SetProperties();
+            List.Add(this);
         }
 
         /// <summary>
-        /// Summon the <see cref="ICustomItem"/> as an existing pickup
+        /// Create an instance of <see cref="SummonedCustomItem"/> by choosing an existing pickup.<br></br>
+        /// From now on it will be considered a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
         /// <param name="pickup"></param>
-        public SummonedCustomItem(ICustomItem customItem, Pickup pickup)
-        {
-            CustomItem = customItem;
-            Owner = null;
-            Pickup = pickup;
-            Serial = Pickup.Serial;
-            IsPickup = true;
-            Item = null;
-            SetProperties();
-        }
+        public SummonedCustomItem(ICustomItem customItem, Pickup pickup) : this(customItem, null, null, pickup) { }
 
         /// <summary>
-        /// Summon the <see cref="ICustomItem"/> as a new pickup
+        /// Create an instance of <see cref="SummonedCustomItem"/> by spawning a new pickup.<br></br>
+        /// From now on it will be considered a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
         /// <param name="position"></param>
         /// <param name="rotation"></param>
-        public SummonedCustomItem(ICustomItem customItem, Vector3 position, Quaternion rotation = new())
-        {
-            CustomItem = customItem;
-            Owner = null;
-            Item = null;
-            Pickup = Pickup.CreateAndSpawn(customItem.Item, position, rotation);
-            IsPickup = true;
-            Serial = Pickup.Serial;
-            SetProperties();
-        }
+        public SummonedCustomItem(ICustomItem customItem, Vector3 position, Quaternion rotation = new()) : this(customItem, Pickup.CreateAndSpawn(customItem.Item, position, rotation)) { }
 
         /// <summary>
-        /// Summon the <see cref="ICustomItem"/> inside the inventory of a player
+        /// Create an instance of <see cref="SummonedCustomItem"/> by spawning the item inside the player's inventory<br></br>
+        /// From now on it will be considered a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
         /// <param name="owner"></param>
-        /// <returns>The <see cref="SummonedCustomItem"/> class of the summoned item</returns>
-        public static SummonedCustomItem Summon(ICustomItem customItem, Player owner)
-        {
-            SummonedCustomItem Item = new(customItem, owner);
-            Manager.SummonedItems.Add(Item);
-            return Item;
-        }
+        public SummonedCustomItem(ICustomItem customItem, Player player) : this(customItem, player, player.AddItem(customItem.Item), null) { }
 
-        public static SummonedCustomItem Summon(ICustomItem customItem, Vector3 position, Quaternion rotation = new())
-        {
-            SummonedCustomItem Item = new(customItem, position, rotation);
-            Manager.SummonedItems.Add(Item);
-            return Item;
-        }
+        /// <summary>
+        /// Create an instance of <see cref="SummonedCustomItem"/> by choosing an item inside a player's inventory<br></br>
+        /// From now on it will be considered a <see cref="ICustomItem"/>
+        /// </summary>
+        /// <param name="customItem"></param>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        /// <returns></returns>
+        public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
-        internal void SetProperties()
+        /// <summary>
+        /// Apply the custom properties of the current <see cref="ICustomItem"/>
+        /// </summary>
+        private void SetProperties()
         {
             if (Item is not null)
-            {
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
@@ -183,7 +184,6 @@ namespace UncomplicatedCustomItems.API.Features
                     default:
                         break;
                 }
-            }
             else if (Pickup is not null)
             {
                 Pickup.Scale = CustomItem.Scale;
@@ -193,7 +193,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal void OnPickup(ItemAddedEventArgs pickedUp)
         {
-            IsPickup = false;
             Pickup = null;
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
@@ -204,7 +203,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal void OnDrop(DroppedItemEventArgs dropped)
         {
-            IsPickup = true;
             Pickup = dropped.Pickup;
             Item = null;
             Owner = null;
@@ -220,59 +218,130 @@ namespace UncomplicatedCustomItems.API.Features
                 IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
                 if (Data.Command is not null && Data.Command.Length > 2)
-                {
                     if (!Data.Command.Contains("P:"))
-                    {
-                        Server.RunCommand(Data.Command.Replace("%id%", player.Id.ToString()));
-                    } 
+                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString())); 
                     else
-                    {
-                        Server.RunCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
-                    }
-                }
+                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
 
                 Utilities.ParseResponse(player, Data);
 
                 // Now we can destry the item if we have been told to do it
                 if (Data.DestroyAfterUse)
-                {
                     Destroy();
-                }
             }
         }
 
         internal void HandleSelectedDisplayHint()
         {
             if (Plugin.Instance.Config.SelectedMessage.Length > 1)
-            {
                 Owner.ShowHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
-            }
         }
 
         internal void HandlePickedUpDisplayHint()
         {
             if (Plugin.Instance.Config.PickedUpMessage.Length > 1)
-            {
                 Owner.ShowHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
+        }
+
+        internal bool HandleCustomAction()
+        {
+            if (Owner is null) 
+                return false;
+
+            if (_managedItems.Contains(CustomItem.CustomItemType))
+            {
+                switch (CustomItem.CustomItemType)
+                {
+                    case CustomItemType.Medikit:
+                        IMedikitData MedikitData = CustomItem.CustomData as IMedikitData;
+                        Owner.Heal(MedikitData.Health, MedikitData.MoreThanMax);
+                        break;
+                    case CustomItemType.Painkillers:
+                        Timing.RunCoroutine(Utilities.PainkillersCoroutine(Owner, CustomItem.CustomData as IPainkillersData));
+                        break;
+                    case CustomItemType.Adrenaline:
+                        IAdrenalineData AdrenalineData = CustomItem.CustomData as IAdrenalineData;
+                        Owner.AddAhp(AdrenalineData.Amount, decay: AdrenalineData.Decay, efficacy: AdrenalineData.Efficacy, sustain: AdrenalineData.Sustain, persistant: AdrenalineData.Persistant);
+                        break;
+                    default:
+                        return false;
+                }
+
+                return true;
             }
+
+            return false;
         }
 
         public void Destroy()
         {
-            Manager.SummonedItems.Remove(this);
+            List.Remove(this);
             if (IsPickup)
-            {
                 Pickup.Destroy();
-            } 
             else
-            {
                 Item.Destroy();
-            }
+
             Pickup = null;
             Item = null;
             Serial = 0;
             Owner = null;
             CustomItem = null;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="List{SummonedCustomItem}"/> of every <see cref="SummonedCustomItem"/> with the given <see cref="ItemType"/>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static List<SummonedCustomItem> Get(ItemType item) => List.Where(sci => sci.CustomItem.Item == item).ToList();
+
+        /// <summary>
+        /// Gets a <see cref="List{SummonedCustomItem}"/> of every <see cref="SummonedCustomItem"/> with the given owner
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <returns></returns>
+        public static List<SummonedCustomItem> Get(Player owner) => List.Where(sci => sci.Owner?.Id == owner.Id).ToList();
+
+        /// <summary>
+        /// Gets a <see cref="SummonedCustomItem"/> by it's owner and it's serial.<br></br>
+        /// It can't be a pickup!
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="serial"></param>
+        /// <returns></returns>
+        public static SummonedCustomItem Get(Player owner, ushort serial) => List.Where(sci => sci.Owner is not null && sci.Owner.Id ==  owner.Id && sci.Serial == serial).FirstOrDefault();
+
+        /// <summary>
+        /// Gets a <see cref="SummonedCustomItem"/> by it's serial.
+        /// </summary>
+        /// <param name="serial"></param>
+        /// <returns></returns>
+        public static SummonedCustomItem Get(ushort serial) => List.Where(sci => sci.Serial == serial).FirstOrDefault();
+
+        /// <summary>
+        /// Try gets a <see cref="SummonedCustomItem"/> by it's owner and it's serial.<br></br>
+        /// It can't be a pickup!
+        /// </summary>
+        /// <param name="serial"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static bool TryGet(ushort serial, out SummonedCustomItem item)
+        {
+            item = Get(serial);
+            return item != null;
+        }
+
+        /// <summary>
+        /// Try gets a <see cref="SummonedCustomItem"/> by it's serial.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="serial"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static bool TryGet(Player player, ushort serial, out SummonedCustomItem item)
+        {
+            item = Get(player, serial);
+            return item != null;
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UncomplicatedCustomItems.Interfaces;
 using UnityEngine;
 
-namespace UncomplicatedCustomItems.Elements
+namespace UncomplicatedCustomItems.API.Features
 {
     public class Spawn : ISpawn
     {

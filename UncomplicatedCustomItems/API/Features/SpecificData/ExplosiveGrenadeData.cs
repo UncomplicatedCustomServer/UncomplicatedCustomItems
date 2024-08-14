@@ -1,6 +1,6 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 
-namespace UncomplicatedCustomItems.Elements.SpecificData
+namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     public class ExplosiveGrenadeData : Data, IExplosiveGrenadeData
     {

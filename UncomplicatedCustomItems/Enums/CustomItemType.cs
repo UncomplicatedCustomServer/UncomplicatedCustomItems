@@ -8,5 +8,6 @@
     Painkillers,
     Jailbird,
     ExplosiveGrenade,
-    FlashGrenade
+    FlashGrenade,
+    Adrenaline
 }

@@ -2,7 +2,6 @@
 using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using System;
-using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -30,7 +29,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            if (!Manager.Items.ContainsKey(uint.Parse(arguments.At(0))))
+            if (!CustomItem.CustomItems.ContainsKey(uint.Parse(arguments.At(0))))
             {
                 response = $"Sorry but there's no custom item with the Id {uint.Parse(arguments.At(0))}!";
                 return false;
@@ -42,7 +41,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 Target = Player.Get(arguments.At(1));
             }
 
-            SummonedCustomItem Item = SummonedCustomItem.Summon(Manager.Items[uint.Parse(arguments.At(0))], Target);
+            SummonedCustomItem Item = new(CustomItem.CustomItems[uint.Parse(arguments.At(0))], Target);
 
             response = $"Successfully summoned 1 '{Item.CustomItem.Name}' to {Target.Nickname}";
             return true;

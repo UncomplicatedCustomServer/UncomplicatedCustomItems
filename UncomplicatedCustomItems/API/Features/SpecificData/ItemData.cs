@@ -1,48 +1,48 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 
-namespace UncomplicatedCustomItems.Elements.SpecificData
+namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
 #nullable enable
 
     public class ItemData : Data, IItemData
     {
         /// <summary>
-        /// The <see cref="ItemEvents"/> of the object
+        /// Gets or sets the <see cref="ItemEvents"/> of the object
         /// </summary>
         public ItemEvents Event { get; set; } = ItemEvents.Pickup;
 
         /// <summary>
-        /// The command (<see cref="string>"/>) that will be executed when the <see cref="ItemEvents"/> will be fired
+        /// Gets or sets the command (<see cref="string>"/>) that will be executed when the <see cref="ItemEvents"/> will be fired
         /// </summary>
         public string? Command { get; set; } = null;
 
         /// <summary>
-        /// The message that will be sent inside the console when the <see cref="ItemEvents"/> will be fired
+        /// Gets or sets the message that will be sent inside the console when the <see cref="ItemEvents"/> will be fired
         /// </summary>
         public string ConsoleMessage { get; set; } = "A funny message for the console";
 
         /// <summary>
-        /// The message that will be sent as broadcast when the <see cref="ItemEvents"/> will be fired
+        /// Gets or sets the message that will be sent as broadcast when the <see cref="ItemEvents"/> will be fired
         /// </summary>
         public string BroadcastMessage { get; set; } = "The broadcast uuhh!!!";
 
         /// <summary>
-        /// The broadcast duration
+        /// Gets or sets the broadcast duration
         /// </summary>
         public ushort BroadcastDuration { get; set; } = 3;
 
         /// <summary>
-        /// The message that will be sent as hint when the <see cref="ItemEvents"/> will be fired
+        /// Gets or sets the message that will be sent as hint when the <see cref="ItemEvents"/> will be fired
         /// </summary>
         public string HintMessage { get; set; } = "Yamato is a femboy";
 
         /// <summary>
-        /// The hint duration
+        /// Gets or sets the hint duration
         /// </summary>
         public float HintDuration { get; set; } = 2.3f;
 
         /// <summary>
-        /// Do destry the item after the use?
+        /// Gets or sets whether should the item be destroyed after it's use
         /// </summary>
         public bool DestroyAfterUse { get; set; } = false;
     }

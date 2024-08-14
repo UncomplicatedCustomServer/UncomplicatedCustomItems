@@ -2,7 +2,6 @@
 using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using System;
-using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -26,7 +25,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             response = "List of every registered custom Items:\n\n Serial | Id | Status |    Name   | Owner";
 
-            foreach (SummonedCustomItem Item in Manager.SummonedItems)
+            foreach (SummonedCustomItem Item in SummonedCustomItem.List)
             {
                 string Status = Item.IsPickup ? "Pickup" : " Item ";
                 string Owner = (Item.Owner is null) ? "null" : Item.Owner.Nickname;

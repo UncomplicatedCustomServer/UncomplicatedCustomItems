@@ -1,4 +1,5 @@
 ﻿using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 using EventSource = Exiled.Events.Handlers.Server;
 
@@ -21,7 +22,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// </summary>
         private static void SpawnItemsOnRoundStarted() 
         {
-            foreach (ICustomItem CustomItem in Manager.Items.Values)
+            foreach (ICustomItem CustomItem in CustomItem.List)
             {
                 if (CustomItem.Spawn is not null && CustomItem.Spawn.DoSpawn)
                 {

@@ -2,7 +2,7 @@
 using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using System;
-using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             response = "List of every registered custom Items:\n\n Id |  Type  |   Name";
 
-            foreach (ICustomItem Item in Manager.Items.Values)
+            foreach (ICustomItem Item in CustomItem.List)
             {
                 response += $"\n  {Item.Id}   {Item.CustomItemType}    {Item.Name}";
             }

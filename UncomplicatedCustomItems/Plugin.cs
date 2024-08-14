@@ -3,9 +3,7 @@ using Exiled.API.Features;
 using System;
 using HarmonyLib;
 using System.IO;
-using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Elements;
-using UncomplicatedCustomItems.Managers;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems
 {
@@ -19,7 +17,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(8, 2, 1);
 
-        public override Version Version { get; } = new(2, 0, 1);
+        public override Version Version { get; } = new(3, 0, 0, 1);
 
         public override PluginPriority Priority => PluginPriority.First;
 
@@ -27,20 +25,22 @@ namespace UncomplicatedCustomItems
 
         private Harmony _harmony;
 
-        internal HttpManager HttpManager;
+        internal static HttpManager HttpManager;
+
+        internal FileConfig FileConfig;
 
         public override void OnEnabled()
         {
             Instance = this;
 
-            _harmony = new("com.ucs.uci");
+            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
 
-            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
-            {   
-                HttpManager = new("uci", uint.MaxValue);
+            FileConfig = new();
+            HttpManager = new("uci", uint.MaxValue);
+
+            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
                 HttpManager.Start();
-            }
 
             LogManager.History.Clear();
 
@@ -50,13 +50,14 @@ namespace UncomplicatedCustomItems
             Log.Info("===========================================");
             Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
-            foreach (YAMLCustomItem Item in Config.CustomItems)
-            {
-                Manager.Register(YAMLCaster.Converter(Item));
-            }
-
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
+
+            FileConfig.Welcome(loadExamples:true);
+            FileConfig.Welcome(Server.Port.ToString());
+            FileConfig.LoadAll();
+            FileConfig.LoadAll(Server.Port.ToString());
+
 
             base.OnEnabled();
         }

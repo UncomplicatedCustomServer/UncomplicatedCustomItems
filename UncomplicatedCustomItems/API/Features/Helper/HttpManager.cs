@@ -1,66 +1,72 @@
-﻿using Exiled.API.Features;
-using Exiled.Loader;
+﻿using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using UncomplicatedCustomItems;
-using Unity.Collections.LowLevel.Unsafe;
-//using UnityEngine.UIElements;
+using UncomplicatedCustomItems.API.Struct;
+using Exiled.API.Features;
 
-namespace UncomplicatedCustomItems.Managers
+namespace UncomplicatedCustomItems.API.Features.Helper
 {
     internal class HttpManager
     {
         /// <summary>
-        /// The <see cref="CoroutineHandle"/> of the presence coroutine.
+        /// Gets the <see cref="CoroutineHandle"/> of the presence coroutine.
         /// </summary>
         public CoroutineHandle PresenceCoroutine { get; internal set; }
 
         /// <summary>
-        /// If <see cref="true"/> the message that confirm that the server is communicating correctly with our APIs has been sent in the console.
+        /// Gets the <see cref="true"/> the message that confirm that the server is communicating correctly with our APIs has been sent in the console.
         /// </summary>
         public bool SentConfirmationMessage { get; internal set; } = false;
 
         /// <summary>
-        /// The number of errors that has occurred. If this number exceed the <see cref="MaxErrors"/> quote then this feature will be deactivated.
+        /// Gets the number of errors that has occurred. If this number exceed the <see cref="MaxErrors"/> quote then this feature will be deactivated.
         /// </summary>
         public uint Errors { get; internal set; } = 0;
 
         /// <summary>
-        /// The maximum number of errors that can occur before deactivating the function.
+        /// Gets the maximum number of errors that can occur before deactivating the function.
         /// </summary>
         public uint MaxErrors { get; }
 
         /// <summary>
-        /// If <see cref="true"/> this feature is active.
+        /// Gets whether <see cref="true"/> this feature is active.
         /// </summary>
         public bool Active { get; internal set; } = false;
 
         /// <summary>
-        /// The prefix of the plugin for our APIs
+        /// Gets if the feature can be activated - missing library
+        /// </summary>
+        public bool IsAllowed { get; internal set; } = true;
+
+        /// <summary>
+        /// Gets the prefix of the plugin for our APIs
         /// </summary>
         public string Prefix { get; }
 
         /// <summary>
-        /// The <see cref="HttpClient"/> public istance
+        /// Gets the <see cref="HttpClient"/> public istance
         /// </summary>
         public HttpClient HttpClient { get; }
 
         /// <summary>
-        /// The UCS APIs endpoint
+        /// Gets the UCS APIs endpoint
         /// </summary>
         public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
 
         /// <summary>
-        /// An array of response times
+        /// Gets the CreditTag storage for the plugin, downloaded from our central server
+        /// </summary>
+        public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
+
+        /// <summary>
+        /// Gets the List of the ResponseTimes
         /// </summary>
         public List<float> ResponseTimes { get; } = new();
 
@@ -71,12 +77,20 @@ namespace UncomplicatedCustomItems.Managers
         /// <param name="maxErrors"></param>
         public HttpManager(string prefix, uint maxErrors = 5)
         {
+            if (Type.GetType("Newtonsoft.Json.JsonConvert") is null)
+            {
+                LogManager.Error($"Failed to load the HttpManager of {prefix.ToUpper()}: Missing library Newtonsoft.Json v13.0.3\nPlease install it AS SOON AS POSSIBLE!");
+                IsAllowed = false;
+                return;
+            }
+
             Prefix = prefix;
             MaxErrors = maxErrors;
             HttpClient = new();
+            LoadCreditTags();
         }
 
-        internal HttpResponseMessage HttpGetRequest(string url)
+        public HttpResponseMessage HttpGetRequest(string url)
         {
             try
             {
@@ -92,7 +106,7 @@ namespace UncomplicatedCustomItems.Managers
             }
         }
 
-        internal HttpResponseMessage HttpPutRequest(string url, string content)
+        public HttpResponseMessage HttpPutRequest(string url, string content)
         {
             try
             {
@@ -108,7 +122,7 @@ namespace UncomplicatedCustomItems.Managers
             }
         }
 
-        internal string RetriveString(HttpResponseMessage response)
+        public string RetriveString(HttpResponseMessage response)
         {
             if (response is null)
                 return string.Empty;
@@ -116,7 +130,7 @@ namespace UncomplicatedCustomItems.Managers
             return RetriveString(response.Content);
         }
 
-        internal string RetriveString(HttpContent response)
+        public string RetriveString(HttpContent response)
         {
             if (response is null)
                 return string.Empty;
@@ -141,6 +155,40 @@ namespace UncomplicatedCustomItems.Managers
                 return new(Version);
 
             return Plugin.Instance.Version;
+        }
+
+        public void LoadCreditTags()
+        {
+            Credits = new();
+            try
+            {
+                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
+
+                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
+                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["ovveride"])));
+            }
+            catch (Exception) { }
+        }
+
+        public Triplet<string, string, bool> GetCreditTag(Player player)
+        {
+            if (Credits.ContainsKey(player.UserId))
+                return Credits[player.UserId];
+
+            return new(null, null, false);
+        }
+
+        public void ApplyCreditTag(Player player)
+        {
+            Triplet<string, string, bool> Tag = GetCreditTag(player);
+            if (player.RankName is not null && player.RankName != string.Empty && !Tag.Third)
+                return; // Do not override
+
+            if (Tag.First is not null && Tag.Second is not null)
+            {
+                player.RankName = Tag.First;
+                player.RankColor = Tag.Second;
+            }
         }
 
         public bool IsLatestVersion(out Version latest)
@@ -174,6 +222,8 @@ namespace UncomplicatedCustomItems.Managers
             return false;
         }
 
+        internal void PresenceNotListed() => HttpGetRequest($"{Endpoint}/{Prefix}/presence_notlisted?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
+
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
             HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version}", data);
@@ -191,16 +241,16 @@ namespace UncomplicatedCustomItems.Managers
         {
             while (Active && Errors <= MaxErrors)
             {
-                if (!Presence(out HttpContent content))
-                {
-                    try
-                    {
-                        Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
-                        Errors++;
-                        LogManager.Warn($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
-                    }
-                    catch (Exception) { }
-                }
+                if (Server.IsVerified)
+                    if (!Presence(out HttpContent content))
+                        try
+                        {
+                            Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
+                            Errors++;
+                        }
+                        catch (Exception) { }
+                    else
+                        PresenceNotListed();
 
                 // Do anche the Mailbox action
                 if (Plugin.Instance.Config.DoEnableAdminMessages)
@@ -218,6 +268,9 @@ namespace UncomplicatedCustomItems.Managers
         public void Start()
         {
             if (Active)
+                return;
+
+            if (!IsAllowed)
                 return;
 
             Active = true;

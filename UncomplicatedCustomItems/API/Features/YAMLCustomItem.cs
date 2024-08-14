@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Elements.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UnityEngine;
 
-namespace UncomplicatedCustomItems.Elements
+namespace UncomplicatedCustomItems.API.Features
 {
     public class YAMLCustomItem
     {
