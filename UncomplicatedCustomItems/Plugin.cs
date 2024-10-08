@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(8, 2, 1);
 
-        public override Version Version { get; } = new(3, 0, 0, 1);
+        public override Version Version { get; } = new(3, 0, 0, 2);
 
         public override PluginPriority Priority => PluginPriority.First;
 
