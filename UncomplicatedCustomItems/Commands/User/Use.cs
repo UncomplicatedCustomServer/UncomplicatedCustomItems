@@ -1,4 +1,5 @@
-﻿using Exiled.API.Features;
+﻿using CommandSystem;
+using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using System;
 using System.Text.RegularExpressions;
@@ -8,19 +9,32 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.Commands.User
 {
-    public class Use : PlayerCommandBase
+    [CommandHandler(typeof(ClientCommandHandler))]
+    internal class Use : ParentCommand
     {
+        public Use() => LoadGeneratedCommands();
+
         public override string Command => "use";
 
-        public override string[] Aliases { get; } = new string[0];
+        public override string[] Aliases { get; } = [];
 
-        public override string Description => "Use item";
+        public override string Description => "Use the current item";
 
-        public override bool Execute(ArraySegment<string> arguments, Player player, out string response)
+        public override void LoadGeneratedCommands() { }
+
+        protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!player.CheckPermission("uci.use"))
+            if (!sender.CheckPermission("uci.use"))
             {
                 response = "Sorry but you don't have the permission to use that command!";
+                return false;
+            }
+
+            Player player = Player.Get(sender);
+
+            if (player is null)
+            {
+                response = "Can't use this command while not in the game!";
                 return false;
             }
 

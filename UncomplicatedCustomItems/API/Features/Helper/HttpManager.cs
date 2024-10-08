@@ -10,6 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Struct;
 using Exiled.API.Features;
+using Exiled.Events.EventArgs.Player;
+
+using PlayerHandler = Exiled.Events.Handlers.Player;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -66,9 +69,31 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
 
         /// <summary>
+        /// Gets the role of the given player (as steamid@64) inside UCR
+        /// </summary>
+        public Dictionary<string, string> OrgPlayerRole { get; } = new();
+
+        /// <summary>
         /// Gets the List of the ResponseTimes
         /// </summary>
         public List<float> ResponseTimes { get; } = new();
+
+        /// <summary>
+        /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
+        /// </summary>
+        public Version LatestVersion
+        {
+            get
+            {
+                if (_latestVersion is null)
+                    LoadLatestVersion();
+                return _latestVersion;
+            }
+        }
+
+        private Version _latestVersion { get; set; } = null;
+
+        private bool _alreadyManaged { get; set; } = false;
 
         /// <summary>
         /// Create a new istance of the HttpManager
@@ -77,18 +102,29 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="maxErrors"></param>
         public HttpManager(string prefix, uint maxErrors = 5)
         {
-            if (Type.GetType("Newtonsoft.Json.JsonConvert") is null)
-            {
-                LogManager.Error($"Failed to load the HttpManager of {prefix.ToUpper()}: Missing library Newtonsoft.Json v13.0.3\nPlease install it AS SOON AS POSSIBLE!");
-                IsAllowed = false;
-                return;
-            }
+            if (!CheckForDependency())
+                Timing.CallContinuously(15f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV"));
 
             Prefix = prefix;
             MaxErrors = maxErrors;
             HttpClient = new();
             LoadCreditTags();
+            RegisterEvents();
         }
+
+        internal void RegisterEvents()
+        {
+            PlayerHandler.Verified += OnVerified;
+        }
+
+        internal void UnregisterEvents()
+        {
+            PlayerHandler.Verified -= OnVerified;
+        }
+
+        public void OnVerified(VerifiedEventArgs ev) => ApplyCreditTag(ev.Player);
+
+        private bool CheckForDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -147,27 +183,34 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
         }
 
-        public Version LatestVersion()
+        public void LoadLatestVersion()
         {
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
 
-            if (Version is not null && Version != string.Empty)
-                return new(Version);
-
-            return Plugin.Instance.Version;
+            if (Version is not null && Version != string.Empty && Version.Contains("."))
+                _latestVersion = new(Version);
+            else
+                _latestVersion = new();
         }
 
         public void LoadCreditTags()
         {
-            Credits = new();
+            Credits = [];
             try
             {
                 Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
 
                 foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
-                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["ovveride"])));
+                {
+                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["override"])));
+                    if (kvp.Value.TryGetValue("job", out string isJob) && isJob is "true")
+                        OrgPlayerRole.Add(kvp.Key, isJob);
+                }
             }
-            catch (Exception) { }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+            }
         }
 
         public Triplet<string, string, bool> GetCreditTag(Player player)
@@ -180,9 +223,19 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void ApplyCreditTag(Player player)
         {
+            if (_alreadyManaged)
+                return;
+
             Triplet<string, string, bool> Tag = GetCreditTag(player);
-            if (player.RankName is not null && player.RankName != string.Empty && !Tag.Third)
-                return; // Do not override
+
+            if (player.RankName is not null && player.RankName != string.Empty)
+            {
+                if (Credits.Any(k => k.Value.First == player.RankName && k.Value.Second == player.RankColor))
+                    _alreadyManaged = true;
+
+                if (!Tag.Third)
+                    return; // Do not override
+            }
 
             if (Tag.First is not null && Tag.Second is not null)
             {
@@ -193,7 +246,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public bool IsLatestVersion(out Version latest)
         {
-            latest = LatestVersion();
+            latest = LatestVersion;
             if (latest.CompareTo(Plugin.Instance.Version) > 0)
                 return false;
 
@@ -203,7 +256,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public bool IsLatestVersion()
         {
-            if (LatestVersion().CompareTo(Plugin.Instance.Version) > 0)
+            if (LatestVersion.CompareTo(Plugin.Instance.Version) > 0)
                 return false;
 
             return true;
@@ -216,9 +269,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             httpContent = Status.Content;
             ResponseTimes.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
             if (Status.StatusCode == HttpStatusCode.OK)
-            {
                 return true;
-            }
             return false;
         }
 
@@ -247,6 +298,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         {
                             Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
                             Errors++;
+                            LogManager.Debug($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
                         }
                         catch (Exception) { }
                     else

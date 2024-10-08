@@ -16,17 +16,12 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Gets the list of every active SummonedCustomItem
         /// </summary>
-        public static List<SummonedCustomItem> List { get; } = new();
+        public static List<SummonedCustomItem> List { get; } = [];
 
         /// <summary>
         /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
         /// </summary>
-        private static readonly List<CustomItemType> _managedItems = new()
-        {
-            CustomItemType.Painkillers,
-            CustomItemType.Medikit,
-            CustomItemType.Adrenaline
-        };
+        private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
 
         /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
