@@ -12,8 +12,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 {
     internal class FileConfig
     {
-        private static readonly List<YAMLCustomItem> _examples = new()
-        {
+        private static readonly List<YAMLCustomItem> _examples =
+        [
             new()
             {
                 CustomData = YAMLCaster.Encode(new ItemData()
@@ -133,7 +133,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     Sustain = 1000
                 })
             }
-        };
+        ];
 
         internal string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomItems");
 
