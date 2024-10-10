@@ -33,9 +33,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
-            {
                 Item.OnDrop(ev);
-            }
         }
 
         /// <summary>
@@ -58,29 +56,19 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void SetDamageFromCustomWeaponOnHurting(HurtingEventArgs ev)
         {
             if (ev.DamageHandler.Type is not Exiled.API.Enums.DamageType.Firearm)
-            {
                 return;
-            }
 
             if (ev.Attacker.CurrentItem is not Firearm)
-            {
                 return;
-            }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
-            {
                 return;
-            }
 
             if (Item.CustomItem.CustomItemType != CustomItemType.Weapon)
-            {
                 return;
-            }
 
             if (Item.CustomItem.CustomData is not IWeaponData WeaponData)
-            {
                 return;
-            }
 
             ev.DamageHandler.Damage = WeaponData.Damage;
         }
@@ -88,23 +76,17 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void OnItemUsingCompleted(UsingItemCompletedEventArgs ev)
         {
             if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
-            {
                 return;
-            }
 
             if (Item is null)
-            {
-                // Non si sa mai
                 return;
-            }
 
             if (Item.CustomItem.CustomItemType is CustomItemType.Medikit)
             {
                 // Do the medikit thing
                 if (Item.CustomItem.CustomData is not IMedikitData Data)
-                {
                     return;
-                }
+
                 ev.IsAllowed = false;
                 ev.Player.Heal(Data.Health, Data.MoreThanMax);
                 Item.Destroy();
@@ -113,30 +95,23 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 // Do the painkillers thing
                 if (Item.CustomItem.CustomData is not IPainkillersData Data)
-                {
                     return;
-                }
+
                 ev.IsAllowed = false;
                 Timing.RunCoroutine(Utilities.PainkillersCoroutine(ev.Player, Data));
                 Item.Destroy();
             } 
             else if (Item.CustomItem.CustomItemType is CustomItemType.Item)
-            {
                 Item.HandleEvent(ev.Player, ItemEvents.Use);
-            }
         }
 
         private static void ChangeItemInHand(ChangedItemEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
-            {
                 return;
-            }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
-            {
                 return;
-            }
 
             Item?.HandleSelectedDisplayHint();
         }
@@ -144,14 +119,10 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void NoclipButton(TogglingNoClipEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
-            {
                 return;
-            }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
-            {
                 return;
-            }
 
             Item?.HandleEvent(ev.Player, ItemEvents.Noclip);
         }

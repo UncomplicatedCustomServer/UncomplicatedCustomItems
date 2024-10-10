@@ -23,15 +23,9 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void SpawnItemsOnRoundStarted() 
         {
             foreach (ICustomItem CustomItem in CustomItem.List)
-            {
                 if (CustomItem.Spawn is not null && CustomItem.Spawn.DoSpawn)
-                {
                     for (uint count = 0; count < CustomItem.Spawn.Count; count++)
-                    {
                         Utilities.SummonCustomItem(CustomItem);
-                    }
-                }
-            }
         }
     }
 }

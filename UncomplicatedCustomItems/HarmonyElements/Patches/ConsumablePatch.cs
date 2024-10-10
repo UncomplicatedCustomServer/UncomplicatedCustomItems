@@ -10,9 +10,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         static bool Prefix(Consumable __instance)
         {
             if (SummonedCustomItem.TryGet(__instance.ItemSerial, out SummonedCustomItem summonedCustomItem))
-            {
                 return !summonedCustomItem.HandleCustomAction();
-            }
 
             return true;
         }

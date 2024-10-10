@@ -262,6 +262,9 @@ namespace UncomplicatedCustomItems.API.Features
                         return false;
                 }
 
+                // Runs also the event as it gets suppressed
+                HandleEvent(Owner, ItemEvents.Use);
+
                 return true;
             }
 
