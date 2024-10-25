@@ -79,13 +79,19 @@ namespace UncomplicatedCustomItems.API.Features
         /// The description. Useful at the moment ig
         /// </summary>
         [Description("The description of the custom item")]
-        public string Description { get; set; } = "11/09/20 COFF COFF uwu uwu uwu";
+        public string Description { get; set; } = "25/06/2024";
 
         /// <summary>
         /// The weight of the item
         /// </summary>
         [Description("The weight of the custom item")]
         public float Weight { get; set; } = 2f;
+
+        /// <summary>
+        /// Whether if the item won't be removed from the player's inventory
+        /// </summary>
+        [Description("Whether if the item won't be removed from the player's inventory after being used. Available only for Consumable items!")]
+        public bool Reusable { get; set; } = false;
 
         /// <summary>
         /// The <see cref="ItemType"/> (Base) of the Custom Item

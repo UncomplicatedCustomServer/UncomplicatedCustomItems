@@ -81,28 +81,10 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (Item is null)
                 return;
 
-            if (Item.CustomItem.CustomItemType is CustomItemType.Medikit)
-            {
-                // Do the medikit thing
-                if (Item.CustomItem.CustomData is not IMedikitData Data)
-                    return;
+            Item.HandleEvent(ev.Player, ItemEvents.Use);
 
+            if (Item.CustomItem.Reusable)
                 ev.IsAllowed = false;
-                ev.Player.Heal(Data.Health, Data.MoreThanMax);
-                Item.Destroy();
-            }
-            else if (Item.CustomItem.CustomItemType is CustomItemType.Painkillers)
-            {
-                // Do the painkillers thing
-                if (Item.CustomItem.CustomData is not IPainkillersData Data)
-                    return;
-
-                ev.IsAllowed = false;
-                Timing.RunCoroutine(Utilities.PainkillersCoroutine(ev.Player, Data));
-                Item.Destroy();
-            } 
-            else if (Item.CustomItem.CustomItemType is CustomItemType.Item)
-                Item.HandleEvent(ev.Player, ItemEvents.Use);
         }
 
         private static void ChangeItemInHand(ChangedItemEventArgs ev)

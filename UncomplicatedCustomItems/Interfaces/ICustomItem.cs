@@ -13,6 +13,8 @@ namespace UncomplicatedCustomItems.Interfaces
 
         public abstract float Weight { get; set; }
 
+        public abstract bool Reusable { get; set; }
+
         public abstract ItemType Item { get; set; }
 
         public abstract Vector3 Scale { get; set; }
