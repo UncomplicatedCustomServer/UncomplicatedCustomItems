@@ -30,7 +30,7 @@ namespace UncomplicatedCustomItems
             new()
             {
                 Id = 2,
-                Name = "FunnyGun",
+                Name = "<color=#3BAAC4>FunnyGun</color>",
                 Description = "A magic gun that has a shotgun like bullet spread",
                 Item = ItemType.GunFRMG0,
                 CustomItemType = CustomItemType.Weapon,
