@@ -134,9 +134,10 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.Weapon:
                         Log.Debug("Updating weapon data");
-                        ((Firearm)Item).Ammo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
-                        ((Firearm)Item).MaxAmmo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
-                        ((Firearm)Item).FireRate = ((IWeaponData)CustomItem.CustomData).FireRate;
+                        ((Firearm)Item).MagazineAmmo = ((IWeaponData)CustomItem.CustomData).MaxAmmo;
+                        ((Firearm)Item).MaxMagazineAmmo = ((IWeaponData)CustomItem.CustomData).MaxMagazineAmmo;
+                        ((Firearm)Item).MaxBarrelAmmo = ((IWeaponData)CustomItem.CustomData).MaxBarrelAmmo;
+                        ((Firearm)Item).AmmoDrain = ((IWeaponData)CustomItem.CustomData).AmmoDrain;
                         break;
 
                     default:

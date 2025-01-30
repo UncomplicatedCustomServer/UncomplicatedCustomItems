@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems
         public bool IsEnabled { get; set; } = true;
 
         [Description("Do enable the developer (debug) mode?")]
-        public bool Debug { get; set; } = true;
+        public bool Debug { get; set; } = false;
         [Description("A list of custom items")]
         public List<YAMLCustomItem> CustomItems { get; set; } = new()
         {
@@ -30,9 +30,9 @@ namespace UncomplicatedCustomItems
             new()
             {
                 Id = 2,
-                Name = "MagicWeapon",
-                Description = "A magic weapon with an incredible firerate",
-                Item = ItemType.GunCOM18,
+                Name = "FunnyGun",
+                Description = "A magic gun that has a shotgun like bullet spread",
+                Item = ItemType.GunFRMG0,
                 CustomItemType = CustomItemType.Weapon,
                 Scale = Vector3.one,
                 CustomData = YAMLCaster.Encode(new WeaponData())

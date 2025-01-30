@@ -55,7 +55,7 @@ namespace UncomplicatedCustomItems.Managers
         /// <summary>
         /// The UCS APIs endpoint
         /// </summary>
-        public string Endpoint { get; } = "https://uci.fcosma.it/api/v2/";
+        public string Endpoint { get; } = "https://api.ucserver.it/v2/";
 
         /// <summary>
         /// An array of response times

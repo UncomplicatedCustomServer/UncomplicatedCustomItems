@@ -34,9 +34,9 @@ namespace UncomplicatedCustomItems.API
             switch (item.CustomItemType)
             {
                 case CustomItemType.Item:
-                    if (item.CustomData is not null)
+                    if (item.CustomData is not IItemData)
                     {
-                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'IData', found '{item.CustomData.GetType().Name}'";
+                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'IItemData', found '{item.CustomData.GetType().Name}'";
                         return false;
                     }
 
