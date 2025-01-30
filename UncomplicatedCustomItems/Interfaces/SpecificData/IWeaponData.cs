@@ -8,8 +8,12 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     {
         public abstract float Damage { get; set; }
 
-        public abstract float FireRate { get; set; }
+        public abstract byte MaxBarrelAmmo { get; set; }
 
         public abstract byte MaxAmmo { get; set; }
+
+        public abstract byte MaxMagazineAmmo { get; set; }
+
+        public int AmmoDrain { get; set; }
     }
 }

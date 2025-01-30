@@ -1,4 +1,6 @@
-﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
+﻿using CameraShaking;
+using UncomplicatedCustomItems.Elements.SpecificData;
+using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.Elements.SpecificData
 {
@@ -10,13 +12,23 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         public float Damage { get; set; } = 2.75f;
 
         /// <summary>
-        /// The fire rate, lower is faster
+        /// The max number of ammunitions in the barrel. Shotgun like effect at higher numbers
         /// </summary>
-        public float FireRate { get; set; } = 0.35f;
+        public byte MaxBarrelAmmo { get; set; } = 10;
 
         /// <summary>
         /// The max number of ammunitions
         /// </summary>
-        public byte MaxAmmo { get; set; } = 20;
+        public byte MaxAmmo { get; set; } = 150;
+
+        /// <summary>
+        /// The max number of ammunitions in the magazine
+        /// </summary>
+        public byte MaxMagazineAmmo { get; set; } = 150;
+
+        /// <summary>
+        /// The amount of ammunitions drained per shot
+        /// </summary>
+        public int AmmoDrain { get; set; } = 1;
     }
 }
