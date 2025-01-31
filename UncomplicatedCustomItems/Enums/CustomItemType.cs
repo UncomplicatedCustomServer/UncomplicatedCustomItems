@@ -4,5 +4,6 @@
     Keycard,
     Armor,
     Weapon,
-    Medical
+    Medical,
+    Throwable
 }

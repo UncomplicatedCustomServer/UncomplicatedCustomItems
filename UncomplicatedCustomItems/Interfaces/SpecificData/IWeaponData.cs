@@ -1,6 +1,8 @@
 ﻿using CameraShaking;
 using Exiled.API.Structs;
 using System.Collections.Generic;
+using Exiled.CustomItems.API;
+using InventorySystem.Items.Firearms.Attachments;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
@@ -14,6 +16,12 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
 
         public abstract byte MaxMagazineAmmo { get; set; }
 
-        public int AmmoDrain { get; set; }
+        public abstract int AmmoDrain { get; set; }
+        
+        public abstract float Penetration { get; set; }
+
+        public abstract float Inaccuracy { get; set; }
+
+        public abstract bool FriendlyFire { get; set; }
     }
 }

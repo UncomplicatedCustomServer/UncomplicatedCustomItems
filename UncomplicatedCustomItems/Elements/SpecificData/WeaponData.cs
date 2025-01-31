@@ -1,6 +1,8 @@
 ﻿using CameraShaking;
 using UncomplicatedCustomItems.Elements.SpecificData;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using InventorySystem.Items.Firearms.Attachments;
+using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.Elements.SpecificData
 {
@@ -30,5 +32,18 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         /// The amount of ammunitions drained per shot
         /// </summary>
         public int AmmoDrain { get; set; } = 1;
+
+        /// <summary>
+        /// Gets or sets the penetration of the firearm
+        /// </summary>
+        public float Penetration { get; set; } = 1.24f;
+
+        /// <summary>
+        /// Gets or sets the inaccuracy of the firearm
+        /// </summary>
+        public float Inaccuracy { get; set; } = 1.24f;
+
+        public virtual bool FriendlyFire { get; set; } = false;
+
     }
 }

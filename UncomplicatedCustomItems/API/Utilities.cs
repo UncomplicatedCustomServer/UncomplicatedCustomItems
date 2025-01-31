@@ -71,6 +71,21 @@ namespace UncomplicatedCustomItems.API
                     }
 
                     break;
+                    
+                case CustomItemType.Throwable:
+                    if (item.CustomData is not IThrowableData)
+                    {
+                        error = $"The item has been flagged as 'throwable' but the CustomData class is not 'IThrowableData', found '{item.CustomData.GetType().Name}'";
+                        return false;
+                    }
+
+                    if (!item.Item.IsThrowable())
+                    {
+                        error = $"The item has been flagged as 'throwable' but the item {item.Item} is not a throwable object in the game!";
+                        return false;
+                    }
+
+                    break;
 
                 case CustomItemType.Armor:
                     if (item.CustomData is not IArmorData)

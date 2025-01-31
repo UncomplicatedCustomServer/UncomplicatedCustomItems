@@ -7,6 +7,7 @@ using System.Runtime.Remoting.Messaging;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using Exiled.CustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -120,13 +121,16 @@ namespace UncomplicatedCustomItems.API.Features
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Item:
+                        Log.Debug("Updating item data");
                         break;
 
                     case CustomItemType.Keycard:
+                        Log.Debug("Updating keycard data");
                         ((Keycard)Item).Permissions = ((IKeycardData)CustomItem.CustomData).Permissions;
                         break;
 
                     case CustomItemType.Armor:
+                        Log.Debug("Updating armor data");
                         ((Armor)Item).HelmetEfficacy = ((IArmorData)CustomItem.CustomData).HeadProtection;
                         ((Armor)Item).RemoveExcessOnDrop = ((IArmorData)CustomItem.CustomData).RemoveExcessOnDrop;
                         ((Armor)Item).StaminaUseMultiplier = ((IArmorData)CustomItem.CustomData).StaminaUseMultiplier;
@@ -138,8 +142,18 @@ namespace UncomplicatedCustomItems.API.Features
                         ((Firearm)Item).MaxMagazineAmmo = ((IWeaponData)CustomItem.CustomData).MaxMagazineAmmo;
                         ((Firearm)Item).MaxBarrelAmmo = ((IWeaponData)CustomItem.CustomData).MaxBarrelAmmo;
                         ((Firearm)Item).AmmoDrain = ((IWeaponData)CustomItem.CustomData).AmmoDrain;
+                        ((Firearm)Item).Penetration = ((IWeaponData)CustomItem.CustomData).Penetration;
+                        ((Firearm)Item).Inaccuracy = ((IWeaponData)CustomItem.CustomData).Inaccuracy;  
+                        ((CustomWeapon)CustomItem).FriendlyFire = ((IWeaponData)CustomItem.CustomData).FriendlyFire;                  
                         break;
 
+                    case CustomItemType.Throwable:
+                        Log.Debug("Updating throwable data");
+                        ((Throwable)Item).PinPullTime = ((IThrowableData)CustomItem.CustomData).PinPullTime;  
+                        ((Throwable)Item).Repickable = ((IThrowableData)CustomItem.CustomData).Repickable;           
+                        ((CustomGrenade)CustomItem).ExplodeOnCollision = ((IThrowableData)CustomItem.CustomData).ExplodeOnCollision;
+                        ((CustomGrenade)CustomItem).FuseTime = ((IThrowableData)CustomItem.CustomData).FuseTime;
+                        break;
                     default:
                         break;
                 }

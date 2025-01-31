@@ -79,6 +79,7 @@ namespace UncomplicatedCustomItems.API
                 CustomItemType.Keycard => (Data)Decode(new KeycardData(), data),
                 CustomItemType.Armor => (Data)Decode(new ArmorData(), data),
                 CustomItemType.Weapon => (Data)Decode(new WeaponData(), data),
+                CustomItemType.Throwable => (Data)Decode(new ThrowableData(), data),
                 _ => new(),
             };
         }
