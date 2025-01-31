@@ -1,8 +1,7 @@
-﻿using CameraShaking;
-using UncomplicatedCustomItems.Elements.SpecificData;
+﻿using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
-using InventorySystem.Items.Firearms.Attachments;
-using YamlDotNet.Serialization;
+using System.Collections.Generic;
+using Exiled.API.Features;
 
 namespace UncomplicatedCustomItems.Elements.SpecificData
 {
@@ -42,8 +41,5 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         /// Gets or sets the inaccuracy of the firearm
         /// </summary>
         public float Inaccuracy { get; set; } = 1.24f;
-
-        public virtual bool FriendlyFire { get; set; } = false;
-
     }
 }

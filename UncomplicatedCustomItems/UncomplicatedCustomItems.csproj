@@ -57,6 +57,10 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\Master\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-Publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExMod.Exiled.9.5.0\lib\net48\Assembly-CSharp-Publicized.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ExMod.Exiled.9.5.0\lib\net48\CommandSystem.Core.dll</HintPath>
     </Reference>
@@ -144,11 +148,13 @@
     <Compile Include="Commands\User\Read.cs" />
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Elements\Attachments.cs" />
     <Compile Include="Elements\CustomItem.cs" />
     <Compile Include="Elements\Spawn.cs" />
     <Compile Include="Elements\SpecificData\ArmorData.cs" />
     <Compile Include="Elements\SpecificData\Data.cs" />
     <Compile Include="Elements\SpecificData\ItemData.cs" />
+    <Compile Include="Elements\SpecificData\ThrowableData.cs" />
     <Compile Include="Elements\SpecificData\WeaponData.cs" />
     <Compile Include="Elements\SpecificData\KeycardData.cs" />
     <Compile Include="Elements\YAMLCustomItem.cs" />
@@ -158,10 +164,12 @@
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
+    <Compile Include="Interfaces\IUCICommand.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />
     <Compile Include="Interfaces\SpecificData\IData.cs" />
     <Compile Include="Interfaces\SpecificData\IItemData.cs" />
     <Compile Include="Interfaces\SpecificData\IKeycardData.cs" />
+    <Compile Include="Interfaces\SpecificData\IThrowableData.cs" />
     <Compile Include="Interfaces\SpecificData\IWeaponData.cs" />
     <Compile Include="Managers\HttpManager.cs" />
     <Compile Include="Patches\PlayerEffectsControllerPatch.cs" />

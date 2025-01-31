@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         /// <summary>
         /// The armor's Body Protection value
         /// </summary>
-        public int BodyProtection { get; set; } = 3;
+        public int VestEfficacy { get; set; } = 3;
 
         /// <summary>
         /// Do remove the ammo in excess when drop?
@@ -28,5 +28,7 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         /// The stamina that this armor drains
         /// </summary>
         public float StaminaUseMultiplier { get; set; } = 2f;
+
+        public float StaminaRegenMultiplier { get; set; } = 1f;
     }
 }

@@ -132,8 +132,10 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Armor:
                         Log.Debug("Updating armor data");
                         ((Armor)Item).HelmetEfficacy = ((IArmorData)CustomItem.CustomData).HeadProtection;
+                        ((Armor)Item).VestEfficacy = ((IArmorData)CustomItem.CustomData).VestEfficacy;
                         ((Armor)Item).RemoveExcessOnDrop = ((IArmorData)CustomItem.CustomData).RemoveExcessOnDrop;
                         ((Armor)Item).StaminaUseMultiplier = ((IArmorData)CustomItem.CustomData).StaminaUseMultiplier;
+                        ((Armor)Item).StaminaRegenMultiplier = ((IArmorData)CustomItem.CustomData).StaminaRegenMultiplier;
                         break;
 
                     case CustomItemType.Weapon:
@@ -143,8 +145,7 @@ namespace UncomplicatedCustomItems.API.Features
                         ((Firearm)Item).MaxBarrelAmmo = ((IWeaponData)CustomItem.CustomData).MaxBarrelAmmo;
                         ((Firearm)Item).AmmoDrain = ((IWeaponData)CustomItem.CustomData).AmmoDrain;
                         ((Firearm)Item).Penetration = ((IWeaponData)CustomItem.CustomData).Penetration;
-                        ((Firearm)Item).Inaccuracy = ((IWeaponData)CustomItem.CustomData).Inaccuracy;  
-                        ((CustomWeapon)CustomItem).FriendlyFire = ((IWeaponData)CustomItem.CustomData).FriendlyFire;                  
+                        ((Firearm)Item).Inaccuracy = ((IWeaponData)CustomItem.CustomData).Inaccuracy;                   
                         break;
 
                     case CustomItemType.Throwable:
