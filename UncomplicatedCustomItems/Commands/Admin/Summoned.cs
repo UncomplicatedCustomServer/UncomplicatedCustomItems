@@ -5,6 +5,7 @@ using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.Manager;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -27,7 +28,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             response = "List of every registered custom Items:\n\n Serial | Id | Status |    Name   | Owner";
 
-            foreach (SummonedCustomItem Item in Manager.SummonedItems)
+            foreach (SummonedCustomItem Item in Utilities.SummonedItems)
             {
                 string Status = Item.IsPickup ? "Pickup" : " Item ";
                 string Owner = (Item.Owner is null) ? "null" : Item.Owner.Nickname;

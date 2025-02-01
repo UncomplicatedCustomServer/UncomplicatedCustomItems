@@ -36,7 +36,8 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
+            if (Utilities.TryGetSummonedCustomItem
+                (ev.Pickup.Serial, out SummonedCustomItem Item))
             {
                 Item.OnDrop(ev);
             }

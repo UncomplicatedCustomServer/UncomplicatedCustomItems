@@ -3,6 +3,8 @@ using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
+using Exiled.CustomRoles;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
@@ -10,12 +12,31 @@ using UncomplicatedCustomItems.Elements;
 using UncomplicatedCustomItems.Elements.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.Manager;
 using ExiledItem = Exiled.API.Features.Items.Item;
 
 namespace UncomplicatedCustomItems.API
 {
     public static class Utilities
     {
+        /// <summary>
+        /// A more easy-to-use dictionary to store every registered <see cref="ICustomItem"/>
+        /// </summary>
+        internal static Dictionary<int, ICustomItem> CustomItems { get; set; } = new();
+
+        /// <summary>
+        /// Get a list of every <see cref="ICustomItem"/> registered.
+        /// </summary>
+        public static List<ICustomItem> List => CustomItems.Values.ToList();
+
+        /// <summary>
+        /// Gets a list of not loaded custom items.
+        /// The data is the Id, the item path, the error type and the error name
+        /// </summary>
+        internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
+
+        internal static List<SummonedCustomItem> SummonedItems = new();
+
         /// <summary>
         /// Check if a <see cref="ICustomItem"/> is valid and can be registered
         /// </summary>
@@ -26,11 +47,10 @@ namespace UncomplicatedCustomItems.API
         {
             if (Manager.Items.ContainsKey(item.Id))
             {
-                error = $"There's already another ICustomItem registered with the same Id ({item.Id})!";
-                return false;
+                error = $"({item}) is using a id thats already used by another CustomItem ({item.Id})! Assigning new Id. ({item.Id++})";
+                item.Id++;
             }
 
-            
             switch (item.CustomItemType)
             {
                 case CustomItemType.Item:
@@ -71,7 +91,7 @@ namespace UncomplicatedCustomItems.API
                     }
 
                     break;
-                    
+
                 case CustomItemType.Throwable:
                     if (item.CustomData is not IThrowableData)
                     {
@@ -86,6 +106,7 @@ namespace UncomplicatedCustomItems.API
                     }
 
                     break;
+
 
                 case CustomItemType.Armor:
                     if (item.CustomData is not IArmorData)
@@ -109,6 +130,55 @@ namespace UncomplicatedCustomItems.API
 
             error = "";
             return true;
+        }
+
+        internal static Dictionary<uint, ICustomItem> Items = new();
+        public static void Register(ICustomItem item)
+        {
+            if (!Utilities.CustomItemValidator(item, out string error))
+            {
+                Log.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
+                return;
+            }
+            Items.Add(item.Id, item);
+            Log.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
+        }
+
+        /// <summary>
+        /// Unregister a <see cref="ICustomItem"/> from the plugin by it's class
+        /// </summary>
+        /// <param name="item"></param>
+        public static void Unregister(ICustomItem item)
+        {
+            if (Items.ContainsKey(item.Id))
+            {
+                Items.Remove(item.Id);
+            }
+        }
+
+        /// <summary>
+        /// Unregister a <see cref="ICustomItem"/> from the plugin by it's Id
+        /// </summary>
+        /// <param name="item"></param>
+        public static void Unregister(uint item)
+        {
+            if (Items.ContainsKey(item))
+            {
+                Items.Remove(item);
+            }
+        }
+
+        /// <summary>
+        /// Get the first free id to register a new custom item
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        public static uint GetFirstFreeID(uint Id)
+        {
+            while (Manager.Items.ContainsKey(Id))
+                Id++;
+
+            return Id;
         }
 
         /// <summary>
@@ -144,6 +214,8 @@ namespace UncomplicatedCustomItems.API
                 player.ShowHint(response.HintMessage, response.HintDuration);
             }
         }
+
+
 
         /// <summary>
         /// Try to get a <see cref="SummonedCustomItem"/> by it's serial

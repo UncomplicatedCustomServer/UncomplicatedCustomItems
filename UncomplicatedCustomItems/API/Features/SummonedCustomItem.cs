@@ -7,7 +7,6 @@ using System.Runtime.Remoting.Messaging;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
-using Exiled.CustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -145,15 +144,14 @@ namespace UncomplicatedCustomItems.API.Features
                         ((Firearm)Item).MaxBarrelAmmo = ((IWeaponData)CustomItem.CustomData).MaxBarrelAmmo;
                         ((Firearm)Item).AmmoDrain = ((IWeaponData)CustomItem.CustomData).AmmoDrain;
                         ((Firearm)Item).Penetration = ((IWeaponData)CustomItem.CustomData).Penetration;
-                        ((Firearm)Item).Inaccuracy = ((IWeaponData)CustomItem.CustomData).Inaccuracy;                   
+                        ((Firearm)Item).Inaccuracy = ((IWeaponData)CustomItem.CustomData).Inaccuracy;
+                        ((Firearm)Item).DamageFalloffDistance = ((IWeaponData)CustomItem.CustomData).DamageFalloffDistance;
                         break;
 
                     case CustomItemType.Throwable:
                         Log.Debug("Updating throwable data");
-                        ((Throwable)Item).PinPullTime = ((IThrowableData)CustomItem.CustomData).PinPullTime;  
-                        ((Throwable)Item).Repickable = ((IThrowableData)CustomItem.CustomData).Repickable;           
-                        ((CustomGrenade)CustomItem).ExplodeOnCollision = ((IThrowableData)CustomItem.CustomData).ExplodeOnCollision;
-                        ((CustomGrenade)CustomItem).FuseTime = ((IThrowableData)CustomItem.CustomData).FuseTime;
+                        ((Throwable)Item).PinPullTime = ((IThrowableData)CustomItem.CustomData).PinPullTime;
+                        ((Throwable)Item).Repickable = ((IThrowableData)CustomItem.CustomData).Repickable;
                         break;
                     default:
                         break;
@@ -190,23 +188,23 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal void HandleEvent(Player player, ItemEvents itemEvent) 
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item && CustomItem.CustomData is ICustomItem && ((IItemData)CustomItem.CustomData).Event == itemEvent)
+            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemEvent)
             {
                 IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
-                if (Data.Command is not null && Data.Command.Length > 2)
+                if (((IItemData)CustomItem.CustomData).Command is not null && ((IItemData)CustomItem.CustomData).Command.Length > 2)
                 {
-                    if (!Data.Command.Contains("P:"))
+                    if (!((IItemData)CustomItem.CustomData).Command.Contains("P:"))
                     {
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()));
+                        Server.ExecuteCommand(((IItemData)CustomItem.CustomData).Command.Replace("%id%", player.Id.ToString()));
                     } 
                     else
                     {
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
+                        Server.ExecuteCommand(((IItemData)CustomItem.CustomData).Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
                     }
                 }
 
-                Utilities.ParseResponse(player, Data);
+                Utilities.ParseResponse(player, (IItemData)CustomItem.CustomData);
             }
         }
 

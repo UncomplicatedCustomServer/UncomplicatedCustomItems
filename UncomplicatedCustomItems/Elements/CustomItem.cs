@@ -1,66 +1,62 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Pickups;
-using System.ComponentModel;
-using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Elements.SpecificData;
+﻿using System.Collections.Generic;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using System.ComponentModel;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 #nullable enable
+
+
 namespace UncomplicatedCustomItems.Elements
 {
     public class CustomItem : ICustomItem
     {
-        /// <summary>
-        /// The unique Id of the Custom Item. Can't be <= 0
-        /// </summary>
-        public uint Id { get; set; } = 1;
+        public uint Id { get; set; } = 2;
 
-        /// <summary>
-        /// The Name of the object. Can appears when for example you pick it up
-        /// </summary>
         [Description("The name of the custom item")]
-        public string Name { get; set; } = "Detonator";
+        public string Name { get; set; } = "<color=#3BAAC4>FunnyGun</color>";
 
-        /// <summary>
-        /// The description. Useful at the moment ig
-        /// </summary>
         [Description("The description of the custom item")]
-        public string Description { get; set; } = "11/09/20 COFF COFF uwu uwu uwu";
+        public string Description { get; set; } = "A magic gun that has a shotgun-like bullet spread";
 
-        /// <summary>
-        /// The weight of the item
-        /// </summary>
         [Description("The weight of the custom item")]
         public float Weight { get; set; } = 2f;
 
-        /// <summary>
-        /// The <see cref="ItemType"/> (Base) of the Custom Item
-        /// </summary>
         [Description("The Item base for the custom item")]
-        public ItemType Item { get; set; } = ItemType.Coin;
+        public ItemType Item { get; set; } = ItemType.GunFRMG0;
 
-        /// <summary>
-        /// The Scale of the Custom Item. If 0, 0, 0 then it's disabled
-        /// </summary>
         [Description("The scale of the custom item, 0 0 0 means disabled")]
-        public Vector3 Scale { get; set; } = Vector3.one;
+        public Vector3 Scale { get; set; } = new Vector3(1, 1, 1);
 
-        /// <summary>
-        /// The <see cref="Elements.Spawn"/> settings for the item
-        /// </summary>
         [Description("The spawn settings for the item")]
         public ISpawn Spawn { get; set; } = new Spawn();
 
-        /// <summary>
-        /// The <see cref="CustomItemType"/> of the Custom Item
-        /// </summary>
-        public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
+        public CustomItemType CustomItemType { get; set; } = CustomItemType.Weapon;
 
-        /// <summary>
-        /// The <see cref="IData">Custom Data</see>, based on the CustomItemType
-        /// </summary>
-        public IData CustomData { get; set; } = new ItemData();
+        public IData CustomData { get; set; } = new CustomWeaponData
+        {
+            Damage = 2.75f,
+            MaxBarrelAmmo = 10,
+            MaxAmmo = 150,
+            MaxMagazineAmmo = 150,
+            AmmoDrain = 1,
+            Penetration = 1.24f,
+            Inaccuracy = 1.24f,
+            DamageFalloffDistance = 1,
+        };
+    }
+
+    public class CustomWeaponData : IData
+    {
+        public float Damage { get; set; }
+        public byte MaxBarrelAmmo { get; set; }
+        public byte MaxAmmo { get; set; }
+        public byte MaxMagazineAmmo { get; set; }
+        public int AmmoDrain { get; set; }
+        public float Penetration { get; set; }
+        public float Inaccuracy { get; set; }
+        public float DamageFalloffDistance { get; set; }
     }
 }

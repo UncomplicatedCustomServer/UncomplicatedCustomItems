@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             response = "List of every registered custom Items:\n\n Id |  Type  |   Name";
 
-            foreach (ICustomItem Item in Manager.Items.Values)
+            foreach (ICustomItem Item in Utilities.Items.Values)
             {
                 response += $"\n  {Item.Id}   {Item.CustomItemType}    {Item.Name}";
             }

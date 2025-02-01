@@ -41,5 +41,9 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         /// Gets or sets the inaccuracy of the firearm
         /// </summary>
         public float Inaccuracy { get; set; } = 1.24f;
+        /// <summary>
+        /// Gets or sets the how much fast the value drop over the distance.
+        /// </summary>
+        public float DamageFalloffDistance { get; set; } = 1f;
     }
 }

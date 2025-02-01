@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// </summary>
         private static void SpawnItemsOnRoundStarted() 
         {
-            foreach (ICustomItem CustomItem in Manager.Items.Values)
+            foreach (ICustomItem CustomItem in Utilities.Items.Values)
             {
                 if (CustomItem.Spawn is not null && CustomItem.Spawn.DoSpawn)
                 {

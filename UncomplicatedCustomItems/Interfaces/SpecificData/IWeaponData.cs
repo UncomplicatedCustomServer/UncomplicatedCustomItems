@@ -22,5 +22,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float Penetration { get; set; }
 
         public abstract float Inaccuracy { get; set; }
+
+        public abstract float DamageFalloffDistance { get; set; }
     }
 }

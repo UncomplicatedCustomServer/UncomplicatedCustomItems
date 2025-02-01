@@ -8,9 +8,5 @@ namespace UncomplicatedCustomItems.Elements.SpecificData
         public float PinPullTime { get; set; } = 1f;
 
         public bool Repickable { get; set; } = false;
-
-        public bool ExplodeOnCollision { get; set; } = true;
-
-        public float FuseTime { get; set; } = 3f;
     }
 }

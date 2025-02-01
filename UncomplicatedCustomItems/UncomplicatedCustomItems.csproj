@@ -57,10 +57,6 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\Master\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp-Publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ExMod.Exiled.9.5.0\lib\net48\Assembly-CSharp-Publicized.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ExMod.Exiled.9.5.0\lib\net48\CommandSystem.Core.dll</HintPath>
     </Reference>
@@ -130,13 +126,14 @@
     <Reference Include="UnityEngine.XRModule">
       <HintPath>..\..\..\Master\UnityEngine.XRModule.dll</HintPath>
     </Reference>
-    <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-      <HintPath>..\packages\ExMod.Exiled.9.5.0\lib\net48\YamlDotNet.dll</HintPath>
+    <Reference Include="YamlDotNet, Version=16.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.16.3.0\lib\net47\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Features\SummonedCustomItem.cs" />
     <Compile Include="API\Manager.cs" />
+    <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />
     <Compile Include="API\YAMLCaster.cs" />
     <Compile Include="Commands\Admin\List.cs" />
@@ -148,8 +145,10 @@
     <Compile Include="Commands\User\Read.cs" />
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="DefaultCustomItem.cs" />
     <Compile Include="Elements\Attachments.cs" />
     <Compile Include="Elements\CustomItem.cs" />
+    <Compile Include="Elements\Effect.cs" />
     <Compile Include="Elements\Spawn.cs" />
     <Compile Include="Elements\SpecificData\ArmorData.cs" />
     <Compile Include="Elements\SpecificData\Data.cs" />
@@ -157,12 +156,14 @@
     <Compile Include="Elements\SpecificData\ThrowableData.cs" />
     <Compile Include="Elements\SpecificData\WeaponData.cs" />
     <Compile Include="Elements\SpecificData\KeycardData.cs" />
+    <Compile Include="Elements\SpecificItemData\SpawnBehaviour.cs" />
     <Compile Include="Elements\YAMLCustomItem.cs" />
     <Compile Include="Enums\CustomItemType.cs" />
     <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
+    <Compile Include="Interfaces\IEffect.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\IUCICommand.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />
@@ -172,6 +173,11 @@
     <Compile Include="Interfaces\SpecificData\IThrowableData.cs" />
     <Compile Include="Interfaces\SpecificData\IWeaponData.cs" />
     <Compile Include="Managers\HttpManager.cs" />
+    <Compile Include="Managers\FileConfigs.cs" />
+    <Compile Include="API\Features\LogEntry.cs" />
+    <Compile Include="Managers\LogManager.cs" />
+    <Compile Include="Managers\NET\VersionInfo.cs" />
+    <Compile Include="Managers\VersionManager.cs" />
     <Compile Include="Patches\PlayerEffectsControllerPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

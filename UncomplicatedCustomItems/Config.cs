@@ -15,29 +15,13 @@ namespace UncomplicatedCustomItems
 
         [Description("Do enable the developer (debug) mode?")]
         public bool Debug { get; set; } = false;
-        [Description("A list of custom items")]
-        public List<YAMLCustomItem> CustomItems { get; set; } = new()
-        {
-            new()
-            {
-                CustomData = YAMLCaster.Encode(new ItemData()
-                {
-                    Event = ItemEvents.Command,
-                    Command = "/SERVER_EVENT DETONATION_INSTANT",
-                    ConsoleMessage = "UHUHUHUH!"
-                })
-            },
-            new()
-            {
-                Id = 2,
-                Name = "<color=#3BAAC4>FunnyGun</color>",
-                Description = "A magic gun that has a shotgun like bullet spread",
-                Item = ItemType.GunFRMG0,
-                CustomItemType = CustomItemType.Weapon,
-                Scale = Vector3.one,
-                CustomData = YAMLCaster.Encode(new WeaponData())
-            }
-        };
+
+        [Description("If false the UCS credit tag system won't be activated. PLEASE DON'T DEACTIVATE IT as LOTS OF PEOPLE WORKED ON THIS PLUGIN completly for FREE!")]
+        public bool EnableCreditTags { get; set; } = true;
+
+        [Description("enable the basic UCI logs?")]
+        public bool EnableBasicLogs { get; set; } = true;
+
         [Description("The hint message that will appear every time that you pick up a custom item. %name% is the item's name, %desc% is the item's description")]
         public string PickedUpMessage { get; set; } = "You have picked up a %name% who's a %desc%";
         [Description("The duration of that hint")]

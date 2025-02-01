@@ -2,9 +2,12 @@
 using HarmonyLib;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Elements;
 using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.Manager;
 
 namespace UncomplicatedCustomItems
 {
@@ -16,22 +19,25 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
 
-        public override Version Version { get; } = new(2, 2, 1);
+        public override Version Version { get; } = new(2, 1, 1);
+
+        internal static HttpManager HttpManager;
+
+        internal static FileConfigs FileConfigs;
 
         private Harmony _harmony;
 
         public override void OnEnabled()
         {
+
+            FileConfigs = new();
+            HttpManager = new("uci");
             Instance = this;
+
+            Utilities.List.Clear();
 
             _harmony = new Harmony($"com.ucs.uci-{DateTime.Now}");
             _harmony.PatchAll();
-
-            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
-            {   
-                Managers.HttpManager httpManager = new Managers.HttpManager("uci");
-                httpManager.Start();
-            }
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
@@ -40,10 +46,18 @@ namespace UncomplicatedCustomItems
             Log.Info("===========================================");
             Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
-            foreach (YAMLCustomItem Item in Config.CustomItems)
+            Task.Run(delegate
             {
-                Manager.Register(YAMLCaster.Converter(Item));
-            }
+                if (HttpManager.LatestVersion.CompareTo(Version) > 0)
+                    LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomItems!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest");
+
+                VersionManager.Init();
+            });
+
+            FileConfigs.Welcome();
+            FileConfigs.Welcome(Server.Port.ToString());
+            FileConfigs.LoadAll();
+            FileConfigs.LoadAll(Server.Port.ToString());
 
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
