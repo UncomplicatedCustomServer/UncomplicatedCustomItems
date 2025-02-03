@@ -1,8 +1,6 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Items;
-using Exiled.API.Features.Pickups;
+﻿using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
-using System;
+using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
@@ -14,7 +12,6 @@ namespace UncomplicatedCustomItems.Events.Internal
     {
         public static void Register()
         {
-            EventSource.UsingItem += CancelUsingCustomItemOnUsingItem;
             EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
             EventSource.DroppedItem += DroppedItemEvent;
@@ -25,7 +22,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         public static void Unregister()
         {
-            EventSource.UsingItem -= CancelUsingCustomItemOnUsingItem;
             EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
             EventSource.DroppedItem -= DroppedItemEvent;
@@ -37,9 +33,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
-            {
                 Item.OnDrop(ev);
-            }
         }
 
         /// <summary>
@@ -62,29 +56,19 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void SetDamageFromCustomWeaponOnHurting(HurtingEventArgs ev)
         {
             if (ev.DamageHandler.Type is not Exiled.API.Enums.DamageType.Firearm)
-            {
                 return;
-            }
 
             if (ev.Attacker.CurrentItem is not Firearm)
-            {
                 return;
-            }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
-            {
                 return;
-            }
 
             if (Item.CustomItem.CustomItemType != CustomItemType.Weapon)
-            {
                 return;
-            }
 
             if (Item.CustomItem.CustomData is not IWeaponData WeaponData)
-            {
                 return;
-            }
 
             ev.DamageHandler.Damage = WeaponData.Damage;
         }
@@ -92,36 +76,24 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void OnItemUsingCompleted(UsingItemCompletedEventArgs ev)
         {
             if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
-            {
                 return;
-            }
 
-            Item?.HandleEvent(ev.Player, ItemEvents.Use);
-        }
-
-        /// <summary>
-        /// Cancel using if it is custom item
-        /// </summary>
-        /// <param name="ev"></param>
-        private static void CancelUsingCustomItemOnUsingItem(UsingItemEventArgs ev)
-        {
-            if (!ev.IsAllowed)
-            {
+            if (Item is null)
                 return;
-            }
+
+            Item.HandleEvent(ev.Player, ItemEvents.Use);
+
+            if (Item.CustomItem.Reusable)
+                ev.IsAllowed = false;
         }
 
         private static void ChangeItemInHand(ChangedItemEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
-            {
                 return;
-            }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
-            {
                 return;
-            }
 
             Item?.HandleSelectedDisplayHint();
         }
@@ -129,14 +101,10 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void NoclipButton(TogglingNoClipEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
-            {
                 return;
-            }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
-            {
                 return;
-            }
 
             Item?.HandleEvent(ev.Player, ItemEvents.Noclip);
         }

@@ -1,37 +1,48 @@
-﻿using Exiled.API.Features;
-using HarmonyLib;
+using Exiled.API.Enums;
+using Exiled.API.Features;
 using System;
+using HarmonyLib;
 using System.IO;
-using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Elements;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public static Plugin Instance { get; private set; }
+        public override string Name => "UncomplicatedCustomItems";
+
+        public override string Prefix => "uci";
 
         public override string Author => "SpGerg & FoxWorn";
 
-        public override Version RequiredExiledVersion { get; } = new(8, 8, 0);
+        public override Version RequiredExiledVersion { get; } = new(8, 2, 1);
 
-        public override Version Version { get; } = new(2, 0, 1);
+        public override Version Version { get; } = new(3, 0, 0, 2);
+
+        public override PluginPriority Priority => PluginPriority.First;
+
+        public static Plugin Instance { get; private set; }
 
         private Harmony _harmony;
+
+        internal static HttpManager HttpManager;
+
+        internal FileConfig FileConfig;
 
         public override void OnEnabled()
         {
             Instance = this;
 
-            _harmony = new Harmony($"com.ucs.uci-{DateTime.Now}");
+            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
 
-            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomRoles", ".nohttp")))
-            {   
-                Managers.HttpManager httpManager = new Managers.HttpManager("uci");
-                httpManager.Start();
-            }
+            FileConfig = new();
+            HttpManager = new("uci", uint.MaxValue);
+
+            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
+                HttpManager.Start();
+
+            LogManager.History.Clear();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
@@ -39,13 +50,14 @@ namespace UncomplicatedCustomItems
             Log.Info("===========================================");
             Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
-            foreach (YAMLCustomItem Item in Config.CustomItems)
-            {
-                Manager.Register(YAMLCaster.Converter(Item));
-            }
-
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
+
+            FileConfig.Welcome(loadExamples:true);
+            FileConfig.Welcome(Server.Port.ToString());
+            FileConfig.LoadAll();
+            FileConfig.LoadAll(Server.Port.ToString());
+
 
             base.OnEnabled();
         }
@@ -54,6 +66,11 @@ namespace UncomplicatedCustomItems
         {
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
+
+            HttpManager.Stop();
+
+            _harmony.UnpatchAll();
+            _harmony = null;
 
             Instance = null;
 

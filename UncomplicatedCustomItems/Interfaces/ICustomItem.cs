@@ -1,5 +1,4 @@
-﻿using UncomplicatedCustomItems.Elements.SpecificData;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.Interfaces
@@ -13,6 +12,8 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract string Description { get; set; }
 
         public abstract float Weight { get; set; }
+
+        public abstract bool Reusable { get; set; }
 
         public abstract ItemType Item { get; set; }
 

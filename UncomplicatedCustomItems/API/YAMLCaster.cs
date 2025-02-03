@@ -1,17 +1,13 @@
 ﻿using Exiled.API.Features;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UncomplicatedCustomItems.Elements;
-using UncomplicatedCustomItems.Elements.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Newtonsoft.Json.Serialization;
-using System.ComponentModel;
 using YamlDotNet.Serialization.NamingConventions;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -79,6 +75,12 @@ namespace UncomplicatedCustomItems.API
                 CustomItemType.Keycard => (Data)Decode(new KeycardData(), data),
                 CustomItemType.Armor => (Data)Decode(new ArmorData(), data),
                 CustomItemType.Weapon => (Data)Decode(new WeaponData(), data),
+                CustomItemType.Medikit => (Data)Decode(new MedikitData(), data),
+                CustomItemType.Painkillers => (Data)Decode(new PainkillersData(), data),
+                CustomItemType.Jailbird => (Data)Decode(new JailbirdData(), data),
+                CustomItemType.ExplosiveGrenade => (Data)Decode(new ExplosiveGrenadeData(), data),
+                CustomItemType.FlashGrenade => (Data)Decode(new FlashGrenadeData(), data),
+                CustomItemType.Adrenaline => (Data)Decode(new AdrenalineData(), data),
                 _ => new(),
             };
         }
@@ -103,7 +105,7 @@ namespace UncomplicatedCustomItems.API
                 if (!data.ContainsKey(snakeCaseStrategy.GetPropertyName(Property.Name, false)))
                 {
                     ExpectedKey = snakeCaseStrategy.GetPropertyName(Property.Name, false);
-                    KeyList = String.Join(", ", data.Keys);
+                    KeyList = string.Join(", ", data.Keys);
                     return false;
                 }
             }

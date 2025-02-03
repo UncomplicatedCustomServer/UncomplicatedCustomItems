@@ -1,10 +1,9 @@
 ﻿using Exiled.API.Enums;
 using System.Collections.Generic;
-using System.ComponentModel;
 using UncomplicatedCustomItems.Interfaces;
 using UnityEngine;
 
-namespace UncomplicatedCustomItems.Elements
+namespace UncomplicatedCustomItems.API.Features
 {
     public class Spawn : ISpawn
     {
@@ -22,22 +21,18 @@ namespace UncomplicatedCustomItems.Elements
         /// The <see cref="Vector3">Positions</see> where the item is allowed to spawn, this is an array so you can set multiple values and one random one will be choose.
         /// If this is empty then the <see cref="Rooms"/> parameter will be used instead.
         /// </summary>
-        public List<Vector3> Coords { get; set; } = new();
+        public List<Vector3> Coords { get; set; } = [];
         /// <summary>
         /// The <see cref="RoomType">Rooms</see> where the item is allowed to spawn.
         /// If this is empty then the <see cref="Zone"/> parameter will be used instead.
         /// </summary>
-        public List<RoomType> Rooms { get; set; } = new();
+        public List<RoomType> Rooms { get; set; } = [];
 
         /// <summary>
         /// The <see cref="ZoneType">Zones</see> where the item is allowed to spawn.
         /// If <see cref="Rooms"/> is empty then this parameter will be used.
         /// </summary>
-        public List<ZoneType> Zones { get; set; } = new()
-        {
-            ZoneType.HeavyContainment,
-            ZoneType.Entrance
-        };
+        public List<ZoneType> Zones { get; set; } = [ZoneType.HeavyContainment, ZoneType.Entrance];
 
         /// <summary>
         /// If <see cref="true"/> this item will replace an existing pickup.
