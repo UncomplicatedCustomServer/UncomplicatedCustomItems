@@ -1,64 +1,124 @@
-﻿using System.Collections.Generic;
+﻿using Exiled.API.Features;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
-using System.ComponentModel;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 #nullable enable
-
-
-namespace UncomplicatedCustomItems.Elements
+namespace UncomplicatedCustomItems.API.Features
 {
     public class CustomItem : ICustomItem
     {
-        public uint Id { get; set; } = 2;
+        /// <summary>
+        /// Gets a list of every registered <see cref="ICustomItem"/>
+        /// </summary>
+        public static List<ICustomItem> List => CustomItems.Values.ToList();
 
+        internal static Dictionary<uint, ICustomItem> CustomItems { get; } = new();
+
+        /// <summary>
+        /// Register a new <see cref="ICustomItem"/> inside the plugin
+        /// </summary>
+        /// <param name="item"></param>
+        public static void Register(ICustomItem item)
+        {
+            if (!Utilities.CustomItemValidator(item, out string error))
+            {
+                Log.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
+                return;
+            }
+            CustomItems.Add(item.Id, item);
+            Log.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
+        }
+
+        /// <summary>
+        /// Unregister a <see cref="ICustomItem"/> from the plugin by it's class
+        /// </summary>
+        /// <param name="item"></param>
+        public static void Unregister(ICustomItem item) => Unregister(item.Id);
+
+        /// <summary>
+        /// Unregister a <see cref="ICustomItem"/> from the plugin by it's Id
+        /// </summary>
+        /// <param name="item"></param>
+        public static void Unregister(uint item)
+        {
+            if (CustomItems.ContainsKey(item))
+                CustomItems.Remove(item);
+        }
+
+        /// <summary>
+        /// Gets the first free Id for a custom item
+        /// </summary>
+        /// <param name="from"></param>
+        /// <returns></returns>
+        public static uint GetFirstFreeId(uint from = 0)
+        {
+            for (uint i = from; i < uint.MaxValue; i++)
+                if (!CustomItems.ContainsKey(i))
+                    return i;
+
+            return 0;
+        }
+
+        /// <summary>
+        /// The unique Id of the Custom Item. Can't be <= 0
+        /// </summary>
+        public uint Id { get; set; } = 1;
+
+        /// <summary>
+        /// The Name of the object. Can appears when for example you pick it up
+        /// </summary>
         [Description("The name of the custom item")]
-        public string Name { get; set; } = "<color=#3BAAC4>FunnyGun</color>";
+        public string Name { get; set; } = "Detonator";
 
+        /// <summary>
+        /// The description. Useful at the moment ig
+        /// </summary>
         [Description("The description of the custom item")]
-        public string Description { get; set; } = "A magic gun that has a shotgun-like bullet spread";
+        public string Description { get; set; } = "25/06/2024";
 
+        /// <summary>
+        /// The weight of the item
+        /// </summary>
         [Description("The weight of the custom item")]
         public float Weight { get; set; } = 2f;
 
+        /// <summary>
+        /// Whether if the item won't be removed from the player's inventory
+        /// </summary>
+        [Description("Whether if the item won't be removed from the player's inventory after being used. Available only for Consumable items!")]
+        public bool Reusable { get; set; } = false;
+
+        /// <summary>
+        /// The <see cref="ItemType"/> (Base) of the Custom Item
+        /// </summary>
         [Description("The Item base for the custom item")]
-        public ItemType Item { get; set; } = ItemType.GunFRMG0;
+        public ItemType Item { get; set; } = ItemType.Coin;
 
+        /// <summary>
+        /// The Scale of the Custom Item. If 0, 0, 0 then it's disabled
+        /// </summary>
         [Description("The scale of the custom item, 0 0 0 means disabled")]
-        public Vector3 Scale { get; set; } = new Vector3(1, 1, 1);
+        public Vector3 Scale { get; set; } = Vector3.one;
 
+        /// <summary>
+        /// The <see cref="Elements.Spawn"/> settings for the item
+        /// </summary>
         [Description("The spawn settings for the item")]
         public ISpawn Spawn { get; set; } = new Spawn();
 
-        public CustomItemType CustomItemType { get; set; } = CustomItemType.Weapon;
+        /// <summary>
+        /// The <see cref="CustomItemType"/> of the Custom Item
+        /// </summary>
+        public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
 
-        public IData CustomData { get; set; } = new CustomWeaponData
-        {
-            Damage = 2.75f,
-            MaxBarrelAmmo = 10,
-            MaxAmmo = 150,
-            MaxMagazineAmmo = 150,
-            AmmoDrain = 1,
-            Penetration = 1.24f,
-            Inaccuracy = 1.24f,
-            DamageFalloffDistance = 1,
-            Effects = [],
-        };
-    }
-
-    public class CustomWeaponData : IData
-    {
-        public float Damage { get; set; }
-        public byte MaxBarrelAmmo { get; set; }
-        public byte MaxAmmo { get; set; }
-        public byte MaxMagazineAmmo { get; set; }
-        public int AmmoDrain { get; set; }
-        public float Penetration { get; set; }
-        public float Inaccuracy { get; set; }
-        public float DamageFalloffDistance { get; set; }
-        public abstract List<Effect>? Effects { get; set; }
+        /// <summary>
+        /// The <see cref="IData">Custom Data</see>, based on the CustomItemType
+        /// </summary>
+        public IData CustomData { get; set; } = new ItemData();
     }
 }
