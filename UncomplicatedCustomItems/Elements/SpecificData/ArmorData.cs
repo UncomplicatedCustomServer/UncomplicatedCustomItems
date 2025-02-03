@@ -1,34 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 
-namespace UncomplicatedCustomItems.Elements.SpecificData
+namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     public class ArmorData : Data, IArmorData
     {
         /// <summary>
-        /// The armor's Head Protection value
+        /// Gets or sets the armor's Head Protection value
         /// </summary>
         public int HeadProtection { get; set; } = 2;
 
         /// <summary>
-        /// The armor's Body Protection value
+        /// Gets or sets the armor's Body Protection value
         /// </summary>
-        public int VestEfficacy { get; set; } = 3;
+        public int BodyProtection { get; set; } = 3;
 
         /// <summary>
-        /// Do remove the ammo in excess when drop?
+        /// Gets or sets whether the excess ammo should be dropped when the armor is dropped
         /// </summary>
         public bool RemoveExcessOnDrop { get; set; } = true;
 
         /// <summary>
-        /// The stamina that this armor drains
+        /// Gets or sets the stamina that this armor drains
         /// </summary>
         public float StaminaUseMultiplier { get; set; } = 2f;
-
-        public float StaminaRegenMultiplier { get; set; } = 1f;
     }
 }

@@ -1,51 +1,50 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
-using Exiled.Permissions.Extensions;
-using System;
+using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    [CommandHandler(typeof(RemoteAdminCommandHandler))]
-    public class Summon : PlayerCommandBase
+    internal class Summon : ISubcommand
     {
-        public override string Command => "summon";
+        public string Name { get; } = "summon";
 
-        public override string[] Aliases { get; } = new string[0];
+        public string Description { get; } = "Summon an existing Custom Item";
 
-        public override string Description => "Summon a custom item";
+        public string VisibleArgs { get; } = "<Item Id>";
 
-        public override bool Execute(ArraySegment<string> arguments, Player player, out string response)
+        public int RequiredArgsCount { get; } = 1;
+
+        public string RequiredPermission { get; } = "uci.summon";
+
+        public string[] Aliases { get; } = ["spawn", "s"];
+
+        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            if (!player.CheckPermission("uci.summon"))
-            {
-                response = "Sorry but you don't have the permission to use that command!";
-                return false;
-            }
-
             if (arguments.Count < 1)
             {
-                response = $"No argument(s) found!\nSyntax: .uci summon <CustomItem Id> (Player Id)";
+                response = $"No argument(s) found!\nSyntax: .ucr summon <CustomItem Id> (Player Id)";
                 return false;
             }
 
-            if (!Utilities.Items.ContainsKey(uint.Parse(arguments.At(0))))
+            if (!CustomItem.CustomItems.ContainsKey(uint.Parse(arguments[0])))
             {
-                response = $"Sorry but there's no custom item with the Id {uint.Parse(arguments.At(0))}!";
+                response = $"Sorry but there's no custom item with the Id {uint.Parse(arguments[0])}!";
                 return false;
             }
 
-            Player Target = player;
-            if (arguments.Count == 2) 
+            ICustomItem customItem = CustomItem.CustomItems[uint.Parse(arguments[0])];
+
+            if (customItem.Spawn is null)
             {
-                Target = Player.Get(arguments.At(1));
+                response = "Can't spawn a custom item without a Spawn settings!\nYou can use the command uci give <Item Id> (Player Id/Nickname)";
+                return false;
             }
 
-            SummonedCustomItem Item = SummonedCustomItem.Summon(Utilities.Items[uint.Parse(arguments.At(0))], Target);
+            Utilities.SummonCustomItem(customItem);
 
-            response = $"Successfully summoned 1 '{Item.CustomItem.Name}' to {Target.Nickname}";
+            response = $"Successfully summoned 1 '{customItem.Name}' to it's spawn point";
             return true;
         }
     }

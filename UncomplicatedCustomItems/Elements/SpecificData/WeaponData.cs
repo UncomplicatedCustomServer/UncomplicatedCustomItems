@@ -1,49 +1,23 @@
-﻿using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
-using System.Collections.Generic;
-using Exiled.API.Features;
+﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 
-namespace UncomplicatedCustomItems.Elements.SpecificData
+namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     public class WeaponData : Data, IWeaponData
     {
         /// <summary>
-        /// The damage of the ammo. Negative to heal
+        /// Gets or sets the damage of the ammo. Negative to heal
         /// </summary>
         public float Damage { get; set; } = 2.75f;
 
         /// <summary>
-        /// The max number of ammunitions in the barrel. Shotgun like effect at higher numbers
+        /// Gets or sets the fire rate, lower is faster.<br></br>
+        /// This field will be effective only if the Firearm is automatic
         /// </summary>
-        public byte MaxBarrelAmmo { get; set; } = 10;
+        public float FireRate { get; set; } = 0.35f;
 
         /// <summary>
-        /// The max number of ammunitions
+        /// Gets or sets the maximum number of ammunitions
         /// </summary>
-        public byte MaxAmmo { get; set; } = 150;
-
-        /// <summary>
-        /// The max number of ammunitions in the magazine
-        /// </summary>
-        public byte MaxMagazineAmmo { get; set; } = 150;
-
-        /// <summary>
-        /// The amount of ammunitions drained per shot
-        /// </summary>
-        public int AmmoDrain { get; set; } = 1;
-
-        /// <summary>
-        /// Gets or sets the penetration of the firearm
-        /// </summary>
-        public float Penetration { get; set; } = 1.24f;
-
-        /// <summary>
-        /// Gets or sets the inaccuracy of the firearm
-        /// </summary>
-        public float Inaccuracy { get; set; } = 1.24f;
-        /// <summary>
-        /// Gets or sets the how much fast the value drop over the distance.
-        /// </summary>
-        public float DamageFalloffDistance { get; set; } = 1f;
+        public byte MaxAmmo { get; set; } = 20;
     }
 }
