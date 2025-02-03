@@ -1,43 +1,48 @@
-﻿using Exiled.API.Features;
-using HarmonyLib;
+﻿using Exiled.API.Enums;
+using Exiled.API.Features;
 using System;
+using HarmonyLib;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Elements;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Manager;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public static Plugin Instance { get; private set; }
+        public override string Name => "UncomplicatedCustomItems";
+
+        public override string Prefix => "uci";
 
         public override string Author => "SpGerg & FoxWorn";
 
-        public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
+        public override Version RequiredExiledVersion { get; } = new(8, 2, 1);
 
-        public override Version Version { get; } = new(2, 1, 1);
+        public override Version Version { get; } = new(3, 0, 0, 2);
 
-        internal static HttpManager HttpManager;
+        public override PluginPriority Priority => PluginPriority.First;
 
-        internal static FileConfigs FileConfigs;
+        public static Plugin Instance { get; private set; }
 
         private Harmony _harmony;
 
+        internal static HttpManager HttpManager;
+
+        internal FileConfig FileConfig;
+
         public override void OnEnabled()
         {
-
-            FileConfigs = new();
-            HttpManager = new("uci");
             Instance = this;
 
-            Utilities.List.Clear();
-
-            _harmony = new Harmony($"com.ucs.uci-{DateTime.Now}");
+            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
+
+            FileConfig = new();
+            HttpManager = new("uci", uint.MaxValue);
+
+            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
+                HttpManager.Start();
+
+            LogManager.History.Clear();
 
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
@@ -46,21 +51,14 @@ namespace UncomplicatedCustomItems
             Log.Info("===========================================");
             Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
-            Task.Run(delegate
-            {
-                if (HttpManager.LatestVersion.CompareTo(Version) > 0)
-                    LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomItems!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest");
-
-                VersionManager.Init();
-            });
-
-            FileConfigs.Welcome();
-            FileConfigs.Welcome(Server.Port.ToString());
-            FileConfigs.LoadAll();
-            FileConfigs.LoadAll(Server.Port.ToString());
-
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
+
+            FileConfig.Welcome(loadExamples:true);
+            FileConfig.Welcome(Server.Port.ToString());
+            FileConfig.LoadAll();
+            FileConfig.LoadAll(Server.Port.ToString());
+
 
             base.OnEnabled();
         }
@@ -69,6 +67,11 @@ namespace UncomplicatedCustomItems
         {
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
+
+            HttpManager.Stop();
+
+            _harmony.UnpatchAll();
+            _harmony = null;
 
             Instance = null;
 

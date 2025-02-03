@@ -45,6 +45,7 @@ namespace UncomplicatedCustomItems.Elements
             Penetration = 1.24f,
             Inaccuracy = 1.24f,
             DamageFalloffDistance = 1,
+            Effects = [],
         };
     }
 
@@ -58,5 +59,6 @@ namespace UncomplicatedCustomItems.Elements
         public float Penetration { get; set; }
         public float Inaccuracy { get; set; }
         public float DamageFalloffDistance { get; set; }
+        public abstract List<Effect>? Effects { get; set; }
     }
 }

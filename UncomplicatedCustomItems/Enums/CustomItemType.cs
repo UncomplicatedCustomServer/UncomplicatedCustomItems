@@ -4,6 +4,10 @@
     Keycard,
     Armor,
     Weapon,
-    Medical,
-    Throwable
+    Medikit,
+    Painkillers,
+    Jailbird,
+    ExplosiveGrenade,
+    FlashGrenade,
+    Adrenaline
 }
