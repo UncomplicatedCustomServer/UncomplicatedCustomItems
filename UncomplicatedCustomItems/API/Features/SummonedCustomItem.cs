@@ -132,10 +132,13 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Weapon:
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
-
-                        Firearm.Ammo = WeaponData.MaxAmmo;
-                        // Firearm.MaxAmmo = WeaponData.MaxAmmo;
-                        Firearm.FireRate = WeaponData.FireRate;
+                        Firearm.MagazineAmmo = WeaponData.MaxAmmo;
+                        Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
+                        Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
+                        Firearm.AmmoDrain = WeaponData.AmmoDrain;
+                        Firearm.Penetration = WeaponData.Penetration;
+                        Firearm.Inaccuracy = WeaponData.Inaccuracy;
+                        Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
                         break;
 
                     case CustomItemType.Jailbird:
