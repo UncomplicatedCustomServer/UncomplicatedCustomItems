@@ -1,13 +1,12 @@
-using Exiled.API.Structs;
-using System.Collections.Generic;
-using Exiled.CustomItems.API;
-using InventorySystem.Items.Firearms.Attachments;
-using Exiled.API.Features;
+﻿using Exiled.API.Enums;
+
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
     public interface IWeaponData : IData
+
     {
+
         public abstract float Damage { get; set; }
 
         public abstract byte MaxBarrelAmmo { get; set; }
@@ -24,4 +23,5 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
 
         public abstract float DamageFalloffDistance { get; set; }
     }
+
 }

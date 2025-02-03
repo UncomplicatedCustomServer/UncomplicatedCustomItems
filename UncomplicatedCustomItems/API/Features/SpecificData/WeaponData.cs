@@ -1,11 +1,13 @@
+﻿
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     public class WeaponData : Data, IWeaponData
     {
         /// <summary>
-        /// Gets or sets the damage of the ammo. Negative to heal
+        /// The damage of the ammo. Negative to heal
         /// </summary>
         public float Damage { get; set; } = 2.75f;
 

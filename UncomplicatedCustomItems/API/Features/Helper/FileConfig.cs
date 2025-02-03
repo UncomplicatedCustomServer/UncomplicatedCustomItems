@@ -26,9 +26,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             new()
             {
                 Id = 2,
-                Name = "MagicWeapon",
-                Description = "A magic weapon with an incredible firerate",
-                Item = ItemType.GunCOM18,
+                Name = "FunnyGun",
+                Description = "A magic weapon that has a shotgun-like bullet spread",
+                Item = ItemType.GunFRMG0,
                 CustomItemType = CustomItemType.Weapon,
                 Scale = Vector3.one,
                 CustomData = YAMLCaster.Encode(new WeaponData())

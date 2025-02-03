@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Items;
+using Exiled.API.Features.Items.FirearmModules.Primary;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
 using MEC;
@@ -8,6 +9,7 @@ using System.Linq;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -125,13 +127,16 @@ namespace UncomplicatedCustomItems.API.Features
                         IArmorData ArmorData = CustomItem.CustomData as IArmorData;
 
                         Armor.HelmetEfficacy = ArmorData.HeadProtection;
+                        Armor.VestEfficacy = ArmorData.BodyProtection;
                         Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
                         Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
+                        Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
                         break;
 
                     case CustomItemType.Weapon:
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+
                         Firearm.MagazineAmmo = WeaponData.MaxAmmo;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
                         Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;

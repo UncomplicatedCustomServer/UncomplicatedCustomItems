@@ -15,9 +15,9 @@ namespace UncomplicatedCustomItems
 
         public override string Author => "SpGerg & FoxWorn";
 
-        public override Version RequiredExiledVersion { get; } = new(8, 2, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
 
-        public override Version Version { get; } = new(3, 0, 0, 2);
+        public override Version Version { get; } = new(3, 0, 0, 5);
 
         public override PluginPriority Priority => PluginPriority.First;
 
@@ -47,6 +47,7 @@ namespace UncomplicatedCustomItems
             Log.Info("===========================================");
             Log.Info(" Thanks for using UncomplicatedCustomItems");
             Log.Info("        by SpGerg & FoxWorn");
+            Log.Info(" Updated to Exiled 9.5.0 by Mr. Baguetter");
             Log.Info("===========================================");
             Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
