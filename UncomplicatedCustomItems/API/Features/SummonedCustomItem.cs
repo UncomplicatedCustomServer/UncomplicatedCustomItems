@@ -132,7 +132,6 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Weapon:
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
-
                         Firearm.MagazineAmmo = WeaponData.MaxAmmo;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
                         Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
