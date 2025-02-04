@@ -7,7 +7,7 @@ namespace UncomplicatedCustomItems
         [Description("Is enabled or not")]
         public bool IsEnabled { get; set; } = true;
 
-        [Description("Do enable the developer (debug) mode?")]
+        [Description("Do  enable the developer(debug) mode?")]
         public bool Debug { get; set; } = true;
 
         [Description("The hint message that will appear every time that you pick up a custom item. %name% is the item's name, %desc% is the item's description")]

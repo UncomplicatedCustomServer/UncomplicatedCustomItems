@@ -112,6 +112,7 @@ namespace UncomplicatedCustomItems.API
 
             return true;
         }
+        
 
         /// <summary>
         /// Convert a basic <see cref="YAMLCustomItem"/> Item into a fullified <see cref="ICustomItem"/>
@@ -126,6 +127,8 @@ namespace UncomplicatedCustomItems.API
                 Name = item.Name,
                 Description = item.Description,
                 Item = item.Item,
+                BadgeName = item.BadgeName,
+                BadgeColor = item.BadgeColor,
                 Weight = item.Weight,
                 Scale = item.Scale,
                 CustomItemType = item.CustomItemType,

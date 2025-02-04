@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
+#nullable enable
     public interface ICustomItem
     {
         public abstract uint Id { get; set; }
@@ -10,6 +11,10 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract string Name { get; set; }
 
         public abstract string Description { get; set; }
+
+        public abstract string BadgeName { get; set; }
+
+        public abstract string BadgeColor { get; set; }
 
         public abstract float Weight { get; set; }
 

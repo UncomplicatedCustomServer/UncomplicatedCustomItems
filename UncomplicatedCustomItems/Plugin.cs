@@ -3,6 +3,7 @@ using Exiled.API.Features;
 using System;
 using HarmonyLib;
 using System.IO;
+using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems
@@ -17,7 +18,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
 
-        public override Version Version { get; } = new(3, 0, 0, 5);
+        public override Version Version { get; } = new(3, 0, 0, 7);
 
         public override PluginPriority Priority => PluginPriority.First;
 
@@ -59,7 +60,7 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll();
             FileConfig.LoadAll(Server.Port.ToString());
 
-
+            Log.Info("You are using a Uncomplicated Custom Items pre-release version 3.0.0 REV-7.");
             base.OnEnabled();
         }
 
@@ -74,8 +75,8 @@ namespace UncomplicatedCustomItems
             _harmony = null;
 
             Instance = null;
-
             base.OnDisabled();
+
         }
     }
 }

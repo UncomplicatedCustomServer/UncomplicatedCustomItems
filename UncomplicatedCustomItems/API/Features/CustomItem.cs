@@ -82,6 +82,18 @@ namespace UncomplicatedCustomItems.API.Features
         public string Description { get; set; } = "25/06/2024";
 
         /// <summary>
+        /// Gets or sets the badge name
+        /// </summary>
+        [Description("Sets the badge name")]
+        public string BadgeName { get; set; } = "Testing";
+
+        /// <summary>
+        /// Gets or sets the badge color
+        /// </summary>
+        [Description("Sets the badge color")]
+        public string BadgeColor { get; set; } = "pumpkin";
+
+        /// <summary>
         /// The weight of the item
         /// </summary>
         [Description("The weight of the custom item")]

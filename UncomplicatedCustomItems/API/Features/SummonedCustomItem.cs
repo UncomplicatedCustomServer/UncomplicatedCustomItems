@@ -10,6 +10,8 @@ using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 using Exiled.API.Enums;
+using UncomplicatedCustomItems.API.Struct;
+using UncomplicatedCustomItems.Events;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -39,6 +41,11 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
+
+        /// <summary>
+        /// Gets the badge of the player if it has one
+        /// </summary>
+        public Triplet<string, string, bool>? Badge { get; private set; }
 
         /// <summary>
         /// The <see cref="SummonedCustomItem"/> as a <see cref="Exiled.API.Features.Pickups.Pickup"/>.
@@ -144,6 +151,7 @@ namespace UncomplicatedCustomItems.API.Features
                         Firearm.Penetration = WeaponData.Penetration;
                         Firearm.Inaccuracy = WeaponData.Inaccuracy;
                         Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        Firearm.AddAttachment(WeaponData.Attachments);
                         break;
 
                     case CustomItemType.Jailbird:
@@ -193,6 +201,21 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Weight = CustomItem.Weight;
             }
         }
+    
+        private string LoadBadge()
+        {
+            string output = "Badge: ";
+
+            if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
+                if (ColorManager.colorMap.ContainsKey(CustomItem.BadgeColor))
+                    output += $"<color={ColorManager.colorMap[CustomItem.BadgeColor]}>{CustomItem.BadgeName}</color>";
+                else
+                    output += $"{CustomItem.BadgeName.Replace("@hidden", "")}";
+            else
+                output += "None";
+            
+            return output;
+        }
 
         internal void OnPickup(ItemAddedEventArgs pickedUp)
         {
@@ -200,6 +223,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
             SetProperties();
+            LoadBadge();
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }

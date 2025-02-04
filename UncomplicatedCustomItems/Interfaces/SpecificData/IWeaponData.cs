@@ -1,12 +1,12 @@
 ﻿using Exiled.API.Enums;
-
+using System.Collections.Generic;
+using InventorySystem.Items.Firearms.Attachments;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
+#nullable enable
     public interface IWeaponData : IData
-
     {
-
         public abstract float Damage { get; set; }
 
         public abstract byte MaxBarrelAmmo { get; set; }
@@ -22,6 +22,8 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float Inaccuracy { get; set; }
 
         public abstract float DamageFalloffDistance { get; set; }
+        
+        public abstract AttachmentName Attachments { get; set; }
     }
 
 }

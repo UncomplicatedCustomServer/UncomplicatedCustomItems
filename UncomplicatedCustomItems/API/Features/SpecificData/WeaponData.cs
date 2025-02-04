@@ -1,9 +1,13 @@
 ﻿
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Exiled.API.Enums;
+using System.Collections.Generic;
+using InventorySystem.Items.Firearms.Attachments;
+using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
+#nullable enable
     public class WeaponData : Data, IWeaponData
     {
         /// <summary>
@@ -45,5 +49,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets the how much fast the value drop over the distance.
         /// </summary>
         public float DamageFalloffDistance { get; set; } = 1f;
+        
+        /// <summary>
+        /// Gets or sets the weapon attachments.
+        /// </summary>
+        public AttachmentName Attachments { get; set; } = AttachmentName.DotSight;
     }
 }
