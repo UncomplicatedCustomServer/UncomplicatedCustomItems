@@ -45,5 +45,5 @@ Please consider donating something to support our work through **OpenCollective*
 ### Dr.Agenda
   **Discord:** `dr.agenda`
 ### Mr. Baguetter
-  **Discord:** `@ender@1992`\
+  **Discord:** `@ender1992`\
   **Email:** `Mr.Baguetter1@gmail.com`
