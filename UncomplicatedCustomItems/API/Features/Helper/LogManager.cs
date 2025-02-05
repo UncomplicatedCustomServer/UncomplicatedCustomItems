@@ -60,7 +60,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Content += $"{Element}\n";
 
             // Now let's add the separator
-            Content += "\n======== BEGIN CUSTOM ROLES ========\n";
+            Content += "\n======== BEGIN CUSTOM ITEMS ========\n";
 
             foreach (ICustomItem Role in CustomItem.List)
             {

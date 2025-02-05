@@ -69,7 +69,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
 
         /// <summary>
-        /// Gets the role of the given player (as steamid@64) inside UCR
+        /// Gets the 
+        /// of the given player (as steamid@64) inside UCR
         /// </summary>
         public Dictionary<string, string> OrgPlayerRole { get; } = new();
 

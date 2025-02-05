@@ -5,6 +5,7 @@ using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using EventSource = Exiled.Events.Handlers.Player;
+using Exiled.API.Features;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -16,8 +17,10 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
             EventSource.DroppedItem += DroppedItemEvent;
             EventSource.ChangedItem += ChangeItemInHand;
+            EventSource.ChangingItem += ChangingItemInHand;
             EventSource.UsingItemCompleted += OnItemUsingCompleted;
             EventSource.TogglingNoClip += NoclipButton;
+            EventSource.Died += DeathEvent;
         }
 
         public static void Unregister()
@@ -26,14 +29,16 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
             EventSource.DroppedItem -= DroppedItemEvent;
             EventSource.ChangedItem -= ChangeItemInHand;
+            EventSource.ChangingItem -= ChangingItemInHand;
             EventSource.UsingItemCompleted -= OnItemUsingCompleted;
-            EventSource.TogglingNoClip -= NoclipButton;
+            EventSource.Died += DeathEvent;
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
                 Item.OnDrop(ev);
+                Item?.ResetBadge(ev.Player);
         }
 
         /// <summary>
@@ -92,10 +97,31 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player.CurrentItem is null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
-            Item?.HandleSelectedDisplayHint();
+            item?.HandleSelectedDisplayHint();
+            item?.LoadBadge(ev.Player);
+        }
+        private static void ChangingItemInHand(ChangingItemEventArgs ev)
+        {
+            if (ev.Player.CurrentItem is null)
+                return;
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+                return;
+
+            item?.ResetBadge(ev.Player);
+        }
+        private static void DeathEvent(DiedEventArgs ev)
+        {
+            if (ev.Player.CurrentItem is null)
+                return;
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+                return;
+
+            item?.ResetBadge(ev.Player);
         }
 
         private static void NoclipButton(TogglingNoClipEventArgs ev)

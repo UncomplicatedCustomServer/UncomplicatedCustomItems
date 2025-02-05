@@ -12,6 +12,9 @@ using UnityEngine;
 using Exiled.API.Enums;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.Events;
+using Exiled.API.Features.Roles;
+using UncomplicatedCustomItems.API.Features.Helper;
+using System;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -201,20 +204,52 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Weight = CustomItem.Weight;
             }
         }
-    
-        private string LoadBadge()
+
+        public string LoadBadge(Player player)
         {
+            Log.Debug("LoadBadge() Triggered");
             string output = "Badge: ";
 
             if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
-                if (ColorManager.colorMap.ContainsKey(CustomItem.BadgeColor))
-                    output += $"<color={ColorManager.colorMap[CustomItem.BadgeColor]}>{CustomItem.BadgeName}</color>";
+            {
+                if (BadgeManager.colorMap.ContainsKey(CustomItem.BadgeColor))
+                    output += $"<color={BadgeManager.colorMap[CustomItem.BadgeColor]}>{CustomItem.BadgeName}</color>";
                 else
                     output += $"{CustomItem.BadgeName.Replace("@hidden", "")}";
+            }
             else
+            {
                 output += "None";
-            
+            }
+
+            Log.Debug($"Badge loaded: {output}");
+
+            CustomItemBadgeApplier(player, CustomItem);
+
             return output;
+        }
+
+        private void CustomItemBadgeApplier(Player Player, ICustomItem Item)
+        {
+            Triplet<string, string, bool>? Badge = null;
+            if (Item.BadgeName is not null && Item.BadgeName.Length > 1 && Item.BadgeColor is not null && Item.BadgeColor.Length > 2)
+            {
+                Badge = new(Player.RankName ?? "", Player.RankColor ?? "", Player.ReferenceHub.serverRoles.HasBadgeHidden);
+                LogManager.Debug($"Badge detected, putting {Item.BadgeName}@{Item.BadgeColor} to player {Player.Id}");
+
+                Player.RankName = Item.BadgeName.Replace("@hidden", "");
+                Player.RankColor = Item.BadgeColor;
+
+                if (Item.BadgeName.Contains("@hidden"))
+                    if (Player.ReferenceHub.serverRoles.TryHideTag())
+                        LogManager.Debug("Tag successfully hidden!");
+            }
+        }
+
+        public void ResetBadge(Player Player)
+        {
+            Player.ReferenceHub.serverRoles.RefreshLocalTag();
+            Log.Debug("Badge successfully reset");
         }
 
         internal void OnPickup(ItemAddedEventArgs pickedUp)
@@ -223,7 +258,6 @@ namespace UncomplicatedCustomItems.API.Features
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
             SetProperties();
-            LoadBadge();
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }

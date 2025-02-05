@@ -459,7 +459,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\Features\ColorManager.cs" />
+    <Compile Include="API\Features\BadgeManager.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
     <Compile Include="API\Features\Helper\HttpManager.cs" />
     <Compile Include="API\Features\Helper\LogEntry.cs" />
