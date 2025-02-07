@@ -6,11 +6,12 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using EventSource = Exiled.Events.Handlers.Player;
 using Exiled.API.Features;
+using UncomplicatedCustomItems.API.Features.CustomModules;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
     internal static class Player
-    {
+    {   //EventSource.EVENT += EVENTNAME
         public static void Register()
         {
             EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
@@ -22,7 +23,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.TogglingNoClip += NoclipButton;
             EventSource.Died += DeathEvent;
         }
-
+        // EventSource.EVENT -= EVENTNAME 
         public static void Unregister()
         {
             EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
@@ -31,7 +32,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ChangedItem -= ChangeItemInHand;
             EventSource.ChangingItem -= ChangingItemInHand;
             EventSource.UsingItemCompleted -= OnItemUsingCompleted;
-            EventSource.Died += DeathEvent;
+            EventSource.Died -= DeathEvent;
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
@@ -39,6 +40,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
                 Item.OnDrop(ev);
                 Item?.ResetBadge(ev.Player);
+                Item?.UnloadItemFlags();
         }
 
         /// <summary>
@@ -51,6 +53,8 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 Item.OnPickup(ev);
                 Item.HandlePickedUpDisplayHint();
+                CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
+                Item?.ReloadItemFlags();
             }
         }
 
@@ -102,6 +106,8 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item?.HandleSelectedDisplayHint();
             item?.LoadBadge(ev.Player);
+            CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
+            item?.ReloadItemFlags();
         }
         private static void ChangingItemInHand(ChangingItemEventArgs ev)
         {
@@ -112,6 +118,8 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
+            item?.ReloadItemFlags();
+            item?.UnloadItemFlags();
         }
         private static void DeathEvent(DiedEventArgs ev)
         {
@@ -122,6 +130,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
+            item.UnloadItemFlags();
         }
 
         private static void NoclipButton(TogglingNoClipEventArgs ev)

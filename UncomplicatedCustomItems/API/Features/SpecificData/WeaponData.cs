@@ -4,6 +4,7 @@ using Exiled.API.Enums;
 using System.Collections.Generic;
 using InventorySystem.Items.Firearms.Attachments;
 using YamlDotNet.Serialization;
+using CameraShaking;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -49,7 +50,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets the how much fast the value drop over the distance.
         /// </summary>
         public float DamageFalloffDistance { get; set; } = 1f;
-        
+
         /// <summary>
         /// Gets or sets the weapon attachments.
         /// </summary>

@@ -8,6 +8,7 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.Enums;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -80,7 +81,6 @@ namespace UncomplicatedCustomItems.API
                 CustomItemType.Jailbird => (Data)Decode(new JailbirdData(), data),
                 CustomItemType.ExplosiveGrenade => (Data)Decode(new ExplosiveGrenadeData(), data),
                 CustomItemType.FlashGrenade => (Data)Decode(new FlashGrenadeData(), data),
-                CustomItemType.Adrenaline => (Data)Decode(new AdrenalineData(), data),
                 _ => new(),
             };
         }
@@ -131,6 +131,7 @@ namespace UncomplicatedCustomItems.API
                 BadgeColor = item.BadgeColor,
                 Weight = item.Weight,
                 Scale = item.Scale,
+                CustomFlags = item.CustomFlags,
                 CustomItemType = item.CustomItemType,
                 CustomData = Decode(item.CustomItemType, item.CustomData)
             };

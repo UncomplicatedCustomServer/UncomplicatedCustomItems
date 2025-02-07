@@ -1,5 +1,6 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using UncomplicatedCustomItems.Enums;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
@@ -25,6 +26,8 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract Vector3 Scale { get; set; }
 
         public abstract ISpawn Spawn { get; set; }
+
+        public abstract CustomFlags? CustomFlags { get; set; }
 
         public abstract CustomItemType CustomItemType { get; set; }
 

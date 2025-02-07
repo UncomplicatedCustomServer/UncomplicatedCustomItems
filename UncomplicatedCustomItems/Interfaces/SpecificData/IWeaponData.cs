@@ -1,6 +1,7 @@
 ﻿using Exiled.API.Enums;
 using System.Collections.Generic;
 using InventorySystem.Items.Firearms.Attachments;
+using CameraShaking;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
@@ -22,7 +23,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float Inaccuracy { get; set; }
 
         public abstract float DamageFalloffDistance { get; set; }
-        
+
         public abstract AttachmentName Attachments { get; set; }
     }
 

@@ -12,7 +12,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string Description { get; } = "Give a Custom Item to a specific player or to yourself";
 
-        public string VisibleArgs { get; } = "<Item Id> (Player Id/Name)";
+        public string VisibleArgs { get; } = "<Item Id> (Player Id/Name or All)";
 
         public int RequiredArgsCount { get; } = 1;
 
@@ -30,23 +30,42 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             ICustomItem customItem = CustomItem.CustomItems[uint.Parse(arguments[0])];
 
-            Player target;
-
             if (arguments.Count == 2)
-                target = Player.Get(arguments[1]);
-            else
-                target = Player.Get(sender);
-
-            if (target is null)
             {
-                response = "Player not found!";
-                return false;
+                if (arguments[1].ToLower() == "all")
+                {
+                    foreach (Player player in Player.List)
+                    {
+                        new SummonedCustomItem(customItem, player);
+                    }
+                    response = $"Successfully gave '{customItem.Name}' to all players!";
+                    return true;
+                }
+                else
+                {
+                    Player target = Player.Get(arguments[1]);
+                    if (target is null)
+                    {
+                        response = "Player not found!";
+                        return false;
+                    }
+                    new SummonedCustomItem(customItem, target);
+                    response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
+                    return true;
+                }
             }
-
-            new SummonedCustomItem(customItem, target);
-
-            response = $"Successfully summoned 1 '{customItem.Name}' to player {target.Nickname}";
-            return true;
+            else
+            {
+                Player target = Player.Get(sender);
+                if (target is null)
+                {
+                    response = "Player not found!";
+                    return false;
+                }
+                new SummonedCustomItem(customItem, target);
+                response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
+                return true;
+            }
         }
     }
 }

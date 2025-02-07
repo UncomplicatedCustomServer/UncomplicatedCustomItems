@@ -6,6 +6,7 @@ using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using UncomplicatedCustomItems.Enums;
 
 #nullable enable
 namespace UncomplicatedCustomItems.API.Features
@@ -85,7 +86,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// Gets or sets the badge name
         /// </summary>
         [Description("Sets the badge name")]
-        public string BadgeName { get; set; } = "Testing";
+        public string BadgeName { get; set; } = "Uncomplicated Custom Items";
 
         /// <summary>
         /// Gets or sets the badge color
@@ -122,6 +123,12 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("The spawn settings for the item")]
         public ISpawn Spawn { get; set; } = new Spawn();
+
+        /// <summary>
+        /// Custom flags of the item
+        /// </summary>
+        [Description("Custom flags for the item")]
+        public CustomFlags? CustomFlags { get; set; } = null;
 
         /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item

@@ -50,7 +50,8 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
+    <Reference Include="0Harmony, Version=2.3.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Harmony-Fat.2.3.3.0\net8.0\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -460,11 +461,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Features\BadgeManager.cs" />
+    <Compile Include="API\Features\CustomModules\CoroutineModule.cs" />
+    <Compile Include="API\Features\CustomModules\CustomModule.cs" />
+    <Compile Include="API\Features\CustomModules\DieOnUse.cs" />
+    <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\HalfLifeSteal.cs" />
+    <Compile Include="API\Features\CustomModules\InfiniteAmmo.cs" />
+    <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
+    <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
     <Compile Include="API\Features\Helper\HttpManager.cs" />
     <Compile Include="API\Features\Helper\LogEntry.cs" />
     <Compile Include="API\Features\Helper\LogManager.cs" />
-    <Compile Include="API\Features\SpecificData\AdrenalineData.cs" />
     <Compile Include="API\Features\SummonedCustomItem.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />
@@ -491,13 +499,18 @@
     <Compile Include="API\Features\YAMLCustomItem.cs" />
     <Compile Include="Enums\CustomItemType.cs" />
     <Compile Include="Enums\ItemEvents.cs" />
+    <Compile Include="Enums\CustomFlags.cs" />
+    <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
+    <Compile Include="Extensions\DictionaryExtension.cs" />
+    <Compile Include="Extensions\ItemExtension.cs" />
+    <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
+    <Compile Include="Interfaces\ICustomModule.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\ISubcommand.cs" />
-    <Compile Include="Interfaces\SpecificData\IAdrenalineData.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />
     <Compile Include="Interfaces\SpecificData\IData.cs" />
     <Compile Include="Interfaces\SpecificData\IExplosiveGrenadeData.cs" />

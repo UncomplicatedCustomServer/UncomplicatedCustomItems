@@ -5,6 +5,8 @@ using HarmonyLib;
 using System.IO;
 using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.HarmonyElements.Patches;
+using Handler = UncomplicatedCustomItems.Events.EventHandler;
 
 namespace UncomplicatedCustomItems
 {
@@ -12,19 +14,21 @@ namespace UncomplicatedCustomItems
     {
         public override string Name => "UncomplicatedCustomItems";
 
-        public override string Prefix => "uci";
+        public override string Prefix => "UncomplicatedCustomItems";
 
         public override string Author => "SpGerg & FoxWorn";
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
 
-        public override Version Version { get; } = new(3, 0, 0, 7);
+        public override Version Version { get; } = new(3, 0, 0, 8);
+
+        internal Handler Handler;
 
         public override PluginPriority Priority => PluginPriority.First;
 
         public static Plugin Instance { get; private set; }
 
-        private Harmony _harmony;
+        public Harmony _harmony;
 
         internal static HttpManager HttpManager;
 
@@ -39,9 +43,18 @@ namespace UncomplicatedCustomItems
 
             FileConfig = new();
             HttpManager = new("uci", uint.MaxValue);
+            Handler = new();
 
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
                 HttpManager.Start();
+
+            Exiled.Events.Handlers.Player.Hurt += Handler.OnHurt;
+            Exiled.Events.Handlers.Player.TriggeringTesla += Handler.OnTriggeringTesla;
+            Exiled.Events.Handlers.Player.Shooting += Handler.OnShooting;
+            Exiled.Events.Handlers.Server.WaitingForPlayers += Handler.OnWaitingForPlayers;
+            Exiled.Events.Handlers.Player.UsedItem += Handler.OnItemUse;
+            Exiled.Events.Handlers.Item.ChangingAttachments += Handler.OnChangingAttachments;
+            Exiled.Events.Handlers.Player.ActivatingWorkstation += Handler.OnWorkstationActivation;
 
             LogManager.History.Clear();
 
@@ -60,7 +73,6 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll();
             FileConfig.LoadAll(Server.Port.ToString());
 
-            Log.Info("You are using a Uncomplicated Custom Items pre-release version 3.0.0 REV-7.");
             base.OnEnabled();
         }
 
@@ -73,6 +85,14 @@ namespace UncomplicatedCustomItems
 
             _harmony.UnpatchAll();
             _harmony = null;
+
+            Exiled.Events.Handlers.Player.Hurt -= Handler.OnHurt;
+            Exiled.Events.Handlers.Player.TriggeringTesla -= Handler.OnTriggeringTesla;
+            Exiled.Events.Handlers.Player.Shooting -= Handler.OnShooting;
+            Exiled.Events.Handlers.Server.WaitingForPlayers -= Handler.OnWaitingForPlayers;
+            Exiled.Events.Handlers.Player.UsedItem -= Handler.OnItemUse;
+            Exiled.Events.Handlers.Item.ChangingAttachments -= Handler.OnChangingAttachments;
+            Exiled.Events.Handlers.Player.ActivatingWorkstation -= Handler.OnWorkstationActivation;
 
             Instance = null;
             base.OnDisabled();

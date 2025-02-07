@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features.SpecificData;
+using UncomplicatedCustomItems.Enums;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
@@ -23,6 +24,8 @@ namespace UncomplicatedCustomItems.API.Features
         public Vector3 Scale { get; set; } = Vector3.one;
 
         public Spawn Spawn { get; set; } = new();
+
+        public virtual CustomFlags? CustomFlags { get; set; } = null;
 
         public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
 
