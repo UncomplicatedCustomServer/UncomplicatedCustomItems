@@ -124,7 +124,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Player  != null)
                 {
                     ev.IsAllowed = false;
-                    ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint, Plugin.Instance.Config.WorkstationBanDuration);
+                    ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint, Plugin.Instance.Config.WorkstationBanHintDuration);
                 }
                 else
                 {
@@ -140,7 +140,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Player != null)
                 {
                     ev.IsAllowed = false;
-                    ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint, Plugin.Instance.Config.WorkstationBanDuration);
+                    ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint, Plugin.Instance.Config.WorkstationBanHintDuration);
                 }
                 else
                 {

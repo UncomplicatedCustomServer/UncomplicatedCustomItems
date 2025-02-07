@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using UncomplicatedCustomItems.Extensions;
 using Exiled.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin

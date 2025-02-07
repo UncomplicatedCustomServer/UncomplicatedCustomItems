@@ -29,8 +29,9 @@ namespace UncomplicatedCustomItems
         public string WorkstationBanHint { get; set; } = "You are not allowed to change the attachments on this weapon!";
 
         [Description("The duration of the WorkstationBan hint")]
-        public float WorkstationBanDuration { get; set; } = 3f;
-        [Description("Do enable the Admin Messages? You will sometimes receive messages to your console from our Central Servers (only for very important things!)")]
+        public float WorkstationBanHintDuration { get; set; } = 3f;
+
+        [Description("Enable Admin Messages? You will sometimes receive messages to your console from our Central Servers (only for very important things!)")]
         public bool DoEnableAdminMessages { get; set; } = true;
     }
 }
