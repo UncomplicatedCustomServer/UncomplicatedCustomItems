@@ -7,11 +7,13 @@ using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.HarmonyElements.Patches;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
+        public const bool IsPrerelease = true;
         public override string Name => "UncomplicatedCustomItems";
 
         public override string Prefix => "UncomplicatedCustomItems";
@@ -48,10 +50,14 @@ namespace UncomplicatedCustomItems
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
                 HttpManager.Start();
 
+            if (IsPrerelease)
+            {
+                Exiled.Events.Handlers.Server.WaitingForPlayers += Handler.OnWaitingForPlayers;
+            }
+
             Exiled.Events.Handlers.Player.Hurt += Handler.OnHurt;
             Exiled.Events.Handlers.Player.TriggeringTesla += Handler.OnTriggeringTesla;
             Exiled.Events.Handlers.Player.Shooting += Handler.OnShooting;
-            Exiled.Events.Handlers.Server.WaitingForPlayers += Handler.OnWaitingForPlayers;
             Exiled.Events.Handlers.Player.UsedItem += Handler.OnItemUse;
             Exiled.Events.Handlers.Item.ChangingAttachments += Handler.OnChangingAttachments;
             Exiled.Events.Handlers.Player.ActivatingWorkstation += Handler.OnWorkstationActivation;

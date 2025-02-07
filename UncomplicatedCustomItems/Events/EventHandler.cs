@@ -152,7 +152,7 @@ namespace UncomplicatedCustomItems.Events
             await Task.Delay(3200);
 
             Log.Info("===========================================");
-            Log.Info("!WARNING! This is Beta Version 3.0.0 REV-8.5 !WARNING!");
+            Log.Info("!WARNING! This is Beta Version 3.0.0 !WARNING!");
             Log.Info("Bugs are to be expected; please report them in our Discord");
             Log.Info(">> https://discord.gg/5StRGu8EJV <<");
             Log.Info("===========================================");

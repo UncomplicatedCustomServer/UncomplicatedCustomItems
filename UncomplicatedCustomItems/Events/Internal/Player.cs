@@ -40,7 +40,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
                 Item.OnDrop(ev);
                 Item?.ResetBadge(ev.Player);
-                Item?.UnloadItemFlags();
+                Item.UnloadItemFlags();
         }
 
         /// <summary>
@@ -54,7 +54,8 @@ namespace UncomplicatedCustomItems.Events.Internal
                 Item.OnPickup(ev);
                 Item.HandlePickedUpDisplayHint();
                 CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
-                Item?.ReloadItemFlags();
+                Item.ReloadItemFlags();
+                Item.LoadItemFlags();
             }
         }
 
@@ -104,10 +105,10 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
-            item?.HandleSelectedDisplayHint();
-            item?.LoadBadge(ev.Player);
-            CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
-            item?.ReloadItemFlags();
+            item.HandleSelectedDisplayHint();
+            item.LoadBadge(ev.Player);
+            item.ReloadItemFlags();
+            item.LoadItemFlags();
         }
         private static void ChangingItemInHand(ChangingItemEventArgs ev)
         {
@@ -117,9 +118,9 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
-            item?.ResetBadge(ev.Player);
-            item?.ReloadItemFlags();
-            item?.UnloadItemFlags();
+            item.ResetBadge(ev.Player);
+            item.ReloadItemFlags();
+            item.UnloadItemFlags();
         }
         private static void DeathEvent(DiedEventArgs ev)
         {
@@ -129,7 +130,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
-            item?.ResetBadge(ev.Player);
+            item.ResetBadge(ev.Player);
             item.UnloadItemFlags();
         }
 
