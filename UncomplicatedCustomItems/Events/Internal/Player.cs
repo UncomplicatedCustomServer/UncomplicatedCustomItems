@@ -107,6 +107,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item.HandleSelectedDisplayHint();
             item.LoadBadge(ev.Player);
+            CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
             item.ReloadItemFlags();
             item.LoadItemFlags();
         }
