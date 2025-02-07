@@ -8,6 +8,7 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.HarmonyElements.Patches;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace UncomplicatedCustomItems
 {
@@ -44,11 +45,10 @@ namespace UncomplicatedCustomItems
             _harmony.PatchAll();
 
             FileConfig = new();
-            HttpManager = new("uci", uint.MaxValue);
+            HttpManager = new("uci");
             Handler = new();
 
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
-                HttpManager.Start();
 
             if (IsPrerelease)
             {
@@ -74,6 +74,14 @@ namespace UncomplicatedCustomItems
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
 
+            Task.Run(delegate
+            {
+                if (HttpManager.LatestVersion.CompareTo(Version) > 0)
+                    LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomItems!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest");
+
+                VersionManager.Init();
+            });
+
             FileConfig.Welcome(loadExamples:true);
             FileConfig.Welcome(Server.Port.ToString());
             FileConfig.LoadAll();
@@ -87,8 +95,7 @@ namespace UncomplicatedCustomItems
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
 
-            HttpManager.Stop();
-
+            HttpManager.UnregisterEvents();
             _harmony.UnpatchAll();
             _harmony = null;
 

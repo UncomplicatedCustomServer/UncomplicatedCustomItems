@@ -473,6 +473,8 @@
     <Compile Include="API\Features\Helper\HttpManager.cs" />
     <Compile Include="API\Features\Helper\LogEntry.cs" />
     <Compile Include="API\Features\Helper\LogManager.cs" />
+    <Compile Include="API\Features\Helper\VersionInfo.cs" />
+    <Compile Include="API\Features\Helper\VersionManager.cs" />
     <Compile Include="API\Features\SummonedCustomItem.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />

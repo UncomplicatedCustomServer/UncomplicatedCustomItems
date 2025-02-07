@@ -19,6 +19,9 @@ namespace UncomplicatedCustomItems
         [Description("The hint message that will appear every time that you select a custom item. %name% is the item's name, %desc% is the item's description")]
         public string SelectedMessage { get; set; } = "You have picked up a %name% who's a %desc%";
 
+        [Description("If true the UCS credit tag system won't be activated. PLEASE DON'T DEACTIVATE IT as LOTS OF PEOPLE WORKED ON THIS PLUGIN completly for FREE!")]
+        public bool EnableCreditTags { get; set; } = true;
+
         [Description("The duration of that hint")]
         public float SelectedMessageDuration { get; set; } = 3f;
 
