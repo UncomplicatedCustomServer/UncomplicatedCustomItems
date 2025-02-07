@@ -90,7 +90,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Item  != null)
                 {
-                    ev.Player.Kill(DamageType.Unknown);
+                    ev.Player.Kill(DamageType.Custom);
                     Log.Debug("DieOnUse triggered: player killed.");
                 }
                 else
@@ -106,7 +106,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Item  != null)
                 {
-                    ev.Player.Kill(DamageType.Unknown);
+                    ev.Player.Kill(DamageType.Custom);
                     Log.Debug("DieOnUse triggered: user killed.");
                 }
                 else
