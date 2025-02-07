@@ -1,6 +1,6 @@
 <div align="center"><a href="https://github.com/Mr-Baguetter/UncomplicatedCustomItems/releases/latest"><img src="https://img.shields.io/github/v/release/Mr-Baguetter/UncomplicatedCustomItems"></a> <a href="https://github.com/Mr-Baguetter/UncomplicatedCustomItems/releases/latest"><img src="https://img.shields.io/github/downloads/Mr-Baguetter/UncomplicatedCustomItems/total"></a> <a href="https://github.com/Mr-Baguetter/UncomplicatedCustomItems/pulls"><img src="https://img.shields.io/github/issues-pr/Mr-Baguetter/UncomplicatedCustomItems"></a> <a href="https://github.com/Mr-Baguetter/UncomplicatedCustomItems/pulls"><img src="https://img.shields.io/github/issues-pr-closed/Mr-Baguetter/UncomplicatedCustomItems"></a> <a href="https://github.com/Mr-Baguetter/UncomplicatedCustomItems/commits/main/"><img src="https://badgen.net/github/commits/Mr-Baguetter/UncomplicatedCustomItems/master">
 
-  <img src="https://raw.githubusercontent.com/UncomplicatedCustomServer/UncomplicatedCustomItems/refs/heads/resources/uci_promo_banner.png">
+  <img src="https://github.com/Mr-Baguetter/UncomplicatedCustomItems/blob/074974d4c5f5455b15b425ba184b61e972873719/test_promo_banner.png">
   <i>Easy, fully configurable and customizable custom items for your SCP:SL Server!</i>
 
   <br><br>
