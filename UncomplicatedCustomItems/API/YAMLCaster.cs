@@ -9,6 +9,7 @@ using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -41,7 +42,7 @@ namespace UncomplicatedCustomItems.API
         {
             if (!Check(baseElement, data, out string Expected, out string KeyList))
             {
-                Log.Error($"Error while decoding class!\nError code: 0x401\nExpected key: {Expected}\nKey list: {KeyList}");
+                LogManager.Error($"Error while decoding class!\nError code: 0x401\nExpected key: {Expected}\nKey list: {KeyList}");
                 return new Data();
             }
 

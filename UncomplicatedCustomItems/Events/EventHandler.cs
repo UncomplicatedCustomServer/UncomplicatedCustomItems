@@ -13,6 +13,7 @@ using Exiled.Events.EventArgs.Server;
 using Exiled.Loader;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomModules;
+using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Extensions;
 
 namespace UncomplicatedCustomItems.Events
@@ -26,32 +27,32 @@ namespace UncomplicatedCustomItems.Events
         public static Type PlayerHandler => EventHandlerAssembly?.GetTypes().Where(x => x.FullName == "Exiled.Events.Handlers.Player").FirstOrDefault();
         public void OnHurt(HurtEventArgs ev)
         {
-            Log.Debug("OnHurt event is being triggered");
+            LogManager.Debug("OnHurt event is being triggered");
             if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem summonedCustomItem))
             {
-                 Log.Debug("Fuck all event is being triggered");
+                 LogManager.Debug("Fuck all event is being triggered");
                 summonedCustomItem.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
                 if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<LifeSteal>())
                 {
-                    Log.Debug("LifeSteal custom flag is being triggered");
+                    LogManager.Debug("LifeSteal custom flag is being triggered");
 
                     if (Amount > 0)
                     {
                         ev.Attacker.Heal(Amount);
-                        Log.Debug($"LifeSteal custom flag triggered, healed {Amount} HP");
+                        LogManager.Debug($"LifeSteal custom flag triggered, healed {Amount} HP");
                     }
                 }
 
                 if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<HalfLifeSteal>())
                 {
-                    Log.Debug("HalfLifeSteal custom flag is being triggered");
+                    LogManager.Debug("HalfLifeSteal custom flag is being triggered");
 
                     if (Amount > 0)
                     {
                         float HealedAmount = Amount * Percentage;
                         ev.Attacker.Heal(HealedAmount);
-                        Log.Debug($"HalfLifeSteal custom flag triggered, healed {HealedAmount} HP");
+                        LogManager.Debug($"HalfLifeSteal custom flag triggered, healed {HealedAmount} HP");
                     }
                 }
             }
@@ -77,12 +78,12 @@ namespace UncomplicatedCustomItems.Events
                     if (ev.Firearm is Firearm firearm)
                     {
                         firearm.MagazineAmmo = firearm.MaxMagazineAmmo;
-                        Log.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {firearm.MagazineAmmo}");
+                        LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {firearm.MagazineAmmo}");
                     }
                 }
                 else
                 {
-                    Log.Warn("ERROR: InfiniteAmmo flag was triggered but no valid firearm found.");
+                    LogManager.Warn("ERROR: InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
 
@@ -91,11 +92,11 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item  != null)
                 {
                     ev.Player.Kill(DamageType.Custom);
-                    Log.Debug("DieOnUse triggered: player killed.");
+                    LogManager.Debug("DieOnUse triggered: player killed.");
                 }
                 else
                 {
-                    Log.Warn("ERROR: DieOnUse flag was triggered but couldnt be ran.");
+                    LogManager.Warn("ERROR: DieOnUse flag was triggered but couldnt be ran.");
                 }
             }
         }
@@ -107,11 +108,11 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item  != null)
                 {
                     ev.Player.Kill(DamageType.Custom);
-                    Log.Debug("DieOnUse triggered: user killed.");
+                    LogManager.Debug("DieOnUse triggered: user killed.");
                 }
                 else
                 {
-                    Log.Warn("ERROR: DieOnUse flag was triggered but couldnt be ran.");
+                    LogManager.Warn("ERROR: DieOnUse flag was triggered but couldnt be ran.");
                 }
             }
         }
@@ -127,7 +128,7 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    Log.Warn("ERROR: WorkstationBan flag was triggered but couldnt be ran.");
+                    LogManager.Warn("ERROR: WorkstationBan flag was triggered but couldnt be ran.");
                 }
             }
         }
@@ -143,7 +144,7 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    Log.Warn("ERROR: WorkstationBan flag was triggered but couldnt be ran.");
+                    LogManager.Warn("ERROR: WorkstationBan flag was triggered but couldnt be ran.");
                 }
             }
         }
@@ -151,11 +152,11 @@ namespace UncomplicatedCustomItems.Events
         {
             await Task.Delay(3200);
 
-            Log.Info("===========================================");
-            Log.Info("!WARNING! This is Beta Version 3.0.0 !WARNING!");
-            Log.Info("Bugs are to be expected; please report them in our Discord");
-            Log.Info(">> https://discord.gg/5StRGu8EJV <<");
-            Log.Info("===========================================");
+            LogManager.Info("===========================================");
+            LogManager.Info("!WARNING! This is Beta Version 3.0.0 !WARNING!");
+            LogManager.Info("Bugs are to be expected; please report them in our Discord");
+            LogManager.Info(">> https://discord.gg/5StRGu8EJV <<");
+            LogManager.Info("===========================================");
         }
     }
 }

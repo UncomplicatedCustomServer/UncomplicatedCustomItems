@@ -64,11 +64,11 @@ namespace UncomplicatedCustomItems
 
             LogManager.History.Clear();
 
-            Log.Info("===========================================");
-            Log.Info(" Thanks for using UncomplicatedCustomItems");
-            Log.Info("    by SpGerg, FoxWorn & Mr. Baguetter");
-            Log.Info("===========================================");
-            Log.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+            LogManager.Info("===========================================");
+            LogManager.Info(" Thanks for using UncomplicatedCustomItems");
+            LogManager.Info("    by SpGerg, FoxWorn & Mr. Baguetter");
+            LogManager.Info("===========================================");
+            LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();

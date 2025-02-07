@@ -429,7 +429,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public string LoadBadge(Player player)
         {
-            Log.Debug("LoadBadge() Triggered");
+            LogManager.Debug("LoadBadge() Triggered");
             string output = "Badge: ";
 
             if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
@@ -444,7 +444,7 @@ namespace UncomplicatedCustomItems.API.Features
                 output += "None";
             }
 
-            Log.Debug($"Badge loaded: {output}");
+            LogManager.Debug($"Badge loaded: {output}");
 
             CustomItemBadgeApplier(player, CustomItem);
 
@@ -471,7 +471,7 @@ namespace UncomplicatedCustomItems.API.Features
         public void ResetBadge(Player Player)
         {
             Player.ReferenceHub.serverRoles.RefreshLocalTag();
-            Log.Debug("Badge successfully reset");
+            LogManager.Debug("Badge successfully reset");
         }
         
         internal void OnPickup(ItemAddedEventArgs pickedUp)
@@ -510,19 +510,19 @@ namespace UncomplicatedCustomItems.API.Features
         }
         public void ReloadItemFlags()
         {
-            Log.Debug("Reload Item Flags Function Triggered");
+            LogManager.Debug("Reload Item Flags Function Triggered");
             _customModules = CustomModule.Load(CustomItem.CustomFlags ?? CustomFlags.None, this);
             List.Add(this);
 
-            Log.Debug("Item Flag(s) Reloaded");
-            Log.Debug($"Loaded Flag(s): {CustomItem.CustomFlags}");
+            LogManager.Debug("Item Flag(s) Reloaded");
+            LogManager.Debug($"Loaded Flag(s): {CustomItem.CustomFlags}");
         }
 
         public void UnloadItemFlags()
         {
-            Log.Debug("Unload Item Flags Triggered");
+            LogManager.Debug("Unload Item Flags Triggered");
             _customModules.Clear();
-            Log.Debug("Item Flags Cleared");
+            LogManager.Debug("Item Flags Cleared");
         }
         
         /// <summary>
@@ -598,7 +598,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (CustomItem.CustomItemType == CustomItemType.Item && CustomItem.CustomData is ICustomItem && ((IItemData)CustomItem.CustomData).Event == itemEvent)
             {
                 IItemData Data = CustomItem.CustomData as IItemData;
-                Log.Debug($"Firing events for item {CustomItem.Name}");
+                LogManager.Debug($"Firing events for item {CustomItem.Name}");
                 if (Data.Command is not null && Data.Command.Length > 2)
                     if (!Data.Command.Contains("P:"))
                         Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString())); 

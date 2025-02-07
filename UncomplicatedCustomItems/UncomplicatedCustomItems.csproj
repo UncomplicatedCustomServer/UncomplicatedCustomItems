@@ -481,6 +481,7 @@
     <Compile Include="API\YAMLCaster.cs" />
     <Compile Include="Commands\Admin\Give.cs" />
     <Compile Include="Commands\Admin\List.cs" />
+    <Compile Include="Commands\Admin\LogShare.cs" />
     <Compile Include="Commands\Admin\Summon.cs" />
     <Compile Include="Commands\Admin\Summoned.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
