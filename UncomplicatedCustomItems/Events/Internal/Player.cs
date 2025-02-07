@@ -22,6 +22,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.UsingItemCompleted += OnItemUsingCompleted;
             EventSource.TogglingNoClip += NoclipButton;
             EventSource.Died += DeathEvent;
+            EventSource.ChangingRole += RoleChangeEvent;
         }
         // EventSource.EVENT -= EVENTNAME 
         public static void Unregister()
@@ -33,6 +34,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ChangingItem -= ChangingItemInHand;
             EventSource.UsingItemCompleted -= OnItemUsingCompleted;
             EventSource.Died -= DeathEvent;
+            EventSource.ChangingRole -= RoleChangeEvent;
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
@@ -128,6 +130,14 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player.CurrentItem is null)
                 return;
 
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+                return;
+
+            item.ResetBadge(ev.Player);
+            item.UnloadItemFlags();
+        }
+        private static void RoleChangeEvent(ChangingRoleEventArgs ev)
+        {
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
