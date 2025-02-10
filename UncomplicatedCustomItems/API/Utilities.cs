@@ -252,6 +252,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="CustomItem"></param>
         internal static void SummonCustomItem(ICustomItem CustomItem)
         {
+
             ISpawn Spawn = CustomItem.Spawn;
 
             if (Spawn.Coords.Count() > 0)

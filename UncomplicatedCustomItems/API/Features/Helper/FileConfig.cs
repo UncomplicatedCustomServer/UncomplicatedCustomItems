@@ -35,6 +35,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.GunFRMG0,
                 CustomItemType = CustomItemType.Weapon,
                 Scale = Vector3.one,
+                Spawn = new(),
                 CustomFlags = CustomFlags.InfiniteAmmo,
                 CustomData = YAMLCaster.Encode(new WeaponData())
             },
@@ -48,6 +49,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.ArmorHeavy,
                 CustomItemType = CustomItemType.Armor,
                 Scale = Vector3.one,
+                Spawn = new(),
                 CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
                 CustomData = YAMLCaster.Encode(new ArmorData()
                 {
@@ -67,6 +69,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.KeycardJanitor,
                 CustomItemType = CustomItemType.Keycard,
                 Scale = Vector3.one,
+                Spawn = new(),
                 CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
                 CustomData = YAMLCaster.Encode(new KeycardData()
                 {
@@ -83,6 +86,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.GrenadeHE,
                 CustomItemType = CustomItemType.ExplosiveGrenade,
                 Scale = Vector3.one,
+                Spawn = new(),
                 CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
                 CustomData = YAMLCaster.Encode(new ExplosiveGrenadeData()
                 {
@@ -99,6 +103,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.GrenadeFlash,
                 CustomItemType = CustomItemType.FlashGrenade,
                 Scale = Vector3.one,
+                Spawn = new(),
                 CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
                 CustomData = YAMLCaster.Encode(new FlashGrenadeData()
                 {
@@ -115,6 +120,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.Medkit,
                 CustomItemType = CustomItemType.Medikit,
                 Scale = new(2, 2, 2),
+                Spawn = new(),
                 CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
                 CustomData = YAMLCaster.Encode(new MedikitData()
                 {
@@ -131,6 +137,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.Painkillers,
                 CustomItemType = CustomItemType.Painkillers,
                 Scale = new(5, 5, 5),
+                Spawn = new Spawn(),
                 CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
                 CustomData = YAMLCaster.Encode(new PainkillersData()
                 {

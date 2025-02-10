@@ -467,6 +467,7 @@
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
     <Compile Include="API\Features\CustomModules\HalfLifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\InfiniteAmmo.cs" />
+    <Compile Include="API\Features\CustomModules\ItemGlow.cs" />
     <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
@@ -475,6 +476,7 @@
     <Compile Include="API\Features\Helper\LogManager.cs" />
     <Compile Include="API\Features\Helper\VersionInfo.cs" />
     <Compile Include="API\Features\Helper\VersionManager.cs" />
+    <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SummonedCustomItem.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />
@@ -488,7 +490,6 @@
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="API\Features\CustomItem.cs" />
-    <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SpecificData\ArmorData.cs" />
     <Compile Include="API\Features\SpecificData\Data.cs" />
     <Compile Include="API\Features\SpecificData\ExplosiveGrenadeData.cs" />

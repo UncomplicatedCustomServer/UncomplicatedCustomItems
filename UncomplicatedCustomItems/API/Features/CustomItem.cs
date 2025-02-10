@@ -8,8 +8,8 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
+using Exiled.API.Enums;
 
-#nullable enable
 namespace UncomplicatedCustomItems.API.Features
 {
     public class CustomItem : ICustomItem
@@ -119,10 +119,6 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("The scale of the custom item, 0 0 0 means disabled")]
         public Vector3 Scale { get; set; } = Vector3.one;
 
-        /// <summary>
-        /// The <see cref="Elements.Spawn"/> settings for the item
-        /// </summary>
-        [Description("The spawn settings for the item")]
         public ISpawn Spawn { get; set; } = new Spawn();
 
         /// <summary>

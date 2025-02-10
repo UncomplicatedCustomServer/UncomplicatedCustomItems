@@ -2,24 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Exiled.API.Enums;
-using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Item;
 using Exiled.Events.EventArgs.Player;
-using Exiled.Events.EventArgs.Server;
 using Exiled.Loader;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Extensions;
+using UnityEngine;
+using Exiled.API.Features.Pickups;
+using Exiled.Events.EventArgs.Map;
+using Light = Exiled.API.Features.Toys.Light;
+
 
 namespace UncomplicatedCustomItems.Events
 {
     internal class EventHandler
     {
+
+        private Dictionary<Pickup, Exiled.API.Features.Toys.Light> ActiveLights = new Dictionary<Pickup, Exiled.API.Features.Toys.Light>();
         public float Amount { get; set; } = 8f;
         public float Percentage => 0.5f;
         public static Assembly EventHandlerAssembly => Loader.Plugins.Where(plugin => plugin.Name is "Exiled.Events").FirstOrDefault()?.Assembly;
@@ -75,10 +79,10 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Firearm != null)
                 {
-                    if (ev.Firearm is Firearm firearm)
+                    if (ev.Firearm is Firearm firearm2)
                     {
-                        firearm.MagazineAmmo = firearm.MaxMagazineAmmo;
-                        LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {firearm.MagazineAmmo}");
+                        firearm2.MagazineAmmo = firearm2.MaxMagazineAmmo;
+                        LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {firearm2.MagazineAmmo}");
                     }
                 }
                 else
@@ -86,10 +90,9 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Warn("ERROR: InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
-
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<DieOnUse>())
             {
-                if (ev.Item  != null)
+                if (ev.Item != null)
                 {
                     ev.Player.Kill(DamageType.Custom);
                     LogManager.Debug("DieOnUse triggered: player killed.");
@@ -148,6 +151,92 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
+        public void OnDrop(DroppedItemEventArgs ev)
+        {
+
+            if (ev.Pickup != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<ItemGlow>())
+            {
+                if (ev.Pickup != null)
+                {
+                    SpawnLightOnItem(ev.Pickup);
+                }
+                else
+                {
+                    LogManager.Warn("ERROR: ItemGlow flag was triggered but couldnt be ran.");
+                }
+            }
+        }
+        public void OnPickup(PickupDestroyedEventArgs ev)
+        {
+            if (ev.Pickup != null)
+            {
+                if (ev.Pickup != null)
+                {
+                    DestroyLightOnItem(ev.Pickup);
+                }
+                else
+                {
+                    LogManager.Warn("ERROR: ItemGlow flag was triggered but couldnt be ran.");
+                }
+            }
+        }
+        public void DestroyLightOnItem(Pickup pickup)
+        {
+            LogManager.Debug("DestroyLightOnItem method triggered");
+            if (pickup == null || !ActiveLights.ContainsKey(pickup))
+                return;
+
+            Exiled.API.Features.Toys.Light ItemLight = ActiveLights[pickup];
+            if (ItemLight != null && ItemLight.Base != null)
+            {
+                GameObject.Destroy(ItemLight.Base.gameObject);
+            }
+
+            ActiveLights.Remove(pickup);
+            LogManager.Debug("Light successfully destroyed.");
+        }
+        public static Color GetColorFromConfig(string colorName)
+        {
+            switch (colorName.ToLower())
+            {
+                case "red": return Color.red;
+                case "green": return Color.green;
+                case "blue": return Color.blue;
+                case "yellow": return Color.yellow;
+                case "cyan": return Color.cyan;
+                case "magenta": return Color.magenta;
+                case "white": return Color.white;
+                case "black": return Color.black;
+                case "gray": return Color.gray;
+                case "grey": return Color.gray;
+                default:
+                    LogManager.Warn($"Invalid color '{colorName}' in config. Using default blue.");
+                    return Color.blue;
+            }
+        }
+        public void SpawnLightOnItem(Pickup pickup)
+        {
+            LogManager.Debug("SpawnLightOnItem method triggered");
+            if (pickup == null || pickup.Base == null || pickup.Base.gameObject == null)
+                return;
+
+            GameObject ItemGameObject = pickup.Base.gameObject;
+            
+            string colorString = Plugin.Instance.Config.GlowColor;
+            Color lightColor = GetColorFromConfig(colorString);
+
+            var Light = Exiled.API.Features.Toys.Light.Create(pickup.Position);
+                
+            Light.Color = lightColor;
+            Light.Intensity = 0.7f;
+            Light.Range = 0.5f;
+            Light.ShadowType = LightShadows.None;
+
+            Light.Base.gameObject.transform.SetParent(ItemGameObject.transform, worldPositionStays: true);
+            LogManager.Debug($"Item Light should be spawned at position: {Light.Base.transform.position}");
+            ActiveLights[pickup] = Light;
+        }
+
         public async void OnWaitingForPlayers()
         {
             await Task.Delay(3200);

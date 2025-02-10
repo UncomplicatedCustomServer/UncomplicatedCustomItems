@@ -36,12 +36,6 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             ICustomItem customItem = CustomItem.CustomItems[uint.Parse(arguments[0])];
 
-            if (customItem.Spawn is null)
-            {
-                response = "Can't spawn a custom item without a Spawn settings!\nYou can use the command uci give <Item Id> (Player Id/Nickname)";
-                return false;
-            }
-
             Utilities.SummonCustomItem(customItem);
 
             response = $"Successfully summoned 1 '{customItem.Name}' to it's spawn point";

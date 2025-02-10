@@ -1,11 +1,9 @@
 ﻿using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
-using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using EventSource = Exiled.Events.Handlers.Player;
-using Exiled.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 
 namespace UncomplicatedCustomItems.Events.Internal
@@ -21,7 +19,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ChangingItem += ChangingItemInHand;
             EventSource.UsingItemCompleted += OnItemUsingCompleted;
             EventSource.TogglingNoClip += NoclipButton;
-            EventSource.Died += DeathEvent;
+            EventSource.Dying += DeathEvent;
             EventSource.ChangingRole += RoleChangeEvent;
         }
         // EventSource.EVENT -= EVENTNAME 
@@ -33,7 +31,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ChangedItem -= ChangeItemInHand;
             EventSource.ChangingItem -= ChangingItemInHand;
             EventSource.UsingItemCompleted -= OnItemUsingCompleted;
-            EventSource.Died -= DeathEvent;
+            EventSource.Dying -= DeathEvent;
             EventSource.ChangingRole -= RoleChangeEvent;
         }
 
@@ -41,7 +39,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
                 Item.OnDrop(ev);
-                Item?.ResetBadge(ev.Player);
+                Item.ResetBadge(ev.Player);
                 Item.UnloadItemFlags();
         }
 
@@ -125,7 +123,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             item.ReloadItemFlags();
             item.UnloadItemFlags();
         }
-        private static void DeathEvent(DiedEventArgs ev)
+        private static void DeathEvent(DyingEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
                 return;
@@ -133,15 +131,18 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
-            item.ResetBadge(ev.Player);
+            item?.ResetBadge(ev.Player);
             item.UnloadItemFlags();
         }
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)
         {
+            if (ev.Player.CurrentItem is null)
+                return;
+                
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
-            item.ResetBadge(ev.Player);
+            item?.ResetBadge(ev.Player);
             item.UnloadItemFlags();
         }
 

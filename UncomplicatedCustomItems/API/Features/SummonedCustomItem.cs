@@ -595,8 +595,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
         internal void HandleEvent(Player player, ItemEvents itemEvent) 
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item && CustomItem.CustomData is ICustomItem && ((IItemData)CustomItem.CustomData).Event == itemEvent)
-            {
+            LogManager.Debug($"HandleEvent Triggered {player} {itemEvent}");
                 IItemData Data = CustomItem.CustomData as IItemData;
                 LogManager.Debug($"Firing events for item {CustomItem.Name}");
                 if (Data.Command is not null && Data.Command.Length > 2)
@@ -607,11 +606,10 @@ namespace UncomplicatedCustomItems.API.Features
 
                 Utilities.ParseResponse(player, Data);
 
-                // Now we can destry the item if we have been told to do it
                 if (Data.DestroyAfterUse)
                     Destroy();
-            }
         }
+        
 
         internal void HandleSelectedDisplayHint()
         {

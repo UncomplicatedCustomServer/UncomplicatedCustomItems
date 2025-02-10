@@ -12,6 +12,7 @@ namespace UncomplicatedCustomItems.Enums
         HalfLifeSteal = 1 << 3,
         InfiniteAmmo = 1 << 4,
         DieOnUse = 1 << 5,
-        WorkstationBan = 1 <<6,
+        WorkstationBan = 1 << 6,
+        ItemGlow = 1 << 7,
     }
 }

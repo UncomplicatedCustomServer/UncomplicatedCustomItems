@@ -132,6 +132,7 @@ namespace UncomplicatedCustomItems.API
                 BadgeColor = item.BadgeColor,
                 Weight = item.Weight,
                 Scale = item.Scale,
+                Spawn = item.Spawn,
                 CustomFlags = item.CustomFlags,
                 CustomItemType = item.CustomItemType,
                 CustomData = Decode(item.CustomItemType, item.CustomData)

@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
-using UncomplicatedCustomItems.Extensions;
 using Exiled.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -20,7 +19,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public override string[] Aliases { get; } = new string[] { };
 
-        public override string Description { get; } = "Share the UCI Debug logs with the developers";
+        public override string Description { get; } = "Share the UCI Debug logs with the developers. (This will not work until the API accepts requests from the plugin)";
 
         public override void LoadGeneratedCommands() { }
 
