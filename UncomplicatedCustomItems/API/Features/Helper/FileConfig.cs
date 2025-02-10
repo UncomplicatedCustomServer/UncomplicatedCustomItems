@@ -137,7 +137,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.Painkillers,
                 CustomItemType = CustomItemType.Painkillers,
                 Scale = new(5, 5, 5),
-                Spawn = new Spawn(),
+                Spawn = new(),
                 CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
                 CustomData = YAMLCaster.Encode(new PainkillersData()
                 {
@@ -181,9 +181,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     if (FileName.Split().First() == ".")
                         return;
 
-                    YAMLCustomItem Role = Loader.Deserializer.Deserialize<YAMLCustomItem>(File.ReadAllText(FileName));
-                    LogManager.Debug($"Proposed to the registerer the external item {Role.Id} [{Role.Name}] from file:\n{FileName}");
-                    action(Role);
+                    YAMLCustomItem Item = Loader.Deserializer.Deserialize<YAMLCustomItem>(File.ReadAllText(FileName));
+                    LogManager.Debug($"Proposed to the registerer the external item {Item.Id} [{Item.Name}] from file:\n{FileName}");
+                    action(Item);
                 }
                 catch (Exception ex)
                 {
@@ -213,7 +213,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     foreach (YAMLCustomItem customItem in _examples)
                         File.WriteAllText(Path.Combine(Dir, localDir, $"{customItem.Name.ToLower().Replace(" ", "-")}.yml"), Loader.Serializer.Serialize(customItem));
 
-                LogManager.Info($"Plugin does not have a role folder, generated one in {Path.Combine(Dir, localDir)}");
+                LogManager.Info($"Plugin does not have a item folder, generated one in {Path.Combine(Dir, localDir)}");
             }
         }
     }

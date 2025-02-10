@@ -39,7 +39,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             if (VersionInfo.PreRelease)
             {
-                LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version.ToString(4)}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomRoles!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
+                LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version.ToString(4)}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomItems!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
                 if (VersionInfo.ForceDebug && !Log.DebugEnabled.Contains(Plugin.Instance.Assembly))
                 {
                     LogManager.Info("Debug logs have been activated!");
@@ -49,7 +49,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
             else
             {
-                LogManager.Info($"You are using UncomplicatedCustomRoles v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
+                LogManager.Info($"You are using UncomplicatedCustomItems v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
             }
 
             // Check integrity
