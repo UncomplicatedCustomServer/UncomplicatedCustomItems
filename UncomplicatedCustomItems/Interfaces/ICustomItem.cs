@@ -1,8 +1,12 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using UncomplicatedCustomItems.Enums;
+using System.Collections.Generic;
+using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
+#nullable enable
     public interface ICustomItem
     {
         public abstract uint Id { get; set; }
@@ -11,6 +15,10 @@ namespace UncomplicatedCustomItems.Interfaces
 
         public abstract string Description { get; set; }
 
+        public abstract string BadgeName { get; set; }
+
+        public abstract string BadgeColor { get; set; }
+
         public abstract float Weight { get; set; }
 
         public abstract bool Reusable { get; set; }
@@ -18,8 +26,10 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract ItemType Item { get; set; }
 
         public abstract Vector3 Scale { get; set; }
-
+        
         public abstract ISpawn Spawn { get; set; }
+
+        public abstract CustomFlags? CustomFlags { get; set; }
 
         public abstract CustomItemType CustomItemType { get; set; }
 

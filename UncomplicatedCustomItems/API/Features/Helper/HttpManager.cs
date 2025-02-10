@@ -1,47 +1,31 @@
-﻿using Exiled.Loader;
+﻿using Exiled.API.Features;
+using Exiled.Events.EventArgs.Player;
+using Exiled.Loader;
 using MEC;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Struct;
-using Exiled.API.Features;
-using Exiled.Events.EventArgs.Player;
+using UncomplicatedCustomItems;
 
 using PlayerHandler = Exiled.Events.Handlers.Player;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
+#pragma warning disable IDE1006
+
     internal class HttpManager
     {
         /// <summary>
         /// Gets the <see cref="CoroutineHandle"/> of the presence coroutine.
         /// </summary>
         public CoroutineHandle PresenceCoroutine { get; internal set; }
-
-        /// <summary>
-        /// Gets the <see cref="true"/> the message that confirm that the server is communicating correctly with our APIs has been sent in the console.
-        /// </summary>
-        public bool SentConfirmationMessage { get; internal set; } = false;
-
-        /// <summary>
-        /// Gets the number of errors that has occurred. If this number exceed the <see cref="MaxErrors"/> quote then this feature will be deactivated.
-        /// </summary>
-        public uint Errors { get; internal set; } = 0;
-
-        /// <summary>
-        /// Gets the maximum number of errors that can occur before deactivating the function.
-        /// </summary>
-        public uint MaxErrors { get; }
-
-        /// <summary>
-        /// Gets whether <see cref="true"/> this feature is active.
-        /// </summary>
-        public bool Active { get; internal set; } = false;
 
         /// <summary>
         /// Gets if the feature can be activated - missing library
@@ -61,7 +45,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <summary>
         /// Gets the UCS APIs endpoint
         /// </summary>
-        public string Endpoint { get; } = "https://ucs.fcosma.it/api/v2";
+        public string Endpoint { get; } = "https://api.ucserver.it/v2";
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
@@ -72,11 +56,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// Gets the role of the given player (as steamid@64) inside UCR
         /// </summary>
         public Dictionary<string, string> OrgPlayerRole { get; } = new();
-
-        /// <summary>
-        /// Gets the List of the ResponseTimes
-        /// </summary>
-        public List<float> ResponseTimes { get; } = new();
 
         /// <summary>
         /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
@@ -99,17 +78,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// Create a new istance of the HttpManager
         /// </summary>
         /// <param name="prefix"></param>
-        /// <param name="maxErrors"></param>
-        public HttpManager(string prefix, uint maxErrors = 5)
+        public HttpManager(string prefix)
         {
             if (!CheckForDependency())
-                Timing.CallContinuously(15f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV"));
+                Timing.CallContinuously(20f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV"));
 
             Prefix = prefix;
-            MaxErrors = maxErrors;
-            HttpClient = new();
-            LoadCreditTags();
             RegisterEvents();
+            HttpClient = new();
+            Task.Run(LoadCreditTags);
         }
 
         internal void RegisterEvents()
@@ -185,6 +162,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void LoadLatestVersion()
         {
+            LogManager.Warn("Proceeding to check first verion [B] [MACCPR]");
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
 
             if (Version is not null && Version != string.Empty && Version.Contains("."))
@@ -195,12 +173,18 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void LoadCreditTags()
         {
-            Credits = [];
+            Credits = new();
             try
             {
-                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://ucs.fcosma.it/api/credits.json")));
+                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://api.ucserver.it/credits.json")));
 
-                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
+                if (Data is null)
+                {
+                    LogManager.Warn("Failed to connect to the UCS Central Server to get the credit tags informations!");
+                    return;
+                }
+
+                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
                 {
                     Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["override"])));
                     if (kvp.Value.TryGetValue("job", out string isJob) && isJob is "true")
@@ -223,6 +207,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void ApplyCreditTag(Player player)
         {
+            if (!Plugin.Instance.Config.EnableCreditTags)
+                return;
+
             if (_alreadyManaged)
                 return;
 
@@ -262,80 +249,22 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return true;
         }
 
-        internal bool Presence(out HttpContent httpContent)
-        {
-            float Start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            HttpResponseMessage Status = HttpGetRequest($"{Endpoint}/{Prefix}/presence?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
-            httpContent = Status.Content;
-            ResponseTimes.Add(DateTimeOffset.Now.ToUnixTimeMilliseconds() - Start);
-            if (Status.StatusCode == HttpStatusCode.OK)
-                return true;
-            return false;
-        }
-
-        internal void PresenceNotListed() => HttpGetRequest($"{Endpoint}/{Prefix}/presence_notlisted?port={Server.Port}&cores={Environment.ProcessorCount}&ram=0&version={Plugin.Instance.Version}");
-
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version}", data);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
         }
 
-        internal KeyValuePair<HttpStatusCode, string> Mailbox()
+#nullable enable
+        internal async Task<Tuple<HttpStatusCode, string?>> VersionInfo()
         {
-            HttpResponseMessage Message = HttpGetRequest($"{Endpoint}/{Prefix}/mailbox?version={Plugin.Instance.Version}");
-            return new(Message.StatusCode, RetriveString(Message.Content));
-        }
+            HttpResponseMessage message = await HttpClient.GetAsync($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(4)}");
 
-        internal IEnumerator<float> PresenceAction()
-        {
-            while (Active && Errors <= MaxErrors)
-            {
-                if (Server.IsVerified)
-                    if (!Presence(out HttpContent content))
-                        try
-                        {
-                            Dictionary<string, string> Response = JsonConvert.DeserializeObject<Dictionary<string, string>>(RetriveString(content));
-                            Errors++;
-                            LogManager.Debug($"[UCS HTTP Manager] >> Error while trying to put data inside our APIs.\nThe endpoint say: {Response["message"]} ({Response["status"]})");
-                        }
-                        catch (Exception) { }
-                    else
-                        PresenceNotListed();
+            if (message.StatusCode != HttpStatusCode.OK)
+                return new(message.StatusCode, null);
 
-                // Do anche the Mailbox action
-                if (Plugin.Instance.Config.DoEnableAdminMessages)
-                {
-                    KeyValuePair<HttpStatusCode, string> Mail = Mailbox();
-
-                    if (Mail.Key is HttpStatusCode.OK)
-                        LogManager.Warn($"[UCS HTTP Manager]:[UCS Mailbox] >> Central server have a message:\n{Mail.Value}");
-                }
-
-                yield return Timing.WaitForSeconds(500.0f);
-            }
-        }
-
-        public void Start()
-        {
-            if (Active)
-                return;
-
-            if (!IsAllowed)
-                return;
-
-            Active = true;
-            PresenceCoroutine = Timing.RunCoroutine(PresenceAction());
-        }
-
-        public void Stop()
-        {
-            if (!Active)
-                return;
-
-            Active = false;
-            Timing.KillCoroutines(PresenceCoroutine);
+            return new(message.StatusCode, await message.Content.ReadAsStringAsync());
         }
     }
 }

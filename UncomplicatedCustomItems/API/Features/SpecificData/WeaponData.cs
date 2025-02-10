@@ -1,11 +1,18 @@
+﻿
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using Exiled.API.Enums;
+using System.Collections.Generic;
+using InventorySystem.Items.Firearms.Attachments;
+using YamlDotNet.Serialization;
+using CameraShaking;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
+#nullable enable
     public class WeaponData : Data, IWeaponData
     {
         /// <summary>
-        /// Gets or sets the damage of the ammo. Negative to heal
+        /// The damage of the ammo. Negative to heal
         /// </summary>
         public float Damage { get; set; } = 2.75f;
 
@@ -43,5 +50,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets the how much fast the value drop over the distance.
         /// </summary>
         public float DamageFalloffDistance { get; set; } = 1f;
+
+        /// <summary>
+        /// Gets or sets the weapon attachments.
+        /// </summary>
+        public AttachmentName Attachments { get; set; } = AttachmentName.DotSight;
     }
 }

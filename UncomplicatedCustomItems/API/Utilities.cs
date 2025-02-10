@@ -159,21 +159,6 @@ namespace UncomplicatedCustomItems.API
 
                     break;
 
-                case CustomItemType.Adrenaline:
-                    if (item.CustomData is not IAdrenalineData)
-                    {
-                        error = $"The item has been flagged as 'Adrenaline' but the CustomData class is not 'IAdrenalineData', found '{item.CustomData.GetType().Name}'";
-                        return false;
-                    }
-
-                    if (item.Item is not ItemType.Adrenaline)
-                    {
-                        error = $"The Item has been flagged as 'Adrenaline' but the item {item.Item} is not a Adrenaline";
-                        return false;
-                    }
-
-                    break;
-
                 default:
                     error = "Unknown error? Uhm please report it on our discord server!";
                     return false;
@@ -267,6 +252,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="CustomItem"></param>
         internal static void SummonCustomItem(ICustomItem CustomItem)
         {
+
             ISpawn Spawn = CustomItem.Spawn;
 
             if (Spawn.Coords.Count() > 0)
