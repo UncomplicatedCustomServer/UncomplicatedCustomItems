@@ -105,9 +105,13 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
+            if (item.CustomModules != null)
+            {
+                CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
+            }
+
             item.HandleSelectedDisplayHint();
             item.LoadBadge(ev.Player);
-            CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
             item.ReloadItemFlags();
             item.LoadItemFlags();
         }
