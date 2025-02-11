@@ -18,6 +18,9 @@ using System;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using HarmonyLib;
+using InventorySystem.Items.Firearms.Attachments;
+using System.Net.Mail;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -255,6 +258,8 @@ namespace UncomplicatedCustomItems.API.Features
                                 weaponData.Penetration = firearm.Penetration;
                                 weaponData.Inaccuracy = firearm.Inaccuracy;
                                 weaponData.DamageFalloffDistance = firearm.DamageFalloffDistance;
+                                firearm.AddAttachment(weaponData.Attachments);
+
                             }
                             break;
                         }
@@ -521,10 +526,10 @@ namespace UncomplicatedCustomItems.API.Features
         public void UnloadItemFlags()
         {
             LogManager.Debug("Unload Item Flags Triggered");
-            _customModules.Clear();
+            _customModules?.Clear(); 
             LogManager.Debug("Item Flags Cleared");
         }
-        
+
         /// <summary>
         /// Gets a <see cref="CustomModule"/> that this custom role implements
         /// </summary>

@@ -16,6 +16,7 @@ using UnityEngine;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Map;
 using Light = Exiled.API.Features.Toys.Light;
+using UncomplicatedCustomItems.Interfaces;
 
 
 namespace UncomplicatedCustomItems.Events
@@ -176,7 +177,7 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Warn("ERROR: ItemGlow flag was triggered but couldnt be ran.");
+                    LogManager.Warn("ERROR: Couldnt destroy light on {Pickup}.");
                 }
             }
         }
@@ -214,28 +215,31 @@ namespace UncomplicatedCustomItems.Events
                     return Color.blue;
             }
         }
+
         public void SpawnLightOnItem(Pickup pickup)
         {
             LogManager.Debug("SpawnLightOnItem method triggered");
             if (pickup == null || pickup.Base == null || pickup.Base.gameObject == null)
                 return;
 
-            GameObject ItemGameObject = pickup.Base.gameObject;
-            
+            GameObject itemGameObject = pickup.Base.gameObject;
+            Color lightColor;
+
             string colorString = Plugin.Instance.Config.GlowColor;
-            Color lightColor = GetColorFromConfig(colorString);
+            lightColor = GetColorFromConfig(colorString);
 
-            var Light = Exiled.API.Features.Toys.Light.Create(pickup.Position);
-                
-            Light.Color = lightColor;
-            Light.Intensity = 0.7f;
-            Light.Range = 0.5f;
-            Light.ShadowType = LightShadows.None;
+            var light = Exiled.API.Features.Toys.Light.Create(pickup.Position);
+            light.Color = lightColor;
+            light.Intensity = 0.7f;
+            light.Range = 0.5f;
+            light.ShadowType = LightShadows.None;
 
-            Light.Base.gameObject.transform.SetParent(ItemGameObject.transform, worldPositionStays: true);
-            LogManager.Debug($"Item Light should be spawned at position: {Light.Base.transform.position}");
-            ActiveLights[pickup] = Light;
+            light.Base.gameObject.transform.SetParent(itemGameObject.transform, worldPositionStays: true);
+            LogManager.Debug($"Item Light should be spawned at position: {light.Base.transform.position}");
+
+            ActiveLights[pickup] = light;
         }
+
 
         public async void OnWaitingForPlayers()
         {

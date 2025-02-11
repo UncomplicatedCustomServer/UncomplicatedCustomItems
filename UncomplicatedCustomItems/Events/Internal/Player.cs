@@ -38,9 +38,11 @@ namespace UncomplicatedCustomItems.Events.Internal
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
+            {
                 Item.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
                 Item.UnloadItemFlags();
+            }
         }
 
         /// <summary>
@@ -53,9 +55,13 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 Item.OnPickup(ev);
                 Item.HandlePickedUpDisplayHint();
-                CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
                 Item.ReloadItemFlags();
                 Item.LoadItemFlags();
+            }
+            
+            if (Item.CustomModules != null)
+            {
+                CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
             }
         }
 

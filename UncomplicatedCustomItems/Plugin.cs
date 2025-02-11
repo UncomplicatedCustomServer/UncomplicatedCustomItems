@@ -62,6 +62,7 @@ namespace UncomplicatedCustomItems
             Exiled.Events.Handlers.Item.ChangingAttachments += Handler.OnChangingAttachments;
             Exiled.Events.Handlers.Player.ActivatingWorkstation += Handler.OnWorkstationActivation;
             Exiled.Events.Handlers.Player.DroppedItem += Handler.OnDrop;
+            Exiled.Events.Handlers.Map.PickupDestroyed += Handler.OnPickup;
 
             LogManager.History.Clear();
 
@@ -107,6 +108,7 @@ namespace UncomplicatedCustomItems
             Exiled.Events.Handlers.Item.ChangingAttachments -= Handler.OnChangingAttachments;
             Exiled.Events.Handlers.Player.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             Exiled.Events.Handlers.Player.DroppedItem -= Handler.OnDrop;
+            Exiled.Events.Handlers.Map.PickupDestroyed -= Handler.OnPickup;
 
             Instance = null;
             base.OnDisabled();
