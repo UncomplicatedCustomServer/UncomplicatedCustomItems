@@ -593,23 +593,26 @@ namespace UncomplicatedCustomItems.API.Features
             foreach (ICustomModule _ in GetModules<T>())
                 RemoveModule<T>();
         }
-        internal void HandleEvent(Player player, ItemEvents itemEvent) 
+        internal void HandleEvent(Player player, ItemEvents itemEvent)
         {
-            LogManager.Debug($"HandleEvent Triggered {player} {itemEvent}");
+            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemEvent)
+            {
                 IItemData Data = CustomItem.CustomData as IItemData;
-                LogManager.Debug($"Firing events for item {CustomItem.Name}");
+                Log.Debug($"Firing events for item {CustomItem.Name}");
                 if (Data.Command is not null && Data.Command.Length > 2)
                     if (!Data.Command.Contains("P:"))
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString())); 
+                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()));
                     else
                         Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
 
                 Utilities.ParseResponse(player, Data);
 
+                // Now we can destry the item if we have been told to do it
                 if (Data.DestroyAfterUse)
                     Destroy();
+            }
         }
-        
+
 
         internal void HandleSelectedDisplayHint()
         {
