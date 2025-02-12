@@ -17,10 +17,10 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using System;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
-using HarmonyLib;
 using InventorySystem.Items.Firearms.Attachments;
 using System.Net.Mail;
 using UncomplicatedCustomItems.API.Features.SpecificData;
+using HarmonyLib;
 
 namespace UncomplicatedCustomItems.API.Features
 {
