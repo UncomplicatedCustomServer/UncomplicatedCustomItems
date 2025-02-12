@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Enums;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UncomplicatedCustomItems.Interfaces;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Decide if the item can naturally spawn or not
         /// </summary>
-        public bool DoSpawn { get; set; } = true;
+        public bool DoSpawn { get; set; } = false;
 
         /// <summary>
         /// How many custom items istances of this item should be spawned?
@@ -21,18 +22,22 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="Vector3">Positions</see> where the item is allowed to spawn, this is an array so you can set multiple values and one random one will be choose.
         /// If this is empty then the <see cref="Rooms"/> parameter will be used instead.
         /// </summary>
-        public List<Vector3> Coords { get; set; } = [];
+        public List<Vector3> Coords { get; set; } = new();
         /// <summary>
         /// The <see cref="RoomType">Rooms</see> where the item is allowed to spawn.
         /// If this is empty then the <see cref="Zone"/> parameter will be used instead.
         /// </summary>
-        public List<RoomType> Rooms { get; set; } = [];
+        public List<RoomType> Rooms { get; set; } = new();
 
         /// <summary>
         /// The <see cref="ZoneType">Zones</see> where the item is allowed to spawn.
         /// If <see cref="Rooms"/> is empty then this parameter will be used.
         /// </summary>
-        public List<ZoneType> Zones { get; set; } = [ZoneType.HeavyContainment, ZoneType.Entrance];
+        public List<ZoneType> Zones { get; set; } = new()
+        {
+            ZoneType.HeavyContainment,
+            ZoneType.Entrance
+        };
 
         /// <summary>
         /// If <see cref="true"/> this item will replace an existing pickup.

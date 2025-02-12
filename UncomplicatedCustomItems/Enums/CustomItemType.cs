@@ -9,5 +9,5 @@
     Jailbird,
     ExplosiveGrenade,
     FlashGrenade,
-    Adrenaline
+
 }

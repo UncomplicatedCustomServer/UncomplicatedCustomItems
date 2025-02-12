@@ -4,5 +4,7 @@
     Pickup,
     Drop,
     Use,
-    Noclip
+    Noclip,
+    // SSSS
+    // Might be eventually implemented. Currently dont really feel like learning it.
 }

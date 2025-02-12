@@ -52,7 +52,7 @@ namespace UncomplicatedCustomItems.Commands
 
             if (cmd.RequiredPermission != string.Empty && !sender.CheckPermission(cmd.RequiredPermission))
             {
-                response = "You don't have enough permissions to access that command!";
+                response = "You don't have permission to access that command!";
                 return false;
             }
 

@@ -60,11 +60,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Content += $"{Element}\n";
 
             // Now let's add the separator
-            Content += "\n======== BEGIN CUSTOM ROLES ========\n";
+            Content += "\n======== BEGIN CUSTOM ITEMS ========\n";
 
-            foreach (ICustomItem Role in CustomItem.List)
+            foreach (ICustomItem Item in CustomItem.List)
             {
-                Content += $"{Loader.Serializer.Serialize(Role)}\n\n---\n\n";
+                Content += $"{Loader.Serializer.Serialize(Item)}\n\n---\n\n";
             }
 
             HttpStatusCode Response = Plugin.HttpManager.ShareLogs(Content, out content);

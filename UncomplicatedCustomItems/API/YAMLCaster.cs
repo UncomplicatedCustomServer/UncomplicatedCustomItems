@@ -8,6 +8,8 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -40,7 +42,7 @@ namespace UncomplicatedCustomItems.API
         {
             if (!Check(baseElement, data, out string Expected, out string KeyList))
             {
-                Log.Error($"Error while decoding class!\nError code: 0x401\nExpected key: {Expected}\nKey list: {KeyList}");
+                LogManager.Error($"Error while decoding class!\nError code: 0x401\nExpected key: {Expected}\nKey list: {KeyList}");
                 return new Data();
             }
 
@@ -80,7 +82,6 @@ namespace UncomplicatedCustomItems.API
                 CustomItemType.Jailbird => (Data)Decode(new JailbirdData(), data),
                 CustomItemType.ExplosiveGrenade => (Data)Decode(new ExplosiveGrenadeData(), data),
                 CustomItemType.FlashGrenade => (Data)Decode(new FlashGrenadeData(), data),
-                CustomItemType.Adrenaline => (Data)Decode(new AdrenalineData(), data),
                 _ => new(),
             };
         }
@@ -112,6 +113,7 @@ namespace UncomplicatedCustomItems.API
 
             return true;
         }
+        
 
         /// <summary>
         /// Convert a basic <see cref="YAMLCustomItem"/> Item into a fullified <see cref="ICustomItem"/>
@@ -126,8 +128,12 @@ namespace UncomplicatedCustomItems.API
                 Name = item.Name,
                 Description = item.Description,
                 Item = item.Item,
+                BadgeName = item.BadgeName,
+                BadgeColor = item.BadgeColor,
                 Weight = item.Weight,
                 Scale = item.Scale,
+                Spawn = item.Spawn,
+                CustomFlags = item.CustomFlags,
                 CustomItemType = item.CustomItemType,
                 CustomData = Decode(item.CustomItemType, item.CustomData)
             };
@@ -135,3 +141,4 @@ namespace UncomplicatedCustomItems.API
         }
     }
 }
+

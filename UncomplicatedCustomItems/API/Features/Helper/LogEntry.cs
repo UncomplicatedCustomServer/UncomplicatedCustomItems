@@ -47,6 +47,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public LogEntry(long time, LogLevel level, string content, string error = null) : this(time, level.ToString(), content, error) { }
 
-        public override string ToString() => $"[{DateTimeOffset.Year}-{DateTimeOffset.Month}-{DateTimeOffset.Day} {DateTimeOffset.Hour}:{DateTimeOffset.Minute}:{DateTimeOffset.Second} {DateTimeOffset.Offset}]  [{Level}]  [UncomplicatedCustomRoles] {PublicError}{Content}";
+        public override string ToString() => $"[{DateTimeOffset.Year}-{DateTimeOffset.Month}-{DateTimeOffset.Day} {DateTimeOffset.Hour}:{DateTimeOffset.Minute}:{DateTimeOffset.Second} {DateTimeOffset.Offset}]  [{Level}]  [UncomplicatedCustomItems] {PublicError}{Content}";
     }
 }

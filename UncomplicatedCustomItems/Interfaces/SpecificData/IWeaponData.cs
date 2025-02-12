@@ -1,11 +1,13 @@
-using Exiled.API.Structs;
+﻿using Exiled.API.Enums;
 using System.Collections.Generic;
-using Exiled.CustomItems.API;
 using InventorySystem.Items.Firearms.Attachments;
-using Exiled.API.Features;
+using CameraShaking;
+using System;
+using System.Linq;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
+#nullable enable
     public interface IWeaponData : IData
     {
         public abstract float Damage { get; set; }
@@ -23,5 +25,9 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float Inaccuracy { get; set; }
 
         public abstract float DamageFalloffDistance { get; set; }
+
+        public abstract AttachmentName Attachments { get; set; }
+
     }
+
 }

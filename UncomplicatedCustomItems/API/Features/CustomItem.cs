@@ -6,8 +6,10 @@ using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Features.Helper;
+using Exiled.API.Enums;
 
-#nullable enable
 namespace UncomplicatedCustomItems.API.Features
 {
     public class CustomItem : ICustomItem
@@ -27,11 +29,11 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (!Utilities.CustomItemValidator(item, out string error))
             {
-                Log.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
+                LogManager.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
                 return;
             }
             CustomItems.Add(item.Id, item);
-            Log.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
+            LogManager.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
         /// <summary>
@@ -82,6 +84,18 @@ namespace UncomplicatedCustomItems.API.Features
         public string Description { get; set; } = "25/06/2024";
 
         /// <summary>
+        /// Gets or sets the badge name
+        /// </summary>
+        [Description("Sets the badge name")]
+        public string BadgeName { get; set; } = "Uncomplicated Custom Items";
+
+        /// <summary>
+        /// Gets or sets the badge color
+        /// </summary>
+        [Description("Sets the badge color")]
+        public string BadgeColor { get; set; } = "pumpkin";
+
+        /// <summary>
         /// The weight of the item
         /// </summary>
         [Description("The weight of the custom item")]
@@ -105,11 +119,13 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("The scale of the custom item, 0 0 0 means disabled")]
         public Vector3 Scale { get; set; } = Vector3.one;
 
-        /// <summary>
-        /// The <see cref="Elements.Spawn"/> settings for the item
-        /// </summary>
-        [Description("The spawn settings for the item")]
         public ISpawn Spawn { get; set; } = new Spawn();
+
+        /// <summary>
+        /// Custom flags of the item
+        /// </summary>
+        [Description("Custom flags for the item")]
+        public CustomFlags? CustomFlags { get; set; } = new();
 
         /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item

@@ -1,4 +1,6 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
+using System.Collections.Generic;
+using Exiled.API.Structs;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -23,5 +25,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets the stamina that this armor drains
         /// </summary>
         public float StaminaUseMultiplier { get; set; } = 2f;
+        
+        /// <summary>
+        /// Gets or sets the stamina regen multiplier
+        /// </summary>
+        public float StaminaRegenMultiplier { get; set; } = 2f;
     }
 }

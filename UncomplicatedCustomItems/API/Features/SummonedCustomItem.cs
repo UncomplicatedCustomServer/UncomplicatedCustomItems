@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Items;
+using Exiled.API.Features.Items.FirearmModules.Primary;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
 using MEC;
@@ -8,6 +9,18 @@ using System.Linq;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using Exiled.API.Enums;
+using UncomplicatedCustomItems.API.Struct;
+using UncomplicatedCustomItems.Events;
+using Exiled.API.Features.Roles;
+using UncomplicatedCustomItems.API.Features.Helper;
+using System;
+using UncomplicatedCustomItems.API.Features.CustomModules;
+using UncomplicatedCustomItems.Enums;
+using InventorySystem.Items.Firearms.Attachments;
+using System.Net.Mail;
+using UncomplicatedCustomItems.API.Features.SpecificData;
+using HarmonyLib;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -21,7 +34,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
         /// </summary>
-        private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
+        private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit];
 
         /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
@@ -39,6 +52,15 @@ namespace UncomplicatedCustomItems.API.Features
         public Item Item { get; internal set; }
 
         /// <summary>
+        /// Gets the badge of the player if it has one
+        /// </summary>
+        public Triplet<string, string, bool>? Badge { get; private set; }
+
+        public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
+
+        private List<ICustomModule> _customModules { get; set; }
+
+        /// <summary>
         /// The <see cref="SummonedCustomItem"/> as a <see cref="Exiled.API.Features.Pickups.Pickup"/>.
         /// If this is not <see cref="null"/> then <see cref="Owner"/> and <see cref="Item"/> will be <see cref="null"/>
         /// </summary>
@@ -53,6 +75,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// Check if this item is a pickup
         /// </summary>
         public bool IsPickup => Pickup is not null;
+
+        public long LastDamageTime { get; internal set; }
 
         /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
@@ -125,13 +149,16 @@ namespace UncomplicatedCustomItems.API.Features
                         IArmorData ArmorData = CustomItem.CustomData as IArmorData;
 
                         Armor.HelmetEfficacy = ArmorData.HeadProtection;
+                        Armor.VestEfficacy = ArmorData.BodyProtection;
                         Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
                         Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
+                        Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
                         break;
 
                     case CustomItemType.Weapon:
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+
                         Firearm.MagazineAmmo = WeaponData.MaxAmmo;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
                         Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
@@ -139,6 +166,7 @@ namespace UncomplicatedCustomItems.API.Features
                         Firearm.Penetration = WeaponData.Penetration;
                         Firearm.Inaccuracy = WeaponData.Inaccuracy;
                         Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        Firearm.AddAttachment(WeaponData.Attachments);
                         break;
 
                     case CustomItemType.Jailbird:
@@ -188,13 +216,275 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Weight = CustomItem.Weight;
             }
         }
+        private void SaveProperties()
+        {
+            if (Item is not null)
+            {
+                switch (CustomItem.CustomItemType)
+                {
+                    case CustomItemType.Keycard:
+                        {
+                            var keycard = Item as Keycard;
+                            var keycardData = CustomItem.CustomData as IKeycardData;
+                            if (keycard != null && keycardData != null)
+                            {
+                                keycardData.Permissions = keycard.Permissions;
+                            }
+                            break;
+                        }
+                    case CustomItemType.Armor:
+                        {
+                            var armor = Item as Armor;
+                            var armorData = CustomItem.CustomData as IArmorData;
+                            if (armor != null && armorData != null)
+                            {
+                                armorData.HeadProtection = armor.HelmetEfficacy;
+                                armorData.BodyProtection = armor.VestEfficacy;
+                                armorData.RemoveExcessOnDrop = armor.RemoveExcessOnDrop;
+                                armorData.StaminaUseMultiplier = armor.StaminaUseMultiplier;
+                                armorData.StaminaRegenMultiplier = armor.StaminaRegenMultiplier;
+                            }
+                            break;
+                        }
+                    case CustomItemType.Weapon:
+                        {
+                            var firearm = Item as Firearm;
+                            var weaponData = CustomItem.CustomData as IWeaponData;
+                            if (firearm != null && weaponData != null)
+                            {
+                                weaponData.MaxMagazineAmmo = (byte)firearm.MaxMagazineAmmo;
+                                weaponData.MaxBarrelAmmo = (byte)firearm.MaxBarrelAmmo;
+                                weaponData.AmmoDrain = firearm.AmmoDrain;
+                                weaponData.Penetration = firearm.Penetration;
+                                weaponData.Inaccuracy = firearm.Inaccuracy;
+                                weaponData.DamageFalloffDistance = firearm.DamageFalloffDistance;
+                                firearm.AddAttachment(weaponData.Attachments);
 
+                            }
+                            break;
+                        }
+                    case CustomItemType.Jailbird:
+                        {
+                            var jailbird = Item as Jailbird;
+                            var jailbirdData = CustomItem.CustomData as IJailbirdData;
+                            if (jailbird != null && jailbirdData != null)
+                            {
+                                jailbirdData.TotalDamageDealt = jailbird.TotalDamageDealt;
+                                jailbirdData.TotalCharges = jailbird.TotalCharges;
+                                jailbirdData.Radius = jailbird.Radius;
+                                jailbirdData.ChargeDamage = jailbird.ChargeDamage;
+                                jailbirdData.MeleeDamage = jailbird.MeleeDamage;
+                                jailbirdData.FlashDuration = jailbird.FlashDuration;
+                            }
+                            break;
+                        }
+                    case CustomItemType.ExplosiveGrenade:
+                        {
+                            var explosiveGrenade = Item as ExplosiveGrenade;
+                            var explosiveData = CustomItem.CustomData as IExplosiveGrenadeData;
+                            if (explosiveGrenade != null && explosiveData != null)
+                            {
+                                explosiveData.MaxRadius = explosiveGrenade.MaxRadius;
+                                explosiveData.PinPullTime = explosiveGrenade.PinPullTime;
+                                explosiveData.ScpDamageMultiplier = explosiveGrenade.ScpDamageMultiplier;
+                                explosiveData.ConcussDuration = explosiveGrenade.ConcussDuration;
+                                explosiveData.BurnDuration = explosiveGrenade.BurnDuration;
+                                explosiveData.DeafenDuration = explosiveGrenade.DeafenDuration;
+                                explosiveData.FuseTime = explosiveGrenade.FuseTime;
+                                explosiveData.Repickable = explosiveGrenade.Repickable;
+                            }
+                            break;
+                        }
+                    case CustomItemType.FlashGrenade:
+                        {
+                            var flashGrenade = Item as FlashGrenade;
+                            var flashData = CustomItem.CustomData as IFlashGrenadeData;
+                            if (flashGrenade != null && flashData != null)
+                            {
+                                flashData.PinPullTime = flashGrenade.PinPullTime;
+                                flashData.Repickable = flashGrenade.Repickable;
+                                flashData.MinimalDurationEffect = flashGrenade.MinimalDurationEffect;
+                                flashData.AdditionalBlindedEffect = flashGrenade.AdditionalBlindedEffect;
+                                flashData.SurfaceDistanceIntensifier = flashGrenade.SurfaceDistanceIntensifier;
+                                flashData.FuseTime = flashGrenade.FuseTime;
+                            }
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
+            else if (Pickup is not null)
+            {
+                CustomItem.Scale = Pickup.Scale;
+                CustomItem.Weight = Pickup.Weight;
+            }
+        }
+        private void LoadProperties()
+        {
+            if (Item is not null)
+            {
+                switch (CustomItem.CustomItemType)
+                {
+                    case CustomItemType.Keycard:
+                        {
+                            var keycard = Item as Keycard;
+                            var keycardData = CustomItem.CustomData as IKeycardData;
+                            if (keycard != null && keycardData != null)
+                            {
+                                keycard.Permissions = keycardData.Permissions;
+                            }
+                            break;
+                        }
+
+                    case CustomItemType.Armor:
+                        {
+                            var armor = Item as Armor;
+                            var armorData = CustomItem.CustomData as IArmorData;
+                            if (armor != null && armorData != null)
+                            {
+                                armor.HelmetEfficacy = armorData.HeadProtection;
+                                armor.VestEfficacy = armorData.BodyProtection;
+                                armor.RemoveExcessOnDrop = armorData.RemoveExcessOnDrop;
+                                armor.StaminaUseMultiplier = armorData.StaminaUseMultiplier;
+                                armor.StaminaRegenMultiplier = armorData.StaminaRegenMultiplier;
+                            }
+                            break;
+                        }
+
+                    case CustomItemType.Weapon:
+                        {
+                            var firearm = Item as Firearm;
+                            var weaponData = CustomItem.CustomData as IWeaponData;
+                            if (firearm != null && weaponData != null)
+                            {
+                                firearm.MaxMagazineAmmo = weaponData.MaxMagazineAmmo;
+                                firearm.MaxBarrelAmmo = weaponData.MaxBarrelAmmo;
+                                firearm.AmmoDrain = weaponData.AmmoDrain;
+                                firearm.Penetration = weaponData.Penetration;
+                                firearm.Inaccuracy = weaponData.Inaccuracy;
+                                firearm.DamageFalloffDistance = weaponData.DamageFalloffDistance;
+                                firearm.AddAttachment(weaponData.Attachments);
+                            }
+                            break;
+                        }
+
+                    case CustomItemType.Jailbird:
+                        {
+                            var jailbird = Item as Jailbird;
+                            var jailbirdData = CustomItem.CustomData as IJailbirdData;
+                            if (jailbird != null && jailbirdData != null)
+                            {
+                                jailbird.TotalDamageDealt = jailbirdData.TotalDamageDealt;
+                                jailbird.TotalCharges = jailbirdData.TotalCharges;
+                                jailbird.Radius = jailbirdData.Radius;
+                                jailbird.ChargeDamage = jailbirdData.ChargeDamage;
+                                jailbird.MeleeDamage = jailbirdData.MeleeDamage;
+                                jailbird.FlashDuration = jailbirdData.FlashDuration;
+                            }
+                            break;
+                        }
+
+                    case CustomItemType.ExplosiveGrenade:
+                        {
+                            var explosiveGrenade = Item as ExplosiveGrenade;
+                            var explosiveData = CustomItem.CustomData as IExplosiveGrenadeData;
+                            if (explosiveGrenade != null && explosiveData != null)
+                            {
+                                explosiveGrenade.MaxRadius = explosiveData.MaxRadius;
+                                explosiveGrenade.PinPullTime = explosiveData.PinPullTime;
+                                explosiveGrenade.ScpDamageMultiplier = explosiveData.ScpDamageMultiplier;
+                                explosiveGrenade.ConcussDuration = explosiveData.ConcussDuration;
+                                explosiveGrenade.BurnDuration = explosiveData.BurnDuration;
+                                explosiveGrenade.DeafenDuration = explosiveData.DeafenDuration;
+                                explosiveGrenade.FuseTime = explosiveData.FuseTime;
+                                explosiveGrenade.Repickable = explosiveData.Repickable;
+                            }
+                            break;
+                        }
+
+                    case CustomItemType.FlashGrenade:
+                        {
+                            var flashGrenade = Item as FlashGrenade;
+                            var flashData = CustomItem.CustomData as IFlashGrenadeData;
+                            if (flashGrenade != null && flashData != null)
+                            {
+                                flashGrenade.PinPullTime = flashData.PinPullTime;
+                                flashGrenade.Repickable = flashData.Repickable;
+                                flashGrenade.MinimalDurationEffect = flashData.MinimalDurationEffect;
+                                flashGrenade.AdditionalBlindedEffect = flashData.AdditionalBlindedEffect;
+                                flashGrenade.SurfaceDistanceIntensifier = flashData.SurfaceDistanceIntensifier;
+                                flashGrenade.FuseTime = flashData.FuseTime;
+                            }
+                            break;
+                        }
+
+                    default:
+                        break;
+                }
+            }
+            else if (Pickup is not null)
+            {
+                Pickup.Scale = CustomItem.Scale;
+                Pickup.Weight = CustomItem.Weight;
+            }
+        }
+
+
+
+        public string LoadBadge(Player player)
+        {
+            LogManager.Debug("LoadBadge() Triggered");
+            string output = "Badge: ";
+
+            if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
+            {
+                if (BadgeManager.colorMap.ContainsKey(CustomItem.BadgeColor))
+                    output += $"<color={BadgeManager.colorMap[CustomItem.BadgeColor]}>{CustomItem.BadgeName}</color>";
+                else
+                    output += $"{CustomItem.BadgeName.Replace("@hidden", "")}";
+            }
+            else
+            {
+                output += "None";
+            }
+
+            LogManager.Debug($"Badge loaded: {output}");
+
+            CustomItemBadgeApplier(player, CustomItem);
+
+            return output;
+        }
+
+        private void CustomItemBadgeApplier(Player Player, ICustomItem Item)
+        {
+            Triplet<string, string, bool>? Badge = null;
+            if (Item.BadgeName is not null && Item.BadgeName.Length > 1 && Item.BadgeColor is not null && Item.BadgeColor.Length > 2)
+            {
+                Badge = new(Player.RankName ?? "", Player.RankColor ?? "", Player.ReferenceHub.serverRoles.HasBadgeHidden);
+                LogManager.Debug($"Badge detected, putting {Item.BadgeName}@{Item.BadgeColor} to player {Player.Id}");
+
+                Player.RankName = Item.BadgeName.Replace("@hidden", "");
+                Player.RankColor = Item.BadgeColor;
+
+                if (Item.BadgeName.Contains("@hidden"))
+                    if (Player.ReferenceHub.serverRoles.TryHideTag())
+                        LogManager.Debug("Tag successfully hidden!");
+            }
+        }
+
+        public void ResetBadge(Player Player)
+        {
+            Player.ReferenceHub.serverRoles.RefreshLocalTag();
+            LogManager.Debug("Badge successfully reset");
+        }
+        
         internal void OnPickup(ItemAddedEventArgs pickedUp)
         {
             Pickup = null;
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
-            SetProperties();
+            LoadProperties();
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
@@ -204,20 +494,119 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = dropped.Pickup;
             Item = null;
             Owner = null;
-            SetProperties();
+            SaveProperties();
             Serial = Pickup.Serial;
             HandleEvent(dropped.Player, ItemEvents.Drop);
         }
 
-        internal void HandleEvent(Player player, ItemEvents itemEvent) 
+        public string LoadItemFlags()
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item && CustomItem.CustomData is ICustomItem && ((IItemData)CustomItem.CustomData).Event == itemEvent)
+            List<string> output = new();
+
+            if (_customModules.Count > 0)
+                output.Add("<color=#a343f7>[CUSTOM MODULES]</color>");
+
+            if (output.Count > 0)
+            {
+                output.Insert(0, "                                ");
+            }
+
+            return string.Join(" ", output);
+        }
+        public void ReloadItemFlags()
+        {
+            LogManager.Debug("Reload Item Flags Function Triggered");
+            _customModules = CustomModule.Load(CustomItem.CustomFlags ?? CustomFlags.None, this);
+            List.Add(this);
+
+            LogManager.Debug("Item Flag(s) Reloaded");
+            LogManager.Debug($"Loaded Flag(s): {CustomItem.CustomFlags}");
+        }
+
+        public void UnloadItemFlags()
+        {
+            LogManager.Debug("Unload Item Flags Triggered");
+            _customModules.Clear(); 
+            LogManager.Debug("Item Flags Cleared");
+        }
+
+        /// <summary>
+        /// Gets a <see cref="CustomModule"/> that this custom role implements
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetModule<T>() where T : CustomModule => _customModules.Where(cm => cm.GetType() == typeof(T)).FirstOrDefault() as T;
+
+        /// <summary>
+        /// Gets a <see cref="CustomModule"/> array that contains every custom module with the same type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T[] GetModules<T>() where T : CustomModule
+        {
+            T[] result = new T[] { };
+            foreach (ICustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
+                result.AddItem(module);
+            return result;
+        }
+
+        /// <summary>
+        /// Try to get a <see cref="CustomModule"/> if its implemented
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="module"></param>
+        /// <returns></returns>
+        public bool GetModule<T>(out T module) where T : CustomModule
+        {
+            module = GetModule<T>();
+            return module != null;
+        }
+
+        /// <summary>
+        /// Gets if the current <see cref="SummonedCustomRole"/> implements the given <see cref="CustomModule"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
+
+        /// <summary>
+        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomRole"/> instance
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
+
+        /// <summary>
+        /// Try to remove the first <see cref="CustomModule"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public void RemoveModule<T>() where T : CustomModule
+        {
+            if (GetModule(out T module))
+            {
+                if (module is CoroutineModule coroutineModule && coroutineModule.CoroutineHandler.IsRunning)
+                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
+                _customModules.Remove(module);
+            }
+        }
+
+        /// <summary>
+        /// Remove every <see cref="CustomModule"/> with the same given type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public void RemoveModules<T>() where T : CustomModule
+        {
+            foreach (ICustomModule _ in GetModules<T>())
+                RemoveModule<T>();
+        }
+        internal void HandleEvent(Player player, ItemEvents itemEvent)
+        {
+            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemEvent)
             {
                 IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
                 if (Data.Command is not null && Data.Command.Length > 2)
                     if (!Data.Command.Contains("P:"))
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString())); 
+                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()));
                     else
                         Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
 
@@ -228,6 +617,7 @@ namespace UncomplicatedCustomItems.API.Features
                     Destroy();
             }
         }
+
 
         internal void HandleSelectedDisplayHint()
         {
@@ -256,10 +646,6 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
                     case CustomItemType.Painkillers:
                         Timing.RunCoroutine(Utilities.PainkillersCoroutine(Owner, CustomItem.CustomData as IPainkillersData));
-                        break;
-                    case CustomItemType.Adrenaline:
-                        IAdrenalineData AdrenalineData = CustomItem.CustomData as IAdrenalineData;
-                        Owner.AddAhp(AdrenalineData.Amount, decay: AdrenalineData.Decay, efficacy: AdrenalineData.Efficacy, sustain: AdrenalineData.Sustain, persistant: AdrenalineData.Persistant);
                         break;
                     default:
                         return false;
