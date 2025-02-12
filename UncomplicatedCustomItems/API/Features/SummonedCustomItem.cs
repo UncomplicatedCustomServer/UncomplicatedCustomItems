@@ -526,7 +526,7 @@ namespace UncomplicatedCustomItems.API.Features
         public void UnloadItemFlags()
         {
             LogManager.Debug("Unload Item Flags Triggered");
-            _customModules?.Clear(); 
+            _customModules.Clear(); 
             LogManager.Debug("Item Flags Cleared");
         }
 

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using InventorySystem.Items.Firearms.Attachments;
 using CameraShaking;
+using System;
+using System.Linq;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
@@ -25,6 +27,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float DamageFalloffDistance { get; set; }
 
         public abstract AttachmentName Attachments { get; set; }
+
     }
 
 }

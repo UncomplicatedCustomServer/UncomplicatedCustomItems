@@ -53,16 +53,15 @@ namespace UncomplicatedCustomItems.Events.Internal
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
             {
+
                 Item.OnPickup(ev);
                 Item.HandlePickedUpDisplayHint();
+                CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
                 Item.ReloadItemFlags();
                 Item.LoadItemFlags();
             }
             
-            if (Item.CustomModules != null)
-            {
-                CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
-            }
+
         }
 
         /// <summary>
@@ -111,13 +110,9 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
-            if (item.CustomModules != null)
-            {
-                CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
-            }
-
             item.HandleSelectedDisplayHint();
             item.LoadBadge(ev.Player);
+            CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
             item.ReloadItemFlags();
             item.LoadItemFlags();
         }

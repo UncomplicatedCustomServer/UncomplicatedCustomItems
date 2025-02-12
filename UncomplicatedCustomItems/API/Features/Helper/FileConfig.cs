@@ -50,7 +50,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Armor,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
+                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new ArmorData()
                 {
                     HeadProtection = 150,
@@ -70,7 +70,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Keycard,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
+                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new KeycardData()
                 {
                     Permissions = KeycardPermissions.AlphaWarhead | KeycardPermissions.Checkpoints
@@ -87,7 +87,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.ExplosiveGrenade,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
+                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new ExplosiveGrenadeData()
                 {
                     MaxRadius = 250f
@@ -104,7 +104,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.FlashGrenade,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
+                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new FlashGrenadeData()
                 {
                     AdditionalBlindedEffect = 250f
@@ -121,7 +121,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Medikit,
                 Scale = new(2, 2, 2),
                 Spawn = new(),
-                CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
+                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new MedikitData()
                 {
                     Health = 250f
@@ -138,7 +138,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Painkillers,
                 Scale = new(5, 5, 5),
                 Spawn = new(),
-                CustomFlags = CustomFlags.DoNotTriggerTeslaGates,
+                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new PainkillersData()
                 {
                     TickHeal = 1f,
