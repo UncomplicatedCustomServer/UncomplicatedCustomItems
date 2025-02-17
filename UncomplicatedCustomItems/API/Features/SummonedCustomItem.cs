@@ -60,6 +60,42 @@ namespace UncomplicatedCustomItems.API.Features
 
         private List<ICustomModule> _customModules { get; set; }
 
+        public static readonly List<IFlagSettings> _flagSettings = new();
+
+        public static void Register(IFlagSettings flagSettings)
+        {
+            if (flagSettings == null)
+                throw new ArgumentNullException(nameof(flagSettings));
+
+            if (!_flagSettings.Contains(flagSettings))
+            {
+                _flagSettings.Add(flagSettings);
+            }
+            LogManager.Debug("added {_flagSettings.flagSettings}");
+        }
+
+        public static bool Unregister(IFlagSettings flagSettings)
+        {
+            return _flagSettings.Remove(flagSettings);
+        }
+
+        public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
+        {
+            LogManager.Debug("Retrieving all loaded Flag Settings");
+            
+            foreach (var flagSetting in _flagSettings)
+            {
+                LogManager.Debug($"Loaded Flag Setting: '{flagSetting.GlowColor}'");
+            }
+            
+            return _flagSettings.AsReadOnly();
+        }
+
+        public static void ClearAllFlagSettings()
+        {
+            _flagSettings.Clear();
+        }
+        
         /// <summary>
         /// The <see cref="SummonedCustomItem"/> as a <see cref="Exiled.API.Features.Pickups.Pickup"/>.
         /// If this is not <see cref="null"/> then <see cref="Owner"/> and <see cref="Item"/> will be <see cref="null"/>
@@ -78,6 +114,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public long LastDamageTime { get; internal set; }
 
+
         /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
         /// </summary>
@@ -90,6 +127,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
+            GetAllFlagSettings();
             SetProperties();
             List.Add(this);
         }
@@ -365,6 +403,7 @@ namespace UncomplicatedCustomItems.API.Features
                                 firearm.Inaccuracy = weaponData.Inaccuracy;
                                 firearm.DamageFalloffDistance = weaponData.DamageFalloffDistance;
                                 firearm.AddAttachment(weaponData.Attachments);
+
                             }
                             break;
                         }
@@ -484,21 +523,24 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = null;
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
+            GetAllFlagSettings();
             LoadProperties();
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
 
-        internal void OnDrop(DroppedItemEventArgs dropped)
+        public void OnDrop(DroppedItemEventArgs dropped)
         {
             Pickup = dropped.Pickup;
             Item = null;
             Owner = null;
+            ClearAllFlagSettings();
             SaveProperties();
             Serial = Pickup.Serial;
             HandleEvent(dropped.Player, ItemEvents.Drop);
-        }
 
+        }
+        
         public string LoadItemFlags()
         {
             List<string> output = new();
@@ -531,7 +573,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Gets a <see cref="CustomModule"/> that this custom role implements
+        /// Gets a <see cref="CustomModule"/> that this custom item implements
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -563,14 +605,14 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Gets if the current <see cref="SummonedCustomRole"/> implements the given <see cref="CustomModule"/>
+        /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomModule"/>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
 
         /// <summary>
-        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomRole"/> instance
+        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomItem"/> instance
         /// </summary>
         /// <typeparam name="T"></typeparam>
         public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
@@ -611,6 +653,8 @@ namespace UncomplicatedCustomItems.API.Features
                         Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
 
                 Utilities.ParseResponse(player, Data);
+
+
 
                 // Now we can destry the item if we have been told to do it
                 if (Data.DestroyAfterUse)

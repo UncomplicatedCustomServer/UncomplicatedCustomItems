@@ -1,0 +1,20 @@
+using Exiled.API.Enums;
+using MapGeneration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+
+namespace UncomplicatedCustomItems.Interfaces
+{
+    public interface IFlagSettings
+    {
+        public abstract string GlowColor { get; set; }
+
+        public abstract float LifeStealAmount { get; set; }
+
+        public abstract float LifeStealPercentage { get; set; }
+    }
+}

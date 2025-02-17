@@ -37,6 +37,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.InfiniteAmmo,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new WeaponData())
             },
             new()
@@ -51,6 +52,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new ArmorData()
                 {
                     HeadProtection = 150,
@@ -71,6 +73,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new KeycardData()
                 {
                     Permissions = KeycardPermissions.AlphaWarhead | KeycardPermissions.Checkpoints
@@ -88,6 +91,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new ExplosiveGrenadeData()
                 {
                     MaxRadius = 250f
@@ -105,6 +109,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new FlashGrenadeData()
                 {
                     AdditionalBlindedEffect = 250f
@@ -122,6 +127,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = new(2, 2, 2),
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new MedikitData()
                 {
                     Health = 250f
@@ -139,6 +145,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = new(5, 5, 5),
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new PainkillersData()
                 {
                     TickHeal = 1f,

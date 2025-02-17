@@ -31,9 +31,6 @@ namespace UncomplicatedCustomItems
         [Description("The duration of the WorkstationBan hint")]
         public float WorkstationBanHintDuration { get; set; } = 3f;
 
-        [Description("The color for the light of the ItemGlow flag")]
-        public string GlowColor { get; set; } = "blue";
-
         [Description("Enable Admin Messages? You will sometimes receive messages to your console from our Central Servers (only for very important things!)")]
         public bool DoEnableAdminMessages { get; set; } = true;
     }

@@ -301,6 +301,7 @@ namespace UncomplicatedCustomItems.API
                 }
             }
         }
+        
 
         /// <summary>
         /// Reproduce the SCP:SL painkillers healing process but with custom things :)

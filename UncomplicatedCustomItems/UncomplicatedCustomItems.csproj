@@ -466,6 +466,7 @@
     <Compile Include="API\Features\CustomModules\ItemGlow.cs" />
     <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
+    <Compile Include="API\Features\FlagSettings.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
     <Compile Include="API\Features\Helper\HttpManager.cs" />
     <Compile Include="API\Features\Helper\LogEntry.cs" />
@@ -509,6 +510,7 @@
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
     <Compile Include="Interfaces\ICustomModule.cs" />
+    <Compile Include="Interfaces\IFlagSettings.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\ISubcommand.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />

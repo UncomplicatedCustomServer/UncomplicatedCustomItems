@@ -1,4 +1,5 @@
 using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features.CustomModules
 {

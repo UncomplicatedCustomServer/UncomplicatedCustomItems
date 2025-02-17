@@ -134,6 +134,7 @@ namespace UncomplicatedCustomItems.API
                 Scale = item.Scale,
                 Spawn = item.Spawn,
                 CustomFlags = item.CustomFlags,
+                FlagSettings = item.FlagSettings,
                 CustomItemType = item.CustomItemType,
                 CustomData = Decode(item.CustomItemType, item.CustomData)
             };

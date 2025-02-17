@@ -5,6 +5,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using EventSource = Exiled.Events.Handlers.Player;
 using UncomplicatedCustomItems.API.Features.CustomModules;
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -59,9 +60,9 @@ namespace UncomplicatedCustomItems.Events.Internal
                 CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
                 Item.ReloadItemFlags();
                 Item.LoadItemFlags();
+                SummonedCustomItem.Register(Item.CustomItem.FlagSettings);
+                SummonedCustomItem.GetAllFlagSettings();
             }
-            
-
         }
 
         /// <summary>
@@ -115,6 +116,8 @@ namespace UncomplicatedCustomItems.Events.Internal
             CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
             item.ReloadItemFlags();
             item.LoadItemFlags();
+            SummonedCustomItem.Register(item.CustomItem.FlagSettings);
+            SummonedCustomItem.GetAllFlagSettings();
         }
         private static void ChangingItemInHand(ChangingItemEventArgs ev)
         {
@@ -127,6 +130,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             item.ResetBadge(ev.Player);
             item.ReloadItemFlags();
             item.UnloadItemFlags();
+            SummonedCustomItem.ClearAllFlagSettings();
         }
         private static void DeathEvent(DyingEventArgs ev)
         {
@@ -138,6 +142,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item?.ResetBadge(ev.Player);
             item.UnloadItemFlags();
+            SummonedCustomItem.ClearAllFlagSettings();
         }
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)
         {
@@ -149,6 +154,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item?.ResetBadge(ev.Player);
             item.UnloadItemFlags();
+            SummonedCustomItem.ClearAllFlagSettings();
         }
 
         private static void NoclipButton(TogglingNoClipEventArgs ev)

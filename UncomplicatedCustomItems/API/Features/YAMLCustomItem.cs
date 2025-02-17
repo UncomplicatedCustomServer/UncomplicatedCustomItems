@@ -2,6 +2,7 @@
 using Exiled.API.Enums;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
@@ -27,6 +28,8 @@ namespace UncomplicatedCustomItems.API.Features
         public Spawn Spawn { get; set; } = new();
 
         public virtual CustomFlags? CustomFlags { get; set; } = null;
+
+        public FlagSettings FlagSettings { get; set; } = new();
 
         public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
 

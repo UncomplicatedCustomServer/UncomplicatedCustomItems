@@ -30,9 +30,10 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract ISpawn Spawn { get; set; }
 
         public abstract CustomFlags? CustomFlags { get; set; }
-
+        
         public abstract CustomItemType CustomItemType { get; set; }
 
         public abstract IData CustomData { get; set; }
+        public abstract IFlagSettings FlagSettings { get; set; }
     }
 }
