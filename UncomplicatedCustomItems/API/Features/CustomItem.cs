@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public static List<ICustomItem> List => CustomItems.Values.ToList();
 
-        internal static Dictionary<uint, ICustomItem> CustomItems { get; } = new();
+        internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = new();
 
         /// <summary>
         /// Register a new <see cref="ICustomItem"/> inside the plugin

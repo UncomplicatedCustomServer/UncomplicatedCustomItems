@@ -461,11 +461,13 @@
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\DieOnUse.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\EffectWhenUsed.cs" />
     <Compile Include="API\Features\CustomModules\HalfLifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\InfiniteAmmo.cs" />
     <Compile Include="API\Features\CustomModules\ItemGlow.cs" />
     <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
+    <Compile Include="API\Features\Effect.cs" />
     <Compile Include="API\Features\FlagSettings.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
     <Compile Include="API\Features\Helper\HttpManager.cs" />
@@ -481,6 +483,7 @@
     <Compile Include="Commands\Admin\Give.cs" />
     <Compile Include="Commands\Admin\List.cs" />
     <Compile Include="Commands\Admin\LogShare.cs" />
+    <Compile Include="Commands\Admin\Reload.cs" />
     <Compile Include="Commands\Admin\Summon.cs" />
     <Compile Include="Commands\Admin\Summoned.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
@@ -510,6 +513,7 @@
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
     <Compile Include="Interfaces\ICustomModule.cs" />
+    <Compile Include="Interfaces\IEffect.cs" />
     <Compile Include="Interfaces\IFlagSettings.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\ISubcommand.cs" />

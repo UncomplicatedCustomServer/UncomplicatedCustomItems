@@ -27,7 +27,9 @@ namespace UncomplicatedCustomItems.Events
 
         private Dictionary<Pickup, Exiled.API.Features.Toys.Light> ActiveLights = new Dictionary<Pickup, Exiled.API.Features.Toys.Light>();
         public float Amount { get; set; } = 0f;
+
         public float Percentage = 0.5f;
+        public EffectType EffectType { get; set; } = EffectType.MovementBoost;
         public static Assembly EventHandlerAssembly => Loader.Plugins.Where(plugin => plugin.Name is "Exiled.Events").FirstOrDefault()?.Assembly;
 
         public static Type PlayerHandler => EventHandlerAssembly?.GetTypes().Where(x => x.FullName == "Exiled.Events.Handlers.Player").FirstOrDefault();
@@ -271,7 +273,7 @@ namespace UncomplicatedCustomItems.Events
             if (pickup == null || !ActiveLights.ContainsKey(pickup))
                 return;
 
-            Exiled.API.Features.Toys.Light ItemLight = ActiveLights[pickup];
+            Light ItemLight = ActiveLights[pickup];
             if (ItemLight != null && ItemLight.Base != null)
             {
                 GameObject.Destroy(ItemLight.Base.gameObject);

@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
+    #nullable enable
     public interface IFlagSettings
     {
         public abstract string GlowColor { get; set; }

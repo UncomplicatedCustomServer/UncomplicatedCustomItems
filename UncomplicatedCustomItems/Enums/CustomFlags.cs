@@ -14,5 +14,6 @@ namespace UncomplicatedCustomItems.Enums
         DieOnUse = 1 << 5,
         WorkstationBan = 1 << 6,
         ItemGlow = 1 << 7,
+        EffectWhenUsed = 1 << 8,
     }
 }

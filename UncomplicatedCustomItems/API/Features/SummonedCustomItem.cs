@@ -51,6 +51,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public Item Item { get; internal set; }
 
+        internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
+
         /// <summary>
         /// Gets the badge of the player if it has one
         /// </summary>
