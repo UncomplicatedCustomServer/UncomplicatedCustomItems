@@ -22,15 +22,16 @@ using Exiled.Events.EventArgs.Server;
 using Exiled.API.Features.Toys;
 using VoiceChat.Networking;
 using System.IO;
+using AdminToys;
 
 
 namespace UncomplicatedCustomItems.Events
 {
     internal class EventHandler
     {
-        private Dictionary<Pickup, Light> ActiveLights = new Dictionary<Pickup, Light>();
+        private Dictionary<Pickup, Light> ActiveLights = [];
+        private Dictionary<Player, Light> ActiveHandLights = [];
         public float Amount { get; set; } = 0f;
-        public string AudioPath { get; set; }
         public float Percentage = 0.5f;
         public EffectType EffectType { get; set; } = EffectType.MovementBoost;
         public static Assembly EventHandlerAssembly => Loader.Plugins.Where(plugin => plugin.Name is "Exiled.Events").FirstOrDefault()?.Assembly;
@@ -41,7 +42,7 @@ namespace UncomplicatedCustomItems.Events
             LogManager.Debug("OnHurt event is being triggered");
             if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem summonedCustomItem))
             {
-                LogManager.Debug("Fuck all event is being triggered");
+                LogManager.Debug("Fuck all is being triggered");
                 summonedCustomItem.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
                 var flagSettings = SummonedCustomItem.GetAllFlagSettings();
@@ -153,10 +154,8 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
-
         public void OnItemUse(UsedItemEventArgs ev)
         {
-
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<DieOnUse>())
             {
                 if (ev.Item != null)
@@ -256,6 +255,7 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
+
         public void Onroundend(RoundEndedEventArgs ev)
         {
             Exiled.Events.Handlers.Map.PickupDestroyed -= OnPickup;
@@ -290,16 +290,15 @@ namespace UncomplicatedCustomItems.Events
             ActiveLights.Remove(pickup);
             LogManager.Debug("Light successfully destroyed.");
         }
-
         public async void OnWaitingForPlayers()
         {
             await Task.Delay(3200);
 
-            LogManager.Info("===========================================");
-            LogManager.Info("!WARNING! This is Beta Version 3.1.0 !WARNING!");
-            LogManager.Info("Bugs are to be expected; please report them in our Discord");
-            LogManager.Info(">> https://discord.gg/5StRGu8EJV <<");
-            LogManager.Info("===========================================");
+            LogManager.Warn("===========================================");
+            LogManager.Warn("!WARNING! This is Beta Version 3.1.0 !WARNING!");
+            LogManager.Warn("Bugs are to be expected; please report them in our Discord");
+            LogManager.Warn(">> https://discord.gg/5StRGu8EJV <<");
+            LogManager.Warn("===========================================");
         }
     }
 }

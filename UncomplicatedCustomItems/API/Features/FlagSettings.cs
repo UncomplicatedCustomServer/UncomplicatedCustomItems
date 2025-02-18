@@ -15,8 +15,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public string GlowColor { get; set; } = "#00FF00";
 
-        public bool GlowInHand { get; set; } = true;
-
         public float LifeStealAmount { get; set; } = 8f;
 
         public float LifeStealPercentage { get; set; } = .5f;

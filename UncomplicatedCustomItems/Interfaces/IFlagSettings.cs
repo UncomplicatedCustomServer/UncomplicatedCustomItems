@@ -14,8 +14,6 @@ namespace UncomplicatedCustomItems.Interfaces
     public interface IFlagSettings
     {
         public abstract string GlowColor { get; set; }
-        
-        public abstract bool GlowInHand { get; set; }
 
         public abstract float LifeStealAmount { get; set; }
 

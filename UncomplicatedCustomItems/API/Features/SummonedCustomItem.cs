@@ -666,10 +666,18 @@ namespace UncomplicatedCustomItems.API.Features
                 IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
                 if (Data.Command is not null && Data.Command.Length > 2)
-                    if (!Data.Command.Contains("P:"))
+                    if (!Data.Command.Contains("{p_id}"))
                         Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()));
                     else
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
+                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("{p_id}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_pos}"))
+                        Server.ExecuteCommand(Data.Command.Replace("%pos%", player.Position.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("%pos%", player.Position.ToString()).Replace("{p_pos}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_role}"))
+                        Server.ExecuteCommand(Data.Command.Replace("%role%", player.Role.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("%role%", player.Role.ToString()).Replace("{p_role}", ""), player.Sender);
 
                 Utilities.ParseResponse(player, Data);
 

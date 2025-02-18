@@ -1,5 +1,4 @@
-﻿using Exiled.API.Structs;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
