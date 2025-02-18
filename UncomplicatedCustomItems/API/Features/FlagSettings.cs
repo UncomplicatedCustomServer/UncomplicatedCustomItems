@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UncomplicatedCustomItems.Interfaces;
 using UnityEngine;
+using VoiceChat.Networking;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -13,6 +14,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// Set the color of the glow if the item has the ItemGlow custom flag
         /// </summary>
         public string GlowColor { get; set; } = "#00FF00";
+
+        public bool GlowInHand { get; set; } = true;
 
         public float LifeStealAmount { get; set; } = 8f;
 

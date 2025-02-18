@@ -18,16 +18,19 @@ using Exiled.Events.EventArgs.Map;
 using Light = Exiled.API.Features.Toys.Light;
 using UncomplicatedCustomItems.Interfaces;
 using Exiled.API.Features;
+using Exiled.Events.EventArgs.Server;
+using Exiled.API.Features.Toys;
+using VoiceChat.Networking;
+using System.IO;
 
 
 namespace UncomplicatedCustomItems.Events
 {
     internal class EventHandler
     {
-
-        private Dictionary<Pickup, Exiled.API.Features.Toys.Light> ActiveLights = new Dictionary<Pickup, Exiled.API.Features.Toys.Light>();
+        private Dictionary<Pickup, Light> ActiveLights = new Dictionary<Pickup, Light>();
         public float Amount { get; set; } = 0f;
-
+        public string AudioPath { get; set; }
         public float Percentage = 0.5f;
         public EffectType EffectType { get; set; } = EffectType.MovementBoost;
         public static Assembly EventHandlerAssembly => Loader.Plugins.Where(plugin => plugin.Name is "Exiled.Events").FirstOrDefault()?.Assembly;
@@ -150,6 +153,7 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
+
         public void OnItemUse(UsedItemEventArgs ev)
         {
 
@@ -251,6 +255,10 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("ItemGlow flag was triggered but couldnt be ran.");
                 }
             }
+        }
+        public void Onroundend(RoundEndedEventArgs ev)
+        {
+            Exiled.Events.Handlers.Map.PickupDestroyed -= OnPickup;
         }
 
         public void OnPickup(PickupDestroyedEventArgs ev)

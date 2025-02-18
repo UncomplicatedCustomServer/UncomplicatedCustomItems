@@ -97,7 +97,19 @@ namespace UncomplicatedCustomItems.API.Features
         {
             _flagSettings.Clear();
         }
-        
+        /// <summary>
+        /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
+        /// </summary>
+        public static List<string> GetAttachmentsList(List<IWeaponData> items)
+        {
+            return items
+                .Where(item => !string.IsNullOrWhiteSpace(item.Attachments))
+                .SelectMany(item => item.Attachments.Split(',')
+                    .Select(attachment => new { AttachmentName = attachment.Trim() }))
+                .Select(x => x.AttachmentName)
+                .ToList();
+        }
+
         /// <summary>
         /// The <see cref="SummonedCustomItem"/> as a <see cref="Exiled.API.Features.Pickups.Pickup"/>.
         /// If this is not <see cref="null"/> then <see cref="Owner"/> and <see cref="Item"/> will be <see cref="null"/>
@@ -206,7 +218,16 @@ namespace UncomplicatedCustomItems.API.Features
                         Firearm.Penetration = WeaponData.Penetration;
                         Firearm.Inaccuracy = WeaponData.Inaccuracy;
                         Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
-                        Firearm.AddAttachment(WeaponData.Attachments);
+                        List<string> attachmentNames = GetAttachmentsList([WeaponData]);
+                        List<AttachmentName> attachmentsList = attachmentNames
+                            .Select(name => Enum.TryParse(name, true, out AttachmentName attachment) ? attachment : (AttachmentName?)null)
+                            .Where(attachment => attachment.HasValue)
+                            .Select(attachment => attachment.Value)
+                            .ToList();
+                        foreach (AttachmentName attachment in attachmentsList)
+                        {
+                            Firearm.AddAttachment(attachment);
+                        }
                         break;
 
                     case CustomItemType.Jailbird:
@@ -298,8 +319,6 @@ namespace UncomplicatedCustomItems.API.Features
                                 weaponData.Penetration = firearm.Penetration;
                                 weaponData.Inaccuracy = firearm.Inaccuracy;
                                 weaponData.DamageFalloffDistance = firearm.DamageFalloffDistance;
-                                firearm.AddAttachment(weaponData.Attachments);
-
                             }
                             break;
                         }
@@ -404,8 +423,6 @@ namespace UncomplicatedCustomItems.API.Features
                                 firearm.Penetration = weaponData.Penetration;
                                 firearm.Inaccuracy = weaponData.Inaccuracy;
                                 firearm.DamageFalloffDistance = weaponData.DamageFalloffDistance;
-                                firearm.AddAttachment(weaponData.Attachments);
-
                             }
                             break;
                         }

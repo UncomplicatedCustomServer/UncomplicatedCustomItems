@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using VoiceChat.Networking;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
@@ -13,6 +14,8 @@ namespace UncomplicatedCustomItems.Interfaces
     public interface IFlagSettings
     {
         public abstract string GlowColor { get; set; }
+        
+        public abstract bool GlowInHand { get; set; }
 
         public abstract float LifeStealAmount { get; set; }
 

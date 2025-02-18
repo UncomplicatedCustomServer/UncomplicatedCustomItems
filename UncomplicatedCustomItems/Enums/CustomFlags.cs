@@ -15,5 +15,6 @@ namespace UncomplicatedCustomItems.Enums
         WorkstationBan = 1 << 6,
         ItemGlow = 1 << 7,
         EffectWhenUsed = 1 << 8,
+        CustomSound = 1 << 9,
     }
 }

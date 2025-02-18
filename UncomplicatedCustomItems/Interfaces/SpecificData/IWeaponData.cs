@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
 
         public abstract float DamageFalloffDistance { get; set; }
 
-        public abstract AttachmentName Attachments { get; set; }
+        public abstract string Attachments { get; set; }
     }
 
 }

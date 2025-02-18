@@ -56,6 +56,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// <summary>
         /// Gets or sets the weapon attachments.
         /// </summary>
-        public AttachmentName Attachments { get; set; } = new();
+        public string Attachments { get; set; } = "DotScope";
     }
 }

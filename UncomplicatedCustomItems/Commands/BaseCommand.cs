@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems.Commands
         {
             if (arguments.Count == 0)
             {
-                response = $"UncomplicatedCustomItems v{Plugin.Instance.Version} by FoxWorn3365 & SpGerg\n\nAvailable commands:";
+                response = $"UncomplicatedCustomItems v{Plugin.Instance.Version} by FoxWorn3365, SpGerg & Mr. Baguetter\n\nAvailable commands:";
                 foreach (ISubcommand command in Subcommands)
                     response += $"- uci {command.Name}{(command.VisibleArgs != string.Empty ? $" {command.VisibleArgs}" : "")} - {command.Description}";
 
