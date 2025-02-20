@@ -461,11 +461,11 @@
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\DieOnUse.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\EffectShot.cs" />
     <Compile Include="API\Features\CustomModules\EffectWhenUsed.cs" />
     <Compile Include="API\Features\CustomModules\HalfLifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\InfiniteAmmo.cs" />
     <Compile Include="API\Features\CustomModules\ItemGlow.cs" />
-    <Compile Include="API\Features\CustomModules\ItemGlowInHand.cs" />
     <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
     <Compile Include="API\Features\FlagSettings.cs" />

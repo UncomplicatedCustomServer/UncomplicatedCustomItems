@@ -73,7 +73,7 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 _flagSettings.Add(flagSettings);
             }
-            LogManager.Debug("added {_flagSettings.flagSettings}");
+            LogManager.Debug($"added {_flagSettings}");
         }
 
         public static bool Unregister(IFlagSettings flagSettings)
@@ -84,11 +84,6 @@ namespace UncomplicatedCustomItems.API.Features
         public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
         {
             LogManager.Debug("Retrieving all loaded Flag Settings");
-            
-            foreach (var flagSetting in _flagSettings)
-            {
-                LogManager.Debug($"Loaded Flag Setting: '{flagSetting.GlowColor}'");
-            }
             
             return _flagSettings.AsReadOnly();
         }
@@ -678,6 +673,18 @@ namespace UncomplicatedCustomItems.API.Features
                         Server.ExecuteCommand(Data.Command.Replace("%role%", player.Role.ToString()));
                     else
                         Server.ExecuteCommand(Data.Command.Replace("%role%", player.Role.ToString()).Replace("{p_role}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_health}"))
+                        Server.ExecuteCommand(Data.Command.Replace("%health%", player.Health.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("%health%", player.Health.ToString()).Replace("{p_health}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_zone}"))
+                        Server.ExecuteCommand(Data.Command.Replace("%zone%", player.Zone.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("%zone%", player.Zone.ToString()).Replace("{p_zone}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_room}"))
+                        Server.ExecuteCommand(Data.Command.Replace("%room%", player.CurrentRoom.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("%room%", player.CurrentRoom.ToString()).Replace("{p_room}", ""), player.Sender);
 
                 Utilities.ParseResponse(player, Data);
 

@@ -62,6 +62,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 Item.LoadItemFlags();
                 SummonedCustomItem.Register(Item.CustomItem.FlagSettings);
                 SummonedCustomItem.GetAllFlagSettings();
+                
             }
         }
 

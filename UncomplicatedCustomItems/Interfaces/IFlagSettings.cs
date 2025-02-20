@@ -1,12 +1,4 @@
 using Exiled.API.Enums;
-using MapGeneration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using VoiceChat.Networking;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
@@ -18,5 +10,15 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract float LifeStealAmount { get; set; }
 
         public abstract float LifeStealPercentage { get; set; }
+
+        public abstract string EffectEvent { get; set; }
+
+        public abstract EffectType Effect {get; set; }
+
+        public abstract byte EffectIntensity { get; set; }
+
+        public abstract float EffectDuration {get; set; }
+
+        public abstract bool ResetDurationOnTrigger { get; set; }
     }
 }

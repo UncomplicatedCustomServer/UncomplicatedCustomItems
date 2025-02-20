@@ -31,9 +31,10 @@ namespace UncomplicatedCustomItems.Interfaces
 
         public abstract CustomFlags? CustomFlags { get; set; }
         
+        public abstract IFlagSettings FlagSettings { get; set; }
+
         public abstract CustomItemType CustomItemType { get; set; }
 
         public abstract IData CustomData { get; set; }
-        public abstract IFlagSettings FlagSettings { get; set; }
     }
 }

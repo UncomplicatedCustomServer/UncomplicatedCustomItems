@@ -9,30 +9,37 @@ namespace UncomplicatedCustomItems.API.Features
     public class Spawn : ISpawn
     {
         /// <summary>
-        /// Decide if the item can naturally spawn or not
+        /// Determines whether the item can naturally spawn.
         /// </summary>
+        [Description("If true, the custom item can spawn. If false, it will not.")]
         public bool DoSpawn { get; set; } = false;
 
         /// <summary>
-        /// How many custom items istances of this item should be spawned?
+        /// Specifies how many instances of this custom item should be spawned.
         /// </summary>
+        [Description("The number of custom items to spawn.")]
         public uint Count { get; set; } = 1;
 
         /// <summary>
-        /// The <see cref="Vector3">Positions</see> where the item is allowed to spawn, this is an array so you can set multiple values and one random one will be choose.
-        /// If this is empty then the <see cref="Rooms"/> parameter will be used instead.
+        /// The <see cref="Vector3"/> positions where the item is allowed to spawn.
+        /// This is an array, allowing multiple values, with one being randomly chosen.
+        /// If this is empty, the <see cref="Rooms"/> parameter will be used instead.
         /// </summary>
+        [Description("Custom coordinates where the custom item will spawn.")]
         public List<Vector3> Coords { get; set; } = new();
+
         /// <summary>
-        /// The <see cref="RoomType">Rooms</see> where the item is allowed to spawn.
-        /// If this is empty then the <see cref="Zone"/> parameter will be used instead.
+        /// The <see cref="RoomType"/> locations where the item is allowed to spawn.
+        /// If this is empty, the <see cref="Zones"/> parameter will be used instead.
         /// </summary>
+        [Description("The room(s) where the custom item can spawn.")]
         public List<RoomType> Rooms { get; set; } = new();
 
         /// <summary>
-        /// The <see cref="ZoneType">Zones</see> where the item is allowed to spawn.
-        /// If <see cref="Rooms"/> is empty then this parameter will be used.
+        /// The <see cref="ZoneType"/> locations where the item is allowed to spawn.
+        /// If <see cref="Rooms"/> is empty, this parameter will be used.
         /// </summary>
+        [Description("The zone(s) where the custom item can spawn.")]
         public List<ZoneType> Zones { get; set; } = new()
         {
             ZoneType.HeavyContainment,
@@ -40,15 +47,17 @@ namespace UncomplicatedCustomItems.API.Features
         };
 
         /// <summary>
-        /// If <see cref="true"/> this item will replace an existing pickup.
-        /// If <see cref="ForceItem"/> is false a random pickup will be replaced with the item's one.
-        /// If <see cref="false"/> this item will be spawned on the floor of the room.
+        /// If true, this item will replace an existing pickup.
+        /// If <see cref="ForceItem"/> is false, a random pickup will be replaced with this item.
+        /// If false, the item will spawn on the floor of the room.
         /// </summary>
+        [Description("If true, the custom item will replace an existing in-game item.")]
         public bool ReplaceExistingPickup { get; set; } = false;
 
         /// <summary>
-        /// If <see cref="true"/> this item will replace only another pickup with the same <see cref="ItemType"/> of the custom item.
+        /// If true, this item will only replace another pickup of the same <see cref="ItemType"/> as the custom item.
         /// </summary>
+        [Description("If true, this item will only replace another pickup of the same item type as the custom item.")]
         public bool ForceItem { get; set; } = false;
     }
 }

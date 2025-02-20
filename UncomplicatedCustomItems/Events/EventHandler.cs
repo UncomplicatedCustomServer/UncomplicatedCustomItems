@@ -23,6 +23,7 @@ using Exiled.API.Features.Toys;
 using VoiceChat.Networking;
 using System.IO;
 using AdminToys;
+using UncomplicatedCustomItems.API;
 
 
 namespace UncomplicatedCustomItems.Events
@@ -33,7 +34,6 @@ namespace UncomplicatedCustomItems.Events
         private Dictionary<Player, Light> ActiveHandLights = [];
         public float Amount { get; set; } = 0f;
         public float Percentage = 0.5f;
-        public EffectType EffectType { get; set; } = EffectType.MovementBoost;
         public static Assembly EventHandlerAssembly => Loader.Plugins.Where(plugin => plugin.Name is "Exiled.Events").FirstOrDefault()?.Assembly;
 
         public static Type PlayerHandler => EventHandlerAssembly?.GetTypes().Where(x => x.FullName == "Exiled.Events.Handlers.Player").FirstOrDefault();
@@ -252,6 +252,144 @@ namespace UncomplicatedCustomItems.Events
                 else
                 {
                     LogManager.Error("ItemGlow flag was triggered but couldnt be ran.");
+                }
+            }
+        }
+        public void OnUsingItem(UsingItemEventArgs ev)
+        {
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
+            {
+                if (ev.Item != null)
+                {
+                    var flagSettings = SummonedCustomItem.GetAllFlagSettings();
+
+                    if (flagSettings != null && flagSettings.Count > 0)
+                    {
+                        var flagSetting = flagSettings.FirstOrDefault();
+
+                        if (flagSetting.EffectEvent == "EffectWhenUsed")
+                        {
+                            if (flagSetting.Effect == null)
+                            {
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for {customItem.CustomItem}");
+                                return;
+                            }
+                            if (flagSetting.EffectDuration <= -2)
+                            {
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for {customItem.CustomItem}");
+                                return;
+                            }
+                            if (flagSetting.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for {customItem.CustomItem}");
+                                return;
+                            }
+
+                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Player}");
+                            EffectType Effect = flagSetting.Effect;
+                            float Duration = flagSetting.EffectDuration;
+                            byte Intensity = flagSetting.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Error("No FlagSettings found on {customItem.CustomItem}");
+                    }
+                }
+                else
+                {
+                    LogManager.Error("EffectWhenUsed Flag was triggered but couldnt be ran.");
+                }
+            }
+        }
+        public void OnShot(ShotEventArgs ev)
+        {
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
+            {
+                if (ev.Item != null)
+                {
+                    var flagSettings = SummonedCustomItem.GetAllFlagSettings();
+                    if (flagSettings != null && flagSettings.Count > 0)
+                    {
+                        var flagSetting = flagSettings.FirstOrDefault();
+                        LogManager.Debug($"Checking if {flagSetting.EffectEvent} = EffectWhenUsed");
+                        if (flagSetting.EffectEvent == "EffectWhenUsed")
+                        {
+                            LogManager.Debug($"{flagSetting.EffectEvent} = EffectWhenUsed");
+                            if (flagSetting.Effect == null)
+                            {
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for {customItem.CustomItem}");
+                                return;
+                            }
+                            if (flagSetting.EffectDuration <= -2)
+                            {
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for {customItem.CustomItem}");
+                                return;
+                            }
+                            if (flagSetting.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for {customItem.CustomItem}");
+                                return;
+                            }
+                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Player}");
+                            EffectType Effect = flagSetting.Effect;
+                            float Duration = flagSetting.EffectDuration;
+                            byte Intensity = flagSetting.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Error($"No FlagSettings found on {customItem.CustomItem}");
+                    }
+                }
+                else
+                {
+                    LogManager.Error("EffectWhenUsed Flag was triggered but couldnt be ran.");
+                }
+            }
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectShot>())
+            {
+                if (ev.Item != null)
+                {
+                    var flagSettings = SummonedCustomItem.GetAllFlagSettings();
+                    if (flagSettings != null && flagSettings.Count > 0)
+                    {
+                        var flagSetting = flagSettings.FirstOrDefault();
+                        if (flagSetting.EffectEvent == "EffectShot")
+                        {
+                            if (flagSetting.Effect == null)
+                            {
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for {CustomItem.CustomItem}");
+                                return;
+                            }
+                            if (flagSetting.EffectDuration <= -2)
+                            {
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for {CustomItem.CustomItem}");
+                                return;
+                            }
+                            if (flagSetting.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for {CustomItem.CustomItem}");
+                                return;
+                            }
+
+                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Target}");
+                            EffectType Effect = flagSetting.Effect;
+                            float Duration = flagSetting.EffectDuration;
+                            byte Intensity = flagSetting.EffectIntensity;
+                            ev.Target?.EnableEffect(Effect, Intensity, Duration, true);
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Error("No FlagSettings found on {CustomItem.CustomItem}");
+                    }
+                }
+                else
+                {
+                    LogManager.Error("EffectShot Flag was triggered but couldnt be ran.");
                 }
             }
         }
