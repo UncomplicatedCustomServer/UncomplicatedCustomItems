@@ -25,11 +25,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public float Radius { get; set; }
 
         /// <summary>
-        /// Gets or sets the total amount of damage dealt with the Jailbird.
-        /// </summary>
-        public float TotalDamageDealt { get; set; }
-
-        /// <summary>
         /// Gets or sets the number of times the item has been charged and used.
         /// </summary>
         public int TotalCharges { get; set; }

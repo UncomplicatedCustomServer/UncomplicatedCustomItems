@@ -154,6 +154,21 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     TotalHealing = 50f
                 })
             },
+            new()
+            {
+                Id = 9,
+                Name = "Just a Jailbird",
+                Description = "Just a Jailbird",
+                BadgeName = "Jailbird",
+                BadgeColor = "pumpkin",
+                Item = ItemType.Jailbird,
+                CustomItemType = CustomItemType.Jailbird,
+                Scale = new(1, 1, 1),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new JailbirdData())
+            },
         ];
 
         internal string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomItems");

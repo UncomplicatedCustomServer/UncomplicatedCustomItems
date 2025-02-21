@@ -468,6 +468,8 @@
     <Compile Include="API\Features\CustomModules\ItemGlow.cs" />
     <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
+    <Compile Include="API\Features\CustomModules\EffectWhenEquiped.cs" />
+    <Compile Include="API\Features\CustomModules\NoCharge.cs" />
     <Compile Include="API\Features\FlagSettings.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
     <Compile Include="API\Features\Helper\HttpManager.cs" />

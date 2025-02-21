@@ -16,5 +16,7 @@ namespace UncomplicatedCustomItems.Enums
         ItemGlow = 1 << 7,
         EffectWhenUsed = 1 << 8,
         EffectShot = 1 << 9,
+        EffectWhenEquiped = 1 << 10,
+        NoCharge = 1 << 11,
     }
 }

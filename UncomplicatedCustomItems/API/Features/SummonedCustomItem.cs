@@ -123,7 +123,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         public long LastDamageTime { get; internal set; }
 
-
         /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
         /// </summary>
@@ -175,6 +174,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="rotation"></param>
         /// <returns></returns>
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
+
+        private int Charges { get; set; }
 
         /// <summary>
         /// Apply the custom properties of the current <see cref="ICustomItem"/>
@@ -229,12 +230,20 @@ namespace UncomplicatedCustomItems.API.Features
                         Jailbird Jailbird = Item as Jailbird;
                         IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
 
-                        Jailbird.TotalDamageDealt = JailbirdData.TotalDamageDealt;
-                        Jailbird.TotalCharges = JailbirdData.TotalCharges;
                         Jailbird.Radius = JailbirdData.Radius;
                         Jailbird.ChargeDamage = JailbirdData.ChargeDamage;
                         Jailbird.MeleeDamage = JailbirdData.MeleeDamage;
                         Jailbird.FlashDuration = JailbirdData.FlashDuration;
+                        if (JailbirdData.TotalCharges > 3)
+                        {
+                            JailbirdData.TotalCharges = -(JailbirdData.TotalCharges + 3);
+                            Charges = JailbirdData.TotalCharges;
+                        }
+                        else
+                        {
+                            Charges = JailbirdData.TotalCharges;
+                        }
+                        Jailbird.TotalCharges = Charges;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
@@ -323,12 +332,20 @@ namespace UncomplicatedCustomItems.API.Features
                             var jailbirdData = CustomItem.CustomData as IJailbirdData;
                             if (jailbird != null && jailbirdData != null)
                             {
-                                jailbirdData.TotalDamageDealt = jailbird.TotalDamageDealt;
-                                jailbirdData.TotalCharges = jailbird.TotalCharges;
                                 jailbirdData.Radius = jailbird.Radius;
                                 jailbirdData.ChargeDamage = jailbird.ChargeDamage;
                                 jailbirdData.MeleeDamage = jailbird.MeleeDamage;
                                 jailbirdData.FlashDuration = jailbird.FlashDuration;
+                                if (jailbirdData.TotalCharges > 3)
+                                {
+                                    jailbirdData.TotalCharges = -(jailbirdData.TotalCharges + 3);
+                                    Charges = jailbirdData.TotalCharges;
+                                }
+                                else
+                                {
+                                    Charges = jailbirdData.TotalCharges;
+                                }
+                                jailbird.TotalCharges = Charges;
                             }
                             break;
                         }
@@ -428,12 +445,20 @@ namespace UncomplicatedCustomItems.API.Features
                             var jailbirdData = CustomItem.CustomData as IJailbirdData;
                             if (jailbird != null && jailbirdData != null)
                             {
-                                jailbird.TotalDamageDealt = jailbirdData.TotalDamageDealt;
-                                jailbird.TotalCharges = jailbirdData.TotalCharges;
                                 jailbird.Radius = jailbirdData.Radius;
                                 jailbird.ChargeDamage = jailbirdData.ChargeDamage;
                                 jailbird.MeleeDamage = jailbirdData.MeleeDamage;
                                 jailbird.FlashDuration = jailbirdData.FlashDuration;
+                                if (jailbirdData.TotalCharges > 3)
+                                {
+                                    jailbirdData.TotalCharges = -(jailbirdData.TotalCharges + 3);
+                                    Charges = jailbirdData.TotalCharges;
+                                }
+                                else
+                                {
+                                    Charges = jailbirdData.TotalCharges;
+                                }
+                                jailbird.TotalCharges = Charges;
                             }
                             break;
                         }
@@ -529,7 +554,7 @@ namespace UncomplicatedCustomItems.API.Features
         public void ResetBadge(Player Player)
         {
             Player.ReferenceHub.serverRoles.RefreshLocalTag();
-            LogManager.Debug("Badge successfully reset");
+            LogManager.Debug($"{Player.Nickname} Badge successfully reset");
         }
         
         internal void OnPickup(ItemAddedEventArgs pickedUp)

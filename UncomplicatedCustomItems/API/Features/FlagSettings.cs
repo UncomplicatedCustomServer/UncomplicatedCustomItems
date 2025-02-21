@@ -49,11 +49,5 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("Sets the duration of the effect applied by the custom item.")]
         public float EffectDuration { get; set; } = -1f;
-
-        /// <summary>
-        /// If true, the effect duration will reset when the effect is triggered.
-        /// </summary>
-        [Description("If true, the effect duration will reset when the effect is triggered.")]
-        public bool ResetDurationOnTrigger { get; set; } = false;
     }
 }

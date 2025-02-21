@@ -8,6 +8,9 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.HarmonyElements.Patches;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using PlayerEvent = Exiled.Events.Handlers.Player;
+using ItemEvent = Exiled.Events.Handlers.Item;
+using ServerEvent = Exiled.Events.Handlers.Server;
+using MapEvent = Exiled.Events.Handlers.Map;
 using System.Threading.Tasks;
 
 namespace UncomplicatedCustomItems
@@ -52,20 +55,22 @@ namespace UncomplicatedCustomItems
 
             if (IsPrerelease)
             {
-                Exiled.Events.Handlers.Server.WaitingForPlayers += Handler.OnWaitingForPlayers;
+                ServerEvent.WaitingForPlayers += Handler.OnWaitingForPlayers;
             }
 
             PlayerEvent.Hurt += Handler.OnHurt;
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.Shooting += Handler.OnShooting;
             PlayerEvent.UsedItem += Handler.OnItemUse;
-            Exiled.Events.Handlers.Item.ChangingAttachments += Handler.OnChangingAttachments;
+            ItemEvent.ChangingAttachments += Handler.OnChangingAttachments;
             PlayerEvent.ActivatingWorkstation += Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem += Handler.OnDrop;
-            Exiled.Events.Handlers.Map.PickupDestroyed += Handler.OnPickup;
-            Exiled.Events.Handlers.Server.RoundEnded += Handler.Onroundend;
+            MapEvent.PickupDestroyed += Handler.OnPickup;
+            ServerEvent.RoundEnded += Handler.Onroundend;
             PlayerEvent.UsingItem += Handler.OnUsingItem;
             PlayerEvent.Shot += Handler.OnShot;
+            PlayerEvent.ChangedItem += Handler.OnSwitchingItem;
+            ItemEvent.ChargingJailbird += Handler.OnCharge;
 
             LogManager.History.Clear();
 
@@ -106,14 +111,16 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Hurt -= Handler.OnHurt;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.Shooting -= Handler.OnShooting;
-            Exiled.Events.Handlers.Server.WaitingForPlayers -= Handler.OnWaitingForPlayers;
+            ServerEvent.WaitingForPlayers -= Handler.OnWaitingForPlayers;
             PlayerEvent.UsedItem -= Handler.OnItemUse;
-            Exiled.Events.Handlers.Item.ChangingAttachments -= Handler.OnChangingAttachments;
+            ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
             PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
-            Exiled.Events.Handlers.Server.RoundEnded -= Handler.Onroundend;
+            ServerEvent.RoundEnded -= Handler.Onroundend;
             PlayerEvent.UsingItem -= Handler.OnUsingItem;
             PlayerEvent.Shot -= Handler.OnShot;
+            PlayerEvent.ChangedItem -= Handler.OnSwitchingItem;
+            ItemEvent.ChargingJailbird -= Handler.OnCharge;
 
             Instance = null;
             base.OnDisabled();

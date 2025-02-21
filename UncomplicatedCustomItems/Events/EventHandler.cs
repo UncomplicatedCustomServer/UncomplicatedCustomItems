@@ -255,6 +255,54 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
+        public void OnSwitchingItem(ChangedItemEventArgs ev)
+        {
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenEquiped>())
+            {
+                if (ev.Item != null)
+                {
+                    var flagSettings = SummonedCustomItem.GetAllFlagSettings();
+
+                    if (flagSettings != null && flagSettings.Count > 0)
+                    {
+                        var flagSetting = flagSettings.FirstOrDefault();
+
+                        if (flagSetting.EffectEvent == "EffectWhenEquiped")
+                        {
+                            if (flagSetting.Effect == null)
+                            {
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (flagSetting.EffectDuration < -1)
+                            {
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (flagSetting.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
+                                return;
+                            }
+
+                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Player}");
+                            EffectType Effect = flagSetting.Effect;
+                            float Duration = flagSetting.EffectDuration;
+                            byte Intensity = flagSetting.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Error($"No FlagSettings found on {customItem.CustomItem.Name}");
+                    }
+                }
+                else
+                {
+                    LogManager.Error("EffectWhenUsed Flag was triggered but couldnt be ran.");
+                }
+            }
+        }
         public void OnUsingItem(UsingItemEventArgs ev)
         {
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
@@ -271,17 +319,17 @@ namespace UncomplicatedCustomItems.Events
                         {
                             if (flagSetting.Effect == null)
                             {
-                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for {customItem.CustomItem}");
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                 return;
                             }
-                            if (flagSetting.EffectDuration <= -2)
+                            if (flagSetting.EffectDuration < -1)
                             {
-                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for {customItem.CustomItem}");
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                 return;
                             }
                             if (flagSetting.EffectIntensity <= 0)
                             {
-                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for {customItem.CustomItem}");
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                 return;
                             }
 
@@ -294,7 +342,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                     else
                     {
-                        LogManager.Error("No FlagSettings found on {customItem.CustomItem}");
+                        LogManager.Error($"No FlagSettings found on {customItem.CustomItem.Name}");
                     }
                 }
                 else
@@ -319,17 +367,17 @@ namespace UncomplicatedCustomItems.Events
                             LogManager.Debug($"{flagSetting.EffectEvent} = EffectWhenUsed");
                             if (flagSetting.Effect == null)
                             {
-                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for {customItem.CustomItem}");
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                 return;
                             }
                             if (flagSetting.EffectDuration <= -2)
                             {
-                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for {customItem.CustomItem}");
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                 return;
                             }
                             if (flagSetting.EffectIntensity <= 0)
                             {
-                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for {customItem.CustomItem}");
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                 return;
                             }
                             LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Player}");
@@ -341,7 +389,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                     else
                     {
-                        LogManager.Error($"No FlagSettings found on {customItem.CustomItem}");
+                        LogManager.Error($"No FlagSettings found on {customItem.CustomItem.Name}");
                     }
                 }
                 else
@@ -361,17 +409,17 @@ namespace UncomplicatedCustomItems.Events
                         {
                             if (flagSetting.Effect == null)
                             {
-                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for {CustomItem.CustomItem}");
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                                 return;
                             }
                             if (flagSetting.EffectDuration <= -2)
                             {
-                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for {CustomItem.CustomItem}");
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                                 return;
                             }
                             if (flagSetting.EffectIntensity <= 0)
                             {
-                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for {CustomItem.CustomItem}");
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                                 return;
                             }
 
@@ -384,7 +432,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                     else
                     {
-                        LogManager.Error("No FlagSettings found on {CustomItem.CustomItem}");
+                        LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
                     }
                 }
                 else
@@ -392,6 +440,17 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("EffectShot Flag was triggered but couldnt be ran.");
                 }
             }
+        }
+        
+        public void OnCharge(ChargingJailbirdEventArgs ev)
+        {
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<NoCharge>())
+            {
+                if (ev.Item != null)
+                {
+                    ev.IsAllowed = false;
+                }
+            } 
         }
 
         public void Onroundend(RoundEndedEventArgs ev)
@@ -409,7 +468,7 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Error("Couldnt destroy light on {Pickup}.");
+                    LogManager.Error($"Couldnt destroy light on {ev.Pickup}.");
                 }
             }
         }
@@ -437,6 +496,9 @@ namespace UncomplicatedCustomItems.Events
             LogManager.Warn("Bugs are to be expected; please report them in our Discord");
             LogManager.Warn(">> https://discord.gg/5StRGu8EJV <<");
             LogManager.Warn("===========================================");
+
+            LogManager.Info("Debug logs will be activated due to this!");
+            Plugin.Instance.Config.Debug = true;
         }
     }
 }
