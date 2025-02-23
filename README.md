@@ -25,7 +25,7 @@ You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins
 - In-game commands to handle the plugin and the items
 
 ## Installation
-Download the `UncomplicatedCustomItems.dll` from the [latest release](https://github.com/Mr-Baguetter/UncomplicatedCustomItemss/releases/latest) and put it inside the `EXILED/Plugins` folder.
+Download the `UncomplicatedCustomItems.dll` from the [latest release](https://github.com/Mr-Baguetter/UncomplicatedCustomItems/releases/latest) and put it inside the `EXILED/Plugins` folder.
 
 ## Having skill issues?
 If you can't fix the problem you can ask the community on our [Discord server](https://discord.gg/5StRGu8EJV)!
