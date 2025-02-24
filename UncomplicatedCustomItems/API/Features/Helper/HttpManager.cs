@@ -10,9 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Struct;
-using UncomplicatedCustomItems;
 
 using PlayerHandler = Exiled.Events.Handlers.Player;
 

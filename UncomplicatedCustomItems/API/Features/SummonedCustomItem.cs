@@ -1,6 +1,5 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Items;
-using Exiled.API.Features.Items.FirearmModules.Primary;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
 using MEC;
@@ -9,18 +8,14 @@ using System.Linq;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
-using Exiled.API.Enums;
 using UncomplicatedCustomItems.API.Struct;
-using UncomplicatedCustomItems.Events;
-using Exiled.API.Features.Roles;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
-using System.Net.Mail;
-using UncomplicatedCustomItems.API.Features.SpecificData;
 using HarmonyLib;
+using Exiled.API.Features.Items.FirearmModules.Primary;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -50,13 +45,15 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
-
+        public float Capacity { get; set; } = 0f;
         internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
 
         /// <summary>
         /// Gets the badge of the player if it has one
         /// </summary>
         public Triplet<string, string, bool>? Badge { get; private set; }
+
+        private static readonly HashSet<ushort> CheckedItemSerials = new HashSet<ushort>();
 
         public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
 
@@ -206,7 +203,7 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Weapon:
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
-
+ 
                         Firearm.MagazineAmmo = WeaponData.MaxAmmo;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
                         Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
@@ -317,8 +314,8 @@ namespace UncomplicatedCustomItems.API.Features
                             var weaponData = CustomItem.CustomData as IWeaponData;
                             if (firearm != null && weaponData != null)
                             {
-                                weaponData.MaxMagazineAmmo = (byte)firearm.MaxMagazineAmmo;
-                                weaponData.MaxBarrelAmmo = (byte)firearm.MaxBarrelAmmo;
+                                weaponData.MaxMagazineAmmo = firearm.MaxMagazineAmmo;
+                                weaponData.MaxBarrelAmmo = firearm.MaxBarrelAmmo;
                                 weaponData.AmmoDrain = firearm.AmmoDrain;
                                 weaponData.Penetration = firearm.Penetration;
                                 weaponData.Inaccuracy = firearm.Inaccuracy;
@@ -508,8 +505,6 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
-
-
         public string LoadBadge(Player player)
         {
             LogManager.Debug("LoadBadge() Triggered");
@@ -577,7 +572,6 @@ namespace UncomplicatedCustomItems.API.Features
             SaveProperties();
             Serial = Pickup.Serial;
             HandleEvent(dropped.Player, ItemEvents.Drop);
-
         }
         
         public string LoadItemFlags()
@@ -834,6 +828,11 @@ namespace UncomplicatedCustomItems.API.Features
         {
             item = Get(player, serial);
             return item != null;
+        }
+
+        internal static bool TryGet(object itemSerial, out SummonedCustomItem summonedCustomItem)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,22 +1,15 @@
-﻿using Exiled.API.Enums;
-using System.Collections.Generic;
-using InventorySystem.Items.Firearms.Attachments;
-using CameraShaking;
-using System;
-using System.Linq;
-
-namespace UncomplicatedCustomItems.Interfaces.SpecificData
+﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
 #nullable enable
     public interface IWeaponData : IData
     {
         public abstract float Damage { get; set; }
 
-        public abstract byte MaxBarrelAmmo { get; set; }
+        public abstract int MaxBarrelAmmo { get; set; }
 
-        public abstract byte MaxAmmo { get; set; }
+        public abstract int MaxAmmo { get; set; }
 
-        public abstract byte MaxMagazineAmmo { get; set; }
+        public abstract int MaxMagazineAmmo { get; set; }
 
         public abstract int AmmoDrain { get; set; }
 

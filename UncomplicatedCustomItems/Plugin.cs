@@ -3,9 +3,7 @@ using Exiled.API.Features;
 using System;
 using HarmonyLib;
 using System.IO;
-using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.HarmonyElements.Patches;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using PlayerEvent = Exiled.Events.Handlers.Player;
 using ItemEvent = Exiled.Events.Handlers.Item;
@@ -69,7 +67,6 @@ namespace UncomplicatedCustomItems
             ServerEvent.RoundEnded += Handler.Onroundend;
             PlayerEvent.UsingItem += Handler.OnUsingItem;
             PlayerEvent.Shot += Handler.OnShot;
-            PlayerEvent.ChangedItem += Handler.OnSwitchingItem;
             ItemEvent.ChargingJailbird += Handler.OnCharge;
 
             LogManager.History.Clear();
@@ -119,7 +116,6 @@ namespace UncomplicatedCustomItems
             ServerEvent.RoundEnded -= Handler.Onroundend;
             PlayerEvent.UsingItem -= Handler.OnUsingItem;
             PlayerEvent.Shot -= Handler.OnShot;
-            PlayerEvent.ChangedItem -= Handler.OnSwitchingItem;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
 
             Instance = null;

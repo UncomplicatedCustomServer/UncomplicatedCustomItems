@@ -1,6 +1,4 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
-using System.Collections.Generic;
-using Exiled.API.Structs;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {

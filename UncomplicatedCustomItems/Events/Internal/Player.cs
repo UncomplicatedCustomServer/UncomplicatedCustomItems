@@ -5,7 +5,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using EventSource = Exiled.Events.Handlers.Player;
 using UncomplicatedCustomItems.API.Features.CustomModules;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -54,7 +54,6 @@ namespace UncomplicatedCustomItems.Events.Internal
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
             {
-
                 Item.OnPickup(ev);
                 Item.HandlePickedUpDisplayHint();
                 CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
@@ -71,21 +70,31 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// <param name="ev"></param>
         private static void SetDamageFromCustomWeaponOnHurting(HurtingEventArgs ev)
         {
-            if (ev.DamageHandler.Type is not Exiled.API.Enums.DamageType.Firearm)
-                return;
-
+            LogManager.Debug($"Checking if item is a firearm");
             if (ev.Attacker.CurrentItem is not Firearm)
+            {
+                LogManager.Debug($"{ev.Attacker} Item Is not a Firearm");
                 return;
-
+            }
+            LogManager.Debug($"Checking if damage is from customitem");
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
+            {
+                LogManager.Debug($"{ev.Player} isnt being damaged by a custom item.");
                 return;
-
+            }
+            LogManager.Debug($"Checking if item is a custom item");
             if (Item.CustomItem.CustomItemType != CustomItemType.Weapon)
+            {
+                LogManager.Debug($"{Item.CustomItem.Name} is not a Weapon custom item");
                 return;
-
+            }
+            LogManager.Debug($"{Item.CustomItem.Name} Weapon data is not correct");
             if (Item.CustomItem.CustomData is not IWeaponData WeaponData)
+            {
+                LogManager.Debug($"{Item.CustomItem.Name} Weapon data is not correct");
                 return;
-
+            }
+            LogManager.Debug($"{ev.Player} is taking {WeaponData.Damage} from {Item.CustomItem.Name}");
             ev.DamageHandler.Damage = WeaponData.Damage;
         }
 

@@ -1,12 +1,4 @@
-﻿
-using UncomplicatedCustomItems.Interfaces.SpecificData;
-using Exiled.API.Enums;
-using System.Collections.Generic;
-using InventorySystem.Items.Firearms.Attachments;
-using YamlDotNet.Serialization;
-using CameraShaking;
-using System;
-using System.Linq;
+﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -21,17 +13,17 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// <summary>
         /// The max number of ammunitions in the barrel. Shotgun like effect at higher numbers
         /// </summary>
-        public byte MaxBarrelAmmo { get; set; } = 10;
+        public int MaxBarrelAmmo { get; set; } = 10;
 
         /// <summary>
         /// The max number of ammunitions
         /// </summary>
-        public byte MaxAmmo { get; set; } = 150;
+        public int MaxAmmo { get; set; } = 150;
 
         /// <summary>
         /// The max number of ammunitions in the magazine
         /// </summary>
-        public byte MaxMagazineAmmo { get; set; } = 150;
+        public int MaxMagazineAmmo { get; set; } = 150;
 
         /// <summary>
         /// The amount of ammunitions drained per shot

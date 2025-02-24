@@ -1,4 +1,3 @@
-using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Interfaces

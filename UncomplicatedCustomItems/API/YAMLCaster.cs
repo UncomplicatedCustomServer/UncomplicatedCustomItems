@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features.SpecificData;
@@ -8,7 +7,6 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API

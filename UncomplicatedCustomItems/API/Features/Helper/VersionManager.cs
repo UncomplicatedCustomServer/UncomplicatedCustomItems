@@ -5,10 +5,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Threading.Tasks;
-using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {

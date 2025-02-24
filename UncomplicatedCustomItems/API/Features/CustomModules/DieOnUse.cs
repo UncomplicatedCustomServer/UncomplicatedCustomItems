@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using UncomplicatedCustomItems.Enums;
+﻿using UncomplicatedCustomItems.Enums;
 
 namespace UncomplicatedCustomItems.API.Features.CustomModules
 {

@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
@@ -8,7 +7,6 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
-using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Features
 {
