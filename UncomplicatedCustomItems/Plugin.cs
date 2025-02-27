@@ -4,12 +4,13 @@ using System;
 using HarmonyLib;
 using System.IO;
 using UncomplicatedCustomItems.API.Features.Helper;
+using System.Threading.Tasks;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
+
 using PlayerEvent = Exiled.Events.Handlers.Player;
 using ItemEvent = Exiled.Events.Handlers.Item;
 using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
-using System.Threading.Tasks;
 
 namespace UncomplicatedCustomItems
 {

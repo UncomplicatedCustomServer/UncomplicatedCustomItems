@@ -26,7 +26,6 @@ namespace UncomplicatedCustomItems.API
                 error = $"There's already another ICustomItem registered with the same Id ({item.Id})!";
                 return false;
             }
-
             
             switch (item.CustomItemType)
             {

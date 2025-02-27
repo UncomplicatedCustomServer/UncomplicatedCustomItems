@@ -15,7 +15,11 @@ using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
+using Exiled.API.Enums;
+using InventorySystem.Items.Firearms.Modules;
 using Exiled.API.Features.Items.FirearmModules.Primary;
+using Exiled.API.Features.Items.FirearmModules;
+using InventorySystem.Items.Firearms.Attachments.Components;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -81,7 +85,7 @@ namespace UncomplicatedCustomItems.API.Features
         public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
         {
             LogManager.Debug("Retrieving all loaded Flag Settings");
-            
+
             return _flagSettings.AsReadOnly();
         }
 
@@ -203,8 +207,9 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Weapon:
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
- 
+
                         Firearm.MagazineAmmo = WeaponData.MaxAmmo;
+                        Firearm.Damage = WeaponData.Damage;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
                         Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
                         Firearm.AmmoDrain = WeaponData.AmmoDrain;
@@ -221,6 +226,7 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             Firearm.AddAttachment(attachment);
                         }
+                        MagCheck(Firearm, WeaponData);
                         break;
 
                     case CustomItemType.Jailbird:
@@ -316,6 +322,7 @@ namespace UncomplicatedCustomItems.API.Features
                             {
                                 weaponData.MaxMagazineAmmo = firearm.MaxMagazineAmmo;
                                 weaponData.MaxBarrelAmmo = firearm.MaxBarrelAmmo;
+                                weaponData.Damage = firearm.Damage;
                                 weaponData.AmmoDrain = firearm.AmmoDrain;
                                 weaponData.Penetration = firearm.Penetration;
                                 weaponData.Inaccuracy = firearm.Inaccuracy;
@@ -428,6 +435,7 @@ namespace UncomplicatedCustomItems.API.Features
                             {
                                 firearm.MaxMagazineAmmo = weaponData.MaxMagazineAmmo;
                                 firearm.MaxBarrelAmmo = weaponData.MaxBarrelAmmo;
+                                firearm.Damage = weaponData.Damage;
                                 firearm.AmmoDrain = weaponData.AmmoDrain;
                                 firearm.Penetration = weaponData.Penetration;
                                 firearm.Inaccuracy = weaponData.Inaccuracy;
@@ -551,7 +559,7 @@ namespace UncomplicatedCustomItems.API.Features
             Player.ReferenceHub.serverRoles.RefreshLocalTag();
             LogManager.Debug($"{Player.Nickname} Badge successfully reset");
         }
-        
+
         internal void OnPickup(ItemAddedEventArgs pickedUp)
         {
             Pickup = null;
@@ -588,6 +596,84 @@ namespace UncomplicatedCustomItems.API.Features
 
             return string.Join(" ", output);
         }
+        
+        public void MagCheck(Firearm Firearm, IWeaponData WeaponData)
+        { 
+            LogManager.Debug($"Searching Attachments for {CustomItem.Name}");
+            foreach (Attachment attachment in Firearm.Attachments)
+            {
+                LogManager.Debug($"Checking Attachments for {CustomItem.Name}");
+                if(attachment.Name == AttachmentName.LowcapMagAP)
+                {
+                    LogManager.Debug($"Found attachment LowcapMagAP for {CustomItem.Name} adding 10 to MaxMagazineAmmo");
+                    WeaponData.MaxMagazineAmmo += 10;
+                    Firearm.MagazineAmmo += 10;
+                    LogManager.Debug($"Added 10 to MaxMagazineAmmo for {CustomItem.Name}");
+                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+                }
+                if(attachment.Name == AttachmentName.LowcapMagJHP)
+                {
+                    LogManager.Debug($"Found attachment LowcapMagJHP for {CustomItem.Name} adding 10 to MaxMagazineAmmo");
+                    WeaponData.MaxMagazineAmmo += 10;
+                    Firearm.MagazineAmmo += 10;
+                    LogManager.Debug($"Added 10 to MaxMagazineAmmo for {CustomItem.Name}");
+                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+                }
+                if(attachment.Name == AttachmentName.ExtendedMagFMJ)
+                {
+                    LogManager.Debug($"Found attachment ExtendedMagFMJ for {CustomItem.Name} removing 20 from MaxMagazineAmmo");
+                    WeaponData.MaxMagazineAmmo -= 20;
+                    Firearm.MagazineAmmo -= 20;
+                    LogManager.Debug($"Removed 20 from MaxMagazineAmmo for {CustomItem.Name}");
+                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+                }
+                if(attachment.Name == AttachmentName.ExtendedMagAP)
+                {
+                    LogManager.Debug($"Found attachment ExtendedMagAP for {CustomItem.Name} removing 20 from MaxMagazineAmmo");
+                    WeaponData.MaxMagazineAmmo -= 20;
+                    Firearm.MagazineAmmo -= 20;
+                    LogManager.Debug($"Removed 20 from MaxMagazineAmmo for {CustomItem.Name}");
+                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+                }
+                if(attachment.Name == AttachmentName.ExtendedMagJHP)
+                {
+                    LogManager.Debug($"Found attachment ExtendedMagJHP for {CustomItem.Name} removing 20 from MaxMagazineAmmo");
+                    WeaponData.MaxMagazineAmmo -= 20;
+                    Firearm.MagazineAmmo -= 20;
+                    LogManager.Debug($"Removed 20 from MaxMagazineAmmo for {CustomItem.Name}");
+                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+                }
+                if(attachment.Name == AttachmentName.DrumMagFMJ)
+                {
+                    FirearmType FirearmType = new();
+                    if(FirearmType == FirearmType.E11SR)
+                    {
+                        LogManager.Debug($"Found attachment DrumMagFMJ for {CustomItem.Name} removing 20 from MaxMagazineAmmo");
+                        WeaponData.MaxMagazineAmmo -= 20;
+                        Firearm.MagazineAmmo -= 20;
+                        LogManager.Debug($"Removed 20 from MaxMagazineAmmo for {CustomItem.Name}");
+                        LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+                    }
+                }
+                if(attachment.Name == AttachmentName.DrumMagAP)
+                {
+                    LogManager.Debug($"Found attachment DrumMagAP for {CustomItem.Name} adding 40 to MaxMagazineAmmo");
+                    WeaponData.MaxMagazineAmmo += 40;
+                    Firearm.MagazineAmmo += 40;
+                    LogManager.Debug($"Added 40 to MaxMagazineAmmo for {CustomItem.Name}");
+                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+                }
+                if(attachment.Name == AttachmentName.DrumMagJHP)
+                {
+                    LogManager.Debug($"Found attachment DrumMagJHP for {CustomItem.Name} removing 25 from MaxMagazineAmmo");
+                    WeaponData.MaxMagazineAmmo -= 25;
+                    Firearm.MagazineAmmo -= 25;
+                    LogManager.Debug($"Removed 25 from MaxMagazineAmmo for {CustomItem.Name}");
+                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+                }
+            }
+        }
+
         public void ReloadItemFlags()
         {
             LogManager.Debug("Reload Item Flags Function Triggered");
@@ -679,31 +765,40 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
+
+                System.Random rand = new();
+                Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
+                string randomPlayerId = randomPlayer?.Id.ToString();
+
                 if (Data.Command is not null && Data.Command.Length > 2)
                     if (!Data.Command.Contains("{p_id}"))
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()));
+                        Server.ExecuteCommand(Data.Command.Replace("{p_id}", player.Id.ToString()));
                     else
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("{p_id}", ""), player.Sender);
+                        Server.ExecuteCommand(Data.Command.Replace("{p_id}", player.Id.ToString()).Replace("{p_id}", ""), player.Sender);
+                    if (!Data.Command.Contains("{rp_id}"))
+                        Server.ExecuteCommand(Data.Command.Replace("{rp_id}", randomPlayerId));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("{rp_id}", randomPlayerId).Replace("{rp_id}", ""), player.Sender);
                     if (!Data.Command.Contains("{p_pos}"))
-                        Server.ExecuteCommand(Data.Command.Replace("%pos%", player.Position.ToString()));
+                        Server.ExecuteCommand(Data.Command.Replace("{p_pos}", player.Position.ToString()));
                     else
-                        Server.ExecuteCommand(Data.Command.Replace("%pos%", player.Position.ToString()).Replace("{p_pos}", ""), player.Sender);
+                        Server.ExecuteCommand(Data.Command.Replace("{p_pos}", player.Position.ToString()).Replace("{p_pos}", ""), player.Sender);
                     if (!Data.Command.Contains("{p_role}"))
-                        Server.ExecuteCommand(Data.Command.Replace("%role%", player.Role.ToString()));
+                        Server.ExecuteCommand(Data.Command.Replace("{p_role}", player.Role.ToString()));
                     else
-                        Server.ExecuteCommand(Data.Command.Replace("%role%", player.Role.ToString()).Replace("{p_role}", ""), player.Sender);
+                        Server.ExecuteCommand(Data.Command.Replace("{p_role}", player.Role.ToString()).Replace("{p_role}", ""), player.Sender);
                     if (!Data.Command.Contains("{p_health}"))
-                        Server.ExecuteCommand(Data.Command.Replace("%health%", player.Health.ToString()));
+                        Server.ExecuteCommand(Data.Command.Replace("{p_health}", player.Health.ToString()));
                     else
-                        Server.ExecuteCommand(Data.Command.Replace("%health%", player.Health.ToString()).Replace("{p_health}", ""), player.Sender);
+                        Server.ExecuteCommand(Data.Command.Replace("{p_health}", player.Health.ToString()).Replace("{p_health}", ""), player.Sender);
                     if (!Data.Command.Contains("{p_zone}"))
-                        Server.ExecuteCommand(Data.Command.Replace("%zone%", player.Zone.ToString()));
+                        Server.ExecuteCommand(Data.Command.Replace("{p_zone}", player.Zone.ToString()));
                     else
-                        Server.ExecuteCommand(Data.Command.Replace("%zone%", player.Zone.ToString()).Replace("{p_zone}", ""), player.Sender);
+                        Server.ExecuteCommand(Data.Command.Replace("{p_zone}", player.Zone.ToString()).Replace("{p_zone}", ""), player.Sender);
                     if (!Data.Command.Contains("{p_room}"))
-                        Server.ExecuteCommand(Data.Command.Replace("%room%", player.CurrentRoom.ToString()));
+                        Server.ExecuteCommand(Data.Command.Replace("{p_room}", player.CurrentRoom.ToString()));
                     else
-                        Server.ExecuteCommand(Data.Command.Replace("%room%", player.CurrentRoom.ToString()).Replace("{p_room}", ""), player.Sender);
+                        Server.ExecuteCommand(Data.Command.Replace("{p_room}", player.CurrentRoom.ToString()).Replace("{p_room}", ""), player.Sender);
 
                 Utilities.ParseResponse(player, Data);
 
@@ -714,6 +809,7 @@ namespace UncomplicatedCustomItems.API.Features
                     Destroy();
             }
         }
+        
 
 
         internal void HandleSelectedDisplayHint()
@@ -828,11 +924,6 @@ namespace UncomplicatedCustomItems.API.Features
         {
             item = Get(player, serial);
             return item != null;
-        }
-
-        internal static bool TryGet(object itemSerial, out SummonedCustomItem summonedCustomItem)
-        {
-            throw new NotImplementedException();
         }
     }
 }

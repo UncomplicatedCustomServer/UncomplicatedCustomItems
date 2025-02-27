@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // Общие сведения об этой сборке предоставляются следующим набором
@@ -8,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("UncomplicatedCustomItems")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("UncomplicatedCustomServer")]
 [assembly: AssemblyProduct("UncomplicatedCustomItems")]
-[assembly: AssemblyCopyright("Copyright ©  2024")]
+[assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
