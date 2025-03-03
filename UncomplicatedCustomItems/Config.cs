@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems
         public float SelectedMessageDuration { get; set; } = 3f;
 
         [Description("The hint message displayed when a player interacts with a workstation while holding a custom item with the WorkstationBan flag.")]
-        public string WorkstationBanHint { get; set; } = "You are not allowed to change the attachments on this weapon!";
+        public string WorkstationBanHint { get; set; } = "You are not allowed to change the attachments on %name%!";
 
         [Description("The duration (in seconds) for which the WorkstationBan hint is displayed.")]
         public float WorkstationBanHintDuration { get; set; } = 3f;

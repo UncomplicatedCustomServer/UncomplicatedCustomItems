@@ -16,10 +16,10 @@ using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
 using Exiled.API.Enums;
-using InventorySystem.Items.Firearms.Modules;
-using Exiled.API.Features.Items.FirearmModules.Primary;
-using Exiled.API.Features.Items.FirearmModules;
 using InventorySystem.Items.Firearms.Attachments.Components;
+using PlayerRoles.Subroutines;
+using System.Threading.Tasks;
+using Exiled.API.Extensions;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -74,7 +74,7 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 _flagSettings.Add(flagSettings);
             }
-            LogManager.Debug($"added {_flagSettings}");
+            LogManager.Debug($"added {string.Join(", ", _flagSettings)}");
         }
 
         public static bool Unregister(IFlagSettings flagSettings)
@@ -599,80 +599,22 @@ namespace UncomplicatedCustomItems.API.Features
         
         public void MagCheck(Firearm Firearm, IWeaponData WeaponData)
         { 
-            LogManager.Debug($"Searching Attachments for {CustomItem.Name}");
-            foreach (Attachment attachment in Firearm.Attachments)
+            LogManager.Debug($"Performing MagCheck for {CustomItem.Name}");
+            if (Firearm.MaxMagazineAmmo != WeaponData.MaxMagazineAmmo)
             {
-                LogManager.Debug($"Checking Attachments for {CustomItem.Name}");
-                if(attachment.Name == AttachmentName.LowcapMagAP)
-                {
-                    LogManager.Debug($"Found attachment LowcapMagAP for {CustomItem.Name} adding 10 to MaxMagazineAmmo");
-                    WeaponData.MaxMagazineAmmo += 10;
-                    Firearm.MagazineAmmo += 10;
-                    LogManager.Debug($"Added 10 to MaxMagazineAmmo for {CustomItem.Name}");
-                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-                }
-                if(attachment.Name == AttachmentName.LowcapMagJHP)
-                {
-                    LogManager.Debug($"Found attachment LowcapMagJHP for {CustomItem.Name} adding 10 to MaxMagazineAmmo");
-                    WeaponData.MaxMagazineAmmo += 10;
-                    Firearm.MagazineAmmo += 10;
-                    LogManager.Debug($"Added 10 to MaxMagazineAmmo for {CustomItem.Name}");
-                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-                }
-                if(attachment.Name == AttachmentName.ExtendedMagFMJ)
-                {
-                    LogManager.Debug($"Found attachment ExtendedMagFMJ for {CustomItem.Name} removing 20 from MaxMagazineAmmo");
-                    WeaponData.MaxMagazineAmmo -= 20;
-                    Firearm.MagazineAmmo -= 20;
-                    LogManager.Debug($"Removed 20 from MaxMagazineAmmo for {CustomItem.Name}");
-                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-                }
-                if(attachment.Name == AttachmentName.ExtendedMagAP)
-                {
-                    LogManager.Debug($"Found attachment ExtendedMagAP for {CustomItem.Name} removing 20 from MaxMagazineAmmo");
-                    WeaponData.MaxMagazineAmmo -= 20;
-                    Firearm.MagazineAmmo -= 20;
-                    LogManager.Debug($"Removed 20 from MaxMagazineAmmo for {CustomItem.Name}");
-                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-                }
-                if(attachment.Name == AttachmentName.ExtendedMagJHP)
-                {
-                    LogManager.Debug($"Found attachment ExtendedMagJHP for {CustomItem.Name} removing 20 from MaxMagazineAmmo");
-                    WeaponData.MaxMagazineAmmo -= 20;
-                    Firearm.MagazineAmmo -= 20;
-                    LogManager.Debug($"Removed 20 from MaxMagazineAmmo for {CustomItem.Name}");
-                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-                }
-                if(attachment.Name == AttachmentName.DrumMagFMJ)
-                {
-                    FirearmType FirearmType = new();
-                    if(FirearmType == FirearmType.E11SR)
-                    {
-                        LogManager.Debug($"Found attachment DrumMagFMJ for {CustomItem.Name} removing 20 from MaxMagazineAmmo");
-                        WeaponData.MaxMagazineAmmo -= 20;
-                        Firearm.MagazineAmmo -= 20;
-                        LogManager.Debug($"Removed 20 from MaxMagazineAmmo for {CustomItem.Name}");
-                        LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-                    }
-                }
-                if(attachment.Name == AttachmentName.DrumMagAP)
-                {
-                    LogManager.Debug($"Found attachment DrumMagAP for {CustomItem.Name} adding 40 to MaxMagazineAmmo");
-                    WeaponData.MaxMagazineAmmo += 40;
-                    Firearm.MagazineAmmo += 40;
-                    LogManager.Debug($"Added 40 to MaxMagazineAmmo for {CustomItem.Name}");
-                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-                }
-                if(attachment.Name == AttachmentName.DrumMagJHP)
-                {
-                    LogManager.Debug($"Found attachment DrumMagJHP for {CustomItem.Name} removing 25 from MaxMagazineAmmo");
-                    WeaponData.MaxMagazineAmmo -= 25;
-                    Firearm.MagazineAmmo -= 25;
-                    LogManager.Debug($"Removed 25 from MaxMagazineAmmo for {CustomItem.Name}");
-                    LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-                }
+                int Ammo = WeaponData.MaxMagazineAmmo - Firearm.MaxMagazineAmmo;
+                WeaponData.MaxMagazineAmmo += Ammo;
+                LogManager.Debug($"Added/Subtracted {Ammo} to/from MaxMagazineAmmo for {CustomItem.Name}");
+                LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
             }
         }
+
+        public void ShowDebugUi(Player Player)
+        {
+            Firearm Firearm = Item as Firearm;
+            Player.ShowHint($"{CustomItem.Name} Effective Damage: {Firearm.EffectiveDamage} \n {CustomItem.Name} Effective Inaccuracy: {Firearm.EffectiveInaccuracy} \n {CustomItem.Name} Effective Penetration: {Firearm.EffectivePenetration} \n {CustomItem.Name} Can See Through Dark: {Firearm.CanSeeThroughDark} \n {CustomItem.Name} Aiming: {Firearm.Aiming}");
+        }
+
 
         public void ReloadItemFlags()
         {
@@ -765,7 +707,6 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
-
                 System.Random rand = new();
                 Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
                 string randomPlayerId = randomPlayer?.Id.ToString();

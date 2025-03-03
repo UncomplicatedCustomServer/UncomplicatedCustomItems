@@ -5,7 +5,6 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using EventSource = Exiled.Events.Handlers.Player;
 using UncomplicatedCustomItems.API.Features.CustomModules;
-using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -105,7 +104,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             if (Item is null)
                 return;
-
+            
             Item.HandleEvent(ev.Player, ItemEvents.Use);
 
             if (Item.CustomItem.Reusable)
@@ -175,6 +174,13 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             Item?.HandleEvent(ev.Player, ItemEvents.Noclip);
+            if (Plugin.Instance.Config.Debug == true)
+            {
+                if (ev.Player.RemoteAdminPermissions == PlayerPermissions.PlayersManagement)
+                {
+                    Item.ShowDebugUi(ev.Player);
+                }
+            }
         }
     }
 }

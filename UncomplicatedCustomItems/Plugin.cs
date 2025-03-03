@@ -58,6 +58,7 @@ namespace UncomplicatedCustomItems
             }
 
             PlayerEvent.Hurt += Handler.OnHurt;
+            PlayerEvent.Hurt += Handler.OnHurt2;
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.Shooting += Handler.OnShooting;
             PlayerEvent.UsedItem += Handler.OnItemUse;
@@ -68,7 +69,9 @@ namespace UncomplicatedCustomItems
             ServerEvent.RoundEnded += Handler.Onroundend;
             PlayerEvent.UsingItem += Handler.OnUsingItem;
             PlayerEvent.Shot += Handler.OnShot;
+            PlayerEvent.Shot += Handler.OnShot2;
             ItemEvent.ChargingJailbird += Handler.OnCharge;
+            PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
 
             LogManager.History.Clear();
 
@@ -107,6 +110,7 @@ namespace UncomplicatedCustomItems
             _harmony = null;
 
             PlayerEvent.Hurt -= Handler.OnHurt;
+            PlayerEvent.Hurt -= Handler.OnHurt2;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.Shooting -= Handler.OnShooting;
             ServerEvent.WaitingForPlayers -= Handler.OnWaitingForPlayers;
@@ -117,7 +121,9 @@ namespace UncomplicatedCustomItems
             ServerEvent.RoundEnded -= Handler.Onroundend;
             PlayerEvent.UsingItem -= Handler.OnUsingItem;
             PlayerEvent.Shot -= Handler.OnShot;
+            PlayerEvent.Shot -= Handler.OnShot2;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
+            PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
 
             Instance = null;
             base.OnDisabled();

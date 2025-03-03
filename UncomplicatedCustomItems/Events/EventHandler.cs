@@ -17,6 +17,7 @@ using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Map;
 using Light = Exiled.API.Features.Toys.Light;
 using Exiled.Events.EventArgs.Server;
+using Mirror;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -89,8 +90,15 @@ namespace UncomplicatedCustomItems.Events
                         LogManager.Debug($"LifeSteal custom flag triggered, healed {Amount} HP");
                     }
                 }
-
-                if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<HalfLifeSteal>())
+                else
+                {
+                    return;
+                }
+            }
+        }
+        public void OnHurt2(HurtEventArgs ev)
+        {
+            if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<HalfLifeSteal>())
                 {
                     LogManager.Debug("HalfLifeSteal custom flag is being triggered");
 
@@ -101,8 +109,11 @@ namespace UncomplicatedCustomItems.Events
                         LogManager.Debug($"HalfLifeSteal custom flag triggered, healed {HealedAmount} HP");
                     }
                 }
+                else
+                {
+                    return;
+                }
             }
-        }
         public void OnTriggeringTesla(TriggeringTeslaEventArgs ev)
         {
             if (!ev.IsAllowed)
@@ -110,7 +121,10 @@ namespace UncomplicatedCustomItems.Events
 
             if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<DoNotTriggerTeslaGates>())
                 ev.IsTriggerable = false;
-
+            else
+            {
+                return;
+            }
         }
         public void OnShooting(ShootingEventArgs ev)
         {
@@ -121,10 +135,10 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Firearm != null)
                 {
-                    if (ev.Firearm is Firearm firearm2)
+                    if (ev.Firearm is Firearm Firearm)
                     {
-                        firearm2.MagazineAmmo = firearm2.MaxMagazineAmmo;
-                        LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {firearm2.MagazineAmmo}");
+                        Firearm.MagazineAmmo = Firearm.MaxMagazineAmmo;
+                        LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {Firearm.MagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
                     }
                 }
                 else
@@ -132,17 +146,28 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
+            else
+            {
+                return;
+            }
+        }
+        public void OnDieOnUseFlag(ShootingEventArgs ev)
+        {
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<DieOnUse>())
             {
                 if (ev.Item != null)
                 {
                     ev.Player.Kill(DamageType.Custom);
-                    LogManager.Debug("DieOnUse triggered: player killed.");
+                    LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed.");
                 }
                 else
                 {
-                    LogManager.Error("DieOnUse flag was triggered but couldnt be ran.");
+                    LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}.");
                 }
+            }
+            else
+            {
+                return;
             }
         }
         public void OnItemUse(UsedItemEventArgs ev)
@@ -156,8 +181,12 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Error("DieOnUse flag was triggered but couldnt be ran.");
+                    LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
+            }
+            else
+            {
+                return;
             }
         }
         public void OnChangingAttachments(ChangingAttachmentsEventArgs ev)
@@ -172,8 +201,12 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Error("WorkstationBan flag was triggered but couldnt be ran.");
+                    LogManager.Error($"WorkstationBan flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
+            }
+            else
+            {
+                return;
             }
         }
         public void OnWorkstationActivation(ActivatingWorkstationEventArgs ev)
@@ -188,8 +221,12 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Error("WorkstationBan flag was triggered but couldnt be ran.");
+                    LogManager.Error($"WorkstationBan flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
+            }
+            else
+            {
+                return;
             }
         }
 
@@ -220,7 +257,7 @@ namespace UncomplicatedCustomItems.Events
                             }
                             else
                             {
-                                LogManager.Error($"Failed to parse color: {flagSetting.GlowColor}");
+                                LogManager.Error($"Failed to parse color: {flagSetting.GlowColor} for {customItem.CustomItem.Name}");
                             }
                         }
                     }
@@ -290,8 +327,12 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Error("EffectWhenUsed Flag was triggered but couldnt be ran.");
+                    LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {customItem.CustomItem.Name}");
                 }
+            }
+            else
+            {
+                return;
             }
         }
         public void OnShot(ShotEventArgs ev)
@@ -327,7 +368,7 @@ namespace UncomplicatedCustomItems.Events
                             EffectType Effect = flagSetting.Effect;
                             float Duration = flagSetting.EffectDuration;
                             byte Intensity = flagSetting.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                            ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
                         }
                     }
                     else
@@ -337,9 +378,16 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Error("EffectWhenUsed Flag was triggered but couldnt be ran.");
+                    LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
+            else
+            {
+                return;
+            }
+        }
+        public void OnShot2(ShotEventArgs ev)
+        {
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectShot>())
             {
                 if (ev.Item != null)
@@ -380,8 +428,12 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Error("EffectShot Flag was triggered but couldnt be ran.");
+                    LogManager.Error($"EffectShot Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}.");
                 }
+            }
+            else
+            {
+                return;
             }
         }
 
@@ -393,6 +445,10 @@ namespace UncomplicatedCustomItems.Events
                 {
                     ev.IsAllowed = false;
                 }
+            }
+            else
+            {
+                return;
             }
         }
 
@@ -411,7 +467,7 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else
                 {
-                    LogManager.Error($"Couldnt destroy light on {ev.Pickup}.");
+                    LogManager.Error($"Couldnt destroy light on {ev.Pickup.Type}.");
                 }
             }
         }
@@ -424,7 +480,7 @@ namespace UncomplicatedCustomItems.Events
             Light ItemLight = ActiveLights[pickup];
             if (ItemLight != null && ItemLight.Base != null)
             {
-                GameObject.Destroy(ItemLight.Base.gameObject);
+                NetworkServer.Destroy(ItemLight.Base.gameObject);
             }
 
             ActiveLights.Remove(pickup);

@@ -12,6 +12,7 @@ namespace UncomplicatedCustomItems.API.Features
 {
     public class CustomItem : ICustomItem
     {
+        #nullable enable
         /// <summary>
         /// Gets a list of every registered <see cref="ICustomItem"/>
         /// </summary>
@@ -125,7 +126,7 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Custom flags for the item")]
         public CustomFlags? CustomFlags { get; set; } = new();
 
-        public IFlagSettings FlagSettings { get; set; } = new FlagSettings();
+        public IFlagSettings? FlagSettings { get; set; } = new FlagSettings();
 
         /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item

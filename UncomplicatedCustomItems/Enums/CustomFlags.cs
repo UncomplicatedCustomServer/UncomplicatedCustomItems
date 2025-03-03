@@ -6,7 +6,7 @@ namespace UncomplicatedCustomItems.Enums
     public enum CustomFlags
     {
         NotExecutable = -1,
-        None = 0,
+        None = 1,
         DoNotTriggerTeslaGates = 1 << 1,
         LifeSteal = 1 << 2,
         HalfLifeSteal = 1 << 3,
