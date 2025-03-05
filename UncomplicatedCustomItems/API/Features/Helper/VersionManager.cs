@@ -97,7 +97,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             byte[] bytes = SHA256Managed.Create().ComputeHash(file);
 
             file.Close();
-
             return BitConverter.ToString(bytes).Replace("-", string.Empty);
         }
     }

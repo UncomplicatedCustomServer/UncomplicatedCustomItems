@@ -26,9 +26,7 @@ namespace UncomplicatedCustomItems.Events
         private Dictionary<Pickup, Light> ActiveLights = [];
         public float Amount { get; set; } = 0f;
         public float Percentage = 0.5f;
-        public static Assembly EventHandlerAssembly => Loader.Plugins.Where(plugin => plugin.Name is "Exiled.Events").FirstOrDefault()?.Assembly;
-
-        public static Type PlayerHandler => EventHandlerAssembly?.GetTypes().Where(x => x.FullName == "Exiled.Events.Handlers.Player").FirstOrDefault();
+        
         public void OnHurt(HurtEventArgs ev)
         {
             LogManager.Debug("OnHurt event is being triggered");
@@ -414,7 +412,7 @@ namespace UncomplicatedCustomItems.Events
                                 return;
                             }
 
-                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Target}");
+                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Target.DisplayNickname}");
                             EffectType Effect = flagSetting.Effect;
                             float Duration = flagSetting.EffectDuration;
                             byte Intensity = flagSetting.EffectIntensity;
@@ -495,8 +493,6 @@ namespace UncomplicatedCustomItems.Events
             LogManager.Warn("Bugs are to be expected; please report them in our Discord");
             LogManager.Warn(">> https://discord.gg/5StRGu8EJV <<");
             LogManager.Warn("===========================================");
-            LogManager.Warn("Debug logs will be activated due to this!");
-            Plugin.Instance.Config.Debug = true;
         }
     }
 }
