@@ -15,11 +15,6 @@ using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
-using Exiled.API.Enums;
-using InventorySystem.Items.Firearms.Attachments.Components;
-using PlayerRoles.Subroutines;
-using System.Threading.Tasks;
-using Exiled.API.Extensions;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -554,6 +549,10 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
+        /// <summary>
+        /// Resets the badge of the player.
+        /// <param name="Player"></param>
+        /// </summary>
         public void ResetBadge(Player Player)
         {
             Player.ReferenceHub.serverRoles.RefreshLocalTag();
@@ -570,7 +569,7 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
-
+        
         public void OnDrop(DroppedItemEventArgs dropped)
         {
             Pickup = dropped.Pickup;
@@ -581,7 +580,10 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Pickup.Serial;
             HandleEvent(dropped.Player, ItemEvents.Drop);
         }
-        
+
+        /// <summary>
+        /// loads the Item Flags for the player.
+        /// </summary>
         public string LoadItemFlags()
         {
             List<string> output = new();
@@ -596,7 +598,12 @@ namespace UncomplicatedCustomItems.API.Features
 
             return string.Join(" ", output);
         }
-        
+
+        /// <summary>
+        /// Checks the magazine of the held weapon.
+        /// <param name="Firearm"></param>
+        /// <param name="WeaponData"></param>
+        /// </summary>
         public void MagCheck(Firearm Firearm, IWeaponData WeaponData)
         { 
             LogManager.Debug($"Performing MagCheck for {CustomItem.Name}");
@@ -615,7 +622,9 @@ namespace UncomplicatedCustomItems.API.Features
             Player.ShowHint($"{CustomItem.Name} Effective Damage: {Firearm.EffectiveDamage} \n {CustomItem.Name} Effective Inaccuracy: {Firearm.EffectiveInaccuracy} \n {CustomItem.Name} Effective Penetration: {Firearm.EffectivePenetration} \n {CustomItem.Name} Can See Through Dark: {Firearm.CanSeeThroughDark} \n {CustomItem.Name} Aiming: {Firearm.Aiming}");
         }
 
-
+        /// <summary>
+        /// Reloads the Flags for the player.
+        /// </summary>
         public void ReloadItemFlags()
         {
             LogManager.Debug("Reload Item Flags Function Triggered");
@@ -626,6 +635,9 @@ namespace UncomplicatedCustomItems.API.Features
             LogManager.Debug($"Loaded Flag(s): {CustomItem.CustomFlags}");
         }
 
+        /// <summary>
+        /// Unloads the Flags for the player.
+        /// </summary>
         public void UnloadItemFlags()
         {
             LogManager.Debug("Unload Item Flags Triggered");

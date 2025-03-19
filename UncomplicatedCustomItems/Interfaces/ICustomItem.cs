@@ -1,8 +1,6 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.Enums;
-using System.Collections.Generic;
-using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
