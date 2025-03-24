@@ -13,7 +13,7 @@
 <br><br>
 
 ## What's UncomplicatedCustomItems
-**UncomplicatedCustomItems** or **UCI** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) that allow you to create fully configurable and customizable custom items with YAML.\
+**UncomplicatedCustomItems** or **UCI** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) that allow you to create fully configurable and customizable custom items with YAML.
 You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins>description</ins> and many more things. 
 
 ## Features
@@ -28,7 +28,7 @@ You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins
 Download the `UncomplicatedCustomItems.dll` from the [latest release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest) and put it inside the `EXILED/Plugins` folder.
 
 ## Having skill issues? <= (Errors)
-Please do ucilogs in your server console then paste the code in the [Bug Report Forum](https://discord.com/channels/1170301876990914631/1230615155193151602) of our Discord server. <br> Please include instructions of how to replicate the bug if possible.
+Please do ucilogs in your server console then paste the code in the [Bug Report Forum](https://discord.com/channels/1170301876990914631/1230615155193151602) of our Discord server. <br> Please include instructions of how to replicate the bug if possible. <br>
 If you can't fix the problem you can ask the community on our [Discord server](https://discord.gg/5StRGu8EJV)!
 
 ## Consider donating to UncomplicatedCustomServer Collective
