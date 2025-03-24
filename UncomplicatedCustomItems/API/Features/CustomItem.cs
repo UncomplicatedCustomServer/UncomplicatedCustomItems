@@ -126,6 +126,9 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Custom flags for the item")]
         public CustomFlags? CustomFlags { get; set; } = new();
 
+        /// <summary>
+        /// Custom flag settings of the item
+        /// </summary>
         public IFlagSettings FlagSettings { get; set; } = new FlagSettings();
 
         /// <summary>

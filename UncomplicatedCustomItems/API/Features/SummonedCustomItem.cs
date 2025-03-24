@@ -44,7 +44,9 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
+
         public float Capacity { get; set; } = 0f;
+        
         internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
 
         /// <summary>
@@ -58,8 +60,15 @@ namespace UncomplicatedCustomItems.API.Features
 
         private List<ICustomModule> _customModules { get; set; }
 
+        /// <summary>
+        /// List of all flag settings.
+        /// </summary>
         public static readonly List<IFlagSettings> _flagSettings = new();
 
+        /// <summary>
+        /// Registers flag setting(s).
+        /// <param name="flagSettings"></param>
+        /// </summary>
         public static void Register(IFlagSettings flagSettings)
         {
             if (flagSettings == null)
@@ -72,6 +81,10 @@ namespace UncomplicatedCustomItems.API.Features
             LogManager.Debug($"added {string.Join(", ", _flagSettings)}");
         }
 
+        /// <summary>
+        /// Unregisters a flag setting.
+        /// <param name="flagSettings"></param>
+        /// </summary>
         public static bool Unregister(IFlagSettings flagSettings)
         {
             return _flagSettings.Remove(flagSettings);
@@ -83,7 +96,9 @@ namespace UncomplicatedCustomItems.API.Features
 
             return _flagSettings.AsReadOnly();
         }
-
+        /// <summary>
+        /// Clears all flag settings
+        /// </summary>
         public static void ClearAllFlagSettings()
         {
             _flagSettings.Clear();
@@ -508,7 +523,11 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
-        public string LoadBadge(Player player)
+        /// <summary>
+        /// Loads the badge of the player according to the CustomItem BadgeName field.
+        /// <param name="Player"></param>
+        /// </summary>
+        public string LoadBadge(Player Player)
         {
             LogManager.Debug("LoadBadge() Triggered");
             string output = "Badge: ";
@@ -527,7 +546,7 @@ namespace UncomplicatedCustomItems.API.Features
 
             LogManager.Debug($"Badge loaded: {output}");
 
-            CustomItemBadgeApplier(player, CustomItem);
+            CustomItemBadgeApplier(Player, CustomItem);
 
             return output;
         }
@@ -586,6 +605,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public string LoadItemFlags()
         {
+
             List<string> output = new();
 
             if (_customModules.Count > 0)
@@ -616,6 +636,10 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
+        /// <summary>
+        /// Displays the debug ui for weapon information to the selected player.
+        /// <param name="Player"></param>
+        /// </summary>
         public void ShowDebugUi(Player Player)
         {
             Firearm Firearm = Item as Firearm;
@@ -623,7 +647,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Reloads the Flags for the player.
+        /// Reloads the Flags for the item.
         /// </summary>
         public void ReloadItemFlags()
         {
@@ -764,13 +788,18 @@ namespace UncomplicatedCustomItems.API.Features
         }
         
 
-
+        /// <summary>
+        /// Displays the hint from the SelectedMessage field in the plugin config.
+        /// </summary>
         internal void HandleSelectedDisplayHint()
         {
             if (Plugin.Instance.Config.SelectedMessage.Length > 1)
                 Owner.ShowHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
         }
 
+        /// <summary>
+        /// Displays the hint from the PickedUpMessage field in the plugin config.
+        /// </summary>
         internal void HandlePickedUpDisplayHint()
         {
             if (Plugin.Instance.Config.PickedUpMessage.Length > 1)
@@ -808,6 +837,9 @@ namespace UncomplicatedCustomItems.API.Features
             return false;
         }
 
+        /// <summary>
+        /// Destroys the customitem.
+        /// </summary>
         public void Destroy()
         {
             List.Remove(this);

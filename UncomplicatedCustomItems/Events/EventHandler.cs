@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Exiled.API.Enums;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Item;
 using Exiled.Events.EventArgs.Player;
-using Exiled.Loader;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -18,6 +16,7 @@ using Exiled.Events.EventArgs.Map;
 using Light = Exiled.API.Features.Toys.Light;
 using Exiled.Events.EventArgs.Server;
 using Mirror;
+using Exiled.API.Features;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -493,6 +492,9 @@ namespace UncomplicatedCustomItems.Events
             LogManager.Warn("Bugs are to be expected; please report them in our Discord");
             LogManager.Warn(">> https://discord.gg/5StRGu8EJV <<");
             LogManager.Warn("===========================================");
+            LogManager.Warn("Debug logs will be activated due to this!");
+            Plugin.Instance.Config.Debug = true;
+            Log.DebugEnabled.Add(Plugin.Instance.Assembly);
         }
     }
 }

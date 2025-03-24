@@ -10,7 +10,7 @@ namespace UncomplicatedCustomItems.Interfaces
 
         public abstract uint Count { get; set; }
         
-        public abstract List<Vector4> Coords { get; set; }
+        public abstract List<Vector3> Coords { get; set; }
 
         public abstract List<RoomType> Rooms { get; set; }
 

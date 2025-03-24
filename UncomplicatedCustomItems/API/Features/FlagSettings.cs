@@ -6,7 +6,6 @@ namespace UncomplicatedCustomItems.API.Features
 {
     public class FlagSettings : IFlagSettings
     {
-        #nullable enable
         /// <summary>
         /// Sets the glow color of the item if it has the ItemGlow custom flag.
         /// </summary>
