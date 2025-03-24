@@ -460,7 +460,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Pickup != null)
                 {
-                    DestroyLightOnItem(ev.Pickup);
+                    DestroyLightOnPickup(ev.Pickup);
                 }
                 else
                 {
@@ -468,19 +468,24 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
-        public void DestroyLightOnItem(Pickup pickup)
+
+        /// <summary>
+        /// Destroys the light on a customitem pickup if it has one.
+        /// <param name="Pickup"></param>
+        /// </summary>
+        public void DestroyLightOnPickup(Pickup Pickup)
         {
-            LogManager.Debug("DestroyLightOnItem method triggered");
-            if (pickup == null || !ActiveLights.ContainsKey(pickup))
+            LogManager.Debug("DestroyLightOnPickup method triggered");
+            if (Pickup == null || !ActiveLights.ContainsKey(Pickup))
                 return;
 
-            Light ItemLight = ActiveLights[pickup];
+            Light ItemLight = ActiveLights[Pickup];
             if (ItemLight != null && ItemLight.Base != null)
             {
                 NetworkServer.Destroy(ItemLight.Base.gameObject);
             }
 
-            ActiveLights.Remove(pickup);
+            ActiveLights.Remove(Pickup);
             LogManager.Debug("Light successfully destroyed.");
         }
         public async void OnWaitingForPlayers()
