@@ -13,7 +13,6 @@ namespace UncomplicatedCustomItems.Events.Internal
         public static void Register()
         {
             EventSource.ItemAdded += ShowItemInfoOnItemAdded;
-            EventSource.Hurting += SetDamageFromCustomWeaponOnHurting;
             EventSource.DroppedItem += DroppedItemEvent;
             EventSource.ChangedItem += ChangeItemInHand;
             EventSource.ChangingItem += ChangingItemInHand;
@@ -26,7 +25,6 @@ namespace UncomplicatedCustomItems.Events.Internal
         public static void Unregister()
         {
             EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
-            EventSource.Hurting -= SetDamageFromCustomWeaponOnHurting;
             EventSource.DroppedItem -= DroppedItemEvent;
             EventSource.ChangedItem -= ChangeItemInHand;
             EventSource.ChangingItem -= ChangingItemInHand;
@@ -61,40 +59,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 SummonedCustomItem.Register(Item.CustomItem.FlagSettings);
                 SummonedCustomItem.GetAllFlagSettings();
             }
-        }
-
-        /// <summary>
-        /// Set damage if weapon is custom item
-        /// </summary>
-        /// <param name="ev"></param>
-        private static void SetDamageFromCustomWeaponOnHurting(HurtingEventArgs ev)
-        {
-            if (ev.DamageHandler.Type is not Exiled.API.Enums.DamageType.Firearm)
-            {
-                return;
-            }
-
-            if (ev.Attacker.CurrentItem is not Firearm)
-            {
-                return;
-            }
-
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
-            {
-                return;
-            }
-
-            if (Item.CustomItem.CustomItemType != CustomItemType.Weapon)
-            {
-                return;
-            }
-
-            if (Item.CustomItem.CustomData is not IWeaponData WeaponData)
-            {
-                return;
-            }
-
-            ev.DamageHandler.Damage = WeaponData.Damage;
         }
 
         private static void OnItemUsingCompleted(UsingItemCompletedEventArgs ev)

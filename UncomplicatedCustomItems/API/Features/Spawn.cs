@@ -22,7 +22,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         /// <summary>
         /// The <see cref="Vector3"/> positions where the item is allowed to spawn.
-        /// This is an array, allowing multiple values, with one being randomly chosen.
         /// If this is empty, the <see cref="Rooms"/> parameter will be used instead.
         /// </summary>
         [Description("Custom coordinates where the custom item will spawn.")]
