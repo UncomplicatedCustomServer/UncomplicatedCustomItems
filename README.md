@@ -46,4 +46,4 @@ Please consider donating something to support our work through **OpenCollective*
   **Discord:** `dr.agenda`
 ### Mr. Baguetter
   **Discord:** `@ender1992`\
-  **Email:** `Mr.Baguetter1@gmail.com`
+  **Email:** `baguetter@thaumielscpsl.site`
