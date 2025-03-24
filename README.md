@@ -27,7 +27,8 @@ You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins
 ## Installation
 Download the `UncomplicatedCustomItems.dll` from the [latest release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest) and put it inside the `EXILED/Plugins` folder.
 
-## Having skill issues?
+## Having skill issues? <= (Errors)
+Please do ucilogs in your server console then paste the code in the [Bug Report Forum](https://discord.com/channels/1170301876990914631/1230615155193151602) of our Discord server. <br> Please include instructions of how to replicate the bug if possible.
 If you can't fix the problem you can ask the community on our [Discord server](https://discord.gg/5StRGu8EJV)!
 
 ## Consider donating to UncomplicatedCustomServer Collective
