@@ -16,6 +16,9 @@
 **UncomplicatedCustomItems** or **UCI** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) that allow you to create fully configurable and customizable custom items with YAML.
 You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins>description</ins> and many more things. 
 
+## UCS Wiki
+Check out the [UCS Wiki](https://thaumielscpsl.site/ucs/wiki) for more information.
+
 ## Features
 **UCI** has lots of features like:
 - Unlimited number of custom items
