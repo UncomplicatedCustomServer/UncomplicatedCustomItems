@@ -87,10 +87,7 @@ namespace UncomplicatedCustomItems.Events
                         LogManager.Debug($"LifeSteal custom flag triggered, healed {Amount} HP");
                     }
                 }
-                else
-                {
-                    return;
-                }
+                else return;
             }
         }
         public void OnHurt2(HurtEventArgs ev)
@@ -106,10 +103,7 @@ namespace UncomplicatedCustomItems.Events
                         LogManager.Debug($"HalfLifeSteal custom flag triggered, healed {HealedAmount} HP");
                     }
                 }
-                else
-                {
-                    return;
-                }
+                else return;
             }
         public void OnTriggeringTesla(TriggeringTeslaEventArgs ev)
         {
@@ -118,10 +112,7 @@ namespace UncomplicatedCustomItems.Events
 
             if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<DoNotTriggerTeslaGates>())
                 ev.IsTriggerable = false;
-            else
-            {
-                return;
-            }
+            else return;
         }
         public void OnShooting(ShootingEventArgs ev)
         {
@@ -143,10 +134,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
         public void OnDieOnUseFlag(ShootingEventArgs ev)
         {
@@ -162,10 +150,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}.");
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
         public void OnItemUse(UsedItemEventArgs ev)
         {
@@ -181,10 +166,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
         public void OnChangingAttachments(ChangingAttachmentsEventArgs ev)
         {
@@ -201,10 +183,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"WorkstationBan flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
         public void OnWorkstationActivation(ActivatingWorkstationEventArgs ev)
         {
@@ -221,10 +200,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"WorkstationBan flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
 
         public void OnDrop(DroppedItemEventArgs ev)
@@ -279,6 +255,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("ItemGlow flag was triggered but couldnt be ran.");
                 }
             }
+            else return;
         }
         public void OnUsingItem(UsingItemEventArgs ev)
         {
@@ -327,10 +304,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {customItem.CustomItem.Name}");
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
         public void OnShot(ShotEventArgs ev)
         {
@@ -378,10 +352,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
         public void OnShot2(ShotEventArgs ev)
         {
@@ -428,10 +399,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"EffectShot Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}.");
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
 
         public void OnCharge(ChargingJailbirdEventArgs ev)
@@ -443,10 +411,7 @@ namespace UncomplicatedCustomItems.Events
                     ev.IsAllowed = false;
                 }
             }
-            else
-            {
-                return;
-            }
+            else return;
         }
 
         public void Onroundend(RoundEndedEventArgs ev)

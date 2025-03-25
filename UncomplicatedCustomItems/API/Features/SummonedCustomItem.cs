@@ -620,7 +620,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Checks the magazine of the held weapon.
+        /// Checks the magazine of the held weapon to remove the capacity modifier from a modification.
         /// <param name="Firearm"></param>
         /// <param name="WeaponData"></param>
         /// </summary>

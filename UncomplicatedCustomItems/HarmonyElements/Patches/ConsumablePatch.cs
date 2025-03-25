@@ -2,6 +2,7 @@
 using InventorySystem.Items.Usables;
 using UncomplicatedCustomItems.API.Features;
 
+// Is this even being used?
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
     [HarmonyPatch(typeof(Consumable), nameof(Consumable.ActivateEffects))]
