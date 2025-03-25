@@ -8,7 +8,7 @@
     <a href='https://discord.gg/5StRGu8EJV'><img src='https://www.allkpop.com/upload/2021/01/content/262046/1611711962-discord-button.png' height="100"></a>
   <br><br>
 </div>
-## [**UCS Wiki**](https://thaumielscpsl.site/ucs/wiki) <br><br>
+## (**UCS Wiki**)[https://thaumielscpsl.site/ucs/wiki] <br><br>
 **EXILED** >= `v9.5.0`
 <br><br>
 
