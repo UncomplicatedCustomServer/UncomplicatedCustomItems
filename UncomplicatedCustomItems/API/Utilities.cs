@@ -83,7 +83,7 @@ https://discord.com/channels/1170301876990914631/1339667184435073074";
                 case CustomItemType.Armor:
                     if (item.CustomData is not IArmorData)
                     {
-error = @$"The item has been flagged as 'Armor' but the CustomData class is not 'IArmorData ', 
+error = @$"The item has been flagged as 'Armor' but the CustomData class is not 'IArmorData', 
 found '{item.CustomData.GetType().Name}' 
 
 The CustomData formatting is incorrect. Please follow the format found here: 
@@ -102,7 +102,7 @@ https://discord.com/channels/1170301876990914631/1339666435491762197";
                 case CustomItemType.ExplosiveGrenade:
                     if (item.CustomData is not IExplosiveGrenadeData)
                     {
-error = @$"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'IExplosiveGrenadeData ', 
+error = @$"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'IExplosiveGrenadeData', 
 found '{item.CustomData.GetType().Name}' 
 
 The CustomData formatting is incorrect. Please follow the format found here: 
@@ -121,7 +121,7 @@ https://discord.com/channels/1170301876990914631/1339667358398152798";
                 case CustomItemType.FlashGrenade:
                     if (item.CustomData is not IFlashGrenadeData)
                     {
-error = @$"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'IFlashGrenadeData ', 
+error = @$"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'IFlashGrenadeData', 
 found '{item.CustomData.GetType().Name}' 
 
 The CustomData formatting is incorrect. Please follow the format found here: 
@@ -140,7 +140,7 @@ https://discord.com/channels/1170301876990914631/1339666785313755156";
                 case CustomItemType.Jailbird:
                     if (item.CustomData is not IJailbirdData)
                     {
-error = @$"The item has been flagged as 'Jailbird' but the CustomData class is not 'IJailbirdData ', 
+error = @$"The item has been flagged as 'Jailbird' but the CustomData class is not 'IJailbirdData', 
 found '{item.CustomData.GetType().Name}' 
 
 The CustomData formatting is incorrect. Please follow the format found here: 
@@ -159,7 +159,7 @@ https://discord.com/channels/1170301876990914631/1342257093629182002";
                 case CustomItemType.Medikit:
                     if (item.CustomData is not IMedikitData)
                     {
-error = @$"The item has been flagged as 'Medikit' but the CustomData class is not 'IMedikitData ', 
+error = @$"The item has been flagged as 'Medikit' but the CustomData class is not 'IMedikitData', 
 found '{item.CustomData.GetType().Name}' 
 
 The CustomData formatting is incorrect. Please follow the format found here: 
@@ -178,7 +178,7 @@ https://discord.com/channels/1170301876990914631/1339667529366372443";
                 case CustomItemType.Painkillers:
                     if (item.CustomData is not IPainkillersData)
                     {
-error = @$"The item has been flagged as 'Painkillers' but the CustomData class is not 'IPainkillersData ', 
+error = @$"The item has been flagged as 'Painkillers' but the CustomData class is not 'IPainkillersData', 
 found '{item.CustomData.GetType().Name}' 
 
 The CustomData formatting is incorrect. Please follow the format found here: 
@@ -195,7 +195,7 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
                     break;
 
                 default:
-                    error = "Unknown error? Uhm please report it on our discord server! D:";
+                    error = "Unknown error how did you do this? Anyway please report it on our discord server! D:";
                     return false;
             }
 
