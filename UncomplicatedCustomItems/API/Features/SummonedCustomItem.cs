@@ -191,7 +191,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Apply the custom properties of the current <see cref="ICustomItem"/>
         /// </summary>
-        private void SetProperties()
+        public void SetProperties()
         {
             if (Item is not null)
                 switch (CustomItem.CustomItemType)
@@ -294,7 +294,7 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Weight = CustomItem.Weight;
             }
         }
-        private void SaveProperties()
+        public void SaveProperties()
         {
             if (Item is not null)
             {
