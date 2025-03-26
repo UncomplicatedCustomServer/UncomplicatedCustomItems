@@ -10,9 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Struct;
-using UncomplicatedCustomItems;
 
 using PlayerHandler = Exiled.Events.Handlers.Player;
 
@@ -75,7 +73,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private bool _alreadyManaged { get; set; } = false;
 
         /// <summary>
-        /// Create a new istance of the HttpManager
+        /// Create a new instance of the HttpManager
         /// </summary>
         /// <param name="prefix"></param>
         public HttpManager(string prefix)
@@ -124,9 +122,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             try
             {
                 Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.PutAsync(url, new StringContent(content, Encoding.UTF8, "text/plain")));
-
                 Response.Wait();
-
                 return Response.Result;
             }
             catch (Exception)
@@ -134,6 +130,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return null;
             }
         }
+
 
         public string RetriveString(HttpResponseMessage response)
         {
@@ -162,7 +159,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void LoadLatestVersion()
         {
-            LogManager.Warn("Proceeding to check first verion [B] [MACCPR]");
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
 
             if (Version is not null && Version != string.Empty && Version.Contains("."))
@@ -251,7 +247,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version.ToString(4)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
         }

@@ -49,16 +49,21 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             content = null;
 
             if (MessageSent)
-                return HttpStatusCode.Forbidden;
+                {
+                    return HttpStatusCode.Forbidden;
+                }
 
             if (History.Count < 1)
-                return HttpStatusCode.Forbidden;
+                {
+                    return HttpStatusCode.Forbidden;
+                }
+
 
             string Content = string.Empty;
 
             foreach (LogEntry Element in History)
                 Content += $"{Element}\n";
-
+            
             // Now let's add the separator
             Content += "\n======== BEGIN CUSTOM ITEMS ========\n";
 

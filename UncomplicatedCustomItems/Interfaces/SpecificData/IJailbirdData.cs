@@ -9,8 +9,6 @@
         public float FlashDuration { get; set; }
 
         public float Radius { get; set; }
-
-        public float TotalDamageDealt { get; set; }
         
         public int TotalCharges { get; set; }
     }

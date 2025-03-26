@@ -1,4 +1,3 @@
-using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +5,6 @@ using System.Reflection;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
-using static PlayerList;
 
 namespace UncomplicatedCustomItems.API.Features.CustomModules
 {

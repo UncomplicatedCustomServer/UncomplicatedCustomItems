@@ -5,10 +5,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Threading.Tasks;
-using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -100,7 +97,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             byte[] bytes = SHA256Managed.Create().ComputeHash(file);
 
             file.Close();
-
             return BitConverter.ToString(bytes).Replace("-", string.Empty);
         }
     }

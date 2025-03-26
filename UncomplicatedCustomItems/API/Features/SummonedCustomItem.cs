@@ -1,6 +1,5 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Items;
-using Exiled.API.Features.Items.FirearmModules.Primary;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Player;
 using MEC;
@@ -9,17 +8,12 @@ using System.Linq;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
-using Exiled.API.Enums;
 using UncomplicatedCustomItems.API.Struct;
-using UncomplicatedCustomItems.Events;
-using Exiled.API.Features.Roles;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
-using System.Net.Mail;
-using UncomplicatedCustomItems.API.Features.SpecificData;
 using HarmonyLib;
 
 namespace UncomplicatedCustomItems.API.Features
@@ -51,14 +45,76 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public Item Item { get; internal set; }
 
+        public float Capacity { get; set; } = 0f;
+        
+        internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
+
         /// <summary>
         /// Gets the badge of the player if it has one
         /// </summary>
         public Triplet<string, string, bool>? Badge { get; private set; }
 
+        private static readonly HashSet<ushort> CheckedItemSerials = new HashSet<ushort>();
+
         public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
 
         private List<ICustomModule> _customModules { get; set; }
+
+        /// <summary>
+        /// List of all flag settings.
+        /// </summary>
+        public static readonly List<IFlagSettings> _flagSettings = new();
+
+        /// <summary>
+        /// Registers flag setting(s).
+        /// <param name="flagSettings"></param>
+        /// </summary>
+        public static void Register(IFlagSettings flagSettings)
+        {
+            if (flagSettings == null)
+                throw new ArgumentNullException(nameof(flagSettings));
+
+            if (!_flagSettings.Contains(flagSettings))
+            {
+                _flagSettings.Add(flagSettings);
+            }
+            LogManager.Debug($"added {string.Join(", ", _flagSettings)}");
+        }
+
+        /// <summary>
+        /// Unregisters a flag setting.
+        /// <param name="flagSettings"></param>
+        /// </summary>
+        public static bool Unregister(IFlagSettings flagSettings)
+        {
+            return _flagSettings.Remove(flagSettings);
+        }
+
+        public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
+        {
+            LogManager.Debug("Retrieving all loaded Flag Settings");
+
+            return _flagSettings.AsReadOnly();
+        }
+        /// <summary>
+        /// Clears all flag settings
+        /// </summary>
+        public static void ClearAllFlagSettings()
+        {
+            _flagSettings.Clear();
+        }
+        /// <summary>
+        /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
+        /// </summary>
+        public static List<string> GetAttachmentsList(List<IWeaponData> items)
+        {
+            return items
+                .Where(item => !string.IsNullOrWhiteSpace(item.Attachments))
+                .SelectMany(item => item.Attachments.Split(',')
+                    .Select(attachment => new { AttachmentName = attachment.Trim() }))
+                .Select(x => x.AttachmentName)
+                .ToList();
+        }
 
         /// <summary>
         /// The <see cref="SummonedCustomItem"/> as a <see cref="Exiled.API.Features.Pickups.Pickup"/>.
@@ -90,6 +146,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
+            GetAllFlagSettings();
             SetProperties();
             List.Add(this);
         }
@@ -129,10 +186,12 @@ namespace UncomplicatedCustomItems.API.Features
         /// <returns></returns>
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
+        private int Charges { get; set; }
+
         /// <summary>
         /// Apply the custom properties of the current <see cref="ICustomItem"/>
         /// </summary>
-        private void SetProperties()
+        public void SetProperties()
         {
             if (Item is not null)
                 switch (CustomItem.CustomItemType)
@@ -160,25 +219,44 @@ namespace UncomplicatedCustomItems.API.Features
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
 
                         Firearm.MagazineAmmo = WeaponData.MaxAmmo;
+                        Firearm.Damage = WeaponData.Damage;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
                         Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
                         Firearm.AmmoDrain = WeaponData.AmmoDrain;
                         Firearm.Penetration = WeaponData.Penetration;
                         Firearm.Inaccuracy = WeaponData.Inaccuracy;
                         Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
-                        Firearm.AddAttachment(WeaponData.Attachments);
+                        List<string> attachmentNames = GetAttachmentsList([WeaponData]);
+                        List<AttachmentName> attachmentsList = attachmentNames
+                            .Select(name => Enum.TryParse(name, true, out AttachmentName attachment) ? attachment : (AttachmentName?)null)
+                            .Where(attachment => attachment.HasValue)
+                            .Select(attachment => attachment.Value)
+                            .ToList();
+                        foreach (AttachmentName attachment in attachmentsList)
+                        {
+                            Firearm.AddAttachment(attachment);
+                        }
+                        MagCheck(Firearm, WeaponData);
                         break;
 
                     case CustomItemType.Jailbird:
                         Jailbird Jailbird = Item as Jailbird;
                         IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
 
-                        Jailbird.TotalDamageDealt = JailbirdData.TotalDamageDealt;
-                        Jailbird.TotalCharges = JailbirdData.TotalCharges;
                         Jailbird.Radius = JailbirdData.Radius;
                         Jailbird.ChargeDamage = JailbirdData.ChargeDamage;
                         Jailbird.MeleeDamage = JailbirdData.MeleeDamage;
                         Jailbird.FlashDuration = JailbirdData.FlashDuration;
+                        if (JailbirdData.TotalCharges > 3)
+                        {
+                            JailbirdData.TotalCharges = -(JailbirdData.TotalCharges + 3);
+                            Charges = JailbirdData.TotalCharges;
+                        }
+                        else
+                        {
+                            Charges = JailbirdData.TotalCharges;
+                        }
+                        Jailbird.TotalCharges = Charges;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
@@ -216,7 +294,7 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Weight = CustomItem.Weight;
             }
         }
-        private void SaveProperties()
+        public void SaveProperties()
         {
             if (Item is not null)
             {
@@ -224,8 +302,8 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         {
-                            var keycard = Item as Keycard;
-                            var keycardData = CustomItem.CustomData as IKeycardData;
+                            Keycard keycard = Item as Keycard;
+                            IKeycardData keycardData = CustomItem.CustomData as IKeycardData;
                             if (keycard != null && keycardData != null)
                             {
                                 keycardData.Permissions = keycard.Permissions;
@@ -234,79 +312,86 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     case CustomItemType.Armor:
                         {
-                            var armor = Item as Armor;
-                            var armorData = CustomItem.CustomData as IArmorData;
-                            if (armor != null && armorData != null)
+                            Armor Armor = Item as Armor;
+                            IArmorData ArmorData = CustomItem.CustomData as IArmorData;
+                            if (Armor != null && ArmorData != null)
                             {
-                                armorData.HeadProtection = armor.HelmetEfficacy;
-                                armorData.BodyProtection = armor.VestEfficacy;
-                                armorData.RemoveExcessOnDrop = armor.RemoveExcessOnDrop;
-                                armorData.StaminaUseMultiplier = armor.StaminaUseMultiplier;
-                                armorData.StaminaRegenMultiplier = armor.StaminaRegenMultiplier;
+                                ArmorData.HeadProtection = Armor.HelmetEfficacy;
+                                ArmorData.BodyProtection = Armor.VestEfficacy;
+                                ArmorData.RemoveExcessOnDrop = Armor.RemoveExcessOnDrop;
+                                ArmorData.StaminaUseMultiplier = Armor.StaminaUseMultiplier;
+                                ArmorData.StaminaRegenMultiplier = Armor.StaminaRegenMultiplier;
                             }
                             break;
                         }
                     case CustomItemType.Weapon:
                         {
-                            var firearm = Item as Firearm;
-                            var weaponData = CustomItem.CustomData as IWeaponData;
-                            if (firearm != null && weaponData != null)
+                            Firearm Firearm = Item as Firearm;
+                            IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+                            if (Firearm != null && WeaponData != null)
                             {
-                                weaponData.MaxMagazineAmmo = (byte)firearm.MaxMagazineAmmo;
-                                weaponData.MaxBarrelAmmo = (byte)firearm.MaxBarrelAmmo;
-                                weaponData.AmmoDrain = firearm.AmmoDrain;
-                                weaponData.Penetration = firearm.Penetration;
-                                weaponData.Inaccuracy = firearm.Inaccuracy;
-                                weaponData.DamageFalloffDistance = firearm.DamageFalloffDistance;
-                                firearm.AddAttachment(weaponData.Attachments);
-
+                                WeaponData.MaxMagazineAmmo = Firearm.MaxMagazineAmmo;
+                                WeaponData.MaxBarrelAmmo = Firearm.MaxBarrelAmmo;
+                                WeaponData.Damage = Firearm.Damage;
+                                WeaponData.AmmoDrain = Firearm.AmmoDrain;
+                                WeaponData.Penetration = Firearm.Penetration;
+                                WeaponData.Inaccuracy = Firearm.Inaccuracy;
+                                WeaponData.DamageFalloffDistance = Firearm.DamageFalloffDistance;
                             }
                             break;
                         }
                     case CustomItemType.Jailbird:
                         {
-                            var jailbird = Item as Jailbird;
-                            var jailbirdData = CustomItem.CustomData as IJailbirdData;
-                            if (jailbird != null && jailbirdData != null)
+                            Jailbird Jailbird = Item as Jailbird;
+                            IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
+                            if (Jailbird != null && JailbirdData != null)
                             {
-                                jailbirdData.TotalDamageDealt = jailbird.TotalDamageDealt;
-                                jailbirdData.TotalCharges = jailbird.TotalCharges;
-                                jailbirdData.Radius = jailbird.Radius;
-                                jailbirdData.ChargeDamage = jailbird.ChargeDamage;
-                                jailbirdData.MeleeDamage = jailbird.MeleeDamage;
-                                jailbirdData.FlashDuration = jailbird.FlashDuration;
+                                JailbirdData.Radius = Jailbird.Radius;
+                                JailbirdData.ChargeDamage = Jailbird.ChargeDamage;
+                                JailbirdData.MeleeDamage = Jailbird.MeleeDamage;
+                                JailbirdData.FlashDuration = Jailbird.FlashDuration;
+                                if (JailbirdData.TotalCharges > 3)
+                                {
+                                    JailbirdData.TotalCharges = -(JailbirdData.TotalCharges + 3);
+                                    Charges = JailbirdData.TotalCharges;
+                                }
+                                else
+                                {
+                                    Charges = JailbirdData.TotalCharges;
+                                }
+                                Jailbird.TotalCharges = Charges;
                             }
                             break;
                         }
                     case CustomItemType.ExplosiveGrenade:
                         {
-                            var explosiveGrenade = Item as ExplosiveGrenade;
-                            var explosiveData = CustomItem.CustomData as IExplosiveGrenadeData;
-                            if (explosiveGrenade != null && explosiveData != null)
+                            ExplosiveGrenade ExplosiveGrenade = Item as ExplosiveGrenade;
+                            IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+                            if (ExplosiveGrenade != null && ExplosiveGrenadeData != null)
                             {
-                                explosiveData.MaxRadius = explosiveGrenade.MaxRadius;
-                                explosiveData.PinPullTime = explosiveGrenade.PinPullTime;
-                                explosiveData.ScpDamageMultiplier = explosiveGrenade.ScpDamageMultiplier;
-                                explosiveData.ConcussDuration = explosiveGrenade.ConcussDuration;
-                                explosiveData.BurnDuration = explosiveGrenade.BurnDuration;
-                                explosiveData.DeafenDuration = explosiveGrenade.DeafenDuration;
-                                explosiveData.FuseTime = explosiveGrenade.FuseTime;
-                                explosiveData.Repickable = explosiveGrenade.Repickable;
+                                ExplosiveGrenadeData.MaxRadius = ExplosiveGrenade.MaxRadius;
+                                ExplosiveGrenadeData.PinPullTime = ExplosiveGrenade.PinPullTime;
+                                ExplosiveGrenadeData.ScpDamageMultiplier = ExplosiveGrenade.ScpDamageMultiplier;
+                                ExplosiveGrenadeData.ConcussDuration = ExplosiveGrenade.ConcussDuration;
+                                ExplosiveGrenadeData.BurnDuration = ExplosiveGrenade.BurnDuration;
+                                ExplosiveGrenadeData.DeafenDuration = ExplosiveGrenade.DeafenDuration;
+                                ExplosiveGrenadeData.FuseTime = ExplosiveGrenade.FuseTime;
+                                ExplosiveGrenadeData.Repickable = ExplosiveGrenade.Repickable;
                             }
                             break;
                         }
                     case CustomItemType.FlashGrenade:
                         {
-                            var flashGrenade = Item as FlashGrenade;
-                            var flashData = CustomItem.CustomData as IFlashGrenadeData;
-                            if (flashGrenade != null && flashData != null)
+                            FlashGrenade FlashGrenade = Item as FlashGrenade;
+                            IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
+                            if (FlashGrenade != null && FlashGrenadeData != null)
                             {
-                                flashData.PinPullTime = flashGrenade.PinPullTime;
-                                flashData.Repickable = flashGrenade.Repickable;
-                                flashData.MinimalDurationEffect = flashGrenade.MinimalDurationEffect;
-                                flashData.AdditionalBlindedEffect = flashGrenade.AdditionalBlindedEffect;
-                                flashData.SurfaceDistanceIntensifier = flashGrenade.SurfaceDistanceIntensifier;
-                                flashData.FuseTime = flashGrenade.FuseTime;
+                                FlashGrenadeData.PinPullTime = FlashGrenade.PinPullTime;
+                                FlashGrenadeData.Repickable = FlashGrenade.Repickable;
+                                FlashGrenadeData.MinimalDurationEffect = FlashGrenade.MinimalDurationEffect;
+                                FlashGrenadeData.AdditionalBlindedEffect = FlashGrenade.AdditionalBlindedEffect;
+                                FlashGrenadeData.SurfaceDistanceIntensifier = FlashGrenade.SurfaceDistanceIntensifier;
+                                FlashGrenadeData.FuseTime = FlashGrenade.FuseTime;
                             }
                             break;
                         }
@@ -320,119 +405,12 @@ namespace UncomplicatedCustomItems.API.Features
                 CustomItem.Weight = Pickup.Weight;
             }
         }
-        private void LoadProperties()
-        {
-            if (Item is not null)
-            {
-                switch (CustomItem.CustomItemType)
-                {
-                    case CustomItemType.Keycard:
-                        {
-                            var keycard = Item as Keycard;
-                            var keycardData = CustomItem.CustomData as IKeycardData;
-                            if (keycard != null && keycardData != null)
-                            {
-                                keycard.Permissions = keycardData.Permissions;
-                            }
-                            break;
-                        }
 
-                    case CustomItemType.Armor:
-                        {
-                            var armor = Item as Armor;
-                            var armorData = CustomItem.CustomData as IArmorData;
-                            if (armor != null && armorData != null)
-                            {
-                                armor.HelmetEfficacy = armorData.HeadProtection;
-                                armor.VestEfficacy = armorData.BodyProtection;
-                                armor.RemoveExcessOnDrop = armorData.RemoveExcessOnDrop;
-                                armor.StaminaUseMultiplier = armorData.StaminaUseMultiplier;
-                                armor.StaminaRegenMultiplier = armorData.StaminaRegenMultiplier;
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.Weapon:
-                        {
-                            var firearm = Item as Firearm;
-                            var weaponData = CustomItem.CustomData as IWeaponData;
-                            if (firearm != null && weaponData != null)
-                            {
-                                firearm.MaxMagazineAmmo = weaponData.MaxMagazineAmmo;
-                                firearm.MaxBarrelAmmo = weaponData.MaxBarrelAmmo;
-                                firearm.AmmoDrain = weaponData.AmmoDrain;
-                                firearm.Penetration = weaponData.Penetration;
-                                firearm.Inaccuracy = weaponData.Inaccuracy;
-                                firearm.DamageFalloffDistance = weaponData.DamageFalloffDistance;
-                                firearm.AddAttachment(weaponData.Attachments);
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.Jailbird:
-                        {
-                            var jailbird = Item as Jailbird;
-                            var jailbirdData = CustomItem.CustomData as IJailbirdData;
-                            if (jailbird != null && jailbirdData != null)
-                            {
-                                jailbird.TotalDamageDealt = jailbirdData.TotalDamageDealt;
-                                jailbird.TotalCharges = jailbirdData.TotalCharges;
-                                jailbird.Radius = jailbirdData.Radius;
-                                jailbird.ChargeDamage = jailbirdData.ChargeDamage;
-                                jailbird.MeleeDamage = jailbirdData.MeleeDamage;
-                                jailbird.FlashDuration = jailbirdData.FlashDuration;
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.ExplosiveGrenade:
-                        {
-                            var explosiveGrenade = Item as ExplosiveGrenade;
-                            var explosiveData = CustomItem.CustomData as IExplosiveGrenadeData;
-                            if (explosiveGrenade != null && explosiveData != null)
-                            {
-                                explosiveGrenade.MaxRadius = explosiveData.MaxRadius;
-                                explosiveGrenade.PinPullTime = explosiveData.PinPullTime;
-                                explosiveGrenade.ScpDamageMultiplier = explosiveData.ScpDamageMultiplier;
-                                explosiveGrenade.ConcussDuration = explosiveData.ConcussDuration;
-                                explosiveGrenade.BurnDuration = explosiveData.BurnDuration;
-                                explosiveGrenade.DeafenDuration = explosiveData.DeafenDuration;
-                                explosiveGrenade.FuseTime = explosiveData.FuseTime;
-                                explosiveGrenade.Repickable = explosiveData.Repickable;
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.FlashGrenade:
-                        {
-                            var flashGrenade = Item as FlashGrenade;
-                            var flashData = CustomItem.CustomData as IFlashGrenadeData;
-                            if (flashGrenade != null && flashData != null)
-                            {
-                                flashGrenade.PinPullTime = flashData.PinPullTime;
-                                flashGrenade.Repickable = flashData.Repickable;
-                                flashGrenade.MinimalDurationEffect = flashData.MinimalDurationEffect;
-                                flashGrenade.AdditionalBlindedEffect = flashData.AdditionalBlindedEffect;
-                                flashGrenade.SurfaceDistanceIntensifier = flashData.SurfaceDistanceIntensifier;
-                                flashGrenade.FuseTime = flashData.FuseTime;
-                            }
-                            break;
-                        }
-
-                    default:
-                        break;
-                }
-            }
-            else if (Pickup is not null)
-            {
-                Pickup.Scale = CustomItem.Scale;
-                Pickup.Weight = CustomItem.Weight;
-            }
-        }
-
-
-
-        public string LoadBadge(Player player)
+        /// <summary>
+        /// Loads the badge of the player according to the CustomItem BadgeName field.
+        /// <param name="Player"></param>
+        /// </summary>
+        public string LoadBadge(Player Player)
         {
             LogManager.Debug("LoadBadge() Triggered");
             string output = "Badge: ";
@@ -451,7 +429,7 @@ namespace UncomplicatedCustomItems.API.Features
 
             LogManager.Debug($"Badge loaded: {output}");
 
-            CustomItemBadgeApplier(player, CustomItem);
+            CustomItemBadgeApplier(Player, CustomItem);
 
             return output;
         }
@@ -473,34 +451,44 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
+        /// <summary>
+        /// Resets the badge of the player.
+        /// <param name="Player"></param>
+        /// </summary>
         public void ResetBadge(Player Player)
         {
             Player.ReferenceHub.serverRoles.RefreshLocalTag();
-            LogManager.Debug("Badge successfully reset");
+            LogManager.Debug($"{Player.Nickname} Badge successfully reset");
         }
-        
+
         internal void OnPickup(ItemAddedEventArgs pickedUp)
         {
             Pickup = null;
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
-            LoadProperties();
+            GetAllFlagSettings();
+            SetProperties();
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
-
-        internal void OnDrop(DroppedItemEventArgs dropped)
+        
+        public void OnDrop(DroppedItemEventArgs dropped)
         {
             Pickup = dropped.Pickup;
             Item = null;
             Owner = null;
+            ClearAllFlagSettings();
             SaveProperties();
             Serial = Pickup.Serial;
             HandleEvent(dropped.Player, ItemEvents.Drop);
         }
 
+        /// <summary>
+        /// loads the Item Flags for the player.
+        /// </summary>
         public string LoadItemFlags()
         {
+
             List<string> output = new();
 
             if (_customModules.Count > 0)
@@ -513,6 +501,37 @@ namespace UncomplicatedCustomItems.API.Features
 
             return string.Join(" ", output);
         }
+
+        /// <summary>
+        /// Checks the magazine of the held weapon to remove the capacity modifier from a modification.
+        /// <param name="Firearm"></param>
+        /// <param name="WeaponData"></param>
+        /// </summary>
+        public void MagCheck(Firearm Firearm, IWeaponData WeaponData)
+        { 
+            LogManager.Debug($"Performing MagCheck for {CustomItem.Name}");
+            if (Firearm.MaxMagazineAmmo != WeaponData.MaxMagazineAmmo)
+            {
+                int Ammo = WeaponData.MaxMagazineAmmo - Firearm.MaxMagazineAmmo;
+                WeaponData.MaxMagazineAmmo += Ammo;
+                LogManager.Debug($"Added/Subtracted {Ammo} to/from MaxMagazineAmmo for {CustomItem.Name}");
+                LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
+            }
+        }
+
+        /// <summary>
+        /// Displays the debug ui for weapon information to the selected player.
+        /// <param name="Player"></param>
+        /// </summary>
+        public void ShowDebugUi(Player Player)
+        {
+            Firearm Firearm = Item as Firearm;
+            Player.ShowHint($"{CustomItem.Name} Effective Damage: {Firearm.EffectiveDamage} \n {CustomItem.Name} Effective Inaccuracy: {Firearm.EffectiveInaccuracy} \n {CustomItem.Name} Effective Penetration: {Firearm.EffectivePenetration} \n {CustomItem.Name} Can See Through Dark: {Firearm.CanSeeThroughDark} \n {CustomItem.Name} Aiming: {Firearm.Aiming}");
+        }
+
+        /// <summary>
+        /// Reloads the Flags for the item.
+        /// </summary>
         public void ReloadItemFlags()
         {
             LogManager.Debug("Reload Item Flags Function Triggered");
@@ -520,9 +539,11 @@ namespace UncomplicatedCustomItems.API.Features
             List.Add(this);
 
             LogManager.Debug("Item Flag(s) Reloaded");
-            LogManager.Debug($"Loaded Flag(s): {CustomItem.CustomFlags}");
         }
 
+        /// <summary>
+        /// Unloads the Flags for the player.
+        /// </summary>
         public void UnloadItemFlags()
         {
             LogManager.Debug("Unload Item Flags Triggered");
@@ -531,7 +552,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Gets a <see cref="CustomModule"/> that this custom role implements
+        /// Gets a <see cref="CustomModule"/> that this custom item implements
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -563,14 +584,14 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Gets if the current <see cref="SummonedCustomRole"/> implements the given <see cref="CustomModule"/>
+        /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomModule"/>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
 
         /// <summary>
-        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomRole"/> instance
+        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomItem"/> instance
         /// </summary>
         /// <typeparam name="T"></typeparam>
         public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
@@ -604,27 +625,63 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
+                System.Random rand = new();
+                Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
+                string randomPlayerId = randomPlayer?.Id.ToString();
+
                 if (Data.Command is not null && Data.Command.Length > 2)
-                    if (!Data.Command.Contains("P:"))
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()));
+                    if (!Data.Command.Contains("{p_id}"))
+                        Server.ExecuteCommand(Data.Command.Replace("{p_id}", player.Id.ToString()));
                     else
-                        Server.ExecuteCommand(Data.Command.Replace("%id%", player.Id.ToString()).Replace("P:", ""), player.Sender);
+                        Server.ExecuteCommand(Data.Command.Replace("{p_id}", player.Id.ToString()).Replace("{p_id}", ""), player.Sender);
+                    if (!Data.Command.Contains("{rp_id}"))
+                        Server.ExecuteCommand(Data.Command.Replace("{rp_id}", randomPlayerId));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("{rp_id}", randomPlayerId).Replace("{rp_id}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_pos}"))
+                        Server.ExecuteCommand(Data.Command.Replace("{p_pos}", player.Position.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("{p_pos}", player.Position.ToString()).Replace("{p_pos}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_role}"))
+                        Server.ExecuteCommand(Data.Command.Replace("{p_role}", player.Role.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("{p_role}", player.Role.ToString()).Replace("{p_role}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_health}"))
+                        Server.ExecuteCommand(Data.Command.Replace("{p_health}", player.Health.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("{p_health}", player.Health.ToString()).Replace("{p_health}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_zone}"))
+                        Server.ExecuteCommand(Data.Command.Replace("{p_zone}", player.Zone.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("{p_zone}", player.Zone.ToString()).Replace("{p_zone}", ""), player.Sender);
+                    if (!Data.Command.Contains("{p_room}"))
+                        Server.ExecuteCommand(Data.Command.Replace("{p_room}", player.CurrentRoom.ToString()));
+                    else
+                        Server.ExecuteCommand(Data.Command.Replace("{p_room}", player.CurrentRoom.ToString()).Replace("{p_room}", ""), player.Sender);
 
                 Utilities.ParseResponse(player, Data);
+
+
 
                 // Now we can destry the item if we have been told to do it
                 if (Data.DestroyAfterUse)
                     Destroy();
             }
         }
+        
 
-
+        /// <summary>
+        /// Displays the hint from the SelectedMessage field in the plugin config.
+        /// </summary>
         internal void HandleSelectedDisplayHint()
         {
             if (Plugin.Instance.Config.SelectedMessage.Length > 1)
                 Owner.ShowHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
         }
 
+        /// <summary>
+        /// Displays the hint from the PickedUpMessage field in the plugin config.
+        /// </summary>
         internal void HandlePickedUpDisplayHint()
         {
             if (Plugin.Instance.Config.PickedUpMessage.Length > 1)
@@ -662,6 +719,9 @@ namespace UncomplicatedCustomItems.API.Features
             return false;
         }
 
+        /// <summary>
+        /// Destroys the customitem.
+        /// </summary>
         public void Destroy()
         {
             List.Remove(this);

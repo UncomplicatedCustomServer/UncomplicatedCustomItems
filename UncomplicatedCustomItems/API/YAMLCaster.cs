@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features.SpecificData;
@@ -8,7 +7,6 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API
@@ -134,6 +132,7 @@ namespace UncomplicatedCustomItems.API
                 Scale = item.Scale,
                 Spawn = item.Spawn,
                 CustomFlags = item.CustomFlags,
+                FlagSettings = item.FlagSettings,
                 CustomItemType = item.CustomItemType,
                 CustomData = Decode(item.CustomItemType, item.CustomData)
             };

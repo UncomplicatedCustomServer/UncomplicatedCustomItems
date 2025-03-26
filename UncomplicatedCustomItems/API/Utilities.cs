@@ -26,14 +26,17 @@ namespace UncomplicatedCustomItems.API
                 error = $"There's already another ICustomItem registered with the same Id ({item.Id})!";
                 return false;
             }
-
             
             switch (item.CustomItemType)
             {
                 case CustomItemType.Item:
                     if (item.CustomData is null)
                     {
-                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'IData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'Item' but the CustomData class is not 'IData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1339667038750244979";
                         return false;
                     }
 
@@ -42,7 +45,11 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Weapon:
                     if (item.CustomData is not IWeaponData)
                     {
-                        error = $"The item has been flagged as 'Weapon' but the CustomData class is not 'IWeaponData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'Weapon' but the CustomData class is not 'IWeaponData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1339666579251793960";
                         return false;
                     }
 
@@ -57,7 +64,11 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Keycard:
                     if (item.CustomData is not IKeycardData)
                     {
-                        error = $"The item has been flagged as 'Keycard' but the CustomData class is not 'IKeycardData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'Keycard' but the CustomData class is not 'IKeycardData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1339667184435073074";
                         return false;
                     }
 
@@ -72,7 +83,11 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Armor:
                     if (item.CustomData is not IArmorData)
                     {
-                        error = $"The item has been flagged as 'Armor' but the CustomData class is not 'IArmorData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'Armor' but the CustomData class is not 'IArmorData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1339666435491762197";
                         return false;
                     }
 
@@ -87,7 +102,11 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.ExplosiveGrenade:
                     if (item.CustomData is not IExplosiveGrenadeData)
                     {
-                        error = $"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'IExplosiveGrenadeData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'IExplosiveGrenadeData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1339667358398152798";
                         return false;
                     }
 
@@ -102,7 +121,11 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.FlashGrenade:
                     if (item.CustomData is not IFlashGrenadeData)
                     {
-                        error = $"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'IFlashGrenadeData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'IFlashGrenadeData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1339666785313755156";
                         return false;
                     }
 
@@ -117,7 +140,11 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Jailbird:
                     if (item.CustomData is not IJailbirdData)
                     {
-                        error = $"The item has been flagged as 'Jailbird' but the CustomData class is not 'IJailbirdData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'Jailbird' but the CustomData class is not 'IJailbirdData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1342257093629182002";
                         return false;
                     }
 
@@ -132,7 +159,11 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Medikit:
                     if (item.CustomData is not IMedikitData)
                     {
-                        error = $"The item has been flagged as 'Medikit' but the CustomData class is not 'IMedikitData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'Medikit' but the CustomData class is not 'IMedikitData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1339667529366372443";
                         return false;
                     }
 
@@ -147,7 +178,11 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Painkillers:
                     if (item.CustomData is not IPainkillersData)
                     {
-                        error = $"The item has been flagged as 'Painkillers' but the CustomData class is not 'IPainkillersData', found '{item.CustomData.GetType().Name}'";
+error = @$"The item has been flagged as 'Painkillers' but the CustomData class is not 'IPainkillersData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/1170301876990914631/1354116780846612711";
                         return false;
                     }
 
@@ -160,7 +195,7 @@ namespace UncomplicatedCustomItems.API
                     break;
 
                 default:
-                    error = "Unknown error? Uhm please report it on our discord server!";
+                    error = "Unknown error how did you do this? Anyway please report it on our discord server! D:";
                     return false;
             }
 
@@ -301,6 +336,7 @@ namespace UncomplicatedCustomItems.API
                 }
             }
         }
+        
 
         /// <summary>
         /// Reproduce the SCP:SL painkillers healing process but with custom things :)

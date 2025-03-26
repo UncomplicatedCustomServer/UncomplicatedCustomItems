@@ -1,12 +1,5 @@
 ﻿using Exiled.API.Features;
-using Exiled.Events;
-using MEC;
-using PlayerRoles;
-using System;
-using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Features;
-using UnityEngine;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace UncomplicatedCustomItems.Extensions

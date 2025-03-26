@@ -13,8 +13,11 @@
 <br><br>
 
 ## What's UncomplicatedCustomItems
-**UncomplicatedCustomItems** or **UCI** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) that allow you to create fully configurable and customizable custom items with YAML.\
+**UncomplicatedCustomItems** or **UCI** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) that allow you to create fully configurable and customizable custom items with YAML.
 You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins>description</ins> and many more things. 
+
+## UCS Wiki
+Check out the [UCS Wiki](https://thaumielscpsl.site/ucs/wiki) for more information.
 
 ## Features
 **UCI** has lots of features like:
@@ -25,9 +28,10 @@ You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins
 - In-game commands to handle the plugin and the items
 
 ## Installation
-Download the `UncomplicatedCustomItems.dll` from the [latest release](https://github.com/Mr-Baguetter/UncomplicatedCustomItemss/releases/latest) and put it inside the `EXILED/Plugins` folder.
+Download the `UncomplicatedCustomItems.dll` from the [latest release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest) and put it inside the `EXILED/Plugins` folder.
 
-## Having skill issues?
+## Having skill issues? <= (Errors)
+Please do ucilogs in your server console then paste the code in the [Bug Report Forum](https://discord.com/channels/1170301876990914631/1230615155193151602) of our Discord server. <br> Please include instructions of how to replicate the bug if possible. <br>
 If you can't fix the problem you can ask the community on our [Discord server](https://discord.gg/5StRGu8EJV)!
 
 ## Consider donating to UncomplicatedCustomServer Collective
@@ -46,4 +50,4 @@ Please consider donating something to support our work through **OpenCollective*
   **Discord:** `dr.agenda`
 ### Mr. Baguetter
   **Discord:** `@ender1992`\
-  **Email:** `Mr.Baguetter1@gmail.com`
+  **Email:** `baguetter@thaumielscpsl.site`

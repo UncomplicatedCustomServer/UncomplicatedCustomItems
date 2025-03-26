@@ -3,12 +3,14 @@ using Exiled.API.Features;
 using System;
 using HarmonyLib;
 using System.IO;
-using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.HarmonyElements.Patches;
-using Handler = UncomplicatedCustomItems.Events.EventHandler;
-using UnityEngine;
 using System.Threading.Tasks;
+using Handler = UncomplicatedCustomItems.Events.EventHandler;
+
+using PlayerEvent = Exiled.Events.Handlers.Player;
+using ItemEvent = Exiled.Events.Handlers.Item;
+using ServerEvent = Exiled.Events.Handlers.Server;
+using MapEvent = Exiled.Events.Handlers.Map;
 
 namespace UncomplicatedCustomItems
 {
@@ -23,7 +25,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
 
-        public override Version Version { get; } = new(3, 0, 0);
+        public override Version Version { get; } = new(3, 1, 0);
 
         internal Handler Handler;
 
@@ -52,17 +54,31 @@ namespace UncomplicatedCustomItems
 
             if (IsPrerelease)
             {
-                Exiled.Events.Handlers.Server.WaitingForPlayers += Handler.OnWaitingForPlayers;
+                ServerEvent.WaitingForPlayers += Handler.OnWaitingForPlayers;
             }
 
-            Exiled.Events.Handlers.Player.Hurt += Handler.OnHurt;
-            Exiled.Events.Handlers.Player.TriggeringTesla += Handler.OnTriggeringTesla;
-            Exiled.Events.Handlers.Player.Shooting += Handler.OnShooting;
-            Exiled.Events.Handlers.Player.UsedItem += Handler.OnItemUse;
-            Exiled.Events.Handlers.Item.ChangingAttachments += Handler.OnChangingAttachments;
-            Exiled.Events.Handlers.Player.ActivatingWorkstation += Handler.OnWorkstationActivation;
-            Exiled.Events.Handlers.Player.DroppedItem += Handler.OnDrop;
-            Exiled.Events.Handlers.Map.PickupDestroyed += Handler.OnPickup;
+            PlayerEvent.Hurt += Handler.OnHurt;
+            PlayerEvent.Hurt += Handler.OnHurt2;
+            PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
+            PlayerEvent.Shooting += Handler.OnShooting;
+            PlayerEvent.UsedItem += Handler.OnItemUse;
+            ItemEvent.ChangingAttachments += Handler.OnChangingAttachments;
+            PlayerEvent.ActivatingWorkstation += Handler.OnWorkstationActivation;
+            PlayerEvent.DroppedItem += Handler.OnDrop;
+            MapEvent.PickupDestroyed += Handler.OnPickup;
+            ServerEvent.RoundEnded += Handler.Onroundend;
+            PlayerEvent.UsingItem += Handler.OnUsingItem;
+            PlayerEvent.Shot += Handler.OnShot;
+            PlayerEvent.Shot += Handler.OnShot2;
+            ItemEvent.ChargingJailbird += Handler.OnCharge;
+            PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
+
+            //Debugging Events
+            PlayerEvent.DroppingItem += Handler.Ondrop;
+            PlayerEvent.ItemAdded += Handler.Onpickup;
+            PlayerEvent.UsingItem += Handler.Onuse;
+            PlayerEvent.ReloadingWeapon += Handler.Onreloading;
+            PlayerEvent.Shooting += Handler.Onshooting;
 
             LogManager.History.Clear();
 
@@ -100,15 +116,28 @@ namespace UncomplicatedCustomItems
             _harmony.UnpatchAll();
             _harmony = null;
 
-            Exiled.Events.Handlers.Player.Hurt -= Handler.OnHurt;
-            Exiled.Events.Handlers.Player.TriggeringTesla -= Handler.OnTriggeringTesla;
-            Exiled.Events.Handlers.Player.Shooting -= Handler.OnShooting;
-            Exiled.Events.Handlers.Server.WaitingForPlayers -= Handler.OnWaitingForPlayers;
-            Exiled.Events.Handlers.Player.UsedItem -= Handler.OnItemUse;
-            Exiled.Events.Handlers.Item.ChangingAttachments -= Handler.OnChangingAttachments;
-            Exiled.Events.Handlers.Player.ActivatingWorkstation -= Handler.OnWorkstationActivation;
-            Exiled.Events.Handlers.Player.DroppedItem -= Handler.OnDrop;
-            Exiled.Events.Handlers.Map.PickupDestroyed -= Handler.OnPickup;
+            PlayerEvent.Hurt -= Handler.OnHurt;
+            PlayerEvent.Hurt -= Handler.OnHurt2;
+            PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
+            PlayerEvent.Shooting -= Handler.OnShooting;
+            ServerEvent.WaitingForPlayers -= Handler.OnWaitingForPlayers;
+            PlayerEvent.UsedItem -= Handler.OnItemUse;
+            ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
+            PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
+            PlayerEvent.DroppedItem -= Handler.OnDrop;
+            ServerEvent.RoundEnded -= Handler.Onroundend;
+            PlayerEvent.UsingItem -= Handler.OnUsingItem;
+            PlayerEvent.Shot -= Handler.OnShot;
+            PlayerEvent.Shot -= Handler.OnShot2;
+            ItemEvent.ChargingJailbird -= Handler.OnCharge;
+            PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
+
+            //Debugging Events
+            PlayerEvent.DroppingItem -= Handler.Ondrop;
+            PlayerEvent.ItemAdded -= Handler.Onpickup;
+            PlayerEvent.UsingItem -= Handler.Onuse;
+            PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
+            PlayerEvent.Shooting -= Handler.Onshooting;
 
             Instance = null;
             base.OnDisabled();

@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
-using UncomplicatedCustomItems.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
@@ -37,6 +36,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.InfiniteAmmo,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new WeaponData())
             },
             new()
@@ -51,6 +51,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new ArmorData()
                 {
                     HeadProtection = 150,
@@ -71,6 +72,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new KeycardData()
                 {
                     Permissions = KeycardPermissions.AlphaWarhead | KeycardPermissions.Checkpoints
@@ -88,6 +90,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new ExplosiveGrenadeData()
                 {
                     MaxRadius = 250f
@@ -105,6 +108,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new FlashGrenadeData()
                 {
                     AdditionalBlindedEffect = 250f
@@ -122,6 +126,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = new(2, 2, 2),
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new MedikitData()
                 {
                     Health = 250f
@@ -139,6 +144,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Scale = new(5, 5, 5),
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new PainkillersData()
                 {
                     TickHeal = 1f,
@@ -146,6 +152,21 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     TimeBeforeStartHealing = 10f,
                     TotalHealing = 50f
                 })
+            },
+            new()
+            {
+                Id = 9,
+                Name = "Just a Jailbird",
+                Description = "Just a Jailbird",
+                BadgeName = "Jailbird",
+                BadgeColor = "pumpkin",
+                Item = ItemType.Jailbird,
+                CustomItemType = CustomItemType.Jailbird,
+                Scale = new(1, 1, 1),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new JailbirdData())
             },
         ];
 

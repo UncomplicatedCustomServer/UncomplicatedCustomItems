@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
@@ -8,18 +7,18 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
-using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Features
 {
     public class CustomItem : ICustomItem
     {
+        #nullable enable
         /// <summary>
         /// Gets a list of every registered <see cref="ICustomItem"/>
         /// </summary>
         public static List<ICustomItem> List => CustomItems.Values.ToList();
 
-        internal static Dictionary<uint, ICustomItem> CustomItems { get; } = new();
+        internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = new();
 
         /// <summary>
         /// Register a new <see cref="ICustomItem"/> inside the plugin
@@ -126,6 +125,11 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("Custom flags for the item")]
         public CustomFlags? CustomFlags { get; set; } = new();
+
+        /// <summary>
+        /// Custom flag settings of the item
+        /// </summary>
+        public IFlagSettings FlagSettings { get; set; } = new FlagSettings();
 
         /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item

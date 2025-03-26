@@ -2,8 +2,8 @@
 
 namespace UncomplicatedCustomItems.API.Features.CustomModules
 {
-    public class DieOnUse : CustomModule
+    public class EffectShot : CustomModule
     {
-        public new static CustomFlags Flag => CustomFlags.DieOnUse;
+        public new static CustomFlags Flag => CustomFlags.EffectShot;
     }
 }

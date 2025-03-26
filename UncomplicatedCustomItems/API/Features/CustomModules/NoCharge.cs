@@ -2,8 +2,8 @@ using UncomplicatedCustomItems.Enums;
 
 namespace UncomplicatedCustomItems.API.Features.CustomModules
 {
-    public class ItemGlow : CustomModule
+    public class NoCharge : CustomModule
     {
-        public new static CustomFlags Flag => CustomFlags.ItemGlow;
+        public new static CustomFlags Flag => CustomFlags.NoCharge;
     }
 }
