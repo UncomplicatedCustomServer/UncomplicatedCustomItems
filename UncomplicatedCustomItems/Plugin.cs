@@ -73,6 +73,12 @@ namespace UncomplicatedCustomItems
             ItemEvent.ChargingJailbird += Handler.OnCharge;
             PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
 
+            //Debugging Events
+            PlayerEvent.DroppingItem += Handler.Ondrop;
+            PlayerEvent.ItemAdded += Handler.Onpickup;
+            PlayerEvent.UsingItem += Handler.Onuse;
+            PlayerEvent.ReloadingWeapon += Handler.Onreloading;
+
             LogManager.History.Clear();
 
             LogManager.Info("===========================================");
@@ -124,6 +130,12 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shot -= Handler.OnShot2;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
             PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
+
+            //Debugging Events
+            PlayerEvent.DroppingItem -= Handler.Ondrop;
+            PlayerEvent.ItemAdded -= Handler.Onpickup;
+            PlayerEvent.UsingItem -= Handler.Onuse;
+            PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
 
             Instance = null;
             base.OnDisabled();

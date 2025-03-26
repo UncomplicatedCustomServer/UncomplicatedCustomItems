@@ -433,6 +433,39 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
+        //Debugging Events.
+        public void Ondrop(DroppingItemEventArgs ev)
+        {
+            ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem);
+            if (ev.Item.Serial == CustomItem.Serial)
+                LogManager.Silent($"{ev.Player.Nickname} is dropping {CustomItem.CustomItem.Name}");
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is dropping {ev.Item}");
+        }
+        public void Onpickup(ItemAddedEventArgs ev)
+        {
+            ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem);
+            if (ev.Item.Serial == CustomItem.Serial)
+                LogManager.Silent($"{ev.Player.Nickname} is adding {CustomItem.CustomItem.Name}");
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is adding {ev.Item}");
+        }
+        public void Onuse(UsingItemEventArgs ev)
+        {
+            ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem);
+            if (ev.Item.Serial == CustomItem.Serial)
+                LogManager.Silent($"{ev.Player.Nickname} is using {CustomItem.CustomItem.Name}");
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is using {ev.Item}");
+        }
+        public void Onreloading(ReloadingWeaponEventArgs ev)
+        {
+            ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem);
+            if (ev.Item.Serial == CustomItem.Serial)
+                LogManager.Silent($"{ev.Player.Nickname} is reloading {CustomItem.CustomItem.Name}");
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
+        }
 
         /// <summary>
         /// Destroys the light on a customitem pickup if it has one.

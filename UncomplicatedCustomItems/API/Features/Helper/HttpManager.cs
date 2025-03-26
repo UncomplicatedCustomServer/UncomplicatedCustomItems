@@ -73,7 +73,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private bool _alreadyManaged { get; set; } = false;
 
         /// <summary>
-        /// Create a new istance of the HttpManager
+        /// Create a new instance of the HttpManager
         /// </summary>
         /// <param name="prefix"></param>
         public HttpManager(string prefix)
@@ -159,7 +159,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void LoadLatestVersion()
         {
-            LogManager.Warn("Proceeding to check first version [B] [MACCPR]");
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));
 
             if (Version is not null && Version != string.Empty && Version.Contains("."))
