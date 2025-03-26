@@ -492,6 +492,7 @@
     <Compile Include="API\Features\SpecificData\Data.cs" />
     <Compile Include="API\Features\SpecificData\ExplosiveGrenadeData.cs" />
     <Compile Include="API\Features\SpecificData\FlashGrenadeData.cs" />
+    <Compile Include="API\Features\SpecificData\SCPItemData.cs" />
     <Compile Include="API\Features\SpecificData\ItemData.cs" />
     <Compile Include="API\Features\SpecificData\JailbirdData.cs" />
     <Compile Include="API\Features\SpecificData\MedikitData.cs" />
@@ -502,11 +503,13 @@
     <Compile Include="Enums\CustomItemType.cs" />
     <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Enums\CustomFlags.cs" />
+    <Compile Include="Enums\SCPItems.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ItemExtension.cs" />
+    <Compile Include="Intergrations\ScriptedEvents.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
@@ -519,6 +522,7 @@
     <Compile Include="Interfaces\SpecificData\IExplosiveGrenadeData.cs" />
     <Compile Include="Interfaces\SpecificData\IFlashGrenadeData.cs" />
     <Compile Include="Interfaces\SpecificData\IItemData.cs" />
+    <Compile Include="Interfaces\SpecificData\ISCPItemData.cs" />
     <Compile Include="Interfaces\SpecificData\IJailbirdData.cs" />
     <Compile Include="Interfaces\SpecificData\IKeycardData.cs" />
     <Compile Include="Interfaces\SpecificData\IMedikitData.cs" />

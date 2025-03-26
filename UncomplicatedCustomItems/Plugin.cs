@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public const bool IsPrerelease = false;
+        public const bool IsPrerelease = true;
         public override string Name => "UncomplicatedCustomItems";
 
         public override string Prefix => "UncomplicatedCustomItems";

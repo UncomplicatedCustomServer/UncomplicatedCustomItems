@@ -3,6 +3,7 @@ using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Pickups;
 using MEC;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
@@ -189,6 +190,25 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
                     if (item.Item is not ItemType.Painkillers)
                     {
                         error = $"The Item has been flagged as 'Painkillers' but the item {item.Item} is not a Painkillers";
+                        return false;
+                    }
+
+                    break;
+
+                case CustomItemType.SCPItem:
+                    if (item.CustomData is not ISCPItemData)
+                    {
+error = @$"The item has been flagged as 'SCPItem' but the CustomData class is not 'ISCPItemData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/null";
+                        return false;
+                    }
+
+                    if (!Enum.IsDefined(typeof(Enums.SCPItems), item.Item))
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
                         return false;
                     }
 

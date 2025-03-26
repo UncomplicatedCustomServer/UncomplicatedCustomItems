@@ -410,6 +410,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item != null)
                 {
                     ev.IsAllowed = false;
+                    ev.Player.CurrentItem = null;
                 }
             }
             else return;
