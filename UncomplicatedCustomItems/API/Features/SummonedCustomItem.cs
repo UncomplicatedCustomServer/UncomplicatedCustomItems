@@ -405,123 +405,6 @@ namespace UncomplicatedCustomItems.API.Features
                 CustomItem.Weight = Pickup.Weight;
             }
         }
-        private void LoadProperties()
-        {
-            if (Item is not null)
-            {
-                switch (CustomItem.CustomItemType)
-                {
-                    case CustomItemType.Keycard:
-                        {
-                            var keycard = Item as Keycard;
-                            var keycardData = CustomItem.CustomData as IKeycardData;
-                            if (keycard != null && keycardData != null)
-                            {
-                                keycard.Permissions = keycardData.Permissions;
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.Armor:
-                        {
-                            var armor = Item as Armor;
-                            var armorData = CustomItem.CustomData as IArmorData;
-                            if (armor != null && armorData != null)
-                            {
-                                armor.HelmetEfficacy = armorData.HeadProtection;
-                                armor.VestEfficacy = armorData.BodyProtection;
-                                armor.RemoveExcessOnDrop = armorData.RemoveExcessOnDrop;
-                                armor.StaminaUseMultiplier = armorData.StaminaUseMultiplier;
-                                armor.StaminaRegenMultiplier = armorData.StaminaRegenMultiplier;
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.Weapon:
-                        {
-                            var firearm = Item as Firearm;
-                            var weaponData = CustomItem.CustomData as IWeaponData;
-                            if (firearm != null && weaponData != null)
-                            {
-                                firearm.MaxMagazineAmmo = weaponData.MaxMagazineAmmo;
-                                firearm.MaxBarrelAmmo = weaponData.MaxBarrelAmmo;
-                                firearm.Damage = weaponData.Damage;
-                                firearm.AmmoDrain = weaponData.AmmoDrain;
-                                firearm.Penetration = weaponData.Penetration;
-                                firearm.Inaccuracy = weaponData.Inaccuracy;
-                                firearm.DamageFalloffDistance = weaponData.DamageFalloffDistance;
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.Jailbird:
-                        {
-                            var jailbird = Item as Jailbird;
-                            var jailbirdData = CustomItem.CustomData as IJailbirdData;
-                            if (jailbird != null && jailbirdData != null)
-                            {
-                                jailbird.Radius = jailbirdData.Radius;
-                                jailbird.ChargeDamage = jailbirdData.ChargeDamage;
-                                jailbird.MeleeDamage = jailbirdData.MeleeDamage;
-                                jailbird.FlashDuration = jailbirdData.FlashDuration;
-                                if (jailbirdData.TotalCharges > 3)
-                                {
-                                    jailbirdData.TotalCharges = -(jailbirdData.TotalCharges + 3);
-                                    Charges = jailbirdData.TotalCharges;
-                                }
-                                else
-                                {
-                                    Charges = jailbirdData.TotalCharges;
-                                }
-                                jailbird.TotalCharges = Charges;
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.ExplosiveGrenade:
-                        {
-                            var explosiveGrenade = Item as ExplosiveGrenade;
-                            var explosiveData = CustomItem.CustomData as IExplosiveGrenadeData;
-                            if (explosiveGrenade != null && explosiveData != null)
-                            {
-                                explosiveGrenade.MaxRadius = explosiveData.MaxRadius;
-                                explosiveGrenade.PinPullTime = explosiveData.PinPullTime;
-                                explosiveGrenade.ScpDamageMultiplier = explosiveData.ScpDamageMultiplier;
-                                explosiveGrenade.ConcussDuration = explosiveData.ConcussDuration;
-                                explosiveGrenade.BurnDuration = explosiveData.BurnDuration;
-                                explosiveGrenade.DeafenDuration = explosiveData.DeafenDuration;
-                                explosiveGrenade.FuseTime = explosiveData.FuseTime;
-                                explosiveGrenade.Repickable = explosiveData.Repickable;
-                            }
-                            break;
-                        }
-
-                    case CustomItemType.FlashGrenade:
-                        {
-                            var flashGrenade = Item as FlashGrenade;
-                            var flashData = CustomItem.CustomData as IFlashGrenadeData;
-                            if (flashGrenade != null && flashData != null)
-                            {
-                                flashGrenade.PinPullTime = flashData.PinPullTime;
-                                flashGrenade.Repickable = flashData.Repickable;
-                                flashGrenade.MinimalDurationEffect = flashData.MinimalDurationEffect;
-                                flashGrenade.AdditionalBlindedEffect = flashData.AdditionalBlindedEffect;
-                                flashGrenade.SurfaceDistanceIntensifier = flashData.SurfaceDistanceIntensifier;
-                                flashGrenade.FuseTime = flashData.FuseTime;
-                            }
-                            break;
-                        }
-
-                    default:
-                        break;
-                }
-            }
-            else if (Pickup is not null)
-            {
-                Pickup.Scale = CustomItem.Scale;
-                Pickup.Weight = CustomItem.Weight;
-            }
-        }
 
         /// <summary>
         /// Loads the badge of the player according to the CustomItem BadgeName field.
@@ -656,7 +539,6 @@ namespace UncomplicatedCustomItems.API.Features
             List.Add(this);
 
             LogManager.Debug("Item Flag(s) Reloaded");
-            LogManager.Debug($"Loaded Flag(s): {CustomItem.CustomFlags}");
         }
 
         /// <summary>

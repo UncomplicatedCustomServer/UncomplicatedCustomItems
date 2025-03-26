@@ -78,6 +78,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ItemAdded += Handler.Onpickup;
             PlayerEvent.UsingItem += Handler.Onuse;
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
+            PlayerEvent.Shooting += Handler.Onshooting;
 
             LogManager.History.Clear();
 
@@ -136,6 +137,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ItemAdded -= Handler.Onpickup;
             PlayerEvent.UsingItem -= Handler.Onuse;
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
+            PlayerEvent.Shooting -= Handler.Onshooting;
 
             Instance = null;
             base.OnDisabled();

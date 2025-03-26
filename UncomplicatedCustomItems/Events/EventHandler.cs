@@ -441,10 +441,9 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is dropping {CustomItem.CustomItem.Name}");
-                else
-                    LogManager.Silent($"{ev.Player.Nickname} is dropping {ev.Item}");
             }
-            else return;
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is dropping {ev.Item}");
         }
         public void Onpickup(ItemAddedEventArgs ev)
         {
@@ -452,10 +451,9 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is adding {CustomItem.CustomItem.Name}");
-                else
-                    LogManager.Silent($"{ev.Player.Nickname} is adding {ev.Item}");
             }
-            else return;
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is adding {ev.Item}");
         }
         public void Onuse(UsingItemEventArgs ev)
         {
@@ -463,10 +461,9 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is using {CustomItem.CustomItem.Name}");
-                else
-                    LogManager.Silent($"{ev.Player.Nickname} is using {ev.Item}");
             }
-            else return;
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is using {ev.Item}");
         }
         public void Onreloading(ReloadingWeaponEventArgs ev)
         {
@@ -474,10 +471,19 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is reloading {CustomItem.CustomItem.Name}");
-                else
-                    LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
             }
-            else return;
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
+        }
+        public void Onshooting(ShootingEventArgs ev)
+        {
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (ev.Item.Serial == CustomItem.Serial)
+                    LogManager.Silent($"{ev.Player.Nickname} is reloading {CustomItem.CustomItem.Name}");
+            }
+            else
+                LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
         }
 
         /// <summary>
