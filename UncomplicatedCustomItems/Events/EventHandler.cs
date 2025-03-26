@@ -17,6 +17,7 @@ using Light = Exiled.API.Features.Toys.Light;
 using Exiled.Events.EventArgs.Server;
 using Mirror;
 using Exiled.API.Features;
+using UncomplicatedCustomItems.API;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -436,35 +437,47 @@ namespace UncomplicatedCustomItems.Events
         //Debugging Events.
         public void Ondrop(DroppingItemEventArgs ev)
         {
-            ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem);
-            if (ev.Item.Serial == CustomItem.Serial)
-                LogManager.Silent($"{ev.Player.Nickname} is dropping {CustomItem.CustomItem.Name}");
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is dropping {ev.Item}");
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (ev.Item.Serial == CustomItem.Serial)
+                    LogManager.Silent($"{ev.Player.Nickname} is dropping {CustomItem.CustomItem.Name}");
+                else
+                    LogManager.Silent($"{ev.Player.Nickname} is dropping {ev.Item}");
+            }
+            else return;
         }
         public void Onpickup(ItemAddedEventArgs ev)
         {
-            ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem);
-            if (ev.Item.Serial == CustomItem.Serial)
-                LogManager.Silent($"{ev.Player.Nickname} is adding {CustomItem.CustomItem.Name}");
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is adding {ev.Item}");
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (ev.Item.Serial == CustomItem.Serial)
+                    LogManager.Silent($"{ev.Player.Nickname} is adding {CustomItem.CustomItem.Name}");
+                else
+                    LogManager.Silent($"{ev.Player.Nickname} is adding {ev.Item}");
+            }
+            else return;
         }
         public void Onuse(UsingItemEventArgs ev)
         {
-            ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem);
-            if (ev.Item.Serial == CustomItem.Serial)
-                LogManager.Silent($"{ev.Player.Nickname} is using {CustomItem.CustomItem.Name}");
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is using {ev.Item}");
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (ev.Item.Serial == CustomItem.Serial)
+                    LogManager.Silent($"{ev.Player.Nickname} is using {CustomItem.CustomItem.Name}");
+                else
+                    LogManager.Silent($"{ev.Player.Nickname} is using {ev.Item}");
+            }
+            else return;
         }
         public void Onreloading(ReloadingWeaponEventArgs ev)
         {
-            ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem);
-            if (ev.Item.Serial == CustomItem.Serial)
-                LogManager.Silent($"{ev.Player.Nickname} is reloading {CustomItem.CustomItem.Name}");
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (ev.Item.Serial == CustomItem.Serial)
+                    LogManager.Silent($"{ev.Player.Nickname} is reloading {CustomItem.CustomItem.Name}");
+                else
+                    LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
+            }
+            else return;
         }
 
         /// <summary>

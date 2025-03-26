@@ -302,8 +302,8 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         {
-                            var keycard = Item as Keycard;
-                            var keycardData = CustomItem.CustomData as IKeycardData;
+                            Keycard keycard = Item as Keycard;
+                            IKeycardData keycardData = CustomItem.CustomData as IKeycardData;
                             if (keycard != null && keycardData != null)
                             {
                                 keycardData.Permissions = keycard.Permissions;
@@ -312,86 +312,86 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     case CustomItemType.Armor:
                         {
-                            var armor = Item as Armor;
-                            var armorData = CustomItem.CustomData as IArmorData;
-                            if (armor != null && armorData != null)
+                            Armor Armor = Item as Armor;
+                            IArmorData ArmorData = CustomItem.CustomData as IArmorData;
+                            if (Armor != null && ArmorData != null)
                             {
-                                armorData.HeadProtection = armor.HelmetEfficacy;
-                                armorData.BodyProtection = armor.VestEfficacy;
-                                armorData.RemoveExcessOnDrop = armor.RemoveExcessOnDrop;
-                                armorData.StaminaUseMultiplier = armor.StaminaUseMultiplier;
-                                armorData.StaminaRegenMultiplier = armor.StaminaRegenMultiplier;
+                                ArmorData.HeadProtection = Armor.HelmetEfficacy;
+                                ArmorData.BodyProtection = Armor.VestEfficacy;
+                                ArmorData.RemoveExcessOnDrop = Armor.RemoveExcessOnDrop;
+                                ArmorData.StaminaUseMultiplier = Armor.StaminaUseMultiplier;
+                                ArmorData.StaminaRegenMultiplier = Armor.StaminaRegenMultiplier;
                             }
                             break;
                         }
                     case CustomItemType.Weapon:
                         {
-                            var firearm = Item as Firearm;
-                            var weaponData = CustomItem.CustomData as IWeaponData;
-                            if (firearm != null && weaponData != null)
+                            Firearm Firearm = Item as Firearm;
+                            IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+                            if (Firearm != null && WeaponData != null)
                             {
-                                weaponData.MaxMagazineAmmo = firearm.MaxMagazineAmmo;
-                                weaponData.MaxBarrelAmmo = firearm.MaxBarrelAmmo;
-                                weaponData.Damage = firearm.Damage;
-                                weaponData.AmmoDrain = firearm.AmmoDrain;
-                                weaponData.Penetration = firearm.Penetration;
-                                weaponData.Inaccuracy = firearm.Inaccuracy;
-                                weaponData.DamageFalloffDistance = firearm.DamageFalloffDistance;
+                                WeaponData.MaxMagazineAmmo = Firearm.MaxMagazineAmmo;
+                                WeaponData.MaxBarrelAmmo = Firearm.MaxBarrelAmmo;
+                                WeaponData.Damage = Firearm.Damage;
+                                WeaponData.AmmoDrain = Firearm.AmmoDrain;
+                                WeaponData.Penetration = Firearm.Penetration;
+                                WeaponData.Inaccuracy = Firearm.Inaccuracy;
+                                WeaponData.DamageFalloffDistance = Firearm.DamageFalloffDistance;
                             }
                             break;
                         }
                     case CustomItemType.Jailbird:
                         {
-                            var jailbird = Item as Jailbird;
-                            var jailbirdData = CustomItem.CustomData as IJailbirdData;
-                            if (jailbird != null && jailbirdData != null)
+                            Jailbird Jailbird = Item as Jailbird;
+                            IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
+                            if (Jailbird != null && JailbirdData != null)
                             {
-                                jailbirdData.Radius = jailbird.Radius;
-                                jailbirdData.ChargeDamage = jailbird.ChargeDamage;
-                                jailbirdData.MeleeDamage = jailbird.MeleeDamage;
-                                jailbirdData.FlashDuration = jailbird.FlashDuration;
-                                if (jailbirdData.TotalCharges > 3)
+                                JailbirdData.Radius = Jailbird.Radius;
+                                JailbirdData.ChargeDamage = Jailbird.ChargeDamage;
+                                JailbirdData.MeleeDamage = Jailbird.MeleeDamage;
+                                JailbirdData.FlashDuration = Jailbird.FlashDuration;
+                                if (JailbirdData.TotalCharges > 3)
                                 {
-                                    jailbirdData.TotalCharges = -(jailbirdData.TotalCharges + 3);
-                                    Charges = jailbirdData.TotalCharges;
+                                    JailbirdData.TotalCharges = -(JailbirdData.TotalCharges + 3);
+                                    Charges = JailbirdData.TotalCharges;
                                 }
                                 else
                                 {
-                                    Charges = jailbirdData.TotalCharges;
+                                    Charges = JailbirdData.TotalCharges;
                                 }
-                                jailbird.TotalCharges = Charges;
+                                Jailbird.TotalCharges = Charges;
                             }
                             break;
                         }
                     case CustomItemType.ExplosiveGrenade:
                         {
-                            var explosiveGrenade = Item as ExplosiveGrenade;
-                            var explosiveData = CustomItem.CustomData as IExplosiveGrenadeData;
-                            if (explosiveGrenade != null && explosiveData != null)
+                            ExplosiveGrenade ExplosiveGrenade = Item as ExplosiveGrenade;
+                            IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+                            if (ExplosiveGrenade != null && ExplosiveGrenadeData != null)
                             {
-                                explosiveData.MaxRadius = explosiveGrenade.MaxRadius;
-                                explosiveData.PinPullTime = explosiveGrenade.PinPullTime;
-                                explosiveData.ScpDamageMultiplier = explosiveGrenade.ScpDamageMultiplier;
-                                explosiveData.ConcussDuration = explosiveGrenade.ConcussDuration;
-                                explosiveData.BurnDuration = explosiveGrenade.BurnDuration;
-                                explosiveData.DeafenDuration = explosiveGrenade.DeafenDuration;
-                                explosiveData.FuseTime = explosiveGrenade.FuseTime;
-                                explosiveData.Repickable = explosiveGrenade.Repickable;
+                                ExplosiveGrenadeData.MaxRadius = ExplosiveGrenade.MaxRadius;
+                                ExplosiveGrenadeData.PinPullTime = ExplosiveGrenade.PinPullTime;
+                                ExplosiveGrenadeData.ScpDamageMultiplier = ExplosiveGrenade.ScpDamageMultiplier;
+                                ExplosiveGrenadeData.ConcussDuration = ExplosiveGrenade.ConcussDuration;
+                                ExplosiveGrenadeData.BurnDuration = ExplosiveGrenade.BurnDuration;
+                                ExplosiveGrenadeData.DeafenDuration = ExplosiveGrenade.DeafenDuration;
+                                ExplosiveGrenadeData.FuseTime = ExplosiveGrenade.FuseTime;
+                                ExplosiveGrenadeData.Repickable = ExplosiveGrenade.Repickable;
                             }
                             break;
                         }
                     case CustomItemType.FlashGrenade:
                         {
-                            var flashGrenade = Item as FlashGrenade;
-                            var flashData = CustomItem.CustomData as IFlashGrenadeData;
-                            if (flashGrenade != null && flashData != null)
+                            FlashGrenade FlashGrenade = Item as FlashGrenade;
+                            IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
+                            if (FlashGrenade != null && FlashGrenadeData != null)
                             {
-                                flashData.PinPullTime = flashGrenade.PinPullTime;
-                                flashData.Repickable = flashGrenade.Repickable;
-                                flashData.MinimalDurationEffect = flashGrenade.MinimalDurationEffect;
-                                flashData.AdditionalBlindedEffect = flashGrenade.AdditionalBlindedEffect;
-                                flashData.SurfaceDistanceIntensifier = flashGrenade.SurfaceDistanceIntensifier;
-                                flashData.FuseTime = flashGrenade.FuseTime;
+                                FlashGrenadeData.PinPullTime = FlashGrenade.PinPullTime;
+                                FlashGrenadeData.Repickable = FlashGrenade.Repickable;
+                                FlashGrenadeData.MinimalDurationEffect = FlashGrenade.MinimalDurationEffect;
+                                FlashGrenadeData.AdditionalBlindedEffect = FlashGrenade.AdditionalBlindedEffect;
+                                FlashGrenadeData.SurfaceDistanceIntensifier = FlashGrenade.SurfaceDistanceIntensifier;
+                                FlashGrenadeData.FuseTime = FlashGrenade.FuseTime;
                             }
                             break;
                         }
@@ -584,7 +584,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
             GetAllFlagSettings();
-            LoadProperties();
+            SetProperties();
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
