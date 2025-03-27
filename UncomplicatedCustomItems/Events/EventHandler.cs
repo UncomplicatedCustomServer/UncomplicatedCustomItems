@@ -78,34 +78,21 @@ namespace UncomplicatedCustomItems.Events
                 {
                     LogManager.Error("No FlagSettings found on custom item");
                 }
-                if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<LifeSteal>())
+
+                if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<LifeSteal>())
                 {
                     LogManager.Debug("LifeSteal custom flag is being triggered");
 
                     if (Amount > 0)
                     {
-                        ev.Attacker.Heal(Amount);
-                        LogManager.Debug($"LifeSteal custom flag triggered, healed {Amount} HP");
+                        float HealedAmount = Amount * Percentage;
+                        ev.Attacker.Heal(HealedAmount);
+                        LogManager.Debug($"LifeSteal custom flag triggered, healed {HealedAmount} HP");
                     }
                 }
                 else return;
             }
         }
-        public void OnHurt2(HurtEventArgs ev)
-        {
-            if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<HalfLifeSteal>())
-                {
-                    LogManager.Debug("HalfLifeSteal custom flag is being triggered");
-
-                    if (Amount > 0)
-                    {
-                        float HealedAmount = Amount * Percentage;
-                        ev.Attacker.Heal(HealedAmount);
-                        LogManager.Debug($"HalfLifeSteal custom flag triggered, healed {HealedAmount} HP");
-                    }
-                }
-                else return;
-            }
         public void OnTriggeringTesla(TriggeringTeslaEventArgs ev)
         {
             if (!ev.IsAllowed)
