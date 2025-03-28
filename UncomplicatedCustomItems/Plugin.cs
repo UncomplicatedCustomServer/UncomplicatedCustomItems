@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
 
-        public override Version Version { get; } = new(3, 1, 0);
+        public override Version Version { get; } = new(3, 1, 1);
 
         internal Handler Handler;
 
@@ -58,7 +58,6 @@ namespace UncomplicatedCustomItems
             }
 
             PlayerEvent.Hurt += Handler.OnHurt;
-            PlayerEvent.Hurt += Handler.OnHurt2;
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.Shooting += Handler.OnShooting;
             PlayerEvent.UsedItem += Handler.OnItemUse;
@@ -117,7 +116,6 @@ namespace UncomplicatedCustomItems
             _harmony = null;
 
             PlayerEvent.Hurt -= Handler.OnHurt;
-            PlayerEvent.Hurt -= Handler.OnHurt2;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.Shooting -= Handler.OnShooting;
             ServerEvent.WaitingForPlayers -= Handler.OnWaitingForPlayers;
