@@ -409,7 +409,7 @@ namespace UncomplicatedCustomItems.Events
         {
             Exiled.Events.Handlers.Map.PickupDestroyed -= OnPickup;
         }
-        public void UsedItem(UsingItemCompletedEventArgs ev)
+        public void UsedItemCompleted(UsingItemCompletedEventArgs ev)
         {
             ItemType Item = new();
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
@@ -430,6 +430,115 @@ namespace UncomplicatedCustomItems.Events
                         ev.IsAllowed = false;
                     }
                 }
+            }
+            else return;
+        }
+        public void UsedItem(UsedItemEventArgs ev)
+        {
+            ItemType Item = new();
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
+            {
+                ISCP500Data SCP500Data = CustomItem.CustomItem.CustomData as ISCP500Data;
+                ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
+                ISCP1853Data SCP1853Data = CustomItem.CustomItem.CustomData as ISCP1853Data;
+                ISCP1576Data SCP1576Data = CustomItem.CustomItem.CustomData as ISCP1576Data;
+                if (Item == ItemType.SCP500 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                {
+                    if (SCP500Data.Effect == null)
+                    {
+                        LogManager.Warn($"Invalid Effect: {SCP500Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                        return;
+                    }
+                    if (SCP500Data.Duration <= -2)
+                    {
+                        LogManager.Warn($"Invalid Duration: {SCP500Data.Duration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                        return;
+                    }
+                    if (SCP500Data.Intensity <= 0)
+                    {
+                        LogManager.Warn($"Invalid intensity: {SCP500Data.Intensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                        return;
+                    }
+                    
+                    LogManager.Debug($"Applying effect {SCP500Data.Effect} at intensity {SCP500Data.Intensity}, duration is {SCP500Data.Duration} to {ev.Player.DisplayNickname}");
+                    EffectType Effect = SCP500Data.Effect;
+                    float Duration = SCP500Data.Duration;
+                    byte Intensity = SCP500Data.Intensity;
+                    ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                }
+                else if (Item == ItemType.SCP207 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                    {
+                        if (SCP207Data.Effect == null)
+                        {
+                            LogManager.Warn($"Invalid Effect: {SCP207Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        if (SCP207Data.Duration <= -2)
+                        {
+                            LogManager.Warn($"Invalid Duration: {SCP207Data.Duration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        if (SCP207Data.Intensity <= 0)
+                        {
+                            LogManager.Warn($"Invalid intensity: {SCP207Data.Intensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        
+                        LogManager.Debug($"Applying effect {SCP207Data.Effect} at intensity {SCP207Data.Intensity}, duration is {SCP207Data.Duration} to {ev.Player.DisplayNickname}");
+                        EffectType Effect = SCP207Data.Effect;
+                        float Duration = SCP207Data.Duration;
+                        byte Intensity = SCP207Data.Intensity;
+                        ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                    }
+                else if (Item == ItemType.SCP1853 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                    {
+                        if (SCP1853Data.Effect == null)
+                        {
+                            LogManager.Warn($"Invalid Effect: {SCP1853Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        if (SCP1853Data.Duration <= -2)
+                        {
+                            LogManager.Warn($"Invalid Duration: {SCP1853Data.Duration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        if (SCP1853Data.Intensity <= 0)
+                        {
+                            LogManager.Warn($"Invalid intensity: {SCP1853Data.Intensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        
+                        LogManager.Debug($"Applying effect {SCP1853Data.Effect} at intensity {SCP1853Data.Intensity}, duration is {SCP1853Data.Duration} to {ev.Player.DisplayNickname}");
+                        EffectType Effect = SCP1853Data.Effect;
+                        float Duration = SCP1853Data.Duration;
+                        byte Intensity = SCP1853Data.Intensity;
+                        ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                    }
+                else if (Item == ItemType.SCP1576 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                    {
+                        if (SCP1576Data.Effect == null)
+                        {
+                            LogManager.Warn($"Invalid Effect: {SCP1576Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        if (SCP1576Data.Duration <= -2)
+                        {
+                            LogManager.Warn($"Invalid Duration: {SCP1576Data.Duration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        if (SCP1576Data.Intensity <= 0)
+                        {
+                            LogManager.Warn($"Invalid intensity: {SCP1576Data.Intensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                            return;
+                        }
+                        
+                        LogManager.Debug($"Applying effect {SCP1576Data.Effect} at intensity {SCP1576Data.Intensity}, duration is {SCP1576Data.Duration} to {ev.Player.DisplayNickname}");
+                        EffectType Effect = SCP1576Data.Effect;
+                        float Duration = SCP1576Data.Duration;
+                        byte Intensity = SCP1576Data.Intensity;
+                        ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                    }
+                else return;
             }
             else return;
         }
