@@ -71,6 +71,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shot += Handler.OnShot2;
             ItemEvent.ChargingJailbird += Handler.OnCharge;
             PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
+            PlayerEvent.UsingItemCompleted += Handler.UsedItem;
+            PlayerEvent.ReceivingEffect += Handler.Recivingeffect;
 
             //Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -129,6 +131,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shot -= Handler.OnShot2;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
             PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
+            PlayerEvent.UsingItemCompleted -= Handler.UsedItem;
+            PlayerEvent.ReceivingEffect -= Handler.Recivingeffect;
 
             //Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

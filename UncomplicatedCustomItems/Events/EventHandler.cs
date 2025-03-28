@@ -18,6 +18,8 @@ using Exiled.Events.EventArgs.Server;
 using Mirror;
 using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.Interfaces.SpecificData;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -407,7 +409,42 @@ namespace UncomplicatedCustomItems.Events
         {
             Exiled.Events.Handlers.Map.PickupDestroyed -= OnPickup;
         }
-
+        public void UsedItem(UsingItemCompletedEventArgs ev)
+        {
+            ItemType Item = new();
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
+            {
+                ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
+                if (Item == ItemType.SCP207 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                {
+                    if (SCP207Data.RemoveItemAfterUse == false)
+                    {
+                        ev.IsAllowed = false;
+                    }
+                    else return;
+                }
+                else return;
+            }
+            else return;
+        }
+        public void Recivingeffect(ReceivingEffectEventArgs ev)
+        {
+            ItemType Item = new();
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
+            {
+                ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
+                if (Item == ItemType.SCP207 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem && (ev.Effect.GetType() == typeof(Scp207) || ev.Effect.GetType() == typeof(AntiScp207)))
+                {
+                    if (SCP207Data.Apply207Effect == false)
+                    {
+                        ev.IsAllowed = false;
+                    }
+                    else return;
+                }
+                else return;
+            }
+            else return;
+        }
         public void OnPickup(PickupDestroyedEventArgs ev)
         {
             if (ev.Pickup != null)

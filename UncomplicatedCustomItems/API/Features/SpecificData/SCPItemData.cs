@@ -20,7 +20,8 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public EffectType Effect { get; set; } = new();
         public float Duration { get; set; } = 20;
         public byte Intensity { get; set; } = 1;
-        public bool ApplyBaseEffect { get; set; } = false;
+        public bool Apply207Effect { get; set; } = false;
+        public bool RemoveItemAfterUse { get; set; } = true;
     }
 
     public class SCP018Data : ISCP018Data
@@ -38,7 +39,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     {
         public float FuseTime { get; set; } = 2f;
     }
-    public class SCP244aData : ISCP244aData
+    public class SCP244Data : ISCP244Data
     {
         public float ActivationDot { get; set; } = 1f;
         public float Health { get; set; } = 1f;
@@ -46,19 +47,12 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public bool Primed { get; set; } = false;
 
     }
-    public class SCP244bData : ISCP244bData
-    {
-        public float ActivationDot { get; set; } = 1f;
-        public float Health { get; set; } = 1f;
-        public float MaxDiameter { get; set; } = 1f;
-        public bool Primed { get; set; } = false;
-    }
-
     public class SCP1853Data : ISCP1853Data
     {
         public EffectType Effect { get; set; } = new();
         public float Duration { get; set; } = 20;
         public byte Intensity { get; set; } = 1;
+        public bool Apply1853Effect { get; set; } = false;
     }
     public class SCP1576Data : ISCP1576Data
     {

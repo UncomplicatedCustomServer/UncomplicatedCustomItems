@@ -215,7 +215,7 @@ https://discord.com/channels/null";
                     break;
 
                 case CustomItemType.SCPItem:
-                    if (item.CustomData is not ISCPItemData)
+                    if (item.CustomData is not ISCPItemData || item.CustomData is not ISCP500Data ||  item.CustomData is not ISCP207Data || item.CustomData is not ISCP018Data || item.CustomData is not ISCP330Data || item.CustomData is not ISCP2176Data || item.CustomData is not ISCP244Data || item.CustomData is not ISCP1853Data || item.CustomData is not ISCP1576Data)
                     {
 error = @$"The item has been flagged as 'SCPItem' but the CustomData class is not 'ISCPItemData', 
 found '{item.CustomData.GetType().Name}' 

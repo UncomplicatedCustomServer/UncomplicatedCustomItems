@@ -19,7 +19,8 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract EffectType Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
-        public abstract bool ApplyBaseEffect { get; set; }
+        public abstract bool Apply207Effect { get; set; }
+        public abstract bool RemoveItemAfterUse { get; set; }
     }
     public interface ISCP018Data : ISCPItemData
     {
@@ -37,26 +38,19 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     {
         public abstract float FuseTime { get; set; }
     }
-    public interface ISCP244aData : ISCPItemData
+    public interface ISCP244Data : ISCPItemData
     {
         public abstract float ActivationDot { get; set; }
         public abstract float Health { get; set; }
         public abstract float MaxDiameter { get; set; }
         public abstract bool Primed { get; set; }
     }
-    public interface ISCP244bData : ISCPItemData
-    {
-        public abstract float ActivationDot { get; set; }
-        public abstract float Health { get; set; }
-        public abstract float MaxDiameter { get; set; }
-        public abstract bool Primed { get; set; }
-    }
-
     public interface ISCP1853Data : ISCPItemData
     {
         public abstract EffectType Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
+        public abstract bool Apply1853Effect { get; set; }
     }
     public interface ISCP1576Data : ISCPItemData
     {
