@@ -129,6 +129,7 @@ namespace UncomplicatedCustomItems.Events
                 AudioApi AudioApi = new();
                 if (ev.Firearm != null)
                 {
+                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
                     AudioApi.PlayAudio(CustomItem, ev.Player.Position);
                 }
             }
@@ -214,6 +215,7 @@ namespace UncomplicatedCustomItems.Events
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
                 {
+                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {Customitem.CustomItem.Name}.");
                     AudioApi.PlayAudio(Customitem, ev.Player.Position);
                 }
             }
@@ -418,6 +420,7 @@ namespace UncomplicatedCustomItems.Events
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
                 {
+                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
                     AudioApi.PlayAudio(customItem, ev.Player.Position);
                 }
             }

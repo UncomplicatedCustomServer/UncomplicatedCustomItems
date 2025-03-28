@@ -51,9 +51,9 @@ namespace UncomplicatedCustomItems.API.Features
 
 #nullable enable
         /// <summary>
-        /// Tells the AudioAPI where the audio file is.
+        /// Tells the AudioAPI where the ogg audio file is.
         /// </summary>
-        [Description("Tells the AudioAPI where the audio file is.")]
+        [Description("Tells the AudioAPI where the ogg audio file is.")]
         public string? AudioPath { get; set; } = "";
 
         /// <summary>

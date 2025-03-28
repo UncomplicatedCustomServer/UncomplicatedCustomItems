@@ -1,4 +1,5 @@
 ﻿using Exiled.Loader;
+using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
@@ -39,12 +40,15 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="Coords"></param>
         public void PlayAudio(SummonedCustomItem CustomItem, Vector3 Coords)
         {
+            LogManager.Debug($"PlayAudio method triggered by {CustomItem.CustomItem.Name} at {Coords}");
             if (EnableAudioApi != false)
             {
+                LogManager.Debug($"Audio API is enabled!");
                 var flagSettings = SummonedCustomItem.GetAllFlagSettings();
                 var flagSetting = flagSettings.FirstOrDefault();
                 if (!string.IsNullOrEmpty(flagSetting.AudioPath))
                 {
+                    LogManager.Debug($"Succesfully loaded audio path {flagSetting.AudioPath}");
                     AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{CustomItem.CustomItem.Id}", onIntialCreation: (p) =>
                     {
                         float maxDistance = flagSetting.AudibleDistance ?? 1f;
@@ -53,7 +57,11 @@ namespace UncomplicatedCustomItems.API.Features
                     });
                     float volume = Clamp(flagSetting.SoundVolume, 1f, 100f);
                     audioPlayer.AddClip($"sound_{CustomItem.CustomItem.Id}", volume);
+                    LogManager.Debug($"Playing {Path.GetFileName(flagSetting.AudioPath)}");
+                    LogManager.Debug($"Audio should have been played.");
                 }
+                else
+                LogManager.Error($"Audio path is null please fill out the config properly.");
             }
             else
             {
