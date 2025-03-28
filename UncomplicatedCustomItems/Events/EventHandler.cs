@@ -421,9 +421,15 @@ namespace UncomplicatedCustomItems.Events
                     {
                         ev.IsAllowed = false;
                     }
-                    else return;
                 }
-                else return;
+                ISCP1853Data SCP1853Data = CustomItem.CustomItem.CustomData as ISCP1853Data;
+                if (Item == ItemType.SCP1853 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                {
+                    if (SCP1853Data.RemoveItemAfterUse == false)
+                    {
+                        ev.IsAllowed = false;
+                    }
+                }
             }
             else return;
         }
@@ -439,9 +445,15 @@ namespace UncomplicatedCustomItems.Events
                     {
                         ev.IsAllowed = false;
                     }
-                    else return;
                 }
-                else return;
+                ISCP1853Data SCP1853Data = CustomItem.CustomItem.CustomData as ISCP1853Data;
+                if (Item == ItemType.SCP1853 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem && (ev.Effect.GetType() == typeof(Scp1853)))
+                {
+                    if (SCP1853Data.Apply1853Effect == false)
+                    {
+                        ev.IsAllowed = false;
+                    }
+                }
             }
             else return;
         }

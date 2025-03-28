@@ -51,6 +51,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
         public abstract bool Apply1853Effect { get; set; }
+        public abstract bool RemoveItemAfterUse { get; set; }
     }
     public interface ISCP1576Data : ISCPItemData
     {

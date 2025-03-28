@@ -53,6 +53,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public float Duration { get; set; } = 20;
         public byte Intensity { get; set; } = 1;
         public bool Apply1853Effect { get; set; } = false;
+        public bool RemoveItemAfterUse { get; set; } = true;
     }
     public class SCP1576Data : ISCP1576Data
     {
