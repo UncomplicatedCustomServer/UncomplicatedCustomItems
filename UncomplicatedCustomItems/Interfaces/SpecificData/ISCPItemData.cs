@@ -1,3 +1,5 @@
+using Exiled.API.Enums;
+
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
     public interface ISCPItemData : IData
@@ -6,12 +8,18 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     }
     public interface ISCP500Data : ISCPItemData
     {
-        
+        public abstract EffectType Effect { get; set; }
+        public abstract float Duration { get; set; }
+        public abstract byte Intensity { get; set; }
+        public abstract bool HealPlayer { get; set; }
     }
 
     public interface ISCP207Data : ISCPItemData
     {
-        
+        public abstract EffectType Effect { get; set; }
+        public abstract float Duration { get; set; }
+        public abstract byte Intensity { get; set; }
+        public abstract bool ApplyBaseEffect { get; set; }
     }
     public interface ISCP018Data : ISCPItemData
     {
@@ -20,13 +28,9 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float FuseTime { get; set; }
     }
 
-    public interface ISCP268Data : ISCPItemData
-    {
-        
-    }
     public interface ISCP330Data : ISCPItemData
     {
-        
+
     }
 
     public interface ISCP2176Data : ISCPItemData
@@ -35,23 +39,29 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     }
     public interface ISCP244aData : ISCPItemData
     {
-        
+        public abstract float ActivationDot { get; set; }
+        public abstract float Health { get; set; }
+        public abstract float MaxDiameter { get; set; }
+        public abstract bool Primed { get; set; }
     }
     public interface ISCP244bData : ISCPItemData
     {
-        
+        public abstract float ActivationDot { get; set; }
+        public abstract float Health { get; set; }
+        public abstract float MaxDiameter { get; set; }
+        public abstract bool Primed { get; set; }
     }
 
     public interface ISCP1853Data : ISCPItemData
     {
-        
+        public abstract EffectType Effect { get; set; }
+        public abstract float Duration { get; set; }
+        public abstract byte Intensity { get; set; }
     }
     public interface ISCP1576Data : ISCPItemData
     {
-        
-    }
-    public interface ISCP1344Data : ISCPItemData
-    {
-        
+        public abstract EffectType Effect { get; set; }
+        public abstract float Duration { get; set; }
+        public abstract byte Intensity { get; set; }
     }
 }
