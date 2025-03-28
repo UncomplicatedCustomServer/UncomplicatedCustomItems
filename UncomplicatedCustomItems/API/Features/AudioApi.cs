@@ -52,7 +52,8 @@ namespace UncomplicatedCustomItems.API.Features
                     AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{CustomItem.CustomItem.Id}", onIntialCreation: (p) =>
                     {
                         float maxDistance = flagSetting.AudibleDistance ?? 1f;
-                        Speaker speaker = p.AddSpeaker("Main", isSpatial: false, maxDistance: maxDistance);
+                        Speaker speaker = p.AddSpeaker("Main", isSpatial: true, maxDistance: maxDistance);
+                        speaker.transform.position = Coords;
                     });
                     float volume = Clamp(flagSetting.SoundVolume, 1f, 100f);
                     audioPlayer.AddClip($"sound_{CustomItem.CustomItem.Id}", volume);

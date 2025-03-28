@@ -124,6 +124,14 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
+            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<CustomSound>())
+            {
+                AudioApi AudioApi = new();
+                if (ev.Firearm != null)
+                {
+                    AudioApi.PlayAudio(CustomItem, ev.Player.Position);
+                }
+            }
             else return;
         }
         public void OnDieOnUseFlag(ShootingEventArgs ev)
@@ -156,7 +164,59 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
-            else return;
+            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectWhenUsed>())
+            {
+                if (ev.Item != null)
+                {
+                    var flagSettings = SummonedCustomItem.GetAllFlagSettings();
+
+                    if (flagSettings != null && flagSettings.Count > 0)
+                    {
+                        var flagSetting = flagSettings.FirstOrDefault();
+
+                        if (flagSetting.EffectEvent == "EffectWhenUsed")
+                        {
+                            if (flagSetting.Effect == null)
+                            {
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (flagSetting.EffectDuration < -1)
+                            {
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (flagSetting.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+
+                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Player}");
+                            EffectType Effect = flagSetting.Effect;
+                            float Duration = flagSetting.EffectDuration;
+                            byte Intensity = flagSetting.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
+                    }
+                }
+                else
+                {
+                    LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}");
+                }
+            }
+            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem Customitem) && Customitem.HasModule<CustomSound>())
+            {
+                AudioApi AudioApi = new();
+                if (ev.Item != null)
+                {
+                    AudioApi.PlayAudio(Customitem, ev.Player.Position);
+                }
+            }
         }
         public void OnChangingAttachments(ChangingAttachmentsEventArgs ev)
         {
@@ -243,55 +303,6 @@ namespace UncomplicatedCustomItems.Events
                 else
                 {
                     LogManager.Error("ItemGlow flag was triggered but couldnt be ran.");
-                }
-            }
-            else return;
-        }
-        public void OnUsingItem(UsingItemEventArgs ev)
-        {
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
-            {
-                if (ev.Item != null)
-                {
-                    var flagSettings = SummonedCustomItem.GetAllFlagSettings();
-
-                    if (flagSettings != null && flagSettings.Count > 0)
-                    {
-                        var flagSetting = flagSettings.FirstOrDefault();
-
-                        if (flagSetting.EffectEvent == "EffectWhenUsed")
-                        {
-                            if (flagSetting.Effect == null)
-                            {
-                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
-                                return;
-                            }
-                            if (flagSetting.EffectDuration < -1)
-                            {
-                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
-                                return;
-                            }
-                            if (flagSetting.EffectIntensity <= 0)
-                            {
-                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
-                                return;
-                            }
-
-                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Player}");
-                            EffectType Effect = flagSetting.Effect;
-                            float Duration = flagSetting.EffectDuration;
-                            byte Intensity = flagSetting.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
-                        }
-                    }
-                    else
-                    {
-                        LogManager.Error($"No FlagSettings found on {customItem.CustomItem.Name}");
-                    }
-                }
-                else
-                {
-                    LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {customItem.CustomItem.Name}");
                 }
             }
             else return;
@@ -400,6 +411,14 @@ namespace UncomplicatedCustomItems.Events
                 {
                     ev.IsAllowed = false;
                     ev.Player.CurrentItem = null;
+                }
+            }
+            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
+            {
+                AudioApi AudioApi = new();
+                if (ev.Item != null)
+                {
+                    AudioApi.PlayAudio(customItem, ev.Player.Position);
                 }
             }
             else return;
@@ -627,10 +646,10 @@ namespace UncomplicatedCustomItems.Events
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
                 if (ev.Item.Serial == CustomItem.Serial)
-                    LogManager.Silent($"{ev.Player.Nickname} is reloading {CustomItem.CustomItem.Name}");
+                    LogManager.Silent($"{ev.Player.Nickname} is shooting {CustomItem.CustomItem.Name}");
             }
             else
-                LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
+                LogManager.Silent($"{ev.Player.Nickname} is shooting {ev.Item}");
         }
 
         /// <summary>

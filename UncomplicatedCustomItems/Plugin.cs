@@ -66,7 +66,6 @@ namespace UncomplicatedCustomItems
             PlayerEvent.DroppedItem += Handler.OnDrop;
             MapEvent.PickupDestroyed += Handler.OnPickup;
             ServerEvent.RoundEnded += Handler.Onroundend;
-            PlayerEvent.UsingItem += Handler.OnUsingItem;
             PlayerEvent.Shot += Handler.OnShot;
             PlayerEvent.Shot += Handler.OnShot2;
             ItemEvent.ChargingJailbird += Handler.OnCharge;
@@ -127,7 +126,6 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
             ServerEvent.RoundEnded -= Handler.Onroundend;
-            PlayerEvent.UsingItem -= Handler.OnUsingItem;
             PlayerEvent.Shot -= Handler.OnShot;
             PlayerEvent.Shot -= Handler.OnShot2;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
