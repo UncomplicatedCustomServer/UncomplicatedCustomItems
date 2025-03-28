@@ -90,6 +90,10 @@ namespace UncomplicatedCustomItems.API.Features
             return _flagSettings.Remove(flagSettings);
         }
 
+        /// <summary>
+        /// Retrieves all loaded flag settings and returns them as a read-only list.
+        /// </summary>
+        /// <returns>A read-only list of flag settings.</returns>
         public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
         {
             LogManager.Debug("Retrieving all loaded Flag Settings");
@@ -434,6 +438,11 @@ namespace UncomplicatedCustomItems.API.Features
             return output;
         }
 
+        /// <summary>
+        /// Applies a custom badge to the specified player if the item has a valid badge name and color.
+        /// </summary>
+        /// <param name="Player">The player receiving the badge.</param>
+        /// <param name="Item">The custom item containing badge details.</param>
         private void CustomItemBadgeApplier(Player Player, ICustomItem Item)
         {
             Triplet<string, string, bool>? Badge = null;
