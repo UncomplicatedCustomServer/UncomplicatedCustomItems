@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
 
-        public override Version Version { get; } = new(3, 1, 1);
+        public override Version Version { get; } = new(3, 2, 0);
 
         internal Handler Handler;
 

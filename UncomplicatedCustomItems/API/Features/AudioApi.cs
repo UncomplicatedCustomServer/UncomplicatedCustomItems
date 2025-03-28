@@ -1,9 +1,5 @@
 ﻿using Exiled.Loader;
-using MEC;
-using PlayerRoles;
 using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
 namespace UncomplicatedCustomItems.API.Features
