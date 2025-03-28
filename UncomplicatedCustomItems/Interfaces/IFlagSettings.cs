@@ -18,5 +18,7 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract byte EffectIntensity { get; set; }
 
         public abstract float EffectDuration {get; set; }
+        
+        public abstract string? AudioPath { get; set; }
     }
 }

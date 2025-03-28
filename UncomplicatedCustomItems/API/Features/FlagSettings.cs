@@ -48,5 +48,12 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("Sets the duration of the effect applied by the custom item.")]
         public float EffectDuration { get; set; } = -1f;
+
+#nullable enable
+        /// <summary>
+        /// Sets the duration of the effect applied by the custom item.
+        /// </summary>
+        [Description("The patch to the audio file to use.")]
+        public string? AudioPath { get; set; } = "";
     }
 }
