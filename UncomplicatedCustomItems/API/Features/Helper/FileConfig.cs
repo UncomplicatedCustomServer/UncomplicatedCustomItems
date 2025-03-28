@@ -168,6 +168,22 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new JailbirdData())
             },
+            new()
+            {
+                Id = 10,
+                Name = "Shitty adrenaline",
+                Description = "This adrenaline just give you 10AHP",
+                Item = ItemType.Adrenaline,
+                CustomItemType = CustomItemType.Adrenaline,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new AdrenalineData()
+                {
+                    Amount = 10,
+                    Decay = 0.01f,
+                    Persistant = true,
+                    Sustain = 1000
+                })
+            }
         ];
 
         internal string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomItems");

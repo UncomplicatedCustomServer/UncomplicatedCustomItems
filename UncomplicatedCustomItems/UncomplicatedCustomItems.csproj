@@ -494,6 +494,7 @@
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="API\Features\CustomItem.cs" />
+    <Compile Include="API\Features\SpecificData\AdrenalineData.cs" />
     <Compile Include="API\Features\SpecificData\ArmorData.cs" />
     <Compile Include="API\Features\SpecificData\Data.cs" />
     <Compile Include="API\Features\SpecificData\ExplosiveGrenadeData.cs" />
@@ -523,6 +524,7 @@
     <Compile Include="Interfaces\IFlagSettings.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\ISubcommand.cs" />
+    <Compile Include="Interfaces\SpecificData\IAdrenalineData.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />
     <Compile Include="Interfaces\SpecificData\IData.cs" />
     <Compile Include="Interfaces\SpecificData\IExplosiveGrenadeData.cs" />

@@ -28,7 +28,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
         /// </summary>
-        private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit];
+        private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
 
         /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
@@ -722,6 +722,10 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
                     case CustomItemType.Painkillers:
                         Timing.RunCoroutine(Utilities.PainkillersCoroutine(Owner, CustomItem.CustomData as IPainkillersData));
+                        break;
+                    case CustomItemType.Adrenaline:
+                        IAdrenalineData AdrenalineData = CustomItem.CustomData as IAdrenalineData;
+                        Owner.AddAhp(AdrenalineData.Amount, decay: AdrenalineData.Decay, efficacy: AdrenalineData.Efficacy, sustain: AdrenalineData.Sustain, persistant: AdrenalineData.Persistant);
                         break;
                     default:
                         return false;

@@ -195,6 +195,25 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
 
                     break;
 
+                case CustomItemType.Adrenaline:
+                    if (item.CustomData is not IAdrenalineData)
+                    {
+                        error = @$"The item has been flagged as 'Adrenaline' but the CustomData class is not 'IAdrenalineData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/null";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.Painkillers)
+                    {
+                        error = $"The Item has been flagged as 'Adrenaline' but the item {item.Item} is not a Adrenaline";
+                        return false;
+                    }
+
+                    break;
+
                 case CustomItemType.SCPItem:
                     if (item.CustomData is not ISCPItemData)
                     {
