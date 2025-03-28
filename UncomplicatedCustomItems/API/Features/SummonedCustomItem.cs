@@ -292,6 +292,11 @@ namespace UncomplicatedCustomItems.API.Features
                         FlashGrenade.FuseTime = FlashGrenadeData.FuseTime;
                         break;
 
+                    case CustomItemType.SCPItem:
+                        {
+                            break;
+                        }
+
                     default:
                         break;
                 }
@@ -403,6 +408,10 @@ namespace UncomplicatedCustomItems.API.Features
                                 FlashGrenadeData.SurfaceDistanceIntensifier = FlashGrenade.SurfaceDistanceIntensifier;
                                 FlashGrenadeData.FuseTime = FlashGrenade.FuseTime;
                             }
+                            break;
+                        }
+                    case CustomItemType.SCPItem:
+                        {
                             break;
                         }
                     default:
