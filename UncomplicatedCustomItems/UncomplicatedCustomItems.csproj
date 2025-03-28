@@ -61,6 +61,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="AudioPlayerApi">
+      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\AudioPlayerApi.dll</HintPath>
+    </Reference>
     <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\BouncyCastle.Cryptography.dll</HintPath>
@@ -97,6 +100,9 @@
     </Reference>
     <Reference Include="NorthwoodLib">
       <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
+    </Reference>
+    <Reference Include="NVorbis">
+      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\NVorbis.dll</HintPath>
     </Reference>
     <Reference Include="PluginAPI">
       <HintPath>$(EXILED_REFERENCES)\PluginAPI.dll</HintPath>
@@ -460,9 +466,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Features\AudioApi.cs" />
     <Compile Include="API\Features\BadgeManager.cs" />
     <Compile Include="API\Features\CustomModules\CoroutineModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
+    <Compile Include="API\Features\CustomModules\CustomSound.cs" />
     <Compile Include="API\Features\CustomModules\DieOnUse.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
     <Compile Include="API\Features\CustomModules\EffectShot.cs" />

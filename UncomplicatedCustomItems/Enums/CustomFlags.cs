@@ -17,5 +17,6 @@ namespace UncomplicatedCustomItems.Enums
         EffectShot = 1 << 8,
         EffectWhenEquiped = 1 << 9,
         NoCharge = 1 << 10,
+        CustomSound = 1 << 11,
     }
 }

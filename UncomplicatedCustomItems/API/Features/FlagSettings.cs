@@ -51,9 +51,22 @@ namespace UncomplicatedCustomItems.API.Features
 
 #nullable enable
         /// <summary>
-        /// Sets the duration of the effect applied by the custom item.
+        /// Tells the AudioAPI where the audio file is.
         /// </summary>
-        [Description("The patch to the audio file to use.")]
+        [Description("Tells the AudioAPI where the audio file is.")]
         public string? AudioPath { get; set; } = "";
+
+        /// <summary>
+        /// Sets the distance that the audio will be heard for.
+        /// </summary>
+        [Description("Sets the distance that the audio will be heard for.")]
+        public float? AudibleDistance { get; set; } = 10f;
+
+        /// <summary>
+        /// Sets the volume of the audio.
+        /// </summary>
+        [Description("Sets the volume percent of the audio.")]
+        public float? SoundVolume { get; set; } = 10f;
+
     }
 }
