@@ -23,7 +23,7 @@ namespace UncomplicatedCustomItems.Events
 {
     internal class EventHandler
     {
-        private Dictionary<Pickup, Light> ActiveLights = [];
+        public Dictionary<Pickup, Light> ActiveLights = [];
         public float Amount { get; set; } = 0f;
         public float Percentage = 0.5f;
         

@@ -118,6 +118,9 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("The scale of the custom item, 0 0 0 means disabled")]
         public Vector3 Scale { get; set; } = Vector3.one;
 
+        /// <summary>
+        /// The Spawn data for the custom item.
+        /// </summary>
         public ISpawn Spawn { get; set; } = new Spawn();
 
         /// <summary>

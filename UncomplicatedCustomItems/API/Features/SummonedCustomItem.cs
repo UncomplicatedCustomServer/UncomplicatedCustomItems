@@ -44,8 +44,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
-
-        public float Capacity { get; set; } = 0f;
         
         internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
 
@@ -136,6 +134,9 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public bool IsPickup => Pickup is not null;
 
+        /// <summary>
+        /// Time since the last time a <see cref="Player"/> was damaged.
+        /// </summary>
         public long LastDamageTime { get; internal set; }
 
         /// <summary>
@@ -143,6 +144,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         /// <param name="customItem"></param>
         /// <param name="owner"></param>
+        /// <param name="item"></param>
+        /// <param name="pickup"></param>
         public SummonedCustomItem(ICustomItem customItem, Player owner, Item item, Pickup pickup)
         {
             CustomItem = customItem;
@@ -177,7 +180,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// From now on it will be considered a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
-        /// <param name="owner"></param>
+        /// <param name="player"></param>
         public SummonedCustomItem(ICustomItem customItem, Player player) : this(customItem, player, player.AddItem(customItem.Item), null) { }
 
         /// <summary>
@@ -185,8 +188,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// From now on it will be considered a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
-        /// <param name="position"></param>
-        /// <param name="rotation"></param>
+        /// <param name="player"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
@@ -298,6 +301,9 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Weight = CustomItem.Weight;
             }
         }
+        /// <summary>
+        /// Save the custom properties of the current <see cref="ICustomItem"/>
+        /// </summary>
         public void SaveProperties()
         {
             if (Item is not null)
@@ -480,7 +486,11 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
-        
+
+        /// <summary>
+        /// Unloads all customitems information for the player who dropped the custom item.
+        /// </summary>
+        /// <param name="dropped"></param>
         public void OnDrop(DroppedItemEventArgs dropped)
         {
             Pickup = dropped.Pickup;
