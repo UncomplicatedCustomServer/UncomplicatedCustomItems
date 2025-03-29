@@ -291,30 +291,33 @@ namespace UncomplicatedCustomItems.API.Features
                         FlashGrenade.SurfaceDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
                         FlashGrenade.FuseTime = FlashGrenadeData.FuseTime;
                         break;
+
                     case CustomItemType.SCPItem:
                         {
-                            switch (CustomItem.Item)
+                            if (Item.Type == ItemType.SCP2176)
                             {
-                                case ItemType.SCP018:
-                                        Scp018 Scp018 = Item as Scp018;
-                                        ISCP018Data SCP018Data = CustomItem.CustomData as ISCP018Data;
-                                        Scp018.FriendlyFireTime = SCP018Data.FriendlyFireTime;
-                                        Scp018.FuseTime = SCP018Data.FuseTime;
-                                    break;
-                                case ItemType.SCP2176:
-                                        Scp2176 Scp2176 = Item as Scp2176;
-                                        ISCP2176Data SCP2176Data = CustomItem.CustomData as ISCP2176Data;
-                                        Scp2176.FuseTime = SCP2176Data.FuseTime;
-                                    break;
-                                case ItemType.SCP244a:
-                                case ItemType.SCP244b:
-                                        Scp244 Scp244 = Item as Scp244;
-                                        ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
-                                        Scp244.ActivationDot = SCP244Data.ActivationDot;
-                                        Scp244.Health = SCP244Data.Health;
-                                        Scp244.MaxDiameter = SCP244Data.MaxDiameter;
-                                        Scp244.Primed = SCP244Data.Primed;
-                                    break;
+                                LogManager.Debug($"SCPItem is SCP-018");
+                                Scp018 Scp018 = Item as Scp018;
+                                ISCP018Data SCP018Data = CustomItem.CustomData as ISCP018Data;
+                                Scp018.FriendlyFireTime = SCP018Data.FriendlyFireTime;
+                                Scp018.FuseTime = SCP018Data.FuseTime;
+                            }
+                            if (Item.Type == ItemType.SCP2176)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-2176");
+                                Scp2176 Scp2176 = Item as Scp2176;
+                                ISCP2176Data SCP2176Data = CustomItem.CustomData as ISCP2176Data;
+                                Scp2176.FuseTime = SCP2176Data.FuseTime;
+                            }
+                            if (Item.Type == ItemType.SCP244a || Item.Type == ItemType.SCP244b)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244 Scp244 = Item as Scp244;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.ActivationDot = SCP244Data.ActivationDot;
+                                Scp244.Health = SCP244Data.Health;
+                                Scp244.MaxDiameter = SCP244Data.MaxDiameter;
+                                Scp244.Primed = SCP244Data.Primed;
                             }
                             break;
                         }
@@ -434,29 +437,28 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     case CustomItemType.SCPItem:
                         {
-                            switch (CustomItem.Item)
+                            if (Item.Type == ItemType.SCP018)
                             {
-                                case ItemType.SCP018:
-                                        Scp018 Scp018 = Item as Scp018;
-                                        ISCP018Data SCP018Data = CustomItem.CustomData as ISCP018Data;
-                                        SCP018Data.FriendlyFireTime = Scp018.FriendlyFireTime;
-                                        SCP018Data.FuseTime = Scp018.FuseTime;
-                                    break;
-                                case ItemType.SCP2176:
-                                        Scp2176 Scp2176 = Item as Scp2176;
-                                        ISCP2176Data SCP2176Data = CustomItem.CustomData as ISCP2176Data;
-                                        SCP2176Data.FuseTime = Scp2176.FuseTime;
-                                    break;
-                                case ItemType.SCP244a:
-                                case ItemType.SCP244b:
-                                        Scp244 Scp244 = Item as Scp244;
-                                        ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
-                                        SCP244Data.ActivationDot = Scp244.ActivationDot;
-                                        SCP244Data.Health = Scp244.Health;
-                                        SCP244Data.MaxDiameter = Scp244.MaxDiameter;
-                                        SCP244Data.Primed = Scp244.Primed;
-                                    break;
+                                Scp018 Scp018 = Item as Scp018;
+                                ISCP018Data SCP018Data = CustomItem.CustomData as ISCP018Data;
+                                SCP018Data.FriendlyFireTime = Scp018.FriendlyFireTime;
+                                SCP018Data.FuseTime = Scp018.FuseTime;
                             }
+                            if (Item.Type == ItemType.SCP2176)
+                            {
+                                Scp2176 Scp2176 = Item as Scp2176;
+                                ISCP2176Data SCP2176Data = CustomItem.CustomData as ISCP2176Data;
+                                SCP2176Data.FuseTime = Scp2176.FuseTime;
+                            }
+                            if (Item.Type == ItemType.SCP244a || Item.Type == ItemType.SCP244b)
+                            {
+                                Scp244 Scp244 = Item as Scp244;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                SCP244Data.ActivationDot = Scp244.ActivationDot;
+                                SCP244Data.Health = Scp244.Health;
+                                SCP244Data.MaxDiameter = Scp244.MaxDiameter;
+                                SCP244Data.Primed = Scp244.Primed;
+                            }    
                             break;
                         }
                     default:
