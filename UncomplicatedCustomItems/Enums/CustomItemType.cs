@@ -9,6 +9,6 @@
     Jailbird,
     ExplosiveGrenade,
     FlashGrenade,
-    SCPItem,
     Adrenaline,
+    SCPItem,
 }

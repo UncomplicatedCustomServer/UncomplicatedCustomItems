@@ -206,7 +206,7 @@ https://discord.com/channels/null";
                         return false;
                     }
 
-                    if (item.Item is not ItemType.Painkillers)
+                    if (item.Item is not ItemType.Adrenaline)
                     {
                         error = $"The Item has been flagged as 'Adrenaline' but the item {item.Item} is not a Adrenaline";
                         return false;
@@ -215,7 +215,7 @@ https://discord.com/channels/null";
                     break;
 
                 case CustomItemType.SCPItem:
-                    if (item.CustomData is not ISCPItemData || item.CustomData is not ISCP500Data ||  item.CustomData is not ISCP207Data || item.CustomData is not ISCP018Data || item.CustomData is not ISCP330Data || item.CustomData is not ISCP2176Data || item.CustomData is not ISCP244Data || item.CustomData is not ISCP1853Data || item.CustomData is not ISCP1576Data)
+                    if (item.CustomData is not ISCPItemData)
                     {
 error = @$"The item has been flagged as 'SCPItem' but the CustomData class is not 'ISCPItemData', 
 found '{item.CustomData.GetType().Name}' 
@@ -225,7 +225,43 @@ https://discord.com/channels/null";
                         return false;
                     }
 
-                    if (!Enum.IsDefined(typeof(Enums.SCPItems), item.Item))
+                    if (item.Item is not ItemType.SCP500)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP207)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP018)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP330)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP2176)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP244a)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP244b)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP1853)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP1576)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else
                     {
                         error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
                         return false;

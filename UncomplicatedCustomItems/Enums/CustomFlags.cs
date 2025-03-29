@@ -18,5 +18,6 @@ namespace UncomplicatedCustomItems.Enums
         EffectWhenEquiped = 1 << 9,
         NoCharge = 1 << 10,
         CustomSound = 1 << 11,
+        ExplosiveBullets = 1 <<12,
     }
 }

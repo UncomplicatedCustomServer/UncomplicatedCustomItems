@@ -68,5 +68,11 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Sets the volume percent of the audio.")]
         public float? SoundVolume { get; set; } = 10f;
 
+        /// <summary>
+        /// Sets the damage radius of the ExplosiveBullets flag.
+        /// </summary>
+        [Description("Sets the volume percent of the audio.")]
+        public float? DamageRadius { get; set; } = 1f;
+
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
-    internal interface IAdrenalineData : IData
+    public interface IAdrenalineData
     {
         public abstract float Amount { get; set; }
 

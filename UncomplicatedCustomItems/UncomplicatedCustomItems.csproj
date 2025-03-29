@@ -17,7 +17,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -39,7 +39,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>12</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <DocumentationFile>bin\x64\Debug\UncomplicatedCustomItems.xml</DocumentationFile>
+    <DocumentationFile>..\..\..\..\AppData\Roaming\EXILED\Plugins\UncomplicatedCustomItems.xml</DocumentationFile>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -475,6 +476,7 @@
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
     <Compile Include="API\Features\CustomModules\EffectShot.cs" />
     <Compile Include="API\Features\CustomModules\EffectWhenUsed.cs" />
+    <Compile Include="API\Features\CustomModules\ExplosiveBullets.cs" />
     <Compile Include="API\Features\CustomModules\InfiniteAmmo.cs" />
     <Compile Include="API\Features\CustomModules\ItemGlow.cs" />
     <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
@@ -518,7 +520,6 @@
     <Compile Include="Enums\CustomItemType.cs" />
     <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Enums\CustomFlags.cs" />
-    <Compile Include="Enums\SCPItems.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />

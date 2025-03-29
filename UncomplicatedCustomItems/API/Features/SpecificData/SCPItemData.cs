@@ -7,7 +7,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     {
 
     }
-    public class SCP500Data : ISCP500Data
+    public class SCP500Data : SCPItemData, ISCP500Data
     {
         public EffectType Effect { get; set; } = new();
         public float Duration { get; set; } = 20;
@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public bool HealPlayer { get; set; } = false;
     }
 
-    public class SCP207Data : ISCP207Data
+    public class SCP207Data : SCPItemData, ISCP207Data
     {
         public EffectType Effect { get; set; } = new();
         public float Duration { get; set; } = 20;
@@ -24,22 +24,22 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public bool RemoveItemAfterUse { get; set; } = true;
     }
 
-    public class SCP018Data : ISCP018Data
+    public class SCP018Data : SCPItemData, ISCP018Data
     {
         public float FriendlyFireTime { get; set; } = 2f;
         public float FuseTime { get; set; } = 2f;
     }
 
-    public class SCP330Data : ISCP330Data
+    public class SCP330Data : SCPItemData, ISCP330Data
     {
 
     }
 
-    public class SCP2176Data : ISCP2176Data
+    public class SCP2176Data : SCPItemData, ISCP2176Data
     {
         public float FuseTime { get; set; } = 2f;
     }
-    public class SCP244Data : ISCP244Data
+    public class SCP244Data : SCPItemData, ISCP244Data
     {
         public float ActivationDot { get; set; } = 1f;
         public float Health { get; set; } = 1f;
@@ -47,7 +47,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public bool Primed { get; set; } = false;
 
     }
-    public class SCP1853Data : ISCP1853Data
+    public class SCP1853Data : SCPItemData, ISCP1853Data
     {
         public EffectType Effect { get; set; } = new();
         public float Duration { get; set; } = 20;
@@ -55,7 +55,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public bool Apply1853Effect { get; set; } = false;
         public bool RemoveItemAfterUse { get; set; } = true;
     }
-    public class SCP1576Data : ISCP1576Data
+    public class SCP1576Data : SCPItemData, ISCP1576Data
     {
         public EffectType Effect { get; set; } = new();
         public float Duration { get; set; } = 20;

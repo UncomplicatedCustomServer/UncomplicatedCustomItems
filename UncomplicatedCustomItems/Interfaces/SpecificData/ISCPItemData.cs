@@ -2,7 +2,7 @@ using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
-    public interface ISCPItemData : IData
+    public interface ISCPItemData
     {
 
     }
@@ -22,7 +22,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract bool Apply207Effect { get; set; }
         public abstract bool RemoveItemAfterUse { get; set; }
     }
-    public interface ISCP018Data : ISCPItemData
+    public interface ISCP018Data : IData
     {
         public abstract float FriendlyFireTime { get; set; }
 
@@ -34,11 +34,11 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
 
     }
 
-    public interface ISCP2176Data : ISCPItemData
+    public interface ISCP2176Data : IData
     {
         public abstract float FuseTime { get; set; }
     }
-    public interface ISCP244Data : ISCPItemData
+    public interface ISCP244Data : IData
     {
         public abstract float ActivationDot { get; set; }
         public abstract float Health { get; set; }

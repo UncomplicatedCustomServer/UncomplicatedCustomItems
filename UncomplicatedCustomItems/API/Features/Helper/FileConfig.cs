@@ -183,6 +183,121 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     Persistant = true,
                     Sustain = 1000
                 })
+            },
+            new()
+            {
+                Id = 11,
+                Name = "SCP-500",
+                Description = "SCP-500",
+                BadgeName = "SCP-500",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP500,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP500Data())
+            },
+            new()
+            {
+                Id = 12,
+                Name = "SCP-207",
+                Description = "SCP-207",
+                BadgeName = "SCP-207",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP207,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP207Data())
+            },
+            new()
+            {
+                Id = 13,
+                Name = "SCP-018",
+                Description = "SCP-018",
+                BadgeName = "SCP-018",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP018,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP018Data())
+            },
+            new()
+            {
+                Id = 14,
+                Name = "SCP2176",
+                Description = "SCP2176",
+                BadgeName = "SCP2176",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP2176,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = new(2, 2, 2),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP2176Data())
+            },
+            new()
+            {
+                Id = 15,
+                Name = "SCP244",
+                Description = "SCP244",
+                BadgeName = "SCP244",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP244a,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = new(5, 5, 5),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP244Data())
+            },
+            new()
+            {
+                Id = 16,
+                Name = "SCP244",
+                Description = "SCP244",
+                BadgeName = "SCP244",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP244b,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = new(5, 5, 5),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP244Data())
+            },
+            new()
+            {
+                Id = 17,
+                Name = "SCP1853",
+                Description = "SCP1853",
+                BadgeName = "SCP1853",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP1853,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = new(1, 1, 1),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP1853Data())
+            },
+            new()
+            {
+                Id = 18,
+                Name = "SCP1576",
+                Description = "SCP1576",
+                Item = ItemType.SCP1576,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new SCP1576Data())
             }
         ];
 

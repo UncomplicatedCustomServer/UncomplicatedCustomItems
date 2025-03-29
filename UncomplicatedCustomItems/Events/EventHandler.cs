@@ -20,6 +20,7 @@ using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
+using UnityEngine.UIElements;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -353,6 +354,22 @@ namespace UncomplicatedCustomItems.Events
                 else
                 {
                     LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
+                }
+            }
+            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<ExplosiveBullets>())
+            {
+                var flagSettings = SummonedCustomItem.GetAllFlagSettings();
+                var flagSetting = flagSettings.FirstOrDefault();
+                if (ev.Firearm != null)
+                {
+                    
+                    ev.CanSpawnImpactEffects = false;
+                    Vector3 Position = ev.Position;
+                    ExplosiveGrenade grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
+                    float DamageRadius = flagSetting.DamageRadius ?? 1f;
+                    grenade.MaxRadius = DamageRadius;
+                    grenade.FuseTime = .1f;
+                    grenade.SpawnActive(Position);
                 }
             }
             else return;

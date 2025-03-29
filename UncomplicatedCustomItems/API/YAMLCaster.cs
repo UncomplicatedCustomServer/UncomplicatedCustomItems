@@ -80,6 +80,8 @@ namespace UncomplicatedCustomItems.API
                 CustomItemType.Jailbird => (Data)Decode(new JailbirdData(), data),
                 CustomItemType.ExplosiveGrenade => (Data)Decode(new ExplosiveGrenadeData(), data),
                 CustomItemType.FlashGrenade => (Data)Decode(new FlashGrenadeData(), data),
+                CustomItemType.SCPItem => (Data)Decode(new SCPItemData(), data),
+                CustomItemType.Adrenaline => (Data)Decode(new AdrenalineData(), data),
                 _ => new(),
             };
         }
