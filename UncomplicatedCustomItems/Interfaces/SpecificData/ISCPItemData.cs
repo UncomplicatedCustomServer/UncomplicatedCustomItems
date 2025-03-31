@@ -11,7 +11,6 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract EffectType Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
-        public abstract bool HealPlayer { get; set; }
     }
 
     public interface ISCP207Data

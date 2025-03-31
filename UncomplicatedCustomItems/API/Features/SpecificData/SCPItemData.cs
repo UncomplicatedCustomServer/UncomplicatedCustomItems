@@ -12,7 +12,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public EffectType Effect { get; set; } = new();
         public float Duration { get; set; } = 20;
         public byte Intensity { get; set; } = 1;
-        public bool HealPlayer { get; set; } = false;
     }
 
     public class SCP207Data : Data, ISCP207Data

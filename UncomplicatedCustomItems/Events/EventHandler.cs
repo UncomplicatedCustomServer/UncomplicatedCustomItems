@@ -20,6 +20,8 @@ using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
+using Exiled.Events.Patches.Generic;
+using Exiled.API.Features.DamageHandlers;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -92,7 +94,6 @@ namespace UncomplicatedCustomItems.Events
                         LogManager.Debug($"LifeSteal custom flag triggered, healed {HealedAmount} HP");
                     }
                 }
-                else return;
             }
         }
         public void OnTriggeringTesla(TriggeringTeslaEventArgs ev)

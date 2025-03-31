@@ -15,6 +15,7 @@ using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
+using Exiled.Events.Patches.Generic;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -115,6 +116,18 @@ namespace UncomplicatedCustomItems.API.Features
                 .SelectMany(item => item.Attachments.Split(',')
                     .Select(attachment => new { AttachmentName = attachment.Trim() }))
                 .Select(x => x.AttachmentName)
+                .ToList();
+        }
+        /// <summary>
+        /// Converts the Command custom data from items into a list to allow multiple commands.
+        /// </summary>
+        public static List<string?> CommandsList(List<IItemData> Commands)
+        {
+            return Commands
+                .Where(item => !string.IsNullOrWhiteSpace(item.Command))
+                .SelectMany(item => item.Command.Split(',')
+                    .Select(Commands => new { Commands = Commands.Trim() }))
+                .Select(x => x.Commands)
                 .ToList();
         }
 
@@ -612,7 +625,6 @@ namespace UncomplicatedCustomItems.API.Features
                 LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
             }
         }
-
         /// <summary>
         /// Displays the debug ui for weapon information to the selected player.
         /// <param name="Player"></param>
