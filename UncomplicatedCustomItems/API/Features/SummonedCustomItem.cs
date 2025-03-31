@@ -725,9 +725,11 @@ namespace UncomplicatedCustomItems.API.Features
             foreach (ICustomModule _ in GetModules<T>())
                 RemoveModule<T>();
         }
+
         internal void HandleEvent(Player player, ItemEvents itemEvent)
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemEvent)
+            if (CustomItem.CustomItemType == CustomItemType.Item &&
+                ((IItemData)CustomItem.CustomData).Event == itemEvent)
             {
                 IItemData Data = CustomItem.CustomData as IItemData;
                 Log.Debug($"Firing events for item {CustomItem.Name}");
@@ -736,45 +738,43 @@ namespace UncomplicatedCustomItems.API.Features
                 string randomPlayerId = randomPlayer?.Id.ToString();
 
                 if (Data.Command is not null && Data.Command.Length > 2)
-                    if (!Data.Command.Contains("{p_id}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_id}", player.Id.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_id}", player.Id.ToString()).Replace("{p_id}", ""), player.Sender);
-                    if (!Data.Command.Contains("{rp_id}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{rp_id}", randomPlayerId));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{rp_id}", randomPlayerId).Replace("{rp_id}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_pos}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_pos}", player.Position.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_pos}", player.Position.ToString()).Replace("{p_pos}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_role}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_role}", player.Role.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_role}", player.Role.ToString()).Replace("{p_role}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_health}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_health}", player.Health.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_health}", player.Health.ToString()).Replace("{p_health}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_zone}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_zone}", player.Zone.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_zone}", player.Zone.ToString()).Replace("{p_zone}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_room}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_room}", player.CurrentRoom.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_room}", player.CurrentRoom.ToString()).Replace("{p_room}", ""), player.Sender);
+                {
+                    List<string?> commandsList = CommandsList(new List<IItemData> { Data });
+                    foreach (string? cmd in commandsList)
+                    {
+                        if (string.IsNullOrWhiteSpace(cmd))
+                            continue;
+
+                        string processedCommand = cmd
+                            .Replace("{p_id}", player.Id.ToString())
+                            .Replace("{rp_id}", randomPlayerId)
+                            .Replace("{p_pos}", player.Position.ToString())
+                            .Replace("{p_role}", player.Role.ToString())
+                            .Replace("{p_health}", player.Health.ToString())
+                            .Replace("{p_zone}", player.Zone.ToString())
+                            .Replace("{p_room}", player.CurrentRoom.ToString());
+
+                        if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
+                            cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
+                            cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
+                            cmd.Contains("{p_room}"))
+                        {
+                            Server.ExecuteCommand(processedCommand, player.Sender);
+                        }
+                        else
+                        {
+                            Server.ExecuteCommand(processedCommand);
+                        }
+                    }
+                }
 
                 Utilities.ParseResponse(player, Data);
 
-
-
-                // Now we can destry the item if we have been told to do it
+                // Destroy the item if needed.
                 if (Data.DestroyAfterUse)
                     Destroy();
             }
         }
-        
 
         /// <summary>
         /// Displays the hint from the SelectedMessage field in the plugin config.
