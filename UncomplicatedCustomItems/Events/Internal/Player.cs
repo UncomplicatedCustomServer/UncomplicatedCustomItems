@@ -41,7 +41,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 Item.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
-                Item.UnloadItemFlags();
+                Item?.UnloadItemFlags();
             }
         }
 
