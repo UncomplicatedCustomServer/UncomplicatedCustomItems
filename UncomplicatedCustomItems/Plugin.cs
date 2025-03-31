@@ -72,7 +72,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
             PlayerEvent.UsingItemCompleted += Handler.UsedItemCompleted;
             PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
-            PlayerEvent.UsingItemCompleted += Handler.UsedItem;
+            PlayerEvent.UsedItem += Handler.UsedItem;
 
             //Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -132,7 +132,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
             PlayerEvent.UsingItemCompleted -= Handler.UsedItemCompleted;
             PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
-            PlayerEvent.UsingItemCompleted -= Handler.UsedItem;
+            PlayerEvent.UsedItem -= Handler.UsedItem;
 
             //Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

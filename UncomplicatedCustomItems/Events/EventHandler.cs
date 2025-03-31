@@ -473,7 +473,7 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
-        public void UsedItem(UsingItemCompletedEventArgs ev)
+        public void UsedItem(UsedItemEventArgs ev)
         {
             ItemType Item = new();
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
@@ -595,7 +595,6 @@ namespace UncomplicatedCustomItems.Events
                     {
                         LogManager.Debug("Removing SCP-207 effect.");
                         ev.Intensity = 0;
-                        ev.IsAllowed = false;
                     }
                 }
                 ISCP1853Data SCP1853Data = CustomItem.CustomItem.CustomData as ISCP1853Data;
@@ -606,7 +605,6 @@ namespace UncomplicatedCustomItems.Events
                     {
                         LogManager.Debug("Removing SCP-1853 effect.");
                         ev.Intensity = 0;
-                        ev.IsAllowed = false;
                     }
                 }
             }

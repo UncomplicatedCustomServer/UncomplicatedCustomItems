@@ -20,6 +20,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.TogglingNoClip += NoclipButton;
             EventSource.Dying += DeathEvent;
             EventSource.ChangingRole += RoleChangeEvent;
+            EventSource.ThrownProjectile += ThrownProjectile;
         }
         // EventSource.EVENT -= EVENTNAME 
         public static void Unregister()
@@ -31,6 +32,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.UsingItemCompleted -= OnItemUsingCompleted;
             EventSource.Dying -= DeathEvent;
             EventSource.ChangingRole -= RoleChangeEvent;
+            EventSource.ThrownProjectile -= ThrownProjectile;
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
@@ -70,6 +72,10 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
             
             Item.HandleEvent(ev.Player, ItemEvents.Use);
+
+            Item?.ResetBadge(ev.Player);
+            Item.UnloadItemFlags();
+            SummonedCustomItem.ClearAllFlagSettings();
 
             if (Item.CustomItem.Reusable)
                 ev.IsAllowed = false;
@@ -128,7 +134,16 @@ namespace UncomplicatedCustomItems.Events.Internal
             item.UnloadItemFlags();
             SummonedCustomItem.ClearAllFlagSettings();
         }
+        private static void ThrownProjectile(ThrownProjectileEventArgs ev)
+        {
 
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+                return;
+
+            item?.ResetBadge(ev.Player);
+            item.UnloadItemFlags();
+            SummonedCustomItem.ClearAllFlagSettings();
+        }
         private static void NoclipButton(TogglingNoClipEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
