@@ -215,15 +215,6 @@ https://discord.com/channels/null";
                     break;
 
                 case CustomItemType.SCPItem:
-                    if (item.CustomData is not ISCPItemData)
-                    {
-error = @$"The item has been flagged as 'SCPItem' but the CustomData class is not 'ISCPItemData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/null";
-                        return false;
-                    }
 
                     if (item.Item is not ItemType.SCP500)
                     {

@@ -60,7 +60,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Hurt += Handler.OnHurt;
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.Shooting += Handler.OnShooting;
-            PlayerEvent.UsedItem += Handler.OnItemUse;
+            PlayerEvent.UsingItemCompleted += Handler.OnItemUse;
             ItemEvent.ChangingAttachments += Handler.OnChangingAttachments;
             PlayerEvent.ActivatingWorkstation += Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem += Handler.OnDrop;
@@ -71,8 +71,8 @@ namespace UncomplicatedCustomItems
             ItemEvent.ChargingJailbird += Handler.OnCharge;
             PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
             PlayerEvent.UsingItemCompleted += Handler.UsedItemCompleted;
-            PlayerEvent.ReceivingEffect += Handler.Recivingeffect;
-            PlayerEvent.UsedItem += Handler.UsedItem;
+            PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
+            PlayerEvent.UsingItemCompleted += Handler.UsedItem;
 
             //Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -121,7 +121,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.Shooting -= Handler.OnShooting;
             ServerEvent.WaitingForPlayers -= Handler.OnWaitingForPlayers;
-            PlayerEvent.UsedItem -= Handler.OnItemUse;
+            PlayerEvent.UsingItemCompleted -= Handler.OnItemUse;
             ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
             PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
@@ -131,8 +131,8 @@ namespace UncomplicatedCustomItems
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
             PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
             PlayerEvent.UsingItemCompleted -= Handler.UsedItemCompleted;
-            PlayerEvent.ReceivingEffect -= Handler.Recivingeffect;
-            PlayerEvent.UsedItem -= Handler.UsedItem;
+            PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
+            PlayerEvent.UsingItemCompleted -= Handler.UsedItem;
 
             //Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

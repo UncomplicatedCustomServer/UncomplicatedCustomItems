@@ -21,6 +21,7 @@ using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
 using UnityEngine.UIElements;
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -152,7 +153,7 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
-        public void OnItemUse(UsedItemEventArgs ev)
+        public void OnItemUse(UsingItemCompletedEventArgs ev)
         {
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<DieOnUse>())
             {
@@ -472,7 +473,7 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
-        public void UsedItem(UsedItemEventArgs ev)
+        public void UsedItem(UsingItemCompletedEventArgs ev)
         {
             ItemType Item = new();
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
@@ -505,7 +506,7 @@ namespace UncomplicatedCustomItems.Events
                     byte Intensity = SCP500Data.Intensity;
                     ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
                 }
-                else if (Item == ItemType.SCP207 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                if (Item == ItemType.SCP207 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
                     {
                         if (SCP207Data.Effect == null)
                         {
@@ -529,7 +530,7 @@ namespace UncomplicatedCustomItems.Events
                         byte Intensity = SCP207Data.Intensity;
                         ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
                     }
-                else if (Item == ItemType.SCP1853 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                if (Item == ItemType.SCP1853 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
                     {
                         if (SCP1853Data.Effect == null)
                         {
@@ -553,7 +554,7 @@ namespace UncomplicatedCustomItems.Events
                         byte Intensity = SCP1853Data.Intensity;
                         ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
                     }
-                else if (Item == ItemType.SCP1576 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                if (Item == ItemType.SCP1576 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
                     {
                         if (SCP1576Data.Effect == null)
                         {
@@ -581,24 +582,30 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
-        public void Recivingeffect(ReceivingEffectEventArgs ev)
+        public void Receivingeffect(ReceivingEffectEventArgs ev)
         {
-            ItemType Item = new();
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
             {
+                LogManager.Debug($"{ev.Player.DisplayNickname} is reciving {ev.Effect}.");
                 ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
-                if (Item == ItemType.SCP207 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem && (ev.Effect.GetType() == typeof(Scp207) || ev.Effect.GetType() == typeof(AntiScp207)))
+                if (ev.Effect.GetType() == typeof(Scp207) || ev.Effect.GetType() == typeof(AntiScp207))
                 {
+                    LogManager.Debug("Effect is from a 207 custom item.");
                     if (SCP207Data.Apply207Effect == false)
                     {
+                        LogManager.Debug("Removing SCP-207 effect.");
+                        ev.Intensity = 0;
                         ev.IsAllowed = false;
                     }
                 }
                 ISCP1853Data SCP1853Data = CustomItem.CustomItem.CustomData as ISCP1853Data;
-                if (Item == ItemType.SCP1853 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem && (ev.Effect.GetType() == typeof(Scp1853)))
+                if (ev.Effect.GetType() == typeof(Scp1853))
                 {
+                    LogManager.Debug("Effect is from a 1853 custom item.");
                     if (SCP1853Data.Apply1853Effect == false)
                     {
+                        LogManager.Debug("Removing SCP-1853 effect.");
+                        ev.Intensity = 0;
                         ev.IsAllowed = false;
                     }
                 }

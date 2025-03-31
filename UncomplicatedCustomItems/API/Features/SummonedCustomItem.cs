@@ -294,7 +294,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.SCPItem:
                         {
-                            if (Item.Type == ItemType.SCP2176)
+                            if (Item.Type == ItemType.SCP018)
                             {
                                 LogManager.Debug($"SCPItem is SCP-018");
                                 Scp018 Scp018 = Item as Scp018;

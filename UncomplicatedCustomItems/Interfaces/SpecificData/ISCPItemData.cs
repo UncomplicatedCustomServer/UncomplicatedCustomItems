@@ -2,11 +2,11 @@ using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
-    public interface ISCPItemData
+    public interface ISCPItemData : IData
     {
 
     }
-    public interface ISCP500Data : ISCPItemData
+    public interface ISCP500Data
     {
         public abstract EffectType Effect { get; set; }
         public abstract float Duration { get; set; }
@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract bool HealPlayer { get; set; }
     }
 
-    public interface ISCP207Data : ISCPItemData
+    public interface ISCP207Data
     {
         public abstract EffectType Effect { get; set; }
         public abstract float Duration { get; set; }
@@ -29,7 +29,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float FuseTime { get; set; }
     }
 
-    public interface ISCP330Data : ISCPItemData
+    public interface ISCP330Data
     {
 
     }
@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float MaxDiameter { get; set; }
         public abstract bool Primed { get; set; }
     }
-    public interface ISCP1853Data : ISCPItemData
+    public interface ISCP1853Data
     {
         public abstract EffectType Effect { get; set; }
         public abstract float Duration { get; set; }
@@ -53,7 +53,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract bool Apply1853Effect { get; set; }
         public abstract bool RemoveItemAfterUse { get; set; }
     }
-    public interface ISCP1576Data : ISCPItemData
+    public interface ISCP1576Data
     {
         public abstract EffectType Effect { get; set; }
         public abstract float Duration { get; set; }

@@ -35,7 +35,7 @@ namespace UncomplicatedCustomItems.API.Features
             return (float)((value < min) ? min : (value > max) ? max : value);
         }
         /// <summary>
-        /// Plays audio that a custom item requests it.
+        /// Plays audio when a custom item requests it.
         /// </summary>
         /// <param name="CustomItem"></param>
         /// <param name="Coords"></param>

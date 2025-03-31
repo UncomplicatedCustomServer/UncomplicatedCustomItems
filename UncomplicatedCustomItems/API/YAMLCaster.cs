@@ -8,6 +8,7 @@ using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
+using Exiled.API.Features.Items;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -66,25 +67,37 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="type"></param>
         /// <param name="data"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
-        public static Data Decode(CustomItemType type, Dictionary<string, string> data)
+        public static Data Decode(CustomItemType type, Dictionary<string, string> data, ItemType item)
         {
-            return type switch
+            return (type, item) switch
             {
-                CustomItemType.Item => (Data)Decode(new ItemData(), data),
-                CustomItemType.Keycard => (Data)Decode(new KeycardData(), data),
-                CustomItemType.Armor => (Data)Decode(new ArmorData(), data),
-                CustomItemType.Weapon => (Data)Decode(new WeaponData(), data),
-                CustomItemType.Medikit => (Data)Decode(new MedikitData(), data),
-                CustomItemType.Painkillers => (Data)Decode(new PainkillersData(), data),
-                CustomItemType.Jailbird => (Data)Decode(new JailbirdData(), data),
-                CustomItemType.ExplosiveGrenade => (Data)Decode(new ExplosiveGrenadeData(), data),
-                CustomItemType.FlashGrenade => (Data)Decode(new FlashGrenadeData(), data),
-                CustomItemType.SCPItem => (Data)Decode(new SCPItemData(), data),
-                CustomItemType.Adrenaline => (Data)Decode(new AdrenalineData(), data),
-                _ => new(),
+                (CustomItemType.Item, _) => (Data)Decode(new ItemData(), data),
+                (CustomItemType.Keycard, _) => (Data)Decode(new KeycardData(), data),
+                (CustomItemType.Armor, _) => (Data)Decode(new ArmorData(), data),
+                (CustomItemType.Weapon, _) => (Data)Decode(new WeaponData(), data),
+                (CustomItemType.Medikit, _) => (Data)Decode(new MedikitData(), data),
+                (CustomItemType.Painkillers, _) => (Data)Decode(new PainkillersData(), data),
+                (CustomItemType.Jailbird, _) => (Data)Decode(new JailbirdData(), data),
+                (CustomItemType.ExplosiveGrenade, _) => (Data)Decode(new ExplosiveGrenadeData(), data),
+                (CustomItemType.FlashGrenade, _) => (Data)Decode(new FlashGrenadeData(), data),
+                (CustomItemType.Adrenaline, _) => (Data)Decode(new AdrenalineData(), data),
+                (_, ItemType.SCP018) => (Data)Decode(new SCP018Data(), data),
+                (_, ItemType.SCP207) => (Data)Decode(new SCP207Data(), data),
+                (_, ItemType.SCP500) => (Data)Decode(new SCP500Data(), data),
+                (_, ItemType.SCP330) => (Data)Decode(new SCP330Data(), data),
+                (_, ItemType.SCP2176) => (Data)Decode(new SCP2176Data(), data),
+                (_, ItemType.SCP244a) => (Data)Decode(new SCP244Data(), data),
+                (_, ItemType.SCP244b) => (Data)Decode(new SCP244Data(), data),
+                (_, ItemType.SCP1853) => (Data)Decode(new SCP1853Data(), data),
+                (_, ItemType.SCP1576) => (Data)Decode(new SCP1576Data(), data),
+                (CustomItemType.SCPItem, _) => (Data)Decode(new SCPItemData(), data),
+
+                _ => new Data(),
             };
         }
+
 
         /// <summary>
         /// Check if the given <paramref name="data"/> (<see cref="Dictionary{string, string}"/>) can fullify the class at <paramref name="element"/>
@@ -136,7 +149,7 @@ namespace UncomplicatedCustomItems.API
                 CustomFlags = item.CustomFlags,
                 FlagSettings = item.FlagSettings,
                 CustomItemType = item.CustomItemType,
-                CustomData = Decode(item.CustomItemType, item.CustomData)
+                CustomData = Decode(item.CustomItemType, item.CustomData, item.Item)
             };
             return NewItem;
         }
