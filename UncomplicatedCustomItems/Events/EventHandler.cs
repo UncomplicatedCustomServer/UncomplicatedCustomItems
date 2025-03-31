@@ -20,8 +20,6 @@ using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
-using UnityEngine.UIElements;
-using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -221,7 +219,7 @@ namespace UncomplicatedCustomItems.Events
                     AudioApi.PlayAudio(Customitem, ev.Player.Position);
                 }
             }
-            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customitem))
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customitem))
             {
                 ISCP500Data SCP500Data = customitem.CustomItem.CustomData as ISCP500Data;
                 ISCP207Data SCP207Data = customitem.CustomItem.CustomData as ISCP207Data;
@@ -324,7 +322,7 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
                 }
             }
-            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem2))
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem2))
             {
                 ISCP207Data SCP207Data = CustomItem2.CustomItem.CustomData as ISCP207Data;
                 if (ev.Item.Type == ItemType.SCP207 || ev.Item.Type == ItemType.AntiSCP207)
