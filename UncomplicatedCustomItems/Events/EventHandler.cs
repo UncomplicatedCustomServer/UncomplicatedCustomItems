@@ -20,6 +20,8 @@ using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
+using Exiled.Events.Patches.Generic;
+using Exiled.API.Features.DamageHandlers;
 
 namespace UncomplicatedCustomItems.Events
 {
