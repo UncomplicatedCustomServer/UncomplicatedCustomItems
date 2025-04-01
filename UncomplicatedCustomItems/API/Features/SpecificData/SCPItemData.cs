@@ -29,7 +29,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public float FuseTime { get; set; } = 2f;
     }
 
-    public class SCP330Data : Data, ISCP330Data
+    public class SCP330Data : Data, ISCP330Data //Dont really know what to do for this
     {
 
     }

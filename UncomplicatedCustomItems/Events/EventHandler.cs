@@ -489,7 +489,7 @@ namespace UncomplicatedCustomItems.Events
                     ExplosiveGrenade grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
                     float DamageRadius = flagSetting.DamageRadius ?? 1f;
                     grenade.MaxRadius = DamageRadius;
-                    grenade.FuseTime = .1f;
+                    grenade.FuseTime = .01f;
                     grenade.SpawnActive(Position);
                 }
             }
