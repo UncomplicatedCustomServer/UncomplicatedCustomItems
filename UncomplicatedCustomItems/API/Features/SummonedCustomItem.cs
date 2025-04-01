@@ -727,7 +727,7 @@ namespace UncomplicatedCustomItems.API.Features
                 RemoveModule<T>();
         }
 
-        private static readonly Dictionary<Player, Dictionary<ItemType, bool>> _cooldownStates = new();
+        private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();
 
         internal void HandleEvent(Player player, ItemEvents itemEvent)
         {
@@ -735,13 +735,13 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 IItemData data = CustomItem.CustomData as IItemData;
 
-                if (IsOnCooldown(player, CustomItem.Item))
+                if (IsOnCooldown(player, player.CurrentItem.Serial))
                 {
                     LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
                     return;
                 }
 
-                Log.Debug($"Firing events for item {CustomItem.Name}");
+                LogManager.Debug($"Firing events for item {CustomItem.Name}");
                 System.Random rand = new();
                 Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
                 string randomPlayerId = randomPlayer?.Id.ToString();
@@ -776,7 +776,7 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     }
                 }
-                StartCooldown(player, CustomItem.Item, data.CoolDown);
+                StartCooldown(player, player.CurrentItem.Serial, data.CoolDown);
 
                 Utilities.ParseResponse(player, data);
 
@@ -789,11 +789,11 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Checks whether the specified item type for the given player is on cooldown.
         /// </summary>
-        public bool IsOnCooldown(Player player, ItemType itemType)
+        public bool IsOnCooldown(Player player, ushort Serial)
         {
-            if (_cooldownStates.TryGetValue(player, out Dictionary<ItemType, bool> itemStates))
+            if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
             {
-                if (itemStates.TryGetValue(itemType, out bool isOnCooldown))
+                if (itemStates.TryGetValue(Serial, out bool isOnCooldown))
                     return isOnCooldown;
             }
             return false;
@@ -802,25 +802,25 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Starts the cooldown coroutine for the given item type and marks it as on cooldown.
         /// </summary>
-        public void StartCooldown(Player player, ItemType itemType, float cooldown)
+        public void StartCooldown(Player player, ushort Serial, float cooldown)
         {
             if (!_cooldownStates.ContainsKey(player))
-                _cooldownStates[player] = new Dictionary<ItemType, bool>();
+                _cooldownStates[player] = new Dictionary<ushort, bool>();
 
-            _cooldownStates[player][itemType] = true;
-            Timing.RunCoroutine(CooldownCoroutine(player, itemType, cooldown));
+            _cooldownStates[player][Serial] = true;
+            Timing.RunCoroutine(CooldownCoroutine(player, Serial, cooldown));
         }
 
         /// <summary>
         /// A coroutine that waits for the cooldown period and then resets the cooldown state.
         /// </summary>
-        public IEnumerator<float> CooldownCoroutine(Player player, ItemType itemType, float cooldown)
+        public IEnumerator<float> CooldownCoroutine(Player player, ushort Serial, float cooldown)
         {
             yield return Timing.WaitForSeconds(cooldown);
 
-            if (_cooldownStates.TryGetValue(player, out Dictionary<ItemType, bool> itemStates))
+            if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
             {
-                itemStates[itemType] = false;
+                itemStates[Serial] = false;
             }
             LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
         }
