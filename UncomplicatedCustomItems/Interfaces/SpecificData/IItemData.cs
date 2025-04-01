@@ -7,6 +7,8 @@
 
         public abstract string? Command { get; set; }
 
+        public abstract float CoolDown { get; set; }
+
         public abstract string ConsoleMessage { get; set; }
 
         public abstract string BroadcastMessage { get; set; }

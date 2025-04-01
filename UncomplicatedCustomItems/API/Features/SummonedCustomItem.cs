@@ -16,6 +16,7 @@ using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
 using Exiled.Events.Patches.Generic;
+using CustomRendering;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -726,20 +727,28 @@ namespace UncomplicatedCustomItems.API.Features
                 RemoveModule<T>();
         }
 
+        private static readonly Dictionary<Player, Dictionary<ItemType, bool>> _cooldownStates = new();
+
         internal void HandleEvent(Player player, ItemEvents itemEvent)
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item &&
-                ((IItemData)CustomItem.CustomData).Event == itemEvent)
+            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemEvent)
             {
-                IItemData Data = CustomItem.CustomData as IItemData;
+                IItemData data = CustomItem.CustomData as IItemData;
+
+                if (IsOnCooldown(player, CustomItem.Item))
+                {
+                    LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
+                    return;
+                }
+
                 Log.Debug($"Firing events for item {CustomItem.Name}");
                 System.Random rand = new();
                 Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
                 string randomPlayerId = randomPlayer?.Id.ToString();
 
-                if (Data.Command is not null && Data.Command.Length > 2)
+                if (data.Command is not null && data.Command.Length > 2)
                 {
-                    List<string?> commandsList = CommandsList(new List<IItemData> { Data });
+                    List<string?> commandsList = CommandsList(new List<IItemData> { data });
                     foreach (string? cmd in commandsList)
                     {
                         if (string.IsNullOrWhiteSpace(cmd))
@@ -767,13 +776,53 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     }
                 }
+                StartCooldown(player, CustomItem.Item, data.CoolDown);
 
-                Utilities.ParseResponse(player, Data);
+                Utilities.ParseResponse(player, data);
 
                 // Destroy the item if needed.
-                if (Data.DestroyAfterUse)
+                if (data.DestroyAfterUse)
                     Destroy();
             }
+        }
+
+        /// <summary>
+        /// Checks whether the specified item type for the given player is on cooldown.
+        /// </summary>
+        public bool IsOnCooldown(Player player, ItemType itemType)
+        {
+            if (_cooldownStates.TryGetValue(player, out Dictionary<ItemType, bool> itemStates))
+            {
+                if (itemStates.TryGetValue(itemType, out bool isOnCooldown))
+                    return isOnCooldown;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Starts the cooldown coroutine for the given item type and marks it as on cooldown.
+        /// </summary>
+        public void StartCooldown(Player player, ItemType itemType, float cooldown)
+        {
+            if (!_cooldownStates.ContainsKey(player))
+                _cooldownStates[player] = new Dictionary<ItemType, bool>();
+
+            _cooldownStates[player][itemType] = true;
+            Timing.RunCoroutine(CooldownCoroutine(player, itemType, cooldown));
+        }
+
+        /// <summary>
+        /// A coroutine that waits for the cooldown period and then resets the cooldown state.
+        /// </summary>
+        public IEnumerator<float> CooldownCoroutine(Player player, ItemType itemType, float cooldown)
+        {
+            yield return Timing.WaitForSeconds(cooldown);
+
+            if (_cooldownStates.TryGetValue(player, out Dictionary<ItemType, bool> itemStates))
+            {
+                itemStates[itemType] = false;
+            }
+            LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
         }
 
         /// <summary>
@@ -783,6 +832,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (Plugin.Instance.Config.SelectedMessage.Length > 1)
                 Owner.ShowHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
+
         }
 
         /// <summary>

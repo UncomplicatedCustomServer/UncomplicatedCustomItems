@@ -17,6 +17,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public string? Command { get; set; } = null;
 
         /// <summary>
+        /// Gets or sets when the delay after <see cref="ItemEvents"/> is fired. 
+        /// </summary>
+        public float CoolDown { get; set; } = 1f;
+        /// <summary>
         /// Gets or sets the message that will be sent inside the console when the <see cref="ItemEvents"/> will be fired
         /// </summary>
         public string ConsoleMessage { get; set; } = "A funny message for the console";
