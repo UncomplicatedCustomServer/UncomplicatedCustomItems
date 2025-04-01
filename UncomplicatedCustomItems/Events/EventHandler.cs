@@ -23,7 +23,7 @@ using CustomPlayerEffects;
 
 namespace UncomplicatedCustomItems.Events
 {
-    internal class EventHandler
+    public class EventHandler
     {
         public Dictionary<Pickup, Light> ActiveLights = [];
         public float Amount { get; set; } = 0f;
@@ -670,18 +670,25 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public void DestroyLightOnPickup(Pickup Pickup)
         {
-            LogManager.Debug("DestroyLightOnPickup method triggered");
-            if (Pickup == null || !ActiveLights.ContainsKey(Pickup))
-                return;
-
-            Light ItemLight = ActiveLights[Pickup];
-            if (ItemLight != null && ItemLight.Base != null)
+            if (Utilities.IsSummonedCustomItem(Pickup.Serial))
             {
-                NetworkServer.Destroy(ItemLight.Base.gameObject);
+                LogManager.Debug($"{Pickup.Type} is a Customitem");
+                if (Pickup == null || !ActiveLights.ContainsKey(Pickup))
+                    return;
+                Light ItemLight = ActiveLights[Pickup];
+                if (ItemLight != null && ItemLight.Base != null)
+                {
+                    NetworkServer.Destroy(ItemLight.Base.gameObject);
+                    LogManager.Debug($"Destroyed light on {Pickup.Type}");
+                }
+                ActiveLights.Remove(Pickup);
+                LogManager.Debug("Light successfully destroyed.");
+            }
+            else
+            {
+                return;
             }
 
-            ActiveLights.Remove(Pickup);
-            LogManager.Debug("Light successfully destroyed.");
         }
         public async void OnWaitingForPlayers()
         {

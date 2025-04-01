@@ -1,10 +1,9 @@
-﻿using Exiled.API.Features.Items;
-using Exiled.Events.EventArgs.Player;
+﻿using Exiled.Events.EventArgs.Player;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
 using EventSource = Exiled.Events.Handlers.Player;
 using UncomplicatedCustomItems.API.Features.CustomModules;
+using UncomplicatedCustomItems.Enums;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -55,7 +54,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 Item.OnPickup(ev);
                 Item.HandlePickedUpDisplayHint();
-                CustomModule.Load((Enums.CustomFlags)Item.CustomItem.CustomFlags, Item);
+                CustomModule.Load((CustomFlags)Item.CustomItem.CustomFlags, Item);
                 Item.ReloadItemFlags();
                 Item.LoadItemFlags();
                 SummonedCustomItem.Register(Item.CustomItem.FlagSettings);
@@ -91,7 +90,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item.HandleSelectedDisplayHint();
             item.LoadBadge(ev.Player);
-            CustomModule.Load((Enums.CustomFlags)item.CustomItem.CustomFlags, item);
+            CustomModule.Load((CustomFlags)item.CustomItem.CustomFlags, item);
             item.ReloadItemFlags();
             item.LoadItemFlags();
             SummonedCustomItem.Register(item.CustomItem.FlagSettings);
