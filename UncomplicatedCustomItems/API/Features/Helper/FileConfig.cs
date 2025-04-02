@@ -314,97 +314,97 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             
             if (itemType == ItemType.SCP244a && customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP244Data();
+                SCP244Data Data = new SCP244Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.SCP244b && customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP244Data();
+                SCP244Data Data = new SCP244Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.SCP2176 && customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP2176Data();
+                SCP2176Data Data = new SCP2176Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.SCP018 && customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP018Data();
+                SCP018Data Data = new SCP018Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.SCP500 && customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP500Data();
+                SCP500Data Data = new SCP500Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.SCP207 && customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP207Data();
+                SCP207Data Data = new SCP207Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.AntiSCP207 &&  customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP207Data();
+                SCP207Data Data = new SCP207Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.SCP1853 && customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP1853Data();
+                SCP1853Data Data = new SCP1853Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.SCP1576 && customType == CustomItemType.SCPItem)
             {
-                var Data = new SCP1576Data();
+                SCP1576Data Data = new SCP1576Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Firearm && customType == CustomItemType.Weapon)
             {
-                var Data = new WeaponData();
+                WeaponData Data = new WeaponData();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Keycard && customType == CustomItemType.Keycard)
             {
-                var Data = new KeycardData();
+                KeycardData Data = new KeycardData();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Armor && customType == CustomItemType.Armor)
             {
-                var Data = new ArmorData();
+                ArmorData Data = new ArmorData();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.GrenadeHE && customType == CustomItemType.ExplosiveGrenade)
             {
-                var Data = new ExplosiveGrenadeData();
+                ExplosiveGrenadeData Data = new ExplosiveGrenadeData();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.GrenadeFlash && customType == CustomItemType.FlashGrenade)
             {
-                var Data = new FlashGrenadeData();
+                FlashGrenadeData Data = new FlashGrenadeData();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.Jailbird && customType == CustomItemType.Jailbird)
             {
-                var Data = new JailbirdData();
+                JailbirdData Data = new JailbirdData();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.Medkit && customType == CustomItemType.Medikit)
             {
-                var Data = new MedikitData();
+                MedikitData Data = new MedikitData();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.Painkillers && customType == CustomItemType.Painkillers)
             {
-                var Data = new PainkillersData();
+                PainkillersData Data = new PainkillersData();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (itemType == ItemType.Adrenaline && customType == CustomItemType.Adrenaline)
             {
-                var Data = new AdrenalineData();
+                AdrenalineData Data = new AdrenalineData();
                 customData = YAMLCaster.Encode(Data);
             }
             else
             {
-                var Data = new ItemData();
+                ItemData Data = new ItemData();
                 customData = YAMLCaster.Encode(Data);
             }
 
