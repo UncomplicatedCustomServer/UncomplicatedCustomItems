@@ -34,9 +34,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
             if (CustomItem.List.Count > 0)
             {
-                foreach (ICustomItem Id in CustomItem.List)
+                foreach (ICustomItem customItem in CustomItem.List)
                 {
-                    CustomItem.Unregister(Id);
+                    CustomItem.Unregister(customItem.Id);
+                    LogManager.Debug($"Unregistered {customItem.Name}.");
                 }
                 FileConfig FileConfig = Plugin.Instance.FileConfig;
                 

@@ -58,7 +58,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 FileConfig.GenerateCustomItem(itemId, itemName, itemType, customType, Description);
 
-                response = $"New custom item '{itemName}' (ID: {itemId}) has been created.";
+                response = $"New custom item '{itemName}' (ID: {FileConfig.NewId}) has been created.";
                 return true;
             }
             else

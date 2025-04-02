@@ -210,7 +210,7 @@ namespace UncomplicatedCustomItems.API.Features
         private int Charges { get; set; }
 
         /// <summary>
-        /// Apply the custom properties of the current <see cref="ICustomItem"/>
+        /// Applies the custom properties of the current <see cref="ICustomItem"/>
         /// </summary>
         public void SetProperties()
         {
@@ -356,7 +356,7 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
         /// <summary>
-        /// Save the custom properties of the current <see cref="ICustomItem"/>
+        /// Saves the custom properties of the <see cref="ICustomItem"/> that triggered it
         /// </summary>
         public void SaveProperties()
         {
@@ -764,12 +764,13 @@ namespace UncomplicatedCustomItems.API.Features
                             .Replace("{p_role}", player.Role.ToString())
                             .Replace("{p_health}", player.Health.ToString())
                             .Replace("{p_zone}", player.Zone.ToString())
-                            .Replace("{p_room}", player.CurrentRoom.ToString());
+                            .Replace("{p_room}", player.CurrentRoom.ToString())
+                            .Replace("{p_rotation}", player.Rotation.ToString());
 
                         if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
                             cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
                             cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
-                            cmd.Contains("{p_room}"))
+                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}"))
                         {
                             Server.ExecuteCommand(processedCommand, player.Sender);
                         }

@@ -10,6 +10,7 @@ using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
 using UnityEngine;
 using Exiled.API.Features.Items;
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -305,6 +306,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         ];
 
+        public uint NewId = new();
+
         public void GenerateCustomItem(uint id, string name, ItemType itemType, CustomItemType customType, string description)
         {
             Dictionary<string, string> customData = [];
@@ -405,9 +408,22 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 customData = YAMLCaster.Encode(Data);
             }
 
+            foreach (ICustomItem customItem in CustomItem.List)
+            {
+                if (customItem.Id == id)
+                {
+                    NewId = CustomItem.GetFirstFreeId(1);
+                    break;
+                }
+                else
+                {
+                    NewId = id;
+                }
+            }
+
             YAMLCustomItem NewItem = new()
             {
-                Id = id,
+                Id = NewId,
                 Name = name,
                 Description = description,
                 BadgeName = name,
@@ -418,7 +434,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
                 FlagSettings = new(),
-                CustomData = customData
+                CustomData = customData,
             };
 
             string filePath = Path.Combine(Paths.Configs, "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
