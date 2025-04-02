@@ -729,7 +729,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();
         /// <summary>
-        /// Handles the commands for Item CustomItems
+        /// Handles the commands for <see cref="IItemData"/> CustomItems
         /// </summary>
         /// <param name="player"></param>
         /// <param name="itemEvent"></param>
