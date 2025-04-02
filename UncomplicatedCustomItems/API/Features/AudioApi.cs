@@ -1,5 +1,4 @@
 ﻿using Exiled.Loader;
-using PlayerRoles;
 using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.Helper;

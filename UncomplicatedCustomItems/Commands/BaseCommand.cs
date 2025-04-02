@@ -25,6 +25,7 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Give());
             Subcommands.Add(new Summon());
             Subcommands.Add(new Summoned());
+            Subcommands.Add(new Generate());
         }
 
         private List<ISubcommand> Subcommands { get; } = [];

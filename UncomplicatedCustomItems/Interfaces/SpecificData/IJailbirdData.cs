@@ -2,14 +2,14 @@
 {
     public interface IJailbirdData : IData
     {
-        public float MeleeDamage { get; set; }
+        public abstract float MeleeDamage { get; set; }
 
-        public float ChargeDamage { get; set; }
+        public abstract float ChargeDamage { get; set; }
 
-        public float FlashDuration { get; set; }
+        public abstract float FlashDuration { get; set; }
 
-        public float Radius { get; set; }
+        public abstract float Radius { get; set; }
         
-        public int TotalCharges { get; set; }
+        public abstract int TotalCharges { get; set; }
     }
 }

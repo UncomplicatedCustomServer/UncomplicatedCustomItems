@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
+using Exiled.API.Extensions;
 using Exiled.Loader;
 using System;
 using System.Collections.Generic;
@@ -8,12 +9,13 @@ using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
 using UnityEngine;
+using Exiled.API.Features.Items;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
     internal class FileConfig
     {
-        private static readonly List<YAMLCustomItem> _examples =
+        public static readonly List<YAMLCustomItem> _examples =
         [
             new()
             {
@@ -175,7 +177,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Description = "This adrenaline just give you 10AHP",
                 Item = ItemType.Adrenaline,
                 CustomItemType = CustomItemType.Adrenaline,
-                Scale = Vector3.one,
+                Scale = new(1, 1, 1),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new AdrenalineData()
                 {
                     Amount = 10,
@@ -300,6 +304,130 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomData = YAMLCaster.Encode(new SCP1576Data())
             }
         ];
+
+        public void GenerateCustomItem(uint id, string name, ItemType itemType, CustomItemType customType, string description)
+        {
+            Dictionary<string, string> customData = [];
+            
+            if (itemType == ItemType.SCP244a && customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP244Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP244b && customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP244Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP2176 && customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP2176Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP018 && customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP018Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP500 && customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP500Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP207 && customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP207Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.AntiSCP207 &&  customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP207Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP1853 && customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP1853Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP1576 && customType == CustomItemType.SCPItem)
+            {
+                var Data = new SCP1576Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Firearm && customType == CustomItemType.Weapon)
+            {
+                var Data = new WeaponData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Keycard && customType == CustomItemType.Keycard)
+            {
+                var Data = new KeycardData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Armor && customType == CustomItemType.Armor)
+            {
+                var Data = new ArmorData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.GrenadeHE && customType == CustomItemType.ExplosiveGrenade)
+            {
+                var Data = new ExplosiveGrenadeData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.GrenadeFlash && customType == CustomItemType.FlashGrenade)
+            {
+                var Data = new FlashGrenadeData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.Jailbird && customType == CustomItemType.Jailbird)
+            {
+                var Data = new JailbirdData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.Medkit && customType == CustomItemType.Medikit)
+            {
+                var Data = new MedikitData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.Painkillers && customType == CustomItemType.Painkillers)
+            {
+                var Data = new PainkillersData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.Adrenaline && customType == CustomItemType.Adrenaline)
+            {
+                var Data = new AdrenalineData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else
+            {
+                var Data = new ItemData();
+                customData = YAMLCaster.Encode(Data);
+            }
+
+            YAMLCustomItem NewItem = new()
+            {
+                Id = id,
+                Name = name,
+                Description = description,
+                BadgeName = name,
+                BadgeColor = "pumpkin",
+                Item = itemType,
+                CustomItemType = customType,
+                Scale = Vector3.one,
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = customData
+            };
+
+            string filePath = Path.Combine(Paths.Configs, "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
+            File.WriteAllText(filePath, Loader.Serializer.Serialize(NewItem));
+
+            CustomItem.Register(YAMLCaster.Converter(NewItem));
+
+            LogManager.Info($"Generated and registered custom item: {NewItem.Name} with ID {NewItem.Id}");
+        }
 
         internal string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomItems");
 
