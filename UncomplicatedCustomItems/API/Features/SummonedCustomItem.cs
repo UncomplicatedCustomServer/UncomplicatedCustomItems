@@ -728,13 +728,16 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();
-
-        internal void HandleEvent(Player player, ItemEvents itemEvent)
+        /// <summary>
+        /// Handles the commands for Item CustomItems
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="itemEvent"></param>
+        public void HandleEvent(Player player, ItemEvents itemEvent)
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemEvent)
+            IItemData ItemData = CustomItem.CustomData as IItemData;
+            if (CustomItem.CustomItemType == CustomItemType.Item && ItemData.Event == itemEvent)
             {
-                IItemData data = CustomItem.CustomData as IItemData;
-
                 if (IsOnCooldown(player, player.CurrentItem.Serial))
                 {
                     LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
@@ -746,9 +749,9 @@ namespace UncomplicatedCustomItems.API.Features
                 Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
                 string randomPlayerId = randomPlayer?.Id.ToString();
 
-                if (data.Command is not null && data.Command.Length > 2)
+                if (ItemData.Command is not null && ItemData.Command.Length > 2)
                 {
-                    List<string?> commandsList = CommandsList(new List<IItemData> { data });
+                    List<string?> commandsList = CommandsList(new List<IItemData> { ItemData });
                     foreach (string? cmd in commandsList)
                     {
                         if (string.IsNullOrWhiteSpace(cmd))
@@ -776,12 +779,12 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     }
                 }
-                StartCooldown(player, player.CurrentItem.Serial, data.CoolDown);
+                StartCooldown(player, player.CurrentItem.Serial, ItemData.CoolDown);
 
-                Utilities.ParseResponse(player, data);
+                Utilities.ParseResponse(player, ItemData);
 
                 // Destroy the item if needed.
-                if (data.DestroyAfterUse)
+                if (ItemData.DestroyAfterUse)
                     Destroy();
             }
         }
