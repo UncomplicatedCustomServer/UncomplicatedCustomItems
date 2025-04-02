@@ -23,7 +23,7 @@ namespace UncomplicatedCustomItems
 
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 
-        public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
+        public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
 
         public override Version Version { get; } = new(3, 2, 0);
 

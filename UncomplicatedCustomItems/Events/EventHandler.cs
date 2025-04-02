@@ -696,8 +696,8 @@ namespace UncomplicatedCustomItems.Events
             Plugin Plugin = new();
             
             LogManager.Warn("===========================================");
-            LogManager.Warn($"!WARNING! This is Beta Version {Plugin.Version} !WARNING!");
-            LogManager.Warn("Bugs are to be expected; please report them in our Discord");
+            LogManager.Warn($"!WARNING! This is Beta Version {Plugin.Version} for Exiled {Plugin.RequiredExiledVersion} !WARNING!");
+            LogManager.Warn("Bugs are to be expected; please report them in our Discord!");
             LogManager.Warn(">> https://discord.gg/5StRGu8EJV <<");
             LogManager.Warn("===========================================");
             LogManager.Warn("Debug logs will be activated due to this!");
