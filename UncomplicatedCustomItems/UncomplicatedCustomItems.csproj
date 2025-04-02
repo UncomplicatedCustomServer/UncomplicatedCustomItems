@@ -63,7 +63,7 @@
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="AudioPlayerApi">
-      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\AudioPlayerApi.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\AudioPlayerApi.dll</HintPath>
     </Reference>
     <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -103,7 +103,7 @@
       <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
     </Reference>
     <Reference Include="NVorbis">
-      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\NVorbis.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\NVorbis.dll</HintPath>
     </Reference>
     <Reference Include="PluginAPI">
       <HintPath>$(EXILED_REFERENCES)\PluginAPI.dll</HintPath>

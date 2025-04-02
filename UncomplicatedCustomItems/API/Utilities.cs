@@ -3,7 +3,6 @@ using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Pickups;
 using MEC;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
@@ -261,7 +260,7 @@ https://discord.com/channels/null";
                     break;
 
                 default:
-                    error = "Unknown error how did you do this? Anyway please report it on our discord server! D:";
+                    error = "Unknown error how did this happen? Anyway please report it on our discord server! D:\nhttps://discord.gg/5StRGu8EJV";
                     return false;
             }
 

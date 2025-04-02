@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string RequiredPermission { get; } = "uci.reload";
 
-        public string[] Aliases { get; } = ["gen"];
+        public string[] Aliases { get; } = ["reload"];
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
             if (arguments.Count > 0)

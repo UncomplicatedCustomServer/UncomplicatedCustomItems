@@ -8,7 +8,6 @@ using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using Exiled.API.Features.Items;
 
 namespace UncomplicatedCustomItems.API
 {
