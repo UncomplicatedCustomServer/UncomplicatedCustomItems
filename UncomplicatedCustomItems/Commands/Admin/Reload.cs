@@ -23,6 +23,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public string RequiredPermission { get; } = "uci.reload";
 
         public string[] Aliases { get; } = ["reload"];
+
+        public Dictionary<ICustomItem, Player> CustomItems = [];
+
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
             if (arguments.Count > 0)
@@ -61,8 +64,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     {
                         int id = player.Id;
                         ushort Serial = Item.Serial;
-                        if (Utilities.IsSummonedCustomItem(Serial))
+                        if (SummonedCustomItem.TryGet(Serial, out SummonedCustomItem CustomItem))
                         {
+                            CustomItems[CustomItem.CustomItem] = player;
                             LogManager.Debug($"Marked {Item.Type} from {player.DisplayNickname} for removal");
                             ItemsToRemove.Add(Serial);
                         }
@@ -91,14 +95,21 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 FileConfig.LoadAll();
                 FileConfig.LoadAll(Server.Port.ToString());
                 Events.Internal.Server.SpawnItemsOnRoundStarted();
+                foreach (var entry in CustomItems)
+                {
+                    Player player = entry.Value;
+                    ICustomItem Item = entry.Key;
+
+                    new SummonedCustomItem(Item, player);
+                }
                 if (NewItems > 0)
                 {
-                    response = $"Reloaded {CustomItem.List.Count} Added {NewItems} New Custom items.\nReplace the customitem in your inventory with a new one to get the new settings";
+                    response = $"Reloaded {CustomItem.List.Count} Added {NewItems} New Custom items.";
                     return true;
                 }
                 else
                 {
-                    response = $"Reloaded {CustomItem.List.Count} Custom items.\nReplace the customitem in your inventory with a new one to get the new settings";
+                    response = $"Reloaded {CustomItem.List.Count} Custom items.";
                     return true;
                 }
             }
