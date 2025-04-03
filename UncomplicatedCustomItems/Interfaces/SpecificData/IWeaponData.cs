@@ -23,6 +23,8 @@
         public abstract float DamageFalloffDistance { get; set; }
 
         public abstract string Attachments { get; set; }
+
+        public abstract bool EnableFriendlyFire { get; set; }
     }
 
 }

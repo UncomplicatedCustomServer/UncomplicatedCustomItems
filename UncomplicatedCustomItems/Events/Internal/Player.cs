@@ -4,6 +4,9 @@ using UncomplicatedCustomItems.API.Features;
 using EventSource = Exiled.Events.Handlers.Player;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
+using Exiled.API.Extensions;
+using UncomplicatedCustomItems.Interfaces.SpecificData;
+using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -20,6 +23,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.Dying += DeathEvent;
             EventSource.ChangingRole += RoleChangeEvent;
             EventSource.ThrownProjectile += ThrownProjectile;
+            EventSource.Shot += Damaged;
         }
         // EventSource.EVENT -= EVENTNAME 
         public static void Unregister()
@@ -32,7 +36,28 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.Dying -= DeathEvent;
             EventSource.ChangingRole -= RoleChangeEvent;
             EventSource.ThrownProjectile -= ThrownProjectile;
+            EventSource.Shot -= Damaged;
         }
+
+        public static void Damaged(ShotEventArgs ev)
+        {
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+            {
+                IWeaponData WeaponData = CustomItem.CustomItem.CustomData as IWeaponData;
+                if (ItemExtensions.GetCategory(CustomItem.Item.Type) == ItemCategory.Firearm)
+                {
+                    if (WeaponData.EnableFriendlyFire == true)
+                    {
+                        if (ev.Target != null)
+                        {
+                            ev.Target?.Hurt(WeaponData.Damage, DamageType.Firearm);
+                            ev.Player.ShowHitMarker(1);
+                        }
+                    }
+                }
+            }
+        }
+
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {

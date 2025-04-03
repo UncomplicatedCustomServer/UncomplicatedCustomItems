@@ -53,5 +53,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets the weapon attachments.
         /// </summary>
         public string Attachments { get; set; } = "DotScope";
+
+        /// <summary>
+        /// Gets or sets if the <see cref="CustomItem"/> can damage the friendly team.
+        /// </summary>
+        public bool EnableFriendlyFire { get; set; } = false;
     }
 }
