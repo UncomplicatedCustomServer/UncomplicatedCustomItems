@@ -18,6 +18,7 @@ using Exiled.Events.EventArgs.Server;
 using Mirror;
 using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
 

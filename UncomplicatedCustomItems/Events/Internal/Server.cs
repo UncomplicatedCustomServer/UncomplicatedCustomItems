@@ -21,7 +21,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// <summary>
         /// Spawn items on round started
         /// </summary>
-        private static void SpawnItemsOnRoundStarted() 
+        public static void SpawnItemsOnRoundStarted() 
         {
             foreach (ICustomItem CustomItem in CustomItem.List)
             {

@@ -50,7 +50,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                     {
                         if (ev.Target != null)
                         {
-                            ev.Target?.Hurt(WeaponData.Damage, DamageType.Firearm);
+                            ev.Target.Hurt(WeaponData.Damage, DamageType.Firearm);
                             ev.Player.ShowHitMarker(1);
                         }
                     }
