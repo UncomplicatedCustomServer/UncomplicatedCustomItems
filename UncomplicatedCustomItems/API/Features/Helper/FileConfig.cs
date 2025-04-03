@@ -9,7 +9,6 @@ using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
 using UnityEngine;
-using Exiled.API.Features.Items;
 using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features.Helper

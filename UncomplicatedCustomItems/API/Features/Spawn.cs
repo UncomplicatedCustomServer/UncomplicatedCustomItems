@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
 {
+    /// <summary>
+    /// Spawn settings for <see cref="ICustomItem"/>.
+    /// </summary>
     public class Spawn : ISpawn
     {
         /// <summary>

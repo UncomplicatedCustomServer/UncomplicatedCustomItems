@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
 {
+    /// <summary>
+    /// The YAML refrence for CustomItems.
+    /// </summary>
     public class YAMLCustomItem
     {
         [Description("Sets the ID of the custom item. Custom items cannot share IDs.")]

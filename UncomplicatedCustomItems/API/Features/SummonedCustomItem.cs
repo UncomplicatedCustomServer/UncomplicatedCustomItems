@@ -15,11 +15,12 @@ using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
-using Exiled.Events.Patches.Generic;
-using CustomRendering;
 
 namespace UncomplicatedCustomItems.API.Features
 {
+    /// <summary>
+    /// Handles the information and methods for every summoned <see cref="ICustomItem"/>
+    /// </summary>
     public class SummonedCustomItem
     {
         /// <summary>
@@ -53,8 +54,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// Gets the badge of the player if it has one
         /// </summary>
         public Triplet<string, string, bool>? Badge { get; private set; }
-
-        private static readonly HashSet<ushort> CheckedItemSerials = new HashSet<ushort>();
 
         public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
 
@@ -506,7 +505,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Loads the badge of the player according to the CustomItem BadgeName field.
+        /// Sets the badge of the <see cref="Player"/> according to the <see cref="ICustomItem"/> BadgeName field.
         /// <param name="Player"></param>
         /// </summary>
         public string LoadBadge(Player Player)
@@ -534,7 +533,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Applies a custom badge to the specified player if the item has a valid badge name and color.
+        /// Applies a custom badge to the specified <see cref="Player"/> if the item has a valid badge name and color.
         /// </summary>
         /// <param name="Player">The player receiving the badge.</param>
         /// <param name="Item">The custom item containing badge details.</param>
@@ -556,7 +555,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Resets the badge of the player.
+        /// Resets the badge of the <see cref="Player"/>.
         /// <param name="Player"></param>
         /// </summary>
         public void ResetBadge(Player Player)
@@ -577,7 +576,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Unloads all customitems information for the player who dropped the custom item.
+        /// Unloads all <see cref="ICustomItem"/> information for the <see cref="Player"/> who dropped the custom item.
         /// </summary>
         /// <param name="dropped"></param>
         public void OnDrop(DroppedItemEventArgs dropped)
@@ -592,7 +591,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// loads the Item Flags for the player.
+        /// loads the Item Flags for the <see cref="Player"/>.
         /// </summary>
         public string LoadItemFlags()
         {
@@ -611,7 +610,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Checks the magazine of the held weapon to remove the capacity modifier from a modification.
+        /// Checks the magazine of the held <see cref="Firearm"/> to remove the capacity modifier from a modification.
         /// <param name="Firearm"></param>
         /// <param name="WeaponData"></param>
         /// </summary>
@@ -627,7 +626,7 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
         /// <summary>
-        /// Displays the debug ui for weapon information to the selected player.
+        /// Displays the debug ui for <see cref="Firearm"/> information to the selected <see cref="Player"/>.
         /// <param name="Player"></param>
         /// </summary>
         public void ShowDebugUi(Player Player)
@@ -637,7 +636,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Reloads the Flags for the item.
+        /// Reloads the Flags for the <see cref="ICustomItem"/>.
         /// </summary>
         public void ReloadItemFlags()
         {
@@ -649,7 +648,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Unloads the Flags for the player.
+        /// Unloads the Flags for the <see cref="Player"/>.
         /// </summary>
         public void UnloadItemFlags()
         {
@@ -659,7 +658,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Gets a <see cref="CustomModule"/> that this custom item implements
+        /// Gets a <see cref="CustomModule"/> that this <see cref="ICustomItem"/> implements
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -791,7 +790,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Checks whether the specified item type for the given player is on cooldown.
+        /// Checks whether the specified <see cref="Item.Serial"/> for the given <see cref="Player"/> is on cooldown.
         /// </summary>
         public bool IsOnCooldown(Player player, ushort Serial)
         {
@@ -804,7 +803,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Starts the cooldown coroutine for the given item type and marks it as on cooldown.
+        /// Starts the cooldown coroutine for the given <see cref="Item.Serial"/> and marks it as on cooldown.
         /// </summary>
         public void StartCooldown(Player player, ushort Serial, float cooldown)
         {
@@ -830,9 +829,9 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Displays the hint from the SelectedMessage field in the plugin config.
+        /// Displays the hint from the <see cref="Config.SelectedMessage"/> field in the plugin <see cref="Config"/>.
         /// </summary>
-        internal void HandleSelectedDisplayHint()
+        public void HandleSelectedDisplayHint()
         {
             if (Plugin.Instance.Config.SelectedMessage.Length > 1)
                 Owner.ShowHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
@@ -840,9 +839,9 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Displays the hint from the PickedUpMessage field in the plugin config.
+        /// Displays the hint from the <see cref="Config.PickedUpMessage"/> field in the plugin <see cref="Config"/>.
         /// </summary>
-        internal void HandlePickedUpDisplayHint()
+        public void HandlePickedUpDisplayHint()
         {
             if (Plugin.Instance.Config.PickedUpMessage.Length > 1)
                 Owner.ShowHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
@@ -884,7 +883,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Destroys the customitem.
+        /// Destroys the <see cref="ICustomItem"/>.
         /// </summary>
         public void Destroy()
         {

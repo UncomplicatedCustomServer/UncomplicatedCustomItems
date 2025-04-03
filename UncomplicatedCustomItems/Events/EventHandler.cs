@@ -25,8 +25,17 @@ namespace UncomplicatedCustomItems.Events
 {
     public class EventHandler
     {
+        /// <summary>
+        /// The Dictionary that handles lights spawned from the <see cref="OnDrop"/> method.
+        /// </summary>
         public Dictionary<Pickup, Light> ActiveLights = [];
+        /// <summary>
+        /// The <see cref="float"/> that handles how much a <see cref="CustomItem"/> with the LifeSteal <see cref="CustomModule"/>.
+        /// </summary>
         public float Amount { get; set; } = 0f;
+        /// <summary>
+        /// The Percentage that a <see cref="CustomItem"/> with the LifeSteal <see cref="CustomModule"/> will heal at. Determined by doing HealedAmount = Amount * Percentage
+        /// </summary>
         public float Percentage = 0.5f;
         
         public void OnHurt(HurtEventArgs ev)
@@ -613,6 +622,9 @@ namespace UncomplicatedCustomItems.Events
         }
 
         //Debugging Events.
+        /// <summary>
+        /// The debugging event for dropping a <see cref="Item"/>
+        /// </summary>
         public void Ondrop(DroppingItemEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
@@ -623,6 +635,9 @@ namespace UncomplicatedCustomItems.Events
             else
                 LogManager.Silent($"{ev.Player.Nickname} is dropping {ev.Item}");
         }
+        /// <summary>
+        /// The debugging event for adding a <see cref="Item"/>
+        /// </summary>
         public void Onpickup(ItemAddedEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
@@ -633,6 +648,9 @@ namespace UncomplicatedCustomItems.Events
             else
                 LogManager.Silent($"{ev.Player.Nickname} is adding {ev.Item}");
         }
+        /// <summary>
+        /// The debugging event for using a <see cref="Item"/>
+        /// </summary>
         public void Onuse(UsingItemEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
@@ -643,6 +661,9 @@ namespace UncomplicatedCustomItems.Events
             else
                 LogManager.Silent($"{ev.Player.Nickname} is using {ev.Item}");
         }
+        /// <summary>
+        /// The debugging event for reloading a <see cref="Firearm"/>
+        /// </summary>
         public void Onreloading(ReloadingWeaponEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
@@ -653,6 +674,10 @@ namespace UncomplicatedCustomItems.Events
             else
                 LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
         }
+        /// <summary>
+        /// The debugging event for shooting a <see cref="Firearm"/>
+        /// </summary>
+        /// <param name="ev"></param>
         public void Onshooting(ShootingEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
@@ -665,7 +690,7 @@ namespace UncomplicatedCustomItems.Events
         }
 
         /// <summary>
-        /// Destroys the light on a customitem pickup if it has one.
+        /// Destroys the <see cref="Light"/> on a <see cref="CustomItem"/> <see cref="Pickup"/>.
         /// <param name="Pickup"></param>
         /// </summary>
         public void DestroyLightOnPickup(Pickup Pickup)
@@ -690,6 +715,9 @@ namespace UncomplicatedCustomItems.Events
             }
 
         }
+        /// <summary>
+        /// Displays the Beta warning if the <see cref="Plugin.Version"/> is a pre release.
+        /// </summary>
         public async void OnWaitingForPlayers()
         {
             await Task.Delay(3200);

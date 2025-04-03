@@ -2,6 +2,9 @@ using System;
 
 namespace UncomplicatedCustomItems.Enums
 {
+    /// <summary>
+    /// Contains all of the available <see cref="CustomFlags"/>
+    /// </summary>
     [Flags]
     public enum CustomFlags
     {

@@ -5,6 +5,9 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
 namespace UncomplicatedCustomItems.API.Features
 {
+    /// <summary>
+    /// Handles all audio related methods for <see cref="CustomItem"/>
+    /// </summary>
     public class AudioApi
     {
 
@@ -12,6 +15,9 @@ namespace UncomplicatedCustomItems.API.Features
         /// If true it enables access to the custom sound custom flag.
         /// </summary>
         public bool EnableAudioApi { get; set; } = false;
+        /// <summary>
+        /// Checks for dependencies that <see cref="AudioApi"/> requires.
+        /// </summary>
         public AudioApi()
         {
             if (!CheckForNVorbisDependency())
@@ -29,12 +35,19 @@ namespace UncomplicatedCustomItems.API.Features
         }
         private bool CheckForAudioPlayerApiDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "AudioPlayerApi");
         private bool CheckForNVorbisDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "NVorbis");
+        /// <summary>
+        /// Clamps the value between the minimum and maximum.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         public static float Clamp(float? value, float min, float max)
         {
             return (float)((value < min) ? min : (value > max) ? max : value);
         }
         /// <summary>
-        /// Plays audio when a custom item requests it.
+        /// Plays audio for a <see cref="CustomItem"/> at the specified location.
         /// </summary>
         /// <param name="CustomItem"></param>
         /// <param name="Coords"></param>

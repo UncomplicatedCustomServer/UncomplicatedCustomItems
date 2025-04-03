@@ -11,7 +11,10 @@ using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API
 {
-    internal static class YAMLCaster
+    /// <summary>
+    /// Casts the YAML data from <see cref="CustomItem"/> files into the plugin
+    /// </summary>
+    public static class YAMLCaster
     {
         /// <summary>
         /// As YAML is a big shit, serialize <see cref="Data"/> elements into manageable Dictionaries for YAML
