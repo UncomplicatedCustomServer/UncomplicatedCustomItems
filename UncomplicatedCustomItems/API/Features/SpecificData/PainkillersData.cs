@@ -2,6 +2,9 @@
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
+    /// <summary>
+    /// The data associated with <see cref="CustomItemType.Painkillers"/> <see cref="CustomItem"/>s
+    /// </summary>
     public class PainkillersData : Data, IPainkillersData
     {
         /// <summary>

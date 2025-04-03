@@ -2,6 +2,9 @@
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
+    /// <summary>
+    /// The data associated with <see cref="CustomItemType.Jailbird"/> <see cref="CustomItem"/>s
+    /// </summary>
     public class JailbirdData : Data, IJailbirdData
     {
         /// <summary>

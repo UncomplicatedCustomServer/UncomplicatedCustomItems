@@ -1,5 +1,8 @@
 ﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
+    /// <summary>
+    /// The interface associated with <see cref="CustomItemType.ExplosiveGrenade"/>
+    /// </summary>
     public interface IExplosiveGrenadeData : IData
     {
         public abstract float MaxRadius { get; set; }

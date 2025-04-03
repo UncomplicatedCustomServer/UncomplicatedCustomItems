@@ -1,8 +1,12 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
+using Exiled.API.Features.Items;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
 #nullable enable
+    /// <summary>
+    /// The data associated with <see cref="Firearm"/>s <see cref="CustomItemType.Weapon"/> <see cref="CustomItem"/>s
+    /// </summary>
     public class WeaponData : Data, IWeaponData
     {
         /// <summary>

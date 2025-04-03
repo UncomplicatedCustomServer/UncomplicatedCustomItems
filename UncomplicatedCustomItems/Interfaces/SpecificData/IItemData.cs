@@ -1,6 +1,9 @@
 ﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
 #nullable enable
+    /// <summary>
+    /// The interface associated with <see cref="CustomItemType.Item"/>
+    /// </summary>
     public interface IItemData : IData
     {
         public abstract ItemEvents Event { get; set; }

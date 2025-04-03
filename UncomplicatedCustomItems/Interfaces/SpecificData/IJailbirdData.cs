@@ -1,5 +1,8 @@
 ﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
+    /// <summary>
+    /// The interface associated with <see cref="CustomItemType.Jailbird"/>
+    /// </summary>
     public interface IJailbirdData : IData
     {
         public abstract float MeleeDamage { get; set; }

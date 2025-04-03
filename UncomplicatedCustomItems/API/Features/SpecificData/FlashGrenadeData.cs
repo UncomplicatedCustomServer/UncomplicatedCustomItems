@@ -1,7 +1,11 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
+using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
+    /// <summary>
+    /// The data associated with <see cref="CustomItemType.FlashGrenade"/> <see cref="CustomItem"/>s
+    /// </summary>
     public class FlashGrenadeData : Data, IFlashGrenadeData
     {
         /// <summary>
