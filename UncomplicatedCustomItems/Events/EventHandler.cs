@@ -20,7 +20,6 @@ using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
-using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -549,7 +548,7 @@ namespace UncomplicatedCustomItems.Events
                     float DamageRadius = flagSetting.DamageRadius ?? 1f;
                     grenade.MaxRadius = DamageRadius;
                     grenade.FuseTime = .01f;
-                    grenade.SpawnActive(Position);
+                    grenade.SpawnActive(Position, ev.Player);
                 }
             }
             else return;

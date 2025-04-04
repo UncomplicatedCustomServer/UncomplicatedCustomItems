@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string Description { get; } = "Reloads all custom items";
 
-        public string VisibleArgs { get; } = "";
+        public string VisibleArgs { get; } = string.Empty;
 
         public int RequiredArgsCount { get; } = 0;
 

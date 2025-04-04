@@ -501,6 +501,7 @@
     <Compile Include="API\Utilities.cs" />
     <Compile Include="API\YAMLCaster.cs" />
     <Compile Include="Commands\Admin\Generate.cs" />
+    <Compile Include="Commands\Admin\Info.cs" />
     <Compile Include="Commands\Admin\Give.cs" />
     <Compile Include="Commands\Admin\List.cs" />
     <Compile Include="Commands\Admin\LogShare.cs" />

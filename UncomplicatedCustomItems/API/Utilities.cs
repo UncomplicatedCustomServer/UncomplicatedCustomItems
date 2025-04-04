@@ -9,6 +9,7 @@ using Exiled.API.Features.Items;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -374,20 +375,28 @@ https://discord.com/channels/null";
                     if (Chance <= DynamicSpawn.Chance)
                     {
                         RoomType Room = DynamicSpawn.Room;
-                        if (Spawn.ReplaceExistingPickup)
+                        if (DynamicSpawn.Coords == Vector3.zero)
                         {
-                            List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                            if (Spawn.ReplaceExistingPickup)
+                            {
+                                List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
-                            if (Spawn.ForceItem)
-                                FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
+                                if (Spawn.ForceItem)
+                                    FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
 
-                            if (FilteredPickups.Count() > 0)
-                                new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
+                                if (FilteredPickups.Count() > 0)
+                                    new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
 
-                            return;
+                                return;
+                            }
+                            else
+                                new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
                         }
                         else
-                            new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
+                        {
+                            Transform Position = Exiled.API.Features.Room.Get(Room).transform;
+                            new SummonedCustomItem(CustomItem, Position.transform.InverseTransformPoint(DynamicSpawn.Coords));
+                        }
                     }
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Enums;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
@@ -6,5 +7,6 @@ namespace UncomplicatedCustomItems.Interfaces
     {
         public abstract RoomType Room { get; set; }
         public abstract int Chance { get; set; }
+        public abstract Vector3 Coords { get; set; }
     }
 }
