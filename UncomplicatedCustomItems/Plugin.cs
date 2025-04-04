@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems
 
         public static Plugin Instance { get; private set; }
 
-        public Harmony _harmony;
+        internal Harmony _harmony;
 
         internal static HttpManager HttpManager;
 
@@ -43,8 +43,7 @@ namespace UncomplicatedCustomItems
         {
             Instance = this;
 
-            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-            _harmony.PatchAll();
+
 
             FileConfig = new();
             HttpManager = new("uci");
@@ -104,6 +103,9 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll();
             FileConfig.LoadAll(Server.Port.ToString());
 
+            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            _harmony.PatchAll();
+
             base.OnEnabled();
         }
 
@@ -114,7 +116,6 @@ namespace UncomplicatedCustomItems
 
             HttpManager.UnregisterEvents();
             _harmony.UnpatchAll();
-            _harmony = null;
 
             PlayerEvent.Hurt -= Handler.OnHurt;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
@@ -140,6 +141,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting -= Handler.Onshooting;
 
             Instance = null;
+            Handler = null;
             base.OnDisabled();
 
         }

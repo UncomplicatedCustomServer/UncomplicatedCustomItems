@@ -1,5 +1,6 @@
 using Exiled.API.Enums;
 using System.Collections.Generic;
+using UncomplicatedCustomItems.API.Features;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.Interfaces
@@ -12,7 +13,7 @@ namespace UncomplicatedCustomItems.Interfaces
         
         public abstract List<Vector3> Coords { get; set; }
 
-        public abstract List<RoomType> Rooms { get; set; }
+        public abstract List<DynamicSpawn> DynamicSpawn { get; set; }
 
         public abstract List<ZoneType> Zones { get; set; }
 

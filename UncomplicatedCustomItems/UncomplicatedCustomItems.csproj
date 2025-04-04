@@ -54,6 +54,10 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp-Publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-Publicized.dll</HintPath>
@@ -483,6 +487,7 @@
     <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
     <Compile Include="API\Features\CustomModules\EffectWhenEquiped.cs" />
     <Compile Include="API\Features\CustomModules\NoCharge.cs" />
+    <Compile Include="API\Features\DynamicSpawn.cs" />
     <Compile Include="API\Features\FlagSettings.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
     <Compile Include="API\Features\Helper\HttpManager.cs" />
@@ -527,6 +532,7 @@
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ItemExtension.cs" />
+    <Compile Include="Interfaces\IDynamicSpawn.cs" />
     <Compile Include="Intergrations\ScriptedEvents.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
@@ -557,9 +563,6 @@
   <ItemGroup>
     <PackageReference Include="ExMod.Exiled">
       <Version>9.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="Lib.Harmony">
-      <Version>2.2.2</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>

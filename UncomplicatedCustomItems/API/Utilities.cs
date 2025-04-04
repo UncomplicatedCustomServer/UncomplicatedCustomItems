@@ -365,23 +365,31 @@ https://discord.com/channels/null";
                 return;
             }
 
-            else if (Spawn.Rooms.Count() > 0)
+            else if (Spawn.DynamicSpawn.Count() > 0)
             {
-                RoomType Room = Spawn.Rooms.RandomItem();
-                if (Spawn.ReplaceExistingPickup)
+                foreach (DynamicSpawn DynamicSpawn in Spawn.DynamicSpawn)
                 {
-                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                    int Chance = UnityEngine.Random.Range(0, 100);
 
-                    if (Spawn.ForceItem)
-                        FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
+                    if (Chance <= DynamicSpawn.Chance)
+                    {
+                        RoomType Room = DynamicSpawn.Room;
+                        if (Spawn.ReplaceExistingPickup)
+                        {
+                            List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
-                    if (FilteredPickups.Count() > 0)
-                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
+                            if (Spawn.ForceItem)
+                                FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
 
-                    return;
+                            if (FilteredPickups.Count() > 0)
+                                new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
+
+                            return;
+                        }
+                        else
+                            new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
+                    }
                 }
-                else
-                    new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
             }
             else if (Spawn.Zones.Count() > 0)
             {
