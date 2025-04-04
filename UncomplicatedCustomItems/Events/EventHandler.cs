@@ -18,9 +18,9 @@ using Exiled.Events.EventArgs.Server;
 using Mirror;
 using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -351,6 +351,55 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
             else return;
+        }
+
+        public void ThrownProjectile(ThrownProjectileEventArgs ev)
+        {
+            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectWhenUsed>())
+            {
+                if (ev.Item != null)
+                {
+                    var flagSettings = SummonedCustomItem.GetAllFlagSettings();
+
+                    if (flagSettings != null && flagSettings.Count > 0)
+                    {
+                        var flagSetting = flagSettings.FirstOrDefault();
+
+                        if (flagSetting.EffectEvent == "EffectWhenUsed")
+                        {
+                            if (flagSetting.Effect == null)
+                            {
+                                LogManager.Warn($"Invalid Effect: {flagSetting.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (flagSetting.EffectDuration < -1)
+                            {
+                                LogManager.Warn($"Invalid Duration: {flagSetting.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (flagSetting.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {flagSetting.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+
+                            LogManager.Debug($"Applying effect {flagSetting.Effect} at intensity {flagSetting.EffectIntensity}, duration is {flagSetting.EffectDuration} to {ev.Player}");
+                            EffectType Effect = flagSetting.Effect;
+                            float Duration = flagSetting.EffectDuration;
+                            byte Intensity = flagSetting.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
+                    }
+                }
+                else
+                {
+                    LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}");
+                }
+            }
         }
         public void OnChangingAttachments(ChangingAttachmentsEventArgs ev)
         {
