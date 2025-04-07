@@ -20,6 +20,7 @@ using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
+using Exiled.API.Features.Toys;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -541,7 +542,6 @@ namespace UncomplicatedCustomItems.Events
                 var flagSetting = flagSettings.FirstOrDefault();
                 if (ev.Firearm != null)
                 {
-                    
                     ev.CanSpawnImpactEffects = false;
                     Vector3 Position = ev.Position;
                     ExplosiveGrenade grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
@@ -550,6 +550,21 @@ namespace UncomplicatedCustomItems.Events
                     grenade.FuseTime = .01f;
                     grenade.SpawnActive(Position, ev.Player);
                 }
+            }
+            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem Customitem) && Customitem.HasModule<ToolGun>())
+            {
+                ev.CanSpawnImpactEffects = false;
+                ev.CanHurt = false;
+                Vector3 RelativePosition = ev.Player.CurrentRoom.transform.InverseTransformPoint(ev.Position);
+                LogManager.Info($"Triggered by {ev.Player.DisplayNickname}. Relative position inside {ev.Player.CurrentRoom.Name}: {RelativePosition}");
+                ev.Player.ShowHint($"Relative position inside {ev.Player.CurrentRoom.Name}: {RelativePosition}. This was also sent to the console.");
+                Vector3 Scale = new(0.2f, 0.2f, 0.2f);
+                var primitive = Primitive.Create(ev.Position);
+                primitive.Type = PrimitiveType.Cube;
+                primitive.Color = Color.red;
+                primitive.Scale = Scale;
+                primitive.Collidable = false;
+                primitive.GameObject.name = RelativePosition.ToString();
             }
             else return;
         }

@@ -22,5 +22,6 @@ namespace UncomplicatedCustomItems.Enums
         NoCharge = 1 << 10,
         CustomSound = 1 << 11,
         ExplosiveBullets = 1 << 12,
+        ToolGun = 1 << 13,
     }
 }

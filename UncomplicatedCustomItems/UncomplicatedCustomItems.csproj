@@ -478,6 +478,7 @@
     <Compile Include="API\Features\CustomModules\CustomSound.cs" />
     <Compile Include="API\Features\CustomModules\DieOnUse.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\ToolGun.cs" />
     <Compile Include="API\Features\CustomModules\EffectShot.cs" />
     <Compile Include="API\Features\CustomModules\EffectWhenUsed.cs" />
     <Compile Include="API\Features\CustomModules\ExplosiveBullets.cs" />
