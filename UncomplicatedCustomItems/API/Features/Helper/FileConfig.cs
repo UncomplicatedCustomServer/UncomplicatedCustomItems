@@ -19,6 +19,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         [
             new()
             {
+                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new ItemData()
                 {
                     Event = ItemEvents.Command,

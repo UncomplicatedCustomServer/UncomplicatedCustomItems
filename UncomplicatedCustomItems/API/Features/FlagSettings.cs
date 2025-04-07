@@ -76,6 +76,5 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("Sets the damage radius of the ExplosiveBullets flag.")]
         public float? DamageRadius { get; set; } = 1f;
-
     }
 }

@@ -355,7 +355,7 @@ namespace UncomplicatedCustomItems.Events
 
         public void ThrownProjectile(ThrownProjectileEventArgs ev)
         {
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectWhenUsed>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectWhenUsed>())
             {
                 if (ev.Item != null)
                 {
@@ -561,7 +561,7 @@ namespace UncomplicatedCustomItems.Events
                 Vector3 Scale = new(0.2f, 0.2f, 0.2f);
                 var primitive = Primitive.Create(ev.Position);
                 primitive.Type = PrimitiveType.Cube;
-                primitive.Color = Color.red;
+                primitive.Color = new Vector4(255, 0, 0, -1);
                 primitive.Scale = Scale;
                 primitive.Collidable = false;
                 primitive.GameObject.name = RelativePosition.ToString();

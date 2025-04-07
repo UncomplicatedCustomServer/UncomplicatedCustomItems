@@ -8,6 +8,6 @@ namespace UncomplicatedCustomItems.API.Features
     {
         public RoomType Room { get; set; } = RoomType.Lcz330;
         public int Chance { get; set; } = 30;
-        public Vector3 Coords { get; set; } = new();
+        public Vector3 Coords { get; set; } = new Vector3(0, 0, 0);
     }
 }

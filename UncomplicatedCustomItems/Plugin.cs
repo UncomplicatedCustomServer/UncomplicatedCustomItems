@@ -43,8 +43,6 @@ namespace UncomplicatedCustomItems
         {
             Instance = this;
 
-
-
             FileConfig = new();
             HttpManager = new("uci");
             Handler = new();

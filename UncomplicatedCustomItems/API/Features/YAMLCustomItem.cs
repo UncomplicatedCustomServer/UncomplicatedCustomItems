@@ -39,7 +39,7 @@ namespace UncomplicatedCustomItems.API.Features
         public Spawn Spawn { get; set; } = new();
 
         [Description("Sets the custom flags of the custom item. Information about custom flags can be found in the UCI Information forum on Discord.")]
-        public virtual CustomFlags? CustomFlags { get; set; } = null;
+        public virtual CustomFlags? CustomFlags { get; set; } = Enums.CustomFlags.None;
 
         [Description("Defines the flag settings for the custom item.")]
         public FlagSettings FlagSettings { get; set; } = new();
