@@ -53,32 +53,33 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="Coords"></param>
         public void PlayAudio(SummonedCustomItem CustomItem, Vector3 Coords)
         {
-            LogManager.Debug($"PlayAudio method triggered by {CustomItem.CustomItem.Name} at {Coords}");
-            if (EnableAudioApi != false)
+            foreach (AudioSettings AudioSettings in CustomItem.CustomItem.FlagSettings.AudioSettings)
             {
-                LogManager.Debug($"Audio API is enabled!");
-                var flagSettings = SummonedCustomItem.GetAllFlagSettings();
-                var flagSetting = flagSettings.FirstOrDefault();
-                if (!string.IsNullOrEmpty(flagSetting.AudioPath))
+                LogManager.Debug($"PlayAudio method triggered by {CustomItem.CustomItem.Name} at {Coords}");
+                if (EnableAudioApi != false)
                 {
-                    LogManager.Debug($"Succesfully loaded audio path {flagSetting.AudioPath}");
-                    AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{CustomItem.Serial}", onIntialCreation: (p) =>
+                    LogManager.Debug($"Audio API is enabled!");
+                    if (!string.IsNullOrEmpty(AudioSettings.AudioPath))
                     {
-                        float maxDistance = flagSetting.AudibleDistance ?? 1f;
-                        Speaker speaker = p.AddSpeaker("Main", Coords, isSpatial: true, maxDistance: maxDistance);
-                    });
-                    float volume = Clamp(flagSetting.SoundVolume, 1f, 100f);
-                    audioPlayer.AddClip($"sound_{CustomItem.Serial}", volume);
-                    AudioClipStorage.LoadClip(flagSetting.AudioPath, $"sound_{CustomItem.Serial}");
-                    LogManager.Debug($"Playing {Path.GetFileName(flagSetting.AudioPath)}");
-                    LogManager.Debug($"Audio should have been played.");
+                        LogManager.Debug($"Succesfully loaded audio path {AudioSettings.AudioPath}");
+                        AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{CustomItem.Serial}", onIntialCreation: (p) =>
+                        {
+                            float maxDistance = AudioSettings.AudibleDistance ?? 1f;
+                            Speaker speaker = p.AddSpeaker("Main", Coords, isSpatial: true, maxDistance: maxDistance);
+                        });
+                        float volume = Clamp(AudioSettings.SoundVolume, 1f, 100f);
+                        audioPlayer.AddClip($"sound_{CustomItem.Serial}", volume);
+                        AudioClipStorage.LoadClip(AudioSettings.AudioPath, $"sound_{CustomItem.Serial}");
+                        LogManager.Debug($"Playing {Path.GetFileName(AudioSettings.AudioPath)}");
+                        LogManager.Debug($"Audio should have been played.");
+                    }
+                    else
+                    LogManager.Error($"Audio path is null please fill out the config properly.");
                 }
                 else
-                LogManager.Error($"Audio path is null please fill out the config properly.");
-            }
-            else
-            {
-                LogManager.Error("You don't have AudioPlayerApi or its dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
+                {
+                    LogManager.Error("You don't have AudioPlayerApi or its dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
+                }
             }
         }
     }

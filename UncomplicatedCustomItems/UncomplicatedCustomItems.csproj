@@ -491,6 +491,11 @@
     <Compile Include="API\Features\CustomModules\NoCharge.cs" />
     <Compile Include="API\Features\DynamicSpawn.cs" />
     <Compile Include="API\Features\FlagSettings\SpawnItemWhenDetonatedSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\EffectSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\AudioSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\LifeStealSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\ExplosiveBulletsSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\ItemGlowSettings.cs" />
     <Compile Include="API\Features\FlagSettings.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
     <Compile Include="API\Features\Helper\HttpManager.cs" />
@@ -545,6 +550,11 @@
     <Compile Include="Interfaces\IFlagSettings.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\FlagSettings\ISpawnItemWhenDetonatedSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IEffectSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IAudioSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\ILifeStealSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IItemGlowSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IExplosiveBulletsSettings.cs" />
     <Compile Include="Interfaces\ISubcommand.cs" />
     <Compile Include="Interfaces\SpecificData\IAdrenalineData.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />
