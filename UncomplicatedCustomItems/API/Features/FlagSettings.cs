@@ -1,4 +1,5 @@
 using Exiled.API.Enums;
+using System.Collections.Generic;
 using System.ComponentModel;
 using UncomplicatedCustomItems.Interfaces;
 
@@ -76,5 +77,18 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("Sets the damage radius of the ExplosiveBullets flag.")]
         public float? DamageRadius { get; set; } = 1f;
+
+        /// <summary>
+        /// Sets the settings for the SpawnItemWhenDetonated flag.
+        /// </summary>
+        [Description("Sets the settings for the SpawnItemWhenDetonated flag.")]
+        public List<SpawnItemWhenDetonatedSettings?> SpawnItemWhenDetonatedSettings { get; set; } =
+        [
+            new()
+            {
+                ItemToSpawn = ItemType.SCP244a,
+                TimeTillDespawn = 6f
+            }
+        ];
     }
 }

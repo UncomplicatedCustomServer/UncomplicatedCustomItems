@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Exiled.API.Enums;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
@@ -26,5 +28,7 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract float? SoundVolume { get; set; }
 
         public abstract float? DamageRadius { get; set; }
+
+        public abstract List<SpawnItemWhenDetonatedSettings?> SpawnItemWhenDetonatedSettings { get; set; }
     }
 }

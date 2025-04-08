@@ -69,6 +69,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
             PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
+            MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
 
             //Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -130,6 +131,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
             PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile -= Handler.ThrownProjectile;
+            MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;
 
             //Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

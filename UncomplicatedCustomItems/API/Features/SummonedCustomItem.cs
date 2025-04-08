@@ -931,7 +931,7 @@ namespace UncomplicatedCustomItems.API.Features
         public static SummonedCustomItem Get(ushort serial) => List.Where(sci => sci.Serial == serial).FirstOrDefault();
 
         /// <summary>
-        /// Try gets a <see cref="SummonedCustomItem"/> by it's owner and it's serial.<br></br>
+        /// Try gets a <see cref="SummonedCustomItem"/> by it's serial.
         /// It can't be a pickup!
         /// </summary>
         /// <param name="serial"></param>
@@ -944,7 +944,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Try gets a <see cref="SummonedCustomItem"/> by it's serial.
+        /// Try gets a <see cref="SummonedCustomItem"/> by it's owner and it's serial.<br></br>
         /// </summary>
         /// <param name="player"></param>
         /// <param name="serial"></param>

@@ -165,7 +165,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            item.UnloadItemFlags();
             SummonedCustomItem.ClearAllFlagSettings();
         }
         private static void NoclipButton(TogglingNoClipEventArgs ev)

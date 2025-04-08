@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Exiled.API.Enums;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Item;
@@ -21,6 +20,8 @@ using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
 using Exiled.API.Features.Toys;
+using InventorySystem.Items.Usables.Scp244;
+using MEC;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -338,7 +339,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     if (SCP207Data.RemoveItemAfterUse == false)
                     {
-                        Server.ExecuteCommand($"/uci give {CustomItem2.CustomItem.Id} {ev.Player.Id}");
+                        new SummonedCustomItem(CustomItem2.CustomItem, ev.Player);
                     }
                 }
                 ISCP1853Data SCP1853Data = CustomItem2.CustomItem.CustomData as ISCP1853Data;
@@ -346,11 +347,61 @@ namespace UncomplicatedCustomItems.Events
                 {
                     if (SCP1853Data.RemoveItemAfterUse == false)
                     {
-                        Server.ExecuteCommand($"/uci give {CustomItem2.CustomItem.Id} {ev.Player.Id}");
+                        new SummonedCustomItem(CustomItem2.CustomItem, ev.Player);
                     }
                 }
             }
             else return;
+        }
+
+        public void GrenadeExploding(ExplodingGrenadeEventArgs ev)
+        {   
+            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<SpawnItemWhenDetonated>())
+            {
+                LogManager.Debug($"{ev.Projectile.Type} is a CustomItem");
+                foreach (SpawnItemWhenDetonatedSettings SpawnItemWhenDetonatedSettings in CustomItem.CustomItem.FlagSettings.SpawnItemWhenDetonatedSettings)
+                {
+                    LogManager.Debug($"Loaded FlagSettings.");
+                    if (SpawnItemWhenDetonatedSettings.ItemToSpawn == ItemType.SCP244a || SpawnItemWhenDetonatedSettings.ItemToSpawn == ItemType.SCP244b)
+                    {
+                        LogManager.Debug($"ItemToSpawn is SCP244a or SCP244b");
+                        Scp244Pickup Scp244Pickup = (Scp244Pickup)Pickup.CreateAndSpawn(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position, null, ev.Player);
+                        Scp244Pickup.MaxDiameter = 0.1f;
+                        Scp244Pickup.State = Scp244State.Active;
+                        if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null)
+                        {
+                            LogManager.Debug($"Starting Despawn Coroutine");
+                            Timing.RunCoroutine(TimeTillDespawnCoroutine(Scp244Pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                        }
+                    }
+                    else
+                    {
+                        Pickup Pickup = Pickup.CreateAndSpawn(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position, null, ev.Player);
+                        Vector3 Vector3 = new(0f, 1f, 0f);
+                        Pickup.Transform.position = Pickup.Transform.position + Vector3;
+                        if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null)
+                        {
+                            LogManager.Debug($"Starting Despawn Coroutine");
+                            Timing.RunCoroutine(TimeTillDespawnCoroutine(ev.Projectile.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                        }
+                    }
+                break;
+                }
+            }
+            else
+            {
+                LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem. Serial: {ev.Projectile.Serial}");
+            }
+        }
+        /// <summary>
+        /// A coroutine that destroys a pickup by its serial after a set amount of time.
+        /// </summary>
+        public IEnumerator<float> TimeTillDespawnCoroutine(ushort Serial, float DespawnTime)
+        {
+            yield return Timing.WaitForSeconds(DespawnTime);
+            Pickup Pickup = Pickup.Get(Serial);
+            Pickup.Destroy();
+            LogManager.Debug($"Destroyed pickup. Type: {Pickup.Type} Previous owner: {Pickup.PreviousOwner} Serial: {Pickup.Serial}");
         }
 
         public void ThrownProjectile(ThrownProjectileEventArgs ev)
@@ -438,7 +489,7 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnDrop(DroppedItemEventArgs ev)
         {
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<ItemGlow>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) && customItem.HasModule<ItemGlow>())
             {
                 if (ev.Player != null)
                 {
@@ -668,7 +719,6 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else return;
         }
         public void OnPickup(PickupDestroyedEventArgs ev)
         {
@@ -784,11 +834,8 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public async void OnWaitingForPlayers()
         {
-            await Task.Delay(3200);
-            Plugin Plugin = new();
-            
             LogManager.Warn("===========================================");
-            LogManager.Warn($"!WARNING! This is Beta Version {Plugin.Version} for Exiled {Plugin.RequiredExiledVersion} !WARNING!");
+            LogManager.Warn($"!WARNING! This is Beta Version {Plugin.Instance.Version} for Exiled {Plugin.Instance.RequiredExiledVersion} !WARNING!");
             LogManager.Warn("Bugs are to be expected; please report them in our Discord!");
             LogManager.Warn(">> https://discord.gg/5StRGu8EJV <<");
             LogManager.Warn("===========================================");
