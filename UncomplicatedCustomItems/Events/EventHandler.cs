@@ -322,6 +322,7 @@ namespace UncomplicatedCustomItems.Events
                             Scp244Pickup Scp244Pickup = (Scp244Pickup)Pickup.CreateAndSpawn(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position, null, ev.Player);
                             Scp244Pickup.MaxDiameter = 0.1f;
                             Scp244Pickup.State = Scp244State.Active;
+                            Scp244Pickup.Weight = 5000f;
                             if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
@@ -332,6 +333,7 @@ namespace UncomplicatedCustomItems.Events
                         {
                             Pickup Pickup = Pickup.CreateAndSpawn(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position, null, ev.Player);
                             Vector3 Vector3 = new(0f, 1f, 0f);
+                            Pickup.Weight = 5000f;
                             Pickup.Transform.position = Pickup.Transform.position + Vector3;
                             if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null)
                             {
@@ -340,12 +342,11 @@ namespace UncomplicatedCustomItems.Events
                             }
                         }
                     }
-                break;
                 }
             }
             else
             {
-                LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem. Serial: {ev.Projectile.Serial}");
+                LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.Projectile.Serial}");
             }
         }
         /// <summary>

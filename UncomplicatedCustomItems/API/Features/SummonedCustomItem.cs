@@ -106,6 +106,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             _flagSettings.Clear();
         }
+
         /// <summary>
         /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
         /// </summary>

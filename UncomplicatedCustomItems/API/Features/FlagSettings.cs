@@ -5,6 +5,7 @@ using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features
 {
+    #nullable enable
     /// <summary>
     /// Flag settings for <see cref="ICustomItem"/>
     /// </summary>
@@ -84,7 +85,6 @@ namespace UncomplicatedCustomItems.API.Features
                 EffectIntensity = 1
             }
         ];
-#nullable enable
         /*
         /// <summary>
         /// Tells the <see cref="AudioApi"/> where the ogg audio file is.
