@@ -17,7 +17,7 @@
 You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins>description</ins> and many more things. 
 
 ## UCS Wiki
-Check out the [UCS Wiki](https://thaumielscpsl.site/ucs/wiki) for more information.
+Check out the [UCS Wiki](https://uci.thaumielscpsl.site/ucswiki) for more information.
 
 ## Features
 **UCI** has lots of features like:
