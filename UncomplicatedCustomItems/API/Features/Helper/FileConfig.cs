@@ -10,6 +10,7 @@ using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
 using UnityEngine;
 using UncomplicatedCustomItems.Interfaces;
+using YamlDotNet.Core;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -477,19 +478,68 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     if (FileName.Split().First() == ".")
                         return;
 
-                    YAMLCustomItem Item = Loader.Deserializer.Deserialize<YAMLCustomItem>(File.ReadAllText(FileName));
-                    LogManager.Debug($"Proposed to the registerer the external item {Item.Id} [{Item.Name}] from file:\n{FileName}");
-                    action(Item);
+                    string fileContent = File.ReadAllText(FileName);
+                    
+                    try 
+                    {
+                        YAMLCustomItem Item = Loader.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
+                        LogManager.Debug($"Proposed to the registerer the external item {Item.Id} [{Item.Name}] from file:\n{FileName}");
+                        action(Item);
+                    }
+                    catch (YamlException yamlEx)
+                    {
+                        string errorMessage = $"Failed to parse {FileName}. YAML syntax error: {yamlEx.Message}";
+
+                        if (yamlEx.Start.Line > 0)
+                        {
+                            errorMessage += $" at line {yamlEx.Start.Line}, column {yamlEx.Start.Column}";
+                            
+                            string[] lines = fileContent.Split('\n');
+                            if (yamlEx.Start.Line <= lines.Length)
+                            {
+                                string problematicLine = lines[yamlEx.Start.Line - 1];
+                                errorMessage += $"\nProblematic line: \"{problematicLine.Trim()}\"";
+                            }
+                        }
+                        
+                        if (Plugin.Instance.Config.Debug)
+                        {
+                            LogManager.Error($"{errorMessage}\nStack trace: {yamlEx.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                        }
+                        else
+                        {
+                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        string errorMessage = $"Failed to process {FileName}. Error: {ex.Message}";
+                        
+                        if (ex.Message.Contains("type") || ex.Message.Contains("convert"))
+                        {
+                            errorMessage += "\nThis appears to be a type mismatch error. Check that your values match the expected types for each field.";
+                        }
+                        else if (ex.Message.Contains("property") || ex.Message.Contains("member"))
+                        {
+                            errorMessage += "\nThis appears to be related to an unknown property. Check for typos in your YAML field names.";
+                        }
+                        
+                        if (Plugin.Instance.Config.Debug)
+                        {
+                            LogManager.Error($"{errorMessage}\nStack trace: {ex.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                        }
+                        else
+                        {
+                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                    if (!Plugin.Instance.Config.Debug)
+                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}");
+                    if (Plugin.Instance.Config.Debug)
                     {
-                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
-                    }
-                    else
-                    {
-                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}");
+                        LogManager.Error($"Stack trace: {ex.StackTrace}");
                     }
                 }
             }
