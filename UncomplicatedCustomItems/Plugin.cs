@@ -103,7 +103,9 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll(Server.Port.ToString());
 
             _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            Harmony.DEBUG = true;
             _harmony.PatchAll();
+            ServerConsole.ReloadServerName();
 
             base.OnEnabled();
         }
@@ -115,6 +117,7 @@ namespace UncomplicatedCustomItems
 
             HttpManager.UnregisterEvents();
             _harmony.UnpatchAll();
+            _harmony = null;
 
             PlayerEvent.Hurt -= Handler.OnHurt;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;

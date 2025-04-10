@@ -541,6 +541,7 @@
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ItemExtension.cs" />
+    <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="Interfaces\IDynamicSpawn.cs" />
     <Compile Include="Intergrations\ScriptedEvents.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
