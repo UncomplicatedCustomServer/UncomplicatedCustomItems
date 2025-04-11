@@ -152,11 +152,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return String.Result;
         }
 
-        public HttpStatusCode AddServerOwner(string discordId)
-        {
-            return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
-        }
-
         public void LoadLatestVersion()
         {
             string Version = RetriveString(HttpGetRequest($"{Endpoint}/{Prefix}/version?vts=5"));

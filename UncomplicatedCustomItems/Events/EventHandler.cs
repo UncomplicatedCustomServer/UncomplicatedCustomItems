@@ -651,11 +651,7 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
-
-        public void Onroundend(RoundEndedEventArgs ev)
-        {
-            Exiled.Events.Handlers.Map.PickupDestroyed -= OnPickup;
-        }
+        
         public void Receivingeffect(ReceivingEffectEventArgs ev)
         {
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
@@ -704,52 +700,56 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public void Ondrop(DroppingItemEventArgs ev)
         {
+            if (ev.Item == null)
+                return;
+
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is dropping {CustomItem.CustomItem.Name}");
             }
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is dropping {ev.Item}");
         }
         /// <summary>
         /// The debugging event for adding a <see cref="Item"/>
         /// </summary>
         public void Onpickup(ItemAddedEventArgs ev)
         {
+            if (ev.Item == null)
+                return;
+
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is adding {CustomItem.CustomItem.Name}");
             }
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is adding {ev.Item}");
         }
         /// <summary>
         /// The debugging event for using a <see cref="Item"/>
         /// </summary>
         public void Onuse(UsingItemEventArgs ev)
         {
+            if (ev.Item == null)
+                return;
+                
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is using {CustomItem.CustomItem.Name}");
             }
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is using {ev.Item}");
         }
         /// <summary>
         /// The debugging event for reloading a <see cref="Firearm"/>
         /// </summary>
         public void Onreloading(ReloadingWeaponEventArgs ev)
         {
+            if (ev.Item == null)
+                return;
+                
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is reloading {CustomItem.CustomItem.Name}");
             }
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is reloading {ev.Item}");
         }
         /// <summary>
         /// The debugging event for shooting a <see cref="Firearm"/>
@@ -757,14 +757,31 @@ namespace UncomplicatedCustomItems.Events
         /// <param name="ev"></param>
         public void Onshooting(ShootingEventArgs ev)
         {
+            if (ev.Item == null)
+                return;
+                
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is shooting {CustomItem.CustomItem.Name}");
             }
-            else
-                LogManager.Silent($"{ev.Player.Nickname} is shooting {ev.Item}");
         }
+        /// <summary>
+        /// The debugging event for throwing a <see cref="Throwable"/>
+        /// </summary>
+        /// <param name="ev"></param>
+        public void Onthrown(ThrownProjectileEventArgs ev)
+        {
+            if (ev.Item == null)
+                return;
+                
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (ev.Item.Serial == CustomItem.Serial)
+                    LogManager.Silent($"{ev.Player.Nickname} has thrown {CustomItem.CustomItem.Name}");
+            }
+        }
+
 
         /// <summary>
         /// Destroys the <see cref="Light"/> on a <see cref="CustomItem"/> <see cref="Pickup"/>.
@@ -791,20 +808,6 @@ namespace UncomplicatedCustomItems.Events
                 return;
             }
 
-        }
-        /// <summary>
-        /// Displays the Beta warning if the <see cref="Plugin.Version"/> is a pre release.
-        /// </summary>
-        public async void OnWaitingForPlayers()
-        {
-            LogManager.Warn("===========================================");
-            LogManager.Warn($"!WARNING! This is Beta Version {Plugin.Instance.Version} for Exiled {Plugin.Instance.RequiredExiledVersion} !WARNING!");
-            LogManager.Warn("Bugs are to be expected; please report them in our Discord!");
-            LogManager.Warn(">> https://discord.gg/5StRGu8EJV <<");
-            LogManager.Warn("===========================================");
-            LogManager.Warn("Debug logs will be activated due to this!");
-            Plugin.Instance.Config.Debug = true;
-            Log.DebugEnabled.Add(Plugin.Instance.Assembly);
         }
     }
 }

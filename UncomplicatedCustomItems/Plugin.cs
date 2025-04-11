@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public const bool IsPrerelease = true;
+        public bool IsPrerelease = true;
         public override string Name => "UncomplicatedCustomItems";
 
         public override string Prefix => "UncomplicatedCustomItems";
@@ -49,11 +49,6 @@ namespace UncomplicatedCustomItems
 
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
 
-            if (IsPrerelease)
-            {
-                ServerEvent.WaitingForPlayers += Handler.OnWaitingForPlayers;
-            }
-
             PlayerEvent.Hurt += Handler.OnHurt;
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.Shooting += Handler.OnShooting;
@@ -62,7 +57,6 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ActivatingWorkstation += Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem += Handler.OnDrop;
             MapEvent.PickupDestroyed += Handler.OnPickup;
-            ServerEvent.RoundEnded += Handler.Onroundend;
             PlayerEvent.Shot += Handler.OnShot;
             PlayerEvent.Shot += Handler.OnShot2;
             ItemEvent.ChargingJailbird += Handler.OnCharge;
@@ -70,6 +64,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
+            PlayerEvent.ThrownProjectile += Handler.Onthrown;
 
             //Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -122,12 +117,10 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Hurt -= Handler.OnHurt;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.Shooting -= Handler.OnShooting;
-            ServerEvent.WaitingForPlayers -= Handler.OnWaitingForPlayers;
             PlayerEvent.UsingItemCompleted -= Handler.OnItemUse;
             ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
             PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
-            ServerEvent.RoundEnded -= Handler.Onroundend;
             PlayerEvent.Shot -= Handler.OnShot;
             PlayerEvent.Shot -= Handler.OnShot2;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
@@ -135,6 +128,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile -= Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;
+            PlayerEvent.ThrownProjectile -= Handler.Onthrown;
 
             //Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
