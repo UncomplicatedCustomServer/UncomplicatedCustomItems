@@ -2,7 +2,10 @@
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
-    internal class AdrenalineData : Data, IAdrenalineData
+    /// <summary>
+    /// The data associated with <see cref="CustomItemType.Adrenaline"/> <see cref="CustomItem"/>s
+    /// </summary>
+    public class AdrenalineData : Data, IAdrenalineData
     {
         /// <summary>
         /// Gets or sets the amout of AHP that has to be given to the player

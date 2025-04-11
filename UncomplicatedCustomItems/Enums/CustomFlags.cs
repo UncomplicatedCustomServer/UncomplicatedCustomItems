@@ -2,6 +2,9 @@ using System;
 
 namespace UncomplicatedCustomItems.Enums
 {
+    /// <summary>
+    /// Contains all of the available <see cref="CustomFlags"/>
+    /// </summary>
     [Flags]
     public enum CustomFlags
     {
@@ -17,5 +20,9 @@ namespace UncomplicatedCustomItems.Enums
         EffectShot = 1 << 8,
         EffectWhenEquiped = 1 << 9,
         NoCharge = 1 << 10,
+        CustomSound = 1 << 11,
+        ExplosiveBullets = 1 << 12,
+        ToolGun = 1 << 13,
+        SpawnItemWhenDetonated = 1 << 14,
     }
 }

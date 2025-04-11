@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
+using Exiled.API.Extensions;
 using Exiled.Loader;
 using System;
 using System.Collections.Generic;
@@ -8,15 +9,18 @@ using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
 using UnityEngine;
+using UncomplicatedCustomItems.Interfaces;
+using YamlDotNet.Core;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
     internal class FileConfig
     {
-        private static readonly List<YAMLCustomItem> _examples =
+        public static readonly List<YAMLCustomItem> _examples =
         [
             new()
             {
+                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new ItemData()
                 {
                     Event = ItemEvents.Command,
@@ -168,7 +172,279 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new JailbirdData())
             },
+            new()
+            {
+                Id = 10,
+                Name = "Shitty adrenaline",
+                Description = "This adrenaline just give you 10AHP",
+                Item = ItemType.Adrenaline,
+                CustomItemType = CustomItemType.Adrenaline,
+                Scale = new(1, 1, 1),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new AdrenalineData()
+                {
+                    Amount = 10,
+                    Decay = 0.01f,
+                    Persistant = true,
+                    Sustain = 1000
+                })
+            },
+            new()
+            {
+                Id = 11,
+                Name = "SCP-500",
+                Description = "SCP-500",
+                BadgeName = "SCP-500",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP500,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP500Data())
+            },
+            new()
+            {
+                Id = 12,
+                Name = "SCP-207",
+                Description = "SCP-207",
+                BadgeName = "SCP-207",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP207,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP207Data())
+            },
+            new()
+            {
+                Id = 13,
+                Name = "SCP-018",
+                Description = "SCP-018",
+                BadgeName = "SCP-018",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP018,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP018Data())
+            },
+            new()
+            {
+                Id = 14,
+                Name = "SCP2176",
+                Description = "SCP2176",
+                BadgeName = "SCP2176",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP2176,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = new(2, 2, 2),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP2176Data())
+            },
+            new()
+            {
+                Id = 15,
+                Name = "SCP244",
+                Description = "SCP244",
+                BadgeName = "SCP244",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP244a,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = new(5, 5, 5),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP244Data())
+            },
+            new()
+            {
+                Id = 16,
+                Name = "SCP244",
+                Description = "SCP244",
+                BadgeName = "SCP244",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP244b,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = new(5, 5, 5),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP244Data())
+            },
+            new()
+            {
+                Id = 17,
+                Name = "SCP1853",
+                Description = "SCP1853",
+                BadgeName = "SCP1853",
+                BadgeColor = "pumpkin",
+                Item = ItemType.SCP1853,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = new(1, 1, 1),
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = YAMLCaster.Encode(new SCP1853Data())
+            },
+            new()
+            {
+                Id = 18,
+                Name = "SCP1576",
+                Description = "SCP1576",
+                Item = ItemType.SCP1576,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new SCP1576Data())
+            }
         ];
+
+        public uint NewId = new();
+
+        public void GenerateCustomItem(uint id, string name, ItemType itemType, CustomItemType customType, string description)
+        {
+            Dictionary<string, string> customData = [];
+            
+            if (itemType == ItemType.SCP244a && customType == CustomItemType.SCPItem)
+            {
+                SCP244Data Data = new SCP244Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP244b && customType == CustomItemType.SCPItem)
+            {
+                SCP244Data Data = new SCP244Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP2176 && customType == CustomItemType.SCPItem)
+            {
+                SCP2176Data Data = new SCP2176Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP018 && customType == CustomItemType.SCPItem)
+            {
+                SCP018Data Data = new SCP018Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP500 && customType == CustomItemType.SCPItem)
+            {
+                SCP500Data Data = new SCP500Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP207 && customType == CustomItemType.SCPItem)
+            {
+                SCP207Data Data = new SCP207Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.AntiSCP207 &&  customType == CustomItemType.SCPItem)
+            {
+                SCP207Data Data = new SCP207Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP1853 && customType == CustomItemType.SCPItem)
+            {
+                SCP1853Data Data = new SCP1853Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.SCP1576 && customType == CustomItemType.SCPItem)
+            {
+                SCP1576Data Data = new SCP1576Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Firearm && customType == CustomItemType.Weapon)
+            {
+                WeaponData Data = new WeaponData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Keycard && customType == CustomItemType.Keycard)
+            {
+                KeycardData Data = new KeycardData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Armor && customType == CustomItemType.Armor)
+            {
+                ArmorData Data = new ArmorData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.GrenadeHE && customType == CustomItemType.ExplosiveGrenade)
+            {
+                ExplosiveGrenadeData Data = new ExplosiveGrenadeData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.GrenadeFlash && customType == CustomItemType.FlashGrenade)
+            {
+                FlashGrenadeData Data = new FlashGrenadeData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.Jailbird && customType == CustomItemType.Jailbird)
+            {
+                JailbirdData Data = new JailbirdData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.Medkit && customType == CustomItemType.Medikit)
+            {
+                MedikitData Data = new MedikitData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.Painkillers && customType == CustomItemType.Painkillers)
+            {
+                PainkillersData Data = new PainkillersData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.Adrenaline && customType == CustomItemType.Adrenaline)
+            {
+                AdrenalineData Data = new AdrenalineData();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else
+            {
+                ItemData Data = new ItemData();
+                customData = YAMLCaster.Encode(Data);
+            }
+
+            foreach (ICustomItem customItem in CustomItem.List)
+            {
+                if (customItem.Id == id)
+                {
+                    NewId = CustomItem.GetFirstFreeId(1);
+                    break;
+                }
+                else
+                {
+                    NewId = id;
+                }
+            }
+
+            YAMLCustomItem NewItem = new()
+            {
+                Id = NewId,
+                Name = name,
+                Description = description,
+                BadgeName = name,
+                BadgeColor = "pumpkin",
+                Item = itemType,
+                CustomItemType = customType,
+                Scale = Vector3.one,
+                Spawn = new(),
+                CustomFlags = CustomFlags.None,
+                FlagSettings = new(),
+                CustomData = customData,
+            };
+
+            string filePath = Path.Combine(Paths.Configs, "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
+            File.WriteAllText(filePath, Loader.Serializer.Serialize(NewItem));
+
+            CustomItem.Register(YAMLCaster.Converter(NewItem));
+
+            LogManager.Info($"Generated and registered custom item: {NewItem.Name} with ID {NewItem.Id}");
+        }
 
         internal string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomItems");
 
@@ -202,19 +478,68 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     if (FileName.Split().First() == ".")
                         return;
 
-                    YAMLCustomItem Item = Loader.Deserializer.Deserialize<YAMLCustomItem>(File.ReadAllText(FileName));
-                    LogManager.Debug($"Proposed to the registerer the external item {Item.Id} [{Item.Name}] from file:\n{FileName}");
-                    action(Item);
+                    string fileContent = File.ReadAllText(FileName);
+                    
+                    try 
+                    {
+                        YAMLCustomItem Item = Loader.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
+                        LogManager.Debug($"Proposed to the registerer the external item {Item.Id} [{Item.Name}] from file:\n{FileName}");
+                        action(Item);
+                    }
+                    catch (YamlException yamlEx)
+                    {
+                        string errorMessage = $"Failed to parse {FileName}. YAML syntax error: {yamlEx.Message}";
+
+                        if (yamlEx.Start.Line > 0)
+                        {
+                            errorMessage += $" at line {yamlEx.Start.Line}, column {yamlEx.Start.Column}";
+                            
+                            string[] lines = fileContent.Split('\n');
+                            if (yamlEx.Start.Line <= lines.Length)
+                            {
+                                string problematicLine = lines[yamlEx.Start.Line - 1];
+                                errorMessage += $"\nProblematic line: \"{problematicLine.Trim()}\"";
+                            }
+                        }
+                        
+                        if (Plugin.Instance.Config.Debug)
+                        {
+                            LogManager.Error($"{errorMessage}\nStack trace: {yamlEx.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                        }
+                        else
+                        {
+                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        string errorMessage = $"Failed to process {FileName}. Error: {ex.Message}";
+                        
+                        if (ex.Message.Contains("type") || ex.Message.Contains("convert"))
+                        {
+                            errorMessage += "\nThis appears to be a type mismatch error. Check that your values match the expected types for each field.";
+                        }
+                        else if (ex.Message.Contains("property") || ex.Message.Contains("member"))
+                        {
+                            errorMessage += "\nThis appears to be related to an unknown property. Check for typos in your YAML field names.";
+                        }
+                        
+                        if (Plugin.Instance.Config.Debug)
+                        {
+                            LogManager.Error($"{errorMessage}\nStack trace: {ex.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                        }
+                        else
+                        {
+                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                    if (!Plugin.Instance.Config.Debug)
+                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}");
+                    if (Plugin.Instance.Config.Debug)
                     {
-                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.");
-                    }
-                    else
-                    {
-                        LogManager.Error($"Failed to parse {FileName}. YAML Exception: {ex.Message}.\nStack trace: {ex.StackTrace}");
+                        LogManager.Error($"Stack trace: {ex.StackTrace}");
                     }
                 }
             }

@@ -1,5 +1,8 @@
 ﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
+    /// <summary>
+    /// The interface associated with <see cref="CustomItemType.FlashGrenade"/>
+    /// </summary>
     public interface IFlashGrenadeData : IData
     {
         public abstract float MinimalDurationEffect { get; set; }

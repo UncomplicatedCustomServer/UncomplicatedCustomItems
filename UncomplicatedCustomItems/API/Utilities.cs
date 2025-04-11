@@ -5,12 +5,17 @@ using Exiled.API.Features.Pickups;
 using MEC;
 using System.Collections.Generic;
 using System.Linq;
+using Exiled.API.Features.Items;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API
 {
+    /// <summary>
+    /// Handles all the <see cref="Utilities"/> needed for UCI.
+    /// </summary>
     public static class Utilities
     {
         /// <summary>
@@ -18,7 +23,7 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="item"></param>
         /// <param name="error"></param>
-        /// <returns><see cref="false"/> if there's any problem. Every error will be outputted with <paramref name="error"/></returns>
+        /// <returns><see cref="bool"/> false if there's any problem. Every error will be outputted with <paramref name="error"/></returns>
         public static bool CustomItemValidator(ICustomItem item, out string error)
         {
             if (CustomItem.CustomItems.ContainsKey(item.Id))
@@ -194,8 +199,73 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
 
                     break;
 
+                case CustomItemType.Adrenaline:
+                    if (item.CustomData is not IAdrenalineData)
+                    {
+                        error = @$"The item has been flagged as 'Adrenaline' but the CustomData class is not 'IAdrenalineData', 
+found '{item.CustomData.GetType().Name}' 
+
+The CustomData formatting is incorrect. Please follow the format found here: 
+https://discord.com/channels/null";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.Adrenaline)
+                    {
+                        error = $"The Item has been flagged as 'Adrenaline' but the item {item.Item} is not a Adrenaline";
+                        return false;
+                    }
+
+                    break;
+
+                case CustomItemType.SCPItem:
+
+                    if (item.Item is not ItemType.SCP500)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP207)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP018)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP330)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP2176)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP244a)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP244b)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP1853)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else if (item.Item is not ItemType.SCP1576)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                    }
+                    else
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        return false;
+                    }
+
+                    break;
+
                 default:
-                    error = "Unknown error how did you do this? Anyway please report it on our discord server! D:";
+                    error = "Unknown error how did this happen? Anyway please report it on our discord server! D:\nhttps://discord.gg/5StRGu8EJV";
                     return false;
             }
 
@@ -208,14 +278,14 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
         /// Does not return the error as text!
         /// </summary>
         /// <param name="item"></param>
-        /// <returns><see cref="false"/> if there's any problem.</returns>
+        /// <returns><see cref="bool"/> false if there's any problem.</returns>
         public static bool CustomItemValidator(ICustomItem item)
         {
             return CustomItemValidator(item, out _);
         }
 
         /// <summary>
-        /// Parse a <see cref="IResponse"/> object as response to a player
+        /// Parse a <see cref="IResponse"/> object as response to a <see cref="Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <param name="response"></param>
@@ -238,7 +308,7 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
         }
 
         /// <summary>
-        /// Try to get a <see cref="SummonedCustomItem"/> by it's serial
+        /// Try to get a <see cref="SummonedCustomItem"/> by it's <see cref="Item.Serial"/>
         /// </summary>
         /// <param name="serial"></param>
         /// <param name="item"></param>
@@ -253,36 +323,36 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
         public static SummonedCustomItem GetSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial);
 
         /// <summary>
-        /// Check if an item is a <see cref="SummonedCustomItem"/> by it's serial
+        /// Check if an item is a <see cref="SummonedCustomItem"/> by it's <see cref="Item.Serial"/>
         /// </summary>
         /// <param name="serial"></param>
-        /// <returns><see cref="true"/> if it is</returns>
+        /// <returns><see cref="bool"/> true if it is</returns>
         public static bool IsSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial) is not null;
 
         /// <summary>
-        /// Try to get a <see cref="ICustomItem"/> by it's Id
+        /// Try to get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Id"/>
         /// </summary>
         /// <param name="id"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="true"/> if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
+        /// <returns><see cref="bool"/> true if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
         public static bool TryGetCustomItem(uint id, out ICustomItem item) => CustomItem.CustomItems.TryGetValue(id, out item);
 
         /// <summary>
-        /// Get a <see cref="ICustomItem"/> by it's Id
+        /// Get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Id"/>
         /// </summary>
         /// <param name="id"></param>
         /// <returns><see cref="ICustomItem"/> if it exists, otherwhise a <see cref="default"/> will be returned</returns>
         public static ICustomItem GetCustomItem(uint id) => CustomItem.CustomItems[id];
 
         /// <summary>
-        /// Check if the given Id is already registered as a <see cref="ICustomItem"/>
+        /// Check if the given <see cref="ICustomItem.Id"/> is already registered as a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         public static bool IsCustomItem(uint id) => CustomItem.CustomItems.ContainsKey(id);
 
         /// <summary>
-        /// Summon a CustomItem
+        /// Summon a <see cref="CustomItem"/>
         /// </summary>
         /// <param name="CustomItem"></param>
         internal static void SummonCustomItem(ICustomItem CustomItem)
@@ -296,23 +366,39 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
                 return;
             }
 
-            else if (Spawn.Rooms.Count() > 0)
+            else if (Spawn.DynamicSpawn.Count() > 0)
             {
-                RoomType Room = Spawn.Rooms.RandomItem();
-                if (Spawn.ReplaceExistingPickup)
+                foreach (DynamicSpawn DynamicSpawn in Spawn.DynamicSpawn)
                 {
-                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                    int Chance = UnityEngine.Random.Range(0, 100);
 
-                    if (Spawn.ForceItem)
-                        FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
+                    if (Chance <= DynamicSpawn.Chance)
+                    {
+                        RoomType Room = DynamicSpawn.Room;
+                        if (DynamicSpawn.Coords == Vector3.zero)
+                        {
+                            if (Spawn.ReplaceExistingPickup)
+                            {
+                                List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
-                    if (FilteredPickups.Count() > 0)
-                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
+                                if (Spawn.ForceItem)
+                                    FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
 
-                    return;
+                                if (FilteredPickups.Count() > 0)
+                                    new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
+
+                                return;
+                            }
+                            else
+                                new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
+                        }
+                        else
+                        {
+                            Transform Position = Exiled.API.Features.Room.Get(Room).transform;
+                            new SummonedCustomItem(CustomItem, Position.transform.InverseTransformPoint(DynamicSpawn.Coords));
+                        }
+                    }
                 }
-                else
-                    new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
             }
             else if (Spawn.Zones.Count() > 0)
             {
@@ -339,7 +425,7 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
         
 
         /// <summary>
-        /// Reproduce the SCP:SL painkillers healing process but with custom things :)
+        /// Reproduce the SCP:SL <see cref="ItemType.Painkillers"/> healing process but with custom things :)
         /// </summary>
         /// <param name="player"></param>
         /// <param name="Data"></param>

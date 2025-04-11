@@ -33,5 +33,8 @@ namespace UncomplicatedCustomItems
 
         [Description("Enables admin messages. Occasionally, you will receive important notifications on your console from our central servers.")]
         public bool DoEnableAdminMessages { get; set; } = true;
+
+        [Description("Allow server tracking? (This does nothing to your server it only allows us to view the amount of servers using the plugin)")]
+        public bool ServerTracking { get; set; } = true;
     }
 }

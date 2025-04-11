@@ -1,9 +1,13 @@
 ﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
+using System;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
 #nullable enable
 
+    /// <summary>
+    /// The data associated with <see cref="CustomItemType.Item"/> <see cref="CustomItem"/>s
+    /// </summary>
     public class ItemData : Data, IItemData
     {
         /// <summary>
@@ -12,10 +16,14 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public ItemEvents Event { get; set; } = ItemEvents.Pickup;
 
         /// <summary>
-        /// Gets or sets the command (<see cref="string>"/>) that will be executed when the <see cref="ItemEvents"/> will be fired
+        /// Gets or sets the command (<see cref="string"/>) that will be executed when the <see cref="ItemEvents"/> will be fired
         /// </summary>
         public string? Command { get; set; } = null;
 
+        /// <summary>
+        /// Gets or sets when the delay after <see cref="ItemEvents"/> is fired. 
+        /// </summary>
+        public float CoolDown { get; set; } = 1f;
         /// <summary>
         /// Gets or sets the message that will be sent inside the console when the <see cref="ItemEvents"/> will be fired
         /// </summary>

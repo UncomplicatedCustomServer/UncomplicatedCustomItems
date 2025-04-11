@@ -7,10 +7,10 @@ namespace UncomplicatedCustomItems.Extensions
     public static class ItemExtension
     {
         /// <summary>
-        /// Try to get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it's one.
+        /// Try to get the current <see cref="SummonedCustomItem"/> of a <see cref="Player"/> if it's one.
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="Item"></param>
+        /// <param name="summonedInstance"></param>
         /// <returns>true if the player is currently <see cref="SummonedCustomItem"/></returns>
         public static bool TryGetSummonedInstance(this Player player, out SummonedCustomItem summonedInstance)
         {
@@ -19,10 +19,10 @@ namespace UncomplicatedCustomItems.Extensions
         }
 
         /// <summary>
-        /// Get the current <see cref="SummonedCustomRole"/> of a <see cref="Player"/> if it's one.
+        /// Get the current <see cref="SummonedCustomItem"/> of a <see cref="Player"/> if it's one.
         /// </summary>
-        /// <param name="player"></param>
-        /// <returns>The current <see cref="SummonedCustomRole"/> if the player has one, otherwise <see cref="null"/></returns>
+        /// <param name="owner"></param>
+        /// <returns>The current <see cref="SummonedCustomItem"/> if the player has one, otherwise <see cref="null"/></returns>
         public static SummonedCustomItem GetSummonedInstance(this Player owner)
         {
             return SummonedCustomItem.Get(owner).FirstOrDefault();

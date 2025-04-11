@@ -1,5 +1,8 @@
 ﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
+    /// <summary>
+    /// The interface associated with <see cref="CustomItemType.Armor"/>
+    /// </summary>
     public interface IArmorData : IData
     {
         public abstract int HeadProtection { get; set; }

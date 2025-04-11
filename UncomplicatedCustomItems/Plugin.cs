@@ -16,16 +16,16 @@ namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public const bool IsPrerelease = false;
+        public bool IsPrerelease = false;
         public override string Name => "UncomplicatedCustomItems";
 
         public override string Prefix => "UncomplicatedCustomItems";
 
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 
-        public override Version RequiredExiledVersion { get; } = new(9, 5, 0);
+        public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
 
-        public override Version Version { get; } = new(3, 1, 1);
+        public override Version Version { get; } = new(3, 2, 0);
 
         internal Handler Handler;
 
@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems
 
         public static Plugin Instance { get; private set; }
 
-        public Harmony _harmony;
+        internal Harmony _harmony;
 
         internal static HttpManager HttpManager;
 
@@ -43,34 +43,28 @@ namespace UncomplicatedCustomItems
         {
             Instance = this;
 
-            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-            _harmony.PatchAll();
-
             FileConfig = new();
             HttpManager = new("uci");
             Handler = new();
 
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
 
-            if (IsPrerelease)
-            {
-                ServerEvent.WaitingForPlayers += Handler.OnWaitingForPlayers;
-            }
-
             PlayerEvent.Hurt += Handler.OnHurt;
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.Shooting += Handler.OnShooting;
-            PlayerEvent.UsedItem += Handler.OnItemUse;
+            PlayerEvent.UsingItemCompleted += Handler.OnItemUse;
             ItemEvent.ChangingAttachments += Handler.OnChangingAttachments;
             PlayerEvent.ActivatingWorkstation += Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem += Handler.OnDrop;
             MapEvent.PickupDestroyed += Handler.OnPickup;
-            ServerEvent.RoundEnded += Handler.Onroundend;
-            PlayerEvent.UsingItem += Handler.OnUsingItem;
             PlayerEvent.Shot += Handler.OnShot;
             PlayerEvent.Shot += Handler.OnShot2;
             ItemEvent.ChargingJailbird += Handler.OnCharge;
             PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
+            PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
+            PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
+            MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
+            PlayerEvent.ThrownProjectile += Handler.Onthrown;
 
             //Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -103,6 +97,11 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll();
             FileConfig.LoadAll(Server.Port.ToString());
 
+            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            Harmony.DEBUG = true;
+            _harmony.PatchAll();
+            ServerConsole.ReloadServerName();
+
             base.OnEnabled();
         }
 
@@ -118,17 +117,18 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Hurt -= Handler.OnHurt;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.Shooting -= Handler.OnShooting;
-            ServerEvent.WaitingForPlayers -= Handler.OnWaitingForPlayers;
-            PlayerEvent.UsedItem -= Handler.OnItemUse;
+            PlayerEvent.UsingItemCompleted -= Handler.OnItemUse;
             ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
             PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
-            ServerEvent.RoundEnded -= Handler.Onroundend;
-            PlayerEvent.UsingItem -= Handler.OnUsingItem;
             PlayerEvent.Shot -= Handler.OnShot;
             PlayerEvent.Shot -= Handler.OnShot2;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
             PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
+            PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
+            PlayerEvent.ThrownProjectile -= Handler.ThrownProjectile;
+            MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;
+            PlayerEvent.ThrownProjectile -= Handler.Onthrown;
 
             //Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
@@ -138,6 +138,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting -= Handler.Onshooting;
 
             Instance = null;
+            Handler = null;
             base.OnDisabled();
 
         }

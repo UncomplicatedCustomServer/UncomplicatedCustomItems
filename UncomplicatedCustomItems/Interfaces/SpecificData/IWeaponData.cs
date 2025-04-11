@@ -1,6 +1,9 @@
 ﻿namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
 #nullable enable
+    /// <summary>
+    /// The interface associated with <see cref="CustomItemType.Weapon"/>
+    /// </summary>
     public interface IWeaponData : IData
     {
         public abstract float Damage { get; set; }
@@ -20,6 +23,8 @@
         public abstract float DamageFalloffDistance { get; set; }
 
         public abstract string Attachments { get; set; }
+
+        public abstract bool EnableFriendlyFire { get; set; }
     }
 
 }

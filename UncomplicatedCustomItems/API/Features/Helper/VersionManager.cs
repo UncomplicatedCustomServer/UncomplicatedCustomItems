@@ -34,9 +34,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return;
             }
 
-            if (VersionInfo.PreRelease)
+            if (VersionInfo.PreRelease || Plugin.Instance.IsPrerelease)
             {
-                LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version.ToString(4)}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomItems!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and malfunctions, for this reason we do not recommend use in production.");
+                LogManager.Info($"\nNOTICE!\nYou are currently using the version v{Plugin.Instance.Version.ToString(4)}, who's a PRE-RELEASE or an EXPERIMENTAL RELESE of UncomplicatedCustomItems!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there can be bugs and errors, for this reason we do not recommend use in production.");
                 if (VersionInfo.ForceDebug && !Log.DebugEnabled.Contains(Plugin.Instance.Assembly))
                 {
                     LogManager.Info("Debug logs have been activated!");

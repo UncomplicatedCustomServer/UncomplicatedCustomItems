@@ -17,7 +17,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -39,7 +39,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>12</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <DocumentationFile>bin\x64\Debug\UncomplicatedCustomItems.xml</DocumentationFile>
+    <DocumentationFile>..\..\..\..\AppData\Roaming\EXILED\Plugins\UncomplicatedCustomItems.xml</DocumentationFile>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -53,6 +54,10 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp-Publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-Publicized.dll</HintPath>
@@ -60,6 +65,9 @@
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="AudioPlayerApi">
+      <HintPath>$(EXILED_REFERENCES)\AudioPlayerApi.dll</HintPath>
     </Reference>
     <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -97,6 +105,9 @@
     </Reference>
     <Reference Include="NorthwoodLib">
       <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
+    </Reference>
+    <Reference Include="NVorbis">
+      <HintPath>$(EXILED_REFERENCES)\NVorbis.dll</HintPath>
     </Reference>
     <Reference Include="PluginAPI">
       <HintPath>$(EXILED_REFERENCES)\PluginAPI.dll</HintPath>
@@ -460,19 +471,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Features\AudioApi.cs" />
     <Compile Include="API\Features\BadgeManager.cs" />
     <Compile Include="API\Features\CustomModules\CoroutineModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
+    <Compile Include="API\Features\CustomModules\CustomSound.cs" />
     <Compile Include="API\Features\CustomModules\DieOnUse.cs" />
     <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
+    <Compile Include="API\Features\CustomModules\ToolGun.cs" />
     <Compile Include="API\Features\CustomModules\EffectShot.cs" />
     <Compile Include="API\Features\CustomModules\EffectWhenUsed.cs" />
+    <Compile Include="API\Features\CustomModules\SpawnItemWhenDetonated.cs" />
+    <Compile Include="API\Features\CustomModules\ExplosiveBullets.cs" />
     <Compile Include="API\Features\CustomModules\InfiniteAmmo.cs" />
     <Compile Include="API\Features\CustomModules\ItemGlow.cs" />
     <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
     <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
     <Compile Include="API\Features\CustomModules\EffectWhenEquiped.cs" />
     <Compile Include="API\Features\CustomModules\NoCharge.cs" />
+    <Compile Include="API\Features\DynamicSpawn.cs" />
+    <Compile Include="API\Features\FlagSettings\SpawnItemWhenDetonatedSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\EffectSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\AudioSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\LifeStealSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\ExplosiveBulletsSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\ItemGlowSettings.cs" />
     <Compile Include="API\Features\FlagSettings.cs" />
     <Compile Include="API\Features\Helper\FileConfig.cs" />
     <Compile Include="API\Features\Helper\HttpManager.cs" />
@@ -485,19 +508,24 @@
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />
     <Compile Include="API\YAMLCaster.cs" />
+    <Compile Include="Commands\Admin\Generate.cs" />
+    <Compile Include="Commands\Admin\Info.cs" />
     <Compile Include="Commands\Admin\Give.cs" />
     <Compile Include="Commands\Admin\List.cs" />
     <Compile Include="Commands\Admin\LogShare.cs" />
+    <Compile Include="Commands\Admin\Reload.cs" />
     <Compile Include="Commands\Admin\Summon.cs" />
     <Compile Include="Commands\Admin\Summoned.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="API\Features\CustomItem.cs" />
+    <Compile Include="API\Features\SpecificData\AdrenalineData.cs" />
     <Compile Include="API\Features\SpecificData\ArmorData.cs" />
     <Compile Include="API\Features\SpecificData\Data.cs" />
     <Compile Include="API\Features\SpecificData\ExplosiveGrenadeData.cs" />
     <Compile Include="API\Features\SpecificData\FlashGrenadeData.cs" />
+    <Compile Include="API\Features\SpecificData\SCPItemData.cs" />
     <Compile Include="API\Features\SpecificData\ItemData.cs" />
     <Compile Include="API\Features\SpecificData\JailbirdData.cs" />
     <Compile Include="API\Features\SpecificData\MedikitData.cs" />
@@ -513,18 +541,29 @@
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ItemExtension.cs" />
+    <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
+    <Compile Include="Interfaces\IDynamicSpawn.cs" />
+    <Compile Include="Intergrations\ScriptedEvents.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
     <Compile Include="Interfaces\ICustomModule.cs" />
     <Compile Include="Interfaces\IFlagSettings.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
+    <Compile Include="Interfaces\FlagSettings\ISpawnItemWhenDetonatedSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IEffectSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IAudioSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\ILifeStealSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IItemGlowSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IExplosiveBulletsSettings.cs" />
     <Compile Include="Interfaces\ISubcommand.cs" />
+    <Compile Include="Interfaces\SpecificData\IAdrenalineData.cs" />
     <Compile Include="Interfaces\SpecificData\IArmorData.cs" />
     <Compile Include="Interfaces\SpecificData\IData.cs" />
     <Compile Include="Interfaces\SpecificData\IExplosiveGrenadeData.cs" />
     <Compile Include="Interfaces\SpecificData\IFlashGrenadeData.cs" />
     <Compile Include="Interfaces\SpecificData\IItemData.cs" />
+    <Compile Include="Interfaces\SpecificData\ISCPItemData.cs" />
     <Compile Include="Interfaces\SpecificData\IJailbirdData.cs" />
     <Compile Include="Interfaces\SpecificData\IKeycardData.cs" />
     <Compile Include="Interfaces\SpecificData\IMedikitData.cs" />
@@ -536,15 +575,10 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Intergrations\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <PackageReference Include="ExMod.Exiled">
       <Version>9.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="Lib.Harmony">
-      <Version>2.2.2</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>

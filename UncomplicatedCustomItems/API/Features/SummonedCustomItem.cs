@@ -18,6 +18,9 @@ using HarmonyLib;
 
 namespace UncomplicatedCustomItems.API.Features
 {
+    /// <summary>
+    /// Handles the information and methods for every summoned <see cref="ICustomItem"/>
+    /// </summary>
     public class SummonedCustomItem
     {
         /// <summary>
@@ -28,7 +31,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
         /// </summary>
-        private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit];
+        private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
 
         /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
@@ -44,8 +47,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
-
-        public float Capacity { get; set; } = 0f;
         
         internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
 
@@ -53,8 +54,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// Gets the badge of the player if it has one
         /// </summary>
         public Triplet<string, string, bool>? Badge { get; private set; }
-
-        private static readonly HashSet<ushort> CheckedItemSerials = new HashSet<ushort>();
 
         public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
 
@@ -90,6 +89,10 @@ namespace UncomplicatedCustomItems.API.Features
             return _flagSettings.Remove(flagSettings);
         }
 
+        /// <summary>
+        /// Retrieves all loaded flag settings and returns them as a read-only list.
+        /// </summary>
+        /// <returns>A read-only list of flag settings.</returns>
         public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
         {
             LogManager.Debug("Retrieving all loaded Flag Settings");
@@ -103,6 +106,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             _flagSettings.Clear();
         }
+
         /// <summary>
         /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
         /// </summary>
@@ -113,6 +117,18 @@ namespace UncomplicatedCustomItems.API.Features
                 .SelectMany(item => item.Attachments.Split(',')
                     .Select(attachment => new { AttachmentName = attachment.Trim() }))
                 .Select(x => x.AttachmentName)
+                .ToList();
+        }
+        /// <summary>
+        /// Converts the Command custom data from items into a list to allow multiple commands.
+        /// </summary>
+        public static List<string?> CommandsList(List<IItemData> Commands)
+        {
+            return Commands
+                .Where(item => !string.IsNullOrWhiteSpace(item.Command))
+                .SelectMany(item => item.Command.Split(',')
+                    .Select(Commands => new { Commands = Commands.Trim() }))
+                .Select(x => x.Commands)
                 .ToList();
         }
 
@@ -132,6 +148,9 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public bool IsPickup => Pickup is not null;
 
+        /// <summary>
+        /// Time since the last time a <see cref="Player"/> was damaged.
+        /// </summary>
         public long LastDamageTime { get; internal set; }
 
         /// <summary>
@@ -139,6 +158,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         /// <param name="customItem"></param>
         /// <param name="owner"></param>
+        /// <param name="item"></param>
+        /// <param name="pickup"></param>
         public SummonedCustomItem(ICustomItem customItem, Player owner, Item item, Pickup pickup)
         {
             CustomItem = customItem;
@@ -173,7 +194,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// From now on it will be considered a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
-        /// <param name="owner"></param>
+        /// <param name="player"></param>
         public SummonedCustomItem(ICustomItem customItem, Player player) : this(customItem, player, player.AddItem(customItem.Item), null) { }
 
         /// <summary>
@@ -181,15 +202,15 @@ namespace UncomplicatedCustomItems.API.Features
         /// From now on it will be considered a <see cref="ICustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
-        /// <param name="position"></param>
-        /// <param name="rotation"></param>
+        /// <param name="player"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
         private int Charges { get; set; }
 
         /// <summary>
-        /// Apply the custom properties of the current <see cref="ICustomItem"/>
+        /// Applies the custom properties of the current <see cref="ICustomItem"/>
         /// </summary>
         public void SetProperties()
         {
@@ -285,6 +306,46 @@ namespace UncomplicatedCustomItems.API.Features
                         FlashGrenade.FuseTime = FlashGrenadeData.FuseTime;
                         break;
 
+                    case CustomItemType.SCPItem:
+                        {
+                            if (Item.Type == ItemType.SCP018)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-018");
+                                Scp018 Scp018 = Item as Scp018;
+                                ISCP018Data SCP018Data = CustomItem.CustomData as ISCP018Data;
+                                Scp018.FriendlyFireTime = SCP018Data.FriendlyFireTime;
+                                Scp018.FuseTime = SCP018Data.FuseTime;
+                            }
+                            else if (Item.Type == ItemType.SCP2176)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-2176");
+                                Scp2176 Scp2176 = Item as Scp2176;
+                                ISCP2176Data SCP2176Data = CustomItem.CustomData as ISCP2176Data;
+                                Scp2176.FuseTime = SCP2176Data.FuseTime;
+                            }
+                            else if (Item.Type == ItemType.SCP244a)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244 Scp244 = Item as Scp244;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.ActivationDot = SCP244Data.ActivationDot;
+                                Scp244.Health = SCP244Data.Health;
+                                Scp244.MaxDiameter = SCP244Data.MaxDiameter;
+                                Scp244.Primed = SCP244Data.Primed;
+                            }
+                            else if (Item.Type == ItemType.SCP244b)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244 Scp244 = Item as Scp244;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.ActivationDot = SCP244Data.ActivationDot;
+                                Scp244.Health = SCP244Data.Health;
+                                Scp244.MaxDiameter = SCP244Data.MaxDiameter;
+                                Scp244.Primed = SCP244Data.Primed;
+                            }
+                            break;
+                        }
+
                     default:
                         break;
                 }
@@ -294,6 +355,9 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Weight = CustomItem.Weight;
             }
         }
+        /// <summary>
+        /// Saves the custom properties of the <see cref="ICustomItem"/> that triggered it
+        /// </summary>
         public void SaveProperties()
         {
             if (Item is not null)
@@ -395,6 +459,41 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             break;
                         }
+                    case CustomItemType.SCPItem:
+                        {
+                            if (Item.Type == ItemType.SCP018)
+                            {
+                                Scp018 Scp018 = Item as Scp018;
+                                ISCP018Data SCP018Data = CustomItem.CustomData as ISCP018Data;
+                                SCP018Data.FriendlyFireTime = Scp018.FriendlyFireTime;
+                                SCP018Data.FuseTime = Scp018.FuseTime;
+                            }
+                            else if (Item.Type == ItemType.SCP2176)
+                            {
+                                Scp2176 Scp2176 = Item as Scp2176;
+                                ISCP2176Data SCP2176Data = CustomItem.CustomData as ISCP2176Data;
+                                SCP2176Data.FuseTime = Scp2176.FuseTime;
+                            }
+                            else if(Item.Type == ItemType.SCP244a)
+                            {
+                                Scp244 Scp244 = Item as Scp244;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                SCP244Data.ActivationDot = Scp244.ActivationDot;
+                                SCP244Data.Health = Scp244.Health;
+                                SCP244Data.MaxDiameter = Scp244.MaxDiameter;
+                                SCP244Data.Primed = Scp244.Primed;
+                            }
+                            else if (Item.Type == ItemType.SCP244b)
+                            {
+                                Scp244 Scp244 = Item as Scp244;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                SCP244Data.ActivationDot = Scp244.ActivationDot;
+                                SCP244Data.Health = Scp244.Health;
+                                SCP244Data.MaxDiameter = Scp244.MaxDiameter;
+                                SCP244Data.Primed = Scp244.Primed;
+                            }
+                            break;
+                        }
                     default:
                         break;
                 }
@@ -407,7 +506,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Loads the badge of the player according to the CustomItem BadgeName field.
+        /// Sets the badge of the <see cref="Player"/> according to the <see cref="ICustomItem"/> BadgeName field.
         /// <param name="Player"></param>
         /// </summary>
         public string LoadBadge(Player Player)
@@ -434,6 +533,11 @@ namespace UncomplicatedCustomItems.API.Features
             return output;
         }
 
+        /// <summary>
+        /// Applies a custom badge to the specified <see cref="Player"/> if the item has a valid badge name and color.
+        /// </summary>
+        /// <param name="Player">The player receiving the badge.</param>
+        /// <param name="Item">The custom item containing badge details.</param>
         private void CustomItemBadgeApplier(Player Player, ICustomItem Item)
         {
             Triplet<string, string, bool>? Badge = null;
@@ -452,7 +556,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Resets the badge of the player.
+        /// Resets the badge of the <see cref="Player"/>.
         /// <param name="Player"></param>
         /// </summary>
         public void ResetBadge(Player Player)
@@ -471,7 +575,11 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
-        
+
+        /// <summary>
+        /// Unloads all <see cref="ICustomItem"/> information for the <see cref="Player"/> who dropped the custom item.
+        /// </summary>
+        /// <param name="dropped"></param>
         public void OnDrop(DroppedItemEventArgs dropped)
         {
             Pickup = dropped.Pickup;
@@ -484,7 +592,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// loads the Item Flags for the player.
+        /// loads the Item Flags for the <see cref="Player"/>.
         /// </summary>
         public string LoadItemFlags()
         {
@@ -503,7 +611,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Checks the magazine of the held weapon to remove the capacity modifier from a modification.
+        /// Checks the magazine of the held <see cref="Firearm"/> to remove the capacity modifier from a modification.
         /// <param name="Firearm"></param>
         /// <param name="WeaponData"></param>
         /// </summary>
@@ -518,9 +626,8 @@ namespace UncomplicatedCustomItems.API.Features
                 LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
             }
         }
-
         /// <summary>
-        /// Displays the debug ui for weapon information to the selected player.
+        /// Displays the debug ui for <see cref="Firearm"/> information to the selected <see cref="Player"/>.
         /// <param name="Player"></param>
         /// </summary>
         public void ShowDebugUi(Player Player)
@@ -530,7 +637,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Reloads the Flags for the item.
+        /// Reloads the Flags for the <see cref="ICustomItem"/>.
         /// </summary>
         public void ReloadItemFlags()
         {
@@ -542,7 +649,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Unloads the Flags for the player.
+        /// Unloads the Flags for the <see cref="Player"/>.
         /// </summary>
         public void UnloadItemFlags()
         {
@@ -552,7 +659,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Gets a <see cref="CustomModule"/> that this custom item implements
+        /// Gets a <see cref="CustomModule"/> that this <see cref="ICustomItem"/> implements
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -619,70 +726,123 @@ namespace UncomplicatedCustomItems.API.Features
             foreach (ICustomModule _ in GetModules<T>())
                 RemoveModule<T>();
         }
-        internal void HandleEvent(Player player, ItemEvents itemEvent)
+
+        private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();
+        /// <summary>
+        /// Handles the commands for <see cref="IItemData"/> CustomItems
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="itemEvent"></param>
+        public void HandleEvent(Player player, ItemEvents itemEvent)
         {
-            if (CustomItem.CustomItemType == CustomItemType.Item && ((IItemData)CustomItem.CustomData).Event == itemEvent)
+            IItemData ItemData = CustomItem.CustomData as IItemData;
+            if (CustomItem.CustomItemType == CustomItemType.Item && ItemData.Event == itemEvent)
             {
-                IItemData Data = CustomItem.CustomData as IItemData;
-                Log.Debug($"Firing events for item {CustomItem.Name}");
+                if (IsOnCooldown(player, player.CurrentItem.Serial))
+                {
+                    LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
+                    return;
+                }
+
+                LogManager.Debug($"Firing events for item {CustomItem.Name}");
                 System.Random rand = new();
                 Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
                 string randomPlayerId = randomPlayer?.Id.ToString();
 
-                if (Data.Command is not null && Data.Command.Length > 2)
-                    if (!Data.Command.Contains("{p_id}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_id}", player.Id.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_id}", player.Id.ToString()).Replace("{p_id}", ""), player.Sender);
-                    if (!Data.Command.Contains("{rp_id}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{rp_id}", randomPlayerId));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{rp_id}", randomPlayerId).Replace("{rp_id}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_pos}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_pos}", player.Position.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_pos}", player.Position.ToString()).Replace("{p_pos}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_role}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_role}", player.Role.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_role}", player.Role.ToString()).Replace("{p_role}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_health}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_health}", player.Health.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_health}", player.Health.ToString()).Replace("{p_health}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_zone}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_zone}", player.Zone.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_zone}", player.Zone.ToString()).Replace("{p_zone}", ""), player.Sender);
-                    if (!Data.Command.Contains("{p_room}"))
-                        Server.ExecuteCommand(Data.Command.Replace("{p_room}", player.CurrentRoom.ToString()));
-                    else
-                        Server.ExecuteCommand(Data.Command.Replace("{p_room}", player.CurrentRoom.ToString()).Replace("{p_room}", ""), player.Sender);
+                if (ItemData.Command is not null && ItemData.Command.Length > 2)
+                {
+                    List<string?> commandsList = CommandsList(new List<IItemData> { ItemData });
+                    foreach (string? cmd in commandsList)
+                    {
+                        if (string.IsNullOrWhiteSpace(cmd))
+                            continue;
 
-                Utilities.ParseResponse(player, Data);
+                        string processedCommand = cmd
+                            .Replace("{p_id}", player.Id.ToString())
+                            .Replace("{rp_id}", randomPlayerId)
+                            .Replace("{p_pos}", player.Position.ToString())
+                            .Replace("{p_role}", player.Role.ToString())
+                            .Replace("{p_health}", player.Health.ToString())
+                            .Replace("{p_zone}", player.Zone.ToString())
+                            .Replace("{p_room}", player.CurrentRoom.ToString())
+                            .Replace("{p_rotation}", player.Rotation.ToString());
 
+                        if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
+                            cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
+                            cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
+                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}"))
+                        {
+                            Server.ExecuteCommand(processedCommand, player.Sender);
+                        }
+                        else
+                        {
+                            Server.ExecuteCommand(processedCommand);
+                        }
+                    }
+                }
+                StartCooldown(player, player.CurrentItem.Serial, ItemData.CoolDown);
 
+                Utilities.ParseResponse(player, ItemData);
 
-                // Now we can destry the item if we have been told to do it
-                if (Data.DestroyAfterUse)
+                // Destroy the item if needed.
+                if (ItemData.DestroyAfterUse)
                     Destroy();
             }
         }
-        
 
         /// <summary>
-        /// Displays the hint from the SelectedMessage field in the plugin config.
+        /// Checks whether the specified <see cref="Item.Serial"/> for the given <see cref="Player"/> is on cooldown.
         /// </summary>
-        internal void HandleSelectedDisplayHint()
+        public bool IsOnCooldown(Player player, ushort Serial)
         {
-            if (Plugin.Instance.Config.SelectedMessage.Length > 1)
-                Owner.ShowHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
+            if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
+            {
+                if (itemStates.TryGetValue(Serial, out bool isOnCooldown))
+                    return isOnCooldown;
+            }
+            return false;
         }
 
         /// <summary>
-        /// Displays the hint from the PickedUpMessage field in the plugin config.
+        /// Starts the cooldown coroutine for the given <see cref="Item.Serial"/> and marks it as on cooldown.
         /// </summary>
-        internal void HandlePickedUpDisplayHint()
+        public void StartCooldown(Player player, ushort Serial, float cooldown)
+        {
+            if (!_cooldownStates.ContainsKey(player))
+                _cooldownStates[player] = new Dictionary<ushort, bool>();
+
+            _cooldownStates[player][Serial] = true;
+            Timing.RunCoroutine(CooldownCoroutine(player, Serial, cooldown));
+        }
+
+        /// <summary>
+        /// A coroutine that waits for the cooldown period and then resets the cooldown state.
+        /// </summary>
+        public IEnumerator<float> CooldownCoroutine(Player player, ushort Serial, float cooldown)
+        {
+            yield return Timing.WaitForSeconds(cooldown);
+
+            if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
+            {
+                itemStates[Serial] = false;
+            }
+            LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
+        }
+
+        /// <summary>
+        /// Displays the hint from the <see cref="Config.SelectedMessage"/> field in the plugin <see cref="Config"/>.
+        /// </summary>
+        public void HandleSelectedDisplayHint()
+        {
+            if (Plugin.Instance.Config.SelectedMessage.Length > 1)
+                Owner.ShowHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
+
+        }
+
+        /// <summary>
+        /// Displays the hint from the <see cref="Config.PickedUpMessage"/> field in the plugin <see cref="Config"/>.
+        /// </summary>
+        public void HandlePickedUpDisplayHint()
         {
             if (Plugin.Instance.Config.PickedUpMessage.Length > 1)
                 Owner.ShowHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
@@ -704,6 +864,10 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Painkillers:
                         Timing.RunCoroutine(Utilities.PainkillersCoroutine(Owner, CustomItem.CustomData as IPainkillersData));
                         break;
+                    case CustomItemType.Adrenaline:
+                        IAdrenalineData AdrenalineData = CustomItem.CustomData as IAdrenalineData;
+                        Owner.AddAhp(AdrenalineData.Amount, decay: AdrenalineData.Decay, efficacy: AdrenalineData.Efficacy, sustain: AdrenalineData.Sustain, persistant: AdrenalineData.Persistant);
+                        break;
                     default:
                         return false;
                 }
@@ -720,7 +884,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Destroys the customitem.
+        /// Destroys the <see cref="ICustomItem"/>.
         /// </summary>
         public void Destroy()
         {
@@ -768,7 +932,7 @@ namespace UncomplicatedCustomItems.API.Features
         public static SummonedCustomItem Get(ushort serial) => List.Where(sci => sci.Serial == serial).FirstOrDefault();
 
         /// <summary>
-        /// Try gets a <see cref="SummonedCustomItem"/> by it's owner and it's serial.<br></br>
+        /// Try gets a <see cref="SummonedCustomItem"/> by it's serial.
         /// It can't be a pickup!
         /// </summary>
         /// <param name="serial"></param>
@@ -781,7 +945,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Try gets a <see cref="SummonedCustomItem"/> by it's serial.
+        /// Try gets a <see cref="SummonedCustomItem"/> by it's owner and it's serial.<br></br>
         /// </summary>
         /// <param name="player"></param>
         /// <param name="serial"></param>

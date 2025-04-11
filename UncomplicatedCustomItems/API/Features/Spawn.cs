@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
 {
+    /// <summary>
+    /// Spawn settings for <see cref="ICustomItem"/>.
+    /// </summary>
     public class Spawn : ISpawn
     {
         /// <summary>
@@ -22,21 +25,28 @@ namespace UncomplicatedCustomItems.API.Features
 
         /// <summary>
         /// The <see cref="Vector3"/> positions where the item is allowed to spawn.
-        /// If this is empty, the <see cref="Rooms"/> parameter will be used instead.
+        /// If this is empty, the <see cref="DynamicSpawn"/> parameter will be used instead.
         /// </summary>
         [Description("Custom coordinates where the custom item will spawn.")]
         public List<Vector3> Coords { get; set; } = new();
 
         /// <summary>
-        /// The <see cref="RoomType"/> locations where the item is allowed to spawn.
+        /// The <see cref="IDynamicSpawn"/> locations where the item is allowed to spawn.
         /// If this is empty, the <see cref="Zones"/> parameter will be used instead.
         /// </summary>
         [Description("The room(s) where the custom item can spawn.")]
-        public List<RoomType> Rooms { get; set; } = new();
+        public List<DynamicSpawn> DynamicSpawn { get; set; } =
+        [
+            new()
+            {
+                Room = RoomType.Lcz914,
+                Chance = 30
+            }
+        ];
 
         /// <summary>
         /// The <see cref="ZoneType"/> locations where the item is allowed to spawn.
-        /// If <see cref="Rooms"/> is empty, this parameter will be used.
+        /// If <see cref="DynamicSpawn"/> is empty, this parameter will be used.
         /// </summary>
         [Description("The zone(s) where the custom item can spawn.")]
         public List<ZoneType> Zones { get; set; } = new()

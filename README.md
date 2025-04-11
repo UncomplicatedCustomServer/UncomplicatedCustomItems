@@ -1,4 +1,4 @@
-<div align="center"><a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest"><img src="https://img.shields.io/github/v/release/UncomplicatedCustomServer/UncomplicatedCustomItems"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest"><img src="https://img.shields.io/github/downloads/UncomplicatedCustomServer/UncomplicatedCustomItems/total"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/pulls"><img src="https://img.shields.io/github/issues-pr/UncomplicatedCustomServer/UncomplicatedCustomItems"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/pulls"><img src="https://img.shields.io/github/issues-pr-closed/Mr-Baguetter/UncomplicatedCustomItems"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/commits/main/"><img src="https://badgen.net/github/commits/UncomplicatedCustomServer/UncomplicatedCustomItems/main">
+<div align="center"><a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest"><img src="https://img.shields.io/github/v/release/UncomplicatedCustomServer/UncomplicatedCustomItems"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest"><img src="https://img.shields.io/github/downloads/UncomplicatedCustomServer/UncomplicatedCustomItems/total"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/pulls"><img src="https://img.shields.io/github/issues-pr/UncomplicatedCustomServer/UncomplicatedCustomItems"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/pulls"><img src="https://img.shields.io/github/issues-pr-closed/UncomplicatedCustomServer/UncomplicatedCustomItems"></a> <a href="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/commits/main/"><img src="https://badgen.net/github/commits/UncomplicatedCustomServer/UncomplicatedCustomItems/main">
 
   <img src="https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/blob/074974d4c5f5455b15b425ba184b61e972873719/test_promo_banner.png">
   <i>Easy, fully configurable and customizable custom items for your SCP:SL Server!</i>
@@ -17,7 +17,7 @@
 You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins>description</ins> and many more things. 
 
 ## UCS Wiki
-Check out the [UCS Wiki](https://thaumielscpsl.site/ucs/wiki) for more information.
+Check out the [UCS Wiki](https://uci.thaumielscpsl.site/ucswiki) for more information.
 
 ## Features
 **UCI** has lots of features like:
