@@ -10,63 +10,73 @@ using Exiled.API.Features;
 using System.Linq;
 using System;
 using MEC;
+using UncomplicatedCustomItems.API.Features.Helper;
 
-[HarmonyPatch(typeof(PlayerHandlers), nameof(PlayerHandlers.GetStartingInventory))]
-public class CommonUtilitiesPatch
+namespace UncomplicatedCustomItems.Intergration
 {
-    [HarmonyPrefix]
-    public static void Prefix(RoleTypeId role, Player player)
+    [HarmonyPatch(typeof(PlayerHandlers), nameof(PlayerHandlers.GetStartingInventory))]
+    internal class CommonUtilitiesPatch
     {
-        var config = Common_Utilities.Plugin.Instance.Config;
-
-        for (int i = 0; i < config.StartingInventories[role].UsedSlots; i++)
+        [HarmonyPrefix]
+        public static void Prefix(RoleTypeId role, Player player)
         {
-            List<ItemChance> list2 = config.StartingInventories[role][i]
-                .Where(x =>
-                    player == null ||
-                    string.IsNullOrEmpty(x.Group) ||
-                    x.Group.Equals("none", StringComparison.OrdinalIgnoreCase) ||
-                    x.Group == player.Group.BadgeText)
-                .ToList();
-
-            double rolledChance = CalculateChance(list2);
-
-            foreach ((string item, double chance) in list2)
+            if (!Plugin.Instance.Config.EnableCommonUtilitiesIntergration)
             {
-                if (rolledChance <= chance)
+                LogManager.Warn("CommonUtilities Intergration disabled aborting CommonUtilities patch.");
+                return;
+            }
+            
+            var config = Common_Utilities.Plugin.Instance.Config;
+
+            for (int i = 0; i < config.StartingInventories[role].UsedSlots; i++)
+            {
+                List<ItemChance> list2 = config.StartingInventories[role][i]
+                    .Where(x =>
+                        player == null ||
+                        string.IsNullOrEmpty(x.Group) ||
+                        x.Group.Equals("none", StringComparison.OrdinalIgnoreCase) ||
+                        x.Group == player.Group.BadgeText)
+                    .ToList();
+
+                double rolledChance = CalculateChance(list2);
+
+                foreach ((string item, double chance) in list2)
                 {
-                    if (Enum.TryParse(item, true, out ItemType _))
-                        continue;
-
-                    if (Exiled.CustomItems.API.Features.CustomItem.TryGet(item, out _))
-                        continue;
-
-                    if (Utilities.TryGetCustomItemByName(item, out ICustomItem customItem))
+                    if (rolledChance <= chance)
                     {
-                        var instance = new CommonUtilitiesPatch();
-                        Timing.RunCoroutine(instance.ItemAddCoroutine(player, customItem));
-                        return;
-                    }
-                }
+                        if (Enum.TryParse(item, true, out ItemType _))
+                            continue;
 
-                if (config.AdditiveProbabilities)
-                    rolledChance -= chance;
+                        if (Exiled.CustomItems.API.Features.CustomItem.TryGet(item, out _))
+                            continue;
+
+                        if (Utilities.TryGetCustomItemByName(item, out ICustomItem customItem))
+                        {
+                            var instance = new CommonUtilitiesPatch();
+                            Timing.RunCoroutine(instance.ItemAddCoroutine(player, customItem));
+                            return;
+                        }
+                    }
+
+                    if (config.AdditiveProbabilities)
+                        rolledChance -= chance;
+                }
             }
         }
-    }
-    public IEnumerator<float> ItemAddCoroutine(Player player, ICustomItem CustomItem)
-    {
-        yield return Timing.WaitForSeconds(1);
-        new SummonedCustomItem(CustomItem, player);
-    }
+        public IEnumerator<float> ItemAddCoroutine(Player player, ICustomItem CustomItem)
+        {
+            yield return Timing.WaitForSeconds(1);
+            new SummonedCustomItem(CustomItem, player);
+        }
 
-    public static double CalculateChance(List<ItemChance> itemChances)
-    {
-        double rolledChance = Common_Utilities.Plugin.Random.NextDouble();
-        if (Common_Utilities.Plugin.Instance.Config.AdditiveProbabilities)
-            rolledChance *= itemChances.Sum(x => x.Chance);
-        else
-            rolledChance *= 100;
-        return rolledChance;
+        public static double CalculateChance(List<ItemChance> itemChances)
+        {
+            double rolledChance = Common_Utilities.Plugin.Random.NextDouble();
+            if (Common_Utilities.Plugin.Instance.Config.AdditiveProbabilities)
+                rolledChance *= itemChances.Sum(x => x.Chance);
+            else
+                rolledChance *= 100;
+            return rolledChance;
+        }
     }
 }

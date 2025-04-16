@@ -8,7 +8,7 @@ namespace UncomplicatedCustomItems
         public bool IsEnabled { get; set; } = true;
 
         [Description("Specifies whether developer (debug) mode is enabled.")]
-        public bool Debug { get; set; } = true;
+        public bool Debug { get; set; } = false;
 
         [Description("The hint message displayed whenever you pick up a custom item. %name% is replaced with the item's name, and %desc% with its description.")]
         public string PickedUpMessage { get; set; } = "You have picked up a %name% who's a %desc%";
@@ -36,5 +36,8 @@ namespace UncomplicatedCustomItems
 
         [Description("Allow server tracking? (This does nothing to your server it only allows us to view the amount of servers using the plugin)")]
         public bool ServerTracking { get; set; } = true;
+
+        [Description("Enables or disables the CommonUtilities intergration. (Set the item name in the CommonUtilities config to the customitem name)")]
+        public bool EnableCommonUtilitiesIntergration { get; set; } = false;
     }
 }

@@ -670,6 +670,8 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.Effect == null)
                 return;
+            if (ev.Player == null || ev.Player.CurrentItem == null)
+                return;
 
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
