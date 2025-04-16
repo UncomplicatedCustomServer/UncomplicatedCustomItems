@@ -13,9 +13,7 @@ using UnityEngine;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Map;
 using Light = Exiled.API.Features.Toys.Light;
-using Exiled.Events.EventArgs.Server;
 using Mirror;
-using Exiled.API.Features;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using CustomPlayerEffects;
@@ -35,13 +33,13 @@ namespace UncomplicatedCustomItems.Events
         public void OnHurt(HurtEventArgs ev)
         {
             LogManager.Debug("OnHurt event is being triggered");
-            if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem summonedCustomItem))
+            if (ev.Player is not null && ev.Attacker is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem))
             {
                 LogManager.Debug("Fuck all is being triggered");
                 summonedCustomItem.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 foreach (LifeStealSettings LifeStealSettings in summonedCustomItem.CustomItem.FlagSettings.LifeStealSettings)
                 {
-                    if (ev.Attacker.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<LifeSteal>())
+                    if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<LifeSteal>())
                     {
                         LogManager.Debug("LifeSteal custom flag is being triggered");
 
@@ -60,7 +58,7 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.IsAllowed)
                 return;
 
-            if (ev.Player is not null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<DoNotTriggerTeslaGates>())
+            if (ev.Player is not null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule<DoNotTriggerTeslaGates>())
                 ev.IsTriggerable = false;
             else return;
         }
@@ -69,7 +67,7 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.IsAllowed)
                 return;
 
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<InfiniteAmmo>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule<InfiniteAmmo>())
             {
                 if (ev.Firearm != null)
                 {
@@ -84,7 +82,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
-            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<CustomSound>())
+            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<CustomSound>())
             {
                 AudioApi AudioApi = new();
                 if (ev.Firearm != null)
@@ -97,7 +95,7 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnDieOnUseFlag(ShootingEventArgs ev)
         {
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<DieOnUse>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<DieOnUse>())
             {
                 if (ev.Item != null)
                 {
@@ -113,7 +111,7 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnItemUse(UsingItemCompletedEventArgs ev)
         {
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<DieOnUse>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule<DieOnUse>())
             {
                 if (ev.Item != null)
                 {
@@ -125,7 +123,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
-            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectWhenUsed>())
+            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectWhenUsed>())
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -171,7 +169,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem Customitem) && Customitem.HasModule<CustomSound>())
+            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.HasModule<CustomSound>())
             {
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
@@ -180,7 +178,7 @@ namespace UncomplicatedCustomItems.Events
                     AudioApi.PlayAudio(Customitem, ev.Player.Position);
                 }
             }
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customitem))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customitem))
             {
                 ISCP500Data SCP500Data = customitem.CustomItem.CustomData as ISCP500Data;
                 ISCP207Data SCP207Data = customitem.CustomItem.CustomData as ISCP207Data;
@@ -283,7 +281,7 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
                 }
             }
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem2))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem2))
             {
                 ISCP207Data SCP207Data = CustomItem2.CustomItem.CustomData as ISCP207Data;
                 if (ev.Item.Type == ItemType.SCP207 || ev.Item.Type == ItemType.AntiSCP207)
@@ -412,7 +410,7 @@ namespace UncomplicatedCustomItems.Events
         public void OnChangingAttachments(ChangingAttachmentsEventArgs ev)
         {
 
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<WorkstationBan>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule<WorkstationBan>())
             {
                 if (ev.Player != null)
                 {
@@ -429,7 +427,7 @@ namespace UncomplicatedCustomItems.Events
         public void OnWorkstationActivation(ActivatingWorkstationEventArgs ev)
         {
 
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<WorkstationBan>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule<WorkstationBan>())
             {
                 if (ev.Player != null)
                 {
@@ -460,12 +458,10 @@ namespace UncomplicatedCustomItems.Events
                         GameObject itemGameObject = ev.Pickup.Base.gameObject;
                         Color lightColor = Color.blue;
 
-                        var FlagSettings = SummonedCustomItem.GetAllFlagSettings();
-                        if (FlagSettings != null && FlagSettings.Count > 0)
+                        if (ItemGlowSettings != null)
                         {
-                            var flagSetting = FlagSettings.FirstOrDefault();
 
-                            if (flagSetting != null && !string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
+                            if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
                             {
                                 if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
                                 {
@@ -512,7 +508,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Firearm == null)
                 return;
 
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
             {
                 foreach (EffectSettings EffectSettings in customItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -557,7 +553,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<ExplosiveBullets>())
+            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<ExplosiveBullets>())
             {
                 foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in CustomItem.CustomItem.FlagSettings.ExplosiveBulletsSettings)
                 {
@@ -573,7 +569,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem Customitem) && Customitem.HasModule<ToolGun>())
+            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.HasModule<ToolGun>())
             {
                 ev.CanSpawnImpactEffects = false;
                 ev.CanHurt = false;
@@ -601,7 +597,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Firearm == null)
                 return;
 
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectShot>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectShot>())
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -650,7 +646,7 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnCharge(ChargingJailbirdEventArgs ev)
         {
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<NoCharge>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<NoCharge>())
             {
                 if (ev.Item != null)
                 {
@@ -658,7 +654,7 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player.CurrentItem = null;
                 }
             }
-            else if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
+            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
             {
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
@@ -675,7 +671,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Effect == null)
                 return;
 
-            if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
                 LogManager.Debug($"{ev.Player.DisplayNickname} is reciving {ev.Effect}.");
                 ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
