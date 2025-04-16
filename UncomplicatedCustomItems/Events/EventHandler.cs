@@ -30,7 +30,7 @@ namespace UncomplicatedCustomItems.Events
         
         public void OnHurt(HurtEventArgs ev)
         {
-            if (ev.Player == null || ev.Player.CurrentItem == null)
+            if (ev.Attacker == null || ev.Attacker.CurrentItem == null)
                 return;
 
             LogManager.Debug("OnHurt event is being triggered");
