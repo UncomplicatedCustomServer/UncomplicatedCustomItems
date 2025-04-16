@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Exiled.API.Enums;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Item;
@@ -8,7 +7,6 @@ using Exiled.Events.EventArgs.Player;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Extensions;
 using UnityEngine;
 using Exiled.API.Features.Pickups;
 using Exiled.Events.EventArgs.Map;
@@ -656,7 +654,7 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.Player == null || ev.Player.CurrentItem == null)
                 return;
-                
+
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<NoCharge>())
             {
                 if (ev.Item != null)
