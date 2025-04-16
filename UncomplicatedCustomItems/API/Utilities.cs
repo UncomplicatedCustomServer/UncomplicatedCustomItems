@@ -338,6 +338,18 @@ https://discord.com/channels/null";
         public static bool TryGetCustomItem(uint id, out ICustomItem item) => CustomItem.CustomItems.TryGetValue(id, out item);
 
         /// <summary>
+        /// Try to get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Name"/>
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="item"></param>
+        /// <returns><see cref="bool"/> true if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
+        public static bool TryGetCustomItemByName(string Name, out ICustomItem item)
+        {
+            item = CustomItem.List.FirstOrDefault(i => i.Name == Name);
+            return item != null;
+        }
+
+        /// <summary>
         /// Get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Id"/>
         /// </summary>
         /// <param name="id"></param>

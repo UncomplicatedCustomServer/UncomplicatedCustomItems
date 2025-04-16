@@ -503,6 +503,15 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnShot(ShotEventArgs ev)
         {
+            if (ev.Position == null)
+                return;
+
+            if (ev.Target == null)
+                return;
+
+            if (ev.Firearm == null)
+                return;
+
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
             {
                 foreach (EffectSettings EffectSettings in customItem.CustomItem.FlagSettings.EffectSettings)
@@ -583,6 +592,15 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnShot2(ShotEventArgs ev)
         {
+            if (ev.Position == null)
+                return;
+
+            if (ev.Target == null)
+                return;
+
+            if (ev.Firearm == null)
+                return;
+
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectShot>())
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
@@ -654,6 +672,9 @@ namespace UncomplicatedCustomItems.Events
         
         public void Receivingeffect(ReceivingEffectEventArgs ev)
         {
+            if (ev.Effect == null)
+                return;
+
             if (ev.Player != null && ev.Player.TryGetSummonedInstance(out SummonedCustomItem CustomItem))
             {
                 LogManager.Debug($"{ev.Player.DisplayNickname} is reciving {ev.Effect}.");

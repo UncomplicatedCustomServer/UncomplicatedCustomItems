@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
 
-        public override Version Version { get; } = new(3, 2, 0);
+        public override Version Version { get; } = new(3, 2, 1);
 
         internal Handler Handler;
 
@@ -129,6 +129,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ThrownProjectile -= Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;
             PlayerEvent.ThrownProjectile -= Handler.Onthrown;
+            MapEvent.PickupDestroyed -= Handler.OnPickup;
 
             //Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

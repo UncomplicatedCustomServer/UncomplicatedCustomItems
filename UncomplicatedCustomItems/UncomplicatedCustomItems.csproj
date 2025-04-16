@@ -80,6 +80,9 @@
     <Reference Include="CommandSystem.Core">
       <HintPath>$(EXILED_REFERENCES)\CommandSystem.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Common.Utilities">
+      <HintPath>..\..\..\..\Downloads\Common.Utilities.dll</HintPath>
+    </Reference>
     <Reference Include="DnsClient, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\DnsClient.dll</HintPath>
@@ -543,6 +546,7 @@
     <Compile Include="Extensions\ItemExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="Interfaces\IDynamicSpawn.cs" />
+    <Compile Include="Intergrations\CommonUtils.cs" />
     <Compile Include="Intergrations\ScriptedEvents.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
