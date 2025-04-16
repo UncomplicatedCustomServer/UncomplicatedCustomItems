@@ -32,6 +32,9 @@ namespace UncomplicatedCustomItems.Events
         
         public void OnHurt(HurtEventArgs ev)
         {
+            if (ev.Player == null || ev.Player.CurrentItem == null)
+                return;
+
             LogManager.Debug("OnHurt event is being triggered");
             if (ev.Player is not null && ev.Attacker is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem))
             {
@@ -56,6 +59,9 @@ namespace UncomplicatedCustomItems.Events
         public void OnTriggeringTesla(TriggeringTeslaEventArgs ev)
         {
             if (!ev.IsAllowed)
+                return;
+
+            if (ev.Player == null || ev.Player.CurrentItem == null)
                 return;
 
             if (ev.Player is not null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule<DoNotTriggerTeslaGates>())
@@ -426,6 +432,8 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnWorkstationActivation(ActivatingWorkstationEventArgs ev)
         {
+            if (ev.Player == null || ev.Player.CurrentItem == null)
+                return;
 
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule<WorkstationBan>())
             {
@@ -646,6 +654,9 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnCharge(ChargingJailbirdEventArgs ev)
         {
+            if (ev.Player == null || ev.Player.CurrentItem == null)
+                return;
+                
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<NoCharge>())
             {
                 if (ev.Item != null)
