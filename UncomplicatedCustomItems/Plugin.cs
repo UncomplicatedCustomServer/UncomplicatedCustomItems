@@ -11,6 +11,7 @@ using PlayerEvent = Exiled.Events.Handlers.Player;
 using ItemEvent = Exiled.Events.Handlers.Item;
 using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
+using UncomplicatedCustomItems.Integration;
 
 namespace UncomplicatedCustomItems
 {
@@ -25,7 +26,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
 
-        public override Version Version { get; } = new(3, 2, 1);
+        public override Version Version { get; } = new(3, 2, 2);
 
         internal Handler Handler;
 
@@ -65,6 +66,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
             PlayerEvent.ThrownProjectile += Handler.Onthrown;
+            ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
 
             //Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -137,11 +139,16 @@ namespace UncomplicatedCustomItems
             PlayerEvent.UsingItem -= Handler.Onuse;
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
             PlayerEvent.Shooting -= Handler.Onshooting;
+            ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
 
             Instance = null;
             Handler = null;
             base.OnDisabled();
 
+        }
+        public void OnFinishedLoadingPlugins()
+        {
+            CommonUtilitiesPatch.Initialize();
         }
     }
 }
