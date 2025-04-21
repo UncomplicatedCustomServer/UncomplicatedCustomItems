@@ -68,7 +68,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ThrownProjectile += Handler.Onthrown;
             ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
 
-            //Debugging Events
+            // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
             PlayerEvent.ItemAdded += Handler.Onpickup;
             PlayerEvent.UsingItem += Handler.Onuse;
@@ -99,9 +99,14 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll();
             FileConfig.LoadAll(Server.Port.ToString());
 
+            if (IsPrerelease)
+            {
+                Harmony.DEBUG = true;
+            }
+
             _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-            Harmony.DEBUG = true;
             _harmony.PatchAll();
+
             ServerConsole.ReloadServerName();
 
             base.OnEnabled();

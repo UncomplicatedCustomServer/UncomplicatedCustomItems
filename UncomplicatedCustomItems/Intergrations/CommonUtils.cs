@@ -13,6 +13,8 @@ using System.Reflection;
 using Exiled.Loader;
 using System.Collections;
 
+// This code is probably terrible. But it works ¯\_(ツ)_/¯
+
 namespace UncomplicatedCustomItems.Integration
 {
     internal class CommonUtilitiesPatch
