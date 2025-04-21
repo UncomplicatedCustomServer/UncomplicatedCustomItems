@@ -80,9 +80,6 @@
     <Reference Include="CommandSystem.Core">
       <HintPath>$(EXILED_REFERENCES)\CommandSystem.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Common.Utilities">
-      <HintPath>..\..\..\..\Downloads\Common.Utilities.dll</HintPath>
-    </Reference>
     <Reference Include="DnsClient, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\DnsClient.dll</HintPath>
