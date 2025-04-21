@@ -21,7 +21,7 @@ using MEC;
 
 namespace UncomplicatedCustomItems.Events
 {
-    public class EventHandler
+    internal class EventHandler
     {
         /// <summary>
         /// The Dictionary that handles lights spawned from the <see cref="OnDrop"/> method.
@@ -66,6 +66,7 @@ namespace UncomplicatedCustomItems.Events
                 ev.IsTriggerable = false;
             else return;
         }
+
         public void OnShooting(ShootingEventArgs ev)
         {
             if (!ev.IsAllowed)
@@ -86,7 +87,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
-            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<CustomSound>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<CustomSound>())
             {
                 AudioApi AudioApi = new();
                 if (ev.Firearm != null)
@@ -103,7 +104,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Item != null)
                 {
-                    ev.Player.Kill(DamageType.Custom);
+                    ev.Player.Kill($"Killed by {CustomItem.CustomItem.Name}");
                     LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed.");
                 }
                 else
@@ -119,7 +120,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Item != null)
                 {
-                    ev.Player.Kill(DamageType.Custom);
+                    ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
                     LogManager.Debug("DieOnUse triggered: user killed.");
                 }
                 else
@@ -127,7 +128,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
-            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectWhenUsed>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<EffectWhenUsed>())
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -173,7 +174,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.HasModule<CustomSound>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.HasModule<CustomSound>())
             {
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
@@ -351,6 +352,7 @@ namespace UncomplicatedCustomItems.Events
                 LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.Projectile.Serial}");
             }
         }
+
         /// <summary>
         /// A coroutine that destroys a pickup by its serial after a set amount of time.
         /// </summary>
@@ -508,9 +510,6 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Position == null)
                 return;
 
-            if (ev.Target == null)
-                return;
-
             if (ev.Firearm == null)
                 return;
 
@@ -559,7 +558,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<ExplosiveBullets>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<ExplosiveBullets>())
             {
                 foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in CustomItem.CustomItem.FlagSettings.ExplosiveBulletsSettings)
                 {
@@ -575,7 +574,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.HasModule<ToolGun>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.HasModule<ToolGun>())
             {
                 ev.CanSpawnImpactEffects = false;
                 ev.CanHurt = false;
@@ -663,7 +662,7 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player.CurrentItem = null;
                 }
             }
-            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())
             {
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
@@ -722,7 +721,7 @@ namespace UncomplicatedCustomItems.Events
             }
         }
 
-        //Debugging Events.
+        // Debugging Events.
         /// <summary>
         /// The debugging event for dropping a <see cref="Item"/>
         /// </summary>
