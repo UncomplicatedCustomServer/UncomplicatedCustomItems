@@ -1,4 +1,5 @@
 ﻿using Exiled.Loader;
+using System;
 using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -62,14 +63,14 @@ namespace UncomplicatedCustomItems.API.Features
                     if (!string.IsNullOrEmpty(AudioSettings.AudioPath))
                     {
                         LogManager.Debug($"Succesfully loaded audio path {AudioSettings.AudioPath}");
-                        AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{CustomItem.Serial}", onIntialCreation: (p) =>
+                        AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}", onIntialCreation: (p) =>
                         {
                             float maxDistance = AudioSettings.AudibleDistance ?? 1f;
                             Speaker speaker = p.AddSpeaker("Main", Coords, isSpatial: true, maxDistance: maxDistance);
                         });
                         float volume = Clamp(AudioSettings.SoundVolume, 1f, 100f);
-                        audioPlayer.AddClip($"sound_{CustomItem.Serial}", volume);
-                        AudioClipStorage.LoadClip(AudioSettings.AudioPath, $"sound_{CustomItem.Serial}");
+                        audioPlayer.AddClip($"sound_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}", volume);
+                        AudioClipStorage.LoadClip(AudioSettings.AudioPath, $"sound_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}");
                         LogManager.Debug($"Playing {Path.GetFileName(AudioSettings.AudioPath)}");
                         LogManager.Debug($"Audio should have been played.");
                     }
