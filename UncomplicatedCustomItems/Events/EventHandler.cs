@@ -664,7 +664,10 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item != null)
                 {
                     ev.IsAllowed = false;
-                    ev.Player.CurrentItem = null;
+                    Timing.CallDelayed(0.1f, () =>
+                    {
+                        ev.Player.CurrentItem = ev.Item;
+                    });
                 }
             }
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule<EffectWhenUsed>())

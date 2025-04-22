@@ -65,7 +65,6 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
-            PlayerEvent.ThrownProjectile += Handler.Onthrown;
             ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
 
             // Debugging Events
@@ -74,6 +73,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.UsingItem += Handler.Onuse;
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
             PlayerEvent.Shooting += Handler.Onshooting;
+            PlayerEvent.ThrownProjectile += Handler.Onthrown;
 
             LogManager.History.Clear();
 
@@ -135,16 +135,16 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile -= Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;
-            PlayerEvent.ThrownProjectile -= Handler.Onthrown;
+            ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
             MapEvent.PickupDestroyed -= Handler.OnPickup;
 
-            //Debugging Events
+            // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
             PlayerEvent.ItemAdded -= Handler.Onpickup;
             PlayerEvent.UsingItem -= Handler.Onuse;
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
             PlayerEvent.Shooting -= Handler.Onshooting;
-            ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
+            PlayerEvent.ThrownProjectile -= Handler.Onthrown;
 
             Instance = null;
             Handler = null;
