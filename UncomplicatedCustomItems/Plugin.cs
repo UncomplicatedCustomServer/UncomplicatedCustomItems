@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
 
-        public override Version Version { get; } = new(3, 2, 2);
+        public override Version Version { get; } = new(3, 2, 3);
 
         internal Handler Handler;
 
@@ -79,7 +79,7 @@ namespace UncomplicatedCustomItems
 
             LogManager.Info("===========================================");
             LogManager.Info(" Thanks for using UncomplicatedCustomItems");
-            LogManager.Info("    by SpGerg, FoxWorn & Mr. Baguetter");
+            LogManager.Info($"    by {Author}");
             LogManager.Info("===========================================");
             LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
