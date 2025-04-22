@@ -848,7 +848,7 @@ namespace UncomplicatedCustomItems.API.Features
                 Owner.ShowHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
         }
 
-        internal bool HandleCustomAction(InventorySystem.Items.Usables.Consumable item)
+        internal bool HandleCustomAction(Item item)
         {
             if (Owner is null) 
                 return false;
@@ -875,7 +875,7 @@ namespace UncomplicatedCustomItems.API.Features
                 // Runs also the event as it gets suppressed
                 HandleEvent(Owner, ItemEvents.Use);
                 if (!CustomItem.Reusable)
-                    Item.Get(item).Destroy();
+                    Item.Get(item.Base).Destroy();
 
                 return true;
             }

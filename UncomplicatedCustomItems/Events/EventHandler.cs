@@ -305,7 +305,13 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else return;
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem SummonedCustomItem))
+            {
+                if (SummonedCustomItem.Item.Type == ItemType.Adrenaline || SummonedCustomItem.Item.Type == ItemType.Medkit || SummonedCustomItem.Item.Type == ItemType.Painkillers)
+                {
+                    SummonedCustomItem.HandleCustomAction(SummonedCustomItem.Item);
+                }
+            }
         }
 
         public void GrenadeExploding(ExplodingGrenadeEventArgs ev)
