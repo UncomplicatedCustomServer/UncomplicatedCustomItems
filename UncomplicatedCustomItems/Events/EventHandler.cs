@@ -474,7 +474,6 @@ namespace UncomplicatedCustomItems.Events
 
                         if (ItemGlowSettings != null)
                         {
-
                             if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
                             {
                                 if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
@@ -741,6 +740,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is dropping {CustomItem.CustomItem.Name}");
             }
+            else return;
         }
         /// <summary>
         /// The debugging event for adding a <see cref="Item"/>
@@ -755,6 +755,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is adding {CustomItem.CustomItem.Name}");
             }
+            else return;
         }
         /// <summary>
         /// The debugging event for using a <see cref="Item"/>
@@ -769,6 +770,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is using {CustomItem.CustomItem.Name}");
             }
+            else return;
         }
         /// <summary>
         /// The debugging event for reloading a <see cref="Firearm"/>
@@ -783,6 +785,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is reloading {CustomItem.CustomItem.Name}");
             }
+            else return;
         }
         /// <summary>
         /// The debugging event for shooting a <see cref="Firearm"/>
@@ -798,6 +801,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} is shooting {CustomItem.CustomItem.Name}");
             }
+            else return;
         }
         /// <summary>
         /// The debugging event for throwing a <see cref="Throwable"/>
@@ -813,6 +817,7 @@ namespace UncomplicatedCustomItems.Events
                 if (ev.Item.Serial == CustomItem.Serial)
                     LogManager.Silent($"{ev.Player.Nickname} has thrown {CustomItem.CustomItem.Name}");
             }
+            else return;
         }
 
 

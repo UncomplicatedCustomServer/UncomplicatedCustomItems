@@ -37,6 +37,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ChangingRole -= RoleChangeEvent;
             EventSource.ThrownProjectile -= ThrownProjectile;
             EventSource.Shot -= Damaged;
+            EventSource.TogglingNoClip -= NoclipButton;
         }
 
         public static void Damaged(ShotEventArgs ev)
@@ -46,7 +47,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 IWeaponData WeaponData = CustomItem.CustomItem.CustomData as IWeaponData;
                 if (ItemExtensions.GetCategory(CustomItem.Item.Type) == ItemCategory.Firearm)
                 {
-                    if (WeaponData.EnableFriendlyFire == true)
+                    if (WeaponData.EnableFriendlyFire)
                     {
                         if (ev.Target != null)
                         {
@@ -58,15 +59,14 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
         }
 
-
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
-            {
-                Item.OnDrop(ev);
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
+                return;
+
+                Item?.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
                 Item?.UnloadItemFlags();
-            }
         }
 
         /// <summary>
@@ -121,6 +121,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             SummonedCustomItem.Register(item.CustomItem.FlagSettings);
             SummonedCustomItem.GetAllFlagSettings();
         }
+
         private static void ChangingItemInHand(ChangingItemEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
@@ -134,9 +135,16 @@ namespace UncomplicatedCustomItems.Events.Internal
             item.UnloadItemFlags();
             SummonedCustomItem.ClearAllFlagSettings();
         }
+
         private static void DeathEvent(DyingEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
+                return;
+
+            if (!ev.Player.IsConnected)
+                return;
+
+            if (ev.Player == null)
                 return;
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
@@ -146,9 +154,13 @@ namespace UncomplicatedCustomItems.Events.Internal
             item.UnloadItemFlags();
             SummonedCustomItem.ClearAllFlagSettings();
         }
+
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
+                return;
+
+            if (!ev.Player.IsConnected)
                 return;
                 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
@@ -158,15 +170,16 @@ namespace UncomplicatedCustomItems.Events.Internal
             item.UnloadItemFlags();
             SummonedCustomItem.ClearAllFlagSettings();
         }
+
         private static void ThrownProjectile(ThrownProjectileEventArgs ev)
         {
-
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
             item?.ResetBadge(ev.Player);
             SummonedCustomItem.ClearAllFlagSettings();
         }
+
         private static void NoclipButton(TogglingNoClipEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
@@ -176,6 +189,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             Item?.HandleEvent(ev.Player, ItemEvents.Noclip);
+
             if (Plugin.Instance.Config.Debug == true)
             {
                 if (ev.Player.RemoteAdminPermissions == PlayerPermissions.PlayersManagement)
