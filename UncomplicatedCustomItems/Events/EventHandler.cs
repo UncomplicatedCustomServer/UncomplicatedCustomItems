@@ -332,7 +332,7 @@ namespace UncomplicatedCustomItems.Events
                             Scp244Pickup.MaxDiameter = 0.1f;
                             Scp244Pickup.State = Scp244State.Active;
 
-                            if (!SpawnItemWhenDetonatedSettings.Pickupable ?? false)
+                            if (!SpawnItemWhenDetonatedSettings.Pickupable ?? true)
                             {
                                 Scp244Pickup.Weight = 5000f;
                             }
