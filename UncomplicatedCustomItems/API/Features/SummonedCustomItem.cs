@@ -570,7 +570,6 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = null;
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
-            GetAllFlagSettings();
             SetProperties();
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
@@ -585,7 +584,6 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = dropped.Pickup;
             Item = null;
             Owner = null;
-            ClearAllFlagSettings();
             SaveProperties();
             Serial = Pickup.Serial;
             HandleEvent(dropped.Player, ItemEvents.Drop);
@@ -654,7 +652,7 @@ namespace UncomplicatedCustomItems.API.Features
         public void UnloadItemFlags()
         {
             LogManager.Debug("Unload Item Flags Triggered");
-            _customModules.Clear(); 
+            _customModules?.Clear(); 
             LogManager.Debug("Item Flags Cleared");
         }
 
@@ -695,7 +693,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
+        public bool HasModule<T>() where T : CustomModule => _customModules?.Any(cm => cm.GetType() == typeof(T)) ?? false;
 
         /// <summary>
         /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomItem"/> instance

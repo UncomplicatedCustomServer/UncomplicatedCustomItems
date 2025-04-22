@@ -59,15 +59,14 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
         }
 
-
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
-            {
-                Item.OnDrop(ev);
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
+                return;
+
+                Item?.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
                 Item?.UnloadItemFlags();
-            }
         }
 
         /// <summary>
@@ -190,6 +189,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             Item?.HandleEvent(ev.Player, ItemEvents.Noclip);
+
             if (Plugin.Instance.Config.Debug == true)
             {
                 if (ev.Player.RemoteAdminPermissions == PlayerPermissions.PlayersManagement)
