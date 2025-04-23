@@ -104,12 +104,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 }
                 if (NewItems > 0)
                 {
-                    response = $"Reloaded {CustomItem.List.Count} Added {NewItems} New Custom items.";
+                    response = $"Reloaded {CustomItem.List.Count} Added {NewItems} New Custom items. \n Amount of unregistered Custom items: {CustomItem.UnregisteredList.Count}";
                     return true;
                 }
                 else
                 {
-                    response = $"Reloaded {CustomItem.List.Count} Custom items.";
+                    response = $"Reloaded {CustomItem.List.Count} Custom items. \n Amount of unregistered Custom items: {CustomItem.UnregisteredList.Count}";
                     return true;
                 }
             }

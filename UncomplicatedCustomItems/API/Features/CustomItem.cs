@@ -18,7 +18,13 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public static List<ICustomItem> List => CustomItems.Values.ToList();
 
+        /// <summary>
+        /// Gets a list of every unregistered <see cref="ICustomItem"/>
+        /// </summary>
+        public static List<ICustomItem> UnregisteredList => UnregisteredCustomItems.Values.ToList();
+
         internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = new();
+        internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = new();
 
         /// <summary>
         /// Register a new <see cref="ICustomItem"/> inside the plugin
@@ -29,6 +35,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (!Utilities.CustomItemValidator(item, out string error))
             {
                 LogManager.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
+                UnregisteredCustomItems.Add(item.Id, item);
                 return;
             }
             CustomItems.Add(item.Id, item);
