@@ -15,6 +15,7 @@ using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
+using UncomplicatedCustomItems.Events;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -763,12 +764,14 @@ namespace UncomplicatedCustomItems.API.Features
                             .Replace("{p_health}", player.Health.ToString())
                             .Replace("{p_zone}", player.Zone.ToString())
                             .Replace("{p_room}", player.CurrentRoom.ToString())
-                            .Replace("{p_rotation}", player.Rotation.ToString());
+                            .Replace("{p_rotation}", player.Rotation.ToString())
+                            .Replace("{pj_pos}", Events.EventHandler.DetonationPosition.ToString());
 
                         if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
                             cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
                             cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
-                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}"))
+                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}") ||
+                            cmd.Contains("{pj_pos}"))
                         {
                             Server.ExecuteCommand(processedCommand, player.Sender);
                         }
