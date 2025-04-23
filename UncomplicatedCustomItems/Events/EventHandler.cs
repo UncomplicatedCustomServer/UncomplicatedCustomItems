@@ -397,6 +397,10 @@ namespace UncomplicatedCustomItems.Events
                             break;
                         }
                     }
+                    else if (SwitchRoleOnUseSettings.RoleType != "ECR" || SwitchRoleOnUseSettings.RoleType != "UCR" || SwitchRoleOnUseSettings.RoleType != "Normal")
+                    {
+                        LogManager.Warn($"The role_type field in {CustomItem3.CustomItem.Name} is currently {SwitchRoleOnUseSettings.RoleType} and should be 'Normal', 'UCR', or 'ECR'");
+                    }
                 }
             }
         }
