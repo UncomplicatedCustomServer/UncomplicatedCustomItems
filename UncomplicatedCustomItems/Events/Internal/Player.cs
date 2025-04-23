@@ -68,7 +68,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Item))
                 return;
 
-            Item?.HandleEvent(ev.Player, ItemEvents.Detonation);
+            Item?.HandleEvent(ev.Player, ItemEvents.Detonation); // Untested
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)

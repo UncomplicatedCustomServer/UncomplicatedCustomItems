@@ -765,7 +765,7 @@ namespace UncomplicatedCustomItems.API.Features
                             .Replace("{p_zone}", player.Zone.ToString())
                             .Replace("{p_room}", player.CurrentRoom.ToString())
                             .Replace("{p_rotation}", player.Rotation.ToString())
-                            .Replace("{pj_pos}", Events.EventHandler.DetonationPosition.ToString());
+                            .Replace("{pj_pos}", Plugin.Instance.Handler.DetonationPosition.ToString());
 
                         if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
                             cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||

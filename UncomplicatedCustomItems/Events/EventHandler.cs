@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.Events
         /// The Dictionary that handles lights spawned from the <see cref="OnDrop"/> method.
         /// </summary>
         public Dictionary<Pickup, Light> ActiveLights = [];
-        public static Vector3 DetonationPosition { get; set; }
+        public Vector3 DetonationPosition { get; set; }
         public void OnHurt(HurtEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null)
@@ -433,7 +433,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the Cluster flag. Serial: {ev.Projectile.Serial}");
             }
-            DetonationPosition = ev.Position;
+            DetonationPosition = ev.Position; // Untested
         }
 
         /// <summary>
