@@ -149,5 +149,16 @@ namespace UncomplicatedCustomItems.API.Features
                 AmountToSpawn = 6
             }
         ];
+        public List<SwitchRoleOnUseSettings?> SwitchRoleOnUseSettings { get; set; } =
+        [
+            new()
+            {
+                RoleType = "Normal",
+                RoleId = new(),
+                Delay = 6,
+                SpawnFlags = PlayerRoles.RoleSpawnFlags.None,
+                KeepLocation = true
+            }
+        ];
     }
 }

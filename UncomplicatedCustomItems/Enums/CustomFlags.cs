@@ -25,5 +25,6 @@ namespace UncomplicatedCustomItems.Enums
         ToolGun = 1 << 13,
         SpawnItemWhenDetonated = 1 << 14,
         Cluster = 1 << 15,
+        SwitchRoleOnUse = 1 << 16,
     }
 }

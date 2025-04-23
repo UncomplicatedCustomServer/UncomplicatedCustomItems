@@ -42,5 +42,6 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract List<ExplosiveBulletsSettings?> ExplosiveBulletsSettings { get; set; }
         public abstract List<SpawnItemWhenDetonatedSettings?> SpawnItemWhenDetonatedSettings { get; set; }
         public abstract List<ClusterSettings?> ClusterSettings { get; set; }
+        public abstract List<SwitchRoleOnUseSettings?> SwitchRoleOnUseSettings { get; set; }
     }
 }
