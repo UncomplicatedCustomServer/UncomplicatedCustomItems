@@ -319,6 +319,12 @@ namespace UncomplicatedCustomItems.Events
             {
                 foreach (SwitchRoleOnUseSettings SwitchRoleOnUseSettings in CustomItem3.CustomItem.FlagSettings.SwitchRoleOnUseSettings)
                 {
+                    if (SwitchRoleOnUseSettings.RoleId == null || SwitchRoleOnUseSettings.RoleType == null)
+                    {
+                        LogManager.Warn($"{CustomItem3.CustomItem.Name} field role_id or role_type is null aborting...");
+                        break;
+                    }
+                    
                     if (SwitchRoleOnUseSettings.RoleType == "ECR")
                     {
                         if (CustomRole.TryGet((uint)SwitchRoleOnUseSettings.RoleId, out CustomRole? ECRRole))
