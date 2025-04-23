@@ -24,5 +24,6 @@ namespace UncomplicatedCustomItems.Enums
         ExplosiveBullets = 1 << 12,
         ToolGun = 1 << 13,
         SpawnItemWhenDetonated = 1 << 14,
+        Cluster = 1 << 15,
     }
 }

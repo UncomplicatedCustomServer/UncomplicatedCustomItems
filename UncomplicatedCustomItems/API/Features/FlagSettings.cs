@@ -141,5 +141,13 @@ namespace UncomplicatedCustomItems.API.Features
                 TimeTillDespawn = 6f
             }
         ];
+        public List<ClusterSettings?> ClusterSettings { get; set; } =
+        [
+            new()
+            {
+                ItemToSpawn = new(),
+                AmountToSpawn = 6
+            }
+        ];
     }
 }

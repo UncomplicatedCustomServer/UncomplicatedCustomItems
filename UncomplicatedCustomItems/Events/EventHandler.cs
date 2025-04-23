@@ -365,6 +365,74 @@ namespace UncomplicatedCustomItems.Events
             {
                 LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.Projectile.Serial}");
             }
+            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Customitem) && CustomItem.HasModule<Cluster>())
+            {
+                LogManager.Debug($"{ev.Projectile.Type} is a CustomItem");
+                foreach (ClusterSettings ClusterSettings in CustomItem.CustomItem.FlagSettings.ClusterSettings)
+                {
+                    Vector3 Scale = CustomItem.CustomItem.Scale * 0.75f;
+                    if (ClusterSettings.ItemToSpawn == ItemType.GrenadeHE)
+                    {
+                        Timing.CallDelayed(0.1f, () =>
+                        {
+                            ExplosiveGrenade Grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
+                            for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
+                            {
+                                Grenade.Scale = Scale;
+                                Grenade.FuseTime = ClusterSettings.FuseTime ?? 5f;
+                                Grenade.ScpDamageMultiplier = ClusterSettings.ScpDamageMultiplier ?? 1f;
+                                Grenade.ChangeItemOwner(null, ev.Player);
+                                Grenade.SpawnActive(ClusterOffset(ev.Position), owner: ev.Player);
+                            }
+                        });
+                    }
+                    else if (ClusterSettings.ItemToSpawn == ItemType.GrenadeFlash)
+                    {
+                        Timing.CallDelayed(0.1f, () =>
+                        {
+                            FlashGrenade FlashGrenade = (FlashGrenade)Item.Create(ItemType.GrenadeFlash);
+                            for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
+                            {
+                                FlashGrenade.FuseTime = ClusterSettings.FuseTime ?? 5f;
+                                FlashGrenade.Scale = Scale;
+                                FlashGrenade.ChangeItemOwner(null, ev.Player);
+                                FlashGrenade.SpawnActive(ClusterOffset(ev.Position), owner: ev.Player);
+                            }
+                        });
+                    }
+                    else if (ClusterSettings.ItemToSpawn == ItemType.SCP018)
+                    {
+                        Timing.CallDelayed(0.1f, () =>
+                        {
+                            Scp018 SCP018 = (Scp018)Item.Create(ItemType.GrenadeFlash);
+                            for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
+                            {
+                                SCP018.FuseTime = ClusterSettings.FuseTime ?? 5f;
+                                SCP018.Scale = Scale;
+                                SCP018.ChangeItemOwner(null, ev.Player);
+                                SCP018.SpawnActive(ClusterOffset(ev.Position), owner: ev.Player);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        Timing.CallDelayed(0.1f, () =>
+                        {
+                            for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
+                            {
+                                Pickup Pickup = Pickup.Create(ClusterSettings.ItemToSpawn);
+                                Pickup.Scale = Scale;
+                                Pickup.PreviousOwner = ev.Player;
+                                Pickup.Spawn(ClusterOffset(ev.Position), previousOwner: ev.Player);
+                            }
+                        });
+                    }
+                }
+            }
+            else
+            {
+                LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the Cluster flag. Serial: {ev.Projectile.Serial}");
+            }
         }
 
         /// <summary>
@@ -386,10 +454,8 @@ namespace UncomplicatedCustomItems.Events
                 {
                     if (ev.Item != null)
                     {
-
                         if (EffectSettings.EffectEvent != null)
                         {
-
                             if (EffectSettings.EffectEvent == "EffectWhenUsed")
                             {
                                 if (EffectSettings.Effect == null)
@@ -857,6 +923,14 @@ namespace UncomplicatedCustomItems.Events
                 return;
             }
 
+        }
+        private Vector3 ClusterOffset(Vector3 position)
+        {
+            System.Random random = new System.Random();
+            float x = position.x - 1 + ((float)random.NextDouble() * random.Next(0, 3));
+            float y = position.y;
+            float z = position.z - 1 + ((float)random.NextDouble() * random.Next(0, 3));
+            return new Vector3(x, y, z);
         }
     }
 }

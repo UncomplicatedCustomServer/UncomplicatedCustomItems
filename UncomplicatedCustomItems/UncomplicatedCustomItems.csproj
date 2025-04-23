@@ -473,6 +473,7 @@
   <ItemGroup>
     <Compile Include="API\Features\AudioApi.cs" />
     <Compile Include="API\Features\BadgeManager.cs" />
+    <Compile Include="API\Features\CustomModules\Cluster.cs" />
     <Compile Include="API\Features\CustomModules\CoroutineModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomModule.cs" />
     <Compile Include="API\Features\CustomModules\CustomSound.cs" />
@@ -490,6 +491,7 @@
     <Compile Include="API\Features\CustomModules\EffectWhenEquiped.cs" />
     <Compile Include="API\Features\CustomModules\NoCharge.cs" />
     <Compile Include="API\Features\DynamicSpawn.cs" />
+    <Compile Include="API\Features\FlagSettings\ClusterSettings.cs" />
     <Compile Include="API\Features\FlagSettings\SpawnItemWhenDetonatedSettings.cs" />
     <Compile Include="API\Features\FlagSettings\EffectSettings.cs" />
     <Compile Include="API\Features\FlagSettings\AudioSettings.cs" />
@@ -542,9 +544,9 @@
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ItemExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
+    <Compile Include="Interfaces\FlagSettings\IClusterSettings.cs" />
     <Compile Include="Interfaces\IDynamicSpawn.cs" />
     <Compile Include="Intergrations\CommonUtils.cs" />
-    <Compile Include="Intergrations\ScriptedEvents.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
     <Compile Include="Interfaces\ICustomItem.cs" />
