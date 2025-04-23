@@ -346,7 +346,7 @@ namespace UncomplicatedCustomItems.Events
                         }
                         else
                         {
-                            LogManager.Debug($"{SwitchRoleOnUseSettings.RoleId} Is not a ECR role");
+                            LogManager.Warn($"{SwitchRoleOnUseSettings.RoleId} Is not a ECR role");
                         }
                     }
                     else if (SwitchRoleOnUseSettings.RoleType == "UCR")
@@ -376,7 +376,7 @@ namespace UncomplicatedCustomItems.Events
                         }
                         else
                         {
-                            LogManager.Debug($"{SwitchRoleOnUseSettings.RoleId} Is not a UCR role");
+                            LogManager.Warn($"{SwitchRoleOnUseSettings.RoleId} Is not a UCR role");
                         }
                     }
                     else if (SwitchRoleOnUseSettings.RoleType == "Normal")
