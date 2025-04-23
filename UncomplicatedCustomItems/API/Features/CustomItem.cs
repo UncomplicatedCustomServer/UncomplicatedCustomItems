@@ -54,8 +54,11 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="item"></param>
         public static void Unregister(uint item)
         {
-            if (CustomItems.ContainsKey(item))
+            if (CustomItems.ContainsKey(item) || UnregisteredCustomItems.ContainsKey(item))
+            {
                 CustomItems.Remove(item);
+                UnregisteredCustomItems.Remove(item);
+            }
         }
 
         /// <summary>
