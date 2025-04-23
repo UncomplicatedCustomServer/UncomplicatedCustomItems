@@ -39,8 +39,6 @@ namespace UncomplicatedCustomItems.Events
             LogManager.Debug("OnHurt event is being triggered");
             if (ev.Player is not null && ev.Attacker is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem))
             {
-                LogManager.Debug("Fuck all is being triggered");
-                summonedCustomItem.LastDamageTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 foreach (LifeStealSettings LifeStealSettings in summonedCustomItem.CustomItem.FlagSettings.LifeStealSettings)
                 {
                     if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule<LifeSteal>())

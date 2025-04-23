@@ -94,8 +94,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 CustomModule.Load((CustomFlags)Item.CustomItem.CustomFlags, Item);
                 Item.ReloadItemFlags();
                 Item.LoadItemFlags();
-                SummonedCustomItem.Register(Item.CustomItem.FlagSettings);
-                SummonedCustomItem.GetAllFlagSettings();
             }
         }
 
@@ -111,7 +109,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             Item?.ResetBadge(ev.Player);
             Item.UnloadItemFlags();
-            SummonedCustomItem.ClearAllFlagSettings();
 
             if (Item.CustomItem.Reusable)
                 ev.IsAllowed = false;
@@ -130,8 +127,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             CustomModule.Load((CustomFlags)item.CustomItem.CustomFlags, item);
             item.ReloadItemFlags();
             item.LoadItemFlags();
-            SummonedCustomItem.Register(item.CustomItem.FlagSettings);
-            SummonedCustomItem.GetAllFlagSettings();
         }
 
         private static void ChangingItemInHand(ChangingItemEventArgs ev)
@@ -145,7 +140,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             item.ResetBadge(ev.Player);
             item.ReloadItemFlags();
             item.UnloadItemFlags();
-            SummonedCustomItem.ClearAllFlagSettings();
         }
 
         private static void DeathEvent(DyingEventArgs ev)
@@ -164,7 +158,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item?.ResetBadge(ev.Player);
             item.UnloadItemFlags();
-            SummonedCustomItem.ClearAllFlagSettings();
         }
 
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)
@@ -180,7 +173,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item?.ResetBadge(ev.Player);
             item.UnloadItemFlags();
-            SummonedCustomItem.ClearAllFlagSettings();
         }
 
         private static void ThrownProjectile(ThrownProjectileEventArgs ev)
@@ -189,7 +181,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            SummonedCustomItem.ClearAllFlagSettings();
         }
 
         private static void NoclipButton(TogglingNoClipEventArgs ev)

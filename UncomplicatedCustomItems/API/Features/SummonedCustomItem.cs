@@ -15,7 +15,6 @@ using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
-using UncomplicatedCustomItems.Events;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -48,65 +47,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
-        
-        internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
-
-        /// <summary>
-        /// Gets the badge of the player if it has one
-        /// </summary>
-        public Triplet<string, string, bool>? Badge { get; private set; }
-
-        public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
 
         private List<ICustomModule> _customModules { get; set; }
-
-        /// <summary>
-        /// List of all flag settings.
-        /// </summary>
-        public static readonly List<IFlagSettings> _flagSettings = new();
-
-        /// <summary>
-        /// Registers flag setting(s).
-        /// <param name="flagSettings"></param>
-        /// </summary>
-        public static void Register(IFlagSettings flagSettings)
-        {
-            if (flagSettings == null)
-                throw new ArgumentNullException(nameof(flagSettings));
-
-            if (!_flagSettings.Contains(flagSettings))
-            {
-                _flagSettings.Add(flagSettings);
-            }
-            LogManager.Debug($"added {string.Join(", ", _flagSettings)}");
-        }
-
-        /// <summary>
-        /// Unregisters a flag setting.
-        /// <param name="flagSettings"></param>
-        /// </summary>
-        public static bool Unregister(IFlagSettings flagSettings)
-        {
-            return _flagSettings.Remove(flagSettings);
-        }
-
-        /// <summary>
-        /// Retrieves all loaded flag settings and returns them as a read-only list.
-        /// </summary>
-        /// <returns>A read-only list of flag settings.</returns>
-        public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
-        {
-            LogManager.Debug("Retrieving all loaded Flag Settings");
-
-            return _flagSettings.AsReadOnly();
-        }
-        /// <summary>
-        /// Clears all flag settings
-        /// </summary>
-        public static void ClearAllFlagSettings()
-        {
-            _flagSettings.Clear();
-        }
 
         /// <summary>
         /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
@@ -150,11 +92,6 @@ namespace UncomplicatedCustomItems.API.Features
         public bool IsPickup => Pickup is not null;
 
         /// <summary>
-        /// Time since the last time a <see cref="Player"/> was damaged.
-        /// </summary>
-        public long LastDamageTime { get; internal set; }
-
-        /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
@@ -168,7 +105,6 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
-            GetAllFlagSettings();
             SetProperties();
             List.Add(this);
         }
