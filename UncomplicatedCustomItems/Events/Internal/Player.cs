@@ -7,6 +7,8 @@ using UncomplicatedCustomItems.Enums;
 using Exiled.API.Extensions;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Exiled.API.Enums;
+using MapEventSource = Exiled.Events.Handlers.Map;
+using Exiled.Events.EventArgs.Map;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -24,6 +26,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ChangingRole += RoleChangeEvent;
             EventSource.ThrownProjectile += ThrownProjectile;
             EventSource.Shot += Damaged;
+            MapEventSource.ExplodingGrenade += GrenadeExploded;
         }
         // EventSource.EVENT -= EVENTNAME 
         public static void Unregister()
@@ -38,6 +41,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ThrownProjectile -= ThrownProjectile;
             EventSource.Shot -= Damaged;
             EventSource.TogglingNoClip -= NoclipButton;
+            MapEventSource.ExplodingGrenade -= GrenadeExploded;
         }
 
         public static void Damaged(ShotEventArgs ev)
@@ -57,6 +61,14 @@ namespace UncomplicatedCustomItems.Events.Internal
                     }
                 }
             }
+        }
+
+        private static void GrenadeExploded(ExplodingGrenadeEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Item))
+                return;
+
+            Item?.HandleEvent(ev.Player, ItemEvents.Detonation);
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
