@@ -21,6 +21,7 @@ using MEC;
 using Exiled.CustomRoles.API.Features;
 using UncomplicatedCustomItems.Integrations;
 using PlayerRoles;
+using UncomplicatedCustomItems.Enums;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -313,7 +314,7 @@ namespace UncomplicatedCustomItems.Events
                     SummonedCustomItem.HandleCustomAction(SummonedCustomItem.Item);
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem3) && CustomItem3.HasModule<SwitchRoleOnUse>())
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem3) && CustomItem3.CustomItem.CustomFlags.HasValue && CustomItem3.CustomItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse)) // Testing a new system for CustomFlags. Hopefully this will fix some bugs
             {
                 foreach (SwitchRoleOnUseSettings SwitchRoleOnUseSettings in CustomItem3.CustomItem.FlagSettings.SwitchRoleOnUseSettings)
                 {

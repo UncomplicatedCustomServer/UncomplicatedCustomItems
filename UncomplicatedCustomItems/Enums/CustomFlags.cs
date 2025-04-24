@@ -10,6 +10,7 @@ namespace UncomplicatedCustomItems.Enums
     {
         NotExecutable = -1,
         None = 1,
+        Custom = 1 << 99, // This should only be used if your coding your own CustomFlag
         DoNotTriggerTeslaGates = 1 << 1,
         LifeSteal = 1 << 2,
         InfiniteAmmo = 1 << 3,

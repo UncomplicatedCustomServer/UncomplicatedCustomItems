@@ -543,6 +543,7 @@
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
+    <Compile Include="Extensions\CustomFlagsExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ItemExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
