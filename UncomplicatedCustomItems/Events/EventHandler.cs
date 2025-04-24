@@ -427,11 +427,11 @@ namespace UncomplicatedCustomItems.Events
                             Scp244Pickup.MaxDiameter = 0.1f;
                             Scp244Pickup.State = Scp244State.Active;
 
-                            if (!SpawnItemWhenDetonatedSettings.Pickupable ?? true)
+                            if (!SpawnItemWhenDetonatedSettings.Pickupable ?? false)
                             {
                                 Scp244Pickup.Weight = 5000f;
                             }
-                            if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null)
+                            if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
                                 Timing.RunCoroutine(TimeTillDespawnCoroutine(Scp244Pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
@@ -447,7 +447,7 @@ namespace UncomplicatedCustomItems.Events
                             {
                                 Pickup.Weight = 5000f;
                             }
-                            if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null)
+                            if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
                                 Timing.RunCoroutine(TimeTillDespawnCoroutine(ev.Projectile.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
@@ -538,8 +538,11 @@ namespace UncomplicatedCustomItems.Events
         {
             yield return Timing.WaitForSeconds(DespawnTime);
             Pickup Pickup = Pickup.Get(Serial);
-            Pickup.Destroy();
-            LogManager.Debug($"Destroyed pickup. Type: {Pickup.Type} Previous owner: {Pickup.PreviousOwner} Serial: {Pickup.Serial}");
+            if (Pickup != null)
+            {
+                Pickup.Destroy();
+                LogManager.Debug($"Destroyed pickup. Type: {Pickup.Type} Previous owner: {Pickup.PreviousOwner} Serial: {Pickup.Serial}");
+            }
         }
 
         public void ThrownProjectile(ThrownProjectileEventArgs ev)
