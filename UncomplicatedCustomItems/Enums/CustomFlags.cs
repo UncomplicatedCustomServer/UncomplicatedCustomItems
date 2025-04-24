@@ -8,7 +8,7 @@ namespace UncomplicatedCustomItems.Enums
     [Flags]
     public enum CustomFlags : long
     {
-        // CustomFlags added via CustomFlagsExtensions should use 49 onwards
+        // CustomFlags added via CustomFlagsExtensions should use 49 to 62
         None = 0,
         Custom = 1L << 48, // This should only be used if your coding your own CustomFlag
         DoNotTriggerTeslaGates = 1L << 1,

@@ -7,7 +7,6 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Exiled.API.Enums;
 using MapEventSource = Exiled.Events.Handlers.Map;
 using Exiled.Events.EventArgs.Map;
-using UncomplicatedCustomItems.API.Features.Helper;
 using Exiled.API.Features.Items;
 
 namespace UncomplicatedCustomItems.Events.Internal
