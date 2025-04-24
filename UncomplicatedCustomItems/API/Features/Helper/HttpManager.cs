@@ -250,7 +250,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 #nullable enable
         internal async Task<Tuple<HttpStatusCode, string?>> VersionInfo()
         {
-            HttpResponseMessage message = await HttpClient.GetAsync($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(4)}");
+            HttpResponseMessage message = await HttpClient.GetAsync($"{Endpoint.Replace("/v2", "")}/vinfo/info?v={Plugin.Instance.Version.ToString(3)}");
 
             if (message.StatusCode != HttpStatusCode.OK)
                 return new(message.StatusCode, null);
