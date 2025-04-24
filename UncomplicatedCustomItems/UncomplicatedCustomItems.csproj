@@ -473,24 +473,6 @@
   <ItemGroup>
     <Compile Include="API\Features\AudioApi.cs" />
     <Compile Include="API\Features\BadgeManager.cs" />
-    <Compile Include="API\Features\CustomModules\Cluster.cs" />
-    <Compile Include="API\Features\CustomModules\CoroutineModule.cs" />
-    <Compile Include="API\Features\CustomModules\CustomModule.cs" />
-    <Compile Include="API\Features\CustomModules\CustomSound.cs" />
-    <Compile Include="API\Features\CustomModules\DieOnUse.cs" />
-    <Compile Include="API\Features\CustomModules\DoNotTriggerTeslaGates.cs" />
-    <Compile Include="API\Features\CustomModules\ToolGun.cs" />
-    <Compile Include="API\Features\CustomModules\EffectShot.cs" />
-    <Compile Include="API\Features\CustomModules\SwitchRoleOnUse.cs" />
-    <Compile Include="API\Features\CustomModules\EffectWhenUsed.cs" />
-    <Compile Include="API\Features\CustomModules\SpawnItemWhenDetonated.cs" />
-    <Compile Include="API\Features\CustomModules\ExplosiveBullets.cs" />
-    <Compile Include="API\Features\CustomModules\InfiniteAmmo.cs" />
-    <Compile Include="API\Features\CustomModules\ItemGlow.cs" />
-    <Compile Include="API\Features\CustomModules\LifeSteal.cs" />
-    <Compile Include="API\Features\CustomModules\WorkstationBan.cs" />
-    <Compile Include="API\Features\CustomModules\EffectWhenEquiped.cs" />
-    <Compile Include="API\Features\CustomModules\NoCharge.cs" />
     <Compile Include="API\Features\DynamicSpawn.cs" />
     <Compile Include="API\Features\FlagSettings\ClusterSettings.cs" />
     <Compile Include="API\Features\FlagSettings\SpawnItemWhenDetonatedSettings.cs" />

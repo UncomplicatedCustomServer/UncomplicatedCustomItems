@@ -2,8 +2,6 @@
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using EventSource = Exiled.Events.Handlers.Player;
-using UncomplicatedCustomItems.API.Features.CustomModules;
-using UncomplicatedCustomItems.Enums;
 using Exiled.API.Extensions;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Exiled.API.Enums;
@@ -78,7 +76,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
                 Item?.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
-                Item?.UnloadItemFlags();
         }
 
         /// <summary>
@@ -91,9 +88,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 Item.OnPickup(ev);
                 Item.HandlePickedUpDisplayHint();
-                CustomModule.Load((CustomFlags)Item.CustomItem.CustomFlags, Item);
-                Item.ReloadItemFlags();
-                Item.LoadItemFlags();
             }
         }
 
@@ -108,7 +102,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             Item.HandleEvent(ev.Player, ItemEvents.Use);
 
             Item?.ResetBadge(ev.Player);
-            Item.UnloadItemFlags();
 
             if (Item.CustomItem.Reusable)
                 ev.IsAllowed = false;
@@ -124,9 +117,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item.HandleSelectedDisplayHint();
             item.LoadBadge(ev.Player);
-            CustomModule.Load((CustomFlags)item.CustomItem.CustomFlags, item);
-            item.ReloadItemFlags();
-            item.LoadItemFlags();
         }
 
         private static void ChangingItemInHand(ChangingItemEventArgs ev)
@@ -138,8 +128,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item.ResetBadge(ev.Player);
-            item.ReloadItemFlags();
-            item.UnloadItemFlags();
         }
 
         private static void DeathEvent(DyingEventArgs ev)
@@ -157,7 +145,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            item.UnloadItemFlags();
         }
 
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)
@@ -172,7 +159,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            item.UnloadItemFlags();
         }
 
         private static void ThrownProjectile(ThrownProjectileEventArgs ev)

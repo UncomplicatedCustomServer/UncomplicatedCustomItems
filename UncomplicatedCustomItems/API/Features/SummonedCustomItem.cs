@@ -11,7 +11,6 @@ using UnityEngine;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System;
-using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
@@ -47,8 +46,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
-
-        private List<ICustomModule> _customModules { get; set; }
 
         /// <summary>
         /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
@@ -527,25 +524,6 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// loads the Item Flags for the <see cref="Player"/>.
-        /// </summary>
-        public string LoadItemFlags()
-        {
-
-            List<string> output = new();
-
-            if (_customModules.Count > 0)
-                output.Add("<color=#a343f7>[CUSTOM MODULES]</color>");
-
-            if (output.Count > 0)
-            {
-                output.Insert(0, "                                ");
-            }
-
-            return string.Join(" ", output);
-        }
-
-        /// <summary>
         /// Checks the magazine of the held <see cref="Firearm"/> to remove the capacity modifier from a modification.
         /// <param name="Firearm"></param>
         /// <param name="WeaponData"></param>
@@ -572,94 +550,18 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Reloads the Flags for the <see cref="ICustomItem"/>.
+        /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomFlags"/>
         /// </summary>
-        public void ReloadItemFlags()
+        /// <returns><see langword="true"/> if the custom flag represented by the Enum <see cref="CustomFlags"/>; otherwise, <see langword="false"/>.</returns>
+        public bool HasModule(CustomFlags Flag)
         {
-            LogManager.Debug("Reload Item Flags Function Triggered");
-            _customModules = CustomModule.Load(CustomItem.CustomFlags ?? CustomFlags.None, this);
-            List.Add(this);
-
-            LogManager.Debug("Item Flag(s) Reloaded");
-        }
-
-        /// <summary>
-        /// Unloads the Flags for the <see cref="Player"/>.
-        /// </summary>
-        public void UnloadItemFlags()
-        {
-            LogManager.Debug("Unload Item Flags Triggered");
-            _customModules?.Clear(); 
-            LogManager.Debug("Item Flags Cleared");
-        }
-
-        /// <summary>
-        /// Gets a <see cref="CustomModule"/> that this <see cref="ICustomItem"/> implements
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T GetModule<T>() where T : CustomModule => _customModules.Where(cm => cm.GetType() == typeof(T)).FirstOrDefault() as T;
-
-        /// <summary>
-        /// Gets a <see cref="CustomModule"/> array that contains every custom module with the same type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T[] GetModules<T>() where T : CustomModule
-        {
-            T[] result = new T[] { };
-            foreach (ICustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
-                result.AddItem(module);
-            return result;
-        }
-
-        /// <summary>
-        /// Try to get a <see cref="CustomModule"/> if its implemented
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="module"></param>
-        /// <returns></returns>
-        public bool GetModule<T>(out T module) where T : CustomModule
-        {
-            module = GetModule<T>();
-            return module != null;
-        }
-
-        /// <summary>
-        /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomModule"/>
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public bool HasModule<T>() where T : CustomModule => _customModules?.Any(cm => cm.GetType() == typeof(T)) ?? false;
-
-        /// <summary>
-        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomItem"/> instance
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
-
-        /// <summary>
-        /// Try to remove the first <see cref="CustomModule"/>
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void RemoveModule<T>() where T : CustomModule
-        {
-            if (GetModule(out T module))
+            if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(Flag))
             {
-                if (module is CoroutineModule coroutineModule && coroutineModule.CoroutineHandler.IsRunning)
-                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
-                _customModules.Remove(module);
+                return true;
             }
-        }
+            else
+                return false;
 
-        /// <summary>
-        /// Remove every <see cref="CustomModule"/> with the same given type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void RemoveModules<T>() where T : CustomModule
-        {
-            foreach (ICustomModule _ in GetModules<T>())
-                RemoveModule<T>();
         }
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();
