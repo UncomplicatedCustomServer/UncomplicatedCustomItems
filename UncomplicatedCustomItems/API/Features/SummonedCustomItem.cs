@@ -524,6 +524,33 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
+        /// Unloads all <see cref="ICustomItem"/> information for the <see cref="Player"/> who died with the custom item.
+        /// </summary>
+        /// <param name="ev"></param><param name="customItem"></param>
+        public void OnDied(DyingEventArgs ev, SummonedCustomItem customItem)
+        {
+            Timing.CallDelayed(0.1f, () =>
+            {
+                foreach (Pickup pickup in Pickup.List)
+                {
+                    if (pickup.Type == customItem.Item.Type)
+                    {
+                        if (pickup.Serial == customItem.Serial)
+                        {
+                            Pickup = pickup;
+                            Item = null;
+                            Owner = null;
+                            SaveProperties();
+                            Serial = pickup.Serial;
+                            HandleEvent(ev.Player, ItemEvents.Drop);
+                            Plugin.Instance.Handler.OnDeath(customItem);
+                        }
+                    }
+                }
+            });
+        }
+
+        /// <summary>
         /// Checks the magazine of the held <see cref="Firearm"/> to remove the capacity modifier from a modification.
         /// <param name="Firearm"></param>
         /// <param name="WeaponData"></param>
@@ -561,7 +588,6 @@ namespace UncomplicatedCustomItems.API.Features
             }
             else
                 return false;
-
         }
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();

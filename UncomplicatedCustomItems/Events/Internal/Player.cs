@@ -7,6 +7,8 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Exiled.API.Enums;
 using MapEventSource = Exiled.Events.Handlers.Map;
 using Exiled.Events.EventArgs.Map;
+using UncomplicatedCustomItems.API.Features.Helper;
+using Exiled.API.Features.Items;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -132,19 +134,20 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void DeathEvent(DyingEventArgs ev)
         {
-            if (ev.Player.CurrentItem is null)
-                return;
-
             if (!ev.Player.IsConnected)
                 return;
 
             if (ev.Player == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
-                return;
-
-            item?.ResetBadge(ev.Player);
+            foreach (Item item in ev.Player.Items)
+            {
+                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customitem))
+                {
+                    customitem.OnDied(ev, customitem);
+                    customitem?.ResetBadge(ev.Player);
+                }
+            }
         }
 
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)

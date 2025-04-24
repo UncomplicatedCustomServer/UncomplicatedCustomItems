@@ -109,7 +109,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="data"></param>
         /// <param name="ExpectedKey"></param>
         /// <param name="KeyList"></param>
-        /// <returns><see cref="true"/> if everything is OK</returns>
+        /// <returns><see cref="bool"/> <see langword="true"/> if everything is OK</returns>
         public static bool Check(IData element, Dictionary<string, string> data, out string ExpectedKey, out string KeyList)
         {
             ExpectedKey = null;

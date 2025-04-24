@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Exiled.API.Enums;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Item;
@@ -628,7 +627,49 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
+        public void OnDeath(SummonedCustomItem customItem)
+        {
+            foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
+            {
+                LogManager.Debug("SpawnLightOnItem method triggered");
 
+                if (customItem.Pickup?.Base?.gameObject == null)
+                    return;
+
+                GameObject itemGameObject = customItem.Pickup.Base.gameObject;
+                Color lightColor = Color.blue;
+
+                if (ItemGlowSettings != null)
+                {
+                    if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
+                    {
+                        if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
+                        {
+                            lightColor = parsedColor;
+                        }
+                        else
+                        {
+                            LogManager.Error($"Failed to parse color: {ItemGlowSettings.GlowColor} for {customItem.CustomItem.Name}");
+                        }
+                    }
+                }
+                else
+                {
+                    LogManager.Error("No FlagSettings found on custom item");
+                }
+
+                var light = Light.Create(customItem.Pickup.Position);
+                light.Color = lightColor;
+                light.Intensity = 0.7f;
+                light.Range = 0.5f;
+                light.ShadowType = LightShadows.None;
+
+                light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
+                LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
+
+                ActiveLights[customItem.Pickup] = light;
+            }
+        }
         public void OnDrop(DroppedItemEventArgs ev)
         {
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.ItemGlow))
