@@ -51,7 +51,7 @@ namespace UncomplicatedCustomItems.Integrations
             }
             catch (Exception e)
             {
-                LogManager.Error(e.ToString());
+                LogManager.Error($"{e.Message}\n{e.HResult}");
                 return false;
             }
         }
@@ -72,7 +72,7 @@ namespace UncomplicatedCustomItems.Integrations
             }
             catch (Exception e)
             {
-                LogManager.Error(e.ToString());
+                LogManager.Error($"{e.Message}\n{e.HResult}");
             }
         }
     }

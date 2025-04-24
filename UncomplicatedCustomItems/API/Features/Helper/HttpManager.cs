@@ -79,7 +79,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public HttpManager(string prefix)
         {
             if (!CheckForDependency())
-                Timing.CallContinuously(20f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV"));
+                Timing.CallContinuously(20f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x406"));
 
             Prefix = prefix;
             RegisterEvents();
@@ -184,7 +184,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
             catch (Exception e)
             {
-                LogManager.Error($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}");
+                LogManager.Error($"Failed to act HttpManager::LoadCreditTags() - {e.GetType().FullName}: {e.Message}\n{e.StackTrace}\n{e.HResult}");
             }
         }
 

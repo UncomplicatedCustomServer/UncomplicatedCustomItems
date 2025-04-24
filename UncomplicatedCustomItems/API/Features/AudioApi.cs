@@ -23,12 +23,12 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (!CheckForNVorbisDependency())
             {
-                LogManager.Error("You don't have the AudioPlayerApi dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
+                LogManager.Error("You don't have the AudioPlayerApi dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x400");
                 EnableAudioApi = false;
             }
             if (!CheckForAudioPlayerApiDependency())
             {
-                LogManager.Error("You don't have the dependency AudioPlayerApi installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
+                LogManager.Error("You don't have the dependency AudioPlayerApi installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x405");
                 EnableAudioApi = false;
             }
             else
@@ -75,11 +75,11 @@ namespace UncomplicatedCustomItems.API.Features
                         LogManager.Debug($"Audio should have been played.");
                     }
                     else
-                    LogManager.Error($"Audio path is null please fill out the config properly.");
+                    LogManager.Warn($"Audio path is null please fill out the config properly.");
                 }
                 else
                 {
-                    LogManager.Error("You don't have AudioPlayerApi or its dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
+                    LogManager.Warn("You don't have AudioPlayerApi or its dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
                 }
             }
         }

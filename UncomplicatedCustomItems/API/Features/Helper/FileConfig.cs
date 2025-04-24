@@ -536,7 +536,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}");
+                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}\n{ex.HResult}");
                     if (Plugin.Instance.Config.Debug)
                     {
                         LogManager.Error($"Stack trace: {ex.StackTrace}");
