@@ -479,7 +479,7 @@ namespace UncomplicatedCustomItems.Events
                             Scp244Pickup.MaxDiameter = 0.1f;
                             Scp244Pickup.State = Scp244State.Active;
 
-                            if (!SpawnItemWhenDetonatedSettings.Pickupable ?? false)
+                            if (SpawnItemWhenDetonatedSettings.Pickupable != true)
                             {
                                 Scp244Pickup.Weight = 5000f;
                             }
@@ -495,7 +495,7 @@ namespace UncomplicatedCustomItems.Events
                             Vector3 Vector3 = new(0f, 1f, 0f);
                             Pickup.Transform.position = Pickup.Transform.position + Vector3;
 
-                            if (!SpawnItemWhenDetonatedSettings.Pickupable ?? false)
+                            if (SpawnItemWhenDetonatedSettings.Pickupable != true)
                             {
                                 Pickup.Weight = 5000f;
                             }
