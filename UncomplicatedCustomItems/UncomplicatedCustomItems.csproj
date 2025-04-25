@@ -497,6 +497,7 @@
     <Compile Include="API\Utilities.cs" />
     <Compile Include="API\YAMLCaster.cs" />
     <Compile Include="Commands\Admin\Generate.cs" />
+    <Compile Include="Commands\Admin\Get.cs" />
     <Compile Include="Commands\Admin\Info.cs" />
     <Compile Include="Commands\Admin\Give.cs" />
     <Compile Include="Commands\Admin\List.cs" />
@@ -530,6 +531,7 @@
     <Compile Include="Extensions\CustomFlagsExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\ItemExtension.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="Interfaces\FlagSettings\IClusterSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IDieOnDropSettings.cs" />

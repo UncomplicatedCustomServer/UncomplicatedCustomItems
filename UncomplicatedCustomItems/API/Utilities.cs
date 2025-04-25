@@ -435,7 +435,6 @@ https://discord.com/channels/null";
             }
         }
         
-
         /// <summary>
         /// Reproduce the SCP:SL <see cref="ItemType.Painkillers"/> healing process but with custom things :)
         /// </summary>

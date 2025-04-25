@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 
@@ -23,15 +24,16 @@ namespace UncomplicatedCustomItems.Commands.Admin
         {
             response = "\nList of every registered custom Item:\n";
 
-            foreach (ICustomItem Item in CustomItem.List)
+            foreach (ICustomItem Item in CustomItem.List.OrderBy(item => item.Id))
                 response += $"<size=23><color=#00ff00>✔</color></size> <size=21>[{Item.Id}]</size> <size=19>{Item.CustomItemType} - <color=green>{Item.Name}</color></size>\n";
 
             if (CustomItem.UnregisteredList.Count > 0)
+            {
                 response += $"\nList of every unregistered custom Item:\n";
 
-            if (CustomItem.UnregisteredList.Count > 0)
-                foreach (ICustomItem Item in CustomItem.UnregisteredList)
+                foreach (ICustomItem Item in CustomItem.UnregisteredList.OrderBy(item => item.Id))
                     response += $"<size=23><color=#ff0000>❌</color></size> <size=21>[{Item.Id}]</size> <size=19>{Item.CustomItemType} - <color=red>{Item.Name}</color></size>\n";
+            }
 
             response += $"\n<color=#00ff00>[✔]</color> {CustomItem.List.Count} Registered CustomItems.\n";
 
