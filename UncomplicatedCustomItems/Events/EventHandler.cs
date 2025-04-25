@@ -869,6 +869,8 @@ namespace UncomplicatedCustomItems.Events
                         {
                             try
                             {
+                                LogManager.Silent("Name | Id | CustomFlag(s)");
+                                LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
                                 LogManager.Debug($"Sending CantDrop Hint to {ev.Player.DisplayNickname}\nHint: {CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}");
                                 ev.Player.ShowHint($"{CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}", (ushort)CantDropSettings.Duration);
                                 break;
@@ -887,8 +889,10 @@ namespace UncomplicatedCustomItems.Events
                         {
                             try
                             {
+                                LogManager.Silent("Name | Id | CustomFlag(s)");
+                                LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
                                 LogManager.Debug($"Sending CantDrop Broadcast to {ev.Player.DisplayNickname}\nBroadcast: {CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}");
-                                ev.Player.Broadcast((ushort)CantDropSettings.Duration, $"{CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}, BroadcastFlags.Normal, true");
+                                ev.Player.Broadcast((ushort)CantDropSettings.Duration, $"{CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}", Broadcast.BroadcastFlags.Normal, true);
                                 break;
                             }
                             catch (Exception ex)
