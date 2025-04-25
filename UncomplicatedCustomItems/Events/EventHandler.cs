@@ -21,6 +21,7 @@ using UncomplicatedCustomItems.Integrations;
 using PlayerRoles;
 using UncomplicatedCustomItems.Enums;
 using System.Linq;
+using Exiled.API.Features.DamageHandlers;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -727,6 +728,15 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnDrop(DroppedItemEventArgs ev)
         {
+            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
+            {
+                if (ev.Pickup is not null)
+                {
+                    ev.Pickup.Scale = SummonedCustomItem.CustomItem.Scale;
+                    ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
+                }
+            }
+
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.ItemGlow))
             {
                 foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
@@ -796,11 +806,18 @@ namespace UncomplicatedCustomItems.Events
         {
             if (!ev.Attacker.IsConnected)
                 return;
+
             if (!ev.Player.IsConnected)
                 return;
 
+            if (ev.DamageHandler.Type != DamageType.Firearm)
+                return;
+
             if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.CurrentItem is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
+            {
                 ev.Player.Vaporize();
+            }
+            else return;
         }
 
         public void OnShot(ShotEventArgs ev)

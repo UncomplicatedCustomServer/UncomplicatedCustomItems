@@ -122,7 +122,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="position"></param>
         /// <param name="rotation"></param>
         public SummonedCustomItem(ICustomItem customItem, Vector3 position, Quaternion rotation = new()) : this(customItem, Pickup.CreateAndSpawn(customItem.Item, position, rotation)) { }
-
         /// <summary>
         /// Create an instance of <see cref="SummonedCustomItem"/> by spawning the item inside the player's inventory<br></br>
         /// From now on it will be considered a <see cref="ICustomItem"/>
@@ -279,15 +278,9 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             break;
                         }
-
                     default:
                         break;
                 }
-            else if (Pickup is not null)
-            {
-                Pickup.Scale = CustomItem.Scale;
-                Pickup.Weight = CustomItem.Weight;
-            }
         }
         /// <summary>
         /// Saves the custom properties of the <see cref="ICustomItem"/> that triggered it
@@ -445,7 +438,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public string LoadBadge(Player Player)
         {
-            LogManager.Debug("LoadBadge() Triggered");
+            LogManager.Debug("LoadBadge Triggered");
             string output = "Badge: ";
 
             if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
@@ -495,7 +488,11 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public void ResetBadge(Player Player)
         {
+            if (CustomItem.BadgeName.Length == 0)
+                return;
+            
             Player.ReferenceHub.serverRoles.RefreshLocalTag();
+            Player.ReferenceHub.serverRoles.TryHideTag();
             LogManager.Debug($"{Player.Nickname} Badge successfully reset");
         }
 
