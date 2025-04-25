@@ -21,7 +21,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Gets a list of every unregistered <see cref="ICustomItem"/>
         /// </summary>
-        public static List<ICustomItem> UnregisteredList => [.. UnregisteredCustomItems.Values];
+        public static List<ICustomItem> UnregisteredList => UnregisteredCustomItems.Values.ToList();
 
         internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = new();
         internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = new();
@@ -101,7 +101,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Gets or sets the badge color
         /// </summary>
-        [Description("Sets the badge color. This uses the badge colors available for server roles")]
+        [Description("Sets the badge color. This uses the badge colors available for server")]
         public string BadgeColor { get; set; } = "pumpkin";
 
         /// <summary>
