@@ -39,7 +39,7 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             LogManager.Debug("OnHurt event is being triggered");
-            if (ev.Player is not null && ev.Attacker is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem))
+            if (ev.Player != null && ev.Attacker != null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem))
             {
                 foreach (LifeStealSettings LifeStealSettings in summonedCustomItem.CustomItem.FlagSettings.LifeStealSettings)
                 {
@@ -65,7 +65,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player == null || ev.Player.CurrentItem == null)
                 return;
 
-            if (ev.Player is not null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
                 ev.IsTriggerable = false;
             else return;
         }
@@ -137,7 +137,6 @@ namespace UncomplicatedCustomItems.Events
                 {
                     if (ev.Item != null)
                     {
-
                         if (EffectSettings.EffectEvent != null)
                         {
 
@@ -329,7 +328,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         if (CustomRole.TryGet((uint)SwitchRoleOnUseSettings.RoleId, out CustomRole? ECRRole))
                         {
-                            if (SwitchRoleOnUseSettings.Delay is not null || SwitchRoleOnUseSettings.Delay > 0f)
+                            if (SwitchRoleOnUseSettings.Delay != null || SwitchRoleOnUseSettings.Delay > 0f)
                             {
                                 Timing.CallDelayed((float)SwitchRoleOnUseSettings.Delay, () =>
                                 {
@@ -359,7 +358,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         if (UCR.TryGetCustomRole((int)SwitchRoleOnUseSettings.RoleId, out _))
                         {
-                            if (SwitchRoleOnUseSettings.Delay is not null || SwitchRoleOnUseSettings.Delay > 0f)
+                            if (SwitchRoleOnUseSettings.Delay != null || SwitchRoleOnUseSettings.Delay > 0f)
                             {
                                 Timing.CallDelayed((float)SwitchRoleOnUseSettings.Delay, () =>
                                 {
@@ -389,7 +388,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         if (ev.Player.Role != (RoleTypeId)SwitchRoleOnUseSettings.RoleId)
                         {
-                            if (SwitchRoleOnUseSettings.Delay is not null || SwitchRoleOnUseSettings.Delay > 0f)
+                            if (SwitchRoleOnUseSettings.Delay != null || SwitchRoleOnUseSettings.Delay > 0f)
                             {
                                 Timing.CallDelayed((float)SwitchRoleOnUseSettings.Delay, () =>
                                 {
@@ -731,7 +730,7 @@ namespace UncomplicatedCustomItems.Events
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
             {
-                if (ev.Pickup is not null)
+                if (ev.Pickup != null)
                 {
                     try
                     {
@@ -819,7 +818,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                     else
                         LogManager.Debug($"Vaporize settings were null or false for {CustomItem.CustomItem.Name}");
-                    if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage is not null)
+                    if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage != null)
                     {
                         try
                         {
@@ -863,9 +862,9 @@ namespace UncomplicatedCustomItems.Events
                 ev.IsAllowed = false;
                 foreach (CantDropSettings CantDropSettings in CustomItem.CustomItem.FlagSettings.CantDropSettings)
                 {
-                    if (CantDropSettings.HintOrBroadcast is not null && CantDropSettings.HintOrBroadcast == "hint" || CantDropSettings.HintOrBroadcast == "Hint")
+                    if (CantDropSettings.HintOrBroadcast != null && CantDropSettings.HintOrBroadcast == "hint" || CantDropSettings.HintOrBroadcast == "Hint")
                     {
-                        if (CantDropSettings.Message is not null && CantDropSettings.Duration is not null && CantDropSettings.Duration >= 1)
+                        if (CantDropSettings.Message != null && CantDropSettings.Duration != null && CantDropSettings.Duration >= 1)
                         {
                             try
                             {
@@ -883,9 +882,9 @@ namespace UncomplicatedCustomItems.Events
                             }
                         }
                     }
-                    else if (CantDropSettings.HintOrBroadcast is not null && CantDropSettings.HintOrBroadcast == "broadcast" || CantDropSettings.HintOrBroadcast == "Broadcast")
+                    else if (CantDropSettings.HintOrBroadcast != null && CantDropSettings.HintOrBroadcast == "broadcast" || CantDropSettings.HintOrBroadcast == "Broadcast")
                     {
-                        if (CantDropSettings.Message is not null && CantDropSettings.Duration is not null && CantDropSettings.Duration >= 1)
+                        if (CantDropSettings.Message != null && CantDropSettings.Duration != null && CantDropSettings.Duration >= 1)
                         {
                             try
                             {
@@ -1108,6 +1107,9 @@ namespace UncomplicatedCustomItems.Events
             }
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.EffectWhenUsed))
             {
+                if (customItem.HasModule(CustomFlags.NoCharge))
+                    return;
+
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
                 {
