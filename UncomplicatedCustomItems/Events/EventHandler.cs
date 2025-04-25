@@ -409,6 +409,57 @@ namespace UncomplicatedCustomItems.Events
             }
         }
 
+        public void OnChangedItem(ChangedItemEventArgs ev)
+        {
+            if (ev.Item is null)
+                return;
+
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+            {
+                foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                {
+                    if (ev.Item != null)
+                    {
+                        if (EffectSettings.EffectEvent != null)
+                        {
+                            if (EffectSettings.EffectEvent == "EffectWhenEquiped")
+                            {
+                                if (EffectSettings.Effect == null)
+                                {
+                                    LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+                                if (EffectSettings.EffectDuration < -1)
+                                {
+                                    LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+                                if (EffectSettings.EffectIntensity <= 0)
+                                {
+                                    LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+
+                                LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
+                                EffectType Effect = EffectSettings.Effect;
+                                float Duration = EffectSettings.EffectDuration;
+                                byte Intensity = EffectSettings.EffectIntensity;
+                                ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                            }
+                        }
+                        else
+                        {
+                            LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Error($"EffectWhenEquiped Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}");
+                    }
+                }
+            }
+        }
+
         public void GrenadeExploding(ExplodingGrenadeEventArgs ev)
         {   
             if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
@@ -748,7 +799,7 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.Player.IsConnected)
                 return;
 
-            if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.CurrentItem is not null  && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
+            if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.CurrentItem is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
                 ev.Player.Vaporize();
         }
 
