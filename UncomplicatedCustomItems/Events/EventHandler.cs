@@ -801,10 +801,12 @@ namespace UncomplicatedCustomItems.Events
                 foreach (DieOnDropSettings DieOnDropSettings in CustomItem.CustomItem.FlagSettings.DieOnDropSettings)
                 {
                     LogManager.Debug($"Checking Vaporize setting for {CustomItem.CustomItem.Name}");
-                    if (DieOnDropSettings.Vaporize is not null && (bool)DieOnDropSettings.Vaporize)
+                    if (DieOnDropSettings.Vaporize != null && (bool)DieOnDropSettings.Vaporize)
                     {
                         try
                         {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
                             LogManager.Debug($"{ev.Player.Nickname} is being vaporized by {CustomItem.CustomItem.Name}");
                             ev.Player.Vaporize();
                         }
@@ -821,6 +823,8 @@ namespace UncomplicatedCustomItems.Events
                     {
                         try
                         {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
                             ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", CustomItem.CustomItem.Name)}");
                         }
                         catch (Exception ex)
@@ -877,7 +881,7 @@ namespace UncomplicatedCustomItems.Events
                             }
                         }
                     }
-                    else if (CantDropSettings.HintOrBroadcast is not null &&  CantDropSettings.HintOrBroadcast == "broadcast" || CantDropSettings.HintOrBroadcast == "Broadcast")
+                    else if (CantDropSettings.HintOrBroadcast is not null && CantDropSettings.HintOrBroadcast == "broadcast" || CantDropSettings.HintOrBroadcast == "Broadcast")
                     {
                         if (CantDropSettings.Message is not null && CantDropSettings.Duration is not null && CantDropSettings.Duration >= 1)
                         {
@@ -906,16 +910,20 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnDying(DyingEventArgs ev)
         {
+            if (ev.Attacker == null)
+                return;
+            if (ev.Player == null)
+                return;
             if (!ev.Attacker.IsConnected)
                 return;
-
             if (!ev.Player.IsConnected)
                 return;
-
+            if (ev.Attacker.CurrentItem == null)
+                return;
             if (!ev.Attacker.CurrentItem.IsWeapon)
                 return;
 
-            if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.CurrentItem is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
+            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
             {
                 try
                 {
