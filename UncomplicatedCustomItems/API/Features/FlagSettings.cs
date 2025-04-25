@@ -160,5 +160,13 @@ namespace UncomplicatedCustomItems.API.Features
                 KeepLocation = true
             }
         ];
+        public List<DieOnDropSettings?> DieOnDropSettings { get; set; } =
+        [
+            new()
+            {
+                DeathMessage = "Dropped %name%",
+                Vaporize = true
+            }
+        ];
     }
 }

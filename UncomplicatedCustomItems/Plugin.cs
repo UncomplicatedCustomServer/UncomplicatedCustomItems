@@ -66,6 +66,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
             ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
+            PlayerEvent.Dying += Handler.OnDying;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -137,6 +138,7 @@ namespace UncomplicatedCustomItems
             MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;
             ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
             MapEvent.PickupDestroyed -= Handler.OnPickup;
+            PlayerEvent.Dying -= Handler.OnDying;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

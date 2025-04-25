@@ -20,6 +20,7 @@ using Exiled.CustomRoles.API.Features;
 using UncomplicatedCustomItems.Integrations;
 using PlayerRoles;
 using UncomplicatedCustomItems.Enums;
+using System.Linq;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -629,45 +630,48 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnDeath(SummonedCustomItem customItem)
         {
-            foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
+            if (customItem.HasModule(CustomFlags.ItemGlow))
             {
-                LogManager.Debug("SpawnLightOnItem method triggered");
-
-                if (customItem.Pickup?.Base?.gameObject == null)
-                    return;
-
-                GameObject itemGameObject = customItem.Pickup.Base.gameObject;
-                Color lightColor = Color.blue;
-
-                if (ItemGlowSettings != null)
+                foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
                 {
-                    if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
+                    LogManager.Debug("SpawnLightOnItem method triggered");
+
+                    if (customItem.Pickup?.Base?.gameObject == null)
+                        return;
+
+                    GameObject itemGameObject = customItem.Pickup.Base.gameObject;
+                    Color lightColor = Color.blue;
+
+                    if (ItemGlowSettings != null)
                     {
-                        if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
+                        if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
                         {
-                            lightColor = parsedColor;
-                        }
-                        else
-                        {
-                            LogManager.Error($"Failed to parse color: {ItemGlowSettings.GlowColor} for {customItem.CustomItem.Name}");
+                            if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
+                            {
+                                lightColor = parsedColor;
+                            }
+                            else
+                            {
+                                LogManager.Error($"Failed to parse color: {ItemGlowSettings.GlowColor} for {customItem.CustomItem.Name}");
+                            }
                         }
                     }
+                    else
+                    {
+                        LogManager.Error("No FlagSettings found on custom item");
+                    }
+
+                    var light = Light.Create(customItem.Pickup.Position);
+                    light.Color = lightColor;
+                    light.Intensity = 0.7f;
+                    light.Range = 0.5f;
+                    light.ShadowType = LightShadows.None;
+
+                    light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
+                    LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
+
+                    ActiveLights[customItem.Pickup] = light;
                 }
-                else
-                {
-                    LogManager.Error("No FlagSettings found on custom item");
-                }
-
-                var light = Light.Create(customItem.Pickup.Position);
-                light.Color = lightColor;
-                light.Intensity = 0.7f;
-                light.Range = 0.5f;
-                light.ShadowType = LightShadows.None;
-
-                light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
-                LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
-
-                ActiveLights[customItem.Pickup] = light;
             }
         }
         public void OnDrop(DroppedItemEventArgs ev)
@@ -722,8 +726,31 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.DieOnDrop))
+            {
+                foreach (DieOnDropSettings DieOnDropSettings in CustomItem.CustomItem.FlagSettings.DieOnDropSettings)
+                {
+                    if (DieOnDropSettings.Vaporize ?? false)
+                    {
+                        ev.Player.Vaporize();
+                    }
+                    if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage is not null)
+                        ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", CustomItem.CustomItem.Name)}");
+                    else
+                        ev.Player.Kill($"Killed by {CustomItem.CustomItem.Name}");
+                }
+            }
             else return;
         }
+
+        public void OnDying(DyingEventArgs ev)
+        {
+            if (ev.Player is not null && ev.Attacker is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
+            {
+                ev.Player.Vaporize();
+            }
+        }
+
         public void OnShot(ShotEventArgs ev)
         {
             if (ev.Position == null)

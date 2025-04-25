@@ -27,5 +27,7 @@ namespace UncomplicatedCustomItems.Enums
         SpawnItemWhenDetonated = 1L << 14,
         Cluster = 1L << 15,
         SwitchRoleOnUse = 1L << 16,
+        DieOnDrop = 1L << 17,
+        VaporizeKills = 1L << 18,
     }
 }
