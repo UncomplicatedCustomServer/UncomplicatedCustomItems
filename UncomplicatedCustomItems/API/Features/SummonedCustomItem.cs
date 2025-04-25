@@ -583,9 +583,7 @@ namespace UncomplicatedCustomItems.API.Features
         public bool HasModule(CustomFlags Flag)
         {
             if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(Flag))
-            {
                 return true;
-            }
             else
                 return false;
         }

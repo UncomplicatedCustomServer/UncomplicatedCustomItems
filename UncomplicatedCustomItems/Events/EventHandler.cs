@@ -731,9 +731,7 @@ namespace UncomplicatedCustomItems.Events
                 foreach (DieOnDropSettings DieOnDropSettings in CustomItem.CustomItem.FlagSettings.DieOnDropSettings)
                 {
                     if (DieOnDropSettings.Vaporize ?? false)
-                    {
                         ev.Player.Vaporize();
-                    }
                     if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage is not null)
                         ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", CustomItem.CustomItem.Name)}");
                     else
@@ -746,9 +744,7 @@ namespace UncomplicatedCustomItems.Events
         public void OnDying(DyingEventArgs ev)
         {
             if (ev.Player is not null && ev.Attacker is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
-            {
                 ev.Player.Vaporize();
-            }
         }
 
         public void OnShot(ShotEventArgs ev)
