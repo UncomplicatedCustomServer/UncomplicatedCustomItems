@@ -46,7 +46,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 { "<color=#00ff00>⚖</color> Weight:", $"<b>{customItem.Weight}</b>" },
             };
 
-            response = $"0\n<size=23><b>{customItem.Name} Info:</b></size>";
+            response = $"\n<size=23><b>{customItem.Name} Info:</b></size>";
 
             if (customItem.Spawn is not null)
             {
