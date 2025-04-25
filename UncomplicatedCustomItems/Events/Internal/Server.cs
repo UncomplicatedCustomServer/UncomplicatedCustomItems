@@ -1,4 +1,6 @@
 ﻿using Exiled.API.Features;
+using Exiled.API.Features.Pickups;
+using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
@@ -35,6 +37,20 @@ namespace UncomplicatedCustomItems.Events.Internal
                     }
                 }
             }
+            Timing.CallDelayed(1f, () =>
+            {
+                foreach (SummonedCustomItem customItem in SummonedCustomItem.List)
+                {
+                    foreach (Pickup pickup in Pickup.List)
+                    {
+                        if (pickup.Serial == customItem.Serial)
+                        {
+                            pickup.Scale = customItem.CustomItem.Scale;
+                            pickup.Weight = customItem.CustomItem.Weight;
+                        }
+                    }
+                }
+            });
         }
     }
 }

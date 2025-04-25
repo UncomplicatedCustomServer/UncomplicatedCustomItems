@@ -65,8 +65,10 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
-            PlayerEvent.ThrownProjectile += Handler.Onthrown;
             ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
+            PlayerEvent.Dying += Handler.OnDying;
+            PlayerEvent.ChangedItem += Handler.OnChangedItem;
+            PlayerEvent.DroppingItem += Handler.OnDropping;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -74,6 +76,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.UsingItem += Handler.Onuse;
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
             PlayerEvent.Shooting += Handler.Onshooting;
+            PlayerEvent.ThrownProjectile += Handler.Onthrown;
 
             LogManager.History.Clear();
 
@@ -135,16 +138,19 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile -= Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;
-            PlayerEvent.ThrownProjectile -= Handler.Onthrown;
+            ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
             MapEvent.PickupDestroyed -= Handler.OnPickup;
+            PlayerEvent.Dying -= Handler.OnDying;
+            PlayerEvent.ChangedItem -= Handler.OnChangedItem;
+            PlayerEvent.DroppingItem -= Handler.OnDropping;
 
-            //Debugging Events
+            // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
             PlayerEvent.ItemAdded -= Handler.Onpickup;
             PlayerEvent.UsingItem -= Handler.Onuse;
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
             PlayerEvent.Shooting -= Handler.Onshooting;
-            ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
+            PlayerEvent.ThrownProjectile -= Handler.Onthrown;
 
             Instance = null;
             Handler = null;

@@ -8,5 +8,6 @@ namespace UncomplicatedCustomItems.API.Features
         public ItemType ItemToSpawn { get; set; } = ItemType.SCP244a;
         public float? TimeTillDespawn { get; set; } = 6f;
         public uint? Chance { get; set; } = 100;
+        public bool? Pickupable { get; set; } = false;
     }
 }

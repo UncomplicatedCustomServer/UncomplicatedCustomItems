@@ -2,11 +2,12 @@
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using EventSource = Exiled.Events.Handlers.Player;
-using UncomplicatedCustomItems.API.Features.CustomModules;
-using UncomplicatedCustomItems.Enums;
 using Exiled.API.Extensions;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using Exiled.API.Enums;
+using MapEventSource = Exiled.Events.Handlers.Map;
+using Exiled.Events.EventArgs.Map;
+using Exiled.API.Features.Items;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -24,6 +25,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ChangingRole += RoleChangeEvent;
             EventSource.ThrownProjectile += ThrownProjectile;
             EventSource.Shot += Damaged;
+            MapEventSource.ExplodingGrenade += GrenadeExploded;
         }
         // EventSource.EVENT -= EVENTNAME 
         public static void Unregister()
@@ -38,6 +40,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             EventSource.ThrownProjectile -= ThrownProjectile;
             EventSource.Shot -= Damaged;
             EventSource.TogglingNoClip -= NoclipButton;
+            MapEventSource.ExplodingGrenade -= GrenadeExploded;
         }
 
         public static void Damaged(ShotEventArgs ev)
@@ -59,6 +62,14 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
         }
 
+        private static void GrenadeExploded(ExplodingGrenadeEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Item))
+                return;
+
+            Item?.HandleEvent(ev.Player, ItemEvents.Detonation); // Untested
+        }
+
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
@@ -66,7 +77,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
                 Item?.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
-                Item?.UnloadItemFlags();
         }
 
         /// <summary>
@@ -79,11 +89,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 Item.OnPickup(ev);
                 Item.HandlePickedUpDisplayHint();
-                CustomModule.Load((CustomFlags)Item.CustomItem.CustomFlags, Item);
-                Item.ReloadItemFlags();
-                Item.LoadItemFlags();
-                SummonedCustomItem.Register(Item.CustomItem.FlagSettings);
-                SummonedCustomItem.GetAllFlagSettings();
             }
         }
 
@@ -98,8 +103,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             Item.HandleEvent(ev.Player, ItemEvents.Use);
 
             Item?.ResetBadge(ev.Player);
-            Item.UnloadItemFlags();
-            SummonedCustomItem.ClearAllFlagSettings();
 
             if (Item.CustomItem.Reusable)
                 ev.IsAllowed = false;
@@ -115,11 +118,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item.HandleSelectedDisplayHint();
             item.LoadBadge(ev.Player);
-            CustomModule.Load((CustomFlags)item.CustomItem.CustomFlags, item);
-            item.ReloadItemFlags();
-            item.LoadItemFlags();
-            SummonedCustomItem.Register(item.CustomItem.FlagSettings);
-            SummonedCustomItem.GetAllFlagSettings();
         }
 
         private static void ChangingItemInHand(ChangingItemEventArgs ev)
@@ -131,28 +129,24 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item.ResetBadge(ev.Player);
-            item.ReloadItemFlags();
-            item.UnloadItemFlags();
-            SummonedCustomItem.ClearAllFlagSettings();
         }
 
         private static void DeathEvent(DyingEventArgs ev)
         {
-            if (ev.Player.CurrentItem is null)
-                return;
-
             if (!ev.Player.IsConnected)
                 return;
 
             if (ev.Player == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
-                return;
-
-            item?.ResetBadge(ev.Player);
-            item.UnloadItemFlags();
-            SummonedCustomItem.ClearAllFlagSettings();
+            foreach (Item item in ev.Player.Items)
+            {
+                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customitem))
+                {
+                    customitem.OnDied(ev, customitem);
+                    customitem?.ResetBadge(ev.Player);
+                }
+            }
         }
 
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)
@@ -167,8 +161,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            item.UnloadItemFlags();
-            SummonedCustomItem.ClearAllFlagSettings();
         }
 
         private static void ThrownProjectile(ThrownProjectileEventArgs ev)
@@ -177,7 +169,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            SummonedCustomItem.ClearAllFlagSettings();
         }
 
         private static void NoclipButton(TogglingNoClipEventArgs ev)

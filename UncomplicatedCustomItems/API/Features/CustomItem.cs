@@ -18,7 +18,13 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public static List<ICustomItem> List => CustomItems.Values.ToList();
 
+        /// <summary>
+        /// Gets a list of every unregistered <see cref="ICustomItem"/>
+        /// </summary>
+        public static List<ICustomItem> UnregisteredList => UnregisteredCustomItems.Values.ToList();
+
         internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = new();
+        internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = new();
 
         /// <summary>
         /// Register a new <see cref="ICustomItem"/> inside the plugin
@@ -29,6 +35,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (!Utilities.CustomItemValidator(item, out string error))
             {
                 LogManager.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
+                UnregisteredCustomItems.Add(item.Id, item);
                 return;
             }
             CustomItems.Add(item.Id, item);
@@ -47,8 +54,11 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="item"></param>
         public static void Unregister(uint item)
         {
-            if (CustomItems.ContainsKey(item))
+            if (CustomItems.ContainsKey(item) || UnregisteredCustomItems.ContainsKey(item))
+            {
                 CustomItems.Remove(item);
+                UnregisteredCustomItems.Remove(item);
+            }
         }
 
         /// <summary>
@@ -91,7 +101,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Gets or sets the badge color
         /// </summary>
-        [Description("Sets the badge color")]
+        [Description("Sets the badge color. This uses the badge colors available for server")]
         public string BadgeColor { get; set; } = "pumpkin";
 
         /// <summary>
@@ -132,6 +142,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Custom flag settings of the item
         /// </summary>
+        [Description("Settings for the CustomFlags. You can remove any unused settings.")]
         public IFlagSettings FlagSettings { get; set; } = new FlagSettings();
 
         /// <summary>

@@ -11,7 +11,6 @@ using UnityEngine;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System;
-using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using HarmonyLib;
@@ -47,65 +46,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
-        
-        internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
-
-        /// <summary>
-        /// Gets the badge of the player if it has one
-        /// </summary>
-        public Triplet<string, string, bool>? Badge { get; private set; }
-
-        public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
-
-        private List<ICustomModule> _customModules { get; set; }
-
-        /// <summary>
-        /// List of all flag settings.
-        /// </summary>
-        public static readonly List<IFlagSettings> _flagSettings = new();
-
-        /// <summary>
-        /// Registers flag setting(s).
-        /// <param name="flagSettings"></param>
-        /// </summary>
-        public static void Register(IFlagSettings flagSettings)
-        {
-            if (flagSettings == null)
-                throw new ArgumentNullException(nameof(flagSettings));
-
-            if (!_flagSettings.Contains(flagSettings))
-            {
-                _flagSettings.Add(flagSettings);
-            }
-            LogManager.Debug($"added {string.Join(", ", _flagSettings)}");
-        }
-
-        /// <summary>
-        /// Unregisters a flag setting.
-        /// <param name="flagSettings"></param>
-        /// </summary>
-        public static bool Unregister(IFlagSettings flagSettings)
-        {
-            return _flagSettings.Remove(flagSettings);
-        }
-
-        /// <summary>
-        /// Retrieves all loaded flag settings and returns them as a read-only list.
-        /// </summary>
-        /// <returns>A read-only list of flag settings.</returns>
-        public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
-        {
-            LogManager.Debug("Retrieving all loaded Flag Settings");
-
-            return _flagSettings.AsReadOnly();
-        }
-        /// <summary>
-        /// Clears all flag settings
-        /// </summary>
-        public static void ClearAllFlagSettings()
-        {
-            _flagSettings.Clear();
-        }
 
         /// <summary>
         /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
@@ -149,11 +89,6 @@ namespace UncomplicatedCustomItems.API.Features
         public bool IsPickup => Pickup is not null;
 
         /// <summary>
-        /// Time since the last time a <see cref="Player"/> was damaged.
-        /// </summary>
-        public long LastDamageTime { get; internal set; }
-
-        /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
@@ -167,7 +102,6 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
-            GetAllFlagSettings();
             SetProperties();
             List.Add(this);
         }
@@ -188,7 +122,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="position"></param>
         /// <param name="rotation"></param>
         public SummonedCustomItem(ICustomItem customItem, Vector3 position, Quaternion rotation = new()) : this(customItem, Pickup.CreateAndSpawn(customItem.Item, position, rotation)) { }
-
         /// <summary>
         /// Create an instance of <see cref="SummonedCustomItem"/> by spawning the item inside the player's inventory<br></br>
         /// From now on it will be considered a <see cref="ICustomItem"/>
@@ -345,15 +278,9 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             break;
                         }
-
                     default:
                         break;
                 }
-            else if (Pickup is not null)
-            {
-                Pickup.Scale = CustomItem.Scale;
-                Pickup.Weight = CustomItem.Weight;
-            }
         }
         /// <summary>
         /// Saves the custom properties of the <see cref="ICustomItem"/> that triggered it
@@ -511,7 +438,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public string LoadBadge(Player Player)
         {
-            LogManager.Debug("LoadBadge() Triggered");
+            LogManager.Debug("LoadBadge Triggered");
             string output = "Badge: ";
 
             if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
@@ -561,7 +488,11 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public void ResetBadge(Player Player)
         {
+            if (CustomItem.BadgeName.Length == 0)
+                return;
+            
             Player.ReferenceHub.serverRoles.RefreshLocalTag();
+            Player.ReferenceHub.serverRoles.TryHideTag();
             LogManager.Debug($"{Player.Nickname} Badge successfully reset");
         }
 
@@ -590,22 +521,30 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// loads the Item Flags for the <see cref="Player"/>.
+        /// Unloads all <see cref="ICustomItem"/> information for the <see cref="Player"/> who died with the custom item.
         /// </summary>
-        public string LoadItemFlags()
+        /// <param name="ev"></param><param name="customItem"></param>
+        public void OnDied(DyingEventArgs ev, SummonedCustomItem customItem)
         {
-
-            List<string> output = new();
-
-            if (_customModules.Count > 0)
-                output.Add("<color=#a343f7>[CUSTOM MODULES]</color>");
-
-            if (output.Count > 0)
+            Timing.CallDelayed(0.1f, () =>
             {
-                output.Insert(0, "                                ");
-            }
-
-            return string.Join(" ", output);
+                foreach (Pickup pickup in Pickup.List)
+                {
+                    if (pickup.Type == customItem.Item.Type)
+                    {
+                        if (pickup.Serial == customItem.Serial)
+                        {
+                            Pickup = pickup;
+                            Item = null;
+                            Owner = null;
+                            SaveProperties();
+                            Serial = pickup.Serial;
+                            HandleEvent(ev.Player, ItemEvents.Drop);
+                            Plugin.Instance.Handler.OnDeath(customItem);
+                        }
+                    }
+                }
+            });
         }
 
         /// <summary>
@@ -635,94 +574,18 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Reloads the Flags for the <see cref="ICustomItem"/>.
+        /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomFlags"/>
         /// </summary>
-        public void ReloadItemFlags()
+        /// <returns><see langword="true"/> if the custom flag represented by the Enum <see cref="CustomFlags"/>; otherwise, <see langword="false"/>.</returns>
+        public bool HasModule(CustomFlags Flag)
         {
-            LogManager.Debug("Reload Item Flags Function Triggered");
-            _customModules = CustomModule.Load(CustomItem.CustomFlags ?? CustomFlags.None, this);
-            List.Add(this);
-
-            LogManager.Debug("Item Flag(s) Reloaded");
-        }
-
-        /// <summary>
-        /// Unloads the Flags for the <see cref="Player"/>.
-        /// </summary>
-        public void UnloadItemFlags()
-        {
-            LogManager.Debug("Unload Item Flags Triggered");
-            _customModules?.Clear(); 
-            LogManager.Debug("Item Flags Cleared");
-        }
-
-        /// <summary>
-        /// Gets a <see cref="CustomModule"/> that this <see cref="ICustomItem"/> implements
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T GetModule<T>() where T : CustomModule => _customModules.Where(cm => cm.GetType() == typeof(T)).FirstOrDefault() as T;
-
-        /// <summary>
-        /// Gets a <see cref="CustomModule"/> array that contains every custom module with the same type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T[] GetModules<T>() where T : CustomModule
-        {
-            T[] result = new T[] { };
-            foreach (ICustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
-                result.AddItem(module);
-            return result;
-        }
-
-        /// <summary>
-        /// Try to get a <see cref="CustomModule"/> if its implemented
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="module"></param>
-        /// <returns></returns>
-        public bool GetModule<T>(out T module) where T : CustomModule
-        {
-            module = GetModule<T>();
-            return module != null;
-        }
-
-        /// <summary>
-        /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomModule"/>
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public bool HasModule<T>() where T : CustomModule => _customModules?.Any(cm => cm.GetType() == typeof(T)) ?? false;
-
-        /// <summary>
-        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomItem"/> instance
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
-
-        /// <summary>
-        /// Try to remove the first <see cref="CustomModule"/>
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void RemoveModule<T>() where T : CustomModule
-        {
-            if (GetModule(out T module))
+            if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(Flag))
             {
-                if (module is CoroutineModule coroutineModule && coroutineModule.CoroutineHandler.IsRunning)
-                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
-                _customModules.Remove(module);
+                LogManager.Debug($"{CustomItem.Name} has {Flag}");
+                return true;
             }
-        }
-
-        /// <summary>
-        /// Remove every <see cref="CustomModule"/> with the same given type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void RemoveModules<T>() where T : CustomModule
-        {
-            foreach (ICustomModule _ in GetModules<T>())
-                RemoveModule<T>();
+            else
+                return false;
         }
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();
@@ -763,12 +626,14 @@ namespace UncomplicatedCustomItems.API.Features
                             .Replace("{p_health}", player.Health.ToString())
                             .Replace("{p_zone}", player.Zone.ToString())
                             .Replace("{p_room}", player.CurrentRoom.ToString())
-                            .Replace("{p_rotation}", player.Rotation.ToString());
+                            .Replace("{p_rotation}", player.Rotation.ToString())
+                            .Replace("{pj_pos}", Plugin.Instance.Handler.DetonationPosition.ToString());
 
                         if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
                             cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
                             cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
-                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}"))
+                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}") ||
+                            cmd.Contains("{pj_pos}"))
                         {
                             Server.ExecuteCommand(processedCommand, player.Sender);
                         }

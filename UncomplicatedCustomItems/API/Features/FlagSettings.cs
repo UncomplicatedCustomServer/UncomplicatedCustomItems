@@ -141,5 +141,41 @@ namespace UncomplicatedCustomItems.API.Features
                 TimeTillDespawn = 6f
             }
         ];
+        public List<ClusterSettings?> ClusterSettings { get; set; } =
+        [
+            new()
+            {
+                ItemToSpawn = new(),
+                AmountToSpawn = 6
+            }
+        ];
+        public List<SwitchRoleOnUseSettings?> SwitchRoleOnUseSettings { get; set; } =
+        [
+            new()
+            {
+                RoleType = "Normal",
+                RoleId = new(),
+                Delay = 6,
+                SpawnFlags = PlayerRoles.RoleSpawnFlags.None,
+                KeepLocation = true
+            }
+        ];
+        public List<DieOnDropSettings?> DieOnDropSettings { get; set; } =
+        [
+            new()
+            {
+                DeathMessage = "Dropped %name%",
+                Vaporize = true
+            }
+        ];
+        public List<CantDropSettings?> CantDropSettings { get; set; } =
+        [
+            new()
+            {
+                HintOrBroadcast = "hint",
+                Message = "You cant drop %name%!",
+                Duration = 10
+            }
+        ];
     }
 }

@@ -89,12 +89,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 int NewItems = CustomItem.List.Count - Before;
                 SummonedCustomItem.List.Clear();
                 CustomItem.List.Clear();
+                CustomItem.UnregisteredList.Clear();
 
                 FileConfig.Welcome(loadExamples: true);
                 FileConfig.Welcome(Server.Port.ToString());
                 FileConfig.LoadAll();
                 FileConfig.LoadAll(Server.Port.ToString());
                 Events.Internal.Server.SpawnItemsOnRoundStarted();
+
                 foreach (var entry in CustomItems)
                 {
                     Player player = entry.Value;
@@ -104,12 +106,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 }
                 if (NewItems > 0)
                 {
-                    response = $"Reloaded {CustomItem.List.Count} Added {NewItems} New Custom items.";
+                    response = $"\nReloaded {CustomItem.List.Count} Added {NewItems} New Custom items. \n Amount of unregistered Custom items: {CustomItem.UnregisteredList.Count}";
                     return true;
                 }
                 else
                 {
-                    response = $"Reloaded {CustomItem.List.Count} Custom items.";
+                    response = $"\nReloaded {CustomItem.List.Count} Custom items. \n Amount of unregistered Custom items: {CustomItem.UnregisteredList.Count}";
                     return true;
                 }
             }
