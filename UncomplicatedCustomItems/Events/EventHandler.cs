@@ -743,7 +743,12 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnDying(DyingEventArgs ev)
         {
-            if (ev.Player is not null && ev.Attacker is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
+            if (!ev.Attacker.IsConnected)
+                return;
+            if (!ev.Player.IsConnected)
+                return;
+
+            if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.CurrentItem is not null  && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
                 ev.Player.Vaporize();
         }
 
