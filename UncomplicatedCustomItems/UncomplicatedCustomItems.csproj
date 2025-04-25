@@ -475,6 +475,7 @@
     <Compile Include="API\Features\BadgeManager.cs" />
     <Compile Include="API\Features\DynamicSpawn.cs" />
     <Compile Include="API\Features\FlagSettings\ClusterSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\CantDropSettings.cs" />
     <Compile Include="API\Features\FlagSettings\DieOnDropSettings.cs" />
     <Compile Include="API\Features\FlagSettings\SpawnItemWhenDetonatedSettings.cs" />
     <Compile Include="API\Features\FlagSettings\EffectSettings.cs" />
@@ -542,6 +543,7 @@
     <Compile Include="Interfaces\IFlagSettings.cs" />
     <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\FlagSettings\ISpawnItemWhenDetonatedSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\ICantDropSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IEffectSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IAudioSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\ILifeStealSettings.cs" />

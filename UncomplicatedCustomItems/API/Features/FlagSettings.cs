@@ -168,5 +168,14 @@ namespace UncomplicatedCustomItems.API.Features
                 Vaporize = true
             }
         ];
+        public List<CantDropSettings?> CantDropSettings { get; set; } =
+        [
+            new()
+            {
+                HintOrBroadcast = "hint",
+                Message = "You cant drop %name%!",
+                Duration = 10
+            }
+        ];
     }
 }

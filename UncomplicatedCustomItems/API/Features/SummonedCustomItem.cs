@@ -580,7 +580,10 @@ namespace UncomplicatedCustomItems.API.Features
         public bool HasModule(CustomFlags Flag)
         {
             if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(Flag))
+            {
+                LogManager.Debug($"{CustomItem.Name} has {Flag}");
                 return true;
+            }
             else
                 return false;
         }

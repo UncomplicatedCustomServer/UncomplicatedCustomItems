@@ -22,6 +22,7 @@ using PlayerRoles;
 using UncomplicatedCustomItems.Enums;
 using System.Linq;
 using Exiled.API.Features.DamageHandlers;
+using System;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -732,8 +733,16 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (ev.Pickup is not null)
                 {
-                    ev.Pickup.Scale = SummonedCustomItem.CustomItem.Scale;
-                    ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
+                    try
+                    {
+                        ev.Pickup.Scale = SummonedCustomItem.CustomItem.Scale;
+                        ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                        LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                    }
                 }
             }
 
@@ -791,12 +800,105 @@ namespace UncomplicatedCustomItems.Events
             {
                 foreach (DieOnDropSettings DieOnDropSettings in CustomItem.CustomItem.FlagSettings.DieOnDropSettings)
                 {
-                    if (DieOnDropSettings.Vaporize ?? false)
-                        ev.Player.Vaporize();
-                    if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage is not null)
-                        ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", CustomItem.CustomItem.Name)}");
+                    LogManager.Debug($"Checking Vaporize setting for {CustomItem.CustomItem.Name}");
+                    if (DieOnDropSettings.Vaporize is not null && (bool)DieOnDropSettings.Vaporize)
+                    {
+                        try
+                        {
+                            LogManager.Debug($"{ev.Player.Nickname} is being vaporized by {CustomItem.CustomItem.Name}");
+                            ev.Player.Vaporize();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                            LogManager.Error($"Couldnt Vaporize {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                        }
+                    }
                     else
-                        ev.Player.Kill($"Killed by {CustomItem.CustomItem.Name}");
+                        LogManager.Debug($"Vaporize settings were null or false for {CustomItem.CustomItem.Name}");
+                    if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage is not null)
+                    {
+                        try
+                        {
+                            ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", CustomItem.CustomItem.Name)}");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                            LogManager.Error($"Couldnt Kill {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                            ev.Player.Kill($"Killed by {CustomItem.CustomItem.Name}");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                            LogManager.Error($"Couldnt Kill {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                        }
+                    }
+                }
+            }
+            else return;
+        }
+        public void OnDropping(DroppingItemEventArgs ev)
+        {
+            if (ev.Item is null)
+                return;
+
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.CantDrop))
+            {
+                ev.IsAllowed = false;
+                foreach (CantDropSettings CantDropSettings in CustomItem.CustomItem.FlagSettings.CantDropSettings)
+                {
+                    if (CantDropSettings.HintOrBroadcast is not null && CantDropSettings.HintOrBroadcast == "hint" || CantDropSettings.HintOrBroadcast == "Hint")
+                    {
+                        if (CantDropSettings.Message is not null && CantDropSettings.Duration is not null && CantDropSettings.Duration >= 1)
+                        {
+                            try
+                            {
+                                LogManager.Debug($"Sending CantDrop Hint to {ev.Player.DisplayNickname}\nHint: {CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}");
+                                ev.Player.ShowHint($"{CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}", (ushort)CantDropSettings.Duration);
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                LogManager.Silent("Name | Id | CustomFlag(s)");
+                                LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                                LogManager.Error($"Couldnt send CantDrop Hint to {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                            }
+                        }
+                    }
+                    else if (CantDropSettings.HintOrBroadcast is not null &&  CantDropSettings.HintOrBroadcast == "broadcast" || CantDropSettings.HintOrBroadcast == "Broadcast")
+                    {
+                        if (CantDropSettings.Message is not null && CantDropSettings.Duration is not null && CantDropSettings.Duration >= 1)
+                        {
+                            try
+                            {
+                                LogManager.Debug($"Sending CantDrop Broadcast to {ev.Player.DisplayNickname}\nBroadcast: {CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}");
+                                ev.Player.Broadcast((ushort)CantDropSettings.Duration, $"{CantDropSettings.Message.Replace("%name%", CustomItem.CustomItem.Name)}, BroadcastFlags.Normal, true");
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                LogManager.Silent("Name | Id | CustomFlag(s)");
+                                LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                                LogManager.Error($"Couldnt send CantDrop Broadcast to {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Warn($"CantDropSettings HintOrBroadcast for {CustomItem.CustomItem.Name} is {CantDropSettings.HintOrBroadcast} Expected values are 'hint' or 'broadcast'");
+                    }
                 }
             }
             else return;
@@ -810,12 +912,24 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.Player.IsConnected)
                 return;
 
-            if (ev.DamageHandler.Type != DamageType.Firearm)
+            if (!ev.Attacker.CurrentItem.IsWeapon)
                 return;
 
             if (ev.Player is not null && ev.Attacker is not null && ev.Attacker.CurrentItem is not null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
             {
-                ev.Player.Vaporize();
+                try
+                {
+                    LogManager.Silent("Name | Id | CustomFlag(s)");
+                    LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
+                    LogManager.Debug($"Vaporizing {ev.Player.DisplayNickname}");
+                    ev.Player.Vaporize();
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Silent("Name | Id | CustomFlag(s)");
+                    LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
+                    LogManager.Error($"Couldnt Vaporize {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                }
             }
             else return;
         }

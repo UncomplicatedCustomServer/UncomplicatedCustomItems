@@ -10,7 +10,6 @@ namespace UncomplicatedCustomItems.Enums
     {
         // CustomFlags added via CustomFlagsExtensions should use 49 to 62
         None = 0,
-        Custom = 1L << 48, // This should only be used if your coding your own CustomFlag
         DoNotTriggerTeslaGates = 1L << 1,
         LifeSteal = 1L << 2,
         InfiniteAmmo = 1L << 3,
@@ -29,5 +28,7 @@ namespace UncomplicatedCustomItems.Enums
         SwitchRoleOnUse = 1L << 16,
         DieOnDrop = 1L << 17,
         VaporizeKills = 1L << 18,
+        CantDrop = 1L << 19,
+        Custom = 1L << 48, // This should only be used if your coding your own CustomFlag
     }
 }

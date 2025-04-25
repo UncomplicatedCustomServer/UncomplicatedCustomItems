@@ -44,5 +44,6 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract List<ClusterSettings?> ClusterSettings { get; set; }
         public abstract List<SwitchRoleOnUseSettings?> SwitchRoleOnUseSettings { get; set; }
         public abstract List<DieOnDropSettings?> DieOnDropSettings { get; set; }
+        public abstract List<CantDropSettings?> CantDropSettings { get; set; }
     }
 }

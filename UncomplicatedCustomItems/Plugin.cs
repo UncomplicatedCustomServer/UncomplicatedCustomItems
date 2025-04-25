@@ -68,6 +68,7 @@ namespace UncomplicatedCustomItems
             ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
             PlayerEvent.Dying += Handler.OnDying;
             PlayerEvent.ChangedItem += Handler.OnChangedItem;
+            PlayerEvent.DroppingItem += Handler.OnDropping;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -141,6 +142,7 @@ namespace UncomplicatedCustomItems
             MapEvent.PickupDestroyed -= Handler.OnPickup;
             PlayerEvent.Dying -= Handler.OnDying;
             PlayerEvent.ChangedItem -= Handler.OnChangedItem;
+            PlayerEvent.DroppingItem -= Handler.OnDropping;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
