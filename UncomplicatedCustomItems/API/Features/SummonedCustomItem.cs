@@ -13,7 +13,7 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using System;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
-using HarmonyLib;
+using InventorySystem.Items.Keycards;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -151,10 +151,11 @@ namespace UncomplicatedCustomItems.API.Features
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
-                        Keycard Keycard = Item as Keycard;
+                        Keycard keycard = Item as Keycard;
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
-
-                        Keycard.Permissions = KeycardData.Permissions;
+                        KeycardGfx keycardGfx = keycard.Base.KeycardGfx;
+                        keycardGfx.SetTint(KeycardData.TintColor);
+                        keycardGfx.SetPermissions(KeycardData.Permissions, KeycardData.PermissionsColor);
                         break;
 
                     case CustomItemType.Armor:
@@ -297,7 +298,9 @@ namespace UncomplicatedCustomItems.API.Features
                             IKeycardData keycardData = CustomItem.CustomData as IKeycardData;
                             if (keycard != null && keycardData != null)
                             {
-                                keycardData.Permissions = keycard.Permissions;
+                                KeycardGfx keycardGfx = keycard.Base.KeycardGfx;
+                                keycardGfx.SetTint(keycardData.TintColor);
+                                keycardGfx.SetPermissions(keycardData.Permissions, keycardData.PermissionsColor);
                             }
                             break;
                         }

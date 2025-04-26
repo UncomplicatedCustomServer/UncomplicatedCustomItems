@@ -1,5 +1,7 @@
 ﻿using Exiled.API.Enums;
+using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -11,16 +13,8 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// <summary>
         /// Gets or sets the <see cref="KeycardPermissions"/> of the KeyCard
         /// </summary>
-        public KeycardPermissions Permissions { get; set; } = KeycardPermissions.Checkpoints;
-
-        /*
-         * public string Name { get; set; } = "%owner%";
-         * public KeycardType { get set; } = KeycardType.ChaosInsurgency;
-         * public string TintColor { get; set; } = "%owner%";
-         * public int WearState { get; set; } = "%owner%";
-         * public string Rank { get; set; } = "Private";
-         * public string Label { get; set; } = "Label";
-         * public int SerialNumber { get; set; } = "1";
-        */
+        public KeycardLevels Permissions { get; set; } = new KeycardLevels(0, 0, 0);
+        public Color TintColor { get; set; } = Color.red;
+        public Color PermissionsColor { get; set; } = Color.red;
     }
 }
