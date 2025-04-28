@@ -14,6 +14,8 @@ using System;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Keycards;
+using Exiled.API.Enums;
+using Interactables.Interobjects.DoorUtils;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -153,9 +155,12 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Keycard:
                         Keycard keycard = Item as Keycard;
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
+                        Color PermissionsColor = GetColor(KeycardData.PermissionsColor);
+                        Color TintColor = GetColor(KeycardData.TintColor);
                         KeycardGfx keycardGfx = keycard.Base.KeycardGfx;
-                        keycardGfx.SetTint(KeycardData.TintColor);
-                        keycardGfx.SetPermissions(KeycardData.Permissions, KeycardData.PermissionsColor);
+                        keycardGfx.SetTint(TintColor);
+                        KeycardLevels permissions = new(KeycardData.Containment, KeycardData.Armory, KeycardData.Admin);
+                        keycardGfx.SetPermissions(permissions, PermissionsColor);
                         keycardGfx.ExtraWeight = CustomItem.Weight;
                         keycardGfx.KeycardLabels[0].text = $"{KeycardData.Label}";
                         keycardGfx.NameFields[0].text = $"{KeycardData.Name.Replace("%name%", player.DisplayNickname)}";
@@ -436,6 +441,26 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 CustomItem.Scale = Pickup.Scale;
                 CustomItem.Weight = Pickup.Weight;
+            }
+        }
+
+        public static Color GetColor(string colorName)
+        {
+            switch (colorName.ToLower())
+            {
+                case "red": return Color.red;
+                case "green": return Color.green;
+                case "blue": return Color.blue;
+                case "yellow": return Color.yellow;
+                case "cyan": return Color.cyan;
+                case "magenta": return Color.magenta;
+                case "white": return Color.white;
+                case "black": return Color.black;
+                case "gray": return Color.gray;
+                case "grey": return Color.gray;
+                default:
+                    LogManager.Warn($"Invalid color '{colorName}' in config. Using default blue.");
+                    return Color.blue;
             }
         }
 

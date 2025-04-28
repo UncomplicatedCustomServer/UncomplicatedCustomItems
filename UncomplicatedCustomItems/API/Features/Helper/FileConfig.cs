@@ -80,9 +80,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new KeycardData()
                 {
-                    Permissions = KeycardPermissions.AlphaWarhead,
-                    PermissionsColor = Color.red,
-                    TintColor = Color.red,
+                    PermissionsColor = "Red",
+                    TintColor = "Red",
                     Name = "Hello",
                     Label = "World",
                 })

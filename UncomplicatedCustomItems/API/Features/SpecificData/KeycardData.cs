@@ -1,7 +1,9 @@
-﻿using Exiled.API.Enums;
+﻿using System.Collections.Generic;
+using Exiled.API.Enums;
 using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -10,12 +12,11 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class KeycardData : Data, IKeycardData
     {
-        /// <summary>
-        /// Gets or sets the <see cref="KeycardPermissions"/> of the KeyCard
-        /// </summary>
-        public KeycardPermissions Permissions { get; set; } = KeycardPermissions.AlphaWarhead;
-        public Color TintColor { get; set; } = Color.red;
-        public Color PermissionsColor { get; set; } = Color.red;
+        public int Containment { get; set; } = 1;
+        public int Armory { get; set; } = 1;
+        public int Admin { get; set; } = 1;
+        public string TintColor { get; set; } = "Red";
+        public string PermissionsColor { get; set; } = "Red";
         public string Name { get; set; } = "";
         public string Label { get; set; } = "";
 
