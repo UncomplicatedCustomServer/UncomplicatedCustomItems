@@ -12,5 +12,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract Color TintColor { get; set; }
         public abstract KeycardLevels Permissions { get; set; }
         public abstract Color PermissionsColor { get; set; }
+        public abstract string Name { get; set; }
+        public abstract string Label { get; set; }
     }
 }

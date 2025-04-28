@@ -581,7 +581,7 @@
   <ItemGroup />
   <ItemGroup>
     <PackageReference Include="ExMod.Exiled">
-      <Version>9.5.2</Version>
+      <Version>9.6.0-beta7</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>

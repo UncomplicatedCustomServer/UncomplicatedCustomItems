@@ -16,5 +16,8 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public KeycardLevels Permissions { get; set; } = new KeycardLevels(0, 0, 0);
         public Color TintColor { get; set; } = Color.red;
         public Color PermissionsColor { get; set; } = Color.red;
+        public string Name { get; set; } = "";
+        public string Label { get; set; } = "";
+
     }
 }

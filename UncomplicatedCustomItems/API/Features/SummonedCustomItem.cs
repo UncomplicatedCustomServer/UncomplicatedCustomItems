@@ -102,7 +102,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
-            SetProperties();
+            SetProperties(owner);
             List.Add(this);
         }
 
@@ -145,7 +145,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Applies the custom properties of the current <see cref="ICustomItem"/>
         /// </summary>
-        public void SetProperties()
+        public void SetProperties(Player player)
         {
             if (Item is not null)
                 switch (CustomItem.CustomItemType)
@@ -156,6 +156,11 @@ namespace UncomplicatedCustomItems.API.Features
                         KeycardGfx keycardGfx = keycard.Base.KeycardGfx;
                         keycardGfx.SetTint(KeycardData.TintColor);
                         keycardGfx.SetPermissions(KeycardData.Permissions, KeycardData.PermissionsColor);
+                        keycardGfx.ExtraWeight = CustomItem.Weight;
+                        keycardGfx.KeycardLabels[0].text = $"{KeycardData.Label}";
+                        keycardGfx.NameFields[0].text = $"{KeycardData.Name.Replace("%name%", player.DisplayNickname)}";
+                        DetailBase detailBase = keycard.Base.Details[0];
+                        detailBase.ApplyDetail(keycardGfx, keycard.Base);
                         break;
 
                     case CustomItemType.Armor:
@@ -164,7 +169,6 @@ namespace UncomplicatedCustomItems.API.Features
 
                         Armor.HelmetEfficacy = ArmorData.HeadProtection;
                         Armor.VestEfficacy = ArmorData.BodyProtection;
-                        Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
                         Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
                         Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
                         break;
@@ -295,12 +299,13 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Keycard:
                         {
                             Keycard keycard = Item as Keycard;
-                            IKeycardData keycardData = CustomItem.CustomData as IKeycardData;
-                            if (keycard != null && keycardData != null)
+                            IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
+                            KeycardGfx keycardGfx = keycard.Base.KeycardGfx;
+                            if (keycard != null && KeycardData != null)
                             {
-                                KeycardGfx keycardGfx = keycard.Base.KeycardGfx;
-                                keycardGfx.SetTint(keycardData.TintColor);
-                                keycardGfx.SetPermissions(keycardData.Permissions, keycardData.PermissionsColor);
+                                CustomItem.Weight = keycardGfx.ExtraWeight;
+                                KeycardData.Label = keycardGfx.KeycardLabels[0].text;
+                                KeycardData.Name = keycardGfx.NameFields[0].text;
                             }
                             break;
                         }
@@ -312,7 +317,6 @@ namespace UncomplicatedCustomItems.API.Features
                             {
                                 ArmorData.HeadProtection = Armor.HelmetEfficacy;
                                 ArmorData.BodyProtection = Armor.VestEfficacy;
-                                ArmorData.RemoveExcessOnDrop = Armor.RemoveExcessOnDrop;
                                 ArmorData.StaminaUseMultiplier = Armor.StaminaUseMultiplier;
                                 ArmorData.StaminaRegenMultiplier = Armor.StaminaRegenMultiplier;
                             }
@@ -504,7 +508,7 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = null;
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
-            SetProperties();
+            SetProperties(pickedUp.Player);
             Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup);
         }
