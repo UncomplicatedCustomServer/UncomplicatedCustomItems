@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Enums;
+using Exiled.API.Features.Items;
 using Interactables.Interobjects.DoorUtils;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     public interface IKeycardData : IData
     {
         public abstract Color TintColor { get; set; }
-        public abstract KeycardLevels Permissions { get; set; }
+        public abstract KeycardPermissions Permissions { get; set; }
         public abstract Color PermissionsColor { get; set; }
         public abstract string Name { get; set; }
         public abstract string Label { get; set; }

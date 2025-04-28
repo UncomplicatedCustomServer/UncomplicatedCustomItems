@@ -13,7 +13,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// <summary>
         /// Gets or sets the <see cref="KeycardPermissions"/> of the KeyCard
         /// </summary>
-        public KeycardLevels Permissions { get; set; } = new KeycardLevels(0, 0, 0);
+        public KeycardPermissions Permissions { get; set; } = KeycardPermissions.AlphaWarhead;
         public Color TintColor { get; set; } = Color.red;
         public Color PermissionsColor { get; set; } = Color.red;
         public string Name { get; set; } = "";
