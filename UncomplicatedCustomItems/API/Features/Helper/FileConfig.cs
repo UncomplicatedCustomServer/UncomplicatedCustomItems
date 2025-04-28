@@ -83,6 +83,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     Permissions = new KeycardLevels(0, 0, 0),
                     PermissionsColor = Color.red,
                     TintColor = Color.red,
+                    Name = "Hello",
+                    Label = "World",
                 })
             },
             new()
