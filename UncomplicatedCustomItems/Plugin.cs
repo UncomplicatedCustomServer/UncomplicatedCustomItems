@@ -69,6 +69,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Dying += Handler.OnDying;
             PlayerEvent.ChangedItem += Handler.OnChangedItem;
             PlayerEvent.DroppingItem += Handler.OnDropping;
+            PlayerEvent.Hurting += Handler.OnHurting;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -143,6 +144,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Dying -= Handler.OnDying;
             PlayerEvent.ChangedItem -= Handler.OnChangedItem;
             PlayerEvent.DroppingItem -= Handler.OnDropping;
+            PlayerEvent.Hurting -= Handler.OnHurting;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
