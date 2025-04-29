@@ -6,12 +6,12 @@ using System.IO;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System.Threading.Tasks;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
+using UncomplicatedCustomItems.Integration;
 
 using PlayerEvent = Exiled.Events.Handlers.Player;
 using ItemEvent = Exiled.Events.Handlers.Item;
 using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
-using UncomplicatedCustomItems.Integration;
 
 namespace UncomplicatedCustomItems
 {
