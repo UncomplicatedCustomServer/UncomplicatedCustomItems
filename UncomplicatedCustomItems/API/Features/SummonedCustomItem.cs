@@ -49,6 +49,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public Item Item { get; internal set; }
 
+        private bool NameApplied { get; set; } = false;
+
         /// <summary>
         /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
         /// </summary>
@@ -275,11 +277,12 @@ namespace UncomplicatedCustomItems.API.Features
                             try
                             {
                                 NametagDetail nametagDetail = keycard.Base.Details.OfType<NametagDetail>().FirstOrDefault();
-                                if (nametagDetail != null)
+                                if (nametagDetail != null && !NameApplied)
                                 {
-                                    object[] args = { KeycardData.Name };
+                                    object[] args = { KeycardData.Name.Replace("%name%", Owner.DisplayNickname) };
                                     ArraySegment<object> arguments = new(args);
                                     nametagDetail.SetArguments(arguments);
+                                    NameApplied = true;
                                 }
                             }
                             catch (Exception ex)
