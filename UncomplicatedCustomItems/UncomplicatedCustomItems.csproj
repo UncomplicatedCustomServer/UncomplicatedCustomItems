@@ -88,6 +88,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
+    <Reference Include="LabApi">
+      <HintPath>$(EXILED_REFERENCES)\LabApi.dll</HintPath>
+    </Reference>
     <Reference Include="Mirror">
       <HintPath>$(EXILED_REFERENCES)\Mirror.dll</HintPath>
     </Reference>
@@ -574,7 +577,7 @@
   <ItemGroup />
   <ItemGroup>
     <PackageReference Include="ExMod.Exiled">
-      <Version>9.5.2</Version>
+      <Version>9.6.0-beta7</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>

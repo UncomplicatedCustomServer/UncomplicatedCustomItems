@@ -11,6 +11,7 @@ using UncomplicatedCustomItems.Enums;
 using UnityEngine;
 using UncomplicatedCustomItems.Interfaces;
 using YamlDotNet.Core;
+using Interactables.Interobjects.DoorUtils;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -79,7 +80,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new KeycardData()
                 {
-                    Permissions = KeycardPermissions.AlphaWarhead | KeycardPermissions.Checkpoints
+                    PermissionsColor = "Red",
+                    TintColor = "Red",
+                    Name = "Hello",
+                    Label = "World",
                 })
             },
             new()
