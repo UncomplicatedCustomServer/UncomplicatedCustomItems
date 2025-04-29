@@ -1,4 +1,6 @@
-﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
+﻿using System;
+using System.ComponentModel;
+using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -18,8 +20,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public int BodyProtection { get; set; } = 3;
 
         /// <summary>
-        /// Gets or sets whether the excess ammo should be dropped when the armor is dropped
+        /// No longer does anything obsoleted
         /// </summary>
+        [Obsolete("No longer does anything obsoleted by EXILED")]
+        [Description("No longer does anything obsoleted by EXILED")]
         public bool RemoveExcessOnDrop { get; set; } = true;
 
         /// <summary>

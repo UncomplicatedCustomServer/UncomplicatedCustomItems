@@ -61,7 +61,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 {
                     HeadProtection = 150,
                     BodyProtection = 200,
-                    RemoveExcessOnDrop = false,
                     StaminaUseMultiplier = 2
                 })
             },
