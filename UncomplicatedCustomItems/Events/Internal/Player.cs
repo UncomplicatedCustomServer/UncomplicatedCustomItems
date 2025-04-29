@@ -85,6 +85,11 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// <param name="ev"></param>
         private static void ShowItemInfoOnItemAdded(ItemAddedEventArgs ev)
         {
+            if (ev.Item is null)
+                return;
+            if (ev.Player is null)
+                return;
+
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
             {
                 Item.OnPickup(ev);
@@ -94,6 +99,13 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void OnItemUsingCompleted(UsingItemCompletedEventArgs ev)
         {
+            if (ev.Player == null)
+                return;
+            if (ev.Item == null)
+                return;
+            if (ev.Usable == null)
+                return;
+                
             if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
                 return;
 
@@ -110,6 +122,12 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void ChangeItemInHand(ChangedItemEventArgs ev)
         {
+            if (ev.Player is null)
+                return;
+
+            if (ev.Item is null)
+                return;
+
             if (ev.Player.CurrentItem is null)
                 return;
 
