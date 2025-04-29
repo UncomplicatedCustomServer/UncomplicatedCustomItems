@@ -19,6 +19,9 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public string PermissionsColor { get; set; } = "Red";
         public string Name { get; set; } = "";
         public string Label { get; set; } = "";
-
+        public string SerialNumber { get; set; } = "";
+        public byte WearDetail { get; set; } = 1;
+        public string LabelColor { get; set; } = "red";
+        public int Rank { get; set; } = 1;
     }
 }

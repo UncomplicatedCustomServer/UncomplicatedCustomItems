@@ -12,5 +12,9 @@
         public abstract string PermissionsColor { get; set; }
         public abstract string Name { get; set; }
         public abstract string Label { get; set; }
+        public abstract string SerialNumber { get; set; }
+        public abstract byte WearDetail { get; set; }
+        public abstract string LabelColor { get; set; }
+        public abstract int Rank { get; set; }
     }
 }
