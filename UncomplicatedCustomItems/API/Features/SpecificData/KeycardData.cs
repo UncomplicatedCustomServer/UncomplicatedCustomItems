@@ -17,11 +17,11 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public int Admin { get; set; } = 1;
         public string TintColor { get; set; } = "Red";
         public string PermissionsColor { get; set; } = "Red";
-        public string Name { get; set; } = "";
-        public string Label { get; set; } = "";
-        public string SerialNumber { get; set; } = "";
+        public string Name { get; set; } = "Hello";
+        public string Label { get; set; } = "World!";
+        public string SerialNumber { get; set; } = "123";
         public byte WearDetail { get; set; } = 1;
-        public string LabelColor { get; set; } = "red";
+        public string LabelColor { get; set; } = "Red";
         public int Rank { get; set; } = 1;
     }
 }
