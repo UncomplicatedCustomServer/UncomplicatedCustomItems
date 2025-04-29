@@ -159,8 +159,11 @@ namespace UncomplicatedCustomItems.API.Features
                         ColorUtility.TryParseHtmlString(KeycardData.LabelColor, out Color LabelColor);
                         KeycardLevels permissions = new(KeycardData.Containment, KeycardData.Armory, KeycardData.Admin);
                         if (!keycard.Base.Customizable)
+                        {
+                            LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
                             return;
-
+                        }
+                    
                         try
                         {
                             try

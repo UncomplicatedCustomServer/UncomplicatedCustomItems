@@ -2,6 +2,7 @@
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
+using MEC;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
@@ -99,10 +100,13 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (var entry in CustomItems)
                 {
-                    Player player = entry.Value;
-                    ICustomItem Item = entry.Key;
+                    Timing.CallDelayed(0.2f, () =>
+                    {
+                        Player player = entry.Value;
+                        ICustomItem Item = entry.Key;
 
-                    new SummonedCustomItem(Item, player);
+                        new SummonedCustomItem(Item, player);
+                    });
                 }
                 if (NewItems > 0)
                 {
