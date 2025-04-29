@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out SummonedCustomItem CustomItem))
             {
                 LogManager.Debug($"Checking if {CustomItem.CustomItem.Name} is Adrenaline, Painkillers or Medkit");
-                if (CustomItem.Item.Type == ItemType.Adrenaline || CustomItem.Item.Type == ItemType.Painkillers || CustomItem.Item.Type == ItemType.Medkit)
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Adrenaline || CustomItem.CustomItem.CustomItemType == CustomItemType.Painkillers || CustomItem.CustomItem.CustomItemType == CustomItemType.Medikit)
                 {
                     LogManager.Debug($"{CustomItem.CustomItem.Name} is Adrenaline, Painkillers or Medkit\n Applying patch...");
                     return false;
