@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems
 
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 
-        public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 5, 2);
 
         public override Version Version { get; } = new(3, 3, 0);
 
@@ -69,6 +69,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Dying += Handler.OnDying;
             PlayerEvent.ChangedItem += Handler.OnChangedItem;
             PlayerEvent.DroppingItem += Handler.OnDropping;
+            PlayerEvent.Hurting += Handler.OnHurting;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -143,6 +144,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Dying -= Handler.OnDying;
             PlayerEvent.ChangedItem -= Handler.OnChangedItem;
             PlayerEvent.DroppingItem -= Handler.OnDropping;
+            PlayerEvent.Hurting -= Handler.OnHurting;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

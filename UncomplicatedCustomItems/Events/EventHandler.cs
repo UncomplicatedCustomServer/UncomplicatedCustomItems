@@ -21,7 +21,6 @@ using UncomplicatedCustomItems.Integrations;
 using PlayerRoles;
 using UncomplicatedCustomItems.Enums;
 using System.Linq;
-using Exiled.API.Features.DamageHandlers;
 using System;
 
 namespace UncomplicatedCustomItems.Events
@@ -33,6 +32,7 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public Dictionary<Pickup, Light> ActiveLights = [];
         public Vector3 DetonationPosition { get; set; }
+        private bool ChargeAttack { get; set; } = false;
         public void OnHurt(HurtEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null)
@@ -687,6 +687,32 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
+        public void OnHurting(HurtingEventArgs ev)
+        {
+            if (ev.Attacker == null)
+                return;
+            if (ev.Player == null)
+                return;
+            if (ev.Attacker.CurrentItem == null)
+                return;
+
+            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Jailbird)
+                {
+                    IJailbirdData Data = CustomItem.CustomItem.CustomData as IJailbirdData;
+                    if (!ChargeAttack)
+                    {
+                        ev.Amount = Data.MeleeDamage;
+                    }
+                    else
+                    {
+                        ev.Amount = Data.ChargeDamage;
+                        ChargeAttack = false;
+                    }
+                }
+            }
+        }
         public void OnDeath(SummonedCustomItem customItem)
         {
             if (customItem.HasModule(CustomFlags.ItemGlow))
@@ -1111,6 +1137,10 @@ namespace UncomplicatedCustomItems.Events
                         ev.Player.CurrentItem = ev.Item;
                     });
                 }
+            }
+            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out _))
+            {
+                ChargeAttack = true;
             }
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.EffectWhenUsed))
             {
