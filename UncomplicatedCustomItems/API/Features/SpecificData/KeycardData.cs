@@ -24,5 +24,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public string LabelColor { get; set; } = "Red";
         public int Rank { get; set; } = 1;
         public bool OneTimeUse { get; set; } = false;
+        public string OneTimeUseHint { get; set; } = "%name% Was a one time use keycard!";
     }
 }

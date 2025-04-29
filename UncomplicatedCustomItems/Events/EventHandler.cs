@@ -651,7 +651,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         Timing.CallDelayed(0.5f, () =>
                         {
-                            ev.Player.ShowHint($"{CustomItem.CustomItem.Name} Was a one time use keycard!");
+                            ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
                             LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
                             ev.Player.RemoveItem(CustomItem.Item, true);
                         });
