@@ -7,7 +7,7 @@ using UncomplicatedCustomItems.API.Features.Helper;
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
     [HarmonyPatch(typeof(Consumable), nameof(Consumable.ActivateEffects))]
-    public class ConsumablePatch
+    internal class ConsumablePatch
     {
         [HarmonyPrefix]
         public static bool Prefix(Consumable __instance)
