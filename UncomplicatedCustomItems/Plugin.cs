@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public bool IsPrerelease = false;
+        public bool IsPrerelease = true;
         public override string Name => "UncomplicatedCustomItems";
 
         public override string Prefix => "UncomplicatedCustomItems";
@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
 
-        public override Version Version { get; } = new(3, 3, 0);
+        public override Version Version { get; } = new(3, 5, 0);
 
         internal Handler Handler;
 
