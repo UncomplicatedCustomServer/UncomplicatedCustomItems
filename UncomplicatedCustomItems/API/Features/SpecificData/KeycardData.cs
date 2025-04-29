@@ -23,5 +23,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public byte WearDetail { get; set; } = 1;
         public string LabelColor { get; set; } = "Red";
         public int Rank { get; set; } = 1;
+        public bool OneTimeUse { get; set; } = false;
     }
 }

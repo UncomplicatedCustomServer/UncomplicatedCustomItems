@@ -612,17 +612,50 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Attacker.CurrentItem == null)
                 return;
+
             if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
-                IJailbirdData Data = CustomItem.CustomItem.CustomData as IJailbirdData;
-                if (!ChargeAttack)
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Jailbird)
                 {
-                    ev.Amount = Data.MeleeDamage;
+                    IJailbirdData Data = CustomItem.CustomItem.CustomData as IJailbirdData;
+                    if (!ChargeAttack)
+                    {
+                        ev.Amount = Data.MeleeDamage;
+                    }
+                    else
+                    {
+                        ev.Amount = Data.ChargeDamage;
+                        ChargeAttack = false;
+                    }
                 }
-                else
+            }
+        }
+
+        public void OnDoorInteracting(InteractingDoorEventArgs ev)
+        {
+            if (ev.Player == null)
+                return;
+            if (ev.CanInteract == false)
+                return;
+            if (ev.Door.KeycardPermissions == KeycardPermissions.None)
+                return;
+            if (ev.Player.CurrentItem.Category != ItemCategory.Keycard)
+                return;
+
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
-                    ev.Amount = Data.ChargeDamage;
-                    ChargeAttack = false;
+                    IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
+                    if (Data.OneTimeUse)
+                    {
+                        Timing.CallDelayed(0.5f, () =>
+                        {
+                            ev.Player.ShowHint($"{CustomItem.CustomItem.Name} Was a one time use keycard!");
+                            LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                            ev.Player.RemoveItem(CustomItem.Item, true);
+                        });
+                    }
                 }
             }
         }

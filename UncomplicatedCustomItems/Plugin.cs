@@ -70,6 +70,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ChangedItem += Handler.OnChangedItem;
             PlayerEvent.DroppingItem += Handler.OnDropping;
             PlayerEvent.Hurting += Handler.OnHurting;
+            PlayerEvent.InteractingDoor += Handler.OnDoorInteracting;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -87,14 +88,22 @@ namespace UncomplicatedCustomItems
             LogManager.Info("===========================================");
             LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
+            if (IsPrerelease)
+            {
+                if (!Log.DebugEnabled.Contains(Instance.Assembly))
+                {
+                    LogManager.Info("Debug logs have been activated!");
+                    Instance.Config.Debug = true;
+                    Log.DebugEnabled.Add(Instance.Assembly);
+                }
+            }
+
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
-
             Task.Run(delegate
             {
                 if (HttpManager.LatestVersion.CompareTo(Version) > 0)
                     LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomItems!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest");
-
                 VersionManager.Init();
             });
 
@@ -145,6 +154,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ChangedItem -= Handler.OnChangedItem;
             PlayerEvent.DroppingItem -= Handler.OnDropping;
             PlayerEvent.Hurting -= Handler.OnHurting;
+            PlayerEvent.InteractingDoor -= Handler.OnDoorInteracting;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

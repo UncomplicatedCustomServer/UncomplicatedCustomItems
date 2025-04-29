@@ -16,5 +16,6 @@
         public abstract byte WearDetail { get; set; }
         public abstract string LabelColor { get; set; }
         public abstract int Rank { get; set; }
+        public abstract bool OneTimeUse { get; set; }
     }
 }
