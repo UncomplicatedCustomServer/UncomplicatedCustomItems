@@ -80,10 +80,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new KeycardData()
                 {
-                    PermissionsColor = "Red",
-                    TintColor = "Red",
-                    Name = "Hello",
-                    Label = "World",
+                    Permissions = Exiled.API.Enums.KeycardPermissions.Checkpoints | Exiled.API.Enums.KeycardPermissions.ExitGates
                 })
             },
             new()
