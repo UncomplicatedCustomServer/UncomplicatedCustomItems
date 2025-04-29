@@ -119,6 +119,13 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnItemUse(UsingItemCompletedEventArgs ev)
         {
+            if (ev.Player == null)
+                return;
+            if (ev.Item == null)
+                return;
+            if (ev.Usable == null)
+                return;
+            
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.DieOnUse))
             {
                 if (ev.Item != null)
@@ -1124,10 +1131,12 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.Effect == null)
                 return;
-            if (ev.Player == null || ev.Player.CurrentItem == null)
+            if (ev.Player == null)
+                return;
+            if (ev.Player.CurrentItem == null)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
                 LogManager.Debug($"{ev.Player.DisplayNickname} is reciving {ev.Effect}.");
                 ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
