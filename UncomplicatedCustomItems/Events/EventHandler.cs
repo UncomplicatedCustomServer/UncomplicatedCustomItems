@@ -42,7 +42,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null)
                 return;
 
-            LogManager.Debug("OnHurt event is being triggered");
+            //LogManager.Debug("OnHurt event is being triggered"); this was really annoying when debugging.
             if (ev.Player != null && ev.Attacker != null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem))
             {
                 foreach (LifeStealSettings LifeStealSettings in summonedCustomItem.CustomItem.FlagSettings.LifeStealSettings)
@@ -719,7 +719,6 @@ namespace UncomplicatedCustomItems.Events
             
             foreach (Item item in ev.Player.Items)
             {
-                
                 if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem CustomItem))
                 {
                     if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
@@ -1220,6 +1219,19 @@ namespace UncomplicatedCustomItems.Events
                 Player.TryGet(playerId, out Player player);
                 RoleTypeId roleID = entry.Value;
                 player.ChangeAppearance(roleID);
+            }
+        }
+        public void OnLeft(LeftEventArgs ev)
+        {
+            if (ev.Player == null)
+                return;
+            if (ev.Player.IsHost)
+                return;
+                
+            if (Appearance.ContainsKey(ev.Player.Id))
+            {
+                LogManager.Debug($"{nameof(OnVerified)}: Removing {ev.Player.Id} from appearance dictionary");
+                Appearance.Remove(ev.Player.Id);
             }
         }
 

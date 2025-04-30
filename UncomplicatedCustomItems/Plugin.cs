@@ -83,6 +83,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Verified += Handler.OnVerified;
             PlayerEvent.ItemAdded += Handler.Onpickup;
             PlayerEvent.Spawned += Handler.OnSpawned;
+            PlayerEvent.Left += Handler.OnLeft;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -182,6 +183,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Verified -= Handler.OnVerified;
             PlayerEvent.ItemAdded -= Handler.Onpickup;
             PlayerEvent.Spawned -= Handler.OnSpawned;
+            PlayerEvent.Left -= Handler.OnLeft;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
@@ -191,6 +193,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting -= Handler.Onshooting;
             PlayerEvent.ThrownProjectile -= Handler.Onthrown;
 
+            Handler.Appearance.Clear();
             Instance = null;
             Handler = null;
             base.OnDisabled();

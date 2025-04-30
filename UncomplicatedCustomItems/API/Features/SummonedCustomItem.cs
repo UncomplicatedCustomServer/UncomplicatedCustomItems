@@ -35,6 +35,11 @@ namespace UncomplicatedCustomItems.API.Features
         private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
 
         /// <summary>
+        /// Stores the original badge status for players who have had a custom item badge applied. Key is Player ID, Value is true if the badge was hidden.
+        /// </summary>
+        internal static Dictionary<int, bool> PlayerBadges = [];
+
+        /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
         /// </summary>
         public ICustomItem CustomItem { get; internal set; }
@@ -634,6 +639,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public string LoadBadge(Player Player)
         {
+            PlayerBadges.Add(Player.Id, Player.BadgeHidden);
             LogManager.Debug("LoadBadge Triggered");
             string output = "Badge: ";
 
@@ -680,16 +686,23 @@ namespace UncomplicatedCustomItems.API.Features
 
         /// <summary>
         /// Resets the badge of the <see cref="Player"/>.
-        /// <param name="Player"></param>
+        /// <param name="player"></param>
         /// </summary>
-        public void ResetBadge(Player Player)
+        public void ResetBadge(Player player)
         {
             if (CustomItem.BadgeName.Length == 0)
                 return;
             
-            Player.ReferenceHub.serverRoles.RefreshLocalTag();
-            Player.ReferenceHub.serverRoles.TryHideTag();
-            LogManager.Debug($"{Player.Nickname} Badge successfully reset");
+            player.ReferenceHub.serverRoles.RefreshLocalTag();
+            if (PlayerBadges.TryGetValue(player.Id, out bool Hidden))
+            {
+                if (Hidden)
+                {
+                    LogManager.Debug($"Hid {player.DisplayNickname} badge.");
+                    player.ReferenceHub.serverRoles.TryHideTag();
+                }
+            }
+            LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }
 
         internal void OnPickup(ItemAddedEventArgs pickedUp)
