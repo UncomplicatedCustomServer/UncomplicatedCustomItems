@@ -306,8 +306,14 @@ namespace UncomplicatedCustomItems.API.Features
 
                         Armor.HelmetEfficacy = ArmorData.HeadProtection;
                         Armor.VestEfficacy = ArmorData.BodyProtection;
+                        // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
+                        // Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
                         Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
                         Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
+                        if (ArmorData.RemoveExcessOnDrop)
+                        {
+                            LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
+                        }
                         break;
 
                     case CustomItemType.Weapon:
@@ -441,6 +447,8 @@ namespace UncomplicatedCustomItems.API.Features
                             {
                                 ArmorData.HeadProtection = Armor.HelmetEfficacy;
                                 ArmorData.BodyProtection = Armor.VestEfficacy;
+                                // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
+                                // ArmorData.RemoveExcessOnDrop = Armor.RemoveExcessOnDrop;
                                 ArmorData.StaminaUseMultiplier = Armor.StaminaUseMultiplier;
                                 ArmorData.StaminaRegenMultiplier = Armor.StaminaRegenMultiplier;
                             }
