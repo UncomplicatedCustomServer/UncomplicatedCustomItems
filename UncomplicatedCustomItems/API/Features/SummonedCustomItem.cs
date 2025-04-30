@@ -37,7 +37,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Stores the original badge status for players who have had a custom item badge applied. Key is Player ID, Value is true if the badge was hidden.
         /// </summary>
-        internal static Dictionary<int, bool> PlayerBadges = [];
+        public static Dictionary<int, bool> PlayerBadges = [];
 
         /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
