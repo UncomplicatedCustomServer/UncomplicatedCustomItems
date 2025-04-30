@@ -7,11 +7,16 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using System.Threading.Tasks;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using UncomplicatedCustomItems.Integration;
+using Exiled.API.Features.Core.UserSettings;
+using System.Collections.Generic;
+using UnityEngine;
+using System.Linq;
 
 using PlayerEvent = Exiled.Events.Handlers.Player;
 using ItemEvent = Exiled.Events.Handlers.Item;
 using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
+using UserSettings.ServerSpecific;
 
 namespace UncomplicatedCustomItems
 {
@@ -39,6 +44,7 @@ namespace UncomplicatedCustomItems
         internal static HttpManager HttpManager;
 
         internal FileConfig FileConfig;
+        internal IEnumerable<SettingBase> _playerSettings;
 
         public override void OnEnabled()
         {
@@ -73,6 +79,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.InteractingDoor += Handler.OnDoorInteracting;
             PlayerEvent.UnlockingGenerator += Handler.OnGeneratorUnlock;
             PlayerEvent.InteractingLocker += Handler.OnLockerInteracting;
+            ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -81,6 +88,14 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
             PlayerEvent.Shooting += Handler.Onshooting;
             PlayerEvent.ThrownProjectile += Handler.Onthrown;
+
+            _playerSettings =
+            [
+                new HeaderSetting("CustomItem Settings"),
+                new KeybindSetting(20, "Trigger CustomItem", KeyCode.K, hintDescription: "When pressed this will trigger the CustomItem your holding")
+            ];
+
+            SettingBase.Register(_playerSettings);
 
             LogManager.History.Clear();
 
@@ -130,6 +145,9 @@ namespace UncomplicatedCustomItems
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
 
+            SettingBase.Unregister(settings: _playerSettings);
+            _playerSettings = null;
+
             HttpManager.UnregisterEvents();
             _harmony.UnpatchAll();
             _harmony = null;
@@ -157,6 +175,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.InteractingDoor -= Handler.OnDoorInteracting;
             PlayerEvent.UnlockingGenerator -= Handler.OnGeneratorUnlock;
             PlayerEvent.InteractingLocker -= Handler.OnLockerInteracting;
+            ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

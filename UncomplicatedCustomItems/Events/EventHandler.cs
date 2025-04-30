@@ -23,6 +23,9 @@ using UncomplicatedCustomItems.Enums;
 using System.Linq;
 using Exiled.API.Features.DamageHandlers;
 using System;
+using UserSettings.ServerSpecific;
+using Exiled.API.Features.Core.UserSettings;
+using Exiled.API.Features;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -604,6 +607,21 @@ namespace UncomplicatedCustomItems.Events
                 LogManager.Debug($"Destroyed pickup. Type: {Pickup.Type} Previous owner: {Pickup.PreviousOwner} Serial: {Pickup.Serial}");
             }
         }
+
+        public void OnValueReceived(ReferenceHub referenceHub, ServerSpecificSettingBase settingBase)
+        {
+            if (settingBase is not SSKeybindSetting keybindSetting || keybindSetting.SettingId != 20 || !keybindSetting.SyncIsPressed)
+                return;
+            if (!Player.TryGet(referenceHub, out Player player))
+                return;
+            if (player.CurrentItem is null)
+                return;
+            if (!Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
+                return;
+
+            Item?.HandleEvent(player, ItemEvents.SSSS);
+        }
+
         public void OnHurting(HurtingEventArgs ev)
         {
             if (ev.Attacker == null)

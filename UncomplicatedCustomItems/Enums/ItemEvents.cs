@@ -11,6 +11,5 @@
         Use,
         Noclip,
         Detonation,
-        // SSSS
-        // Might be eventually implemented. Currently dont really feel like learning it.
+        SSSS
     }
