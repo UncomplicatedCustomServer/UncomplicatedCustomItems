@@ -10,13 +10,13 @@ using UncomplicatedCustomItems.Integration;
 using Exiled.API.Features.Core.UserSettings;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+using UserSettings.ServerSpecific;
 
+// Events
 using PlayerEvent = Exiled.Events.Handlers.Player;
 using ItemEvent = Exiled.Events.Handlers.Item;
 using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
-using UserSettings.ServerSpecific;
 
 namespace UncomplicatedCustomItems
 {
@@ -80,6 +80,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.UnlockingGenerator += Handler.OnGeneratorUnlock;
             PlayerEvent.InteractingLocker += Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
+            PlayerEvent.Verified += Handler.OnVerified;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -176,6 +177,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.UnlockingGenerator -= Handler.OnGeneratorUnlock;
             PlayerEvent.InteractingLocker -= Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
+            PlayerEvent.Verified -= Handler.OnVerified;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

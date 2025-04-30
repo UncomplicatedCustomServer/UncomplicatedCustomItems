@@ -21,11 +21,10 @@ using UncomplicatedCustomItems.Integrations;
 using PlayerRoles;
 using UncomplicatedCustomItems.Enums;
 using System.Linq;
-using Exiled.API.Features.DamageHandlers;
 using System;
 using UserSettings.ServerSpecific;
-using Exiled.API.Features.Core.UserSettings;
 using Exiled.API.Features;
+using Exiled.API.Extensions;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -37,6 +36,7 @@ namespace UncomplicatedCustomItems.Events
         public Dictionary<Pickup, Light> ActiveLights = [];
         public Vector3 DetonationPosition { get; set; }
         private bool ChargeAttack { get; set; } = false;
+        internal static Dictionary<int, RoleTypeId> Appearance = [];
         public void OnHurt(HurtEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null)
@@ -105,6 +105,7 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
+
         public void OnDieOnUseFlag(ShootingEventArgs ev)
         {
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.DieOnUse))
@@ -1070,7 +1071,35 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"Couldnt Vaporize {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                 }
             }
+            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.ChangeAppearanceOnKill))
+            {
+                LogManager.Debug($"{nameof(OnDying)}: Changing {ev.Attacker.DisplayNickname} appearance to {ev.Player.Role.Name}");
+                ev.Attacker.ChangeAppearance(ev.Player.Role);
+                if (Appearance.ContainsKey(ev.Attacker.Id))
+                {
+                    Appearance.Remove(ev.Attacker.Id);
+                    LogManager.Debug($"{nameof(OnDying)}: Removing {ev.Attacker.Id} from appearance dictionary");
+                    LogManager.Debug($"{nameof(OnDying)}: Adding {ev.Attacker.Id} to appearance dictionary");
+                    Appearance.Add(ev.Attacker.Id, ev.Player.Role);
+                }
+                else
+                {
+                    LogManager.Debug($"{nameof(OnDying)}: Adding {ev.Attacker.Id} to appearance dictionary");
+                    Appearance.Add(ev.Attacker.Id, ev.Player.Role);
+                }
+            }
             else return;
+        }
+        public void OnVerified(VerifiedEventArgs ev)
+        {
+            foreach (var entry in Appearance)
+            {
+                LogManager.Debug($"{nameof(OnVerified)}: Changing {entry.Key} appearance to {entry.Value}");
+                int playerId = entry.Key;
+                Player.TryGet(playerId, out Player player);
+                RoleTypeId roleID = entry.Value;
+                player.ChangeAppearance(roleID);
+            }
         }
 
         public void OnShot(ShotEventArgs ev)
