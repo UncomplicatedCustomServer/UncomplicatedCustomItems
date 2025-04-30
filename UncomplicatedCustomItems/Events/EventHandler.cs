@@ -659,7 +659,54 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
-
+        public void OnGeneratorUnlock(UnlockingGeneratorEventArgs ev)
+        {
+            if (ev.Player == null)
+                return;
+            if (ev.Player.CurrentItem == null)
+                return;
+            // This probably will throw a error with plugins like RemoteKeycard
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
+                {
+                    IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
+                    if (Data.OneTimeUse)
+                    {
+                        Timing.CallDelayed(0.5f, () =>
+                        {
+                            ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                            LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                            ev.Player.RemoveItem(CustomItem.Item, true);
+                        });
+                    }
+                }
+            }
+        }
+        public void OnLockerInteracting(InteractingLockerEventArgs ev)
+        {
+            if (ev.Player == null)
+                return;
+            if (ev.Player.CurrentItem == null)
+                return;
+            // This probably will throw a error with plugins like RemoteKeycard
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+            {
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
+                {
+                    IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
+                    if (Data.OneTimeUse)
+                    {
+                        Timing.CallDelayed(0.5f, () =>
+                        {
+                            ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                            LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                            ev.Player.RemoveItem(CustomItem.Item, true);
+                        });
+                    }
+                }
+            }
+        }
         public void ThrownProjectile(ThrownProjectileEventArgs ev)
         {
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.EffectWhenUsed))

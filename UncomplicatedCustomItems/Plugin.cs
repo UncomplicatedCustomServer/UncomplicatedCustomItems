@@ -71,6 +71,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.DroppingItem += Handler.OnDropping;
             PlayerEvent.Hurting += Handler.OnHurting;
             PlayerEvent.InteractingDoor += Handler.OnDoorInteracting;
+            PlayerEvent.UnlockingGenerator += Handler.OnGeneratorUnlock;
+            PlayerEvent.InteractingLocker += Handler.OnLockerInteracting;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -155,6 +157,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.DroppingItem -= Handler.OnDropping;
             PlayerEvent.Hurting -= Handler.OnHurting;
             PlayerEvent.InteractingDoor -= Handler.OnDoorInteracting;
+            PlayerEvent.UnlockingGenerator -= Handler.OnGeneratorUnlock;
+            PlayerEvent.InteractingLocker -= Handler.OnLockerInteracting;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
