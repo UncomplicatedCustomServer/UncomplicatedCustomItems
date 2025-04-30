@@ -81,10 +81,11 @@ namespace UncomplicatedCustomItems
             PlayerEvent.InteractingLocker += Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
             PlayerEvent.Verified += Handler.OnVerified;
+            PlayerEvent.ItemAdded += Handler.Onpickup;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
-            PlayerEvent.ItemAdded += Handler.Onpickup;
+            PlayerEvent.ItemAdded += Handler.OnDebuggingpickup;
             PlayerEvent.UsingItem += Handler.Onuse;
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
             PlayerEvent.Shooting += Handler.Onshooting;
@@ -178,10 +179,11 @@ namespace UncomplicatedCustomItems
             PlayerEvent.InteractingLocker -= Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
             PlayerEvent.Verified -= Handler.OnVerified;
+            PlayerEvent.ItemAdded -= Handler.Onpickup;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
-            PlayerEvent.ItemAdded -= Handler.Onpickup;
+            PlayerEvent.ItemAdded -= Handler.OnDebuggingpickup;
             PlayerEvent.UsingItem -= Handler.Onuse;
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
             PlayerEvent.Shooting -= Handler.Onshooting;
