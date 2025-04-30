@@ -122,8 +122,6 @@ namespace UncomplicatedCustomItems
             _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
 
-            ServerConsole.ReloadServerName();
-
             base.OnEnabled();
         }
 

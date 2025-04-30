@@ -1,14 +1,12 @@
 ﻿using HarmonyLib;
-using System.Reflection;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
     [HarmonyPatch(typeof(ServerConsole), nameof(ServerConsole.ReloadServerName))]
-    internal class ServerNamePatch
+    internal static class ServerNamePatch
     {
-        [HarmonyPostfix]
-        public static void Postfix()
+        private static void Postfix()
         {
             if (!Plugin.Instance.Config.ServerTracking)
             {
@@ -16,7 +14,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 return;
             }
             ServerConsole.ServerName += $"<color=#00000000><size=1>UCI {Plugin.Instance.Version.ToString(3)}</size></color>";
-            LogManager.Debug("ServerName Patched!");
+            LogManager.Debug($"ServerName Patched!\n{ServerConsole.ServerName}");
         }
     }
 }
