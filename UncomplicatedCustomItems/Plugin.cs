@@ -82,6 +82,7 @@ namespace UncomplicatedCustomItems
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
             PlayerEvent.Verified += Handler.OnVerified;
             PlayerEvent.ItemAdded += Handler.Onpickup;
+            PlayerEvent.Spawned += Handler.OnSpawned;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -180,6 +181,7 @@ namespace UncomplicatedCustomItems
             ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
             PlayerEvent.Verified -= Handler.OnVerified;
             PlayerEvent.ItemAdded -= Handler.Onpickup;
+            PlayerEvent.Spawned -= Handler.OnSpawned;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
