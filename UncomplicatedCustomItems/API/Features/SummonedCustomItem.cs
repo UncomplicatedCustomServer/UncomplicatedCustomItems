@@ -158,6 +158,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (Item is not null)
                 switch (CustomItem.CustomItemType)
                 {
+                    // Might eventually make this into a wrapper to cleanup the code.
                     case CustomItemType.Keycard:
                         Keycard keycard = Item as Keycard;
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
@@ -221,6 +222,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                             try
                             {
+                                // I have no clue what this does. Everything ive tried has done nothing.
                                 CustomWearDetail wearDetail = keycard.Base.Details.OfType<CustomWearDetail>().FirstOrDefault();
                                 if (wearDetail != null)
                                 {
@@ -267,6 +269,7 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             try
                             {
+                                // Also have no clue what this does. Everything ive tried has done nothing.
                                 CustomRankDetail rankDetail = keycard.Base.Details.OfType<CustomRankDetail>().FirstOrDefault();
                                 if (rankDetail != null)
                                 {
