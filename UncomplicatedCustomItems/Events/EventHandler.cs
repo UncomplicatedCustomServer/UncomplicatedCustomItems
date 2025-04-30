@@ -793,19 +793,28 @@ namespace UncomplicatedCustomItems.Events
                     }
                     if (CustomItem.HasModule(CustomFlags.Disguise))
                     {
-                        LogManager.Debug($"{nameof(Onpickup)}: Changing {ev.Player.DisplayNickname} appearance to {ev.Player.Role.Name}");
-                        ev.Player.ChangeAppearance(ev.Player.Role);
-                        if (Appearance.ContainsKey(ev.Player.Id))
+                        foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
                         {
-                            Appearance.Remove(ev.Player.Id);
-                            LogManager.Debug($"{nameof(Onpickup)}: Removing {ev.Player.Id} from appearance dictionary");
-                            LogManager.Debug($"{nameof(Onpickup)}: Adding {ev.Player.Id} to appearance dictionary");
-                            Appearance.Add(ev.Player.Id, ev.Player.Role);
-                        }
-                        else
-                        {
-                            LogManager.Debug($"{nameof(Onpickup)}: Adding {ev.Player.Id} to appearance dictionary");
-                            Appearance.Add(ev.Player.Id, ev.Player.Role);
+                            if (DisguiseSettings.RoleId == null)
+                                return;
+                            if (DisguiseSettings.DisguiseMessage == null)
+                                return;
+
+                            LogManager.Debug($"{nameof(OnSpawned)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
+                            ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
+                            ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
+                            if (Appearance.ContainsKey(ev.Player.Id))
+                            {
+                                Appearance.Remove(ev.Player.Id);
+                                LogManager.Debug($"{nameof(OnSpawned)}: Removing {ev.Player.Id} from appearance dictionary");
+                                LogManager.Debug($"{nameof(OnSpawned)}: Adding {ev.Player.Id} to appearance dictionary");
+                                Appearance.Add(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
+                            }
+                            else
+                            {
+                                LogManager.Debug($"{nameof(OnSpawned)}: Adding {ev.Player.Id} to appearance dictionary");
+                                Appearance.Add(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
+                            }
                         }
                     }
                 }
