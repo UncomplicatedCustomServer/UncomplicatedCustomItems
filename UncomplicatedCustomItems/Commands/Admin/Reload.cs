@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string[] Aliases { get; } = ["reload"];
 
-        public Dictionary<ICustomItem, Player> CustomItems = [];
+        public Dictionary<uint, Player> CustomItems = [];
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
@@ -67,7 +67,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         ushort Serial = Item.Serial;
                         if (SummonedCustomItem.TryGet(Serial, out SummonedCustomItem CustomItem))
                         {
-                            CustomItems[CustomItem.CustomItem] = player;
+                            CustomItems[CustomItem.CustomItem.Id] = player;
                             LogManager.Debug($"Marked {Item.Type} from {player.DisplayNickname} for removal");
                             ItemsToRemove.Add(Serial);
                         }
@@ -100,12 +100,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (var entry in CustomItems)
                 {
-                    Timing.CallDelayed(0.2f, () =>
+                    Timing.CallDelayed(1f, () =>
                     {
                         Player player = entry.Value;
-                        ICustomItem Item = entry.Key;
-
-                        new SummonedCustomItem(Item, player);
+                        uint Id = entry.Key;
+                        Utilities.TryGetCustomItem(Id, out ICustomItem item);
+                        new SummonedCustomItem(item, player);
                     });
                 }
                 if (NewItems > 0)
