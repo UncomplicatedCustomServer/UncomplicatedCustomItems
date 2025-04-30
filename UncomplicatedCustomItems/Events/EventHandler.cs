@@ -529,6 +529,32 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                 }
+                if (CustomItem.HasModule(CustomFlags.Disguise))
+                {
+                    foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
+                    {
+                        if (DisguiseSettings.RoleId == null)
+                            return;
+                        if (DisguiseSettings.DisguiseMessage == null)
+                            return;
+
+                        LogManager.Debug($"{nameof(Onpickup)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
+                        ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
+                        ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
+                        if (Appearance.ContainsKey(ev.Player.Id))
+                        {
+                            Appearance.Remove(ev.Player.Id);
+                            LogManager.Debug($"{nameof(Onpickup)}: Removing {ev.Player.Id} from appearance dictionary");
+                            LogManager.Debug($"{nameof(Onpickup)}: Adding {ev.Player.Id} to appearance dictionary");
+                            Appearance.Add(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
+                        }
+                        else
+                        {
+                            LogManager.Debug($"{nameof(Onpickup)}: Adding {ev.Player.Id} to appearance dictionary");
+                            Appearance.Add(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
+                        }
+                    }
+                }
             }
             else return;
         }
@@ -765,9 +791,26 @@ namespace UncomplicatedCustomItems.Events
                             }
                         }
                     }
+                    if (CustomItem.HasModule(CustomFlags.Disguise))
+                    {
+                        LogManager.Debug($"{nameof(Onpickup)}: Changing {ev.Player.DisplayNickname} appearance to {ev.Player.Role.Name}");
+                        ev.Player.ChangeAppearance(ev.Player.Role);
+                        if (Appearance.ContainsKey(ev.Player.Id))
+                        {
+                            Appearance.Remove(ev.Player.Id);
+                            LogManager.Debug($"{nameof(Onpickup)}: Removing {ev.Player.Id} from appearance dictionary");
+                            LogManager.Debug($"{nameof(Onpickup)}: Adding {ev.Player.Id} to appearance dictionary");
+                            Appearance.Add(ev.Player.Id, ev.Player.Role);
+                        }
+                        else
+                        {
+                            LogManager.Debug($"{nameof(Onpickup)}: Adding {ev.Player.Id} to appearance dictionary");
+                            Appearance.Add(ev.Player.Id, ev.Player.Role);
+                        }
+                    }
                 }
+                else return;
             }
-            else return;
         }
 
         public void OnDoorInteracting(InteractingDoorEventArgs ev)
@@ -991,6 +1034,10 @@ namespace UncomplicatedCustomItems.Events
                 {
                     LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
                     LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                }
+                if (SummonedCustomItem.HasModule(CustomFlags.Disguise))
+                {
+                    ev.Player.ChangeAppearance(ev.Player.Role);
                 }
             }
 

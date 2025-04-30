@@ -1,4 +1,5 @@
 using Exiled.API.Enums;
+using PlayerRoles;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UncomplicatedCustomItems.Interfaces;
@@ -175,6 +176,15 @@ namespace UncomplicatedCustomItems.API.Features
                 HintOrBroadcast = "hint",
                 Message = "You cant drop %name%!",
                 Duration = 10
+            }
+        ];
+        [Description("This is recommended to only be applied to armor.")]
+        public List<DisguiseSettings?> DisguiseSettings { get; set; } =
+        [
+            new()
+            {
+                RoleId = RoleTypeId.NtfSpecialist,
+                DisguiseMessage = "Your are disguised as an NtfSpecialist!",
             }
         ];
     }
