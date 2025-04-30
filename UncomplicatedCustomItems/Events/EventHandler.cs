@@ -639,6 +639,8 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Door.KeycardPermissions == KeycardPermissions.None)
                 return;
+            if (ev.Player.CurrentItem == null)
+                return;
             // This probably will throw a error with plugins like RemoteKeycard
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
