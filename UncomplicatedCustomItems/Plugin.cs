@@ -17,6 +17,8 @@ using PlayerEvent = Exiled.Events.Handlers.Player;
 using ItemEvent = Exiled.Events.Handlers.Item;
 using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
+using LabAPIPlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using LabAPIServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 namespace UncomplicatedCustomItems
 {
@@ -84,6 +86,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ItemAdded += Handler.Onpickup;
             PlayerEvent.Spawned += Handler.OnSpawned;
             PlayerEvent.Left += Handler.OnLeft;
+            LabAPIPlayerEvent.FlippedCoin += Handler.FlippedCoin;
+            LabAPIPlayerEvent.ToggledFlashlight += Handler.ToggledFlashlight;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -184,6 +188,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ItemAdded -= Handler.Onpickup;
             PlayerEvent.Spawned -= Handler.OnSpawned;
             PlayerEvent.Left -= Handler.OnLeft;
+            LabAPIPlayerEvent.FlippedCoin -= Handler.FlippedCoin;
+            LabAPIPlayerEvent.ToggledFlashlight -= Handler.ToggledFlashlight;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

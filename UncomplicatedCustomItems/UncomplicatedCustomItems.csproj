@@ -112,9 +112,6 @@
     <Reference Include="NVorbis">
       <HintPath>$(EXILED_REFERENCES)\NVorbis.dll</HintPath>
     </Reference>
-    <Reference Include="PluginAPI">
-      <HintPath>$(EXILED_REFERENCES)\PluginAPI.dll</HintPath>
-    </Reference>
     <Reference Include="Pooling, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Pooling.dll</HintPath>

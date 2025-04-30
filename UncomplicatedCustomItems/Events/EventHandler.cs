@@ -25,6 +25,7 @@ using System;
 using UserSettings.ServerSpecific;
 using Exiled.API.Features;
 using Exiled.API.Extensions;
+using LabApi.Events.Arguments.PlayerEvents;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -897,6 +898,17 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
+        }
+
+        public void FlippedCoin(PlayerFlippedCoinEventArgs ev)
+        {
+            if (Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem summonedCustomItem))
+                summonedCustomItem.HandleEvent(ev.Player, ItemEvents.Use);
+        }
+        public void ToggledFlashlight(PlayerToggledFlashlightEventArgs ev)
+        {
+            if (Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem summonedCustomItem))
+                summonedCustomItem.HandleEvent(ev.Player, ItemEvents.Use);
         }
         public void ThrownProjectile(ThrownProjectileEventArgs ev)
         {
