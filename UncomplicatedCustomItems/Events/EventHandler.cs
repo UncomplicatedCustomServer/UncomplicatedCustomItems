@@ -791,20 +791,20 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnDrop(DroppedItemEventArgs ev)
         {
+            if (ev.Pickup == null)
+                return;
+
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
             {
-                if (ev.Pickup != null)
+                try
                 {
-                    try
-                    {
-                        ev.Pickup.Scale = SummonedCustomItem.CustomItem.Scale;
-                        ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
-                        LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                    }
+                    ev.Pickup.Scale = SummonedCustomItem.CustomItem.Scale;
+                    ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                    LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                 }
             }
 

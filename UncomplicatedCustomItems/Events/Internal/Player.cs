@@ -72,6 +72,9 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
         {
+            if (ev.Pickup == null)
+                return;
+
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
                 return;
 
