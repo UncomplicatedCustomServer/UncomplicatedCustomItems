@@ -704,6 +704,7 @@ namespace UncomplicatedCustomItems.API.Features
                     LogManager.Debug($"Hid {player.DisplayNickname} badge.");
                     player.ReferenceHub.serverRoles.TryHideTag();
                 }
+                PlayerBadges.Remove(player.Id);
             }
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }
