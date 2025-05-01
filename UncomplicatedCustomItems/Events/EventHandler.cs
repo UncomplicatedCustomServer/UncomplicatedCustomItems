@@ -16,8 +16,6 @@ using CustomPlayerEffects;
 using Exiled.API.Features.Toys;
 using InventorySystem.Items.Usables.Scp244;
 using MEC;
-using Exiled.CustomRoles.API.Features;
-using UncomplicatedCustomItems.Integrations;
 using PlayerRoles;
 using UncomplicatedCustomItems.Enums;
 using System.Linq;
@@ -26,6 +24,7 @@ using UserSettings.ServerSpecific;
 using Exiled.API.Features;
 using Exiled.API.Extensions;
 using LabApi.Events.Arguments.PlayerEvents;
+using UncomplicatedCustomItems.Events.Methods;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -38,6 +37,7 @@ namespace UncomplicatedCustomItems.Events
         public Vector3 DetonationPosition { get; set; }
         private bool ChargeAttack { get; set; } = false;
         internal static Dictionary<int, RoleTypeId> Appearance = [];
+        internal static Dictionary<ushort, SummonedCustomItem> EquipedKeycards = [];
         public void OnHurt(HurtEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null)
@@ -327,99 +327,9 @@ namespace UncomplicatedCustomItems.Events
                     SummonedCustomItem.HandleCustomAction(SummonedCustomItem.Item);
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem3) && CustomItem3.CustomItem.CustomFlags.HasValue && CustomItem3.CustomItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse)) // Testing a new system for CustomFlags. Hopefully this will fix some bugs
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem3) && CustomItem3.CustomItem.CustomFlags.HasValue && CustomItem3.CustomItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse))
             {
-                foreach (SwitchRoleOnUseSettings SwitchRoleOnUseSettings in CustomItem3.CustomItem.FlagSettings.SwitchRoleOnUseSettings)
-                {
-                    if (SwitchRoleOnUseSettings.RoleId == null || SwitchRoleOnUseSettings.RoleType == null)
-                    {
-                        LogManager.Warn($"{CustomItem3.CustomItem.Name} field role_id or role_type is null aborting...");
-                        break;
-                    }
-                    
-                    if (SwitchRoleOnUseSettings.RoleType == "ECR")
-                    {
-                        if (CustomRole.TryGet((uint)SwitchRoleOnUseSettings.RoleId, out CustomRole? ECRRole))
-                        {
-                            if (SwitchRoleOnUseSettings.Delay != null || SwitchRoleOnUseSettings.Delay > 0f)
-                            {
-                                Timing.CallDelayed((float)SwitchRoleOnUseSettings.Delay, () =>
-                                {
-                                    ECRRole.AddRole(ev.Player);
-                                });
-                            }
-                            else
-                            {
-                                ECRRole.AddRole(ev.Player);
-                            }
-                            if (SwitchRoleOnUseSettings.KeepLocation != null || SwitchRoleOnUseSettings.KeepLocation != false)
-                            {
-                                Vector3 OldPos = ev.Player.Position;
-                                Timing.CallDelayed(0.1f, () =>
-                                {
-                                    ev.Player.Position = OldPos;
-                                });
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            LogManager.Warn($"{SwitchRoleOnUseSettings.RoleId} Is not a ECR role");
-                        }
-                    }
-                    else if (SwitchRoleOnUseSettings.RoleType == "UCR")
-                    {
-                        if (UCR.TryGetCustomRole((int)SwitchRoleOnUseSettings.RoleId, out _))
-                        {
-                            if (SwitchRoleOnUseSettings.Delay != null || SwitchRoleOnUseSettings.Delay > 0f)
-                            {
-                                Timing.CallDelayed((float)SwitchRoleOnUseSettings.Delay, () =>
-                                {
-                                    UCR.GiveCustomRole((int)SwitchRoleOnUseSettings.RoleId, ev.Player);
-                                });
-                            }
-                            else
-                            {
-                                UCR.GiveCustomRole((int)SwitchRoleOnUseSettings.RoleId, ev.Player);
-                            }
-                            if (SwitchRoleOnUseSettings.KeepLocation != null || SwitchRoleOnUseSettings.KeepLocation != false)
-                            {
-                                Vector3 OldPos = ev.Player.Position;
-                                Timing.CallDelayed(0.1f, () =>
-                                {
-                                    ev.Player.Position = OldPos;
-                                });
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            LogManager.Warn($"{SwitchRoleOnUseSettings.RoleId} Is not a UCR role");
-                        }
-                    }
-                    else if (SwitchRoleOnUseSettings.RoleType == "Normal")
-                    {
-                        if (ev.Player.Role != (RoleTypeId)SwitchRoleOnUseSettings.RoleId)
-                        {
-                            if (SwitchRoleOnUseSettings.Delay != null || SwitchRoleOnUseSettings.Delay > 0f)
-                            {
-                                Timing.CallDelayed((float)SwitchRoleOnUseSettings.Delay, () =>
-                                {
-                                    ev.Player.Role.Set((RoleTypeId)SwitchRoleOnUseSettings.RoleId, SpawnReason.ItemUsage, (RoleSpawnFlags)SwitchRoleOnUseSettings.SpawnFlags);
-                                });
-                            }
-                            else
-                            {
-                                ev.Player.Role.Set((RoleTypeId)SwitchRoleOnUseSettings.RoleId, SpawnReason.ItemUsage, (RoleSpawnFlags)SwitchRoleOnUseSettings.SpawnFlags);
-                            }
-                            break;
-                        }
-                    }
-                    else if (SwitchRoleOnUseSettings.RoleType != "ECR" || SwitchRoleOnUseSettings.RoleType != "UCR" || SwitchRoleOnUseSettings.RoleType != "Normal")
-                    {
-                        LogManager.Warn($"The role_type field in {CustomItem3.CustomItem.Name} is currently {SwitchRoleOnUseSettings.RoleType} and should be 'Normal', 'UCR', or 'ECR'");
-                    }
-                }
+                SwitchRoleOnUseMethod.Start(CustomItem3, ev.Player);
             }
         }
 
@@ -474,6 +384,9 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                 }
+                IKeycardData data = CustomItem.CustomItem.CustomData as IKeycardData;
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
+                    EquipedKeycards.Add(CustomItem.Serial, CustomItem);
             }
         }
 
@@ -702,12 +615,25 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (!Player.TryGet(referenceHub, out Player player))
                 return;
-            if (player.CurrentItem is null)
-                return;
-            if (!Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
-                return;
 
-            Item?.HandleEvent(player, ItemEvents.SSSS);
+            if (player.CurrentItem is null)
+            {
+                foreach (Item item in player.Items)
+                {
+                    if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.Item == ItemType.ArmorLight || customItem.CustomItem.Item == ItemType.ArmorCombat || customItem.CustomItem.Item == ItemType.ArmorHeavy)
+                    {
+                        if (!player.IsConnected)
+                            return;
+                            
+                        customItem?.HandleEvent(player, ItemEvents.SSSS, item.Serial);
+                        break;
+                    }
+                    else
+                        LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
+                }
+            }
+            else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
+                Item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
         }
 
         public void OnHurting(HurtingEventArgs ev)
@@ -908,13 +834,15 @@ namespace UncomplicatedCustomItems.Events
 
         public void FlippedCoin(PlayerFlippedCoinEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem summonedCustomItem))
-                summonedCustomItem.HandleEvent(ev.Player, ItemEvents.Use);
+            if (Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem CustomItem))
+                CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.CoinItem.Serial);
+            SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
         }
         public void ToggledFlashlight(PlayerToggledFlashlightEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem summonedCustomItem))
-                summonedCustomItem.HandleEvent(ev.Player, ItemEvents.Use);
+            if (Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem CustomItem))
+                CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.LightItem.Serial);
+            SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
         }
         public void ThrownProjectile(ThrownProjectileEventArgs ev)
         {

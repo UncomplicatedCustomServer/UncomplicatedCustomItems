@@ -67,7 +67,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Item))
                 return;
 
-            Item?.HandleEvent(ev.Player, ItemEvents.Detonation); // Untested
+            Item?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.Projectile.Serial); // Untested
         }
 
         private static void DroppedItemEvent(DroppedItemEventArgs ev)
@@ -115,7 +115,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (Item is null)
                 return;
             
-            Item.HandleEvent(ev.Player, ItemEvents.Use);
+            Item.HandleEvent(ev.Player, ItemEvents.Use, ev.Item.Serial);
 
             Item?.ResetBadge(ev.Player);
 
@@ -147,8 +147,13 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+            {
+                if (EventHandler.EquipedKeycards.ContainsKey(ev.Player.CurrentItem.Serial))
+                    EventHandler.EquipedKeycards.Remove(ev.Player.CurrentItem.Serial);
                 return;
-
+            }
+            if (EventHandler.EquipedKeycards.ContainsKey(item.Serial))
+                EventHandler.EquipedKeycards.Remove(item.Serial);
             item.ResetBadge(ev.Player);
         }
 
@@ -200,7 +205,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
                 return;
 
-            Item?.HandleEvent(ev.Player, ItemEvents.Noclip);
+            Item?.HandleEvent(ev.Player, ItemEvents.Noclip, ev.Player.CurrentItem.Serial);
 
             if (Plugin.Instance.Config.Debug == true)
             {

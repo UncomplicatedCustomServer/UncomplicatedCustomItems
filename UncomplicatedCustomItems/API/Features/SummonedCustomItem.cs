@@ -302,10 +302,8 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             LogManager.Error($"Error!\n{ex.Message}");
                         }
-
                         RemoveKeycardDetail(keycard.Serial);
                         KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
-                        keycard.Base.OnAdded(null);
                         break;
 
                     case CustomItemType.Armor:
@@ -716,7 +714,7 @@ namespace UncomplicatedCustomItems.API.Features
             Owner = pickedUp.Player;
             SetProperties();
             Serial = Item.Serial;
-            HandleEvent(pickedUp.Player, ItemEvents.Pickup);
+            HandleEvent(pickedUp.Player, ItemEvents.Pickup, pickedUp.Item.Serial);
         }
 
         /// <summary>
@@ -730,7 +728,7 @@ namespace UncomplicatedCustomItems.API.Features
             Owner = null;
             SaveProperties();
             Serial = Pickup.Serial;
-            HandleEvent(dropped.Player, ItemEvents.Drop);
+            HandleEvent(dropped.Player, ItemEvents.Drop, dropped.Pickup.Serial);
         }
 
         /// <summary>
@@ -752,7 +750,7 @@ namespace UncomplicatedCustomItems.API.Features
                             Owner = null;
                             SaveProperties();
                             Serial = pickup.Serial;
-                            HandleEvent(ev.Player, ItemEvents.Drop);
+                            HandleEvent(ev.Player, ItemEvents.Drop, pickup.Serial);
                             Plugin.Instance.Handler.OnDeath(customItem);
                         }
                     }
@@ -807,12 +805,12 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         /// <param name="player"></param>
         /// <param name="itemEvent"></param>
-        public void HandleEvent(Player player, ItemEvents itemEvent)
+        public void HandleEvent(Player player, ItemEvents itemEvent, ushort playerItemSerial)
         {
             IItemData ItemData = CustomItem.CustomData as IItemData;
             if (CustomItem.CustomItemType == CustomItemType.Item && ItemData.Event == itemEvent)
             {
-                if (IsOnCooldown(player, player.CurrentItem.Serial))
+                if (IsOnCooldown(player, playerItemSerial))
                 {
                     LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
                     return;
@@ -856,7 +854,7 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     }
                 }
-                StartCooldown(player, player.CurrentItem.Serial, ItemData.CoolDown);
+                StartCooldown(player, playerItemSerial, ItemData.CoolDown);
 
                 Utilities.ParseResponse(player, ItemData);
 
@@ -949,7 +947,7 @@ namespace UncomplicatedCustomItems.API.Features
                 }
 
                 // Runs also the event as it gets suppressed
-                HandleEvent(Owner, ItemEvents.Use);
+                HandleEvent(Owner, ItemEvents.Use, Serial);
                 if (!CustomItem.Reusable)
                     Item.Get(item.Base).Destroy();
 

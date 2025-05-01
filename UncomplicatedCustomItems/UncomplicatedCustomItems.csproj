@@ -527,6 +527,7 @@
     <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Enums\CustomFlags.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Events\Methods\SwitchRoleOnUseMethod.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Extensions\CustomFlagsExtensions.cs" />
