@@ -25,19 +25,32 @@ using Exiled.API.Features;
 using Exiled.API.Extensions;
 using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.Events.Methods;
+using UncomplicatedCustomItems.Extensions;
 
 namespace UncomplicatedCustomItems.Events
 {
     internal class EventHandler
     {
         /// <summary>
-        /// The Dictionary that handles lights spawned from the <see cref="OnDrop"/> method.
+        /// The <see cref="Dictionary{TKey,TValue}"/> that handles lights spawned from the <see cref="OnDrop"/> method.
         /// </summary>
         public Dictionary<Pickup, Light> ActiveLights = [];
-        public Vector3 DetonationPosition { get; set; }
+        /// <summary>
+        /// The <see cref="Vector3"/> coordinates of the latest detonation point for a <see cref="Exiled.API.Features.Pickups.Projectiles.EffectGrenadeProjectile"/>.
+        /// Triggered by the <see cref="GrenadeExploding"/> method.
+        /// </summary>
+        public Vector3 DetonationPosition { get; set; } = Vector3.zero;
         private bool ChargeAttack { get; set; } = false;
-        internal static Dictionary<int, RoleTypeId> Appearance = [];
-        internal static Dictionary<ushort, SummonedCustomItem> EquipedKeycards = [];
+        /// <summary>
+        /// The <see cref="Dictionary{TKey,TValue}"/> that stores appearances for the <see cref="CustomFlags.Disguise"/> and <see cref="CustomFlags.ChangeAppearanceOnKill"/> flags.
+        /// Triggered by the <see cref="OnDying"/> method.
+        /// </summary>
+        public static Dictionary<int, RoleTypeId> Appearance = [];
+        /// <summary>
+        /// The <see cref="Dictionary{TKey,TValue}"/> that handles equiped keycards 
+        /// Triggered by the <see cref="OnChangedItem"/> method.
+        /// </summary>
+        public static Dictionary<ushort, SummonedCustomItem> EquipedKeycards = [];
         public void OnHurt(HurtEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null)
@@ -384,9 +397,8 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                 }
-                IKeycardData data = CustomItem.CustomItem.CustomData as IKeycardData;
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
-                    EquipedKeycards.Add(CustomItem.Serial, CustomItem);
+                    EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
             }
         }
 
@@ -455,18 +467,8 @@ namespace UncomplicatedCustomItems.Events
                         LogManager.Debug($"{nameof(Onpickup)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
                         ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
                         ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
-                        if (Appearance.ContainsKey(ev.Player.Id))
-                        {
-                            Appearance.Remove(ev.Player.Id);
-                            LogManager.Debug($"{nameof(Onpickup)}: Removing {ev.Player.Id} from appearance dictionary");
-                            LogManager.Debug($"{nameof(Onpickup)}: Adding {ev.Player.Id} to appearance dictionary");
-                            Appearance.Add(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
-                        }
-                        else
-                        {
-                            LogManager.Debug($"{nameof(Onpickup)}: Adding {ev.Player.Id} to appearance dictionary");
-                            Appearance.Add(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
-                        }
+                        LogManager.Debug($"{nameof(Onpickup)}: Adding or updating {ev.Player.Id} to appearance dictionary");
+                        Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
                     }
                 }
             }
@@ -736,18 +738,8 @@ namespace UncomplicatedCustomItems.Events
                             LogManager.Debug($"{nameof(OnSpawned)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
                             ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
                             ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
-                            if (Appearance.ContainsKey(ev.Player.Id))
-                            {
-                                Appearance.Remove(ev.Player.Id);
-                                LogManager.Debug($"{nameof(OnSpawned)}: Removing {ev.Player.Id} from appearance dictionary");
-                                LogManager.Debug($"{nameof(OnSpawned)}: Adding {ev.Player.Id} to appearance dictionary");
-                                Appearance.Add(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
-                            }
-                            else
-                            {
-                                LogManager.Debug($"{nameof(OnSpawned)}: Adding {ev.Player.Id} to appearance dictionary");
-                                Appearance.Add(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
-                            }
+                            LogManager.Debug($"{nameof(OnSpawned)}: Adding or updating {ev.Player.Id} to appearance dictionary");
+                            Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
                         }
                     }
                 }
@@ -1197,18 +1189,8 @@ namespace UncomplicatedCustomItems.Events
             {
                 LogManager.Debug($"{nameof(OnDying)}: Changing {ev.Attacker.DisplayNickname} appearance to {ev.Player.Role.Name}");
                 ev.Attacker.ChangeAppearance(ev.Player.Role);
-                if (Appearance.ContainsKey(ev.Attacker.Id))
-                {
-                    Appearance.Remove(ev.Attacker.Id);
-                    LogManager.Debug($"{nameof(OnDying)}: Removing {ev.Attacker.Id} from appearance dictionary");
-                    LogManager.Debug($"{nameof(OnDying)}: Adding {ev.Attacker.Id} to appearance dictionary");
-                    Appearance.Add(ev.Attacker.Id, ev.Player.Role);
-                }
-                else
-                {
-                    LogManager.Debug($"{nameof(OnDying)}: Adding {ev.Attacker.Id} to appearance dictionary");
-                    Appearance.Add(ev.Attacker.Id, ev.Player.Role);
-                }
+                LogManager.Debug($"{nameof(OnDying)}: Adding {ev.Attacker.Id} to appearance dictionary");
+                Appearance.TryAdd(ev.Attacker.Id, ev.Player.Role);
             }
             else return;
         }
@@ -1233,7 +1215,7 @@ namespace UncomplicatedCustomItems.Events
             if (Appearance.ContainsKey(ev.Player.Id))
             {
                 LogManager.Debug($"{nameof(OnVerified)}: Removing {ev.Player.Id} from appearance dictionary");
-                Appearance.Remove(ev.Player.Id);
+                Appearance.TryRemove(ev.Player.Id);
             }
         }
 
@@ -1577,7 +1559,7 @@ namespace UncomplicatedCustomItems.Events
                     NetworkServer.Destroy(ItemLight.Base.gameObject);
                     LogManager.Debug($"Destroyed light on {Pickup.Type}");
                 }
-                ActiveLights.Remove(Pickup);
+                ActiveLights.TryRemove(Pickup);
                 LogManager.Debug("Light successfully destroyed.");
             }
             else

@@ -84,5 +84,27 @@ namespace UncomplicatedCustomItems.Extensions
 
             return Data;
         }
+        
+        /// <summary>
+        /// Adds a range of key-value pairs to the dictionary.
+        /// </summary>
+        /// <typeparam name="TKey">Type of the dictionary key.</typeparam>
+        /// <typeparam name="TValue">Type of the dictionary value.</typeparam>
+        /// <param name="dictionary">The dictionary to modify.</param>
+        /// <param name="items">A collection of key-value pairs to add.</param>
+        /// <exception cref="ArgumentNullException">Thrown if the dictionary or items is null.</exception>
+        public static void AddRange<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, IEnumerable<KeyValuePair<TKey, TValue>> items)
+        {
+            if (dictionary is null)
+                throw new ArgumentNullException(nameof(dictionary));
+
+            if (items is null)
+                throw new ArgumentNullException(nameof(items));
+
+            foreach (var kvp in items)
+            {
+                dictionary[kvp.Key] = kvp.Value;
+            }
+        }
     }
 }
