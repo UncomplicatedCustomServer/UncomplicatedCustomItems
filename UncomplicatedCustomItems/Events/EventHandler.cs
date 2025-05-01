@@ -734,6 +734,12 @@ namespace UncomplicatedCustomItems.Events
                         ChargeAttack = false;
                     }
                 }
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Weapon)
+                {
+                    IWeaponData Data = CustomItem.CustomItem.CustomData as IWeaponData;
+                    LogManager.Debug($"Reducing {ev.Player.DisplayNickname} health by {Data.Damage}");
+                    ev.Amount = Data.Damage;
+                }
             }
         }
 
