@@ -177,13 +177,11 @@ namespace UncomplicatedCustomItems.API.Features
                             return;
                         }
 
-                        CustomKeycard customKeycard = new();
-                        customKeycard.ParentKeycard = keycard;
+                        CustomKeycard customKeycard = new CustomKeycard(keycard);
                         if (!NameApplied)
                         {
                             customKeycard.NameTag = KeycardData.Name;
                         }
-                        customKeycard.Owner = Owner;
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
                         customKeycard.RankIndex = KeycardData.Rank;

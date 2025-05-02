@@ -14,9 +14,15 @@ using UnityEngine;
 namespace UncomplicatedCustomItems.API.Wrappers
 {
     /// <summary>
-    /// A wrapper class for creating nametags on custom keycards.
-    /// </summary> 
-    public class CustomKeycard : IWrapper<SyncedDetail>
+    /// A wrapper class for creating and customizing custom keycards via UCI.
+    /// Provides easy-to-use properties to set name tags, colors, permissions, and other metadata.
+    /// <para>Example usage:</para>
+    /// <code>
+    /// Keycard keycard = Item as Keycard;
+    /// CustomKeycard customKeycard = new CustomKeycard(keycard);
+    /// </code>
+    /// </summary>
+    public class CustomKeycard : IWrapper<KeycardItem>
     {
         private Dictionary<ushort, Color32> PermissionColorsDic = [];
         private Dictionary<ushort, Color32> LabelColorsDic = [];
@@ -29,12 +35,28 @@ namespace UncomplicatedCustomItems.API.Wrappers
         private Dictionary<ushort, byte> WearIndexDic = [];
         private Dictionary<ushort, int> RankIndexDic = [];
 
-        public Keycard ParentKeycard { get; set; }
+        /// <summary>
+        /// The underlying Exiled <see cref="Keycard"/> instance being wrapped.
+        /// </summary>
+        public Keycard ParentKeycard { get; private set; }
 
-        public Player Owner { get; set; }
+        /// <summary>
+        /// The base synced detail object that this wrapper manages.
+        /// </summary>
+        public new KeycardItem Base { get; }
 
-        public new SyncedDetail Base { get; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CustomKeycard"/> class.
+        /// </summary>
+        /// <param name="keycard"> The <see cref="Keycard"/> to wrap.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public CustomKeycard(Keycard keycard)
+        {
+            ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
+        }
+        /// <summary>
+        /// Gets or sets the name text shown on the <see cref="Keycard"/>.
+        /// </summary>
         public string NameTag
         {
             get
@@ -49,7 +71,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = { value.Replace("%name%", ParentKeycard.Owner.DisplayNickname) };
                         ArraySegment<object> arguments = new(args);
                         nametagDetail.SetArguments(arguments);
                         NameTagDic.TryAdd(ParentKeycard.Serial, value);
@@ -62,9 +84,13 @@ namespace UncomplicatedCustomItems.API.Wrappers
                     }
                 }
                 else
-                    LogManager.Error($"{nameof(CustomKeycard)}: This keycard {ParentKeycard.Type} dosent have a NameTag section.");
+                    LogManager.Error($"{nameof(CustomKeycard)}: This keycard {ParentKeycard.Type} doesn't have a NameTag section.");
             }
         }
+
+        /// <summary>
+        /// Gets or sets the background tint color of the <see cref="Keycard"/>.
+        /// </summary>
         public Color32 CardColor
         {
             get
@@ -91,6 +117,10 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets the display name of the <see cref="Keycard"/> in inventory.
+        /// </summary>
         public string ItemName
         {
             get
@@ -117,6 +147,10 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 }
             }
         }
+        /// <summary>
+        /// Gets or sets the color of the label text printed on the <see cref="Keycard"/>.
+        /// Set this first before setting <see cref="LabelText"/>, or the label will not render.
+        /// </summary>
         public Color32 LabelColor
         {
             get
@@ -140,6 +174,10 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets the text printed on the label of the <see cref="Keycard"/>.
+        /// </summary>
         public string LabelText
         {
             get
@@ -167,6 +205,10 @@ namespace UncomplicatedCustomItems.API.Wrappers
             }
         }
 
+        /// <summary>
+        /// Gets or sets the color used when rendering permissions on the <see cref="Keycard"/>.
+        /// Set this first before setting <see cref="Permissions"/>, or the color will not render.
+        /// </summary>
         public Color32 PermissionsColor
         {
             get
@@ -179,6 +221,10 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 PermissionColorsDic.TryAdd(ParentKeycard.Serial, value);
             }
         }
+
+        /// <summary>
+        /// Gets or sets the <see cref="KeycardLevels"/> granted by this <see cref="Keycard"/>.
+        /// </summary>
         public KeycardLevels Permissions
         {
             get
@@ -205,6 +251,11 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets a custom serial number string.
+        /// Only for Task Force or Metal Case cards.
+        /// </summary>
         public string SerialNumber
         {
             get
@@ -215,7 +266,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
             set
             {
                 CustomSerialNumberDetail serialNumberDetail = ParentKeycard.Base.Details.OfType<CustomSerialNumberDetail>().FirstOrDefault();
-                if (serialNumberDetail != null && ParentKeycard.Type == ItemType.KeycardCustomTaskForce || ParentKeycard.Type == ItemType.KeycardCustomMetalCase)
+                if (serialNumberDetail != null && (ParentKeycard.Type == ItemType.KeycardCustomTaskForce || ParentKeycard.Type == ItemType.KeycardCustomMetalCase))
                 {
                     try
                     {
@@ -230,9 +281,14 @@ namespace UncomplicatedCustomItems.API.Wrappers
                     }
                 }
                 else
-                    LogManager.Info($"Custom Serial Numbers are only available on CustomTaskForce and CustomMetalCase keycards");
+                    LogManager.Info("Custom Serial Numbers are only available on CustomTaskForce and CustomMetalCase keycards");
             }
         }
+
+        /// <summary>
+        /// Gets or sets the wear index.
+        /// I dont think this is applied currently in the 14.1 beta.
+        /// </summary>
         public byte WearIndex
         {
             get
@@ -259,6 +315,11 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets the rank shown on the card.
+        /// I dont think this is applied currently in the 14.1 beta.
+        /// </summary>
         public int RankIndex
         {
             get
