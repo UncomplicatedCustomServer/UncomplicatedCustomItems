@@ -102,11 +102,8 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
-                if (ev.Firearm is Firearm Firearm)
-                {
-                    Firearm.MagazineAmmo = Firearm.MaxMagazineAmmo;
-                    LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {Firearm.MagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
-                }
+                ev.Firearm.MagazineAmmo = ev.Firearm.MaxMagazineAmmo;
+                LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {ev.Firearm.MagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
             }
             if (customItem.HasModule(CustomFlags.CustomSound))
             {
