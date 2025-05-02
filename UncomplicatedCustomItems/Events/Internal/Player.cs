@@ -155,6 +155,8 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (EventHandler.EquipedKeycards.ContainsKey(item.Serial))
                 EventHandler.EquipedKeycards.Remove(item.Serial);
             item.ResetBadge(ev.Player);
+            if (item.HasModule(Enums.CustomFlags.ToolGun))
+                EventHandler.StopRelativePosCoroutine(ev.Player);
         }
 
         private static void DeathEvent(DyingEventArgs ev)

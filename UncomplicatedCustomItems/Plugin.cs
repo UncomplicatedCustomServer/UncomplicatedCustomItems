@@ -67,9 +67,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.DroppedItem += Handler.OnDrop;
             MapEvent.PickupDestroyed += Handler.OnPickup;
             PlayerEvent.Shot += Handler.OnShot;
-            PlayerEvent.Shot += Handler.OnShot2;
             ItemEvent.ChargingJailbird += Handler.OnCharge;
-            PlayerEvent.Shooting += Handler.OnDieOnUseFlag;
             PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
@@ -168,9 +166,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
             PlayerEvent.Shot -= Handler.OnShot;
-            PlayerEvent.Shot -= Handler.OnShot2;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
-            PlayerEvent.Shooting -= Handler.OnDieOnUseFlag;
             PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
             PlayerEvent.ThrownProjectile -= Handler.ThrownProjectile;
             MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;

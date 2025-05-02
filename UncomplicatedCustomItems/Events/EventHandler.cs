@@ -51,13 +51,18 @@ namespace UncomplicatedCustomItems.Events
         /// Triggered by the <see cref="OnChangedItem"/> method.
         /// </summary>
         public static Dictionary<ushort, SummonedCustomItem> EquipedKeycards = [];
+        private static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
+
         public void OnHurt(HurtEventArgs ev)
         {
-            if (ev.Attacker == null || ev.Attacker.CurrentItem == null)
+            if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null)
                 return;
 
             //LogManager.Debug("OnHurt event is being triggered"); this was really annoying when debugging.
-            if (ev.Player != null && ev.Attacker != null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem))
+            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem) || !summonedCustomItem.CustomItem.CustomFlags.HasValue)
+                return;
+
+            if (summonedCustomItem.HasModule(CustomFlags.LifeSteal))
             {
                 foreach (LifeStealSettings LifeStealSettings in summonedCustomItem.CustomItem.FlagSettings.LifeStealSettings)
                 {
@@ -77,23 +82,25 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnTriggeringTesla(TriggeringTeslaEventArgs ev)
         {
-            if (!ev.IsAllowed)
+            if (ev.Player == null || ev.Player.CurrentItem == null || !ev.IsAllowed)
+                return;
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
 
-            if (ev.Player == null || ev.Player.CurrentItem == null)
-                return;
-
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
+            if (customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
                 ev.IsTriggerable = false;
             else return;
         }
 
         public void OnShooting(ShootingEventArgs ev)
         {
-            if (!ev.IsAllowed)
+            if (!ev.IsAllowed || ev.Player == null || ev.Item == null)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.InfiniteAmmo))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem))
+                return;
+
+            if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
                 if (ev.Firearm != null)
                 {
@@ -108,34 +115,24 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.CustomSound))
+            if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.CustomSound))
             {
                 AudioApi AudioApi = new();
                 if (ev.Firearm != null)
                 {
-                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
-                    AudioApi.PlayAudio(CustomItem, ev.Player.Position);
+                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
+                    AudioApi.PlayAudio(customItem, ev.Player.Position);
                 }
             }
-            else return;
+            if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.DieOnUse))
+            {
+                ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
+                LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed.");
+            }
+            else
+                LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
         }
 
-        public void OnDieOnUseFlag(ShootingEventArgs ev)
-        {
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.DieOnUse))
-            {
-                if (ev.Item != null)
-                {
-                    ev.Player.Kill($"Killed by {CustomItem.CustomItem.Name}");
-                    LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed.");
-                }
-                else
-                {
-                    LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}.");
-                }
-            }
-            else return;
-        }
         public void OnItemUse(UsingItemCompletedEventArgs ev)
         {
             if (ev.Player == null)
@@ -144,98 +141,86 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Usable == null)
                 return;
-            
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.DieOnUse))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+                return;
+
+            if (customItem.HasModule(CustomFlags.DieOnUse))
             {
-                if (ev.Item != null)
-                {
-                    ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
-                    LogManager.Debug("DieOnUse triggered: user killed.");
-                }
-                else
-                {
-                    LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
-                }
+                ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
+                LogManager.Debug($"{nameof(OnItemUse)}: DieOnUse user killed.");
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenUsed))
+            if (customItem.HasModule(CustomFlags.EffectWhenUsed))
             {
-                foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                foreach (EffectSettings EffectSettings in customItem.CustomItem.FlagSettings.EffectSettings)
                 {
-                    if (ev.Item != null)
+                    if (EffectSettings.EffectEvent != null)
                     {
-                        if (EffectSettings.EffectEvent != null)
-                        {
 
-                            if (EffectSettings.EffectEvent == "EffectWhenUsed")
+                        if (EffectSettings.EffectEvent == "EffectWhenUsed")
+                        {
+                            if (EffectSettings.Effect.ToString() == string.Empty)
                             {
-                                if (EffectSettings.Effect == null)
-                                {
-                                    LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
-                                if (EffectSettings.EffectDuration < -1)
-                                {
-                                    LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
-                                if (EffectSettings.EffectIntensity <= 0)
-                                {
-                                    LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
-
-                                LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                EffectType Effect = EffectSettings.Effect;
-                                float Duration = EffectSettings.EffectDuration;
-                                byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                                LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
+                                return;
                             }
-                        }
-                        else
-                        {
-                            LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
+                            if (EffectSettings.EffectDuration < -1)
+                            {
+                                LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (EffectSettings.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
+                                return;
+                            }
+
+                            LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
+                            EffectType Effect = EffectSettings.Effect;
+                            float Duration = EffectSettings.EffectDuration;
+                            byte Intensity = EffectSettings.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
                         }
                     }
                     else
                     {
-                        LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}");
+                        LogManager.Error($"{nameof(OnItemUse)}: No FlagSettings found on {customItem.CustomItem.Name}");
                     }
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.CustomItem.CustomFlags.HasValue && Customitem.HasModule(CustomFlags.CustomSound))
+            if (customItem.HasModule(CustomFlags.CustomSound))
             {
                 AudioApi AudioApi = new();
-                if (ev.Item != null)
-                {
-                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {Customitem.CustomItem.Name}.");
-                    AudioApi.PlayAudio(Customitem, ev.Player.Position);
-                }
+                LogManager.Debug($"{nameof(OnItemUse)}: Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
+                AudioApi.PlayAudio(customItem, ev.Player.Position);
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customitem))
+            if (customItem.CustomItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse))
+                SwitchRoleOnUseMethod.Start(customItem, ev.Player);
+            // End of CustomFlags
+
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
-                ISCP500Data SCP500Data = customitem.CustomItem.CustomData as ISCP500Data;
-                ISCP207Data SCP207Data = customitem.CustomItem.CustomData as ISCP207Data;
-                ISCP1853Data SCP1853Data = customitem.CustomItem.CustomData as ISCP1853Data;
-                ISCP1576Data SCP1576Data = customitem.CustomItem.CustomData as ISCP1576Data;
+                ISCP500Data SCP500Data = CustomItem.CustomItem.CustomData as ISCP500Data;
+                ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
+                ISCP1853Data SCP1853Data = CustomItem.CustomItem.CustomData as ISCP1853Data;
+                ISCP1576Data SCP1576Data = CustomItem.CustomItem.CustomData as ISCP1576Data;
                 if (ev.Item.Type == ItemType.SCP500)
                 {
-                    if (SCP500Data.Effect == null)
+                    if (SCP500Data.Effect.ToString() == string.Empty)
                     {
-                        LogManager.Warn($"Invalid Effect: {SCP500Data.Effect} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid Effect: {SCP500Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
                     if (SCP500Data.Duration <= -2)
                     {
-                        LogManager.Warn($"Invalid Duration: {SCP500Data.Duration} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid Duration: {SCP500Data.Duration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
                     if (SCP500Data.Intensity <= 0)
                     {
-                        LogManager.Warn($"Invalid intensity: {SCP500Data.Intensity} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid intensity: {SCP500Data.Intensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
-
-                    LogManager.Debug($"Applying effect {SCP500Data.Effect} at intensity {SCP500Data.Intensity}, duration is {SCP500Data.Duration} to {ev.Player.DisplayNickname}");
+                    LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP500Data.Effect} at intensity {SCP500Data.Intensity}, duration is {SCP500Data.Duration} to {ev.Player.DisplayNickname}");
                     EffectType Effect = SCP500Data.Effect;
                     float Duration = SCP500Data.Duration;
                     byte Intensity = SCP500Data.Intensity;
@@ -243,23 +228,22 @@ namespace UncomplicatedCustomItems.Events
                 }
                 if (ev.Item.Type == ItemType.SCP207 || ev.Item.Type == ItemType.AntiSCP207)
                 {
-                    if (SCP207Data.Effect == null)
+                    if (SCP207Data.Effect.ToString() == string.Empty)
                     {
-                        LogManager.Warn($"Invalid Effect: {SCP207Data.Effect} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid Effect: {SCP207Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
                     if (SCP207Data.Duration <= -2)
                     {
-                        LogManager.Warn($"Invalid Duration: {SCP207Data.Duration} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid Duration: {SCP207Data.Duration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
                     if (SCP207Data.Intensity <= 0)
                     {
-                        LogManager.Warn($"Invalid intensity: {SCP207Data.Intensity} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid intensity: {SCP207Data.Intensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
-
-                    LogManager.Debug($"Applying effect {SCP207Data.Effect} at intensity {SCP207Data.Intensity}, duration is {SCP207Data.Duration} to {ev.Player.DisplayNickname}");
+                    LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP207Data.Effect} at intensity {SCP207Data.Intensity}, duration is {SCP207Data.Duration} to {ev.Player.DisplayNickname}");
                     EffectType Effect = SCP207Data.Effect;
                     float Duration = SCP207Data.Duration;
                     byte Intensity = SCP207Data.Intensity;
@@ -267,23 +251,22 @@ namespace UncomplicatedCustomItems.Events
                 }
                 if (ev.Item.Type == ItemType.SCP1853)
                 {
-                    if (SCP1853Data.Effect == null)
+                    if (SCP1853Data.Effect.ToString() == string.Empty)
                     {
-                        LogManager.Warn($"Invalid Effect: {SCP1853Data.Effect} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid Effect: {SCP1853Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
                     if (SCP1853Data.Duration <= -2)
                     {
-                        LogManager.Warn($"Invalid Duration: {SCP1853Data.Duration} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid Duration: {SCP1853Data.Duration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
                     if (SCP1853Data.Intensity <= 0)
                     {
-                        LogManager.Warn($"Invalid intensity: {SCP1853Data.Intensity} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid intensity: {SCP1853Data.Intensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
-
-                    LogManager.Debug($"Applying effect {SCP1853Data.Effect} at intensity {SCP1853Data.Intensity}, duration is {SCP1853Data.Duration} to {ev.Player.DisplayNickname}");
+                    LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP1853Data.Effect} at intensity {SCP1853Data.Intensity}, duration is {SCP1853Data.Duration} to {ev.Player.DisplayNickname}");
                     EffectType Effect = SCP1853Data.Effect;
                     float Duration = SCP1853Data.Duration;
                     byte Intensity = SCP1853Data.Intensity;
@@ -291,115 +274,89 @@ namespace UncomplicatedCustomItems.Events
                 }
                 if (ev.Item.Type == ItemType.SCP1576)
                 {
-                    if (SCP1576Data.Effect == null)
+                    if (SCP1576Data.Effect.ToString() == string.Empty)
                     {
-                        LogManager.Warn($"Invalid Effect: {SCP1576Data.Effect} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid Effect: {SCP1576Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
                     if (SCP1576Data.Duration <= -2)
                     {
-                        LogManager.Warn($"Invalid Duration: {SCP1576Data.Duration} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid Duration: {SCP1576Data.Duration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
                     if (SCP1576Data.Intensity <= 0)
                     {
-                        LogManager.Warn($"Invalid intensity: {SCP1576Data.Intensity} for ID: {customitem.CustomItem.Id} Name: {customitem.CustomItem.Name}");
+                        LogManager.Warn($"Invalid intensity: {SCP1576Data.Intensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
                     }
-
-                    LogManager.Debug($"Applying effect {SCP1576Data.Effect} at intensity {SCP1576Data.Intensity}, duration is {SCP1576Data.Duration} to {ev.Player.DisplayNickname}");
+                    LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP1576Data.Effect} at intensity {SCP1576Data.Intensity}, duration is {SCP1576Data.Duration} to {ev.Player.DisplayNickname}");
                     EffectType Effect = SCP1576Data.Effect;
                     float Duration = SCP1576Data.Duration;
                     byte Intensity = SCP1576Data.Intensity;
                     ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
                 }
-            }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem2))
-            {
-                ISCP207Data SCP207Data = CustomItem2.CustomItem.CustomData as ISCP207Data;
                 if (ev.Item.Type == ItemType.SCP207 || ev.Item.Type == ItemType.AntiSCP207)
-                {
                     if (SCP207Data.RemoveItemAfterUse == false)
-                    {
-                        new SummonedCustomItem(CustomItem2.CustomItem, ev.Player);
-                    }
-                }
-                ISCP1853Data SCP1853Data = CustomItem2.CustomItem.CustomData as ISCP1853Data;
+                        new SummonedCustomItem(CustomItem.CustomItem, ev.Player);
                 if (ev.Item.Type == ItemType.SCP1853)
-                {
                     if (SCP1853Data.RemoveItemAfterUse == false)
-                    {
-                        new SummonedCustomItem(CustomItem2.CustomItem, ev.Player);
-                    }
-                }
-            }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem SummonedCustomItem))
-            {
-                if (SummonedCustomItem.Item.Type == ItemType.Adrenaline || SummonedCustomItem.Item.Type == ItemType.Medkit || SummonedCustomItem.Item.Type == ItemType.Painkillers)
-                {
-                    SummonedCustomItem.HandleCustomAction(SummonedCustomItem.Item);
-                }
-            }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem3) && CustomItem3.CustomItem.CustomFlags.HasValue && CustomItem3.CustomItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse))
-            {
-                SwitchRoleOnUseMethod.Start(CustomItem3, ev.Player);
+                        new SummonedCustomItem(CustomItem.CustomItem, ev.Player);
+                if (CustomItem.Item.Type == ItemType.Adrenaline || CustomItem.Item.Type == ItemType.Medkit || CustomItem.Item.Type == ItemType.Painkillers)
+                    CustomItem.HandleCustomAction(CustomItem.Item);
             }
         }
 
         public void OnChangedItem(ChangedItemEventArgs ev)
         {
-            if (ev.Item is null)
+            if (ev.Item is null || ev.Player == null || ev.Player.IsHost)
+                return;
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
+            if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
             {
-                if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
-                    foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                    if (EffectSettings.EffectEvent != null)
                     {
-                        if (ev.Item != null)
+                        if (EffectSettings.EffectEvent == "EffectWhenEquiped")
                         {
-                            if (EffectSettings.EffectEvent != null)
+                            if (EffectSettings.Effect.ToString() == string.Empty)
                             {
-                                if (EffectSettings.EffectEvent == "EffectWhenEquiped")
-                                {
-                                    if (EffectSettings.Effect == null)
-                                    {
-                                        LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                        return;
-                                    }
-                                    if (EffectSettings.EffectDuration < -1)
-                                    {
-                                        LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                        return;
-                                    }
-                                    if (EffectSettings.EffectIntensity <= 0)
-                                    {
-                                        LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                        return;
-                                    }
+                                LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (EffectSettings.EffectDuration < -1)
+                            {
+                                LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (EffectSettings.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
 
-                                    LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                    EffectType Effect = EffectSettings.Effect;
-                                    float Duration = EffectSettings.EffectDuration;
-                                    byte Intensity = EffectSettings.EffectIntensity;
-                                    ev.Player.EnableEffect(Effect, Intensity, Duration, true);
-                                }
-                            }
-                            else
-                            {
-                                LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
-                            }
-                        }
-                        else
-                        {
-                            LogManager.Error($"EffectWhenEquiped Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}");
+                            LogManager.Debug($"{nameof(OnChangedItem)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
+                            EffectType Effect = EffectSettings.Effect;
+                            float Duration = EffectSettings.EffectDuration;
+                            byte Intensity = EffectSettings.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
                         }
                     }
+                    else
+                    {
+                        LogManager.Error($"{nameof(OnChangedItem)}: No FlagSettings found on {CustomItem.CustomItem.Name}");
+                    }
                 }
-                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
-                    EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
             }
+            if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
+                EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
+            if (CustomItem.HasModule(CustomFlags.ToolGun))
+            {
+                StartRelativePosCoroutine(ev.Player);
+            }
+
         }
 
         public void Onpickup(ItemAddedEventArgs ev)
@@ -409,77 +366,74 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Item.Category != ItemCategory.Armor)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                return;
+            if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
             {
-                if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
-                    foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                    if (EffectSettings.EffectEvent != null)
                     {
-                        if (ev.Item != null)
+                        if (EffectSettings.EffectEvent == "EffectWhenEquiped")
                         {
-                            if (EffectSettings.EffectEvent != null)
+                            if (EffectSettings.Effect.ToString() == string.Empty)
                             {
-                                if (EffectSettings.EffectEvent == "EffectWhenEquiped")
-                                {
-                                    if (EffectSettings.Effect == null)
-                                    {
-                                        LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                        return;
-                                    }
-                                    if (EffectSettings.EffectDuration < -1)
-                                    {
-                                        LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                        return;
-                                    }
-                                    if (EffectSettings.EffectIntensity <= 0)
-                                    {
-                                        LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                        return;
-                                    }
+                                LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (EffectSettings.EffectDuration < -1)
+                            {
+                                LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (EffectSettings.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
 
-                                    LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                    EffectType Effect = EffectSettings.Effect;
-                                    float Duration = EffectSettings.EffectDuration;
-                                    byte Intensity = EffectSettings.EffectIntensity;
-                                    ev.Player.EnableEffect(Effect, Intensity, Duration, true);
-                                }
-                            }
-                            else
-                            {
-                                LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
-                            }
-                        }
-                        else
-                        {
-                            LogManager.Error($"EffectWhenEquiped Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}");
+                            LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
+                            EffectType Effect = EffectSettings.Effect;
+                            float Duration = EffectSettings.EffectDuration;
+                            byte Intensity = EffectSettings.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
                         }
                     }
-                }
-                if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.Disguise))
-                {
-                    foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
+                    else
                     {
-                        if (DisguiseSettings.RoleId == null)
-                            return;
-                        if (DisguiseSettings.DisguiseMessage == null)
-                            return;
-
-                        LogManager.Debug($"{nameof(Onpickup)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
-                        ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
-                        ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
-                        LogManager.Debug($"{nameof(Onpickup)}: Adding or updating {ev.Player.Id} to appearance dictionary");
-                        Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
+                        LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
                     }
                 }
             }
-            else return;
+            if (CustomItem.HasModule(CustomFlags.Disguise))
+            {
+                foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
+                {
+                    if (DisguiseSettings.RoleId == null)
+                        return;
+                    if (DisguiseSettings.DisguiseMessage == null)
+                        return;
+
+                    LogManager.Debug($"{nameof(Onpickup)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
+                    ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
+                    ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
+                    LogManager.Debug($"{nameof(Onpickup)}: Adding or updating {ev.Player.Id} to appearance dictionary");
+                    Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
+                }
+            }
         }
 
         public void GrenadeExploding(ExplodingGrenadeEventArgs ev)
         {   
-            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
-            {
+            if (ev.Projectile == null || ev.Player == null || ev.Position == null)
+                return;
+            DetonationPosition = ev.Position;
+            if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                return;
+            
                 LogManager.Debug($"{ev.Projectile.Type} is a CustomItem");
+            if (CustomItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
+            {
                 foreach (SpawnItemWhenDetonatedSettings SpawnItemWhenDetonatedSettings in CustomItem.CustomItem.FlagSettings.SpawnItemWhenDetonatedSettings)
                 {
                     int Chance = UnityEngine.Random.Range(0, 100);
@@ -526,7 +480,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.Projectile.Serial}");
             }
-            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Customitem) && Customitem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.Cluster))
+            if (CustomItem.HasModule(CustomFlags.Cluster))
             {
                 LogManager.Debug($"{ev.Projectile.Type} is a CustomItem");
                 foreach (ClusterSettings ClusterSettings in CustomItem.CustomItem.FlagSettings.ClusterSettings)
@@ -594,7 +548,6 @@ namespace UncomplicatedCustomItems.Events
             {
                 LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the Cluster flag. Serial: {ev.Projectile.Serial}");
             }
-            DetonationPosition = ev.Position; // Untested
         }
 
         /// <summary>
@@ -608,6 +561,50 @@ namespace UncomplicatedCustomItems.Events
             {
                 Pickup.Destroy();
                 LogManager.Debug($"Destroyed pickup. Type: {Pickup.Type} Previous owner: {Pickup.PreviousOwner} Serial: {Pickup.Serial}");
+            }
+        }
+
+        internal static void StartRelativePosCoroutine(Player player)
+        {
+            StopRelativePosCoroutine(player);
+            CoroutineHandle handle = Timing.RunCoroutine(RelativePos(player));
+            _relativePosCoroutine[player] = handle;
+        }
+        internal static void PauseRelativePosCoroutine(Player player)
+        {
+            if (_relativePosCoroutine.TryGetValue(player, out CoroutineHandle handle))
+            {
+                Timing.PauseCoroutines(handle);
+                Timing.CallDelayed(6f, () =>
+                {
+                    Timing.ResumeCoroutines(handle);
+                });
+            }
+
+
+        }
+        internal static void StopRelativePosCoroutine(Player player)
+        {
+            if (_relativePosCoroutine.TryGetValue(player, out CoroutineHandle handle))
+            {
+                Timing.KillCoroutines(handle);
+                _relativePosCoroutine.Remove(player);
+            }
+        }
+        internal static IEnumerator<float> RelativePos(Player player)
+        {
+            try
+            {
+                for (; ;)
+                {
+                    player.ShowHint($"<voffset=-19em>{player.CurrentRoom.Type} - {player.CurrentRoom.transform.InverseTransformPoint(player.Position)}</voffset>");
+                    yield return Timing.WaitForSeconds(0.1f);
+                }
+            }
+            finally
+            {
+                if (_relativePosCoroutine.ContainsKey(player))
+                        _relativePosCoroutine.Remove(player);
             }
         }
 
@@ -653,9 +650,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     IJailbirdData Data = CustomItem.CustomItem.CustomData as IJailbirdData;
                     if (!ChargeAttack)
-                    {
                         ev.Amount = Data.MeleeDamage;
-                    }
                     else
                     {
                         ev.Amount = Data.ChargeDamage;
@@ -677,70 +672,63 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Player.Role == RoleTypeId.Spectator || ev.Player.Role == RoleTypeId.Destroyed)
                 return;
-            
+
             foreach (Item item in ev.Player.Items)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem CustomItem))
-                {
-                    if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
-                    {
-                        foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
-                        {
-                            if (item != null)
-                            {
-                                if (EffectSettings.EffectEvent != null)
-                                {
-                                    if (EffectSettings.EffectEvent == "EffectWhenEquiped")
-                                    {
-                                        if (EffectSettings.Effect == null)
-                                        {
-                                            LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                            return;
-                                        }
-                                        if (EffectSettings.EffectDuration < -1)
-                                        {
-                                            LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                            return;
-                                        }
-                                        if (EffectSettings.EffectIntensity <= 0)
-                                        {
-                                            LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                            return;
-                                        }
+                if (!Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                    return;
 
-                                        LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                        EffectType Effect = EffectSettings.Effect;
-                                        float Duration = EffectSettings.EffectDuration;
-                                        byte Intensity = EffectSettings.EffectIntensity;
-                                        ev.Player.EnableEffect(Effect, Intensity, Duration, true);
-                                    }
-                                }
-                                else
-                                {
-                                    LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
-                                }
-                            }
-                            else
+                if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                {
+                    foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                    {
+                        if (EffectSettings.EffectEvent != null)
+                        {
+                            if (EffectSettings.EffectEvent == "EffectWhenEquiped")
                             {
-                                LogManager.Error($"EffectWhenEquiped Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}");
+                                if (EffectSettings.Effect == null)
+                                {
+                                    LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+                                if (EffectSettings.EffectDuration < -1)
+                                {
+                                    LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+                                if (EffectSettings.EffectIntensity <= 0)
+                                {
+                                    LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+
+                                LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
+                                EffectType Effect = EffectSettings.Effect;
+                                float Duration = EffectSettings.EffectDuration;
+                                byte Intensity = EffectSettings.EffectIntensity;
+                                ev.Player.EnableEffect(Effect, Intensity, Duration, true);
                             }
+                        }
+                        else
+                        {
+                            LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
                         }
                     }
-                    if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.Disguise))
+                }
+                if (CustomItem.HasModule(CustomFlags.Disguise))
+                {
+                    foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
                     {
-                        foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
-                        {
-                            if (DisguiseSettings.RoleId == null)
-                                return;
-                            if (DisguiseSettings.DisguiseMessage == null)
-                                return;
+                        if (DisguiseSettings.RoleId == null)
+                            return;
+                        if (DisguiseSettings.DisguiseMessage == null)
+                            return;
 
-                            LogManager.Debug($"{nameof(OnSpawned)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
-                            ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
-                            ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
-                            LogManager.Debug($"{nameof(OnSpawned)}: Adding or updating {ev.Player.Id} to appearance dictionary");
-                            Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
-                        }
+                        LogManager.Debug($"{nameof(OnSpawned)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
+                        ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
+                        ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
+                        LogManager.Debug($"{nameof(OnSpawned)}: Adding or updating {ev.Player.Id} to appearance dictionary");
+                        Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
                     }
                 }
                 else return;
@@ -838,65 +826,60 @@ namespace UncomplicatedCustomItems.Events
         }
         public void ThrownProjectile(ThrownProjectileEventArgs ev)
         {
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenUsed))
+            if (ev.Item == null || ev.Player == null || ev.Projectile == null)
+                return;
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                return;
+
+            if (CustomItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
-                    if (ev.Item != null)
+                    if (EffectSettings.EffectEvent != null)
                     {
-                        if (EffectSettings.EffectEvent != null)
+                        if (EffectSettings.EffectEvent == "EffectWhenUsed")
                         {
-                            if (EffectSettings.EffectEvent == "EffectWhenUsed")
+                            if (EffectSettings.Effect.ToString() == string.Empty)
                             {
-                                if (EffectSettings.Effect == null)
-                                {
-                                    LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
-                                if (EffectSettings.EffectDuration < -1)
-                                {
-                                    LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
-                                if (EffectSettings.EffectIntensity <= 0)
-                                {
-                                    LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
-
-                                LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                EffectType Effect = EffectSettings.Effect;
-                                float Duration = EffectSettings.EffectDuration;
-                                byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                                LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
                             }
-                        }
-                        else
-                        {
-                            LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
+                            if (EffectSettings.EffectDuration < -1)
+                            {
+                                LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+                            if (EffectSettings.EffectIntensity <= 0)
+                            {
+                                LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                return;
+                            }
+
+                            LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
+                            EffectType Effect = EffectSettings.Effect;
+                            float Duration = EffectSettings.EffectDuration;
+                            byte Intensity = EffectSettings.EffectIntensity;
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
                         }
                     }
                     else
                     {
-                        LogManager.Error($"EffectWhenUsed Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}");
+                        LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
                     }
                 }
             }
         }
         public void OnChangingAttachments(ChangingAttachmentsEventArgs ev)
         {
+            if (ev.Item == null || ev.Player == null || ev.Firearm == null)
+                return;
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+                return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.WorkstationBan))
+            if (customItem.HasModule(CustomFlags.WorkstationBan))
             {
-                if (ev.Player != null)
-                {
-                    ev.IsAllowed = false;
-                    ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", customItem.CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
-                }
-                else
-                {
-                    LogManager.Error($"WorkstationBan flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
-                }
+                ev.IsAllowed = false;
+                ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", customItem.CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
             }
             else return;
         }
@@ -904,18 +887,13 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.Player == null || ev.Player.CurrentItem == null)
                 return;
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+                return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.WorkstationBan))
+            if (customItem.HasModule(CustomFlags.WorkstationBan))
             {
-                if (ev.Player != null)
-                {
-                    ev.IsAllowed = false;
-                    ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", customItem.CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
-                }
-                else
-                {
-                    LogManager.Error($"WorkstationBan flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
-                }
+                ev.IsAllowed = false;
+                ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", customItem.CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
             }
             else return;
         }
@@ -988,7 +966,9 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.ItemGlow))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+                return;
+            if (customItem.HasModule(CustomFlags.ItemGlow))
             {
                 foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
                 {
@@ -1038,41 +1018,41 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.DieOnDrop))
+            if (customItem.HasModule(CustomFlags.DieOnDrop))
             {
-                foreach (DieOnDropSettings DieOnDropSettings in CustomItem.CustomItem.FlagSettings.DieOnDropSettings)
+                foreach (DieOnDropSettings DieOnDropSettings in customItem.CustomItem.FlagSettings.DieOnDropSettings)
                 {
-                    LogManager.Debug($"Checking Vaporize setting for {CustomItem.CustomItem.Name}");
+                    LogManager.Debug($"Checking Vaporize setting for {customItem.CustomItem.Name}");
                     if (DieOnDropSettings.Vaporize != null && (bool)DieOnDropSettings.Vaporize)
                     {
                         try
                         {
                             LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
-                            LogManager.Debug($"{ev.Player.Nickname} is being vaporized by {CustomItem.CustomItem.Name}");
+                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
+                            LogManager.Debug($"{ev.Player.Nickname} is being vaporized by {customItem.CustomItem.Name}");
                             ev.Player.Vaporize();
                         }
                         catch (Exception ex)
                         {
                             LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
                             LogManager.Error($"Couldnt Vaporize {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                         }
                     }
                     else
-                        LogManager.Debug($"Vaporize settings were null or false for {CustomItem.CustomItem.Name}");
+                        LogManager.Debug($"Vaporize settings were null or false for {customItem.CustomItem.Name}");
                     if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage != null)
                     {
                         try
                         {
                             LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
-                            ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", CustomItem.CustomItem.Name)}");
+                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
+                            ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
                         }
                         catch (Exception ex)
                         {
                             LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
                             LogManager.Error($"Couldnt Kill {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                         }
                     }
@@ -1081,13 +1061,13 @@ namespace UncomplicatedCustomItems.Events
                         try
                         {
                             LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
-                            ev.Player.Kill($"Killed by {CustomItem.CustomItem.Name}");
+                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
+                            ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
                         }
                         catch (Exception ex)
                         {
                             LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} - {CustomItem.CustomItem.CustomFlags}");
+                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
                             LogManager.Error($"Couldnt Kill {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                         }
                     }
@@ -1097,10 +1077,12 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnDropping(DroppingItemEventArgs ev)
         {
-            if (ev.Item is null)
+            if (ev.Item is null || ev.Player == null)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.CantDrop))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                return;
+            if (CustomItem.HasModule(CustomFlags.CantDrop))
             {
                 ev.IsAllowed = false;
                 foreach (CantDropSettings CantDropSettings in CustomItem.CustomItem.FlagSettings.CantDropSettings)
@@ -1168,8 +1150,10 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (!ev.Attacker.CurrentItem.IsWeapon)
                 return;
+            if (!Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+                return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.VaporizeKills))
+            if (customItem.HasModule(CustomFlags.VaporizeKills))
             {
                 try
                 {
@@ -1185,7 +1169,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"Couldnt Vaporize {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                 }
             }
-            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.ChangeAppearanceOnKill))
+            if (customItem.HasModule(CustomFlags.ChangeAppearanceOnKill))
             {
                 LogManager.Debug($"{nameof(OnDying)}: Changing {ev.Attacker.DisplayNickname} appearance to {ev.Player.Role.Name}");
                 ev.Attacker.ChangeAppearance(ev.Player.Role);
@@ -1221,13 +1205,12 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnShot(ShotEventArgs ev)
         {
-            if (ev.Position == null)
+            if (ev.Position == null || ev.Firearm == null || ev.Player == null)
+                return;
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
 
-            if (ev.Firearm == null)
-                return;
-
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.EffectWhenUsed))
+            if (customItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 foreach (EffectSettings EffectSettings in customItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -1239,7 +1222,7 @@ namespace UncomplicatedCustomItems.Events
                             if (EffectSettings.EffectEvent == "EffectWhenUsed")
                             {
                                 LogManager.Debug($"{EffectSettings.EffectEvent} = EffectWhenUsed");
-                                if (EffectSettings.Effect == null)
+                                if (EffectSettings.Effect.ToString() == string.Empty)
                                 {
                                     LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                     return;
@@ -1272,9 +1255,9 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.ExplosiveBullets))
+            if (customItem.HasModule(CustomFlags.ExplosiveBullets))
             {
-                foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in CustomItem.CustomItem.FlagSettings.ExplosiveBulletsSettings)
+                foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in customItem.CustomItem.FlagSettings.ExplosiveBulletsSettings)
                 {
                     if (ev.Firearm != null)
                     {
@@ -1288,37 +1271,25 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.CustomItem.CustomFlags.HasValue && Customitem.HasModule(CustomFlags.ToolGun))
+            if (customItem.HasModule(CustomFlags.ToolGun))
             {
+                PauseRelativePosCoroutine(ev.Player);
                 ev.CanSpawnImpactEffects = false;
                 ev.CanHurt = false;
                 Vector3 RelativePosition = ev.Player.CurrentRoom.transform.InverseTransformPoint(ev.Position);
                 LogManager.Info($"Triggered by {ev.Player.DisplayNickname}. Relative position inside {ev.Player.CurrentRoom.Name}: {RelativePosition}");
-                ev.Player.ShowHint($"Relative position inside {ev.Player.CurrentRoom.Name}: {RelativePosition}. This was also sent to the console.");
+                ev.Player.ShowHint($"Relative position inside {ev.Player.CurrentRoom.Type}: {RelativePosition}. This was also sent to the console.", 6f);
                 Vector3 Scale = new(0.2f, 0.2f, 0.2f);
-                var primitive = Primitive.Create(ev.Position);
+                Primitive primitive = Primitive.Create(ev.Position);
                 primitive.Type = PrimitiveType.Cube;
                 primitive.Color = new Vector4(255, 0, 0, -1);
                 primitive.Scale = Scale;
                 primitive.Collidable = false;
                 primitive.GameObject.name = RelativePosition.ToString();
             }
-            else return;
-        }
-        public void OnShot2(ShotEventArgs ev)
-        {
-            if (ev.Position == null)
-                return;
-
-            if (ev.Target == null)
-                return;
-
-            if (ev.Firearm == null)
-                return;
-
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectShot))
+            if (customItem.HasModule(CustomFlags.EffectShot))
             {
-                foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                foreach (EffectSettings EffectSettings in customItem.CustomItem.FlagSettings.EffectSettings)
                 {
                     if (ev.Item != null)
                     {
@@ -1326,19 +1297,19 @@ namespace UncomplicatedCustomItems.Events
                         {
                             if (EffectSettings.EffectEvent == "EffectShot")
                             {
-                                if (EffectSettings.Effect == null)
+                                if (EffectSettings.Effect.ToString() == string.Empty)
                                 {
-                                    LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                     return;
                                 }
                                 if (EffectSettings.EffectDuration <= -2)
                                 {
-                                    LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                     return;
                                 }
                                 if (EffectSettings.EffectIntensity <= 0)
                                 {
-                                    LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                     return;
                                 }
 
@@ -1351,24 +1322,25 @@ namespace UncomplicatedCustomItems.Events
                         }
                         else
                         {
-                            LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
+                            LogManager.Error($"No FlagSettings found on {customItem.CustomItem.Name}");
                         }
                     }
                     else
                     {
-                        LogManager.Error($"EffectShot Flag was triggered but couldnt be ran for {CustomItem.CustomItem.Name}.");
+                        LogManager.Error($"EffectShot Flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                     }
                 }
             }
-            else return;
         }
 
         public void OnCharge(ChargingJailbirdEventArgs ev)
         {
-            if (ev.Player == null || ev.Player.CurrentItem == null)
+            if (ev.Player == null || ev.Player.CurrentItem == null || ev.Player == null)
+                return;
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.NoCharge))
+            if (CustomItem.HasModule(CustomFlags.NoCharge))
             {
                 if (ev.Item != null)
                 {
@@ -1379,20 +1351,14 @@ namespace UncomplicatedCustomItems.Events
                     });
                 }
             }
-            else if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out _))
-            {
                 ChargeAttack = true;
-            }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.EffectWhenUsed))
+            if (CustomItem.HasModule(CustomFlags.EffectWhenUsed))
             {
-                if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.NoCharge))
-                    return;
-
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
                 {
-                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
-                    AudioApi.PlayAudio(customItem, ev.Player.Position);
+                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
+                    AudioApi.PlayAudio(CustomItem, ev.Player.Position);
                 }
             }
             else return;
