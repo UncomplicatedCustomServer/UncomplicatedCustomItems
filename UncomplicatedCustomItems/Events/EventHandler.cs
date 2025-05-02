@@ -94,43 +94,31 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnShooting(ShootingEventArgs ev)
         {
-            if (!ev.IsAllowed || ev.Player == null || ev.Item == null)
+            if (!ev.IsAllowed || ev.Player == null || ev.Item == null || ev.Firearm == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
 
-            if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.InfiniteAmmo))
+            if (customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
-                if (ev.Firearm != null)
+                if (ev.Firearm is Firearm Firearm)
                 {
-                    if (ev.Firearm is Firearm Firearm)
-                    {
-                        Firearm.MagazineAmmo = Firearm.MaxMagazineAmmo;
-                        LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {Firearm.MagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
-                    }
-                }
-                else
-                {
-                    LogManager.Error("InfiniteAmmo flag was triggered but no valid firearm found.");
+                    Firearm.MagazineAmmo = Firearm.MaxMagazineAmmo;
+                    LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {Firearm.MagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
                 }
             }
-            if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.CustomSound))
+            if (customItem.HasModule(CustomFlags.CustomSound))
             {
                 AudioApi AudioApi = new();
-                if (ev.Firearm != null)
-                {
-                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
-                    AudioApi.PlayAudio(customItem, ev.Player.Position);
-                }
+                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
+                AudioApi.PlayAudio(customItem, ev.Player.Position);
             }
-            if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.DieOnUse))
+            if (customItem.HasModule(CustomFlags.DieOnUse))
             {
                 ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
                 LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed.");
             }
-            else
-                LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
         }
 
         public void OnItemUse(UsingItemCompletedEventArgs ev)
