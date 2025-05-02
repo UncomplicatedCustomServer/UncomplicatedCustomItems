@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using InventorySystem.Items.Usables;
-using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 
@@ -12,7 +11,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPrefix]
         public static bool Prefix(Consumable __instance)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out SummonedCustomItem CustomItem))
+            if (API.Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out SummonedCustomItem CustomItem))
             {
                 LogManager.Debug($"Checking if {CustomItem.CustomItem.Name} is Adrenaline, Painkillers or Medkit");
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Adrenaline || CustomItem.CustomItem.CustomItemType == CustomItemType.Painkillers || CustomItem.CustomItem.CustomItemType == CustomItemType.Medikit)

@@ -15,7 +15,9 @@ using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Keycards;
 using Interactables.Interobjects.DoorUtils;
-using System.Reflection;
+using UncomplicatedCustomItems.HarmonyElements.Utilities;
+using UncomplicatedCustomItems.API.Wrappers;
+using UncomplicatedCustomItems.Extensions;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -54,7 +56,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public Item Item { get; internal set; }
 
-        private bool NameApplied { get; set; } = false;
+        internal bool NameApplied { get; set; } = false;
 
         /// <summary>
         /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
@@ -165,144 +167,34 @@ namespace UncomplicatedCustomItems.API.Features
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
                         ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
                         ColorUtility.TryParseHtmlString(KeycardData.LabelColor, out Color LabelColor);
+                        Color32 PermissionsColor32 = PermissionsColor;
+                        Color32 TintColor32 = TintColor;
+                        Color32 LabelColor32 = LabelColor;
                         KeycardLevels permissions = new(KeycardData.Containment, KeycardData.Armory, KeycardData.Admin);
                         if (!keycard.Base.Customizable)
                         {
                             LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
                             return;
                         }
-                    
-                        try
+
+                        CustomKeycard customKeycard = new();
+                        customKeycard.ParentKeycard = keycard;
+                        if (!NameApplied)
                         {
-                            try
-                            {
-                                CustomItemNameDetail nameDetail = keycard.Base.Details.OfType<CustomItemNameDetail>().FirstOrDefault();
-                                if (nameDetail != null)
-                                {
-                                    object[] args = { KeycardData.Name };
-                                    ArraySegment<object> arguments = new(args);
-                                    nameDetail.SetArguments(arguments);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"Error processing CustomItemNameDetail: {ex.Message}\nStack Trace: {ex.StackTrace}");
-                            }
-
-                            try
-                            {
-                                CustomLabelDetail labelDetail = keycard.Base.Details.OfType<CustomLabelDetail>().FirstOrDefault();
-                                if (labelDetail != null)
-                                {
-                                    Color32 LabelColor32 = LabelColor;
-                                    object[] args = { KeycardData.Label, LabelColor32 };
-                                    ArraySegment<object> arguments = new(args);
-                                    labelDetail.SetArguments(arguments);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"Error processing CustomLabelDetail: {ex.Message}\nStack Trace: {ex.StackTrace}");
-                            }
-
-                            try
-                            {
-                                CustomSerialNumberDetail serialDetail = keycard.Base.Details.OfType<CustomSerialNumberDetail>().FirstOrDefault();
-                                if (serialDetail != null)
-                                {
-                                    object[] args = { KeycardData.SerialNumber };
-                                    ArraySegment<object> arguments = new(args);
-                                    serialDetail.SetArguments(arguments);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"Error processing CustomSerialNumberDetail: {ex.Message}\nStack Trace: {ex.StackTrace}");
-                            }
-
-                            try
-                            {
-                                // I have no clue what this does. Everything ive tried has done nothing.
-                                CustomWearDetail wearDetail = keycard.Base.Details.OfType<CustomWearDetail>().FirstOrDefault();
-                                if (wearDetail != null)
-                                {
-                                    object[] args = { KeycardData.WearDetail };
-                                    ArraySegment<object> arguments = new(args);
-                                    wearDetail.SetArguments(arguments);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"Error processing CustomWearDetail: {ex.Message}\nStack Trace: {ex.StackTrace}");
-                            }
-
-                            try
-                            {
-                                CustomPermsDetail permsDetail = keycard.Base.Details.OfType<CustomPermsDetail>().FirstOrDefault();
-                                if (permsDetail != null)
-                                {
-                                    Color32 PermissionsColor32 = PermissionsColor;
-                                    object[] args = { permissions, PermissionsColor32 };
-                                    ArraySegment<object> arguments = new(args);
-                                    permsDetail.SetArguments(arguments);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"Error processing CustomPermsDetail: {ex.Message}\nStack Trace: {ex.StackTrace}");
-                            }
-
-                            try
-                            {
-                                CustomTintDetail tintDetail = keycard.Base.Details.OfType<CustomTintDetail>().FirstOrDefault();
-                                if (tintDetail != null)
-                                {
-                                    Color32 tintColor32 = TintColor;
-                                    object[] args = { tintColor32 };
-                                    ArraySegment<object> arguments = new(args);
-                                    tintDetail.SetArguments(arguments);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"Error processing CustomTintDetail: {ex.Message}\nStack Trace: {ex.StackTrace}");
-                            }
-                            try
-                            {
-                                // Also have no clue what this does. Everything ive tried has done nothing.
-                                CustomRankDetail rankDetail = keycard.Base.Details.OfType<CustomRankDetail>().FirstOrDefault();
-                                if (rankDetail != null)
-                                {
-                                    object[] args = { KeycardData.Rank };
-                                    ArraySegment<object> arguments = new(args);
-                                    rankDetail.SetArguments(arguments);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"Error processing CustomTintDetail: {ex.Message}\nStack Trace: {ex.StackTrace}");
-                            }
-                            try
-                            {
-                                NametagDetail nametagDetail = keycard.Base.Details.OfType<NametagDetail>().FirstOrDefault();
-                                if (nametagDetail != null && !NameApplied)
-                                {
-                                    object[] args = { KeycardData.Name.Replace("%name%", Owner.DisplayNickname) };
-                                    ArraySegment<object> arguments = new(args);
-                                    nametagDetail.SetArguments(arguments);
-                                    NameApplied = true;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"Error processing CustomTintDetail: {ex.Message}\nStack Trace: {ex.StackTrace}");
-                            }
+                            customKeycard.NameTag = KeycardData.Name;
                         }
-                        catch (Exception ex)
-                        {
-                            LogManager.Error($"Error!\n{ex.Message}");
-                        }
-                        RemoveKeycardDetail(keycard.Serial);
+                        customKeycard.Owner = Owner;
+                        customKeycard.SerialNumber = KeycardData.SerialNumber;
+                        customKeycard.WearIndex = KeycardData.WearDetail;
+                        customKeycard.RankIndex = KeycardData.Rank;
+                        customKeycard.LabelColor = LabelColor32;
+                        customKeycard.LabelText = KeycardData.Label;
+                        customKeycard.ItemName = KeycardData.Name;
+                        customKeycard.CardColor = TintColor32;
+                        customKeycard.PermissionsColor = PermissionsColor32;
+                        customKeycard.Permissions = permissions;
+                        LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
+                        KeycardUtils.RemoveKeycardDetail(keycard.Serial);
                         KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
                         break;
 
@@ -577,70 +469,13 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
-        public bool RemoveKeycardDetail(ushort serial)
-        {
-            try
-            {
-                Type synchronizerType = typeof(KeycardDetailSynchronizer);
-                FieldInfo databaseField = synchronizerType.GetField("Database", BindingFlags.Static | BindingFlags.NonPublic);
-
-                if (databaseField == null)
-                {
-                    LogManager.Error("Could not find the 'Database' field via reflection.");
-                    return false;
-                }
-
-                object databaseObject = databaseField.GetValue(null);
-
-                if (databaseObject == null)
-                {
-                    LogManager.Error("The 'Database' field value is null.");
-                    return false;
-                }
-
-                if (!(databaseObject is Dictionary<ushort, ArraySegment<byte>>))
-                {
-                    LogManager.Error($"'Database' field is not the expected Dictionary type. Found: {databaseObject.GetType().FullName}");
-                    return false;
-                }
-
-                Type dictionaryType = databaseObject.GetType();
-                MethodInfo removeMethod = dictionaryType.GetMethod(
-                    "Remove",
-                    BindingFlags.Public | BindingFlags.Instance,
-                    null,
-                    new Type[] { typeof(ushort) },
-                    null);
-
-                if (removeMethod == null)
-                {
-                    LogManager.Error("Could not find the 'Remove(ushort)' method on the Dictionary type via reflection.");
-                    return false;
-                }
-
-                object[] methodArgs = new object[] { serial };
-                object result = removeMethod.Invoke(databaseObject, methodArgs);
-
-                bool wasRemoved = (bool)result;
-                LogManager.Debug($"Reflection attempt to remove key {serial}. Result: {wasRemoved}");
-                return wasRemoved;
-
-            }
-            catch (Exception ex)
-            {
-                LogManager.Error($"An exception occurred during reflection: {ex.Message}");
-                LogManager.Error(ex.StackTrace);
-                return false;
-            }
-        }
-
         /// <summary>
         /// Sets the badge of the <see cref="Player"/> according to the <see cref="ICustomItem"/> BadgeName field.
         /// <param name="Player"></param>
         /// </summary>
         public string LoadBadge(Player Player)
         {
-            PlayerBadges.Add(Player.Id, Player.BadgeHidden);
+            PlayerBadges.TryAdd(Player.Id, Player.BadgeHidden);
             LogManager.Debug("LoadBadge Triggered");
             string output = "Badge: ";
 
@@ -702,7 +537,6 @@ namespace UncomplicatedCustomItems.API.Features
                     LogManager.Debug($"Hid {player.DisplayNickname} badge.");
                     player.ReferenceHub.serverRoles.TryHideTag();
                 }
-                PlayerBadges.Remove(player.Id);
             }
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }
