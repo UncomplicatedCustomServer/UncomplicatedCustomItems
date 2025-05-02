@@ -59,7 +59,7 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             //LogManager.Debug("OnHurt event is being triggered"); this was really annoying when debugging.
-            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem) || !summonedCustomItem.CustomItem.CustomFlags.HasValue)
+            if (!Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem summonedCustomItem) || !summonedCustomItem.CustomItem.CustomFlags.HasValue)
                 return;
 
             if (summonedCustomItem.HasModule(CustomFlags.LifeSteal))
@@ -84,7 +84,7 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.Player == null || ev.Player.CurrentItem == null || !ev.IsAllowed)
                 return;
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
 
             if (customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
