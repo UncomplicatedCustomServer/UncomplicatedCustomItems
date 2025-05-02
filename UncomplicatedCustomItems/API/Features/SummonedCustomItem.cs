@@ -59,18 +59,6 @@ namespace UncomplicatedCustomItems.API.Features
         internal bool NameApplied { get; set; } = false;
 
         /// <summary>
-        /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
-        /// </summary>
-        public static List<string> GetAttachmentsList(List<IWeaponData> items)
-        {
-            return items
-                .Where(item => !string.IsNullOrWhiteSpace(item.Attachments))
-                .SelectMany(item => item.Attachments.Split(',')
-                    .Select(attachment => new { AttachmentName = attachment.Trim() }))
-                .Select(x => x.AttachmentName)
-                .ToList();
-        }
-        /// <summary>
         /// Converts the Command custom data from items into a list to allow multiple commands.
         /// </summary>
         public static List<string?> CommandsList(List<IItemData> Commands)
@@ -213,6 +201,7 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Weapon:
+                        List<string> attachmentList = GetAttachmentsList();
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
 
@@ -224,14 +213,10 @@ namespace UncomplicatedCustomItems.API.Features
                         Firearm.Penetration = WeaponData.Penetration;
                         Firearm.Inaccuracy = WeaponData.Inaccuracy;
                         Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
-                        List<string> attachmentNames = GetAttachmentsList([WeaponData]);
-                        List<AttachmentName> attachmentsList = attachmentNames
-                            .Select(name => Enum.TryParse(name, true, out AttachmentName attachment) ? attachment : (AttachmentName?)null)
-                            .Where(attachment => attachment.HasValue)
-                            .Select(attachment => attachment.Value)
-                            .ToList();
-                        foreach (AttachmentName attachment in attachmentsList)
+                        foreach (string attachmentstring in attachmentList)
                         {
+                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
+                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
                             Firearm.AddAttachment(attachment);
                         }
                         MagCheck(Firearm, WeaponData);
@@ -464,6 +449,32 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 CustomItem.Scale = Pickup.Scale;
                 CustomItem.Weight = Pickup.Weight;
+            }
+        }
+
+        private List<string> GetAttachmentsList()
+        {
+            if (CustomItem.CustomData is IWeaponData weaponData)
+            {
+                string attachmentsString = weaponData.Attachments;
+
+                if (string.IsNullOrWhiteSpace(attachmentsString))
+                {
+                    return new List<string>();
+                }
+
+                List<string> attachmentsList = attachmentsString
+                    .Split(',')
+                    .Select(att => att.Trim())
+                    .Where(att => !string.IsNullOrEmpty(att))
+                    .ToList();
+
+                return attachmentsList;
+            }
+            else
+            {
+                LogManager.Warn("CustomData is not in the expected IWeaponData format or is null.");
+                return new List<string>();
             }
         }
 
