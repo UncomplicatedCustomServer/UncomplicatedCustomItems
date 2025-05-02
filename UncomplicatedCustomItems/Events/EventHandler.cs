@@ -61,7 +61,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 foreach (LifeStealSettings LifeStealSettings in summonedCustomItem.CustomItem.FlagSettings.LifeStealSettings)
                 {
-                    if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.LifeSteal))
+                    if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.LifeSteal))
                     {
                         LogManager.Debug("LifeSteal custom flag is being triggered");
 
@@ -83,7 +83,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player == null || ev.Player.CurrentItem == null)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
                 ev.IsTriggerable = false;
             else return;
         }
@@ -93,7 +93,7 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.IsAllowed)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.InfiniteAmmo))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
                 if (ev.Firearm != null)
                 {
@@ -108,7 +108,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error("InfiniteAmmo flag was triggered but no valid firearm found.");
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.CustomSound))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.CustomSound))
             {
                 AudioApi AudioApi = new();
                 if (ev.Firearm != null)
@@ -122,7 +122,7 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnDieOnUseFlag(ShootingEventArgs ev)
         {
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.DieOnUse))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.DieOnUse))
             {
                 if (ev.Item != null)
                 {
@@ -145,7 +145,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Usable == null)
                 return;
             
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.DieOnUse))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.DieOnUse))
             {
                 if (ev.Item != null)
                 {
@@ -157,7 +157,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"DieOnUse flag was triggered but couldnt be ran for {customItem.CustomItem.Name}.");
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.EffectWhenUsed))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -202,7 +202,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.HasModule(CustomFlags.CustomSound))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.CustomItem.CustomFlags.HasValue && Customitem.HasModule(CustomFlags.CustomSound))
             {
                 AudioApi AudioApi = new();
                 if (ev.Item != null)
@@ -353,7 +353,7 @@ namespace UncomplicatedCustomItems.Events
 
             if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
-                if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
                 {
                     foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                     {
@@ -411,7 +411,7 @@ namespace UncomplicatedCustomItems.Events
 
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem))
             {
-                if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
                 {
                     foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                     {
@@ -455,7 +455,7 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                 }
-                if (CustomItem.HasModule(CustomFlags.Disguise))
+                if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.Disguise))
                 {
                     foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
                     {
@@ -477,7 +477,7 @@ namespace UncomplicatedCustomItems.Events
 
         public void GrenadeExploding(ExplodingGrenadeEventArgs ev)
         {   
-            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
+            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
             {
                 LogManager.Debug($"{ev.Projectile.Type} is a CustomItem");
                 foreach (SpawnItemWhenDetonatedSettings SpawnItemWhenDetonatedSettings in CustomItem.CustomItem.FlagSettings.SpawnItemWhenDetonatedSettings)
@@ -526,7 +526,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.Projectile.Serial}");
             }
-            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Customitem) && CustomItem.HasModule(CustomFlags.Cluster))
+            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Customitem) && Customitem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.Cluster))
             {
                 LogManager.Debug($"{ev.Projectile.Type} is a CustomItem");
                 foreach (ClusterSettings ClusterSettings in CustomItem.CustomItem.FlagSettings.ClusterSettings)
@@ -682,7 +682,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem CustomItem))
                 {
-                    if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                    if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
                     {
                         foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                         {
@@ -726,7 +726,7 @@ namespace UncomplicatedCustomItems.Events
                             }
                         }
                     }
-                    if (CustomItem.HasModule(CustomFlags.Disguise))
+                    if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.Disguise))
                     {
                         foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
                         {
@@ -838,7 +838,7 @@ namespace UncomplicatedCustomItems.Events
         }
         public void ThrownProjectile(ThrownProjectileEventArgs ev)
         {
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.EffectWhenUsed))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -886,7 +886,7 @@ namespace UncomplicatedCustomItems.Events
         public void OnChangingAttachments(ChangingAttachmentsEventArgs ev)
         {
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.WorkstationBan))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.WorkstationBan))
             {
                 if (ev.Player != null)
                 {
@@ -905,7 +905,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player == null || ev.Player.CurrentItem == null)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.WorkstationBan))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.WorkstationBan))
             {
                 if (ev.Player != null)
                 {
@@ -921,7 +921,7 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnDeath(SummonedCustomItem customItem)
         {
-            if (customItem.HasModule(CustomFlags.ItemGlow))
+            if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.ItemGlow))
             {
                 foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
                 {
@@ -982,7 +982,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
                     LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                 }
-                if (SummonedCustomItem.HasModule(CustomFlags.Disguise))
+                if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.Disguise))
                 {
                     ev.Player.ChangeAppearance(ev.Player.Role);
                 }
@@ -1038,7 +1038,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.DieOnDrop))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.DieOnDrop))
             {
                 foreach (DieOnDropSettings DieOnDropSettings in CustomItem.CustomItem.FlagSettings.DieOnDropSettings)
                 {
@@ -1100,7 +1100,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Item is null)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.CantDrop))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.CantDrop))
             {
                 ev.IsAllowed = false;
                 foreach (CantDropSettings CantDropSettings in CustomItem.CustomItem.FlagSettings.CantDropSettings)
@@ -1169,7 +1169,7 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.Attacker.CurrentItem.IsWeapon)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.VaporizeKills))
+            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.VaporizeKills))
             {
                 try
                 {
@@ -1185,7 +1185,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"Couldnt Vaporize {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                 }
             }
-            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.ChangeAppearanceOnKill))
+            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.ChangeAppearanceOnKill))
             {
                 LogManager.Debug($"{nameof(OnDying)}: Changing {ev.Attacker.DisplayNickname} appearance to {ev.Player.Role.Name}");
                 ev.Attacker.ChangeAppearance(ev.Player.Role);
@@ -1227,7 +1227,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Firearm == null)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.EffectWhenUsed))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 foreach (EffectSettings EffectSettings in customItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -1272,7 +1272,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.ExplosiveBullets))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.ExplosiveBullets))
             {
                 foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in CustomItem.CustomItem.FlagSettings.ExplosiveBulletsSettings)
                 {
@@ -1288,7 +1288,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.HasModule(CustomFlags.ToolGun))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Customitem) && Customitem.CustomItem.CustomFlags.HasValue && Customitem.HasModule(CustomFlags.ToolGun))
             {
                 ev.CanSpawnImpactEffects = false;
                 ev.CanHurt = false;
@@ -1316,7 +1316,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Firearm == null)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.EffectShot))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.EffectShot))
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
                 {
@@ -1368,7 +1368,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player == null || ev.Player.CurrentItem == null)
                 return;
 
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.HasModule(CustomFlags.NoCharge))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) && CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.HasModule(CustomFlags.NoCharge))
             {
                 if (ev.Item != null)
                 {
@@ -1383,9 +1383,9 @@ namespace UncomplicatedCustomItems.Events
             {
                 ChargeAttack = true;
             }
-            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.HasModule(CustomFlags.EffectWhenUsed))
+            if (ev.Player != null && Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.EffectWhenUsed))
             {
-                if (customItem.HasModule(CustomFlags.NoCharge))
+                if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.NoCharge))
                     return;
 
                 AudioApi AudioApi = new();
