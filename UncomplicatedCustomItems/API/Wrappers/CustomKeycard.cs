@@ -41,7 +41,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
         public Keycard ParentKeycard { get; private set; }
 
         /// <summary>
-        /// The base synced detail object that this wrapper manages.
+        /// The base <see cref="KeycardItem"/> object that this wrapper manages.
         /// </summary>
         public new KeycardItem Base { get; }
 
