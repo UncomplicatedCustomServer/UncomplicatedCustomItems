@@ -430,34 +430,36 @@ namespace UncomplicatedCustomItems.Events
                         if (SpawnItemWhenDetonatedSettings.ItemToSpawn == ItemType.SCP244a || SpawnItemWhenDetonatedSettings.ItemToSpawn == ItemType.SCP244b)
                         {
                             LogManager.Debug($"ItemToSpawn is SCP244a or SCP244b");
-                            Scp244Pickup Scp244Pickup = (Scp244Pickup)Pickup.CreateAndSpawn(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position, null, ev.Player);
-                            Scp244Pickup.MaxDiameter = 0.1f;
-                            Scp244Pickup.State = Scp244State.Active;
+                            LABAPI.Scp244Pickup scp244Pickup = (LABAPI.Scp244Pickup)LABAPI.Scp244Pickup.Create(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position);
+                            scp244Pickup.Base.MaxDiameter = 0.1f;
+                            scp244Pickup.State = Scp244State.Active;
+                            scp244Pickup.Spawn();
 
                             if (SpawnItemWhenDetonatedSettings.Pickupable != true)
                             {
-                                Scp244Pickup.Weight = 5000f;
+                                scp244Pickup.Weight = 5000f;
                             }
                             if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(Scp244Pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                Timing.RunCoroutine(TimeTillDespawnCoroutine(scp244Pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
                             }
                         }
                         else
                         {
-                            Pickup Pickup = Pickup.CreateAndSpawn(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position, null, ev.Player);
-                            Vector3 Vector3 = new(0f, 1f, 0f);
-                            Pickup.Transform.position = Pickup.Transform.position + Vector3;
+                            LABAPI.Pickup pickup = LABAPI.Pickup.Create(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position);
+                            Vector3 vector3 = new(0f, 1f, 0f);
+                            pickup.Transform.position = pickup.Transform.position + vector3;
+                            pickup.Spawn();
 
                             if (SpawnItemWhenDetonatedSettings.Pickupable != true)
                             {
-                                Pickup.Weight = 5000f;
+                                pickup.Weight = 5000f;
                             }
                             if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(ev.Projectile.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                Timing.RunCoroutine(TimeTillDespawnCoroutine(pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
                             }
                         }
                     }
@@ -473,46 +475,15 @@ namespace UncomplicatedCustomItems.Events
                 foreach (ClusterSettings ClusterSettings in CustomItem.CustomItem.FlagSettings.ClusterSettings)
                 {
                     Vector3 Scale = CustomItem.CustomItem.Scale * 0.75f;
-                    if (ClusterSettings.ItemToSpawn == ItemType.GrenadeHE)
+                    if (ClusterSettings.ItemToSpawn == ItemType.GrenadeHE || ClusterSettings.ItemToSpawn == ItemType.GrenadeFlash || ClusterSettings.ItemToSpawn == ItemType.SCP018)
                     {
                         Timing.CallDelayed(0.1f, () =>
                         {
-                            ExplosiveGrenade Grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
                             for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
                             {
-                                Grenade.Scale = Scale;
-                                Grenade.FuseTime = ClusterSettings.FuseTime ?? 5f;
-                                Grenade.ScpDamageMultiplier = ClusterSettings.ScpDamageMultiplier ?? 1f;
-                                Grenade.ChangeItemOwner(null, ev.Player);
-                                Grenade.SpawnActive(ClusterOffset(ev.Position), owner: ev.Player);
-                            }
-                        });
-                    }
-                    else if (ClusterSettings.ItemToSpawn == ItemType.GrenadeFlash)
-                    {
-                        Timing.CallDelayed(0.1f, () =>
-                        {
-                            FlashGrenade FlashGrenade = (FlashGrenade)Item.Create(ItemType.GrenadeFlash);
-                            for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
-                            {
-                                FlashGrenade.FuseTime = ClusterSettings.FuseTime ?? 5f;
-                                FlashGrenade.Scale = Scale;
-                                FlashGrenade.ChangeItemOwner(null, ev.Player);
-                                FlashGrenade.SpawnActive(ClusterOffset(ev.Position), owner: ev.Player);
-                            }
-                        });
-                    }
-                    else if (ClusterSettings.ItemToSpawn == ItemType.SCP018)
-                    {
-                        Timing.CallDelayed(0.1f, () =>
-                        {
-                            Scp018 SCP018 = (Scp018)Item.Create(ItemType.GrenadeFlash);
-                            for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
-                            {
-                                SCP018.FuseTime = ClusterSettings.FuseTime ?? 5f;
-                                SCP018.Scale = Scale;
-                                SCP018.ChangeItemOwner(null, ev.Player);
-                                SCP018.SpawnActive(ClusterOffset(ev.Position), owner: ev.Player);
+                                LABAPI.ExplosiveGrenadeProjectile grenade = (LABAPI.ExplosiveGrenadeProjectile)LABAPI.ExplosiveGrenadeProjectile.SpawnActive(ClusterOffset(ev.Position), ClusterSettings.ItemToSpawn, ev.Player, (double)ClusterSettings.FuseTime);
+                                grenade.GameObject.transform.localScale = Scale;
+                                grenade.ScpDamageMultiplier = ClusterSettings.ScpDamageMultiplier ?? 1f;
                             }
                         });
                     }
@@ -522,10 +493,7 @@ namespace UncomplicatedCustomItems.Events
                         {
                             for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
                             {
-                                Pickup Pickup = Pickup.Create(ClusterSettings.ItemToSpawn);
-                                Pickup.Scale = Scale;
-                                Pickup.PreviousOwner = ev.Player;
-                                Pickup.Spawn(ClusterOffset(ev.Position), previousOwner: ev.Player);
+                                LABAPI.Pickup pickup = LABAPI.Pickup.Create(ClusterSettings.ItemToSpawn, ClusterOffset(ev.Position), ev.Player.Rotation, Scale);
                             }
                         });
                     }
