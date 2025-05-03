@@ -62,15 +62,15 @@ namespace UncomplicatedCustomItems.API.Features
                     LogManager.Debug($"Audio API is enabled!");
                     if (!string.IsNullOrEmpty(AudioSettings.AudioPath))
                     {
+                        string clipId = $"sound_{Guid.NewGuid()}";
                         LogManager.Debug($"Succesfully loaded audio path {AudioSettings.AudioPath}");
-                        AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}", onIntialCreation: (p) =>
+                        AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{Guid.NewGuid()}", onIntialCreation: (p) =>
                         {
-                            float maxDistance = AudioSettings.AudibleDistance ?? 1f;
-                            Speaker speaker = p.AddSpeaker("Main", Coords, isSpatial: true, maxDistance: maxDistance);
+                            Speaker speaker = p.AddSpeaker("Main", Coords, isSpatial: true, maxDistance: AudioSettings.AudibleDistance ?? 1f);
                         });
                         float volume = Clamp(AudioSettings.SoundVolume, 1f, 100f);
-                        audioPlayer.AddClip($"sound_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}", volume);
-                        AudioClipStorage.LoadClip(AudioSettings.AudioPath, $"sound_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}");
+                        audioPlayer.AddClip($"{clipId}", volume);
+                        AudioClipStorage.LoadClip(AudioSettings.AudioPath, $"{clipId}");
                         LogManager.Debug($"Playing {Path.GetFileName(AudioSettings.AudioPath)}");
                         LogManager.Debug($"Audio should have been played.");
                     }
