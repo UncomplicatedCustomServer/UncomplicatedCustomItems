@@ -26,7 +26,7 @@ using Exiled.API.Extensions;
 using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Extensions;
-using UncomplicatedCustomItems.Interfaces;
+using LABAPI = LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -1248,10 +1248,9 @@ namespace UncomplicatedCustomItems.Events
                 {
                     ev.CanHurt = false;
                     ev.CanSpawnImpactEffects = false;
-                    ExplosiveGrenade grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
-                    grenade.MaxRadius = ExplosiveBulletsSettings.DamageRadius ?? 1f;
-                    grenade.FuseTime = .01f;
-                    grenade.SpawnActive(ev.Position, ev.Player);
+                    LABAPI.ExplosiveGrenadeProjectile grenade = (LABAPI.ExplosiveGrenadeProjectile)LABAPI.ExplosiveGrenadeProjectile.SpawnActive(ev.Position, ItemType.GrenadeHE, ev.Player, 0.2);
+                    grenade.MaxRadius = ExplosiveBulletsSettings.DamageRadius ?? 10f;
+                    grenade.FuseEnd();
                 }
             }
             if (customItem.HasModule(CustomFlags.ToolGun))
