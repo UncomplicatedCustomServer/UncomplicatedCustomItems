@@ -494,6 +494,7 @@ namespace UncomplicatedCustomItems.Events
                             for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
                             {
                                 LABAPI.Pickup pickup = LABAPI.Pickup.Create(ClusterSettings.ItemToSpawn, ClusterOffset(ev.Position), ev.Player.Rotation, Scale);
+                                pickup.Spawn();
                             }
                         });
                     }
