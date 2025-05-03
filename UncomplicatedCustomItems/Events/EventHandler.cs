@@ -26,6 +26,7 @@ using Exiled.API.Extensions;
 using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -102,8 +103,9 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
-                ev.Firearm.MagazineAmmo = ev.Firearm.MaxMagazineAmmo;
-                LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {ev.Firearm.MagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
+                IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
+                ev.Firearm.MagazineAmmo = data.MaxMagazineAmmo;
+                LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
             }
             if (customItem.HasModule(CustomFlags.CustomSound))
             {
@@ -1244,16 +1246,12 @@ namespace UncomplicatedCustomItems.Events
             {
                 foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in customItem.CustomItem.FlagSettings.ExplosiveBulletsSettings)
                 {
-                    if (ev.Firearm != null)
-                    {
-                        ev.CanSpawnImpactEffects = false;
-                        Vector3 Position = ev.Position;
-                        ExplosiveGrenade grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
-                        float DamageRadius = ExplosiveBulletsSettings.DamageRadius ?? 1f;
-                        grenade.MaxRadius = DamageRadius;
-                        grenade.FuseTime = .01f;
-                        grenade.SpawnActive(Position, ev.Player);
-                    }
+                    ev.CanHurt = false;
+                    ev.CanSpawnImpactEffects = false;
+                    ExplosiveGrenade grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
+                    grenade.MaxRadius = ExplosiveBulletsSettings.DamageRadius ?? 1f;
+                    grenade.FuseTime = .01f;
+                    grenade.SpawnActive(ev.Position, ev.Player);
                 }
             }
             if (customItem.HasModule(CustomFlags.ToolGun))

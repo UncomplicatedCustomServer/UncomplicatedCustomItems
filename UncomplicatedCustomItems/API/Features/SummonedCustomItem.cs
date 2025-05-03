@@ -87,6 +87,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public bool IsPickup => Pickup is not null;
 
+        internal bool PropertiesSet { get; set; }
+
         /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
         /// </summary>
@@ -204,7 +206,8 @@ namespace UncomplicatedCustomItems.API.Features
                         List<string> attachmentList = GetAttachmentsList();
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
-
+                        if (!PropertiesSet)
+                            MagCheck(Firearm, WeaponData);
                         Firearm.MagazineAmmo = WeaponData.MaxAmmo;
                         Firearm.Damage = WeaponData.Damage;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
@@ -219,7 +222,7 @@ namespace UncomplicatedCustomItems.API.Features
                             LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
                             Firearm.AddAttachment(attachment);
                         }
-                        MagCheck(Firearm, WeaponData);
+                        PropertiesSet = true;
                         break;
 
                     case CustomItemType.Jailbird:
