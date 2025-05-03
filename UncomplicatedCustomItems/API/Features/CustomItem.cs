@@ -7,6 +7,7 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.Extensions;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -35,10 +36,10 @@ namespace UncomplicatedCustomItems.API.Features
             if (!Utilities.CustomItemValidator(item, out string error))
             {
                 LogManager.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
-                UnregisteredCustomItems.Add(item.Id, item);
+                UnregisteredCustomItems.TryAdd(item.Id, item);
                 return;
             }
-            CustomItems.Add(item.Id, item);
+            CustomItems.TryAdd(item.Id, item);
             LogManager.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 

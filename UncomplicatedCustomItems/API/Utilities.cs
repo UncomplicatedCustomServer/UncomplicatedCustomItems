@@ -10,6 +10,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -28,8 +29,11 @@ namespace UncomplicatedCustomItems.API
         {
             if (CustomItem.CustomItems.ContainsKey(item.Id))
             {
-                error = $"There's already another ICustomItem registered with the same Id ({item.Id})!";
-                return false;
+                uint OldId = item.Id;
+                uint NewId = CustomItem.GetFirstFreeId(1);
+                item.Id = NewId;
+                LogManager.Warn($"{item.Name} - {OldId} ID is already used asigning new ID...\n{item.Name} new ID is {NewId}");
+                CustomItem.Register(item);
             }
             
             switch (item.CustomItemType)

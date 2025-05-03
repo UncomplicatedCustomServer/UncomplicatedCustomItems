@@ -1,5 +1,4 @@
-﻿using Exiled.API.Enums;
-using Exiled.API.Features;
+﻿using Exiled.API.Features;
 using Exiled.API.Extensions;
 using Exiled.Loader;
 using System;
@@ -11,7 +10,6 @@ using UncomplicatedCustomItems.Enums;
 using UnityEngine;
 using UncomplicatedCustomItems.Interfaces;
 using YamlDotNet.Core;
-using Interactables.Interobjects.DoorUtils;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
