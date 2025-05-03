@@ -22,8 +22,6 @@
 
         public float AimingInaccuracy { get; set; }
 
-        public float HipfireInaccuracy { get; set; }
-
         public abstract float DamageFalloffDistance { get; set; }
 
         public abstract string Attachments { get; set; }

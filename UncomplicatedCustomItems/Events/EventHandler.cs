@@ -101,6 +101,16 @@ namespace UncomplicatedCustomItems.Events
             if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
 
+            if (ev.Firearm.Aiming)
+            {
+                IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
+                ev.Firearm.Inaccuracy = data.AimingInaccuracy;
+            }
+            else
+            {
+                IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
+                ev.Firearm.Inaccuracy = data.Inaccuracy;
+            }
             if (customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
                 IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;

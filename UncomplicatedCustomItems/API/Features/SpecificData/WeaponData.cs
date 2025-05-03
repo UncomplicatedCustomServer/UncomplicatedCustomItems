@@ -43,14 +43,11 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets the inaccuracy of the firearm
         /// </summary>
         public float Inaccuracy { get; set; } = 1.24f;
+
         /// <summary>
         /// Gets or sets the inaccuracy of the firearm while the player is ADS
         /// </summary>
         public float AimingInaccuracy { get; set; } = 1.24f;
-        /// <summary>
-        /// Gets or sets the inaccuracy of the firearm while the player is hipfireing
-        /// </summary>
-        public float HipfireInaccuracy { get; set; } = 1.24f;
 
         /// <summary>
         /// Gets or sets the how much fast the value drop over the distance.
