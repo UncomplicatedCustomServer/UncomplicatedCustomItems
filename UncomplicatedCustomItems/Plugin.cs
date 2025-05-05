@@ -19,7 +19,6 @@ using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
 using Scp914Event = Exiled.Events.Handlers.Scp914;
 using LabAPIPlayerEvent = LabApi.Events.Handlers.PlayerEvents;
-using LabAPIServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 namespace UncomplicatedCustomItems
 {

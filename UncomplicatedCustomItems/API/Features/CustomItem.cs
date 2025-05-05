@@ -43,6 +43,17 @@ namespace UncomplicatedCustomItems.API.Features
             LogManager.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
+        public bool HasModule(CustomFlags Flag)
+        {
+            if (CustomFlags.HasValue && CustomFlags.Value.HasFlag(Flag))
+            {
+                LogManager.Debug($"{Name} has {Flag}");
+                return true;
+            }
+            else
+                return false;
+        }
+
         /// <summary>
         /// Unregister a <see cref="ICustomItem"/> from the plugin by it's class
         /// </summary>

@@ -199,12 +199,5 @@ namespace UncomplicatedCustomItems.API.Features
                 Chance = 100,
             }
         ];
-        public List<CustomGravitySettings?> CustomGravitySettings { get; set; } =
-        [
-            new()
-            {
-                Gravity = new(1, -19.60f, 1)
-            }
-        ];
     }
 }

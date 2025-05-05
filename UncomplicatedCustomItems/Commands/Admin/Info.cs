@@ -156,7 +156,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 data.Add("<color=#bf4eb6>📂</color> SpawnItemWhenDetonatedSettings:", "");
                 foreach (SpawnItemWhenDetonatedSettings SpawnItemWhenDetonatedSettings in customItem.FlagSettings.SpawnItemWhenDetonatedSettings)
                 {
-                    data.Add("    <color=#bf4eb6>🔫</color> Item To Spawn:", string.Join(", ", SpawnItemWhenDetonatedSettings.ItemToSpawn));
+                    data.Add("    <color=#bf4eb6>🔫</color> Item To Spawn:", string.Join(", ", SpawnItemWhenDetonatedSettings.ItemId));
                     data.Add("    <color=#bf4eb6>🎲</color> Chance:", string.Join(", ", SpawnItemWhenDetonatedSettings.Chance));
                     data.Add("    <color=#bf4eb6>🛠️</color> Pickupable:", string.Join(", ", SpawnItemWhenDetonatedSettings.Pickupable));
                     data.Add("    <color=#bf4eb6>🕛</color> TimeTillDespawn:", string.Join(", ", SpawnItemWhenDetonatedSettings.TimeTillDespawn));

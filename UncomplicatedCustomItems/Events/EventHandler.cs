@@ -28,6 +28,7 @@ using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.Interfaces;
+using LabApi.Events.Arguments.Scp914Events;
 using Exiled.Events.EventArgs.Scp914;
 
 namespace UncomplicatedCustomItems.Events
@@ -421,17 +422,6 @@ namespace UncomplicatedCustomItems.Events
                     Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
                 }
             }
-            if (CustomItem.HasModule(CustomFlags.CustomGravity))
-            {
-                foreach (CustomGravitySettings GravitySettings in CustomItem.CustomItem.FlagSettings.CustomGravitySettings)
-                {
-                    if (GravitySettings.Gravity == null)
-                        break;
-
-                    LABAPI.Player player =  ev.Player;
-                    player.Gravity = (Vector3)GravitySettings.Gravity;
-                }
-            }
         }
 
         public void GrenadeExploding(ExplodingGrenadeEventArgs ev)
@@ -571,15 +561,16 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnPickupUpgrade(UpgradingPickupEventArgs ev)
         {
-            if (ev.Pickup == null || !ev.IsAllowed)
-                return;
-
+            LogManager.Debug($"{nameof(OnPickupUpgrade)}: Triggered");
             foreach (CustomItem customItem in CustomItem.List)
             {
-                if (customItem.CustomFlags.Value.HasFlag(CustomFlags.Craftable))
+                LogManager.Debug($"{nameof(OnPickupUpgrade)}: {customItem.Name}");
+                if (customItem.HasModule(CustomFlags.Craftable))
                 {
+                    LogManager.Debug($"{nameof(OnPickupUpgrade)}: {customItem.Name} has Craftable CustomFlag");
                     foreach (CraftableSettings craftableSettings in customItem.FlagSettings.CraftableSettings)
                     {
+                        LogManager.Debug($"{nameof(OnPickupUpgrade)}: Checking settings on {customItem.Name}");
                         if (craftableSettings.OriginalItem == null || craftableSettings.KnobSetting == null || craftableSettings.Chance == null)
                         {
                             LogManager.Warn($"{nameof(OnPickupUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or chance equal null. Aborting... \n Values: {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
@@ -587,33 +578,58 @@ namespace UncomplicatedCustomItems.Events
                         }
                         else if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
                         {
-                            if (ev.Pickup.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
+                            LogManager.Debug($"{nameof(OnPickupUpgrade)}: {customItem.Name} Passed chance");
+                            try
                             {
-                                Timing.CallDelayed(0.1f, () =>
+                                LogManager.Debug($"{nameof(OnPickupUpgrade)}: Checking if {craftableSettings.OriginalItem} equals {ev.Pickup} and {craftableSettings.KnobSetting} equals {ev.KnobSetting}");
+                                if (ev.Pickup.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
                                 {
-                                    new SummonedCustomItem(customItem, ev.Pickup);
-                                });
-                                break;
+                                    LogManager.Debug($"{nameof(OnPickupUpgrade)}: Check passed!");
+                                    LogManager.Debug($"{nameof(OnPickupUpgrade)}: Spawning {customItem.Name} at {ev.Pickup.Position}...");
+                                    try
+                                    {
+                                        new SummonedCustomItem(customItem, ev.OutputPosition);
+                                        LogManager.Debug($"{nameof(OnPickupUpgrade)}: CustomItem created successfully at {ev.OutputPosition}");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogManager.Error($"{nameof(OnPickupUpgrade)}: Error creating CustomItem: {ex.Message}");
+                                    }
+                                    try
+                                    {
+                                        ev.Pickup.Destroy();
+                                        LogManager.Debug($"{nameof(OnPickupUpgrade)}: Original pickup destroyed successfully");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogManager.Error($"{nameof(OnPickupUpgrade)}: Error destroying pickup: {ex.Message}");
+                                    }
+                                }
+                                else
+                                    LogManager.Debug($"{nameof(OnPickupUpgrade)}: {ev.KnobSetting} != {craftableSettings.KnobSetting} or {ev.Pickup} != {craftableSettings.OriginalItem}");
                             }
-                            else
-                                LogManager.Debug($"{nameof(OnPickupUpgrade)}: {ev.KnobSetting} != {craftableSettings.KnobSetting} or {ev.Pickup.Type} != {craftableSettings.OriginalItem}");
+                            catch (Exception ex)
+                            {
+                                LogManager.Error($"{nameof(OnPickupUpgrade)}: Exception: {ex.Message}");
+                            }
                         }
                     }
-                }
+                }    
             }
         }
         
         public void OnItemUpgrade(UpgradingInventoryItemEventArgs ev)
         {
-            if (ev.Item == null || !ev.IsAllowed || ev.Player == null)
-                return;
-
+            LogManager.Debug($"{nameof(OnItemUpgrade)}: Triggered");
             foreach (CustomItem customItem in CustomItem.List)
             {
-                if (customItem.CustomFlags.Value.HasFlag(CustomFlags.Craftable))
+                LogManager.Debug($"{nameof(OnItemUpgrade)}: {customItem.Name}");
+                if (customItem.HasModule(CustomFlags.Craftable))
                 {
+                    LogManager.Debug($"{nameof(OnItemUpgrade)}: {customItem.Name} has Craftable CustomFlag");
                     foreach (CraftableSettings craftableSettings in customItem.FlagSettings.CraftableSettings)
                     {
+                        LogManager.Debug($"{nameof(OnItemUpgrade)}: Checking settings on {customItem.Name}");
                         if (craftableSettings.OriginalItem == null || craftableSettings.KnobSetting == null || craftableSettings.Chance == null)
                         {
                             LogManager.Warn($"{nameof(OnItemUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or Chance equals null. Aborting... \n Values: {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
@@ -621,16 +637,30 @@ namespace UncomplicatedCustomItems.Events
                         }
                         else if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
                         {
-                            if (ev.Item.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
+                            try
                             {
-                                Timing.CallDelayed(0.1f, () =>
+                                LogManager.Debug($"{nameof(OnItemUpgrade)}: Checking if {craftableSettings.OriginalItem} equals {ev.Item.Type} and {craftableSettings.KnobSetting} equals {ev.KnobSetting}");
+                                if (ev.Item.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
                                 {
-                                    new SummonedCustomItem(customItem, ev.Player, ev.Item);
-                                });
-                                break;
+                                    LogManager.Debug($"{nameof(OnItemUpgrade)}: Check passed!");
+                                    LogManager.Debug($"{nameof(OnItemUpgrade)}: Giving {customItem.Name} to {ev.Player.DisplayNickname}...");
+                                    try
+                                    {
+                                        new SummonedCustomItem(customItem, ev.Player, ev.Item);
+                                        LogManager.Debug($"{nameof(OnItemUpgrade)}: CustomItem given successfully to {ev.Player.DisplayNickname}");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogManager.Error($"{nameof(OnItemUpgrade)}: Error creating CustomItem: {ex.Message}");
+                                    }
+                                }
+                                else
+                                    LogManager.Debug($"{nameof(OnItemUpgrade)}: {ev.KnobSetting} != {craftableSettings.KnobSetting} or {ev.Item} != {craftableSettings.OriginalItem}");
                             }
-                            else
-                                LogManager.Debug($"{nameof(OnItemUpgrade)}: {ev.KnobSetting} != {craftableSettings.KnobSetting} or {ev.Item.Type} != {craftableSettings.OriginalItem}");
+                            catch (Exception ex)
+                            {
+                                LogManager.Error($"{nameof(OnItemUpgrade)}: Exception: {ex.Message}");
+                            }
                         }
                     }
                 }
@@ -820,17 +850,6 @@ namespace UncomplicatedCustomItems.Events
                             Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
                         }
                     }
-                    if (CustomItem.HasModule(CustomFlags.CustomGravity))
-                    {
-                        foreach (CustomGravitySettings GravitySettings in CustomItem.CustomItem.FlagSettings.CustomGravitySettings)
-                        {
-                            if (GravitySettings.Gravity == null)
-                                break;
-        
-                            LABAPI.Player player =  ev.Player;
-                            player.Gravity = (Vector3)GravitySettings.Gravity;
-                        }
-                    }
                 }
             });
         }
@@ -851,15 +870,21 @@ namespace UncomplicatedCustomItems.Events
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
                     IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
-                    if (Data.OneTimeUse)
+                    Timing.CallDelayed(0.2f, () =>
                     {
-                        Timing.CallDelayed(0.5f, () =>
+                        if (ev.Door.IsOpen)
                         {
-                            ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
-                            LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
-                            ev.Player.RemoveItem(CustomItem.Item, true);
-                        });
-                    }
+                            if (Data.OneTimeUse)
+                            {
+                                Timing.CallDelayed(0.5f, () =>
+                                {
+                                    ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                                    LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                                    ev.Player.RemoveItem(CustomItem.Item, true);
+                                });
+                            }
+                        }
+                    });
                 }
             }
         }
