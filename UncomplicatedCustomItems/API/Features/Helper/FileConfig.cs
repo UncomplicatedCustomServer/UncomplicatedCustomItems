@@ -69,19 +69,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Description = "UWU owo keycard",
                 BadgeName = "Keycard",
                 BadgeColor = "pumpkin",
-                Item = ItemType.KeycardJanitor,
+                Item = ItemType.KeycardCustomSite02,
                 CustomItemType = CustomItemType.Keycard,
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
                 FlagSettings = new(),
-                CustomData = YAMLCaster.Encode(new KeycardData()
-                {
-                    PermissionsColor = "Red",
-                    TintColor = "Red",
-                    Name = "Hello",
-                    Label = "World",
-                })
+                CustomData = YAMLCaster.Encode(new KeycardData())
             },
             new()
             {

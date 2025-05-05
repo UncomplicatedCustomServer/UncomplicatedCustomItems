@@ -42,13 +42,13 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Sets the primary name displayed on the keycard (e.g., the holder's name).
         /// </summary>
         [Description("Sets the name displayed on the keycard.")]
-        public string Name { get; set; } = "Hello";
+        public string Name { get; set; } = "%name%";
 
         /// <summary>
         /// Sets the secondary label displayed on the keycard (e.g., a title or department).
         /// </summary>
         [Description("Sets the label displayed on the keycard.")]
-        public string Label { get; set; } = "World!";
+        public string Label { get; set; } = "Hello :D";
 
         /// <summary>
         /// Sets the serial number displayed visually on the keycard. Digit amount should be 12 Note: This is distinct from the underlying item's unique serial ID.
