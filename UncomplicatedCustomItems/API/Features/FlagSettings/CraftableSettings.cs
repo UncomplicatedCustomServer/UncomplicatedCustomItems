@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Scp914;
 using UncomplicatedCustomItems.Interfaces.FlagSettings;
 

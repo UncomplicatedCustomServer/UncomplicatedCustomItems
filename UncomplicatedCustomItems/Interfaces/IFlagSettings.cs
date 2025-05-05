@@ -47,5 +47,6 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract List<CantDropSettings?> CantDropSettings { get; set; }
         public abstract List<DisguiseSettings?> DisguiseSettings { get; set; }
         public abstract List<CraftableSettings?> CraftableSettings { get; set; }
+        public abstract List<CustomGravitySettings?> CustomGravitySettings { get; set; }
     }
 }

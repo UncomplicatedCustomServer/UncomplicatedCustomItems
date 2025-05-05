@@ -367,6 +367,7 @@ namespace UncomplicatedCustomItems.Events
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
                 return;
+
             if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
@@ -418,6 +419,17 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
                     LogManager.Debug($"{nameof(Onpickup)}: Adding or updating {ev.Player.Id} to appearance dictionary");
                     Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
+                }
+            }
+            if (CustomItem.HasModule(CustomFlags.CustomGravity))
+            {
+                foreach (CustomGravitySettings GravitySettings in CustomItem.CustomItem.FlagSettings.CustomGravitySettings)
+                {
+                    if (GravitySettings.Gravity == null)
+                        break;
+
+                    LABAPI.Player player =  ev.Player;
+                    player.Gravity = (Vector3)GravitySettings.Gravity;
                 }
             }
         }
@@ -747,67 +759,80 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Player.Role == RoleTypeId.Spectator || ev.Player.Role == RoleTypeId.Destroyed)
                 return;
-
-            foreach (Item item in ev.Player.Items)
+            
+            Timing.CallDelayed(0.1f, () =>
             {
-                if (!Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
-                    return;
-
-                if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                foreach (Item item in ev.Player.Items)
                 {
-                    foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
-                    {
-                        if (EffectSettings.EffectEvent != null)
-                        {
-                            if (EffectSettings.EffectEvent == "EffectWhenEquiped")
-                            {
-                                if (EffectSettings.Effect == null)
-                                {
-                                    LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
-                                if (EffectSettings.EffectDuration < -1)
-                                {
-                                    LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
-                                if (EffectSettings.EffectIntensity <= 0)
-                                {
-                                    LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                    return;
-                                }
+                    if (!Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                        return;
 
-                                LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                EffectType Effect = EffectSettings.Effect;
-                                float Duration = EffectSettings.EffectDuration;
-                                byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                    if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                    {
+                        foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                        {
+                            if (EffectSettings.EffectEvent != null)
+                            {
+                                if (EffectSettings.EffectEvent == "EffectWhenEquiped")
+                                {
+                                    if (EffectSettings.Effect == null)
+                                    {
+                                        LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                        return;
+                                    }
+                                    if (EffectSettings.EffectDuration < -1)
+                                    {
+                                        LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                        return;
+                                    }
+                                    if (EffectSettings.EffectIntensity <= 0)
+                                    {
+                                        LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                        return;
+                                    }
+
+                                    LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
+                                    EffectType Effect = EffectSettings.Effect;
+                                    float Duration = EffectSettings.EffectDuration;
+                                    byte Intensity = EffectSettings.EffectIntensity;
+                                    ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                                }
+                            }
+                            else
+                            {
+                                LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
                             }
                         }
-                        else
+                    }
+                    if (CustomItem.HasModule(CustomFlags.Disguise))
+                    {
+                        foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
                         {
-                            LogManager.Error($"No FlagSettings found on {CustomItem.CustomItem.Name}");
+                            if (DisguiseSettings.RoleId == null)
+                                return;
+                            if (DisguiseSettings.DisguiseMessage == null)
+                                return;
+
+                            LogManager.Debug($"{nameof(OnSpawned)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
+                            ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
+                            ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
+                            LogManager.Debug($"{nameof(OnSpawned)}: Adding or updating {ev.Player.Id} to appearance dictionary");
+                            Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
+                        }
+                    }
+                    if (CustomItem.HasModule(CustomFlags.CustomGravity))
+                    {
+                        foreach (CustomGravitySettings GravitySettings in CustomItem.CustomItem.FlagSettings.CustomGravitySettings)
+                        {
+                            if (GravitySettings.Gravity == null)
+                                break;
+        
+                            LABAPI.Player player =  ev.Player;
+                            player.Gravity = (Vector3)GravitySettings.Gravity;
                         }
                     }
                 }
-                if (CustomItem.HasModule(CustomFlags.Disguise))
-                {
-                    foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
-                    {
-                        if (DisguiseSettings.RoleId == null)
-                            return;
-                        if (DisguiseSettings.DisguiseMessage == null)
-                            return;
-
-                        LogManager.Debug($"{nameof(OnSpawned)}: Changing {ev.Player.DisplayNickname} appearance to {DisguiseSettings.RoleId}");
-                        ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
-                        ev.Player.Broadcast(10, $"{DisguiseSettings.DisguiseMessage}", Broadcast.BroadcastFlags.Normal, true);
-                        LogManager.Debug($"{nameof(OnSpawned)}: Adding or updating {ev.Player.Id} to appearance dictionary");
-                        Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
-                    }
-                }
-                else return;
-            }
+            });
         }
 
         public void OnDoorInteracting(InteractingDoorEventArgs ev)
