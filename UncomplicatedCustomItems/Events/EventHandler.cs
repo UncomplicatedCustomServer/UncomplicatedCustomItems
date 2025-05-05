@@ -177,7 +177,7 @@ namespace UncomplicatedCustomItems.Events
                             EffectType Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -340,7 +340,7 @@ namespace UncomplicatedCustomItems.Events
                             EffectType Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, false);
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -396,7 +396,7 @@ namespace UncomplicatedCustomItems.Events
                             EffectType Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, false);
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -825,7 +825,7 @@ namespace UncomplicatedCustomItems.Events
                                     EffectType Effect = EffectSettings.Effect;
                                     float Duration = EffectSettings.EffectDuration;
                                     byte Intensity = EffectSettings.EffectIntensity;
-                                    ev.Player.EnableEffect(Effect, Intensity, Duration, false);
+                                    ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                                 }
                             }
                             else
@@ -984,7 +984,7 @@ namespace UncomplicatedCustomItems.Events
                             EffectType Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -1366,7 +1366,7 @@ namespace UncomplicatedCustomItems.Events
                                 EffectType Effect = EffectSettings.Effect;
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                                ev.Player?.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                             }
                         }
                         else
@@ -1437,7 +1437,7 @@ namespace UncomplicatedCustomItems.Events
                                 EffectType Effect = EffectSettings.Effect;
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Target?.EnableEffect(Effect, Intensity, Duration, true);
+                                ev.Target?.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                             }
                         }
                         else

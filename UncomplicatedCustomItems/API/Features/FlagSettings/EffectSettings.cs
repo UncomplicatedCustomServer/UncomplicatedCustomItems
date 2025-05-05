@@ -29,5 +29,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("Sets the duration of the effect applied by the custom item.")]
         public float EffectDuration { get; set; } = -1f;
+        [Description("If true when the effect is applied while the current effect is active it will add the duration to the current effect duration")]
+        public bool? AddDurationIfActive { get; set; } = true;
     }
 }
