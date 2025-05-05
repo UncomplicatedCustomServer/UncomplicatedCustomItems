@@ -561,9 +561,6 @@ namespace UncomplicatedCustomItems.Events
         public void OnPickupUpgrade(UpgradingPickupEventArgs ev)
         {
             LogManager.Debug($"{nameof(OnPickupUpgrade)}: Triggered");
-            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out _))
-                ev.IsAllowed = false;
-
             foreach (CustomItem customItem in CustomItem.List)
             {
                 LogManager.Debug($"{nameof(OnPickupUpgrade)}: {customItem.Name}");
@@ -623,9 +620,6 @@ namespace UncomplicatedCustomItems.Events
         public void OnItemUpgrade(UpgradingInventoryItemEventArgs ev)
         {
             LogManager.Debug($"{nameof(OnItemUpgrade)}: Triggered");
-            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out _))
-                ev.IsAllowed = false;
-
             foreach (CustomItem customItem in CustomItem.List)
             {
                 LogManager.Debug($"{nameof(OnItemUpgrade)}: {customItem.Name}");
