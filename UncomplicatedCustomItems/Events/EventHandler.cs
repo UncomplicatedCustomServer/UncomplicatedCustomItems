@@ -28,7 +28,6 @@ using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.Interfaces;
-using LabApi.Events.Arguments.Scp914Events;
 using Exiled.Events.EventArgs.Scp914;
 
 namespace UncomplicatedCustomItems.Events
@@ -562,6 +561,9 @@ namespace UncomplicatedCustomItems.Events
         public void OnPickupUpgrade(UpgradingPickupEventArgs ev)
         {
             LogManager.Debug($"{nameof(OnPickupUpgrade)}: Triggered");
+            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out _))
+                ev.IsAllowed = false;
+
             foreach (CustomItem customItem in CustomItem.List)
             {
                 LogManager.Debug($"{nameof(OnPickupUpgrade)}: {customItem.Name}");
@@ -621,6 +623,9 @@ namespace UncomplicatedCustomItems.Events
         public void OnItemUpgrade(UpgradingInventoryItemEventArgs ev)
         {
             LogManager.Debug($"{nameof(OnItemUpgrade)}: Triggered");
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out _))
+                ev.IsAllowed = false;
+
             foreach (CustomItem customItem in CustomItem.List)
             {
                 LogManager.Debug($"{nameof(OnItemUpgrade)}: {customItem.Name}");
@@ -639,15 +644,16 @@ namespace UncomplicatedCustomItems.Events
                         {
                             try
                             {
-                                LogManager.Debug($"{nameof(OnItemUpgrade)}: Checking if {craftableSettings.OriginalItem} equals {ev.Item.Type} and {craftableSettings.KnobSetting} equals {ev.KnobSetting}");
-                                if (ev.Item.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
+                                LogManager.Debug($"{nameof(OnItemUpgrade)}: Checking if {craftableSettings.OriginalItem} equals {ev.Player.CurrentItem.Type} and {craftableSettings.KnobSetting} equals {ev.KnobSetting}");
+                                if (ev.Player.CurrentItem.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
                                 {
                                     LogManager.Debug($"{nameof(OnItemUpgrade)}: Check passed!");
                                     LogManager.Debug($"{nameof(OnItemUpgrade)}: Giving {customItem.Name} to {ev.Player.DisplayNickname}...");
                                     try
                                     {
-                                        new SummonedCustomItem(customItem, ev.Player, ev.Item);
-                                        LogManager.Debug($"{nameof(OnItemUpgrade)}: CustomItem given successfully to {ev.Player.DisplayNickname}");
+                                        ev.Player.RemoveItem(ev.Item);
+                                        new SummonedCustomItem(customItem, ev.Player);
+                                        LogManager.Debug($"{nameof(OnItemUpgrade)}: Gave {customItem.Name} to {ev.Player.DisplayNickname}...");
                                     }
                                     catch (Exception ex)
                                     {
