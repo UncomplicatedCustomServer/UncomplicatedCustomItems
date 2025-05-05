@@ -53,6 +53,8 @@ namespace UncomplicatedCustomItems.API.Wrappers
         public CustomKeycard(Keycard keycard)
         {
             ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
+            if (!ParentKeycard.Base.Customizable)
+                LogManager.Warn($"{ParentKeycard.Type} is not customizable!\nThe item must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
         }
         /// <summary>
         /// Gets or sets the name text shown on the <see cref="Keycard"/>.
