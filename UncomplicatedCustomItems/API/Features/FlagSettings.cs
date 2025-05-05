@@ -138,8 +138,11 @@ namespace UncomplicatedCustomItems.API.Features
         [
             new()
             {
-                ItemToSpawn = new(),
-                TimeTillDespawn = 6f
+                ItemType = "Normal",
+                ItemId = 1,
+                Chance = 100,
+                TimeTillDespawn = 6f,
+                Pickupable = false
             }
         ];
         public List<ClusterSettings?> ClusterSettings { get; set; } =

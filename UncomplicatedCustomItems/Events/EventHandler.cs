@@ -28,8 +28,7 @@ using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
 using Exiled.CustomItems.API.EventArgs;
-using LabApi.Events.Arguments.Scp914Events;
-using Exiled.Events.EventArgs.Scp914;
+using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -436,43 +435,82 @@ namespace UncomplicatedCustomItems.Events
             {
                 foreach (SpawnItemWhenDetonatedSettings SpawnItemWhenDetonatedSettings in CustomItem.CustomItem.FlagSettings.SpawnItemWhenDetonatedSettings)
                 {
+                    if (SpawnItemWhenDetonatedSettings.Chance == null || SpawnItemWhenDetonatedSettings.ItemId == null || SpawnItemWhenDetonatedSettings.ItemType == null || SpawnItemWhenDetonatedSettings.Pickupable == null || SpawnItemWhenDetonatedSettings.TimeTillDespawn == null)
+                    {
+                        LogManager.Warn($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} Chance, ItemId, ItemType, Pickupable, or TimeTillDespawn equals null. Aborting... \n Values: {SpawnItemWhenDetonatedSettings.Chance} {SpawnItemWhenDetonatedSettings.ItemId} {SpawnItemWhenDetonatedSettings.ItemType} {SpawnItemWhenDetonatedSettings.Pickupable} {SpawnItemWhenDetonatedSettings.TimeTillDespawn}");
+                        break;
+                    }
+
                     int Chance = UnityEngine.Random.Range(0, 100);
                     if (Chance <= SpawnItemWhenDetonatedSettings.Chance)
                     {
                         LogManager.Debug($"Loaded FlagSettings.");
-                        if (SpawnItemWhenDetonatedSettings.ItemToSpawn == ItemType.SCP244a || SpawnItemWhenDetonatedSettings.ItemToSpawn == ItemType.SCP244b)
+                        if (SpawnItemWhenDetonatedSettings.ItemType == "UCI" || SpawnItemWhenDetonatedSettings.ItemType == "uci")
                         {
-                            LogManager.Debug($"ItemToSpawn is SCP244a or SCP244b");
-                            LABAPI.Scp244Pickup scp244Pickup = (LABAPI.Scp244Pickup)LABAPI.Scp244Pickup.Create(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position);
-                            scp244Pickup.Base.MaxDiameter = 0.1f;
-                            scp244Pickup.State = Scp244State.Active;
-                            scp244Pickup.Spawn();
-
-                            if (SpawnItemWhenDetonatedSettings.Pickupable != true)
+                            if (Utilities.TryGetCustomItem((uint)SpawnItemWhenDetonatedSettings.ItemId, out ICustomItem customItem))
                             {
-                                scp244Pickup.Weight = 5000f;
+                                SummonedCustomItem customitem = new(customItem, ev.Position);
+                                if (SpawnItemWhenDetonatedSettings.Pickupable == false)
+                                {
+                                    customitem.Pickup.Weight = 5000f;
+                                }
+                                if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                                {
+                                    LogManager.Debug($"Starting Despawn Coroutine");
+                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(customitem.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                }
                             }
-                            if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
-                            {
-                                LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(scp244Pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
-                            }
+                            else
+                                LogManager.Warn($"{SpawnItemWhenDetonatedSettings.ItemId} is not a UCI CustomItem ID!");
                         }
-                        else
+                        else if (SpawnItemWhenDetonatedSettings.ItemType == "ECI" || SpawnItemWhenDetonatedSettings.ItemType == "eci")
                         {
-                            LABAPI.Pickup pickup = LABAPI.Pickup.Create(SpawnItemWhenDetonatedSettings.ItemToSpawn, ev.Position);
-                            Vector3 vector3 = new(0f, 1f, 0f);
-                            pickup.Transform.position = pickup.Transform.position + vector3;
-                            pickup.Spawn();
-
-                            if (SpawnItemWhenDetonatedSettings.Pickupable != true)
+                            if (Exiled.CustomItems.API.Features.CustomItem.TryGet((uint)SpawnItemWhenDetonatedSettings.ItemId, out Exiled.CustomItems.API.Features.CustomItem ExCustomItem))
                             {
-                                pickup.Weight = 5000f;
+                                Pickup exCustomItem = ExCustomItem.Spawn(ev.Position);
+                                if (SpawnItemWhenDetonatedSettings.Pickupable == false)
+                                    exCustomItem.Weight = 5000f;
+                                if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                                {
+                                    LogManager.Debug($"Starting Despawn Coroutine");
+                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(exCustomItem.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                }
                             }
-                            if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                            else
+                                LogManager.Warn($"{SpawnItemWhenDetonatedSettings.ItemId} is not a Exiled CustomItem ID!");
+                        }
+                        else if (SpawnItemWhenDetonatedSettings.ItemType == "Normal" || SpawnItemWhenDetonatedSettings.ItemType == "normal")
+                        {
+                            if ((ItemType)SpawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244a || (ItemType)SpawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244b)
                             {
-                                LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                LogManager.Debug($"Item is SCP244a or SCP244b");
+                                LABAPI.Scp244Pickup scp244Pickup = (LABAPI.Scp244Pickup)LABAPI.Scp244Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
+                                scp244Pickup.Base.MaxDiameter = 0.1f;
+                                scp244Pickup.State = Scp244State.Active;
+                                scp244Pickup.Spawn();
+
+                                if (SpawnItemWhenDetonatedSettings.Pickupable == false)
+                                    scp244Pickup.Weight = 5000f;
+                                if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                                {
+                                    LogManager.Debug($"Starting Despawn Coroutine");
+                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(scp244Pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                }
+                            }
+                            else
+                            {
+                                LABAPI.Pickup pickup = LABAPI.Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
+                                Vector3 vector3 = new(0f, 1f, 0f);
+                                pickup.Transform.position = pickup.Transform.position + vector3;
+                                pickup.Spawn();
+
+                                if (SpawnItemWhenDetonatedSettings.Pickupable == false)
+                                    pickup.Weight = 5000f;
+                                if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                                {
+                                    LogManager.Debug($"Starting Despawn Coroutine");
+                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(pickup.Serial, (float)SpawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                }
                             }
                         }
                     }
@@ -532,7 +570,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         if (craftableSettings.OriginalItem == null || craftableSettings.KnobSetting == null || craftableSettings.Chance == null)
                         {
-                            LogManager.Warn($"{nameof(OnPickupUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or chance equal null. Aborting... \n {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
+                            LogManager.Warn($"{nameof(OnPickupUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or chance equal null. Aborting... \n Values: {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
                             break;
                         }
                         else if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
