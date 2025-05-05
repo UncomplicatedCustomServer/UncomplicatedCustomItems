@@ -27,8 +27,8 @@ using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
-using Exiled.CustomItems.API.EventArgs;
 using UncomplicatedCustomItems.Interfaces;
+using Exiled.Events.EventArgs.Scp914;
 
 namespace UncomplicatedCustomItems.Events
 {
