@@ -17,6 +17,7 @@ using PlayerEvent = Exiled.Events.Handlers.Player;
 using ItemEvent = Exiled.Events.Handlers.Item;
 using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
+using Scp914Event = Exiled.Events.Handlers.Scp914;
 using LabAPIPlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using LabAPIServerEvent = LabApi.Events.Handlers.ServerEvents;
 
@@ -86,6 +87,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Left += Handler.OnLeft;
             LabAPIPlayerEvent.FlippedCoin += Handler.FlippedCoin;
             LabAPIPlayerEvent.ToggledFlashlight += Handler.ToggledFlashlight;
+            Scp914Event.UpgradingPickup += Handler.OnPickupUpgrade;
+            Scp914Event.UpgradingInventoryItem += Handler.OnItemUpgrade;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -186,6 +189,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Left -= Handler.OnLeft;
             LabAPIPlayerEvent.FlippedCoin -= Handler.FlippedCoin;
             LabAPIPlayerEvent.ToggledFlashlight -= Handler.ToggledFlashlight;
+            Scp914Event.UpgradingPickup -= Handler.OnPickupUpgrade;
+            Scp914Event.UpgradingInventoryItem -= Handler.OnItemUpgrade;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

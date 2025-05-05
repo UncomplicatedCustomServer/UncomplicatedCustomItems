@@ -187,5 +187,14 @@ namespace UncomplicatedCustomItems.API.Features
                 DisguiseMessage = "Your are disguised as an NtfSpecialist!",
             }
         ];
+        public List<CraftableSettings?> CraftableSettings { get; set; } =
+        [
+            new()
+            {
+                KnobSetting = Scp914.Scp914KnobSetting.Coarse,
+                OriginalItem = ItemType.Adrenaline,
+                Chance = 100,
+            }
+        ];
     }
 }

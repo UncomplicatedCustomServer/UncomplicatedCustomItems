@@ -27,6 +27,9 @@ using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
+using Exiled.CustomItems.API.EventArgs;
+using LabApi.Events.Arguments.Scp914Events;
+using Exiled.Events.EventArgs.Scp914;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -513,6 +516,74 @@ namespace UncomplicatedCustomItems.Events
             else
             {
                 LogManager.Debug($"{ev.Projectile.Type} is not a CustomItem with the Cluster flag. Serial: {ev.Projectile.Serial}");
+            }
+        }
+
+        public void OnPickupUpgrade(UpgradingPickupEventArgs ev)
+        {
+            if (ev.Pickup == null || !ev.IsAllowed)
+                return;
+
+            foreach (CustomItem customItem in CustomItem.List)
+            {
+                if (customItem.CustomFlags.Value.HasFlag(CustomFlags.Craftable))
+                {
+                    foreach (CraftableSettings craftableSettings in customItem.FlagSettings.CraftableSettings)
+                    {
+                        if (craftableSettings.OriginalItem == null || craftableSettings.KnobSetting == null || craftableSettings.Chance == null)
+                        {
+                            LogManager.Warn($"{nameof(OnPickupUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or chance equal null. Aborting... \n {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
+                            break;
+                        }
+                        else if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
+                        {
+                            if (ev.Pickup.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
+                            {
+                                Timing.CallDelayed(0.1f, () =>
+                                {
+                                    new SummonedCustomItem(customItem, ev.Pickup);
+                                });
+                                break;
+                            }
+                            else
+                                LogManager.Debug($"{nameof(OnPickupUpgrade)}: {ev.KnobSetting} != {craftableSettings.KnobSetting} or {ev.Pickup.Type} != {craftableSettings.OriginalItem}");
+                        }
+                    }
+                }
+            }
+        }
+        
+        public void OnItemUpgrade(UpgradingInventoryItemEventArgs ev)
+        {
+            if (ev.Item == null || !ev.IsAllowed || ev.Player == null)
+                return;
+
+            foreach (CustomItem customItem in CustomItem.List)
+            {
+                if (customItem.CustomFlags.Value.HasFlag(CustomFlags.Craftable))
+                {
+                    foreach (CraftableSettings craftableSettings in customItem.FlagSettings.CraftableSettings)
+                    {
+                        if (craftableSettings.OriginalItem == null || craftableSettings.KnobSetting == null || craftableSettings.Chance == null)
+                        {
+                            LogManager.Warn($"{nameof(OnItemUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or Chance equals null. Aborting... \n Values: {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
+                            break;
+                        }
+                        else if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
+                        {
+                            if (ev.Item.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
+                            {
+                                Timing.CallDelayed(0.1f, () =>
+                                {
+                                    new SummonedCustomItem(customItem, ev.Player, ev.Item);
+                                });
+                                break;
+                            }
+                            else
+                                LogManager.Debug($"{nameof(OnItemUpgrade)}: {ev.KnobSetting} != {craftableSettings.KnobSetting} or {ev.Item.Type} != {craftableSettings.OriginalItem}");
+                        }
+                    }
+                }
             }
         }
 
