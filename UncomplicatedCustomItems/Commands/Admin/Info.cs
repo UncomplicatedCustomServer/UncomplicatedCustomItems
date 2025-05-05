@@ -174,6 +174,44 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     data.Add("    <color=#bf4eb6>󾓦</color> SpawnFlags:", string.Join(", ", SwitchRoleOnUseSettings.SpawnFlags));                    
                 }
             }
+            if (customItem.FlagSettings.DisguiseSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.Disguise))
+            {
+                data.Add("<color=#bf4eb6>📂</color> DisguiseSettings:", "");
+                foreach (DisguiseSettings DisguiseSettings in customItem.FlagSettings.DisguiseSettings)
+                {
+                    data.Add("    <color=#bf4eb6>🎲</color> Disguise Message:", string.Join(", ", DisguiseSettings.DisguiseMessage));
+                    data.Add("    <color=#bf4eb6>🔒</color> Disguise Role:", string.Join(", ", DisguiseSettings.RoleId));                  
+                }
+            }
+            if (customItem.FlagSettings.DieOnDropSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.DieOnDrop))
+            {
+                data.Add("<color=#bf4eb6>📂</color> DieOnDropSettings:", "");
+                foreach (DieOnDropSettings DieOnDropSettings in customItem.FlagSettings.DieOnDropSettings)
+                {
+                    data.Add("    <color=#bf4eb6>🎲</color> DieOnDrop Death Message:", string.Join(", ", DieOnDropSettings.DeathMessage));
+                    data.Add("    <color=#bf4eb6>🔒</color> DieOnDrop Vaporize:", string.Join(", ", DieOnDropSettings.Vaporize));                  
+                }
+            }
+            if (customItem.FlagSettings.CantDropSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.CantDrop))
+            {
+                data.Add("<color=#bf4eb6>📂</color> CantDropSettings:", "");
+                foreach (CantDropSettings CantDropSettings in customItem.FlagSettings.CantDropSettings)
+                {
+                    data.Add("    <color=#bf4eb6>🎲</color> CantDrop Message Duration:", string.Join(", ", CantDropSettings.Duration));
+                    data.Add("    <color=#bf4eb6>🔒</color> CantDrop Hint or Broadcast?:", string.Join(", ", CantDropSettings.HintOrBroadcast));
+                    data.Add("    <color=#bf4eb6>🆔</color> CantDrop Message:", string.Join(", ", CantDropSettings.Message));                    
+                }
+            }
+            if (customItem.FlagSettings.CraftableSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.Craftable))
+            {
+                data.Add("<color=#bf4eb6>📂</color> CraftableSettings:", "");
+                foreach (CraftableSettings CraftableSettings in customItem.FlagSettings.CraftableSettings)
+                {
+                    data.Add("    <color=#bf4eb6>🎲</color> Craftable Chance:", string.Join(", ", CraftableSettings.Chance));
+                    data.Add("    <color=#bf4eb6>🔒</color> Craftable Knob Setting:", string.Join(", ", CraftableSettings.KnobSetting));
+                    data.Add("    <color=#bf4eb6>🆔</color> Craftable Original Item:", string.Join(", ", CraftableSettings.OriginalItem));                    
+                }
+            }
             if (customItem.CustomFlags.HasValue)
                 data.Add("<color=#bf4eb6>📄</color> Custom flags:", string.Join(", ", customItem.CustomFlags.ToString()));
             foreach (KeyValuePair<string, string> kvp in data)
