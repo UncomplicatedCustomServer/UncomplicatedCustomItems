@@ -341,7 +341,7 @@ namespace UncomplicatedCustomItems.Events
                             EffectType Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, false);
                         }
                     }
                     else
@@ -397,7 +397,7 @@ namespace UncomplicatedCustomItems.Events
                             EffectType Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                            ev.Player.EnableEffect(Effect, Intensity, Duration, false);
                         }
                     }
                     else
@@ -825,7 +825,7 @@ namespace UncomplicatedCustomItems.Events
                                     EffectType Effect = EffectSettings.Effect;
                                     float Duration = EffectSettings.EffectDuration;
                                     byte Intensity = EffectSettings.EffectIntensity;
-                                    ev.Player.EnableEffect(Effect, Intensity, Duration, true);
+                                    ev.Player.EnableEffect(Effect, Intensity, Duration, false);
                                 }
                             }
                             else
