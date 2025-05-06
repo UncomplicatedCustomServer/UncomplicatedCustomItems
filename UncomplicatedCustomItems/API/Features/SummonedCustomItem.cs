@@ -150,7 +150,6 @@ namespace UncomplicatedCustomItems.API.Features
             if (Item is not null)
                 switch (CustomItem.CustomItemType)
                 {
-                    // Might eventually make this into a wrapper to cleanup the code.
                     case CustomItemType.Keycard:
                         Keycard keycard = Item as Keycard;
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
@@ -177,13 +176,14 @@ namespace UncomplicatedCustomItems.API.Features
                         customKeycard.RankIndex = KeycardData.Rank;
                         customKeycard.LabelColor = LabelColor32;
                         customKeycard.LabelText = KeycardData.Label;
-                        customKeycard.ItemName = KeycardData.Name;
+                        customKeycard.ItemName = CustomItem.Name;
                         customKeycard.CardColor = TintColor32;
                         customKeycard.PermissionsColor = PermissionsColor32;
                         customKeycard.Permissions = permissions;
                         LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
                         KeycardUtils.RemoveKeycardDetail(keycard.Serial);
                         KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
+                        NameApplied = true;
                         break;
 
                     case CustomItemType.Armor:
@@ -651,6 +651,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         /// <param name="player"></param>
         /// <param name="itemEvent"></param>
+        /// <param name="playerItemSerial"></param>
         public void HandleEvent(Player player, ItemEvents itemEvent, ushort playerItemSerial)
         {
             IItemData ItemData = CustomItem.CustomData as IItemData;
