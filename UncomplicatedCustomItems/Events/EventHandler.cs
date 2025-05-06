@@ -131,7 +131,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     if (DieOnUseSettings.Vaporize ?? false)
                         ev.Player.Vaporize(ev.Player);
-                    else if (DieOnUseSettings.DeathMessage != null)
+                    if (DieOnUseSettings.DeathMessage != null)
                         ev.Player.Kill($"{DieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
                     else
                         ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
@@ -157,7 +157,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     if (DieOnUseSettings.Vaporize ?? false)
                         ev.Player.Vaporize(ev.Player);
-                    else if (DieOnUseSettings.DeathMessage != null)
+                    if (DieOnUseSettings.DeathMessage != null)
                         ev.Player.Kill($"{DieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
                     else
                         ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
