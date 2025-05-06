@@ -747,16 +747,19 @@ namespace UncomplicatedCustomItems.Events
             {
                 foreach (Item item in player.Items)
                 {
-                    if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem) && customItem.CustomItem.Item == ItemType.ArmorLight || customItem.CustomItem.Item == ItemType.ArmorCombat || customItem.CustomItem.Item == ItemType.ArmorHeavy)
+                    if (item.IsArmor)
                     {
-                        if (!player.IsConnected)
-                            return;
-                            
-                        customItem?.HandleEvent(player, ItemEvents.SSSS, item.Serial);
-                        break;
+                        if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
+                        {
+                            if (!player.IsConnected || player.IsInventoryEmpty)
+                                return;
+
+                            customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
+                            break;
+                        }
+                        else
+                            LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
                     }
-                    else
-                        LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
                 }
             }
             else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
