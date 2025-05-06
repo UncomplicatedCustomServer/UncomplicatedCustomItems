@@ -712,8 +712,6 @@ namespace UncomplicatedCustomItems.Events
                     Timing.ResumeCoroutines(handle);
                 });
             }
-
-
         }
         internal static void StopRelativePosCoroutine(Player player)
         {

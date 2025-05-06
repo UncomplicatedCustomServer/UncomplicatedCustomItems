@@ -46,6 +46,10 @@ namespace UncomplicatedCustomItems
         internal static HttpManager HttpManager;
 
         internal FileConfig FileConfig;
+
+        internal static System.Random random = new();
+        internal int keybindid = random.Next();
+
         internal IEnumerable<SettingBase> _playerSettings;
 
         public override void OnEnabled()
@@ -100,7 +104,7 @@ namespace UncomplicatedCustomItems
             _playerSettings =
             [
                 new HeaderSetting("CustomItem Settings"),
-                new KeybindSetting(20, "Trigger CustomItem", KeyCode.K, hintDescription: "When pressed this will trigger the CustomItem your holding")
+                new KeybindSetting(keybindid, "Trigger CustomItem", KeyCode.K, hintDescription: "When pressed this will trigger the CustomItem your holding")
             ];
 
             SettingBase.Register(_playerSettings);
