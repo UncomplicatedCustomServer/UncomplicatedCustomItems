@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using UncomplicatedCustomItems.Interfaces.FlagSettings;
+﻿using UncomplicatedCustomItems.Interfaces.FlagSettings;
 
 namespace UncomplicatedCustomItems.API.Features
 {
-    public class DieOnDropSettings : IDieOnDropSettings
+    public class DieOnUseSettings : IDieOnUseSettings
     {
         public string? DeathMessage { get; set; } = "Killed by %name%";
         public bool? Vaporize { get; set; } = false;

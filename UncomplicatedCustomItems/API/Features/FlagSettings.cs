@@ -199,5 +199,13 @@ namespace UncomplicatedCustomItems.API.Features
                 Chance = 100,
             }
         ];
+        public List<DieOnUseSettings?> DieOnUseSettings { get; set; } =
+        [
+            new()
+            {
+                DeathMessage = "Killed by %name%",
+                Vaporize = false,
+            }
+        ];
     }
 }

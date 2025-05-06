@@ -127,7 +127,13 @@ namespace UncomplicatedCustomItems.Events
             }
             if (customItem.HasModule(CustomFlags.DieOnUse))
             {
-                ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
+                foreach (DieOnUseSettings DieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
+                {
+                    if (DieOnUseSettings.Vaporize ?? false)
+                        ev.Player.Vaporize(ev.Player);
+                    else
+                        ev.Player.Kill($"{DieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
+                }
                 LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed.");
             }
         }
@@ -145,8 +151,13 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.HasModule(CustomFlags.DieOnUse))
             {
-                ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
-                LogManager.Debug($"{nameof(OnItemUse)}: DieOnUse user killed.");
+                foreach (DieOnUseSettings DieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
+                {
+                    if (DieOnUseSettings.Vaporize ?? false)
+                        ev.Player.Vaporize(ev.Player);
+                    else
+                        ev.Player.Kill($"{DieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
+                }
             }
             if (customItem.HasModule(CustomFlags.EffectWhenUsed))
             {

@@ -478,6 +478,7 @@
     <Compile Include="API\Features\FlagSettings\CraftableSettings.cs" />
     <Compile Include="API\Features\FlagSettings\CantDropSettings.cs" />
     <Compile Include="API\Features\FlagSettings\DieOnDropSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\DieOnUseSettings.cs" />
     <Compile Include="API\Features\FlagSettings\DisguiseSettings.cs" />
     <Compile Include="API\Features\FlagSettings\SpawnItemWhenDetonatedSettings.cs" />
     <Compile Include="API\Features\FlagSettings\EffectSettings.cs" />
@@ -539,6 +540,7 @@
     <Compile Include="HarmonyElements\Utilities\KeycardUtils.cs" />
     <Compile Include="Interfaces\FlagSettings\IClusterSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IDieOnDropSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IDieOnUseSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IDisguiseSettings.cs" />
     <Compile Include="Interfaces\IDynamicSpawn.cs" />
     <Compile Include="Intergrations\CommonUtils.cs" />
