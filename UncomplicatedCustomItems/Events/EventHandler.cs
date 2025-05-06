@@ -131,8 +131,10 @@ namespace UncomplicatedCustomItems.Events
                 {
                     if (DieOnUseSettings.Vaporize ?? false)
                         ev.Player.Vaporize(ev.Player);
-                    else
+                    else if (DieOnUseSettings.DeathMessage != null)
                         ev.Player.Kill($"{DieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
+                    else
+                        ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
                 }
                 LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed.");
             }
@@ -155,8 +157,10 @@ namespace UncomplicatedCustomItems.Events
                 {
                     if (DieOnUseSettings.Vaporize ?? false)
                         ev.Player.Vaporize(ev.Player);
-                    else
+                    else if (DieOnUseSettings.DeathMessage != null)
                         ev.Player.Kill($"{DieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
+                    else
+                        ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
                 }
             }
             if (customItem.HasModule(CustomFlags.EffectWhenUsed))
