@@ -80,6 +80,8 @@ namespace UncomplicatedCustomItems.Events.Internal
 
                 Item?.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
+            if (Item.HasModule(Enums.CustomFlags.ToolGun))
+                EventHandler.StopRelativePosCoroutine(ev.Player);
         }
 
         /// <summary>
@@ -173,6 +175,8 @@ namespace UncomplicatedCustomItems.Events.Internal
                 {
                     customitem.OnDied(ev, customitem);
                     customitem?.ResetBadge(ev.Player);
+                    if (customitem.HasModule(Enums.CustomFlags.ToolGun))
+                        EventHandler.StopRelativePosCoroutine(ev.Player);
                 }
             }
         }
@@ -189,6 +193,8 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
+            if (item.HasModule(Enums.CustomFlags.ToolGun))
+                EventHandler.StopRelativePosCoroutine(ev.Player);
         }
 
         private static void ThrownProjectile(ThrownProjectileEventArgs ev)
