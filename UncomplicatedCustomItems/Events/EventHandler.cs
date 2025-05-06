@@ -727,7 +727,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 for (; ;)
                 {
-                    player.ShowHint($"<voffset=-19em>{player.CurrentRoom.Type} - {player.CurrentRoom.transform.InverseTransformPoint(player.Position)}</voffset>");
+                    player.ShowHint($"<voffset=-19em>{player.CurrentRoom.Type} - {player.CurrentRoom.LocalPosition(player.Position)}</voffset>");
                     yield return Timing.WaitForSeconds(0.1f);
                 }
             }
@@ -1418,7 +1418,7 @@ namespace UncomplicatedCustomItems.Events
                 PauseRelativePosCoroutine(ev.Player);
                 ev.CanSpawnImpactEffects = false;
                 ev.CanHurt = false;
-                Vector3 RelativePosition = ev.Player.CurrentRoom.transform.InverseTransformPoint(ev.Position);
+                Vector3 RelativePosition = ev.Player.CurrentRoom.LocalPosition(ev.Position);
                 LogManager.Info($"Triggered by {ev.Player.DisplayNickname}. Relative position inside {ev.Player.CurrentRoom.Name}: {RelativePosition}");
                 ev.Player.ShowHint($"Relative position inside {ev.Player.CurrentRoom.Type}: {RelativePosition}. This was also sent to the console.", 6f);
                 Vector3 Scale = new(0.2f, 0.2f, 0.2f);

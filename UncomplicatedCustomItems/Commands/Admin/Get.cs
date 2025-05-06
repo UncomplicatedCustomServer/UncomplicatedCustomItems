@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            response = $"\nData for {CustomItem.CustomItem.Name} - Serial {CustomItem.Serial}:\n[\U0001F4C1] Position: {CustomItem.Pickup.Position}\n[\U0001F4CC] Relative Position Inside Room: {CustomItem.Pickup.Room.transform.InverseTransformPoint(CustomItem.Pickup.Position)}\n[\U0001F4C4] Room: {CustomItem.Pickup.Room.Name}";
+            response = $"\nData for {CustomItem.CustomItem.Name} - Serial {CustomItem.Serial}:\n[\U0001F4C1] Position: {CustomItem.Pickup.Position}\n[\U0001F4CC] Relative Position Inside Room: {CustomItem.Pickup.Room.LocalPosition(CustomItem.Pickup.Position)}\n[\U0001F4C4] Room: {CustomItem.Pickup.Room.Name}";
             return true;
         }
     }

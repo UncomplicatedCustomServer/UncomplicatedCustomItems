@@ -410,8 +410,8 @@ https://discord.com/channels/null";
                         }
                         else
                         {
-                            Transform Position = Exiled.API.Features.Room.Get(Room).transform;
-                            new SummonedCustomItem(CustomItem, Position.transform.InverseTransformPoint(DynamicSpawn.Coords));
+                            Room room = Exiled.API.Features.Room.Get(Room);
+                            new SummonedCustomItem(CustomItem, room.WorldPosition(DynamicSpawn.Coords));
                         }
                     }
                 }
