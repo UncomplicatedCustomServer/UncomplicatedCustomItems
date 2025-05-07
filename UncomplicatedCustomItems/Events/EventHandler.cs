@@ -649,7 +649,7 @@ namespace UncomplicatedCustomItems.Events
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogManager.Error($"{nameof(OnPickupUpgrade)}: Error creating CustomItem: {ex.Message}");
+                                        LogManager.Error($"{nameof(OnPickupUpgrade)}: Error during CustomItem creation: {ex.Message}\n{ex.StackTrace}");
                                     }
                                 }
                                 else
@@ -657,7 +657,7 @@ namespace UncomplicatedCustomItems.Events
                             }
                             catch (Exception ex)
                             {
-                                LogManager.Error($"{nameof(OnPickupUpgrade)}: Exception: {ex.Message}");
+                                LogManager.Error($"{nameof(OnPickupUpgrade)}: Exception: {ex.Message}\n{ex.StackTrace}");
                             }
                         }
                     }
@@ -699,7 +699,7 @@ namespace UncomplicatedCustomItems.Events
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogManager.Error($"{nameof(OnItemUpgrade)}: Error creating CustomItem: {ex.Message}");
+                                        LogManager.Error($"{nameof(OnItemUpgrade)}: Error during CustomItem creation: {ex.Message}\n{ex.StackTrace}");
                                     }
                                 }
                                 else
@@ -707,7 +707,7 @@ namespace UncomplicatedCustomItems.Events
                             }
                             catch (Exception ex)
                             {
-                                LogManager.Error($"{nameof(OnItemUpgrade)}: Exception: {ex.Message}");
+                                LogManager.Error($"{nameof(OnItemUpgrade)}: Exception: {ex.Message}\n{ex.StackTrace}");
                             }
                         }
                     }
