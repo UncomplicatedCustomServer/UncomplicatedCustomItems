@@ -32,6 +32,7 @@ using Exiled.Events.EventArgs.Scp914;
 using Exiled.API.Features.Core.UserSettings;
 using System.Globalization;
 using Exiled.Events.EventArgs.Server;
+using System.Collections.ObjectModel;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -384,7 +385,19 @@ namespace UncomplicatedCustomItems.Events
                         new TwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hintDescription: "Sets the deletion mode of the ToolGun"),
                         new TwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
                     };
-                    SettingBase.Register(_ToolGunSettings, p => p.Id == ev.Player.Id);
+                    HashSet<int> toolGunSettingIds = [];
+                    foreach (SettingBase toolGunSetting in _ToolGunSettings)
+                    {
+                        if (toolGunSetting.Id != 0)
+                            toolGunSettingIds.Add(toolGunSetting.Id);
+                    }
+                    foreach (KeyValuePair<Player, ReadOnlyCollection<SettingBase>> playerSettingsPair in SettingBase.SyncedList)
+                    {
+                        bool playerHasToolGunSetting = playerSettingsPair.Value.Any(setting => toolGunSettingIds.Contains(setting.Id));
+
+                        if (!playerHasToolGunSetting)
+                            SettingBase.Register(_ToolGunSettings, p => p.Id == ev.Player.Id);
+                    }
                     StartRelativePosCoroutine(ev.Player);
                 }
             }
@@ -760,6 +773,33 @@ namespace UncomplicatedCustomItems.Events
             {
                 for (; ;)
                 {
+                    string deletioncolor = "";
+                    bool deletionbool = false;
+                    string DeletionMode = "";
+                    SSTwoButtonsSetting deletionMode = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(player.ReferenceHub, 22);
+                    if (deletionMode.SyncIsA)
+                    {
+                        DeletionMode = "ADS";
+                        if (player.IsAimingDownWeapon)
+                            deletionbool = true;
+                        else
+                            deletionbool = false;
+                    }
+                    else if (deletionMode.SyncIsB)
+                    {
+                        DeletionMode = "Flashlight Toggle";
+                        if (player.HasFlashlightModuleEnabled)
+                            deletionbool = true;
+                        else
+                            deletionbool = false;
+                    }
+                    if (deletionbool)
+                        deletioncolor = "#00ff00";
+                    else
+                        deletioncolor = "#Ff0000";
+                    SSPlaintextSetting colorSetting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 21);
+                    Extensions.StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
+                    string hexcolor = Vector3Extensions.ToHexColor(color);
                     if (player.CurrentItem == null)
                         StopRelativePosCoroutine(player);
                     else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
@@ -767,7 +807,8 @@ namespace UncomplicatedCustomItems.Events
                             StopRelativePosCoroutine(player);
                     if (player.CurrentRoom == null)
                         PauseRelativePosCoroutine(player);
-                    player.ShowHint($"<voffset=-19em>{player.CurrentRoom.Type} - {player.CurrentRoom.LocalPosition(player.Position)}</voffset>", 0.5f);
+                    string hinttext = $"<pos=-10em><voffset=-12.3em><color={player.RankColor}>{player.DisplayNickname} - {player.Role.Name}</color></voffset>\n<pos=-10em>{player.CurrentRoom.Type} - {player.CurrentRoom.LocalPosition(player.Position)}\n<pos=-10em>Primitve Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
+                    player.ShowHint($"<align=left>{hinttext}</align>", 0.5f);
                     yield return Timing.WaitForSeconds(0.1f);
                 }
             }
@@ -1504,8 +1545,9 @@ namespace UncomplicatedCustomItems.Events
                         color = new Vector4(x, y, z, w);
                     }
                     Vector3 RelativePosition = ev.Player.CurrentRoom.LocalPosition(ev.Position);
-                    LogManager.Info($"Triggered by {ev.Player.DisplayNickname}. Relative position inside {ev.Player.CurrentRoom.Name}: {RelativePosition}");
+                    LogManager.Info($"Triggered by {ev.Player.DisplayNickname}. Relative position inside {ev.Player.CurrentRoom.Type}: {RelativePosition}");
                     ev.Player.ShowHint($"Relative position inside {ev.Player.CurrentRoom.Type}: {RelativePosition}. This was also sent to the console.", 6f);
+                    ev.Player.SendConsoleMessage($"Relative position inside {ev.Player.CurrentRoom.Type}: {RelativePosition}", "white");
                     Vector3 Scale = new(0.2f, 0.2f, 0.2f);
                     Primitive primitive = Primitive.Create(ev.Position);
                     primitive.Type = PrimitiveType.Cube;
