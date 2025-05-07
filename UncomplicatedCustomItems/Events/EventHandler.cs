@@ -29,6 +29,8 @@ using UncomplicatedCustomItems.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.Interfaces;
 using Exiled.Events.EventArgs.Scp914;
+using Exiled.API.Features.Core.UserSettings;
+using System.Globalization;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -55,6 +57,8 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public static Dictionary<ushort, SummonedCustomItem> EquipedKeycards = [];
         private static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
+
+        internal IEnumerable<SettingBase> _ToolGunSettings;
 
         public void OnHurt(HurtEventArgs ev)
         {
@@ -322,55 +326,75 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnChangedItem(ChangedItemEventArgs ev)
         {
-            if (ev.Item is null || ev.Player == null || ev.Player.IsHost)
+            if (ev.Player == null || ev.Player.IsHost)
                 return;
-            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
-                return;
-
-            if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+            if (ev.Item is not null)
             {
-                foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
-                {
-                    if (EffectSettings.EffectEvent != null)
-                    {
-                        if (EffectSettings.EffectEvent == "EffectWhenEquiped")
-                        {
-                            if (EffectSettings.Effect.ToString() == string.Empty)
-                            {
-                                LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                return;
-                            }
-                            if (EffectSettings.EffectDuration < -1)
-                            {
-                                LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                return;
-                            }
-                            if (EffectSettings.EffectIntensity <= 0)
-                            {
-                                LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
-                                return;
-                            }
+                if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                    return;
 
-                            LogManager.Debug($"{nameof(OnChangedItem)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                            EffectType Effect = EffectSettings.Effect;
-                            float Duration = EffectSettings.EffectDuration;
-                            byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
+                {
+                    foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                    {
+                        if (EffectSettings.EffectEvent != null)
+                        {
+                            if (EffectSettings.EffectEvent == "EffectWhenEquiped")
+                            {
+                                if (EffectSettings.Effect.ToString() == string.Empty)
+                                {
+                                    LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+                                if (EffectSettings.EffectDuration < -1)
+                                {
+                                    LogManager.Warn($"Invalid Duration: {EffectSettings.EffectDuration} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+                                if (EffectSettings.EffectIntensity <= 0)
+                                {
+                                    LogManager.Warn($"Invalid intensity: {EffectSettings.EffectIntensity} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
+                                    return;
+                                }
+
+                                LogManager.Debug($"{nameof(OnChangedItem)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
+                                EffectType Effect = EffectSettings.Effect;
+                                float Duration = EffectSettings.EffectDuration;
+                                byte Intensity = EffectSettings.EffectIntensity;
+                                ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                            }
+                        }
+                        else
+                        {
+                            LogManager.Error($"{nameof(OnChangedItem)}: No FlagSettings found on {CustomItem.CustomItem.Name}");
                         }
                     }
-                    else
+                }
+                if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
+                    EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
+                if (CustomItem.HasModule(CustomFlags.ToolGun))
+                {
+                    _ToolGunSettings = new SettingBase[]
                     {
-                        LogManager.Error($"{nameof(OnChangedItem)}: No FlagSettings found on {CustomItem.CustomItem.Name}");
-                    }
+                        new HeaderSetting("UCI ToolGun Settings"),
+                        new UserTextInputSetting(21, "Primitive Color", placeHolder: "255, 0, 0, -1",  hintDescription: "The color of the primitives spawned by the ToolGun"),
+                        new TwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hintDescription: "Sets the deletion mode of the ToolGun")
+                    };
+                    SettingBase.Register(ev.Player, _ToolGunSettings);
+                    StartRelativePosCoroutine(ev.Player);
                 }
             }
-            if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
-                EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
-            if (CustomItem.HasModule(CustomFlags.ToolGun))
+            if (ev.OldItem != null)
             {
-                StartRelativePosCoroutine(ev.Player);
+                if (Utilities.TryGetSummonedCustomItem(ev.OldItem.Serial, out SummonedCustomItem customItem))
+                    if (customItem.HasModule(CustomFlags.ToolGun))
+                    {
+                        foreach (Primitive primitive in Primitive.List.ToList())
+                            if (primitive.GameObject.name.Contains("UCI"))
+                                primitive.Destroy();
+                        SettingBase.Unregister(ev.Player, _ToolGunSettings);
+                    }
             }
-
         }
 
         public void Onpickup(ItemAddedEventArgs ev)
@@ -1415,19 +1439,66 @@ namespace UncomplicatedCustomItems.Events
             }
             if (customItem.HasModule(CustomFlags.ToolGun))
             {
-                PauseRelativePosCoroutine(ev.Player);
-                ev.CanSpawnImpactEffects = false;
-                ev.CanHurt = false;
-                Vector3 RelativePosition = ev.Player.CurrentRoom.LocalPosition(ev.Position);
-                LogManager.Info($"Triggered by {ev.Player.DisplayNickname}. Relative position inside {ev.Player.CurrentRoom.Name}: {RelativePosition}");
-                ev.Player.ShowHint($"Relative position inside {ev.Player.CurrentRoom.Type}: {RelativePosition}. This was also sent to the console.", 6f);
-                Vector3 Scale = new(0.2f, 0.2f, 0.2f);
-                Primitive primitive = Primitive.Create(ev.Position);
-                primitive.Type = PrimitiveType.Cube;
-                primitive.Color = new Vector4(255, 0, 0, -1);
-                primitive.Scale = Scale;
-                primitive.Collidable = false;
-                primitive.GameObject.name = RelativePosition.ToString();
+                SSTwoButtonsSetting deletionMode = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(ev.Player.ReferenceHub, 22);
+                if (deletionMode.SyncIsA && ev.Firearm.Aiming)
+                {
+                    foreach (Primitive primitive in Primitive.List.ToList())
+                    {
+                        if (primitive.GameObject.name.Contains("UCI"))
+                        {
+                            Vector3 halfSize = primitive.Scale / 2f;
+                            Vector3 minBounds = primitive.Position - halfSize;
+                            Vector3 maxBounds = primitive.Position + halfSize;
+
+                            if (ev.Position.x >= minBounds.x && ev.Position.x <= maxBounds.x && ev.Position.y >= minBounds.y && ev.Position.y <= maxBounds.y && ev.Position.z >= minBounds.z && ev.Position.z <= maxBounds.z)
+                                primitive.Destroy();
+                        }
+                    }
+                }
+                else if (deletionMode.SyncIsB && ev.Firearm.FlashlightEnabled)
+                {
+                    foreach (Primitive primitive in Primitive.List.ToList())
+                    {
+                        if (primitive.GameObject.name.Contains("UCI"))
+                        {
+                            Vector3 halfSize = primitive.Scale / 2f;
+                            Vector3 minBounds = primitive.Position - halfSize;
+                            Vector3 maxBounds = primitive.Position + halfSize;
+
+                            if (ev.Position.x >= minBounds.x && ev.Position.x <= maxBounds.x && ev.Position.y >= minBounds.y && ev.Position.y <= maxBounds.y && ev.Position.z >= minBounds.z && ev.Position.z <= maxBounds.z)
+                                primitive.Destroy();
+                        }
+                    }
+                }
+                else
+                {
+                    PauseRelativePosCoroutine(ev.Player);
+                    ev.CanSpawnImpactEffects = false;
+                    ev.CanHurt = false;
+                    SSPlaintextSetting setting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(ev.Player.ReferenceHub, 21);
+                    string[] components = setting.SyncInputText.Split(',');
+                    Vector4 color = new();
+                    if (components.Length == 4)
+                    {
+                        float x = float.Parse(components[0].Trim(), CultureInfo.InvariantCulture);
+                        float y = float.Parse(components[1].Trim(), CultureInfo.InvariantCulture);
+                        float z = float.Parse(components[2].Trim(), CultureInfo.InvariantCulture);
+                        float w = float.Parse(components[3].Trim(), CultureInfo.InvariantCulture);
+
+                        color = new Vector4(x, y, z, w);
+                    }
+                    Vector3 RelativePosition = ev.Player.CurrentRoom.LocalPosition(ev.Position);
+                    LogManager.Info($"Triggered by {ev.Player.DisplayNickname}. Relative position inside {ev.Player.CurrentRoom.Name}: {RelativePosition}");
+                    ev.Player.ShowHint($"Relative position inside {ev.Player.CurrentRoom.Type}: {RelativePosition}. This was also sent to the console.", 6f);
+                    Vector3 Scale = new(0.2f, 0.2f, 0.2f);
+                    Primitive primitive = Primitive.Create(ev.Position);
+                    primitive.Type = PrimitiveType.Cube;
+                    primitive.Color = color;
+                    primitive.Scale = Scale;
+                    primitive.Collidable = false;
+                    primitive.Rotation = ev.Player.CurrentRoom.Rotation;
+                    primitive.GameObject.name = $"UCI {RelativePosition}";
+                }
             }
             if (customItem.HasModule(CustomFlags.EffectShot))
             {
