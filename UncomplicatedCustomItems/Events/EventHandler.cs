@@ -760,7 +760,14 @@ namespace UncomplicatedCustomItems.Events
             {
                 for (; ;)
                 {
-                    player.ShowHint($"<voffset=-19em>{player.CurrentRoom.Type} - {player.CurrentRoom.LocalPosition(player.Position)}</voffset>");
+                    if (player.CurrentItem == null)
+                        StopRelativePosCoroutine(player);
+                    else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+                        if (!CustomItem.HasModule(CustomFlags.ToolGun))
+                            StopRelativePosCoroutine(player);
+                    if (player.CurrentRoom == null)
+                        PauseRelativePosCoroutine(player);
+                    player.ShowHint($"<voffset=-19em>{player.CurrentRoom.Type} - {player.CurrentRoom.LocalPosition(player.Position)}</voffset>", 0.5f);
                     yield return Timing.WaitForSeconds(0.1f);
                 }
             }
