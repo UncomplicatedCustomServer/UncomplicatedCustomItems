@@ -807,7 +807,7 @@ namespace UncomplicatedCustomItems.Events
                             StopRelativePosCoroutine(player);
                     if (player.CurrentRoom == null)
                         PauseRelativePosCoroutine(player);
-                    string hinttext = $"<pos=-10em><voffset=-12.3em><color={player.RankColor}>{player.DisplayNickname} - {player.Role.Name}</color></voffset>\n<pos=-10em><color={zoneColor}>{player.CurrentRoom.Type}</color> - <color=yellow>{player.CurrentRoom.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
+                    string hinttext = $"<pos=-10em><voffset=-12.3em><color={player.RankColor}>{player.DisplayNickname} - {player.Role.Name}</color></voffset>\n<pos=-10em>{player.CurrentRoom.Type} - <color=yellow>{player.CurrentRoom.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
                     player.ShowHint($"<align=left>{hinttext}</align>", 0.5f);
                     yield return Timing.WaitForSeconds(0.1f);
                 }
@@ -1408,13 +1408,11 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnVerified(VerifiedEventArgs ev)
         {
-            foreach (var entry in Appearance)
+            foreach (KeyValuePair<int, RoleTypeId> entry in Appearance)
             {
                 LogManager.Debug($"{nameof(OnVerified)}: Changing {entry.Key} appearance to {entry.Value}");
-                int playerId = entry.Key;
-                Player.TryGet(playerId, out Player player);
-                RoleTypeId roleID = entry.Value;
-                player.ChangeAppearance(roleID);
+                Player.TryGet(entry.Key, out Player player);
+                player.ChangeAppearance(entry.Value);
             }
         }
         public void OnLeft(LeftEventArgs ev)
@@ -1426,7 +1424,7 @@ namespace UncomplicatedCustomItems.Events
                 
             if (Appearance.ContainsKey(ev.Player.Id))
             {
-                LogManager.Debug($"{nameof(OnVerified)}: Removing {ev.Player.Id} from appearance dictionary");
+                LogManager.Debug($"{nameof(OnLeft)}: Removing {ev.Player.Id} from appearance dictionary");
                 Appearance.TryRemove(ev.Player.Id);
             }
         }
