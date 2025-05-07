@@ -807,7 +807,7 @@ namespace UncomplicatedCustomItems.Events
                             StopRelativePosCoroutine(player);
                     if (player.CurrentRoom == null)
                         PauseRelativePosCoroutine(player);
-                    string hinttext = $"<pos=-10em><voffset=-12.3em><color={player.RankColor}>{player.DisplayNickname} - {player.Role.Name}</color></voffset>\n<pos=-10em>{player.CurrentRoom.Type} - {player.CurrentRoom.LocalPosition(player.Position)}\n<pos=-10em>Primitve Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
+                    string hinttext = $"<pos=-10em><voffset=-12.3em><color={player.RankColor}>{player.DisplayNickname} - {player.Role.Name}</color></voffset>\n<pos=-10em><color={zoneColor}>{player.CurrentRoom.Type}</color> - <color=yellow>{player.CurrentRoom.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
                     player.ShowHint($"<align=left>{hinttext}</align>", 0.5f);
                     yield return Timing.WaitForSeconds(0.1f);
                 }
