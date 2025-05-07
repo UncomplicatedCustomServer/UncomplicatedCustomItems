@@ -31,6 +31,7 @@ using UncomplicatedCustomItems.Interfaces;
 using Exiled.Events.EventArgs.Scp914;
 using Exiled.API.Features.Core.UserSettings;
 using System.Globalization;
+using Exiled.Events.EventArgs.Server;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -58,7 +59,9 @@ namespace UncomplicatedCustomItems.Events
         public static Dictionary<ushort, SummonedCustomItem> EquipedKeycards = [];
         private static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
 
-        internal IEnumerable<SettingBase> _ToolGunSettings;
+        internal static IEnumerable<SettingBase> _ToolGunSettings;
+
+        internal static Dictionary<Primitive, int> ToolGunPrimitives = [];
 
         public void OnHurt(HurtEventArgs ev)
         {
@@ -378,9 +381,10 @@ namespace UncomplicatedCustomItems.Events
                     {
                         new HeaderSetting("UCI ToolGun Settings"),
                         new UserTextInputSetting(21, "Primitive Color", placeHolder: "255, 0, 0, -1",  hintDescription: "The color of the primitives spawned by the ToolGun"),
-                        new TwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hintDescription: "Sets the deletion mode of the ToolGun")
+                        new TwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hintDescription: "Sets the deletion mode of the ToolGun"),
+                        new TwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
                     };
-                    SettingBase.Register(ev.Player, _ToolGunSettings);
+                    SettingBase.Register(_ToolGunSettings, p => p.Id == ev.Player.Id);
                     StartRelativePosCoroutine(ev.Player);
                 }
             }
@@ -389,10 +393,13 @@ namespace UncomplicatedCustomItems.Events
                 if (Utilities.TryGetSummonedCustomItem(ev.OldItem.Serial, out SummonedCustomItem customItem))
                     if (customItem.HasModule(CustomFlags.ToolGun))
                     {
+                        SSTwoButtonsSetting clearList = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(ev.Player.ReferenceHub, 23);
                         foreach (Primitive primitive in Primitive.List.ToList())
-                            if (primitive.GameObject.name.Contains("UCI"))
-                                primitive.Destroy();
-                        SettingBase.Unregister(ev.Player, _ToolGunSettings);
+                            if (ToolGunPrimitives.TryGetValue(primitive, out int iD))
+                                if (clearList.SyncIsA)
+                                    if (ev.Player.Id == iD)
+                                        primitive.Destroy();
+                        SettingBase.Unregister(p => p.Id == ev.Player.Id, _ToolGunSettings);
                     }
             }
         }
@@ -459,6 +466,16 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Debug($"{nameof(Onpickup)}: Adding or updating {ev.Player.Id} to appearance dictionary");
                     Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
                 }
+            }
+        }
+
+        public void OnRoundEnd(EndingRoundEventArgs ev)
+        {
+            if (!ev.IsAllowed)
+                return;
+            foreach (Player player in Player.List)
+            {
+                SettingBase.Unregister(player, _ToolGunSettings);
             }
         }
 
@@ -1498,6 +1515,7 @@ namespace UncomplicatedCustomItems.Events
                     primitive.Collidable = false;
                     primitive.Rotation = ev.Player.CurrentRoom.Rotation;
                     primitive.GameObject.name = $"UCI {RelativePosition}";
+                    ToolGunPrimitives.TryAdd(primitive, ev.Player.Id);
                 }
             }
             if (customItem.HasModule(CustomFlags.EffectShot))

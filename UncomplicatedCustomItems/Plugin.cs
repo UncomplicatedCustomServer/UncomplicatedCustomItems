@@ -89,6 +89,7 @@ namespace UncomplicatedCustomItems
             LabAPIPlayerEvent.ToggledFlashlight += Handler.ToggledFlashlight;
             Scp914Event.UpgradingPickup += Handler.OnPickupUpgrade;
             Scp914Event.UpgradingInventoryItem += Handler.OnItemUpgrade;
+            ServerEvent.EndingRound += Handler.OnRoundEnd;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -191,6 +192,7 @@ namespace UncomplicatedCustomItems
             LabAPIPlayerEvent.ToggledFlashlight -= Handler.ToggledFlashlight;
             Scp914Event.UpgradingPickup -= Handler.OnPickupUpgrade;
             Scp914Event.UpgradingInventoryItem -= Handler.OnItemUpgrade;
+            ServerEvent.EndingRound -= Handler.OnRoundEnd;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

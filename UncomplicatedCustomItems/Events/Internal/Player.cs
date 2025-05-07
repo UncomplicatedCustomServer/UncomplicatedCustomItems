@@ -8,6 +8,7 @@ using Exiled.API.Enums;
 using MapEventSource = Exiled.Events.Handlers.Map;
 using Exiled.Events.EventArgs.Map;
 using Exiled.API.Features.Items;
+using Exiled.API.Features.Core.UserSettings;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -81,7 +82,10 @@ namespace UncomplicatedCustomItems.Events.Internal
                 Item?.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
             if (Item.HasModule(Enums.CustomFlags.ToolGun))
+            {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
+                SettingBase.Unregister(p => p.Id == ev.Player.Id, EventHandler._ToolGunSettings);
+            }
         }
 
         /// <summary>
@@ -158,7 +162,10 @@ namespace UncomplicatedCustomItems.Events.Internal
                 EventHandler.EquipedKeycards.Remove(item.Serial);
             item.ResetBadge(ev.Player);
             if (item.HasModule(Enums.CustomFlags.ToolGun))
+            {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
+                SettingBase.Unregister(p => p.Id == ev.Player.Id, EventHandler._ToolGunSettings);
+            }
         }
 
         private static void DeathEvent(DyingEventArgs ev)
@@ -176,7 +183,11 @@ namespace UncomplicatedCustomItems.Events.Internal
                     customitem.OnDied(ev, customitem);
                     customitem?.ResetBadge(ev.Player);
                     if (customitem.HasModule(Enums.CustomFlags.ToolGun))
+                    {
                         EventHandler.StopRelativePosCoroutine(ev.Player);
+                        SettingBase.Unregister(p => p.Id == ev.Player.Id, EventHandler._ToolGunSettings);
+                    }
+                        
                 }
             }
         }
@@ -194,7 +205,10 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item?.ResetBadge(ev.Player);
             if (item.HasModule(Enums.CustomFlags.ToolGun))
+            {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
+                SettingBase.Unregister(p => p.Id == ev.Player.Id, EventHandler._ToolGunSettings);
+            }
         }
 
         private static void ThrownProjectile(ThrownProjectileEventArgs ev)
