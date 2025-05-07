@@ -602,7 +602,8 @@ namespace UncomplicatedCustomItems.Events
                         {
                             for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
                             {
-                                LABAPI.ExplosiveGrenadeProjectile grenade = (LABAPI.ExplosiveGrenadeProjectile)LABAPI.ExplosiveGrenadeProjectile.SpawnActive(ClusterOffset(ev.Position), ClusterSettings.ItemToSpawn, ev.Player, (double)ClusterSettings.FuseTime);
+                                Vector3 position = ClusterOffset(ev.Position);
+                                LABAPI.ExplosiveGrenadeProjectile grenade = (LABAPI.ExplosiveGrenadeProjectile)LABAPI.ExplosiveGrenadeProjectile.SpawnActive(position, ClusterSettings.ItemToSpawn, ev.Player, (double)ClusterSettings.FuseTime);
                                 grenade.GameObject.transform.localScale = Scale;
                                 grenade.ScpDamageMultiplier = ClusterSettings.ScpDamageMultiplier ?? 1f;
                             }
@@ -614,7 +615,8 @@ namespace UncomplicatedCustomItems.Events
                         {
                             for (int i = 0; i <= ClusterSettings.AmountToSpawn; i++)
                             {
-                                LABAPI.Pickup pickup = LABAPI.Pickup.Create(ClusterSettings.ItemToSpawn, ClusterOffset(ev.Position), ev.Player.Rotation, Scale);
+                                Vector3 position = ClusterOffset(ev.Position);
+                                LABAPI.Pickup pickup = LABAPI.Pickup.Create(ClusterSettings.ItemToSpawn, position, ev.Player.Rotation, Scale);
                                 pickup.Spawn();
                             }
                         });
