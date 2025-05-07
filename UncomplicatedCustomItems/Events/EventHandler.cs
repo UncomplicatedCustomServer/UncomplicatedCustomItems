@@ -379,7 +379,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     _ToolGunSettings = new SettingBase[]
                     {
-                        new HeaderSetting("UCI ToolGun Settings"),
+                        new HeaderSetting("UCI ToolGun Settings", hintDescription: "If multiple are created the first one will be the correct one"),
                         new UserTextInputSetting(21, "Primitive Color", placeHolder: "255, 0, 0, -1",  hintDescription: "The color of the primitives spawned by the ToolGun"),
                         new TwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hintDescription: "Sets the deletion mode of the ToolGun"),
                         new TwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
@@ -643,6 +643,7 @@ namespace UncomplicatedCustomItems.Events
                                     LogManager.Debug($"{nameof(OnPickupUpgrade)}: Spawning {customItem.Name} at {ev.Pickup.Position}...");
                                     try
                                     {
+                                        ev.Pickup.Destroy();
                                         new SummonedCustomItem(customItem, ev.OutputPosition);
                                         LogManager.Debug($"{nameof(OnPickupUpgrade)}: CustomItem created successfully at {ev.OutputPosition}");
                                     }
