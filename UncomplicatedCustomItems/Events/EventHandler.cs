@@ -651,15 +651,6 @@ namespace UncomplicatedCustomItems.Events
                                     {
                                         LogManager.Error($"{nameof(OnPickupUpgrade)}: Error creating CustomItem: {ex.Message}");
                                     }
-                                    try
-                                    {
-                                        ev.Pickup.Destroy();
-                                        LogManager.Debug($"{nameof(OnPickupUpgrade)}: Original pickup destroyed successfully");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        LogManager.Error($"{nameof(OnPickupUpgrade)}: Error destroying pickup: {ex.Message}");
-                                    }
                                 }
                                 else
                                     LogManager.Debug($"{nameof(OnPickupUpgrade)}: {ev.KnobSetting} != {craftableSettings.KnobSetting} or {ev.Pickup} != {craftableSettings.OriginalItem}");
