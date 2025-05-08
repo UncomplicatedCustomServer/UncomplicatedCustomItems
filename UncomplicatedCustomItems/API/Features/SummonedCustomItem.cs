@@ -348,6 +348,24 @@ namespace UncomplicatedCustomItems.API.Features
                         Serial = Pickup.Serial;
                         break;
 
+                    case CustomItemType.Armor:
+                        Armor Armor = (Armor)Armor.Create(CustomItem.Item);
+                        IArmorData ArmorData = CustomItem.CustomData as IArmorData;
+
+                        Armor.HelmetEfficacy = ArmorData.HeadProtection;
+                        Armor.VestEfficacy = ArmorData.BodyProtection;
+                        // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
+                        // Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
+                        Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
+                        Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
+                        if (ArmorData.RemoveExcessOnDrop)
+                            LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
+                        BodyArmorPickup armorPickup = (BodyArmorPickup)Armor.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        Pickup = armorPickup;
+                        Serial = Pickup.Serial;
+                        break;
+
                     case CustomItemType.Weapon:
                         List<string> attachmentList = GetAttachmentsList();
                         Firearm Firearm = (Firearm)Firearm.Create(CustomItem.Item);
@@ -371,9 +389,56 @@ namespace UncomplicatedCustomItems.API.Features
                         Pickup = firearmpickup;
                         Serial = Pickup.Serial;
                         break;
+
+                    case CustomItemType.ExplosiveGrenade:
+                        ExplosiveGrenade ExplosiveGrenade = (ExplosiveGrenade)ExplosiveGrenade.Create(CustomItem.Item);
+                        IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+
+                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        ExplosiveGrenade.PinPullTime = ExplosiveGrenadeData.PinPullTime;
+                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        ExplosiveGrenade.ConcussDuration = ExplosiveGrenadeData.ConcussDuration;
+                        ExplosiveGrenade.BurnDuration = ExplosiveGrenadeData.BurnDuration;
+                        ExplosiveGrenade.DeafenDuration = ExplosiveGrenadeData.DeafenDuration;
+                        ExplosiveGrenade.FuseTime = ExplosiveGrenadeData.FuseTime;
+                        ExplosiveGrenade.Repickable = ExplosiveGrenadeData.Repickable;
+                        Pickup ExplosiveGrenadePickup = ExplosiveGrenade.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        Pickup = ExplosiveGrenadePickup;
+                        Serial = Pickup.Serial;
+                        break;
+
+                    case CustomItemType.FlashGrenade:
+                        FlashGrenade FlashGrenade = (FlashGrenade)FlashGrenade.Create(CustomItem.Item);
+                        IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
+
+                        FlashGrenade.PinPullTime = FlashGrenadeData.PinPullTime;
+                        FlashGrenade.Repickable = FlashGrenadeData.Repickable;
+                        FlashGrenade.MinimalDurationEffect = FlashGrenadeData.MinimalDurationEffect;
+                        FlashGrenade.AdditionalBlindedEffect = FlashGrenadeData.AdditionalBlindedEffect;
+                        FlashGrenade.SurfaceDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        FlashGrenade.FuseTime = FlashGrenadeData.FuseTime;
+                        Pickup FlashGrenadePickup = FlashGrenade.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        Pickup = FlashGrenadePickup;
+                        Serial = Pickup.Serial;
+                        break;
+
                     case CustomItemType.SCPItem:
                         {
-                            if (Item.Type == ItemType.SCP244a)
+                            if (Item.Type == ItemType.SCP018)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-018");
+                                Scp018 Scp018 = (Scp018)Scp018.Create(CustomItem.Item);
+                                ISCP018Data SCP018Data = CustomItem.CustomData as ISCP018Data;
+                                Scp018.FriendlyFireTime = SCP018Data.FriendlyFireTime;
+                                Scp018.FuseTime = SCP018Data.FuseTime;
+                                Pickup Scp018Pickup = Scp018.CreatePickup(Pickup.Position);
+                                Pickup.Destroy();
+                                Pickup = Scp018Pickup;
+                                Serial = Pickup.Serial;
+                            }
+                            else if (Item.Type == ItemType.SCP244a)
                             {
                                 LogManager.Debug($"SCPItem is SCP-244");
                                 Scp244Pickup Scp244 = Pickup as Scp244Pickup;
@@ -736,7 +801,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(Flag))
             {
-                LogManager.Debug($"{CustomItem.Name} has {Flag}");
+                LogManager.Silent($"{CustomItem.Name} has {Flag}");
                 return true;
             }
             else

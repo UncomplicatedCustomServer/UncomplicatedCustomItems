@@ -395,7 +395,9 @@ namespace UncomplicatedCustomItems.Events
                     {
                         if (!SettingBase.TryGetSetting(ev.Player, id, out _))
                         {
-                            SettingBase.SendToPlayer(ev.Player, _ToolGunSettings);
+                            SettingBase.Register(ev.Player, _ToolGunSettings);
+                            foreach (ServerSpecificSettingBase settings in ServerSpecificSettingsSync.DefinedSettings) // Debugging
+                                LogManager.Debug($"{settings.Label} - {settings.SettingId}");
                             break;
                         }
                     }
