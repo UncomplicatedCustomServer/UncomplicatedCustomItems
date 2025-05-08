@@ -391,12 +391,13 @@ namespace UncomplicatedCustomItems.Events
                         if (toolGunSetting.Id != 0)
                             toolGunSettingIds.Add(toolGunSetting.Id);
                     }
-                    foreach (KeyValuePair<Player, ReadOnlyCollection<SettingBase>> playerSettingsPair in SettingBase.SyncedList)
+                    foreach (int id in toolGunSettingIds)
                     {
-                        bool playerHasToolGunSetting = playerSettingsPair.Value.Any(setting => toolGunSettingIds.Contains(setting.Id));
-
-                        if (!playerHasToolGunSetting)
-                            SettingBase.Register(_ToolGunSettings, p => p.Id == ev.Player.Id);
+                        if (!SettingBase.TryGetSetting(ev.Player, id, out _))
+                        {
+                            SettingBase.SendToPlayer(ev.Player, _ToolGunSettings);
+                            break;
+                        }
                     }
                     StartRelativePosCoroutine(ev.Player);
                 }
@@ -413,7 +414,7 @@ namespace UncomplicatedCustomItems.Events
                                     if (ev.Player.Id == iD)
                                         primitive.Destroy();
 
-                        SettingBase.Unregister(p => p.Id == ev.Player.Id, _ToolGunSettings);
+                        SettingBase.Unregister(ev.Player, _ToolGunSettings);
                     }
             }
         }
