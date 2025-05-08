@@ -289,7 +289,7 @@ https://discord.com/channels/null";
         }
 
         /// <summary>
-        /// Parse a <see cref="IResponse"/> object as response to a <see cref="Player"/>
+        /// Parse a <see cref="object"/> as response to a <see cref="Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <param name="response"></param>
@@ -338,7 +338,7 @@ https://discord.com/channels/null";
         /// </summary>
         /// <param name="id"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="bool"/> <see langword="true"/> if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
+        /// <returns><see cref="bool"/> <see langword="true"/> if the item exists and <paramref name="item"/> is not <see langword="null"/> or <see langword="default"/></returns>
         public static bool TryGetCustomItem(uint id, out ICustomItem item) => CustomItem.CustomItems.TryGetValue(id, out item);
 
         /// <summary>
@@ -346,7 +346,7 @@ https://discord.com/channels/null";
         /// </summary>
         /// <param name="Name"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="bool"/> <see langword="true"/> if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
+        /// <returns><see cref="bool"/> <see langword="true"/> if the item exists and <paramref name="item"/> is not <see langword="null"/> or <see langword="default"/></returns>
         public static bool TryGetCustomItemByName(string Name, out ICustomItem item)
         {
             item = CustomItem.List.FirstOrDefault(i => i.Name == Name);
@@ -357,7 +357,7 @@ https://discord.com/channels/null";
         /// Get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Id"/>
         /// </summary>
         /// <param name="id"></param>
-        /// <returns><see cref="ICustomItem"/> if it exists, otherwhise a <see cref="default"/> will be returned</returns>
+        /// <returns><see cref="ICustomItem"/> if it exists, otherwhise a <see langword="default"/> will be returned</returns>
         public static ICustomItem GetCustomItem(uint id) => CustomItem.CustomItems[id];
 
         /// <summary>
@@ -409,10 +409,7 @@ https://discord.com/channels/null";
                                 new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
                         }
                         else
-                        {
-                            Room room = Exiled.API.Features.Room.Get(Room);
-                            new SummonedCustomItem(CustomItem, room.WorldPosition(DynamicSpawn.Coords));
-                        }
+                            new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).WorldPosition(DynamicSpawn.Coords));
                     }
                 }
             }

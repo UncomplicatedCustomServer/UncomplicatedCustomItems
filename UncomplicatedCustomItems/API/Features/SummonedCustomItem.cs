@@ -148,6 +148,7 @@ namespace UncomplicatedCustomItems.API.Features
         public void SetProperties()
         {
             if (Item is not null)
+            {
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
@@ -313,6 +314,108 @@ namespace UncomplicatedCustomItems.API.Features
                     default:
                         break;
                 }
+            }
+            else if (IsPickup)
+            {
+                switch (CustomItem.CustomItemType)
+                {
+                    case CustomItemType.Keycard:
+                        Keycard keycard = (Keycard)Keycard.Create(CustomItem.Item);
+                        IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
+                        ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
+                        ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
+                        ColorUtility.TryParseHtmlString(KeycardData.LabelColor, out Color LabelColor);
+                        Color32 PermissionsColor32 = PermissionsColor;
+                        Color32 TintColor32 = TintColor;
+                        Color32 LabelColor32 = LabelColor;
+                        KeycardLevels permissions = new(KeycardData.Containment, KeycardData.Armory, KeycardData.Admin);
+                        if (!keycard.Base.Customizable)
+                        {
+                            LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
+                            return;
+                        }
+
+                        CustomKeycard customKeycard = new CustomKeycard(keycard);
+                        if (!NameApplied)
+                        {
+                            customKeycard.NameTag = KeycardData.Name;
+                        }
+                        customKeycard.SerialNumber = KeycardData.SerialNumber;
+                        customKeycard.WearIndex = KeycardData.WearDetail;
+                        customKeycard.RankIndex = KeycardData.Rank;
+                        customKeycard.LabelColor = LabelColor32;
+                        customKeycard.LabelText = KeycardData.Label;
+                        customKeycard.ItemName = CustomItem.Name;
+                        customKeycard.CardColor = TintColor32;
+                        customKeycard.PermissionsColor = PermissionsColor32;
+                        customKeycard.Permissions = permissions;
+                        LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
+                        KeycardUtils.RemoveKeycardDetail(keycard.Serial);
+                        KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
+                        Exiled.API.Features.Pickups.KeycardPickup keycardpickup = (Exiled.API.Features.Pickups.KeycardPickup)keycard.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        break;
+
+                    case CustomItemType.Weapon:
+                        List<string> attachmentList = GetAttachmentsList();
+                        Firearm Firearm = (Firearm)Firearm.Create(CustomItem.Item);
+                        IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+                        Firearm.MagazineAmmo = WeaponData.MaxAmmo;
+                        Firearm.Damage = WeaponData.Damage;
+                        Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
+                        Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
+                        Firearm.AmmoDrain = WeaponData.AmmoDrain;
+                        Firearm.Penetration = WeaponData.Penetration;
+                        Firearm.Inaccuracy = WeaponData.Inaccuracy;
+                        Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        foreach (string attachmentstring in attachmentList)
+                        {
+                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
+                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                            Firearm.AddAttachment(attachment);
+                        }
+                        FirearmPickup firearmpickup = (FirearmPickup)Firearm.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        break;
+                    case CustomItemType.SCPItem:
+                        {
+                            if (Item.Type == ItemType.SCP244a)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244Pickup Scp244 = Pickup as Scp244Pickup;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.ActivationDot = SCP244Data.ActivationDot;
+                                Scp244.Health = SCP244Data.Health;
+                                Scp244.MaxDiameter = SCP244Data.MaxDiameter;
+                                if (SCP244Data.Primed)
+                                    Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Active;
+                                else
+                                    Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Idle;
+                                Scp244.Spawn(Pickup.Position);
+                                Pickup.Destroy();
+                            }
+                            else if (Item.Type == ItemType.SCP244b)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244Pickup Scp244 = Pickup as Scp244Pickup;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.ActivationDot = SCP244Data.ActivationDot;
+                                Scp244.Health = SCP244Data.Health;
+                                Scp244.MaxDiameter = SCP244Data.MaxDiameter;
+                                if (SCP244Data.Primed)
+                                    Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Active;
+                                else
+                                    Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Idle;
+                                Scp244.Spawn(Pickup.Position);
+                                Pickup.Destroy();
+
+                            }
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
         }
         /// <summary>
         /// Saves the custom properties of the <see cref="ICustomItem"/> that triggered it

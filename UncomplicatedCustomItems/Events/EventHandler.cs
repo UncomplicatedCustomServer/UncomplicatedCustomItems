@@ -490,6 +490,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 SettingBase.Unregister(player, _ToolGunSettings);
             }
+            Appearance.Clear();
         }
 
         public void GrenadeExploding(ExplodingGrenadeEventArgs ev)
