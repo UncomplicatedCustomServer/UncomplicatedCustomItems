@@ -376,7 +376,42 @@ https://discord.com/channels/null";
 
             ISpawn Spawn = CustomItem.Spawn;
 
-            if (Spawn.Coords.Count() > 0)
+            //TODO:
+            //Test this
+            if (Spawn.PedestalSpawn ?? false)
+            {
+                if (Spawn.ReplaceExistingPickup)
+                {
+                    foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
+                    {
+                        LabApi.Features.Wrappers.Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                        if (pedestalLockerPickup != null && pedestalLockerPickup.Type == CustomItem.Item)
+                        {
+                            pedestalLocker.RemoveItem(pedestalLockerPickup);
+                            LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
+                            if (pickup.Type == CustomItem.Item)
+                            {
+                                SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
+                            }
+                        }
+                    }
+                }
+                else 
+                {
+                    foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
+                    {
+                        LabApi.Features.Wrappers.Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                        if (pedestalLockerPickup != null)
+                        {
+                            pedestalLocker.RemoveItem(pedestalLockerPickup);
+                            LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
+                            SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
+                        }
+                    }
+                }
+            }
+
+            else if (Spawn.Coords.Count() > 0)
             {
                 new SummonedCustomItem(CustomItem, Spawn.Coords.RandomItem());
                 return;

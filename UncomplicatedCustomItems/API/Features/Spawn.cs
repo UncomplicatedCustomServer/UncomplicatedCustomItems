@@ -23,6 +23,9 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("The number of custom items to spawn.")]
         public uint Count { get; set; } = 1;
 
+        [Description("Replace a existing item in a SCP Pedestal with this CustomItem.")]
+        public bool? PedestalSpawn { get; set; } = false;
+
         /// <summary>
         /// The <see cref="Vector3"/> positions where the item is allowed to spawn.
         /// If this is empty, the <see cref="DynamicSpawn"/> parameter will be used instead.
