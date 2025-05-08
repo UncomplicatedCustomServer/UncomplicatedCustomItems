@@ -407,11 +407,12 @@ namespace UncomplicatedCustomItems.Events
                     if (customItem.HasModule(CustomFlags.ToolGun))
                     {
                         SSTwoButtonsSetting clearList = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(ev.Player.ReferenceHub, 23);
-                        foreach (Primitive primitive in Primitive.List.ToList())
+                        foreach (Primitive primitive in AdminToy.List.OfType<Primitive>().ToList())
                             if (ToolGunPrimitives.TryGetValue(primitive, out int iD))
                                 if (clearList.SyncIsA)
                                     if (ev.Player.Id == iD)
                                         primitive.Destroy();
+
                         SettingBase.Unregister(p => p.Id == ev.Player.Id, _ToolGunSettings);
                     }
             }
@@ -970,9 +971,9 @@ namespace UncomplicatedCustomItems.Events
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
                     IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
-                    Timing.CallDelayed(0.2f, () =>
+                    Timing.CallDelayed(0.1f, () =>
                     {
-                        if (ev.Door.IsOpen)
+                        if (ev.Player.HasKeycardPermission((KeycardPermissions)ev.Door.RequiredPermissions))
                         {
                             if (Data.OneTimeUse)
                             {
@@ -1023,15 +1024,18 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
-                    IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
-                    if (Data.OneTimeUse)
+                    if (ev.Player.HasKeycardPermission(ev.InteractingChamber.RequiredPermissions))
                     {
-                        Timing.CallDelayed(0.5f, () =>
+                        IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
+                        if (Data.OneTimeUse)
                         {
-                            ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
-                            LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
-                            ev.Player.RemoveItem(CustomItem.Item, true);
-                        });
+                            Timing.CallDelayed(0.5f, () =>
+                            {
+                                ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                                LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                                ev.Player.RemoveItem(CustomItem.Item, true);
+                            });
+                        }
                     }
                 }
             }
@@ -1128,18 +1132,104 @@ namespace UncomplicatedCustomItems.Events
             }
             else return;
         }
-        public void OnDeath(SummonedCustomItem customItem)
+
+        public void OnDrop(DroppedItemEventArgs ev)
         {
-            if (customItem.CustomItem.CustomFlags.HasValue && customItem.HasModule(CustomFlags.ItemGlow))
+            if (ev.Pickup == null)
+                return;
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
+                return;
+            if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.Disguise))
+            {
+                ev.Player.ChangeAppearance(ev.Player.Role);
+            }
+            if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.DieOnDrop))
+            {
+                foreach (DieOnDropSettings DieOnDropSettings in SummonedCustomItem.CustomItem.FlagSettings.DieOnDropSettings)
+                {
+                    LogManager.Debug($"Checking Vaporize setting for {SummonedCustomItem.CustomItem.Name}");
+                    if (DieOnDropSettings.Vaporize != null && (bool)DieOnDropSettings.Vaporize)
+                    {
+                        try
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                            LogManager.Debug($"{ev.Player.Nickname} is being vaporized by {SummonedCustomItem.CustomItem.Name}");
+                            ev.Player.Vaporize();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                            LogManager.Error($"Couldnt Vaporize {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                        }
+                    }
+                    else
+                        LogManager.Debug($"Vaporize settings were null or false for {SummonedCustomItem.CustomItem.Name}");
+                    if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage != null)
+                    {
+                        try
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                            ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", SummonedCustomItem.CustomItem.Name)}");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                            LogManager.Error($"Couldnt Kill {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                            ev.Player.Kill($"Killed by {SummonedCustomItem.CustomItem.Name}");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Silent("Name | Id | CustomFlag(s)");
+                            LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                            LogManager.Error($"Couldnt Kill {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                        }
+                    }
+                }
+            }
+            else return;
+        }
+
+        public void OnPickupCreation(PickupAddedEventArgs ev)
+        {
+
+            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
+            {
+                try
+                {
+                    ev.Pickup.GameObject.transform.localScale = SummonedCustomItem.CustomItem.Scale;
+                    ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                    LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                }
+            }
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+                return;
+            if (customItem.HasModule(CustomFlags.ItemGlow))
             {
                 foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
                 {
                     LogManager.Debug("SpawnLightOnItem method triggered");
 
-                    if (customItem.Pickup?.Base?.gameObject == null)
+                    if (ev.Pickup?.Base?.gameObject == null)
                         return;
 
-                    GameObject itemGameObject = customItem.Pickup.Base.gameObject;
+                    GameObject itemGameObject = ev.Pickup.Base.gameObject;
                     Color lightColor = Color.blue;
 
                     if (ItemGlowSettings != null)
@@ -1161,7 +1251,7 @@ namespace UncomplicatedCustomItems.Events
                         LogManager.Error("No FlagSettings found on custom item");
                     }
 
-                    var light = Light.Create(customItem.Pickup.Position);
+                    var light = Light.Create(ev.Pickup.Position);
                     light.Color = lightColor;
                     light.Intensity = 0.7f;
                     light.Range = 0.5f;
@@ -1169,142 +1259,9 @@ namespace UncomplicatedCustomItems.Events
 
                     light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
                     LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
-
-                    ActiveLights[customItem.Pickup] = light;
+                    ActiveLights[ev.Pickup] = light;
                 }
             }
-        }
-        public void OnDrop(DroppedItemEventArgs ev)
-        {
-            if (ev.Pickup == null)
-                return;
-
-            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
-            {
-                try
-                {
-                    ev.Pickup.Scale = SummonedCustomItem.CustomItem.Scale;
-                    ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
-                    LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                }
-                if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.Disguise))
-                {
-                    ev.Player.ChangeAppearance(ev.Player.Role);
-                }
-            }
-
-            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
-                return;
-            if (customItem.HasModule(CustomFlags.ItemGlow))
-            {
-                foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
-                {
-                    if (ev.Player != null)
-                    {
-                        LogManager.Debug("SpawnLightOnItem method triggered");
-
-                        if (ev.Pickup?.Base?.gameObject == null)
-                            return;
-
-                        GameObject itemGameObject = ev.Pickup.Base.gameObject;
-                        Color lightColor = Color.blue;
-
-                        if (ItemGlowSettings != null)
-                        {
-                            if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
-                            {
-                                if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
-                                {
-                                    lightColor = parsedColor;
-                                }
-                                else
-                                {
-                                    LogManager.Error($"Failed to parse color: {ItemGlowSettings.GlowColor} for {customItem.CustomItem.Name}");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            LogManager.Error("No FlagSettings found on custom item");
-                        }
-
-                        var light = Light.Create(ev.Pickup.Position);
-                        light.Color = lightColor;
-                        light.Intensity = 0.7f;
-                        light.Range = 0.5f;
-                        light.ShadowType = LightShadows.None;
-
-                        light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
-                        LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
-
-                        ActiveLights[ev.Pickup] = light;
-                    }
-                    else
-                    {
-                        LogManager.Error("ItemGlow flag was triggered but couldnt be ran.");
-                    }
-                }
-            }
-            if (customItem.HasModule(CustomFlags.DieOnDrop))
-            {
-                foreach (DieOnDropSettings DieOnDropSettings in customItem.CustomItem.FlagSettings.DieOnDropSettings)
-                {
-                    LogManager.Debug($"Checking Vaporize setting for {customItem.CustomItem.Name}");
-                    if (DieOnDropSettings.Vaporize != null && (bool)DieOnDropSettings.Vaporize)
-                    {
-                        try
-                        {
-                            LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
-                            LogManager.Debug($"{ev.Player.Nickname} is being vaporized by {customItem.CustomItem.Name}");
-                            ev.Player.Vaporize();
-                        }
-                        catch (Exception ex)
-                        {
-                            LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
-                            LogManager.Error($"Couldnt Vaporize {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                        }
-                    }
-                    else
-                        LogManager.Debug($"Vaporize settings were null or false for {customItem.CustomItem.Name}");
-                    if (DieOnDropSettings.DeathMessage.Count() >= 1 && DieOnDropSettings.DeathMessage != null)
-                    {
-                        try
-                        {
-                            LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
-                            ev.Player.Kill($"{DieOnDropSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
-                        }
-                        catch (Exception ex)
-                        {
-                            LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
-                            LogManager.Error($"Couldnt Kill {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
-                            ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
-                        }
-                        catch (Exception ex)
-                        {
-                            LogManager.Silent("Name | Id | CustomFlag(s)");
-                            LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
-                            LogManager.Error($"Couldnt Kill {ev.Player.DisplayNickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                        }
-                    }
-                }
-            }
-            else return;
         }
         public void OnDropping(DroppingItemEventArgs ev)
         {
@@ -1500,7 +1457,7 @@ namespace UncomplicatedCustomItems.Events
                 SSTwoButtonsSetting deletionMode = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(ev.Player.ReferenceHub, 22);
                 if (deletionMode.SyncIsA && ev.Firearm.Aiming)
                 {
-                    foreach (Primitive primitive in Primitive.List.ToList())
+                    foreach (Primitive primitive in AdminToy.List.OfType<Primitive>().ToList())
                     {
                         if (primitive.GameObject.name.Contains("UCI"))
                         {
@@ -1515,7 +1472,7 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else if (deletionMode.SyncIsB && ev.Firearm.FlashlightEnabled)
                 {
-                    foreach (Primitive primitive in Primitive.List.ToList())
+                    foreach (Primitive primitive in AdminToy.List.OfType<Primitive>().ToList())
                     {
                         if (primitive.GameObject.name.Contains("UCI"))
                         {

@@ -90,6 +90,7 @@ namespace UncomplicatedCustomItems
             Scp914Event.UpgradingPickup += Handler.OnPickupUpgrade;
             Scp914Event.UpgradingInventoryItem += Handler.OnItemUpgrade;
             ServerEvent.EndingRound += Handler.OnRoundEnd;
+            MapEvent.PickupAdded += Handler.OnPickupCreation;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -193,6 +194,7 @@ namespace UncomplicatedCustomItems
             Scp914Event.UpgradingPickup -= Handler.OnPickupUpgrade;
             Scp914Event.UpgradingInventoryItem -= Handler.OnItemUpgrade;
             ServerEvent.EndingRound -= Handler.OnRoundEnd;
+            MapEvent.PickupAdded -= Handler.OnPickupCreation;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

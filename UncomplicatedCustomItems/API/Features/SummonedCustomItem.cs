@@ -706,8 +706,6 @@ namespace UncomplicatedCustomItems.API.Features
                             Owner = null;
                             SaveProperties();
                             Serial = pickup.Serial;
-                            HandleEvent(ev.Player, ItemEvents.Drop, pickup.Serial);
-                            Plugin.Instance.Handler.OnDeath(customItem);
                         }
                     }
                 }
