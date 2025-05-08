@@ -380,7 +380,7 @@ https://discord.com/channels/null";
             //Test this
             if (Spawn.PedestalSpawn ?? false)
             {
-                if (Spawn.ReplaceExistingPickup)
+                if (Spawn.ForceItem)
                 {
                     foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
                     {
@@ -421,7 +421,7 @@ https://discord.com/channels/null";
             {
                 foreach (DynamicSpawn DynamicSpawn in Spawn.DynamicSpawn)
                 {
-                    int Chance = UnityEngine.Random.Range(0, 100);
+                    int Chance = Random.Range(0, 100);
 
                     if (Chance <= DynamicSpawn.Chance)
                     {

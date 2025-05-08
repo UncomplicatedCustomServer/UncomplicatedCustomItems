@@ -23,6 +23,10 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("The number of custom items to spawn.")]
         public uint Count { get; set; } = 1;
 
+        /// <summary>
+        /// Specifies if the CustomItem will spawn in a SCP Pedestal.
+        /// If this is false, the <see cref="Coords"/> parameter will be used instead.
+        /// </summary>
         [Description("Replace a existing item in a SCP Pedestal with this CustomItem.")]
         public bool? PedestalSpawn { get; set; } = false;
 
