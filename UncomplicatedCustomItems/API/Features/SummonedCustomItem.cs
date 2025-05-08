@@ -18,6 +18,7 @@ using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Extensions;
+using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -153,6 +154,7 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         Keycard keycard = Item as Keycard;
+                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
                         ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
@@ -172,6 +174,7 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             customKeycard.NameTag = KeycardData.Name;
                         }
+                        openDoorsProperty.SetValue(keycard.Base, true);
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
                         customKeycard.RankIndex = KeycardData.Rank;
@@ -198,9 +201,7 @@ namespace UncomplicatedCustomItems.API.Features
                         Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
                         Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
                         if (ArmorData.RemoveExcessOnDrop)
-                        {
                             LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
-                        }
                         break;
 
                     case CustomItemType.Weapon:
@@ -234,16 +235,7 @@ namespace UncomplicatedCustomItems.API.Features
                         Jailbird.ChargeDamage = JailbirdData.ChargeDamage;
                         Jailbird.MeleeDamage = JailbirdData.MeleeDamage;
                         Jailbird.FlashDuration = JailbirdData.FlashDuration;
-                        if (JailbirdData.TotalCharges > 3)
-                        {
-                            JailbirdData.TotalCharges = -(JailbirdData.TotalCharges + 3);
-                            Charges = JailbirdData.TotalCharges;
-                        }
-                        else
-                        {
-                            Charges = JailbirdData.TotalCharges;
-                        }
-                        Jailbird.TotalCharges = Charges;
+                        PropertiesSet = true;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
@@ -321,6 +313,7 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         Keycard keycard = (Keycard)Keycard.Create(CustomItem.Item);
+                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
                         ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
@@ -335,11 +328,8 @@ namespace UncomplicatedCustomItems.API.Features
                             return;
                         }
 
+                        openDoorsProperty.SetValue(keycard.Base, true);
                         CustomKeycard customKeycard = new CustomKeycard(keycard);
-                        if (!NameApplied)
-                        {
-                            customKeycard.NameTag = KeycardData.Name;
-                        }
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
                         customKeycard.RankIndex = KeycardData.Rank;

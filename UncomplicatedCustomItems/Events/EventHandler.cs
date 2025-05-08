@@ -866,12 +866,29 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Jailbird)
                 {
-                    IJailbirdData Data = CustomItem.CustomItem.CustomData as IJailbirdData;
+                    Jailbird jailbird = ev.Attacker.CurrentItem as Jailbird;
+                    IJailbirdData data = CustomItem.CustomItem.CustomData as IJailbirdData;
+                    if (data.TotalCharges >= 2)
+                    {
+                        data.TotalCharges -= 1;
+                        jailbird.WearState = InventorySystem.Items.Jailbird.JailbirdWearState.Healthy;
+                    }
+                    else if (data.TotalCharges == 1)
+                    {
+                        data.TotalCharges -= 1;
+                        jailbird.WearState = InventorySystem.Items.Jailbird.JailbirdWearState.AlmostBroken;
+                    }
+                    else if (data.TotalCharges == 0)
+                    {
+                        jailbird.WearState = InventorySystem.Items.Jailbird.JailbirdWearState.Broken;
+                        jailbird.Break();
+                    }
+                    
                     if (!ChargeAttack)
-                        ev.Amount = Data.MeleeDamage;
+                        ev.Amount = data.MeleeDamage;
                     else
                     {
-                        ev.Amount = Data.ChargeDamage;
+                        ev.Amount = data.ChargeDamage;
                         ChargeAttack = false;
                     }
                 }
@@ -1581,7 +1598,7 @@ namespace UncomplicatedCustomItems.Events
                     });
                 }
             }
-                ChargeAttack = true;
+            ChargeAttack = true;
             if (CustomItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 AudioApi AudioApi = new();
