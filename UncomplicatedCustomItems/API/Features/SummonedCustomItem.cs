@@ -354,6 +354,8 @@ namespace UncomplicatedCustomItems.API.Features
                         KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
                         Exiled.API.Features.Pickups.KeycardPickup keycardpickup = (Exiled.API.Features.Pickups.KeycardPickup)keycard.CreatePickup(Pickup.Position);
                         Pickup.Destroy();
+                        Pickup = keycardpickup;
+                        Serial = Pickup.Serial;
                         break;
 
                     case CustomItemType.Weapon:
@@ -376,6 +378,8 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                         FirearmPickup firearmpickup = (FirearmPickup)Firearm.CreatePickup(Pickup.Position);
                         Pickup.Destroy();
+                        Pickup = firearmpickup;
+                        Serial = Pickup.Serial;
                         break;
                     case CustomItemType.SCPItem:
                         {
@@ -391,8 +395,10 @@ namespace UncomplicatedCustomItems.API.Features
                                     Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Active;
                                 else
                                     Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Idle;
-                                Scp244.Spawn(Pickup.Position);
+                                var scp244a = Scp244.Spawn(Pickup.Position);
                                 Pickup.Destroy();
+                                Pickup = scp244a;
+                                Serial = Pickup.Serial;
                             }
                             else if (Item.Type == ItemType.SCP244b)
                             {
@@ -406,9 +412,10 @@ namespace UncomplicatedCustomItems.API.Features
                                     Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Active;
                                 else
                                     Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Idle;
-                                Scp244.Spawn(Pickup.Position);
+                                var scp244b = Scp244.Spawn(Pickup.Position);
                                 Pickup.Destroy();
-
+                                Pickup = scp244b;
+                                Serial = Pickup.Serial;
                             }
                             break;
                         }
