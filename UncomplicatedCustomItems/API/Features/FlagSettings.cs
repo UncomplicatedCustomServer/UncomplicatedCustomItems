@@ -207,5 +207,13 @@ namespace UncomplicatedCustomItems.API.Features
                 Vaporize = false,
             }
         ];
+        public virtual List<HealOnKillSettings?> HealOnKillSettings { get; set; } =
+        [
+            new()
+            {
+                HealAmount = 1f,
+                ConvertToAhpIfFull = false,
+            }
+        ];
     }
 }

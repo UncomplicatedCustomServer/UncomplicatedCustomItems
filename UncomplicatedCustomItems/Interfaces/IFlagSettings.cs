@@ -48,5 +48,6 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract List<DisguiseSettings?> DisguiseSettings { get; set; }
         public abstract List<CraftableSettings?> CraftableSettings { get; set; }
         public abstract List<DieOnUseSettings?> DieOnUseSettings { get; set; }
+        public abstract List<HealOnKillSettings?> HealOnKillSettings { get; set; }
     }
 }

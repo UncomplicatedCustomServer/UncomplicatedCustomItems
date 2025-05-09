@@ -1369,7 +1369,20 @@ namespace UncomplicatedCustomItems.Events
                 LogManager.Debug($"{nameof(OnDying)}: Adding {ev.Attacker.Id} to appearance dictionary");
                 Appearance.TryAdd(ev.Attacker.Id, ev.Player.Role);
             }
-            else return;
+            if (customItem.HasModule(CustomFlags.HealOnKill))
+            {
+                foreach (HealOnKillSettings healOnKillSettings in customItem.CustomItem.FlagSettings.HealOnKillSettings)
+                {
+                    LogManager.Debug($"{nameof(OnDying)}: Healing {ev.Attacker.DisplayNickname} by {healOnKillSettings.HealAmount}");
+                    if (ev.Attacker.Health != ev.Attacker.MaxHealth)
+                        ev.Attacker.Heal(healOnKillSettings.HealAmount ?? 5f);
+                    else if (healOnKillSettings.ConvertToAhpIfFull ?? false)
+                    {
+                        LogManager.Debug($"{nameof(OnDying)}: {ev.Attacker.DisplayNickname} health is full and ConvertToAhpIfFull is true adding {healOnKillSettings.HealAmount} to {ev.Attacker.DisplayNickname} AHP");
+                        ev.Attacker.AddAhp(healOnKillSettings.HealAmount ?? 5f);
+                    }
+                }
+            }
         }
         public void OnVerified(VerifiedEventArgs ev)
         {

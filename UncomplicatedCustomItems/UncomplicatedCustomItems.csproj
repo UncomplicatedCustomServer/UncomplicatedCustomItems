@@ -487,6 +487,7 @@
     <Compile Include="API\Features\FlagSettings\AudioSettings.cs" />
     <Compile Include="API\Features\FlagSettings\LifeStealSettings.cs" />
     <Compile Include="API\Features\FlagSettings\ExplosiveBulletsSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\HealOnKillSettings.cs" />
     <Compile Include="API\Features\FlagSettings\ItemGlowSettings.cs" />
     <Compile Include="API\Features\FlagSettings\SwitchRoleOnUseSettings.cs" />
     <Compile Include="API\Features\FlagSettings.cs" />
@@ -560,6 +561,7 @@
     <Compile Include="Interfaces\ISpawn.cs" />
     <Compile Include="Interfaces\FlagSettings\ISpawnItemWhenDetonatedSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\ICraftableSettings.cs" />
+    <Compile Include="Interfaces\FlagSettings\IHealOnKillSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\ICantDropSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IEffectSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IAudioSettings.cs" />
