@@ -540,6 +540,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\SettingBasePatch.cs" />
     <Compile Include="HarmonyElements\Utilities\KeycardUtils.cs" />
     <Compile Include="Interfaces\FlagSettings\IClusterSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IDieOnDropSettings.cs" />
