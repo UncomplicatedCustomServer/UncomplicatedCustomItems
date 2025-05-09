@@ -12,56 +12,56 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// <summary>
         /// The damage of the ammo. Negative to heal
         /// </summary>
-        public float Damage { get; set; } = 2.75f;
+        public virtual float Damage { get; set; } = 2.75f;
 
         /// <summary>
         /// The max number of ammunitions in the barrel. Shotgun like effect at higher numbers
         /// </summary>
-        public int MaxBarrelAmmo { get; set; } = 10;
+        public virtual int MaxBarrelAmmo { get; set; } = 10;
 
         /// <summary>
         /// The max number of ammunitions
         /// </summary>
-        public int MaxAmmo { get; set; } = 150;
+        public virtual int MaxAmmo { get; set; } = 150;
 
         /// <summary>
         /// The max number of ammunitions in the magazine
         /// </summary>
-        public int MaxMagazineAmmo { get; set; } = 150;
+        public virtual int MaxMagazineAmmo { get; set; } = 150;
 
         /// <summary>
         /// The amount of ammunitions drained per shot
         /// </summary>
-        public int AmmoDrain { get; set; } = 1;
+        public virtual int AmmoDrain { get; set; } = 1;
 
         /// <summary>
         /// Gets or sets the penetration of the firearm
         /// </summary>
-        public float Penetration { get; set; } = 1.24f;
+        public virtual float Penetration { get; set; } = 1.24f;
 
         /// <summary>
         /// Gets or sets the inaccuracy of the firearm
         /// </summary>
-        public float Inaccuracy { get; set; } = 1.24f;
+        public virtual float Inaccuracy { get; set; } = 1.24f;
 
         /// <summary>
         /// Gets or sets the inaccuracy of the firearm while the player is ADS
         /// </summary>
-        public float AimingInaccuracy { get; set; } = 1.24f;
+        public virtual float AimingInaccuracy { get; set; } = 1.24f;
 
         /// <summary>
         /// Gets or sets the how much fast the value drop over the distance.
         /// </summary>
-        public float DamageFalloffDistance { get; set; } = 1f;
+        public virtual float DamageFalloffDistance { get; set; } = 1f;
 
         /// <summary>
         /// Gets or sets the weapon attachments.
         /// </summary>
-        public string Attachments { get; set; } = "DotScope";
+        public virtual string Attachments { get; set; } = "DotScope";
 
         /// <summary>
         /// Gets or sets if the <see cref="CustomItem"/> can damage the friendly team.
         /// </summary>
-        public bool EnableFriendlyFire { get; set; } = false;
+        public virtual bool EnableFriendlyFire { get; set; } = false;
     }
 }

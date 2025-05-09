@@ -16,9 +16,9 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP500Data : Data, ISCP500Data
     {
-        public EffectType Effect { get; set; } = new();
-        public float Duration { get; set; } = 20;
-        public byte Intensity { get; set; } = 1;
+        public virtual EffectType Effect { get; set; } = new();
+        public virtual float Duration { get; set; } = 20;
+        public virtual byte Intensity { get; set; } = 1;
     }
 
     /// <summary>
@@ -26,11 +26,11 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP207Data : Data, ISCP207Data
     {
-        public EffectType Effect { get; set; } = new();
-        public float Duration { get; set; } = 20;
-        public byte Intensity { get; set; } = 1;
-        public bool Apply207Effect { get; set; } = false;
-        public bool RemoveItemAfterUse { get; set; } = true;
+        public virtual EffectType Effect { get; set; } = new();
+        public virtual float Duration { get; set; } = 20;
+        public virtual byte Intensity { get; set; } = 1;
+        public virtual bool Apply207Effect { get; set; } = false;
+        public virtual bool RemoveItemAfterUse { get; set; } = true;
     }
 
     /// <summary>
@@ -38,15 +38,15 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP018Data : Data, ISCP018Data
     {
-        public float FriendlyFireTime { get; set; } = 2f;
-        public float FuseTime { get; set; } = 2f;
+        public virtual float FriendlyFireTime { get; set; } = 2f;
+        public virtual float FuseTime { get; set; } = 2f;
     }
 
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP330"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// Currently unused
     /// </summary>
-    public class SCP330Data : Data, ISCP330Data //Dont really know what to do for this
+    public class SCP330Data : Data, ISCP330Data // Dont really know what to do for this
     {
 
     }
@@ -56,7 +56,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP2176Data : Data, ISCP2176Data
     {
-        public float FuseTime { get; set; } = 2f;
+        public virtual float FuseTime { get; set; } = 2f;
     }
 
     /// <summary>
@@ -64,10 +64,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP244Data : Data, ISCP244Data
     {
-        public float ActivationDot { get; set; } = 1f;
-        public float Health { get; set; } = 1f;
-        public float MaxDiameter { get; set; } = 1f;
-        public bool Primed { get; set; } = false;
+        public virtual float ActivationDot { get; set; } = 1f;
+        public virtual float Health { get; set; } = 1f;
+        public virtual float MaxDiameter { get; set; } = 1f;
+        public virtual bool Primed { get; set; } = false;
 
     }
 
@@ -76,11 +76,11 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP1853Data : Data, ISCP1853Data
     {
-        public EffectType Effect { get; set; } = new();
-        public float Duration { get; set; } = 20;
-        public byte Intensity { get; set; } = 1;
-        public bool Apply1853Effect { get; set; } = false;
-        public bool RemoveItemAfterUse { get; set; } = true;
+        public virtual EffectType Effect { get; set; } = new();
+        public virtual float Duration { get; set; } = 20;
+        public virtual byte Intensity { get; set; } = 1;
+        public virtual bool Apply1853Effect { get; set; } = false;
+        public virtual bool RemoveItemAfterUse { get; set; } = true;
     }
 
     /// <summary>
@@ -88,8 +88,8 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP1576Data : Data, ISCP1576Data
     {
-        public EffectType Effect { get; set; } = new();
-        public float Duration { get; set; } = 20;
-        public byte Intensity { get; set; } = 1;
+        public virtual EffectType Effect { get; set; } = new();
+        public virtual float Duration { get; set; } = 20;
+        public virtual byte Intensity { get; set; } = 1;
     }
 }

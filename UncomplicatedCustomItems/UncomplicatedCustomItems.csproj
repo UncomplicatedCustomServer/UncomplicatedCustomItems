@@ -472,6 +472,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Attributes\PluginCustomItem.cs" />
     <Compile Include="API\Features\AudioApi.cs" />
     <Compile Include="API\Features\BadgeManager.cs" />
     <Compile Include="API\Features\DynamicSpawn.cs" />
@@ -495,6 +496,7 @@
     <Compile Include="API\Features\Helper\LogManager.cs" />
     <Compile Include="API\Features\Helper\VersionInfo.cs" />
     <Compile Include="API\Features\Helper\VersionManager.cs" />
+    <Compile Include="API\Features\Helper\ImportManager.cs" />
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SummonedCustomItem.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
@@ -534,6 +536,7 @@
     <Compile Include="Events\Methods\SwitchRoleOnUseMethod.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
+    <Compile Include="Example\ExampleCustomItem.cs" />
     <Compile Include="Extensions\CustomFlagsExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\PlayerExtensions.cs" />

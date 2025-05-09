@@ -43,11 +43,11 @@ namespace UncomplicatedCustomItems.API.Features
             LogManager.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
-        public bool HasModule(CustomFlags Flag)
+        internal bool HasModule(CustomFlags Flag)
         {
             if (CustomFlags.HasValue && CustomFlags.Value.HasFlag(Flag))
             {
-                LogManager.Debug($"{Name} has {Flag}");
+                LogManager.Silent($"{Name} has {Flag}");
                 return true;
             }
             else
@@ -55,13 +55,13 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Unregister a <see cref="ICustomItem"/> from the plugin by it's class
+        /// Unregister a <see cref="ICustomItem"/> from the plugin by its class
         /// </summary>
         /// <param name="item"></param>
         public static void Unregister(ICustomItem item) => Unregister(item.Id);
 
         /// <summary>
-        /// Unregister a <see cref="ICustomItem"/> from the plugin by it's Id
+        /// Unregister a <see cref="ICustomItem"/> from the plugin by its Id
         /// </summary>
         /// <param name="item"></param>
         public static void Unregister(uint item)
@@ -88,83 +88,83 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// The unique Id of the Custom Item. Can't be <= 0
+        /// The unique Id of the Custom Item. Can't be less than 1
         /// </summary>
-        public uint Id { get; set; } = 1;
+        public virtual uint Id { get; set; } = 1;
 
         /// <summary>
         /// The Name of the object. Can appears when for example you pick it up
         /// </summary>
         [Description("The name of the custom item")]
-        public string Name { get; set; } = "Detonator";
+        public virtual string Name { get; set; } = "Detonator";
 
         /// <summary>
         /// The description. Useful at the moment ig
         /// </summary>
         [Description("The description of the custom item")]
-        public string Description { get; set; } = "25/06/2024";
+        public virtual string Description { get; set; } = "25/06/2024";
 
         /// <summary>
         /// Gets or sets the badge name
         /// </summary>
         [Description("Sets the badge name")]
-        public string BadgeName { get; set; } = "Uncomplicated Custom Items";
+        public virtual string BadgeName { get; set; } = "Uncomplicated Custom Items";
 
         /// <summary>
         /// Gets or sets the badge color
         /// </summary>
         [Description("Sets the badge color. This uses the badge colors available for server")]
-        public string BadgeColor { get; set; } = "pumpkin";
+        public virtual string BadgeColor { get; set; } = "pumpkin";
 
         /// <summary>
         /// The weight of the item
         /// </summary>
         [Description("The weight of the custom item")]
-        public float Weight { get; set; } = 2f;
+        public virtual float Weight { get; set; } = 2f;
 
         /// <summary>
         /// Whether if the item won't be removed from the player's inventory
         /// </summary>
         [Description("Whether if the item won't be removed from the player's inventory after being used. Available only for Consumable items!")]
-        public bool Reusable { get; set; } = false;
+        public virtual bool Reusable { get; set; } = false;
 
         /// <summary>
         /// The <see cref="ItemType"/> (Base) of the Custom Item
         /// </summary>
         [Description("The Item base for the custom item")]
-        public ItemType Item { get; set; } = ItemType.Coin;
+        public virtual ItemType Item { get; set; } = ItemType.Coin;
 
         /// <summary>
         /// The Scale of the Custom Item. If 0, 0, 0 then it's disabled
         /// </summary>
         [Description("The scale of the custom item, 0 0 0 means disabled")]
-        public Vector3 Scale { get; set; } = Vector3.one;
+        public virtual Vector3 Scale { get; set; } = Vector3.one;
 
         /// <summary>
         /// The Spawn data for the custom item.
         /// </summary>
-        public ISpawn Spawn { get; set; } = new Spawn();
+        public virtual ISpawn Spawn { get; set; } = new Spawn();
 
         /// <summary>
         /// Custom flags of the item
         /// </summary>
         [Description("Custom flags for the item")]
-        public CustomFlags? CustomFlags { get; set; } = new();
+        public virtual CustomFlags? CustomFlags { get; set; } = new();
 
         /// <summary>
         /// Custom flag settings of the item
         /// </summary>
         [Description("Settings for the CustomFlags. You can remove any unused settings.")]
-        public IFlagSettings FlagSettings { get; set; } = new FlagSettings();
+        public virtual IFlagSettings FlagSettings { get; set; } = new FlagSettings();
 
         /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item
         /// </summary>
-        public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
+        public virtual CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
 
         /// <summary>
         /// The <see cref="IData">Custom Data</see>, based on the CustomItemType
         /// </summary>
-        public IData CustomData { get; set; } = new ItemData();
+        public virtual IData CustomData { get; set; } = new ItemData();
     }
 }

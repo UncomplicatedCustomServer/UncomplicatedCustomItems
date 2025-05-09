@@ -12,28 +12,28 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// <summary>
         /// Gets or sets the armor's Head Protection value
         /// </summary>
-        public int HeadProtection { get; set; } = 2;
+        public virtual int HeadProtection { get; set; } = 2;
 
         /// <summary>
         /// Gets or sets the armor's Body Protection value
         /// </summary>
-        public int BodyProtection { get; set; } = 3;
+        public virtual int BodyProtection { get; set; } = 3;
 
         /// <summary>
         /// No longer does anything obsoleted
         /// </summary>
         [Obsolete("No longer does anything obsoleted by EXILED")]
         [Description("No longer does anything obsoleted by EXILED")]
-        public bool RemoveExcessOnDrop { get; set; } = true;
+        public virtual bool RemoveExcessOnDrop { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the stamina that this armor drains
         /// </summary>
-        public float StaminaUseMultiplier { get; set; } = 2f;
+        public virtual float StaminaUseMultiplier { get; set; } = 2f;
         
         /// <summary>
         /// Gets or sets the stamina regen multiplier
         /// </summary>
-        public float StaminaRegenMultiplier { get; set; } = 2f;
+        public virtual float StaminaRegenMultiplier { get; set; } = 2f;
     }
 }

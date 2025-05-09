@@ -20,7 +20,7 @@ namespace UncomplicatedCustomItems.API.Features
         public string GlowColor { get; set; } = "#00FF00";
         */
         [Description("Sets the settings for the ItemGlow flag.")]
-        public List<ItemGlowSettings?> ItemGlowSettings { get; set; } =
+        public virtual List<ItemGlowSettings?> ItemGlowSettings { get; set; } =
         [
             new()
             {
@@ -41,7 +41,7 @@ namespace UncomplicatedCustomItems.API.Features
         public float LifeStealPercentage { get; set; } = 0.5f;
         */
         [Description("Sets the settings for the LifeSteal flag.")]
-        public List<LifeStealSettings?> LifeStealSettings { get; set; } =
+        public virtual List<LifeStealSettings?> LifeStealSettings { get; set; } =
         [
             new()
             {
@@ -76,7 +76,7 @@ namespace UncomplicatedCustomItems.API.Features
         public float EffectDuration { get; set; } = -1f;
         */
         [Description("Sets the settings for the Effect flags.")]
-        public List<EffectSettings?> EffectSettings { get; set; } = 
+        public virtual List<EffectSettings?> EffectSettings { get; set; } = 
         [
             new()
             {
@@ -106,7 +106,7 @@ namespace UncomplicatedCustomItems.API.Features
         public float? SoundVolume { get; set; } = 10f;
         */
         [Description("Sets the settings for the CustomSound flag.")]
-        public List<AudioSettings?> AudioSettings { get; set; } = 
+        public virtual List<AudioSettings?> AudioSettings { get; set; } = 
         [
             new()
             {
@@ -123,7 +123,7 @@ namespace UncomplicatedCustomItems.API.Features
         public float? DamageRadius { get; set; } = 1f;
         */
         [Description("Sets the settings for the ExplosiveBullets flag.")]
-        public List<ExplosiveBulletsSettings?> ExplosiveBulletsSettings { get; set; } = 
+        public virtual List<ExplosiveBulletsSettings?> ExplosiveBulletsSettings { get; set; } = 
         [
             new()
             {
@@ -134,7 +134,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// Sets the settings for the SpawnItemWhenDetonated flag.
         /// </summary>
         [Description("Sets the settings for the SpawnItemWhenDetonated flag.")]
-        public List<SpawnItemWhenDetonatedSettings?> SpawnItemWhenDetonatedSettings { get; set; } =
+        public virtual List<SpawnItemWhenDetonatedSettings?> SpawnItemWhenDetonatedSettings { get; set; } =
         [
             new()
             {
@@ -145,7 +145,7 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickupable = false
             }
         ];
-        public List<ClusterSettings?> ClusterSettings { get; set; } =
+        public virtual List<ClusterSettings?> ClusterSettings { get; set; } =
         [
             new()
             {
@@ -153,7 +153,7 @@ namespace UncomplicatedCustomItems.API.Features
                 AmountToSpawn = 6
             }
         ];
-        public List<SwitchRoleOnUseSettings?> SwitchRoleOnUseSettings { get; set; } =
+        public virtual List<SwitchRoleOnUseSettings?> SwitchRoleOnUseSettings { get; set; } =
         [
             new()
             {
@@ -164,7 +164,7 @@ namespace UncomplicatedCustomItems.API.Features
                 KeepLocation = true
             }
         ];
-        public List<DieOnDropSettings?> DieOnDropSettings { get; set; } =
+        public virtual List<DieOnDropSettings?> DieOnDropSettings { get; set; } =
         [
             new()
             {
@@ -172,7 +172,7 @@ namespace UncomplicatedCustomItems.API.Features
                 Vaporize = true
             }
         ];
-        public List<CantDropSettings?> CantDropSettings { get; set; } =
+        public virtual List<CantDropSettings?> CantDropSettings { get; set; } =
         [
             new()
             {
@@ -182,7 +182,7 @@ namespace UncomplicatedCustomItems.API.Features
             }
         ];
         [Description("This is recommended to only be applied to armor.")]
-        public List<DisguiseSettings?> DisguiseSettings { get; set; } =
+        public virtual List<DisguiseSettings?> DisguiseSettings { get; set; } =
         [
             new()
             {
@@ -190,7 +190,7 @@ namespace UncomplicatedCustomItems.API.Features
                 DisguiseMessage = "Your are disguised as an NtfSpecialist!",
             }
         ];
-        public List<CraftableSettings?> CraftableSettings { get; set; } =
+        public virtual List<CraftableSettings?> CraftableSettings { get; set; } =
         [
             new()
             {
@@ -199,7 +199,7 @@ namespace UncomplicatedCustomItems.API.Features
                 Chance = 100,
             }
         ];
-        public List<DieOnUseSettings?> DieOnUseSettings { get; set; } =
+        public virtual List<DieOnUseSettings?> DieOnUseSettings { get; set; } =
         [
             new()
             {
