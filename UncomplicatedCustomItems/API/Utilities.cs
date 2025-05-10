@@ -383,11 +383,8 @@ https://discord.com/channels/null";
         /// <param name="CustomItem"></param>
         internal static void SummonCustomItem(ICustomItem CustomItem)
         {
-
             ISpawn Spawn = CustomItem.Spawn;
 
-            //TODO:
-            //Test this
             if (Spawn.PedestalSpawn ?? false)
             {
                 if (Spawn.ReplaceExistingPickup)
