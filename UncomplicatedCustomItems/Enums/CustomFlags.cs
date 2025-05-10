@@ -33,6 +33,7 @@ namespace UncomplicatedCustomItems.Enums
         Disguise = 1L << 21,
         Craftable = 1L << 22,
         HealOnKill = 1L << 23,
+        Capybara = 1L << 24,
         Custom = 1L << 48, // This should only be used if your coding your own CustomFlag
     }
 }

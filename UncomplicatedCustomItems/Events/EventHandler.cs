@@ -32,7 +32,6 @@ using Exiled.Events.EventArgs.Scp914;
 using Exiled.API.Features.Core.UserSettings;
 using System.Globalization;
 using Exiled.Events.EventArgs.Server;
-using System.Collections.ObjectModel;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -64,6 +63,7 @@ namespace UncomplicatedCustomItems.Events
 
         internal static Dictionary<Primitive, int> ToolGunPrimitives = [];
 
+        internal static Dictionary<int, LABAPI.CapybaraToy> Capybara = [];
         public void OnHurt(HurtEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null)
@@ -483,6 +483,15 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Debug($"{nameof(Onpickup)}: Adding or updating {ev.Player.Id} to appearance dictionary");
                     Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
                 }
+            }
+            if (CustomItem.HasModule(CustomFlags.Capybara))
+            {
+                LABAPI.CapybaraToy capybara = LABAPI.CapybaraToy.Create(ev.Player.Transform);
+                capybara.CollidersEnabled = false;
+                capybara.Position = capybara.Position + new Vector3(0, -0.8f, 0);
+                ev.Player.Scale = new(0.2f, 0.3f, 0.5f);
+                capybara.Scale = new(6f, 4f, 2.8f);
+                Capybara.TryAdd(ev.Player.Id, capybara);
             }
         }
 
@@ -968,6 +977,15 @@ namespace UncomplicatedCustomItems.Events
                             Appearance.TryAdd(ev.Player.Id, (RoleTypeId)DisguiseSettings.RoleId);
                         }
                     }
+                    if (CustomItem.HasModule(CustomFlags.Capybara))
+                    {
+                        LABAPI.CapybaraToy capybara = LABAPI.CapybaraToy.Create(ev.Player.Transform);
+                        capybara.CollidersEnabled = false;
+                        capybara.Position = capybara.Position + new Vector3(0, -0.8f, 0);
+                        ev.Player.Scale = new(0.2f, 0.3f, 0.5f);
+                        capybara.Scale = new(6f, 4f, 2.8f);
+                        Capybara.TryAdd(ev.Player.Id, capybara);
+                    }
                 }
             });
         }
@@ -1160,6 +1178,14 @@ namespace UncomplicatedCustomItems.Events
             {
                 ev.Player.ChangeAppearance(ev.Player.Role);
             }
+            if (SummonedCustomItem.HasModule(CustomFlags.Capybara))
+            {
+                if (Capybara.TryGetValue(ev.Player.Id, out var capybara))
+                {
+                    capybara.Destroy();
+                    ev.Player.Scale = new(1, 1, 1);
+                }
+            }
             if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.DieOnDrop))
             {
                 foreach (DieOnDropSettings DieOnDropSettings in SummonedCustomItem.CustomItem.FlagSettings.DieOnDropSettings)
@@ -1346,6 +1372,21 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnDying(DyingEventArgs ev)
         {
+            foreach (Item item in ev.Player.Items)
+            {
+                if (Utilities.TryGetSummonedCustomItem(item.Serial, out var sItem))
+                {
+                    if (sItem.CustomItem.CustomFlags.HasValue && sItem.HasModule(CustomFlags.Capybara))
+                    {
+                        if (Capybara.TryGetValue(ev.Player.Id, out var capybara))
+                        {
+                            capybara.Destroy();
+                            ev.Player.Scale = new(1, 1, 1);
+                        }
+                    }
+                }
+            }
+
             if (ev.Attacker == null)
                 return;
             if (ev.Player == null)

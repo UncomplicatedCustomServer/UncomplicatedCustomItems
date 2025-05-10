@@ -89,9 +89,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
-    <Reference Include="LabApi">
-      <HintPath>$(EXILED_REFERENCES)\LabApi.dll</HintPath>
-    </Reference>
     <Reference Include="Mirror">
       <HintPath>$(EXILED_REFERENCES)\Mirror.dll</HintPath>
     </Reference>
@@ -106,9 +103,6 @@
     <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Release\Mono.Security.dll</HintPath>
-    </Reference>
-    <Reference Include="NorthwoodLib">
-      <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
     </Reference>
     <Reference Include="NVorbis">
       <HintPath>$(EXILED_REFERENCES)\NVorbis.dll</HintPath>
