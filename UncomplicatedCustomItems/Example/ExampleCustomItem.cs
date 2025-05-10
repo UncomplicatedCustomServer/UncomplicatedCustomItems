@@ -32,7 +32,9 @@ namespace UncomplicatedCustomItems.Examples
         public override ISpawn Spawn { get; set; } = new SpawnData();
 
         public override CustomFlags? CustomFlags { get; set; } = Enums.CustomFlags.DieOnUse | Enums.CustomFlags.DieOnDrop;
-        
+
+        public override IFlagSettings FlagSettings { get; set; } = new FlagSettingsData();
+
         public override Vector3 Scale { get; set; } = new Vector3(1.2f, 1.2f, 1.2f);
         
         public override CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
@@ -74,5 +76,26 @@ namespace UncomplicatedCustomItems.Examples
         };
         public override bool ReplaceExistingPickup { get; set; } = false;
         public override bool ForceItem { get; set; } = false;
+    }
+
+    public class FlagSettingsData : FlagSettings
+    {
+        public override List<DieOnDropSettings?> DieOnDropSettings { get; set; } =
+        [
+            new()
+            {
+                DeathMessage = "Dropped %name%",
+                Vaporize = true
+            }
+        ];
+        public override List<CantDropSettings?> CantDropSettings { get; set; } =
+        [
+            new()
+            {
+                HintOrBroadcast = "hint",
+                Message = "You cant drop %name%!",
+                Duration = 10
+            }
+        ];
     }
 }
