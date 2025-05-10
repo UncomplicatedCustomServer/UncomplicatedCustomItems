@@ -417,8 +417,6 @@ namespace UncomplicatedCustomItems.Events
                                 if (clearList.SyncIsA)
                                     if (ev.Player.Id == iD)
                                         primitive.Destroy();
-
-                        SettingBase.Unregister(ev.Player, _ToolGunSettings);
                     }
             }
         }
@@ -492,10 +490,7 @@ namespace UncomplicatedCustomItems.Events
         {
             if (!ev.IsAllowed)
                 return;
-            foreach (Player player in Player.List)
-            {
-                SettingBase.Unregister(player, _ToolGunSettings);
-            }
+
             Appearance.Clear();
         }
 
@@ -1225,7 +1220,6 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnPickupCreation(PickupAddedEventArgs ev)
         {
-
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
             {
                 try
@@ -1242,47 +1236,51 @@ namespace UncomplicatedCustomItems.Events
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
+
             if (customItem.HasModule(CustomFlags.ItemGlow))
             {
-                foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
+                Timing.CallDelayed(1f, () =>
                 {
-                    LogManager.Debug("SpawnLightOnItem method triggered");
-
-                    if (ev.Pickup?.Base?.gameObject == null)
-                        return;
-
-                    GameObject itemGameObject = ev.Pickup.Base.gameObject;
-                    Color lightColor = Color.blue;
-
-                    if (ItemGlowSettings != null)
+                    foreach (ItemGlowSettings ItemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
                     {
-                        if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
+                        LogManager.Debug("SpawnLightOnItem method triggered");
+
+                        if (ev.Pickup?.Base?.gameObject == null)
+                            return;
+
+                        GameObject itemGameObject = ev.Pickup.Base.gameObject;
+                        Color lightColor = Color.blue;
+
+                        if (ItemGlowSettings != null)
                         {
-                            if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
+                            if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
                             {
-                                lightColor = parsedColor;
-                            }
-                            else
-                            {
-                                LogManager.Error($"Failed to parse color: {ItemGlowSettings.GlowColor} for {customItem.CustomItem.Name}");
+                                if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
+                                {
+                                    lightColor = parsedColor;
+                                }
+                                else
+                                {
+                                    LogManager.Error($"Failed to parse color: {ItemGlowSettings.GlowColor} for {customItem.CustomItem.Name}");
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        LogManager.Error("No FlagSettings found on custom item");
-                    }
+                        else
+                        {
+                            LogManager.Error("No FlagSettings found on custom item");
+                        }
 
-                    var light = Light.Create(ev.Pickup.Position);
-                    light.Color = lightColor;
-                    light.Intensity = 0.7f;
-                    light.Range = 0.5f;
-                    light.ShadowType = LightShadows.None;
+                        var light = Light.Create(ev.Pickup.Position);
+                        light.Color = lightColor;
+                        light.Intensity = 0.7f;
+                        light.Range = 0.5f;
+                        light.ShadowType = LightShadows.None;
 
-                    light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
-                    LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
-                    ActiveLights[ev.Pickup] = light;
-                }
+                        light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
+                        LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
+                        ActiveLights[ev.Pickup] = light;
+                    }
+                });
             }
         }
         public void OnDropping(DroppingItemEventArgs ev)

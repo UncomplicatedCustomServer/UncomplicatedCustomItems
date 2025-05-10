@@ -84,7 +84,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (Item.HasModule(Enums.CustomFlags.ToolGun))
             {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
-                SettingBase.Unregister(p => p.Id == ev.Player.Id, EventHandler._ToolGunSettings);
             }
         }
 
@@ -164,7 +163,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
-                SettingBase.Unregister(p => p.Id == ev.Player.Id, EventHandler._ToolGunSettings);
             }
         }
 
@@ -185,7 +183,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                     if (customitem.HasModule(Enums.CustomFlags.ToolGun))
                     {
                         EventHandler.StopRelativePosCoroutine(ev.Player);
-                        SettingBase.Unregister(p => p.Id == ev.Player.Id, EventHandler._ToolGunSettings);
                     }
                         
                 }
@@ -207,7 +204,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
-                SettingBase.Unregister(p => p.Id == ev.Player.Id, EventHandler._ToolGunSettings);
             }
         }
 
