@@ -299,6 +299,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = Vector3.one,
                 CustomData = YAMLCaster.Encode(new SCP1576Data())
+            },
+            new()
+            {
+                Id = 19,
+                Name = "SCP127",
+                Description = "SCP127",
+                Item = ItemType.GunSCP127,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new SCP127Data())
             }
         ];
 
@@ -351,6 +361,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             else if (itemType == ItemType.SCP1576 && customType == CustomItemType.SCPItem)
             {
                 SCP1576Data Data = new SCP1576Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.GunSCP127 && customType == CustomItemType.SCPItem)
+            {
+                SCP127Data Data = new SCP127Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Firearm && customType == CustomItemType.Weapon)

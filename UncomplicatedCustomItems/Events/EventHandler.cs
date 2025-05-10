@@ -108,19 +108,36 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.IsAllowed || ev.Player == null || ev.Item == null || ev.Firearm == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem))
                 return;
 
             if (ev.Firearm.Aiming)
             {
-                IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
-                ev.Firearm.Inaccuracy = data.AimingInaccuracy;
+                if (ev.Firearm.Type != ItemType.GunSCP127)
+                {
+                    IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
+                    ev.Firearm.Inaccuracy = data.AimingInaccuracy;
+                }
+                else
+                {
+                    ISCP127Data data = customItem.CustomItem.CustomData as ISCP127Data;
+                    ev.Firearm.Inaccuracy = data.AimingInaccuracy;
+                }
             }
-            else
+            else if (ev.Firearm.Type != ItemType.GunSCP127)
             {
                 IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
                 ev.Firearm.Inaccuracy = data.Inaccuracy;
             }
+            else
+            {
+                ISCP127Data data = customItem.CustomItem.CustomData as ISCP127Data;
+                ev.Firearm.Inaccuracy = data.Inaccuracy;
+            }
+
+            if (!customItem.CustomItem.CustomFlags.HasValue || customItem.HasModule(CustomFlags.None))
+                return;
+
             if (customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
                 IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;

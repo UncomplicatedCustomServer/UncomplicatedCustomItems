@@ -301,6 +301,39 @@ namespace UncomplicatedCustomItems.API.Features
                                 Scp244.MaxDiameter = SCP244Data.MaxDiameter;
                                 Scp244.Primed = SCP244Data.Primed;
                             }
+                            else if (Item.Type == ItemType.GunSCP127)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-127");
+                                Firearm ScpFirearm = Item as Firearm;
+                                if (ScpFirearm == null)
+                                    LogManager.Error($"ScpFirearm is Null!");
+                                CustomScp127 CustomScp127 = new CustomScp127(ScpFirearm);
+                                if (CustomScp127 == null)
+                                    LogManager.Error($"CustomScp127 is Null!");
+                                ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
+                                if (Scp127Data == null)
+                                    LogManager.Error($"Scp127Data is null!");
+                                else
+                                {
+                                    try
+                                    {
+                                        ScpFirearm.MagazineAmmo = Scp127Data.MaxAmmo;
+                                        ScpFirearm.Damage = Scp127Data.Damage;
+                                        ScpFirearm.MaxMagazineAmmo = Scp127Data.MaxMagazineAmmo;
+                                        ScpFirearm.MaxBarrelAmmo = Scp127Data.MaxBarrelAmmo;
+                                        ScpFirearm.AmmoDrain = Scp127Data.AmmoDrain;
+                                        ScpFirearm.Penetration = Scp127Data.Penetration;
+                                        ScpFirearm.Inaccuracy = Scp127Data.Inaccuracy;
+                                        ScpFirearm.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
+                                        CustomScp127.GiveHumeShield = Scp127Data.GiveHumeShield;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogManager.Error($"Error when trying to parse Custom127 {ex.Message}\n{ex.StackTrace}");
+                                    }
+                                }
+
+                            }
                             break;
                         }
                     default:
@@ -470,6 +503,25 @@ namespace UncomplicatedCustomItems.API.Features
                                 var scp244b = Scp244.Spawn(Pickup.Position);
                                 Pickup.Destroy();
                                 Pickup = scp244b;
+                                Serial = Pickup.Serial;
+                            }
+                            else if (Item.Type == ItemType.GunSCP127)
+                            {
+                                Firearm ScpFirearm = (Firearm)Firearm.Create(CustomItem.Item);
+                                CustomScp127 CustomScp127 = new(ScpFirearm); 
+                                ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
+                                ScpFirearm.MagazineAmmo = Scp127Data.MaxAmmo;
+                                ScpFirearm.Damage = Scp127Data.Damage;
+                                ScpFirearm.MaxMagazineAmmo = Scp127Data.MaxMagazineAmmo;
+                                ScpFirearm.MaxBarrelAmmo = Scp127Data.MaxBarrelAmmo;
+                                ScpFirearm.AmmoDrain = Scp127Data.AmmoDrain;
+                                ScpFirearm.Penetration = Scp127Data.Penetration;
+                                ScpFirearm.Inaccuracy = Scp127Data.Inaccuracy;
+                                ScpFirearm.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
+                                CustomScp127.GiveHumeShield = Scp127Data.GiveHumeShield;
+                                FirearmPickup SCP127Pickup = (FirearmPickup)ScpFirearm.CreatePickup(Pickup.Position);
+                                Pickup.Destroy();
+                                Pickup = SCP127Pickup;
                                 Serial = Pickup.Serial;
                             }
                             break;

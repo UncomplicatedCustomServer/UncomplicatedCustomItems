@@ -264,6 +264,10 @@ https://discord.com/channels/null";
                     {
                         error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP1576!";
                     }
+                    else if (item.Item is not ItemType.GunSCP127)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not GunSCP127!";
+                    }
                     else
                     {
                         error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a modifiable SCP Item!";

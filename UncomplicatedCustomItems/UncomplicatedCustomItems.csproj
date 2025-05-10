@@ -41,7 +41,7 @@
     <ErrorReport>prompt</ErrorReport>
     <DocumentationFile>..\..\..\..\AppData\Roaming\EXILED\Plugins\UncomplicatedCustomItems.xml</DocumentationFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -503,6 +503,7 @@
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />
     <Compile Include="API\Wrappers\CustomKeycard.cs" />
+    <Compile Include="API\Wrappers\CustomScp127.cs" />
     <Compile Include="API\YAMLCaster.cs" />
     <Compile Include="Commands\Admin\Generate.cs" />
     <Compile Include="Commands\Admin\Get.cs" />

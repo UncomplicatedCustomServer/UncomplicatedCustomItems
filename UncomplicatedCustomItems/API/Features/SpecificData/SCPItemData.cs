@@ -92,4 +92,38 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual float Duration { get; set; } = 20;
         public virtual byte Intensity { get; set; } = 1;
     }
+    public class SCP127Data : Data, ISCP127Data
+    {
+        public virtual bool GiveHumeShield { get; set; } = false;
+        public virtual float Tier1BulletFireRate { get; set; } = 1f;
+        public virtual float Tier2BulletFireRate { get; set; } = 1f;
+        public virtual float Tier3BulletFireRate { get; set; } = 1f;
+        public virtual float Tier1BulletRegenRate { get; set; } = 1f;
+        public virtual float Tier2BulletRegenRate { get; set; } = 1f;
+        public virtual float Tier3BulletRegenRate { get; set; } = 1f;
+        public virtual float Tier1BulletRegenPostFireDelay { get; set; } = 1f;
+        public virtual float Tier2BulletRegenPostFireDelay { get; set; } = 1f;
+        public virtual float Tier3BulletRegenPostFireDelay { get; set; } = 1f;
+        public virtual float Tier1HumeShieldAmount { get; set; } = 1f;
+        public virtual float Tier2HumeShieldAmount { get; set; } = 1f;
+        public virtual float Tier3HumeShieldAmount { get; set; } = 1f;
+        public virtual float Tier1ShieldRegenRate { get; set; } = 1f;
+        public virtual float Tier2ShieldRegenRate { get; set; } = 1f;
+        public virtual float Tier3ShieldRegenRate { get; set; } = 1f;
+        public virtual float Tier1ShieldDecayRate { get; set; } = 1f;
+        public virtual float Tier2ShieldDecayRate { get; set; } = 1f;
+        public virtual float Tier3ShieldDecayRate { get; set; } = 1f;
+        public virtual float Tier1ShieldOnDamagePause { get; set; } = 1f;
+        public virtual float Tier2ShieldOnDamagePause { get; set; } = 1f;
+        public virtual float Tier3ShieldOnDamagePause { get; set; } = 1f;
+        public virtual float Damage { get; set; } = 2.75f;
+        public virtual int MaxBarrelAmmo { get; set; } = 10;
+        public virtual int MaxAmmo { get; set; } = 150;
+        public virtual int MaxMagazineAmmo { get; set; } = 150;
+        public virtual int AmmoDrain { get; set; } = 1;
+        public virtual float Penetration { get; set; } = 1.24f;
+        public virtual float Inaccuracy { get; set; } = 1.24f;
+        public virtual float AimingInaccuracy { get; set; } = 1.24f;
+        public virtual float DamageFalloffDistance { get; set; } = 1f;
+    }
 }

@@ -95,6 +95,7 @@ namespace UncomplicatedCustomItems.API
                 (_, ItemType.SCP244b) => (Data)Decode(new SCP244Data(), data),
                 (_, ItemType.SCP1853) => (Data)Decode(new SCP1853Data(), data),
                 (_, ItemType.SCP1576) => (Data)Decode(new SCP1576Data(), data),
+                (_, ItemType.GunSCP127) => (Data)Decode(new SCP127Data(), data),
                 (CustomItemType.SCPItem, _) => (Data)Decode(new SCPItemData(), data),
 
                 _ => new Data(),

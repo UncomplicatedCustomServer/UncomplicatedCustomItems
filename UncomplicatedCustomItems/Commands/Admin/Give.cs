@@ -49,6 +49,11 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         response = "Player not found!";
                         return false;
                     }
+                    else if (target.Role.Type == PlayerRoles.RoleTypeId.Spectator || target.Role.Type == PlayerRoles.RoleTypeId.Destroyed)
+                    {
+                        response = "Cannot give items to spectators!";
+                        return false;
+                    }
                     new SummonedCustomItem(customItem, target);
                     response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                     return true;
@@ -60,6 +65,11 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 if (target is null)
                 {
                     response = "Player not found!";
+                    return false;
+                }
+                else if (target.Role.Type == PlayerRoles.RoleTypeId.Spectator || target.Role.Type == PlayerRoles.RoleTypeId.Destroyed)
+                {
+                    response = "Cannot give items to spectators!";
                     return false;
                 }
                 new SummonedCustomItem(customItem, target);
