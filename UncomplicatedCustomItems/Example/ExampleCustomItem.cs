@@ -54,6 +54,7 @@ namespace UncomplicatedCustomItems.Examples
         public override float HintDuration { get; set; } = 3.5f;
         public override bool DestroyAfterUse { get; set; } = false;
     }
+
     public class SpawnData : Spawn
     {
         public override bool DoSpawn { get; set; } = false;

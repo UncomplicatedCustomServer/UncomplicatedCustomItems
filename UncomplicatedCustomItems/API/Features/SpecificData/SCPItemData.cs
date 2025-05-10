@@ -125,5 +125,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual float Inaccuracy { get; set; } = 1.24f;
         public virtual float AimingInaccuracy { get; set; } = 1.24f;
         public virtual float DamageFalloffDistance { get; set; } = 1f;
+        public virtual bool MuteVoiceLines { get; set; } = false;
     }
 }

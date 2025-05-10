@@ -123,5 +123,6 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float Inaccuracy { get; set; }
         public abstract float AimingInaccuracy { get; set; }
         public abstract float DamageFalloffDistance { get; set; }
+        public abstract bool MuteVoiceLines { get; set; }
     }
 }

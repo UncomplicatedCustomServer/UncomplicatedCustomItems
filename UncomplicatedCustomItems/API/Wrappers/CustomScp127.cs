@@ -1,13 +1,14 @@
 ﻿using Exiled.API.Features.Items;
 using Exiled.API.Interfaces;
 using HarmonyLib;
-using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
+using Mirror;
 using System;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Wrappers
 {
@@ -271,6 +272,32 @@ namespace UncomplicatedCustomItems.API.Wrappers
                         LogManager.Error($"{nameof(ShieldOnDamagePausePatch)}: {ex.Message}\n{ex.StackTrace}");
                     }
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(Scp127VoiceTriggerBase), nameof(Scp127VoiceTriggerBase.ServerPlayVoiceLine), new Type[] { typeof(AudioClip), typeof(Action<NetworkWriter>), typeof(Scp127VoiceTriggerBase.VoiceLinePriority) })]
+        public static class ServerPlayVoiceLineMutePatch
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(Scp127VoiceTriggerBase __instance, AudioClip clip, Action<NetworkWriter> extraData, Scp127VoiceTriggerBase.VoiceLinePriority priority)
+            {
+                if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out SummonedCustomItem SCI))
+                {
+                    if (SCI.CustomItem.CustomItemType == CustomItemType.SCPItem && SCI.Item.Type == ItemType.GunSCP127)
+                    {
+                        try
+                        {
+                            ISCP127Data data = SCI.CustomItem.CustomData as ISCP127Data;
+                            if (data.MuteVoiceLines)
+                                return false;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Error($"{nameof(ServerPlayVoiceLineMutePatch)} Error checking MuteVoiceLines for item {__instance.Item.ItemSerial}: {ex.Message}\n{ex.StackTrace}");
+                        }
+                    }
+                }
+                return true;
             }
         }
     }

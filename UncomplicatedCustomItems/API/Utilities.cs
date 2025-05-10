@@ -375,6 +375,8 @@ https://discord.com/channels/null";
         /// <returns></returns>
         public static bool IsCustomItem(uint id) => CustomItem.CustomItems.ContainsKey(id);
 
+        private static Dictionary<LabApi.Features.Wrappers.PedestalLocker, ICustomItem> usedLockers { get; set; } = [];
+
         /// <summary>
         /// Summon a <see cref="CustomItem"/>
         /// </summary>
@@ -388,18 +390,26 @@ https://discord.com/channels/null";
             //Test this
             if (Spawn.PedestalSpawn ?? false)
             {
-                if (Spawn.ForceItem)
+                if (Spawn.ReplaceExistingPickup)
                 {
                     foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
                     {
                         LabApi.Features.Wrappers.Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
                         if (pedestalLockerPickup != null && pedestalLockerPickup.Type == CustomItem.Item)
                         {
+                            LogManager.Debug($"Removed {pedestalLockerPickup.Type} from {pedestalLockerPickup.Position}");
                             pedestalLocker.RemoveItem(pedestalLockerPickup);
                             LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
-                            if (pickup.Type == CustomItem.Item)
+                            if (pickup.Type == CustomItem.Item && !usedLockers.ContainsKey(pedestalLocker))
                             {
+                                usedLockers.Add(pedestalLocker, CustomItem);
+                                LogManager.Debug($"Summoned {CustomItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
                                 SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
+                                break;
+                            }
+                            else if (usedLockers.ContainsKey(pedestalLocker))
+                            {
+                                LogManager.Debug($"Aborting spawn, locker used already.");
                             }
                         }
                     }
@@ -409,11 +419,19 @@ https://discord.com/channels/null";
                     foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
                     {
                         LabApi.Features.Wrappers.Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
-                        if (pedestalLockerPickup != null)
+                        if (pedestalLockerPickup != null && !usedLockers.ContainsKey(pedestalLocker))
                         {
+                            usedLockers.Add(pedestalLocker, CustomItem);
+                            LogManager.Debug($"Removed {pedestalLockerPickup.Type} from {pedestalLockerPickup.Position}");
                             pedestalLocker.RemoveItem(pedestalLockerPickup);
                             LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
+                            LogManager.Debug($"Summoned {CustomItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
                             SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
+                            break;
+                        }
+                        else if (usedLockers.ContainsKey(pedestalLocker))
+                        {
+                            LogManager.Debug($"Aborting spawn, locker used already.");
                         }
                     }
                 }
