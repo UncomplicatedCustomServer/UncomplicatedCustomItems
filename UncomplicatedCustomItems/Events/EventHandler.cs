@@ -501,6 +501,7 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             Appearance.Clear();
+            Capybara.Clear();
         }
 
         public void GrenadeExploding(ExplodingGrenadeEventArgs ev)
@@ -786,10 +787,20 @@ namespace UncomplicatedCustomItems.Events
             {
                 for (; ;)
                 {
-                    string deletioncolor = "";
-                    bool deletionbool = false;
-                    string DeletionMode = "";
+                    if (player.CurrentItem == null)
+                        StopRelativePosCoroutine(player);
+                    else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+                        if (!CustomItem.HasModule(CustomFlags.ToolGun))
+                            StopRelativePosCoroutine(player);
+                    if (player.CurrentRoom == null)
+                        PauseRelativePosCoroutine(player);
+
+                    SSPlaintextSetting colorSetting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 21);
                     SSTwoButtonsSetting deletionMode = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(player.ReferenceHub, 22);
+
+                    string deletioncolor = string.Empty;
+                    bool deletionbool = false;
+                    string DeletionMode = string.Empty;
                     if (deletionMode.SyncIsA)
                     {
                         DeletionMode = "ADS";
@@ -806,23 +817,17 @@ namespace UncomplicatedCustomItems.Events
                         else
                             deletionbool = false;
                     }
+
                     if (deletionbool)
                         deletioncolor = "#00ff00";
                     else
                         deletioncolor = "#Ff0000";
-                    SSPlaintextSetting colorSetting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 21);
+
                     Extensions.StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
                     string hexcolor = Vector3Extensions.ToHexColor(color);
-                    if (player.CurrentItem == null)
-                        StopRelativePosCoroutine(player);
-                    else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
-                        if (!CustomItem.HasModule(CustomFlags.ToolGun))
-                            StopRelativePosCoroutine(player);
-                    if (player.CurrentRoom == null)
-                        PauseRelativePosCoroutine(player);
                     string hinttext = $"<pos=-10em><voffset=-12.3em><color={player.RankColor}>{player.DisplayNickname} - {player.Role.Name}</color></voffset>\n<pos=-10em>{player.CurrentRoom.Type} - <color=yellow>{player.CurrentRoom.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
                     player.ShowHint($"<align=left>{hinttext}</align>", 0.5f);
-                    yield return Timing.WaitForSeconds(0.1f);
+                    yield return Timing.WaitForOneFrame;
                 }
             }
             finally
@@ -1180,7 +1185,7 @@ namespace UncomplicatedCustomItems.Events
             }
             if (SummonedCustomItem.HasModule(CustomFlags.Capybara))
             {
-                if (Capybara.TryGetValue(ev.Player.Id, out var capybara))
+                if (Capybara.TryGetValue(ev.Player.Id, out LABAPI.CapybaraToy capybara))
                 {
                     capybara.Destroy();
                     ev.Player.Scale = new(1, 1, 1);
@@ -1372,16 +1377,19 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnDying(DyingEventArgs ev)
         {
-            foreach (Item item in ev.Player.Items)
+            if (!ev.Player.IsInventoryEmpty)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out var sItem))
+                foreach (Item item in ev.Player.Items)
                 {
-                    if (sItem.CustomItem.CustomFlags.HasValue && sItem.HasModule(CustomFlags.Capybara))
+                    if (Utilities.TryGetSummonedCustomItem(item.Serial, out var sItem))
                     {
-                        if (Capybara.TryGetValue(ev.Player.Id, out var capybara))
+                        if (sItem.HasModule(CustomFlags.Capybara))
                         {
-                            capybara.Destroy();
-                            ev.Player.Scale = new(1, 1, 1);
+                            if (Capybara.TryGetValue(ev.Player.Id, out LABAPI.CapybaraToy capybara))
+                            {
+                                capybara.Destroy();
+                                ev.Player.Scale = new(1, 1, 1);
+                            }
                         }
                     }
                 }
@@ -1461,6 +1469,8 @@ namespace UncomplicatedCustomItems.Events
                 LogManager.Debug($"{nameof(OnLeft)}: Removing {ev.Player.Id} from appearance dictionary");
                 Appearance.TryRemove(ev.Player.Id);
             }
+            if (Capybara.ContainsKey(ev.Player.Id))
+                Capybara.TryRemove(ev.Player.Id);
         }
 
         public void OnShot(ShotEventArgs ev)

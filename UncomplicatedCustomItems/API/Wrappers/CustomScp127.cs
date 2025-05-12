@@ -80,8 +80,6 @@ namespace UncomplicatedCustomItems.API.Wrappers
         /// </summary>
         public Scp127MagazineModule Scp127MagazineModule { get; private set; }
 
-        public bool GiveHumeShield { get; set; } = false;
-
         [HarmonyPatch(typeof(Scp127HumeModule), nameof(Scp127HumeModule.HsMax), MethodType.Getter)]
         public static class MaxHumeShieldPatch
         {

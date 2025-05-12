@@ -307,9 +307,6 @@ namespace UncomplicatedCustomItems.API.Features
                                 Firearm ScpFirearm = Item as Firearm;
                                 if (ScpFirearm == null)
                                     LogManager.Error($"ScpFirearm is Null!");
-                                CustomScp127 CustomScp127 = new CustomScp127(ScpFirearm);
-                                if (CustomScp127 == null)
-                                    LogManager.Error($"CustomScp127 is Null!");
                                 ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
                                 if (Scp127Data == null)
                                     LogManager.Error($"Scp127Data is null!");
@@ -325,7 +322,6 @@ namespace UncomplicatedCustomItems.API.Features
                                         ScpFirearm.Penetration = Scp127Data.Penetration;
                                         ScpFirearm.Inaccuracy = Scp127Data.Inaccuracy;
                                         ScpFirearm.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
-                                        CustomScp127.GiveHumeShield = Scp127Data.GiveHumeShield;
                                     }
                                     catch (Exception ex)
                                     {
@@ -508,7 +504,6 @@ namespace UncomplicatedCustomItems.API.Features
                             else if (Item.Type == ItemType.GunSCP127)
                             {
                                 Firearm ScpFirearm = (Firearm)Firearm.Create(CustomItem.Item);
-                                CustomScp127 CustomScp127 = new(ScpFirearm); 
                                 ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
                                 ScpFirearm.MagazineAmmo = Scp127Data.MaxAmmo;
                                 ScpFirearm.Damage = Scp127Data.Damage;
@@ -518,7 +513,6 @@ namespace UncomplicatedCustomItems.API.Features
                                 ScpFirearm.Penetration = Scp127Data.Penetration;
                                 ScpFirearm.Inaccuracy = Scp127Data.Inaccuracy;
                                 ScpFirearm.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
-                                CustomScp127.GiveHumeShield = Scp127Data.GiveHumeShield;
                                 FirearmPickup SCP127Pickup = (FirearmPickup)ScpFirearm.CreatePickup(Pickup.Position);
                                 Pickup.Destroy();
                                 Pickup = SCP127Pickup;
