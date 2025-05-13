@@ -33,9 +33,7 @@ using Exiled.API.Features.Core.UserSettings;
 using System.Globalization;
 using Exiled.Events.EventArgs.Server;
 using InventorySystem.Items.Firearms.Modules.Scp127;
-using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms;
-using static PlayerList;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -62,7 +60,8 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public static Dictionary<ushort, SummonedCustomItem> EquipedKeycards = [];
         private static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
-
+        private static Dictionary<Player, CoroutineHandle> _HumeShieldRegenCoroutine = [];
+        private static Dictionary<Player, long> _damageTimes = [];
         internal static IEnumerable<SettingBase> _ToolGunSettings = 
         [
             new HeaderSetting("UCI ToolGun Settings", hintDescription: "If multiple are created any will work"),
@@ -368,12 +367,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     ISCP127Data data = CustomItem.CustomItem.CustomData as ISCP127Data;
                     Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(CustomItem.Item.Base);
-                    if (tier == Scp127Tier.Tier1)
-                        ev.Player.HumeShieldRegenerationMultiplier = data.Tier1ShieldRegenRate;
-                    else if (tier == Scp127Tier.Tier2)
-                        ev.Player.HumeShieldRegenerationMultiplier = data.Tier2ShieldRegenRate;
-                    else if (tier == Scp127Tier.Tier3)
-                        ev.Player.HumeShieldRegenerationMultiplier = data.Tier3ShieldRegenRate;
+                    StartHumeShieldRegen(ev.Player, data, tier, CustomItem);
                 }
 
                 if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
@@ -433,6 +427,63 @@ namespace UncomplicatedCustomItems.Events
                                     if (ev.Player.Id == iD)
                                         primitive.Destroy();
                     }
+            }
+        }
+
+        internal static void StartHumeShieldRegen(Player player, ISCP127Data data, Scp127Tier tier, SummonedCustomItem customItem)
+        {
+            StopHumeShieldRegen(player);
+            CoroutineHandle handle = Timing.RunCoroutine(HumeShieldRegeneration(player, data, tier, customItem));
+            _HumeShieldRegenCoroutine[player] = handle;
+        }
+
+        internal static void StopHumeShieldRegen(Player player)
+        {
+            if (_relativePosCoroutine.TryGetValue(player, out CoroutineHandle handle))
+            {
+                Timing.KillCoroutines(handle);
+                _HumeShieldRegenCoroutine.Remove(player);
+            }
+        }
+
+
+        internal static IEnumerator<float> HumeShieldRegeneration(Player player, ISCP127Data data, Scp127Tier tier, SummonedCustomItem customItem)
+        {
+            float regenRate = 0f;
+            float damagePause = 0f;
+
+            switch (tier)
+            {
+                case Scp127Tier.Tier1:
+                    regenRate = data.Tier1ShieldRegenRate;
+                    damagePause = data.Tier1ShieldOnDamagePause;
+                    break;
+                case Scp127Tier.Tier2:
+                    regenRate = data.Tier2ShieldRegenRate;
+                    damagePause = data.Tier2ShieldOnDamagePause;
+                    break;
+                case Scp127Tier.Tier3:
+                    regenRate = data.Tier3ShieldRegenRate;
+                    damagePause = data.Tier3ShieldOnDamagePause;
+                    break;
+            }
+
+            for (;;)
+            {
+                if (_damageTimes.TryGetValue(player, out long time))
+                {
+                    long elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - time;
+                    player.HumeShieldRegenerationMultiplier = (elapsed >= damagePause) ? regenRate : 0f;
+                }
+                else
+                {
+                    player.HumeShieldRegenerationMultiplier = regenRate;
+                }
+
+                if (player.CurrentItem == null || player.CurrentItem.Serial != customItem.Serial)
+                    yield break;
+
+                yield return Timing.WaitForOneFrame;
             }
         }
 
@@ -515,6 +566,7 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.IsAllowed)
                 return;
 
+            _damageTimes.Clear();
             Appearance.Clear();
             Capybara.Clear();
         }
@@ -891,6 +943,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Attacker.CurrentItem == null)
                 return;
 
+            _damageTimes.TryAdd(ev.Player, DateTimeOffset.Now.ToUnixTimeMilliseconds());
             if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Jailbird)
