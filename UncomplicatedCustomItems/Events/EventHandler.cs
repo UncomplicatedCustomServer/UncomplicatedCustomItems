@@ -32,6 +32,10 @@ using Exiled.Events.EventArgs.Scp914;
 using Exiled.API.Features.Core.UserSettings;
 using System.Globalization;
 using Exiled.Events.EventArgs.Server;
+using InventorySystem.Items.Firearms.Modules.Scp127;
+using InventorySystem.Items.Firearms.Modules;
+using InventorySystem.Items.Firearms;
+using static PlayerList;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -359,6 +363,18 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
                     return;
+
+                if (CustomItem.CustomItem.Item == ItemType.GunSCP127 && CustomItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                {
+                    ISCP127Data data = CustomItem.CustomItem.CustomData as ISCP127Data;
+                    Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(CustomItem.Item.Base);
+                    if (tier == Scp127Tier.Tier1)
+                        ev.Player.HumeShieldRegenerationMultiplier = data.Tier1ShieldRegenRate;
+                    else if (tier == Scp127Tier.Tier2)
+                        ev.Player.HumeShieldRegenerationMultiplier = data.Tier2ShieldRegenRate;
+                    else if (tier == Scp127Tier.Tier3)
+                        ev.Player.HumeShieldRegenerationMultiplier = data.Tier3ShieldRegenRate;
+                }
 
                 if (CustomItem.HasModule(CustomFlags.EffectWhenEquiped))
                 {

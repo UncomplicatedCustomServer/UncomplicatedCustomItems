@@ -9,6 +9,8 @@ using MapEventSource = Exiled.Events.Handlers.Map;
 using Exiled.Events.EventArgs.Map;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Core.UserSettings;
+using InventorySystem.Items.Firearms.Modules.Scp127;
+using MEC;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -159,10 +161,27 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
             if (EventHandler.EquipedKeycards.ContainsKey(item.Serial))
                 EventHandler.EquipedKeycards.Remove(item.Serial);
+
             item.ResetBadge(ev.Player);
+
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
+            }
+
+            if (item.Item.Type == ItemType.GunSCP127 && item.CustomItem.CustomItemType == CustomItemType.SCPItem)
+            {
+                Timing.CallDelayed(0.5f, () =>
+                {
+                    ISCP127Data data = item.CustomItem.CustomData as ISCP127Data;
+                    Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(item.Item.Base);
+                    if (tier == Scp127Tier.Tier1)
+                        ev.Player.HumeShieldRegenerationMultiplier = -data.Tier1ShieldDecayRate;
+                    else if (tier == Scp127Tier.Tier2)
+                        ev.Player.HumeShieldRegenerationMultiplier = -data.Tier2ShieldDecayRate;
+                    else if (tier == Scp127Tier.Tier3)
+                        ev.Player.HumeShieldRegenerationMultiplier = -data.Tier3ShieldDecayRate;
+                });
             }
         }
 
