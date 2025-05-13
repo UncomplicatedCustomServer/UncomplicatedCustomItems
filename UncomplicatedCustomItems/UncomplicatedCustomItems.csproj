@@ -494,6 +494,7 @@
     <Compile Include="API\Features\Helper\ImportManager.cs" />
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SummonedCustomItem.cs" />
+    <Compile Include="API\Toolgun\ToolGun.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />
     <Compile Include="API\Wrappers\CustomKeycard.cs" />

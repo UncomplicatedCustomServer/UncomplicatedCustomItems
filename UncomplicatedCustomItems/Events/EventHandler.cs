@@ -59,7 +59,13 @@ namespace UncomplicatedCustomItems.Events
         public static Dictionary<ushort, SummonedCustomItem> EquipedKeycards = [];
         private static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
 
-        internal static IEnumerable<SettingBase> _ToolGunSettings;
+        internal static IEnumerable<SettingBase> _ToolGunSettings = 
+        [
+            new HeaderSetting("UCI ToolGun Settings", hintDescription: "If multiple are created any will work"),
+            new UserTextInputSetting(21, "Primitive Color", placeHolder: "255, 0, 0, -1",  hintDescription: "The color of the primitives spawned by the ToolGun"),
+            new TwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hintDescription: "Sets the deletion mode of the ToolGun"),
+            new TwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
+        ];
 
         internal static Dictionary<Primitive, int> ToolGunPrimitives = [];
 
@@ -395,13 +401,6 @@ namespace UncomplicatedCustomItems.Events
                     EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
                 if (CustomItem.HasModule(CustomFlags.ToolGun))
                 {
-                    _ToolGunSettings = new SettingBase[]
-                    {
-                        new HeaderSetting("UCI ToolGun Settings", hintDescription: "If multiple are created any will work"),
-                        new UserTextInputSetting(21, "Primitive Color", placeHolder: "255, 0, 0, -1",  hintDescription: "The color of the primitives spawned by the ToolGun"),
-                        new TwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hintDescription: "Sets the deletion mode of the ToolGun"),
-                        new TwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
-                    };
                     SettingBase.Register(ev.Player, _ToolGunSettings);
                     StartRelativePosCoroutine(ev.Player);
                 }

@@ -28,7 +28,7 @@ namespace UncomplicatedCustomItems.Extensions
 
             if (string.IsNullOrEmpty(inputString))
             {
-                Debug.LogWarning("Input string for TryParseVector3 is null or empty.");
+                LogManager.Error("Input string for TryParseVector3 is null or empty.");
                 return false;
             }
 

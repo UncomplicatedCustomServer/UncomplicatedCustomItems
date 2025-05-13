@@ -11,7 +11,7 @@ using UnityEngine;
 namespace UncomplicatedCustomItems.Examples
 {
     [PluginCustomItem]
-    public class ExampleCustomItem : CustomItem
+    public class ExampleCustomItem : CustomItem // You could also use the toolgun as a example.
     {
         public override uint Id { get; set; } = 1;
         

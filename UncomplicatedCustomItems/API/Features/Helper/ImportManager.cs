@@ -32,30 +32,30 @@ namespace UncomplicatedCustomItems.Manager
 
         private static void Actor()
         {
-            LogManager.Info($"{nameof(ImportManager)}: Checking for CustomItems registered in other plugins to import...");
+            LogManager.Info($"{nameof(ImportManager.Actor)}: Checking for CustomItems registered in other plugins to import...");
 
             _alreadyLoaded = true;
 
-            foreach (IPlugin<IConfig> plugin in Loader.Plugins.Where(plugin => plugin.Name != Plugin.Instance.Name))
+            foreach (IPlugin<IConfig> plugin in Loader.Plugins)
             {
-                LogManager.Silent($"{nameof(ImportManager)}: Passing plugin {plugin.Name}");
+                LogManager.Silent($"{nameof(ImportManager.Actor)}: Passing plugin {plugin.Name}");
                 foreach (Type type in plugin.Assembly.GetTypes())
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);
                         if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomItem)) || type.IsSubclassOf(typeof(CustomItem))))
                         {
-                            LogManager.Silent($"{nameof(ImportManager)}: Importing It!");
+                            LogManager.Silent($"{nameof(ImportManager.Actor)}: Importing It!");
                             ActivePlugins.TryAdd(plugin);
 
                             ICustomItem Item = Activator.CreateInstance(type) as ICustomItem;
-                            LogManager.Info($"{nameof(ImportManager)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
+                            LogManager.Info($"{nameof(ImportManager.Actor)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
                             CustomItem.Register(Item);
                         }
                     }
                     catch (Exception e)
                     {
-                        LogManager.Error($"{nameof(ImportManager)}: Error while registering CustomItem from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{plugin.Name}] - Source: {e.Source}");
+                        LogManager.Error($"{nameof(ImportManager.Actor)}: Error while registering CustomItem from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{plugin.Name}] - Source: {e.Source}");
                     }
             }
         }
