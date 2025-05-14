@@ -1,4 +1,5 @@
-using Exiled.API.Enums;
+using LabApi.Features.Wrappers;
+using MapGeneration;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace UncomplicatedCustomItems.Interfaces
 
         public abstract List<DynamicSpawn> DynamicSpawn { get; set; }
 
-        public abstract List<ZoneType> Zones { get; set; }
+        public abstract List<FacilityZone> Zones { get; set; }
 
         public abstract bool ReplaceExistingPickup { get; set; }
 

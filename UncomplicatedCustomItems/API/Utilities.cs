@@ -1,16 +1,14 @@
-﻿using Exiled.API.Enums;
-using Exiled.API.Extensions;
-using Exiled.API.Features;
-using Exiled.API.Features.Pickups;
-using MEC;
+﻿using MEC;
 using System.Collections.Generic;
 using System.Linq;
-using Exiled.API.Features.Items;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.Extensions;
+using LabApi.Features.Wrappers;
+using MapGeneration;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -270,12 +268,12 @@ error = $"The item has been flagged as 'Armor' but the CustomData class is not '
 
             if (response.BroadcastMessage.Length > 1 && response.BroadcastDuration > 0)
             {
-                player.Broadcast(response.BroadcastDuration, response.BroadcastMessage);
+                player.SendBroadcast( response.BroadcastMessage, response.BroadcastDuration);
             }
 
             if (response.HintMessage.Length > 1 && response.HintDuration > 0)
             {
-                player.ShowHint(response.HintMessage, response.HintDuration);
+                player.SendHint(response.HintMessage, response.HintDuration);
             }
         }
 
@@ -408,12 +406,12 @@ error = $"The item has been flagged as 'Armor' but the CustomData class is not '
 
                     if (Chance <= DynamicSpawn.Chance)
                     {
-                        RoomType Room = DynamicSpawn.Room;
+                        RoomName Room = DynamicSpawn.Room;
                         if (DynamicSpawn.Coords == Vector3.zero)
                         {
                             if (Spawn.ReplaceExistingPickup)
                             {
-                                List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Type == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                                List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
                                 if (Spawn.ForceItem)
                                     FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
@@ -424,16 +422,16 @@ error = $"The item has been flagged as 'Armor' but the CustomData class is not '
                                 return;
                             }
                             else
-                                new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
+                                new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).Position);
                         }
                         else
-                            new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).WorldPosition(DynamicSpawn.Coords));
+                            new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).WorldPosition(DynamicSpawn.Coords));
                     }
                 }
             }
             else if (Spawn.Zones.Count() > 0)
             {
-                ZoneType Zone = Spawn.Zones.RandomItem();
+                FacilityZone Zone = Spawn.Zones.RandomItem();
                 if (Spawn.ReplaceExistingPickup)
                 {
                     List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();

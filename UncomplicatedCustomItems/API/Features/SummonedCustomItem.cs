@@ -1,8 +1,4 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Items;
-using Exiled.API.Features.Pickups;
-using Exiled.Events.EventArgs.Player;
-using MEC;
+﻿using MEC;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.Interfaces;
@@ -19,6 +15,20 @@ using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Extensions;
 using System.Reflection;
+using LabApi.Features.Wrappers;
+using InventorySystem.Items.Armor;
+using InventorySystem.Items.Firearms;
+using InventorySystem.Items.Firearms.Modules;
+using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
+using Armor = LabApi.Features.Wrappers.BodyArmorItem;
+using Firearm = LabApi.Features.Wrappers.FirearmItem;
+using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
+using ExplosiveGrenade = LabApi.Features.Wrappers.ExplosiveGrenadeProjectile;
+using FlashGrenade = LabApi.Features.Wrappers.FlashbangProjectile;
+using Scp018 = LabApi.Features.Wrappers.Scp018Projectile;
+using Scp2176 = LabApi.Features.Wrappers.Scp2176Projectile;
+using Scp244 = LabApi.Features.Wrappers.Scp244Item;
+using InventorySystem.Items.ThrowableProjectiles;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -53,7 +63,7 @@ namespace UncomplicatedCustomItems.API.Features
         public Player Owner { get; internal set; }
 
         /// <summary>
-        /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
+        /// The <see cref="SummonedCustomItem"/> as an <see cref="LabApi.Features.Wrappers.Items.Firearm"/>
         /// </summary>
         public Item Item { get; internal set; }
 
@@ -89,6 +99,10 @@ namespace UncomplicatedCustomItems.API.Features
         public bool IsPickup => Pickup is not null;
 
         internal bool PropertiesSet { get; set; }
+
+        IPrimaryAmmoContainerModule MagazineModule { get; set; }
+        HitscanHitregModuleBase HitscanHitregModule { get; set; }
+        IAmmoContainerModule BarrelModule { get; set; }
 
         /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
@@ -153,7 +167,7 @@ namespace UncomplicatedCustomItems.API.Features
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
-                        Keycard keycard = Item as Keycard;
+                        KeycardItem keycard = Item as KeycardItem;
                         PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
@@ -194,12 +208,12 @@ namespace UncomplicatedCustomItems.API.Features
                         Armor Armor = Item as Armor;
                         IArmorData ArmorData = CustomItem.CustomData as IArmorData;
 
-                        Armor.HelmetEfficacy = ArmorData.HeadProtection;
-                        Armor.VestEfficacy = ArmorData.BodyProtection;
+                        Armor.Base.HelmetEfficacy = ArmorData.HeadProtection;
+                        Armor.Base.VestEfficacy = ArmorData.BodyProtection;
                         // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
                         // Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
-                        Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
-                        Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
+                        //Armor.Base.StaminaUsageMultiplier = ArmorData.StaminaUseMultiplier;
+                        //Armor.Base.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
                         if (ArmorData.RemoveExcessOnDrop)
                             LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
                         break;
@@ -231,37 +245,41 @@ namespace UncomplicatedCustomItems.API.Features
                         Jailbird Jailbird = Item as Jailbird;
                         IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
 
-                        Jailbird.Radius = JailbirdData.Radius;
-                        Jailbird.ChargeDamage = JailbirdData.ChargeDamage;
-                        Jailbird.MeleeDamage = JailbirdData.MeleeDamage;
-                        Jailbird.FlashDuration = JailbirdData.FlashDuration;
+                        Jailbird.Base._hitreg._hitregRadius = JailbirdData.Radius;
+                        Jailbird.Base._hitreg._damageCharge = JailbirdData.ChargeDamage;
+                        Jailbird.Base._hitreg._damageMelee = JailbirdData.MeleeDamage;
+                        Jailbird.Base._hitreg._flashedDuration = JailbirdData.FlashDuration;
                         PropertiesSet = true;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
-                        ExplosiveGrenade ExplosiveGrenade = Item as ExplosiveGrenade;
-                        IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+                            IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+                            LabApi.Features.Wrappers.ThrowableItem ThrowableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
+                            ExplosionGrenade baseGrenade = ThrowableItem.Base.Projectile as ExplosionGrenade;
+                            ExplosiveGrenade ExplosiveGrenade = ExplosiveGrenadeProjectile.Get(baseGrenade);
 
-                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
-                        ExplosiveGrenade.PinPullTime = ExplosiveGrenadeData.PinPullTime;
-                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
-                        ExplosiveGrenade.ConcussDuration = ExplosiveGrenadeData.ConcussDuration;
-                        ExplosiveGrenade.BurnDuration = ExplosiveGrenadeData.BurnDuration;
-                        ExplosiveGrenade.DeafenDuration = ExplosiveGrenadeData.DeafenDuration;
-                        ExplosiveGrenade.FuseTime = ExplosiveGrenadeData.FuseTime;
-                        ExplosiveGrenade.Repickable = ExplosiveGrenadeData.Repickable;
+                            ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                            ThrowableItem.Base._pinPullTime = ExplosiveGrenadeData.PinPullTime;
+                            ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                            ExplosiveGrenade.Base._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
+                            ExplosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
+                            ExplosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
+                            ThrowableItem.Base._repickupable = ExplosiveGrenadeData.Repickable;
+                            ExplosiveGrenade.RemainingTime = ExplosiveGrenadeData.FuseTime;
                         break;
 
                     case CustomItemType.FlashGrenade:
-                        FlashGrenade FlashGrenade = Item as FlashGrenade;
+                        LabApi.Features.Wrappers.ThrowableItem throwableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
+                        ExplosionGrenade baseFlashGrenade = throwableItem.Base.Projectile as ExplosionGrenade;
+                        FlashGrenade FlashGrenade = (FlashGrenade)TimedGrenadeProjectile.Get(baseFlashGrenade);
                         IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
 
-                        FlashGrenade.PinPullTime = FlashGrenadeData.PinPullTime;
-                        FlashGrenade.Repickable = FlashGrenadeData.Repickable;
-                        FlashGrenade.MinimalDurationEffect = FlashGrenadeData.MinimalDurationEffect;
-                        FlashGrenade.AdditionalBlindedEffect = FlashGrenadeData.AdditionalBlindedEffect;
-                        FlashGrenade.SurfaceDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
-                        FlashGrenade.FuseTime = FlashGrenadeData.FuseTime;
+                        throwableItem.Base._pinPullTime = FlashGrenadeData.PinPullTime;
+                        throwableItem.Base._repickupable = FlashGrenadeData.Repickable;
+                        FlashGrenade.BaseBlindTime = FlashGrenadeData.MinimalDurationEffect;
+                        FlashGrenade.Base._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
+                        FlashGrenade.Base._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        FlashGrenade.RemainingTime = FlashGrenadeData.FuseTime;
                         break;
 
                     case CustomItemType.SCPItem:
@@ -341,7 +359,7 @@ namespace UncomplicatedCustomItems.API.Features
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
-                        Keycard keycard = (Keycard)Keycard.Create(CustomItem.Item);
+                        LabApi.Features.Wrappers.KeycardItem keycard = (LabApi.Features.Wrappers.KeycardItem)LabApi.Features.Wrappers.KeycardItem.Get((InventorySystem.Items.Keycards.KeycardItem)Item.Base);
                         PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
@@ -371,25 +389,25 @@ namespace UncomplicatedCustomItems.API.Features
                         LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
                         KeycardUtils.RemoveKeycardDetail(keycard.Serial);
                         KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
-                        Exiled.API.Features.Pickups.KeycardPickup keycardpickup = (Exiled.API.Features.Pickups.KeycardPickup)keycard.CreatePickup(Pickup.Position);
+                        LabApi.Features.Wrappers.KeycardPickup keycardpickup = (LabApi.Features.Wrappers.KeycardPickup)LabApi.Features.Wrappers.KeycardPickup.Create(keycard.Type, Pickup.Position);
                         Pickup.Destroy();
                         Pickup = keycardpickup;
                         Serial = Pickup.Serial;
                         break;
 
                     case CustomItemType.Armor:
-                        Armor Armor = (Armor)Armor.Create(CustomItem.Item);
+                        BodyArmorItem Armor = (BodyArmorItem)BodyArmorItem.Get((BodyArmor)Item.Base);
                         IArmorData ArmorData = CustomItem.CustomData as IArmorData;
 
-                        Armor.HelmetEfficacy = ArmorData.HeadProtection;
-                        Armor.VestEfficacy = ArmorData.BodyProtection;
+                        Armor.Base.HelmetEfficacy = ArmorData.HeadProtection;
+                        Armor.Base.VestEfficacy = ArmorData.BodyProtection;
                         // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
                         // Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
-                        Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
-                        Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
+                        Armor.Base._staminaUseMultiplier = ArmorData.StaminaUseMultiplier;
+                        // Armor.Base.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
                         if (ArmorData.RemoveExcessOnDrop)
                             LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
-                        BodyArmorPickup armorPickup = (BodyArmorPickup)Armor.CreatePickup(Pickup.Position);
+                        LabApi.Features.Wrappers.BodyArmorPickup armorPickup = (LabApi.Features.Wrappers.BodyArmorPickup)LabApi.Features.Wrappers.BodyArmorPickup.Create(Armor.Type, Pickup.Position);
                         Pickup.Destroy();
                         Pickup = armorPickup;
                         Serial = Pickup.Serial;
@@ -397,43 +415,60 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.Weapon:
                         List<string> attachmentList = GetAttachmentsList();
-                        Firearm Firearm = (Firearm)Firearm.Create(CustomItem.Item);
+                        FirearmItem firearm = (FirearmItem)FirearmItem.Get((Firearm)Item.Base);
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
-                        Firearm.MagazineAmmo = WeaponData.MaxAmmo;
-                        Firearm.Damage = WeaponData.Damage;
-                        Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
-                        Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
-                        Firearm.AmmoDrain = WeaponData.AmmoDrain;
-                        Firearm.Penetration = WeaponData.Penetration;
-                        Firearm.Inaccuracy = WeaponData.Inaccuracy;
-                        Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        foreach (ModuleBase module in firearm.Base.Modules)
+                        {
+                            switch (module)
+                            {
+                                case IPrimaryAmmoContainerModule magazine when MagazineModule == null:
+                                    MagazineModule = magazine;
+                                    break;
+
+                                case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
+                                    HitscanHitregModule = hitscan;
+                                    break;
+
+                                case IAmmoContainerModule barrelammo when BarrelModule == null:
+                                    BarrelModule = barrelammo;
+                                    break;
+                            }
+                        }
+
+                        MagazineModule.AmmoMax = WeaponData.MaxAmmo;
+                        HitscanHitregModule.BaseDamage = WeaponData.Damage;
+                        MagazineModule.AmmoMax = WeaponData.MaxMagazineAmmo;
+                        BarrelModule.AmmoMax = WeaponData.MaxBarrelAmmo;
+                        firearm.Base.AmmoDrain = WeaponData.AmmoDrain;
+                        firearm.Base.Penetration = WeaponData.Penetration;
+                        firearm.Base.Inaccuracy = WeaponData.Inaccuracy;
+                        firearm.Base.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
                         foreach (string attachmentstring in attachmentList)
                         {
                             Enum.TryParse(attachmentstring, out AttachmentName attachment);
                             LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                            Firearm.AddAttachment(attachment);
+                            
                         }
-                        FirearmPickup firearmpickup = (FirearmPickup)Firearm.CreatePickup(Pickup.Position);
+                        LabApi.Features.Wrappers.FirearmPickup firearmpickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(firearm.Type, Pickup.Position);
                         Pickup.Destroy();
                         Pickup = firearmpickup;
                         Serial = Pickup.Serial;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
-                        ExplosiveGrenade ExplosiveGrenade = (ExplosiveGrenade)ExplosiveGrenade.Create(CustomItem.Item);
+                        ExplosiveGrenadeProjectile ExplosiveGrenade = (ExplosiveGrenadeProjectile)ExplosiveGrenadeProjectile.Create(Item.Type, Pickup.Position);
                         IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
 
                         ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
-                        ExplosiveGrenade.PinPullTime = ExplosiveGrenadeData.PinPullTime;
+                        //ExplosiveGrenade.PinPullTime = ExplosiveGrenadeData.PinPullTime;
                         ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
-                        ExplosiveGrenade.ConcussDuration = ExplosiveGrenadeData.ConcussDuration;
-                        ExplosiveGrenade.BurnDuration = ExplosiveGrenadeData.BurnDuration;
-                        ExplosiveGrenade.DeafenDuration = ExplosiveGrenadeData.DeafenDuration;
-                        ExplosiveGrenade.FuseTime = ExplosiveGrenadeData.FuseTime;
-                        ExplosiveGrenade.Repickable = ExplosiveGrenadeData.Repickable;
-                        Pickup ExplosiveGrenadePickup = ExplosiveGrenade.CreatePickup(Pickup.Position);
+                        //ExplosiveGrenade.ConcussDuration = ExplosiveGrenadeData.ConcussDuration;
+                        //ExplosiveGrenade.BurnDuration = ExplosiveGrenadeData.BurnDuration;
+                        //ExplosiveGrenade.DeafenDuration = ExplosiveGrenadeData.DeafenDuration;
+                        //ExplosiveGrenade.FuseTime = ExplosiveGrenadeData.FuseTime;
+                        //ExplosiveGrenade.Repickable = ExplosiveGrenadeData.Repickable;
                         Pickup.Destroy();
-                        Pickup = ExplosiveGrenadePickup;
+                        Pickup = ExplosiveGrenade;
                         Serial = Pickup.Serial;
                         break;
 

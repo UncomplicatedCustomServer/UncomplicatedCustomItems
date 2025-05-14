@@ -34,6 +34,8 @@ using System.Globalization;
 using Exiled.Events.EventArgs.Server;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Firearms;
+using LabApi.Features.Wrappers;
+using InventorySystem.Items.ThrowableProjectiles;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -174,15 +176,13 @@ namespace UncomplicatedCustomItems.Events
             }
         }
 
-        public void OnItemUse(UsingItemCompletedEventArgs ev)
+        public void OnItemUse(PlayerUsedItemEventArgs ev)
         {
             if (ev.Player == null)
                 return;
-            if (ev.Item == null)
+            if (ev.UsableItem == null)
                 return;
-            if (ev.Usable == null)
-                return;
-            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+            if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
 
             if (customItem.HasModule(CustomFlags.DieOnUse))
@@ -223,7 +223,7 @@ namespace UncomplicatedCustomItems.Events
                             }
 
                             LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                            EffectType Effect = EffectSettings.Effect;
+                            StatusEffectBase Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
                             ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
@@ -1167,13 +1167,17 @@ namespace UncomplicatedCustomItems.Events
                 CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.LightItem.Serial);
             SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
         }
-        public void ThrownProjectile(ThrownProjectileEventArgs ev)
-        {
-            if (ev.Item == null || ev.Player == null || ev.Projectile == null)
-                return;
-            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
-                return;
 
+        public void ThrownProjectile(PlayerThrewProjectileEventArgs ev)
+        {
+            if (ev.Projectile == null || ev.Player == null || ev.Projectile == null)
+                return;
+            if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                return;
+            if (ev.Projectile.Type == ItemType.GrenadeHE)
+            {
+
+            }
             if (CustomItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)

@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Enums;
+using MapGeneration;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UncomplicatedCustomItems.Interfaces;
@@ -56,10 +57,10 @@ namespace UncomplicatedCustomItems.API.Features
         /// If <see cref="DynamicSpawn"/> is empty, this parameter will be used.
         /// </summary>
         [Description("The zone(s) where the custom item can spawn.")]
-        public virtual List<ZoneType> Zones { get; set; } = new()
+        public virtual List<FacilityZone> Zones { get; set; } = new()
         {
-            ZoneType.HeavyContainment,
-            ZoneType.Entrance
+            FacilityZone.HeavyContainment,
+            FacilityZone.Entrance
         };
 
         /// <summary>

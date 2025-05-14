@@ -1,7 +1,4 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Extensions;
-using Exiled.Loader;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +7,8 @@ using UncomplicatedCustomItems.Enums;
 using UnityEngine;
 using UncomplicatedCustomItems.Interfaces;
 using YamlDotNet.Core;
+using LabApi.Features.Wrappers;
+using LabApi.Loader.Features.Misc;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -368,17 +367,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 SCP127Data Data = new SCP127Data();
                 customData = YAMLCaster.Encode(Data);
             }
-            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Firearm && customType == CustomItemType.Weapon)
+            else if (customType == CustomItemType.Weapon)
             {
                 WeaponData Data = new WeaponData();
                 customData = YAMLCaster.Encode(Data);
             }
-            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Keycard && customType == CustomItemType.Keycard)
+            else if (customType == CustomItemType.Keycard)
             {
                 KeycardData Data = new KeycardData();
                 customData = YAMLCaster.Encode(Data);
             }
-            else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Armor && customType == CustomItemType.Armor)
+            else if (customType == CustomItemType.Armor)
             {
                 ArmorData Data = new ArmorData();
                 customData = YAMLCaster.Encode(Data);
@@ -448,15 +447,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomData = customData,
             };
 
-            string filePath = Path.Combine(Paths.Configs, "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
-            File.WriteAllText(filePath, Loader.Serializer.Serialize(NewItem));
+            string filePath = Path.Combine(LabApi.Loader.Features.Paths.PathManager.Configs.ToString(), "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
+            File.WriteAllText(filePath, LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(NewItem));
 
             CustomItem.Register(YAMLCaster.Converter(NewItem));
 
             LogManager.Info($"Generated and registered custom item: {NewItem.Name} with ID {NewItem.Id}");
         }
 
-        internal string Dir = Path.Combine(Paths.Configs, "UncomplicatedCustomItems");
+        internal string Dir = Path.Combine(LabApi.Loader.Features.Paths.PathManager.Configs.ToString(), "UncomplicatedCustomItems");
 
         public bool Is(string localDir = "")
         {
@@ -492,7 +491,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     
                     try 
                     {
-                        YAMLCustomItem Item = Loader.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
+                        YAMLCustomItem Item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
                         LogManager.Debug($"Proposed to the registerer the external item {Item.Id} [{Item.Name}] from file:\n{FileName}");
                         action(Item);
                     }
@@ -561,13 +560,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 Directory.CreateDirectory(Path.Combine(Dir, localDir));
                 if (!loadExamples)
-                    File.WriteAllText(Path.Combine(Dir, localDir, "example-item.yml"), Loader.Serializer.Serialize(new YAMLCustomItem()
+                    File.WriteAllText(Path.Combine(Dir, localDir, "example-item.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(new YAMLCustomItem()
                     {
                         Id = CustomItem.GetFirstFreeId(1)
                     }));
                 else
                     foreach (YAMLCustomItem customItem in _examples)
-                        File.WriteAllText(Path.Combine(Dir, localDir, $"{customItem.Name.ToLower().Replace(" ", "-")}.yml"), Loader.Serializer.Serialize(customItem));
+                        File.WriteAllText(Path.Combine(Dir, localDir, $"{customItem.Name.ToLower().Replace(" ", "-")}.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(customItem));
 
                 LogManager.Info($"Plugin does not have a item folder, generated one in {Path.Combine(Dir, localDir)}");
             }

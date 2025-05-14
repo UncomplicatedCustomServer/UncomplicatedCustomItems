@@ -1,11 +1,10 @@
 ﻿using Discord;
-using Exiled.Loader;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net;
 using UncomplicatedCustomItems.Interfaces;
-using Exiled.API.Features;
+using Logger = LabApi.Features.Console.Logger;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -19,25 +18,25 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public static void Debug(string message)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
-            Log.Debug(message);
+            Logger.Debug(message, Plugin.Instance.DebugMode);
         }
 
         public static void Info(string message)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Info.ToString(), message));
-            Log.Info(message);
+            Logger.Info(message);
         }
 
         public static void Warn(string message, string error = "CS0000")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
-            Log.Warn(message);
+            Logger.Warn(message);
         }
 
         public static void Error(string message, string error = "CS0000")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
-            Log.Error(message);
+            Logger.Error(message);
         }
 
         public static void Silent(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SILENT", message));
@@ -69,7 +68,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             foreach (ICustomItem Item in CustomItem.List)
             {
-                Content += $"{Loader.Serializer.Serialize(Item)}\n\n---\n\n";
+                Content += $"{LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(Item)}\n\n---\n\n";
             }
 
             HttpStatusCode Response = Plugin.HttpManager.ShareLogs(Content, out content);

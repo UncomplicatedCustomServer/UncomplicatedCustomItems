@@ -1,7 +1,4 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Items;
-using Exiled.API.Interfaces;
-using Interactables.Interobjects.DoorUtils;
+﻿using Interactables.Interobjects.DoorUtils;
 using InventorySystem.Items.Keycards;
 using System;
 using System.Collections.Generic;
@@ -10,6 +7,8 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Extensions;
 using UnityEngine;
+using LabApi.Features.Wrappers;
+using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 
 namespace UncomplicatedCustomItems.API.Wrappers
 {
@@ -22,7 +21,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
     /// CustomKeycard customKeycard = new CustomKeycard(keycard);
     /// </code>
     /// </summary>
-    public class CustomKeycard : IWrapper<KeycardItem>
+    public class CustomKeycard
     {
         private Dictionary<ushort, Color32> PermissionColorsDic = [];
         private Dictionary<ushort, Color32> LabelColorsDic = [];
@@ -38,19 +37,14 @@ namespace UncomplicatedCustomItems.API.Wrappers
         /// <summary>
         /// The underlying Exiled <see cref="Keycard"/> instance being wrapped.
         /// </summary>
-        public Keycard ParentKeycard { get; private set; }
-
-        /// <summary>
-        /// The base <see cref="KeycardItem"/> object that this wrapper manages.
-        /// </summary>
-        public new KeycardItem Base { get; }
+        public KeycardItem ParentKeycard { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomKeycard"/> class.
         /// </summary>
         /// <param name="keycard"> The <see cref="Keycard"/> to wrap.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CustomKeycard(Keycard keycard)
+        public CustomKeycard(KeycardItem keycard)
         {
             if (!keycard.Base.Customizable)
                 LogManager.Warn($"{keycard.Type} is not customizable!\nThe keycard type must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
@@ -75,7 +69,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value.Replace("%name%", ParentKeycard.Owner.DisplayNickname) };
+                        object[] args = { value.Replace("%name%", ParentKeycard.Base.Owner.nicknameSync.ToString()) };
                         ArraySegment<object> arguments = new(args);
                         nametagDetail.SetArguments(arguments);
                         NameTagDic.TryAdd(ParentKeycard.Serial, value);

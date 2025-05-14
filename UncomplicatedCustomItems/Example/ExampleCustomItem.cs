@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Exiled.API.Enums;
+using MapGeneration;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
@@ -65,15 +66,15 @@ namespace UncomplicatedCustomItems.Examples
         [
             new()
             {
-                Room = RoomType.Lcz914,
+                Room = RoomName.Lcz914,
                 Chance = 30,
                 Coords = Vector3.zero
             }
         ];
-        public override List<ZoneType> Zones { get; set; } = new()
+        public override List<FacilityZone> Zones { get; set; } = new()
         {
-            ZoneType.HeavyContainment,
-            ZoneType.Entrance
+            FacilityZone.HeavyContainment,
+            FacilityZone.Entrance
         };
         public override bool ReplaceExistingPickup { get; set; } = false;
         public override bool ForceItem { get; set; } = false;

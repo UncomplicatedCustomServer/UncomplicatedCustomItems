@@ -1,6 +1,4 @@
-﻿using Exiled.API.Features.Items;
-using Exiled.API.Interfaces;
-using HarmonyLib;
+﻿using HarmonyLib;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using Mirror;
@@ -9,17 +7,18 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomItems.API.Wrappers
 {
-    public class CustomScp127 : IWrapper<Firearm>
+    public class CustomScp127
     {
         /// <summary>
         /// Gets the <see cref="InventorySystem.Items.Firearms.Firearm"/> that this class is encapsulating.
         /// </summary>
-        public new Firearm Base { get; }
+        public new FirearmItem Base { get; }
 
-        public CustomScp127(Firearm firearm)
+        public CustomScp127(FirearmItem firearm)
         {
             if (firearm.Type != ItemType.GunSCP127)
             {

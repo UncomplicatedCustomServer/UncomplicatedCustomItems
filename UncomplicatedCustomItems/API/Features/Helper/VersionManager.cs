@@ -1,9 +1,9 @@
-﻿using Exiled.API.Features;
-using Exiled.Loader;
+﻿using LabApi.Loader.Features.Misc;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -37,11 +37,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (VersionInfo.PreRelease || Plugin.Instance.IsPrerelease)
             {
                 LogManager.Info($"\nNOTICE!\nYou are currently using version v{Plugin.Instance.Version.ToString(3)}, which is a PRE-RELEASE or an EXPERIMENTAL RELEASE of UncomplicatedCustomItems!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there may be bugs and errors. For this reason, we do not recommend its use in production.");
-                if (VersionInfo.ForceDebug && !Log.DebugEnabled.Contains(Plugin.Instance.Assembly))
+                if (VersionInfo.ForceDebug && !Plugin.Instance.DebugMode)
                 {
                     LogManager.Info("Debug logs have been activated!");
                     Plugin.Instance.Config.Debug = true;
-                    Log.DebugEnabled.Add(Plugin.Instance.Assembly);
+                    Plugin.Instance.DebugMode = true;
                 }
             }
             else
@@ -50,7 +50,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
 
             // Check integrity
-            string hash = HashFile(Plugin.Instance.Assembly.GetPath());
+            AssemblyUtils.TryGetLoadedAssembly(Plugin.Instance, out Assembly assembly);
+            string hash = HashFile(assembly.GetHashCode().ToString());
             if (hash != VersionInfo.Hash)
             {
                 RecallMessageSender();

@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {

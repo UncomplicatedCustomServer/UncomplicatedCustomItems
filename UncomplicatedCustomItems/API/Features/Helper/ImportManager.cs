@@ -1,5 +1,3 @@
-using Exiled.API.Interfaces;
-using Exiled.Loader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +7,15 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
+using LabApi.Loader.Features.Plugins;
+using LabApi.Loader.Features.Misc;
+using System.Reflection;
 
 namespace UncomplicatedCustomItems.Manager
 {
     internal class ImportManager
     {
-        public static List<IPlugin<IConfig>> ActivePlugins => new();
+        public static List<Plugin<Config>> ActivePlugins => new();
 
         public const float WaitingTime = 5f;
 
@@ -36,10 +37,11 @@ namespace UncomplicatedCustomItems.Manager
 
             _alreadyLoaded = true;
 
-            foreach (IPlugin<IConfig> plugin in Loader.Plugins)
+            foreach (Plugin<Config> plugin in LabApi.Loader.PluginLoader.EnabledPlugins.Cast<Plugin<Config>>())
             {
                 LogManager.Silent($"{nameof(ImportManager.Actor)}: Passing plugin {plugin.Name}");
-                foreach (Type type in plugin.Assembly.GetTypes())
+                AssemblyUtils.TryGetLoadedAssembly(plugin, out Assembly assembly);
+                foreach (Type type in assembly.GetTypes())
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);

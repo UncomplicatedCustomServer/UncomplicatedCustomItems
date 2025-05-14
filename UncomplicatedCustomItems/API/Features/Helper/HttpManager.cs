@@ -1,6 +1,7 @@
-﻿using Exiled.API.Features;
-using Exiled.Events.EventArgs.Player;
-using Exiled.Loader;
+﻿using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Features;
+using LabApi.Features.Wrappers;
+using LabApi.Loader.Features.Misc;
 using MEC;
 using Newtonsoft.Json;
 using System;
@@ -8,11 +9,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Struct;
 
-using PlayerHandler = Exiled.Events.Handlers.Player;
+using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -89,17 +91,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal void RegisterEvents()
         {
-            PlayerHandler.Verified += OnVerified;
+            PlayerHandler.Joined += OnVerified;
         }
 
         internal void UnregisterEvents()
         {
-            PlayerHandler.Verified -= OnVerified;
+            PlayerHandler.Joined -= OnVerified;
         }
 
-        public void OnVerified(VerifiedEventArgs ev) => ApplyCreditTag(ev.Player);
+        public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
 
-        private bool CheckForDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
+        private bool CheckForDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly == "Newtonsoft.Json");
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -206,9 +208,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             Triplet<string, string, bool> Tag = GetCreditTag(player);
 
-            if (player.RankName is not null && player.RankName != string.Empty)
+            if (player.GroupName is not null && player.GroupName != string.Empty)
             {
-                if (Credits.Any(k => k.Value.First == player.RankName && k.Value.Second == player.RankColor))
+                if (Credits.Any(k => k.Value.First == player.GroupName && k.Value.Second == player.GroupColor))
                     _alreadyManaged = true;
 
                 if (!Tag.Third)
@@ -217,8 +219,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             if (Tag.First is not null && Tag.Second is not null)
             {
-                player.RankName = Tag.First;
-                player.RankColor = Tag.Second;
+                player.GroupName = Tag.First;
+                player.GroupColor = Tag.Second;
             }
         }
 
@@ -242,7 +244,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
+            AssemblyUtils.TryGetLoadedAssembly(Plugin.Instance, out Assembly assembly);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&LabApi_version={LabApiProperties.CompiledVersion}&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(assembly.Location)}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
         }

@@ -1,5 +1,3 @@
-using Exiled.API.Enums;
-using Exiled.API.Features;
 using System;
 using HarmonyLib;
 using System.IO;
@@ -7,19 +5,21 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using System.Threading.Tasks;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using UncomplicatedCustomItems.Integration;
-using Exiled.API.Features.Core.UserSettings;
-using System.Collections.Generic;
 using UnityEngine;
+using Logger = LabApi.Features.Console.Logger;
 using UserSettings.ServerSpecific;
 using UncomplicatedCustomItems.Manager;
+using LabApi.Loader.Features.Plugins;
+using LabApi.Loader.Features.Plugins.Enums;
+using LabApi.Features.Wrappers;
+using LabApi.Loader;
 
 // Events
-using PlayerEvent = Exiled.Events.Handlers.Player;
-using ItemEvent = Exiled.Events.Handlers.Item;
-using ServerEvent = Exiled.Events.Handlers.Server;
-using MapEvent = Exiled.Events.Handlers.Map;
-using Scp914Event = Exiled.Events.Handlers.Scp914;
-using LabAPIPlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using ItemEvent = LabApi.Events.Handlers.PlayerEvents;
+using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using MapEvent = LabApi.Events.Handlers.ServerEvents;
+using Scp914Event = LabApi.Events.Handlers.Scp914Events;
 
 namespace UncomplicatedCustomItems
 {
@@ -28,17 +28,17 @@ namespace UncomplicatedCustomItems
         public bool IsPrerelease = true;
         public override string Name => "UncomplicatedCustomItems";
 
-        public override string Prefix => "UncomplicatedCustomItems";
+        public override string Description => "UncomplicatedCustomItems";
 
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 
-        public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
+        public override Version RequiredApiVersion { get; } = new(0, 7, 0);
 
         public override Version Version { get; } = new(3, 5, 0);
 
         internal Handler Handler;
 
-        public override PluginPriority Priority => PluginPriority.First;
+        public override LoadPriority Priority => LoadPriority.Highest;
 
         public static Plugin Instance { get; private set; }
 
@@ -48,9 +48,11 @@ namespace UncomplicatedCustomItems
 
         internal FileConfig FileConfig;
 
-        internal IEnumerable<SettingBase> _playerSettings;
+        internal ServerSpecificSettingBase[] _playerSettings;
 
-        public override void OnEnabled()
+        internal bool DebugMode;
+
+        public override void Enable()
         {
             Instance = this;
 
@@ -58,21 +60,21 @@ namespace UncomplicatedCustomItems
             HttpManager = new("uci");
             Handler = new();
 
-            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
+            if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(Instance, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
 
             PlayerEvent.Hurt += Handler.OnHurt;
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.Shooting += Handler.OnShooting;
             PlayerEvent.UsingItemCompleted += Handler.OnItemUse;
-            ItemEvent.ChangingAttachments += Handler.OnChangingAttachments;
-            PlayerEvent.ActivatingWorkstation += Handler.OnWorkstationActivation;
+            ItemEvent. += Handler.OnChangingAttachments;
+            PlayerEvent.Changinga += Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem += Handler.OnDrop;
             MapEvent.PickupDestroyed += Handler.OnPickup;
-            PlayerEvent.Shot += Handler.OnShot;
+            PlayerEvent.ShotWeapon += Handler.OnShot;
             ItemEvent.ChargingJailbird += Handler.OnCharge;
-            PlayerEvent.ReceivingEffect += Handler.Receivingeffect;
-            PlayerEvent.ThrownProjectile += Handler.ThrownProjectile;
-            MapEvent.ExplodingGrenade += Handler.GrenadeExploding;
+            PlayerEvent.UpdatingEffect += Handler.Receivingeffect;
+            PlayerEvent.ThrewProjectile += Handler.ThrownProjectile;
+            MapEvent.ProjectileExploded += Handler.GrenadeExploding;
             ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
             PlayerEvent.Dying += Handler.OnDying;
             PlayerEvent.ChangedItem += Handler.OnChangedItem;
@@ -82,32 +84,32 @@ namespace UncomplicatedCustomItems
             PlayerEvent.UnlockingGenerator += Handler.OnGeneratorUnlock;
             PlayerEvent.InteractingLocker += Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
-            PlayerEvent.Verified += Handler.OnVerified;
-            PlayerEvent.ItemAdded += Handler.Onpickup;
+            PlayerEvent.Joined += Handler.OnVerified;
+            PlayerEvent.PickedUpItem += Handler.Onpickup;
             PlayerEvent.Spawned += Handler.OnSpawned;
             PlayerEvent.Left += Handler.OnLeft;
-            LabAPIPlayerEvent.FlippedCoin += Handler.FlippedCoin;
-            LabAPIPlayerEvent.ToggledFlashlight += Handler.ToggledFlashlight;
-            Scp914Event.UpgradingPickup += Handler.OnPickupUpgrade;
-            Scp914Event.UpgradingInventoryItem += Handler.OnItemUpgrade;
-            ServerEvent.EndingRound += Handler.OnRoundEnd;
-            MapEvent.PickupAdded += Handler.OnPickupCreation;
+            PlayerEvent.FlippedCoin += Handler.FlippedCoin;
+            PlayerEvent.ToggledFlashlight += Handler.ToggledFlashlight;
+            Scp914Event.ProcessingPickup += Handler.OnPickupUpgrade;
+            Scp914Event.ProcessingInventoryItem += Handler.OnItemUpgrade;
+            ServerEvent.RoundEnded += Handler.OnRoundEnd;
+            MapEvent.PickupCreated += Handler.OnPickupCreation;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
-            PlayerEvent.ItemAdded += Handler.OnDebuggingpickup;
+            PlayerEvent.PickedUpItem += Handler.OnDebuggingpickup;
             PlayerEvent.UsingItem += Handler.Onuse;
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
-            PlayerEvent.Shooting += Handler.Onshooting;
-            PlayerEvent.ThrownProjectile += Handler.Onthrown;
+            PlayerEvent.ShootingWeapon += Handler.Onshooting;
+            PlayerEvent.ThrewProjectile += Handler.Onthrown;
 
             _playerSettings =
             [
-                new HeaderSetting("CustomItem Settings"),
-                new KeybindSetting(20, "Trigger CustomItem", KeyCode.K, hintDescription: "When pressed this will trigger the CustomItem your holding")
+                new SSGroupHeader("CustomItem Settings"),
+                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
             ];
-
-            SettingBase.Register(_playerSettings);
+            ServerSpecificSettingsSync.DefinedSettings = _playerSettings;
+            ServerSpecificSettingsSync.SendToAll();
 
             LogManager.History.Clear();
 
@@ -119,11 +121,11 @@ namespace UncomplicatedCustomItems
 
             if (IsPrerelease)
             {
-                if (!Log.DebugEnabled.Contains(Instance.Assembly))
+                if (!Instance.Config.Debug)
                 {
                     LogManager.Info("Debug logs have been activated!");
                     Instance.Config.Debug = true;
-                    Log.DebugEnabled.Add(Instance.Assembly);
+                    DebugMode = true;
                 }
             }
 
@@ -148,16 +150,13 @@ namespace UncomplicatedCustomItems
 
             _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
-
-            base.OnEnabled();
         }
 
-        public override void OnDisabled()
+        public override void Disable()
         {
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
 
-            SettingBase.Unregister(settings: _playerSettings);
             _playerSettings = null;
 
             HttpManager.UnregisterEvents();
@@ -166,16 +165,16 @@ namespace UncomplicatedCustomItems
 
             PlayerEvent.Hurt -= Handler.OnHurt;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
-            PlayerEvent.Shooting -= Handler.OnShooting;
+            PlayerEvent.ShootingWeapon -= Handler.OnShooting;
             PlayerEvent.UsingItemCompleted -= Handler.OnItemUse;
             ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
             PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
-            PlayerEvent.Shot -= Handler.OnShot;
+            PlayerEvent.ShotWeapon -= Handler.OnShot;
             ItemEvent.ChargingJailbird -= Handler.OnCharge;
-            PlayerEvent.ReceivingEffect -= Handler.Receivingeffect;
-            PlayerEvent.ThrownProjectile -= Handler.ThrownProjectile;
-            MapEvent.ExplodingGrenade -= Handler.GrenadeExploding;
+            PlayerEvent.UpdatingEffect -= Handler.Receivingeffect;
+            PlayerEvent.ThrewProjectile -= Handler.ThrownProjectile;
+            MapEvent.ProjectileExploding -= Handler.GrenadeExploding;
             ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
             MapEvent.PickupDestroyed -= Handler.OnPickup;
             PlayerEvent.Dying -= Handler.OnDying;
@@ -186,30 +185,28 @@ namespace UncomplicatedCustomItems
             PlayerEvent.UnlockingGenerator -= Handler.OnGeneratorUnlock;
             PlayerEvent.InteractingLocker -= Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
-            PlayerEvent.Verified -= Handler.OnVerified;
-            PlayerEvent.ItemAdded -= Handler.Onpickup;
+            PlayerEvent.Joined -= Handler.OnVerified;
+            PlayerEvent.PickedUpItem -= Handler.Onpickup;
             PlayerEvent.Spawned -= Handler.OnSpawned;
             PlayerEvent.Left -= Handler.OnLeft;
-            LabAPIPlayerEvent.FlippedCoin -= Handler.FlippedCoin;
-            LabAPIPlayerEvent.ToggledFlashlight -= Handler.ToggledFlashlight;
-            Scp914Event.UpgradingPickup -= Handler.OnPickupUpgrade;
-            Scp914Event.UpgradingInventoryItem -= Handler.OnItemUpgrade;
-            ServerEvent.EndingRound -= Handler.OnRoundEnd;
-            MapEvent.PickupAdded -= Handler.OnPickupCreation;
+            PlayerEvent.FlippedCoin -= Handler.FlippedCoin;
+            PlayerEvent.ToggledFlashlight -= Handler.ToggledFlashlight;
+            Scp914Event.ProcessedPickup -= Handler.OnPickupUpgrade;
+            Scp914Event.ProcessedInventoryItem -= Handler.OnItemUpgrade;
+            ServerEvent.RoundEnding -= Handler.OnRoundEnd;
+            MapEvent.PickupCreated -= Handler.OnPickupCreation;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
-            PlayerEvent.ItemAdded -= Handler.OnDebuggingpickup;
+            PlayerEvent.PickedUpItem -= Handler.OnDebuggingpickup;
             PlayerEvent.UsingItem -= Handler.Onuse;
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
-            PlayerEvent.Shooting -= Handler.Onshooting;
-            PlayerEvent.ThrownProjectile -= Handler.Onthrown;
+            PlayerEvent.ShootingWeapon -= Handler.Onshooting;
+            PlayerEvent.ThrewProjectile -= Handler.Onthrown;
 
             Handler.Appearance.Clear();
             Instance = null;
             Handler = null;
-            base.OnDisabled();
-
         }
         public void OnFinishedLoadingPlugins()
         {

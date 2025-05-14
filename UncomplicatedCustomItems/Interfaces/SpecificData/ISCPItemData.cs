@@ -1,4 +1,4 @@
-using Exiled.API.Enums;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP500Data
     {
-        public abstract EffectType Effect { get; set; }
+        public abstract StatusEffectBase Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
     }
@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP207Data
     {
-        public abstract EffectType Effect { get; set; }
+        public abstract StatusEffectBase Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
         public abstract bool Apply207Effect { get; set; }
@@ -74,7 +74,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP1853Data
     {
-        public abstract EffectType Effect { get; set; }
+        public abstract StatusEffectBase Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
         public abstract bool Apply1853Effect { get; set; }
@@ -86,7 +86,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP1576Data
     {
-        public abstract EffectType Effect { get; set; }
+        public abstract StatusEffectBase Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
     }
