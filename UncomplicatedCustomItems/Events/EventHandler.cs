@@ -34,6 +34,7 @@ using Player = LabApi.Features.Wrappers.Player;
 using AdminToys;
 using PrimitiveObjectToy = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using LabApi.Features.Extensions;
+using UncomplicatedCustomItems.API.Wrappers;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -62,13 +63,6 @@ namespace UncomplicatedCustomItems.Events
         private static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
         private static Dictionary<Player, CoroutineHandle> _HumeShieldRegenCoroutine = [];
         private static Dictionary<Player, long> _damageTimes = [];
-        internal static ServerSpecificSettingBase[] _ToolGunSettings = 
-        [
-            new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
-            new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1",  hint: "The color of the primitives spawned by the ToolGun"),
-            new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
-            new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
-        ];
 
         internal static Dictionary<PrimitiveObjectToy, int> ToolGunPrimitives = [];
 
@@ -461,8 +455,7 @@ namespace UncomplicatedCustomItems.Events
                     EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
                 if (CustomItem.HasModule(CustomFlags.ToolGun))
                 {
-                    ServerSpecificSettingsSync.DefinedSettings = _ToolGunSettings;
-                    ServerSpecificSettingsSync.SendToPlayer(ev.Player.ReferenceHub);
+                    SSS.AddToolGunSettingsToUser(ev.Player.ReferenceHub);
                     StartRelativePosCoroutine(ev.Player);
                 }
             }
@@ -1544,6 +1537,7 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnVerified(PlayerJoinedEventArgs ev)
         {
+            SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
             foreach (KeyValuePair<int, RoleTypeId> entry in Appearance)
             {
                 LogManager.Debug($"{nameof(OnVerified)}: Changing {entry.Key} appearance to {entry.Value}");

@@ -1,4 +1,6 @@
-/*using Exiled.API.Features;
+/*
+UCR isnt ported to LabApi yet
+using Exiled.API.Features;
 using Exiled.Loader;
 using System;
 using System.Linq;

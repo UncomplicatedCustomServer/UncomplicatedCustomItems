@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 namespace UncomplicatedCustomItems
 {
     public class Config
@@ -24,10 +25,10 @@ namespace UncomplicatedCustomItems
         [Description("The duration (in seconds) for which the hint is displayed.")]
         public float SelectedMessageDuration { get; set; } = 3f;
 
-        [Description("The hint message displayed when a player interacts with a workstation while holding a custom item with the WorkstationBan flag.")]
+        [Description("The hint message displayed when a player interacts with a workstation while holding a custom item with the WorkstationBan flag. Currently does nothing since LabApi dosent have a event for this")]
         public string WorkstationBanHint { get; set; } = "You are not allowed to change the attachments on %name%!";
 
-        [Description("The duration (in seconds) for which the WorkstationBan hint is displayed.")]
+        [Description("The duration (in seconds) for which the WorkstationBan hint is displayed. Currently does nothing since LabApi dosent have a event for this")]
         public float WorkstationBanHintDuration { get; set; } = 3f;
 
         [Description("Enables admin messages. Occasionally, you will receive important notifications on your console from our central servers.")]
@@ -37,6 +38,7 @@ namespace UncomplicatedCustomItems
         public bool ServerTracking { get; set; } = true;
 
         [Description("Enables or disables the CommonUtilities intergration. (Set the item name in the CommonUtilities config to the customitem name)")]
+        [Obsolete("Does nothing as CommonUtilities is a Exiled plugin")]
         public bool EnableCommonUtilitiesIntergration { get; set; } = true;
     }
 }

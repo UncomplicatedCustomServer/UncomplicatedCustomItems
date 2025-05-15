@@ -61,7 +61,7 @@ namespace UncomplicatedCustomItems.Extensions
         public static void ChangeAppearance(this Player player, RoleTypeId type, IEnumerable<Player> playersToAffect, bool skipJump = false, byte unitId = 0)
         {
             RelativePosition relativePos = new RelativePosition(player.Position);
-            if (!player.Connection.isReady || !PlayerRoleLoader.TryGetRoleTemplate(type, out PlayerRoleBase roleBase))
+            if (player.GameObject == null || !PlayerRoleLoader.TryGetRoleTemplate(type, out PlayerRoleBase roleBase))
                 return;
 
             bool isRisky = type.GetTeam() == Team.Dead || player.Role == RoleTypeId.Spectator || player.Role == RoleTypeId.Destroyed;

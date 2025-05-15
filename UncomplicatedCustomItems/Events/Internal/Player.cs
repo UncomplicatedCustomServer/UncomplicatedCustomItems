@@ -12,6 +12,8 @@ using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.Extensions;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
+using UncomplicatedCustomItems.API.Wrappers;
+using PlayerRoles;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -49,20 +51,22 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         public static void Damaged(PlayerHurtingEventArgs ev)
         {
+            if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null || ev.Player.Role == RoleTypeId.Destroyed || ev.Player.Role == RoleTypeId.Spectator)
+                return;
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
-            {
-                IWeaponData WeaponData = CustomItem.CustomItem.CustomData as IWeaponData;
-                if (CustomItem.Item.Type.IsWeapon())
                 {
-                    if (WeaponData.EnableFriendlyFire)
+                    IWeaponData WeaponData = CustomItem.CustomItem.CustomData as IWeaponData;
+                    if (CustomItem.Item.Type.IsWeapon())
                     {
-                        if (ev.Player != null)
+                        if (WeaponData.EnableFriendlyFire)
                         {
-                            ev.Player.Damage(WeaponData.Damage, ev.Attacker);
+                            if (ev.Player != null)
+                            {
+                                ev.Player.Damage(WeaponData.Damage, ev.Attacker);
+                            }
                         }
                     }
                 }
-            }
         }
 
         private static void GrenadeExploded(ProjectileExplodedEventArgs ev)
@@ -85,6 +89,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 Item.ResetBadge(ev.Player);
             if (Item.HasModule(Enums.CustomFlags.ToolGun))
             {
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
         }
@@ -165,6 +170,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
             }
 
             if (item.Item.Type == ItemType.GunSCP127 && item.CustomItem.CustomItemType == CustomItemType.SCPItem)
@@ -224,6 +230,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                     customitem?.ResetBadge(ev.Player);
                     if (customitem.HasModule(Enums.CustomFlags.ToolGun))
                     {
+                        SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                         EventHandler.StopRelativePosCoroutine(ev.Player);
                     }
                         
@@ -245,6 +252,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             item?.ResetBadge(ev.Player);
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
         }
