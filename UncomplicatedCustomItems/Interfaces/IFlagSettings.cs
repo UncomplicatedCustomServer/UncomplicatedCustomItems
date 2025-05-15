@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Exiled.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Interfaces

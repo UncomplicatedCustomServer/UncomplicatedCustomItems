@@ -1,5 +1,4 @@
-﻿using Exiled.Loader;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -34,8 +33,8 @@ namespace UncomplicatedCustomItems.API.Features
             else
                 EnableAudioApi = true;
         }
-        private bool CheckForAudioPlayerApiDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "AudioPlayerApi");
-        private bool CheckForNVorbisDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "NVorbis");
+        private bool CheckForAudioPlayerApiDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly == "AudioPlayerApi");
+        private bool CheckForNVorbisDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly == "NVorbis");
         /// <summary>
         /// Clamps the value between the minimum and maximum.
         /// </summary>

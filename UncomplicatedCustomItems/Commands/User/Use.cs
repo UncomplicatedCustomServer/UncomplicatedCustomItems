@@ -1,12 +1,11 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
-using Exiled.Permissions.Extensions;
 using System;
 using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UncomplicatedCustomItems.Enums;
+using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomItems.Commands.User
 {
@@ -25,12 +24,6 @@ namespace UncomplicatedCustomItems.Commands.User
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!sender.CheckPermission("uci.use"))
-            {
-                response = "Sorry but you don't have the permission to use that command!";
-                return false;
-            }
-
             Player player = Player.Get(sender);
 
             if (player is null)

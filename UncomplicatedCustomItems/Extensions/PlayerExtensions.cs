@@ -14,6 +14,8 @@ using UnityEngine;
 using UncomplicatedCustomItems.API.Features.Helper;
 using RelativePositioning;
 using static UnityEngine.UI.GridLayoutGroup;
+using CustomPlayerEffects;
+using System;
 
 namespace UncomplicatedCustomItems.Extensions
 {
@@ -119,6 +121,12 @@ namespace UncomplicatedCustomItems.Extensions
             // To counter a bug that makes the player invisible until they move after changing their appearance, we will teleport them upwards slightly to force a new position update for all clients.
             if (!skipJump)
                 player.Position += Vector3.up * 0.25f;
+        }
+        public static StatusEffectBase? GetEffectDynamic(this Player player, Type effectType)
+        {
+            PlayerEffectsController controller = player.ReferenceHub.playerEffectsController;
+            System.Reflection.MethodInfo method = typeof(PlayerEffectsController).GetMethod("GetEffect")?.MakeGenericMethod(effectType);
+            return method?.Invoke(controller, null) as StatusEffectBase;
         }
 
     }

@@ -1,3 +1,4 @@
+using System;
 using CustomPlayerEffects;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 
@@ -16,7 +17,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP500Data : Data, ISCP500Data
     {
-        public virtual StatusEffectBase Effect { get; set; }
+        public virtual Type Effect { get; set; }
         public virtual float Duration { get; set; } = 20;
         public virtual byte Intensity { get; set; } = 1;
     }
@@ -26,7 +27,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP207Data : Data, ISCP207Data
     {
-        public virtual StatusEffectBase Effect { get; set; }
+        public virtual Type Effect { get; set; }
         public virtual float Duration { get; set; } = 20;
         public virtual byte Intensity { get; set; } = 1;
         public virtual bool Apply207Effect { get; set; } = false;
@@ -76,7 +77,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP1853Data : Data, ISCP1853Data
     {
-        public virtual StatusEffectBase Effect { get; set; }
+        public virtual Type Effect { get; set; }
         public virtual float Duration { get; set; } = 20;
         public virtual byte Intensity { get; set; } = 1;
         public virtual bool Apply1853Effect { get; set; } = false;
@@ -88,7 +89,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP1576Data : Data, ISCP1576Data
     {
-        public virtual StatusEffectBase Effect { get; set; }
+        public virtual Type Effect { get; set; }
         public virtual float Duration { get; set; } = 20;
         public virtual byte Intensity { get; set; } = 1;
     }

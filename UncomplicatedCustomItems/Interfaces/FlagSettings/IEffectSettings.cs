@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using Exiled.API.Enums;
+using System;
 
 namespace UncomplicatedCustomItems.Interfaces
 {
@@ -7,7 +6,7 @@ namespace UncomplicatedCustomItems.Interfaces
     {
         public abstract string EffectEvent { get; set; }
 
-        public abstract EffectType Effect {get; set; }
+        public abstract Type Effect {get; set; }
 
         public abstract byte EffectIntensity { get; set; }
 

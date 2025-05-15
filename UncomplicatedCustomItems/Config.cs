@@ -1,8 +1,7 @@
-﻿using Exiled.API.Interfaces;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 namespace UncomplicatedCustomItems
 {
-    public class Config : IConfig
+    public class Config
     {
         [Description("Specifies whether the plugin is enabled.")]
         public bool IsEnabled { get; set; } = true;

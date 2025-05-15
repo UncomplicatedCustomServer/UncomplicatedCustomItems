@@ -2,6 +2,7 @@
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.Extensions
+{
     internal static class RoomExtensions
     {
         /// <summary>

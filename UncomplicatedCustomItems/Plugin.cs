@@ -4,9 +4,7 @@ using System.IO;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System.Threading.Tasks;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
-using UncomplicatedCustomItems.Integration;
 using UnityEngine;
-using Logger = LabApi.Features.Console.Logger;
 using UserSettings.ServerSpecific;
 using UncomplicatedCustomItems.Manager;
 using LabApi.Loader.Features.Plugins;
@@ -16,7 +14,6 @@ using LabApi.Loader;
 
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
-using ItemEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using MapEvent = LabApi.Events.Handlers.ServerEvents;
 using Scp914Event = LabApi.Events.Handlers.Scp914Events;
@@ -74,7 +71,7 @@ namespace UncomplicatedCustomItems
             //ItemEvent.ChargingJailbird += Handler.OnCharge;
             PlayerEvent.UpdatingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrewProjectile += Handler.ThrownProjectile;
-            MapEvent.ProjectileExploded += Handler.GrenadeExploding;
+            MapEvent.ProjectileExploding += Handler.GrenadeExploding;
             ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
             PlayerEvent.Dying += Handler.OnDying;
             PlayerEvent.ChangedItem += Handler.OnChangedItem;
@@ -148,7 +145,7 @@ namespace UncomplicatedCustomItems
                 Harmony.DEBUG = true;
             }
 
-            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
         }
 
@@ -166,7 +163,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Hurt -= Handler.OnHurt;
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.ShootingWeapon -= Handler.OnShooting;
-            PlayerEvent.UsingItemCompleted -= Handler.OnItemUse;
+            PlayerEvent.UsedItem -= Handler.OnItemUse;
             //ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
             //PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
@@ -191,8 +188,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Left -= Handler.OnLeft;
             PlayerEvent.FlippedCoin -= Handler.FlippedCoin;
             PlayerEvent.ToggledFlashlight -= Handler.ToggledFlashlight;
-            Scp914Event.ProcessedPickup -= Handler.OnPickupUpgrade;
-            Scp914Event.ProcessedInventoryItem -= Handler.OnItemUpgrade;
+            Scp914Event.ProcessingPickup -= Handler.OnPickupUpgrade;
+            Scp914Event.ProcessingInventoryItem -= Handler.OnItemUpgrade;
             ServerEvent.RoundEnding -= Handler.OnRoundEnd;
             MapEvent.PickupCreated -= Handler.OnPickupCreation;
 
@@ -211,7 +208,7 @@ namespace UncomplicatedCustomItems
         public void OnFinishedLoadingPlugins()
         {
             ImportManager.Init();
-            CommonUtilitiesPatch.Initialize();
+            //CommonUtilitiesPatch.Initialize();
         }
     }
 }

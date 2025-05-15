@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.Extensions;
 using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -16,7 +17,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public int RequiredArgsCount { get; } = 1;
 
-        public string RequiredPermission { get; } = "uci.get";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.GivingItems;
 
         public string[] Aliases { get; } = ["get"];
 

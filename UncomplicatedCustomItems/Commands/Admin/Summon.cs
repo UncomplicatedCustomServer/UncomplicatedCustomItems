@@ -1,5 +1,5 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
@@ -17,13 +17,13 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public int RequiredArgsCount { get; } = 1;
 
-        public string RequiredPermission { get; } = "uci.summon";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.GivingItems;
 
         public string[] Aliases { get; } = ["spawn", "s"];
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            if (!Round.IsStarted)
+            if (!Round.IsRoundStarted)
             {
                 response = "<color=red>[⚠]</color> This command cannot be ran if the round isnt started!";
                 return false;

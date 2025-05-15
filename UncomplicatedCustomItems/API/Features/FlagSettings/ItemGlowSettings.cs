@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Exiled.API.Enums;
 using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features

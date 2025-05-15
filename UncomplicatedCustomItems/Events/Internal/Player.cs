@@ -266,14 +266,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             Item?.HandleEvent(ev.Player, ItemEvents.Noclip, ev.Player.CurrentItem.Serial);
-
-            if (Plugin.Instance.Config.Debug == true)
-            {
-                if (ev.Player.RemoteAdminAccess)
-                {
-                    Item.ShowDebugUi(ev.Player);
-                }
-            }
         }
     }
 }

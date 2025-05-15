@@ -1,5 +1,4 @@
 ﻿using CommandSystem;
-using Exiled.Permissions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +53,7 @@ namespace UncomplicatedCustomItems.Commands
                 return false;
             }
 
-            if (cmd.RequiredPermission != string.Empty && !sender.CheckPermission(cmd.RequiredPermission))
+            if (!sender.CheckPermission(cmd.RequiredPermission))
             {
                 response = "You don't have permission to access that command!";
                 return false;

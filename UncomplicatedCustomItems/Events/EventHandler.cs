@@ -127,7 +127,7 @@ namespace UncomplicatedCustomItems.Events
                                 }
 
                                 LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player.Nickname}");
-                                StatusEffectBase Effect = EffectSettings.Effect;
+                                StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
                                 ev.Player?.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
@@ -274,7 +274,7 @@ namespace UncomplicatedCustomItems.Events
                             }
 
                             LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                            StatusEffectBase Effect = EffectSettings.Effect;
+                            StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
                             ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
@@ -320,7 +320,7 @@ namespace UncomplicatedCustomItems.Events
                         return;
                     }
                     LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP500Data.Effect} at intensity {SCP500Data.Intensity}, duration is {SCP500Data.Duration} to {ev.Player.Nickname}");
-                    StatusEffectBase Effect = SCP500Data.Effect;
+                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(SCP500Data.Effect);
                     float Duration = SCP500Data.Duration;
                     byte Intensity = SCP500Data.Intensity;
                     ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
@@ -343,7 +343,7 @@ namespace UncomplicatedCustomItems.Events
                         return;
                     }
                     LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP207Data.Effect} at intensity {SCP207Data.Intensity}, duration is {SCP207Data.Duration} to {ev.Player.Nickname}");
-                    StatusEffectBase Effect = SCP207Data.Effect;
+                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(SCP207Data.Effect);
                     float Duration = SCP207Data.Duration;
                     byte Intensity = SCP207Data.Intensity;
                     ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
@@ -366,7 +366,7 @@ namespace UncomplicatedCustomItems.Events
                         return;
                     }
                     LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP1853Data.Effect} at intensity {SCP1853Data.Intensity}, duration is {SCP1853Data.Duration} to {ev.Player.Nickname}");
-                    StatusEffectBase Effect = SCP1853Data.Effect;
+                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(SCP1853Data.Effect);
                     float Duration = SCP1853Data.Duration;
                     byte Intensity = SCP1853Data.Intensity;
                     ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
@@ -389,7 +389,7 @@ namespace UncomplicatedCustomItems.Events
                         return;
                     }
                     LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP1576Data.Effect} at intensity {SCP1576Data.Intensity}, duration is {SCP1576Data.Duration} to {ev.Player.Nickname}");
-                    StatusEffectBase Effect = SCP1576Data.Effect;
+                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(SCP1576Data.Effect);
                     float Duration = SCP1576Data.Duration;
                     byte Intensity = SCP1576Data.Intensity;
                     ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
@@ -446,7 +446,7 @@ namespace UncomplicatedCustomItems.Events
                                 }
 
                                 LogManager.Debug($"{nameof(OnChangedItem)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                StatusEffectBase Effect = EffectSettings.Effect;
+                                StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
                                 ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
@@ -574,7 +574,7 @@ namespace UncomplicatedCustomItems.Events
                             }
 
                             LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                            StatusEffectBase Effect = EffectSettings.Effect;
+                            StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
                             ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
@@ -623,7 +623,7 @@ namespace UncomplicatedCustomItems.Events
             Capybara.Clear();
         }
 
-        public void GrenadeExploding(ProjectileExplodedEventArgs ev)
+        public void GrenadeExploding(ProjectileExplodingEventArgs ev)
         {   
             if (ev.TimedGrenade == null || ev.Player == null || ev.Position == null)
                 return;
@@ -703,7 +703,7 @@ namespace UncomplicatedCustomItems.Events
             }
             else
             {
-                LogManager.Debug($"{ev.TimedGrenade.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.Projectile.Serial}");
+                LogManager.Debug($"{ev.TimedGrenade.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.TimedGrenade.Serial}");
             }
             if (CustomItem.HasModule(CustomFlags.Cluster))
             {
@@ -1020,7 +1020,7 @@ namespace UncomplicatedCustomItems.Events
                                     }
 
                                     LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                    StatusEffectBase Effect = EffectSettings.Effect;
+                                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
                                     float Duration = EffectSettings.EffectDuration;
                                     byte Intensity = EffectSettings.EffectIntensity;
                                     ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
@@ -1222,7 +1222,7 @@ namespace UncomplicatedCustomItems.Events
                             }
 
                             LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                            StatusEffectBase Effect = EffectSettings.Effect;
+                            StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
                             ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
@@ -1603,7 +1603,7 @@ namespace UncomplicatedCustomItems.Events
                                     return;
                                 }
                                 LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                StatusEffectBase Effect = EffectSettings.Effect;
+                                StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
                                 ev.Player?.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);

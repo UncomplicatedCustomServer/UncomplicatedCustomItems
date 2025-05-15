@@ -1,5 +1,5 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
+using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public int RequiredArgsCount { get; } = 1;
 
-        public string RequiredPermission { get; } = "uci.give";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.GivingItems;
 
         public string[] Aliases { get; } = ["g"];
 
@@ -49,14 +49,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         response = "Player not found!";
                         return false;
                     }
-                    else if (target.Role.Type == PlayerRoles.RoleTypeId.Spectator || target.Role.Type == PlayerRoles.RoleTypeId.Destroyed)
+                    else if (target.Role == PlayerRoles.RoleTypeId.Spectator || target.Role == PlayerRoles.RoleTypeId.Destroyed)
                     {
                         response = "Cannot give items to spectators!";
                         return false;
                     }
                     else if (target.IsInventoryFull)
                     {
-                        response = $"{target.DisplayNickname} Inventory is full!";
+                        response = $"{target.Nickname} Inventory is full!";
                         return false;
                     }
                     new SummonedCustomItem(customItem, target);
@@ -72,14 +72,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = "Player not found!";
                     return false;
                 }
-                else if (target.Role.Type == PlayerRoles.RoleTypeId.Spectator || target.Role.Type == PlayerRoles.RoleTypeId.Destroyed)
+                else if (target.Role == PlayerRoles.RoleTypeId.Spectator || target.Role == PlayerRoles.RoleTypeId.Destroyed)
                 {
                     response = "Cannot give items to spectators!";
                     return false;
                 }
                 else if (target.IsInventoryFull)
                 {
-                    response = $"{target.DisplayNickname} Inventory is full!";
+                    response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
                 new SummonedCustomItem(customItem, target);

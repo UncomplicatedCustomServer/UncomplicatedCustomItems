@@ -1,4 +1,4 @@
-using Exiled.API.Enums;
+using CustomPlayerEffects;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -35,7 +35,7 @@ namespace UncomplicatedCustomItems.API.Features
             new()
             {
                 EffectEvent = "EffectWhenUsed",
-                Effect = EffectType.AntiScp207,
+                Effect = typeof(Blurred),
                 EffectDuration = 1,
                 EffectIntensity = 1
             }

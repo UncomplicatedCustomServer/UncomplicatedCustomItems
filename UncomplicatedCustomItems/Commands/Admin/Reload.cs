@@ -1,7 +1,5 @@
 ﻿using CommandSystem;
-using Exiled.API.Features;
-using Exiled.API.Features.Items;
-using Exiled.API.Features.Pickups;
+using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
@@ -21,7 +19,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public int RequiredArgsCount { get; } = 0;
 
-        public string RequiredPermission { get; } = "uci.reload";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.ServerConfigs;
 
         public string[] Aliases { get; } = ["reload"];
 
@@ -63,20 +61,20 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     foreach (Item Item in player.Items)
                     {
-                        int id = player.Id;
+                        int id = player.PlayerId;
                         ushort Serial = Item.Serial;
                         if (SummonedCustomItem.TryGet(Serial, out SummonedCustomItem CustomItem))
                         {
                             CustomItems[CustomItem.CustomItem.Id] = player;
-                            LogManager.Debug($"Marked {Item.Type} from {player.DisplayNickname} for removal");
+                            LogManager.Debug($"Marked {Item.Type} from {player.Nickname} for removal");
                             ItemsToRemove.Add(Serial);
                         }
                     }
 
                     foreach (ushort Serial in ItemsToRemove)
                     {
-                        player.RemoveItem(Serial);
-                        LogManager.Debug($"Removed CustomItem with serial {Serial} from {player.DisplayNickname}");
+                        player.RemoveItem(Item.Get(Serial));
+                        LogManager.Debug($"Removed CustomItem with serial {Serial} from {player.Nickname}");
                     }
                 }
 

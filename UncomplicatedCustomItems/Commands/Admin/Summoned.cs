@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public int RequiredArgsCount { get; } = 0;
 
-        public string RequiredPermission { get; } = "uci.summoned";
+        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.GivingItems;
 
         public string[] Aliases { get; } = [];
 

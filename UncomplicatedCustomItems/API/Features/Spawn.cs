@@ -46,7 +46,7 @@ namespace UncomplicatedCustomItems.API.Features
         [
             new()
             {
-                Room = RoomType.Lcz914,
+                Room = RoomName.Lcz914,
                 Chance = 30
             }
         ];

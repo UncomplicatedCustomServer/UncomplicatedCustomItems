@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.Interfaces
 
         public string[] Aliases { get; }
 
-        public string RequiredPermission { get; }
+        public PlayerPermissions RequiredPermission { get; }
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response);
     }

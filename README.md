@@ -9,11 +9,11 @@
   <br><br>
 </div>
 
-**EXILED** >= `v9.5.0`
+**LabApi** >= `v0.7.0`
 <br><br>
 
 ## What's UncomplicatedCustomItems
-**UncomplicatedCustomItems** or **UCI** is a plugin for [EXILED](https://github.com/ExMod-Team/EXILED) that allow you to create fully configurable and customizable custom items with YAML.
+**UncomplicatedCustomItems** or **UCI** is a plugin for [LabApi](https://github.com/Northwood-Studios/LabApi) that allow you to create fully configurable and customizable custom items with YAML.
 You'll be able to configure the <ins>item</ins>, the <ins>damage</ins>, the <ins>description</ins> and many more things. 
 
 ## UCS Wiki
@@ -22,13 +22,13 @@ Check out the [UCS Wiki](https://uci.thaumielscpsl.site/ucswiki) for more inform
 ## Features
 **UCI** has lots of features like:
 - Unlimited number of custom items
-- Configs are in a separate file, not the EXILED default one
+- Configs are in a separate file, not the LabApi default one
 - Active community on **Discord**
 - __Special privileges and previews__ for verified server owners
 - In-game commands to handle the plugin and the items
 
 ## Installation
-Download the `UncomplicatedCustomItems.dll` from the [latest release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest) and put it inside the `EXILED/Plugins` folder.
+Download the `UncomplicatedCustomItems.dll` from the [latest release](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest) and put it inside the `LabApi/Port/Plugins` folder.
 
 ## Having skill issues? <= (Errors)
 Please do ucilogs in your server console then paste the code in the [Bug Report Forum](https://discord.com/channels/1170301876990914631/1230615155193151602) of our Discord server. <br> Please include instructions of how to replicate the bug if possible. <br>
