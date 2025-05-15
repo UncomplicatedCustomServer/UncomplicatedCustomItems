@@ -1,19 +1,17 @@
-﻿using Exiled.Events.EventArgs.Player;
-using UncomplicatedCustomItems.API;
+﻿using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using EventSource = Exiled.Events.Handlers.Player;
-using Exiled.API.Extensions;
+using EventSource = LabApi.Events.Handlers.PlayerEvents;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
-using Exiled.API.Enums;
-using MapEventSource = Exiled.Events.Handlers.Map;
-using Exiled.Events.EventArgs.Map;
-using Exiled.API.Features.Items;
-using Exiled.API.Features.Core.UserSettings;
+using MapEventSource = LabApi.Events.Handlers.ServerEvents;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using MEC;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
 using System.Collections.Generic;
+using LabApi.Events.Arguments.PlayerEvents;
+using UncomplicatedCustomItems.Extensions;
+using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -21,62 +19,61 @@ namespace UncomplicatedCustomItems.Events.Internal
     {   //EventSource.EVENT += EVENTNAME
         public static void Register()
         {
-            EventSource.ItemAdded += ShowItemInfoOnItemAdded;
+            EventSource.PickedUpItem += ShowItemInfoOnItemAdded;
             EventSource.DroppedItem += DroppedItemEvent;
             EventSource.ChangedItem += ChangeItemInHand;
             EventSource.ChangingItem += ChangingItemInHand;
-            EventSource.UsingItemCompleted += OnItemUsingCompleted;
-            EventSource.TogglingNoClip += NoclipButton;
+            EventSource.UsedItem += OnItemUsingCompleted;
+            EventSource.ToggledNoclip += NoclipButton;
             EventSource.Dying += DeathEvent;
             EventSource.ChangingRole += RoleChangeEvent;
-            EventSource.ThrownProjectile += ThrownProjectile;
-            EventSource.Shot += Damaged;
-            MapEventSource.ExplodingGrenade += GrenadeExploded;
+            EventSource.ThrewProjectile += ThrownProjectile;
+            EventSource.Hurting += Damaged;
+            MapEventSource.ProjectileExploded += GrenadeExploded;
         }
         // EventSource.EVENT -= EVENTNAME 
         public static void Unregister()
         {
-            EventSource.ItemAdded -= ShowItemInfoOnItemAdded;
+            EventSource.PickedUpItem -= ShowItemInfoOnItemAdded;
             EventSource.DroppedItem -= DroppedItemEvent;
             EventSource.ChangedItem -= ChangeItemInHand;
             EventSource.ChangingItem -= ChangingItemInHand;
-            EventSource.UsingItemCompleted -= OnItemUsingCompleted;
+            EventSource.UsedItem -= OnItemUsingCompleted;
             EventSource.Dying -= DeathEvent;
             EventSource.ChangingRole -= RoleChangeEvent;
-            EventSource.ThrownProjectile -= ThrownProjectile;
-            EventSource.Shot -= Damaged;
-            EventSource.TogglingNoClip -= NoclipButton;
-            MapEventSource.ExplodingGrenade -= GrenadeExploded;
+            EventSource.ThrewProjectile -= ThrownProjectile;
+            EventSource.Hurting -= Damaged;
+            EventSource.ToggledNoclip -= NoclipButton;
+            MapEventSource.ProjectileExploded -= GrenadeExploded;
         }
 
-        public static void Damaged(ShotEventArgs ev)
+        public static void Damaged(PlayerHurtingEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
                 IWeaponData WeaponData = CustomItem.CustomItem.CustomData as IWeaponData;
-                if (ItemExtensions.GetCategory(CustomItem.Item.Type) == ItemCategory.Firearm)
+                if (CustomItem.Item.Type.IsWeapon())
                 {
                     if (WeaponData.EnableFriendlyFire)
                     {
-                        if (ev.Target != null)
+                        if (ev.Player != null)
                         {
-                            ev.Target.Hurt(WeaponData.Damage, DamageType.Firearm);
-                            ev.Player.ShowHitMarker(1);
+                            ev.Player.Damage(WeaponData.Damage, ev.Attacker);
                         }
                     }
                 }
             }
         }
 
-        private static void GrenadeExploded(ExplodingGrenadeEventArgs ev)
+        private static void GrenadeExploded(ProjectileExplodedEventArgs ev)
         {
-            if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem Item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem Item))
                 return;
 
-            Item?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.Projectile.Serial); // Untested
+            Item?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial); // Untested
         }
 
-        private static void DroppedItemEvent(DroppedItemEventArgs ev)
+        private static void DroppedItemEvent(PlayerDroppedItemEventArgs ev)
         {
             if (ev.Pickup == null)
                 return;
@@ -96,7 +93,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// Show item name if it is custom item
         /// </summary>
         /// <param name="ev"></param>
-        private static void ShowItemInfoOnItemAdded(ItemAddedEventArgs ev)
+        private static void ShowItemInfoOnItemAdded(PlayerPickedUpItemEventArgs ev)
         {
             if (ev.Item is null)
                 return;
@@ -110,48 +107,46 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
         }
 
-        private static void OnItemUsingCompleted(UsingItemCompletedEventArgs ev)
+        private static void OnItemUsingCompleted(PlayerUsedItemEventArgs ev)
         {
             if (ev.Player == null)
                 return;
-            if (ev.Item == null)
+            if (ev.UsableItem == null)
                 return;
-            if (ev.Usable == null)
-                return;
-                
-            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem Item))
                 return;
 
             if (Item is null)
                 return;
             
-            Item.HandleEvent(ev.Player, ItemEvents.Use, ev.Item.Serial);
+            Item.HandleEvent(ev.Player, ItemEvents.Use, ev.UsableItem.Serial);
 
             Item?.ResetBadge(ev.Player);
 
             if (Item.CustomItem.Reusable)
-                ev.IsAllowed = false;
+                new SummonedCustomItem(Item.CustomItem, ev.Player);
         }
 
-        private static void ChangeItemInHand(ChangedItemEventArgs ev)
+        private static void ChangeItemInHand(PlayerChangedItemEventArgs ev)
         {
             if (ev.Player is null)
                 return;
 
-            if (ev.Item is null)
+            if (ev.NewItem is null)
                 return;
 
             if (ev.Player.CurrentItem is null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem item))
                 return;
 
             item.HandleSelectedDisplayHint();
             item.LoadBadge(ev.Player);
         }
 
-        private static void ChangingItemInHand(ChangingItemEventArgs ev)
+        private static void ChangingItemInHand(PlayerChangingItemEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
                 return;
@@ -178,17 +173,17 @@ namespace UncomplicatedCustomItems.Events.Internal
                 Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(item.Item.Base);
                 if (tier == Scp127Tier.Tier1)
                 {
-                    ev.Player.HumeShieldRegenerationMultiplier = 0f;
+                    ev.Player.HumeShieldRegenRate = 0f;
                     Timing.RunCoroutine(DecayRate(ev.Player, data.Tier1ShieldDecayRate));
                 }
                 else if (tier == Scp127Tier.Tier2)
                 {
-                    ev.Player.HumeShieldRegenerationMultiplier = 0f;
+                    ev.Player.HumeShieldRegenRate = 0f;
                     Timing.RunCoroutine(DecayRate(ev.Player, data.Tier2ShieldDecayRate));
                 }
                 else if (tier == Scp127Tier.Tier3)
                 {
-                    ev.Player.HumeShieldRegenerationMultiplier = 0f;
+                    ev.Player.HumeShieldRegenRate = 0f;
                     Timing.RunCoroutine(DecayRate(ev.Player, data.Tier3ShieldDecayRate));
                 }
                 else
@@ -197,7 +192,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
         }
 
-        internal static IEnumerator<float> DecayRate(Exiled.API.Features.Player player, float DecayRate)
+        internal static IEnumerator<float> DecayRate(LabApi.Features.Wrappers.Player player, float DecayRate)
         {
             for (; ; )
             {
@@ -213,9 +208,9 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
         }
 
-        private static void DeathEvent(DyingEventArgs ev)
+        private static void DeathEvent(PlayerDyingEventArgs ev)
         {
-            if (!ev.Player.IsConnected)
+            if (!ev.Player.Connection.isReady)
                 return;
 
             if (ev.Player == null)
@@ -236,12 +231,12 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
         }
 
-        private static void RoleChangeEvent(ChangingRoleEventArgs ev)
+        private static void RoleChangeEvent(PlayerChangingRoleEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
                 return;
 
-            if (!ev.Player.IsConnected)
+            if (!ev.Player.Connection.isReady)
                 return;
                 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
@@ -254,15 +249,15 @@ namespace UncomplicatedCustomItems.Events.Internal
             }
         }
 
-        private static void ThrownProjectile(ThrownProjectileEventArgs ev)
+        private static void ThrownProjectile(PlayerThrewProjectileEventArgs ev)
         {
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem item))
                 return;
 
             item?.ResetBadge(ev.Player);
         }
 
-        private static void NoclipButton(TogglingNoClipEventArgs ev)
+        private static void NoclipButton(PlayerToggledNoclipEventArgs ev)
         {
             if (ev.Player.CurrentItem is null)
                 return;
@@ -274,7 +269,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             if (Plugin.Instance.Config.Debug == true)
             {
-                if (ev.Player.RemoteAdminPermissions == PlayerPermissions.PlayersManagement)
+                if (ev.Player.RemoteAdminAccess)
                 {
                     Item.ShowDebugUi(ev.Player);
                 }

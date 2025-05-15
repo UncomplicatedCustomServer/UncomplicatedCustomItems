@@ -64,14 +64,14 @@ namespace UncomplicatedCustomItems
 
             PlayerEvent.Hurt += Handler.OnHurt;
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
-            PlayerEvent.Shooting += Handler.OnShooting;
-            PlayerEvent.UsingItemCompleted += Handler.OnItemUse;
-            ItemEvent. += Handler.OnChangingAttachments;
-            PlayerEvent.Changinga += Handler.OnWorkstationActivation;
+            PlayerEvent.ShootingWeapon += Handler.OnShooting;
+            PlayerEvent.UsedItem += Handler.OnItemUse;
+            //ItemEvent.PlayerChangingAttachments += Handler.OnChangingAttachments;
+            //PlayerEvent.PlayerActivatingWorkstation += Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem += Handler.OnDrop;
             MapEvent.PickupDestroyed += Handler.OnPickup;
             PlayerEvent.ShotWeapon += Handler.OnShot;
-            ItemEvent.ChargingJailbird += Handler.OnCharge;
+            //ItemEvent.ChargingJailbird += Handler.OnCharge;
             PlayerEvent.UpdatingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrewProjectile += Handler.ThrownProjectile;
             MapEvent.ProjectileExploded += Handler.GrenadeExploding;
@@ -92,7 +92,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ToggledFlashlight += Handler.ToggledFlashlight;
             Scp914Event.ProcessingPickup += Handler.OnPickupUpgrade;
             Scp914Event.ProcessingInventoryItem += Handler.OnItemUpgrade;
-            ServerEvent.RoundEnded += Handler.OnRoundEnd;
+            ServerEvent.RoundEnding += Handler.OnRoundEnd;
             MapEvent.PickupCreated += Handler.OnPickupCreation;
 
             // Debugging Events
@@ -167,11 +167,11 @@ namespace UncomplicatedCustomItems
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.ShootingWeapon -= Handler.OnShooting;
             PlayerEvent.UsingItemCompleted -= Handler.OnItemUse;
-            ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
-            PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
+            //ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
+            //PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
             PlayerEvent.ShotWeapon -= Handler.OnShot;
-            ItemEvent.ChargingJailbird -= Handler.OnCharge;
+            //ItemEvent.ChargingJailbird -= Handler.OnCharge;
             PlayerEvent.UpdatingEffect -= Handler.Receivingeffect;
             PlayerEvent.ThrewProjectile -= Handler.ThrownProjectile;
             MapEvent.ProjectileExploding -= Handler.GrenadeExploding;

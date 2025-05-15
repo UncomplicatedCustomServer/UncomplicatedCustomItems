@@ -530,7 +530,9 @@
     <Compile Include="API\Features\SpecificData\WeaponData.cs" />
     <Compile Include="API\Features\SpecificData\KeycardData.cs" />
     <Compile Include="API\Features\YAMLCustomItem.cs" />
+    <Compile Include="Enums\AmmoType.cs" />
     <Compile Include="Enums\CustomItemType.cs" />
+    <Compile Include="Enums\FirearmType.cs" />
     <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Enums\CustomFlags.cs" />
     <Compile Include="Events\EventHandler.cs" />
@@ -540,7 +542,9 @@
     <Compile Include="Example\ExampleCustomItem.cs" />
     <Compile Include="Extensions\CustomFlagsExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
+    <Compile Include="Extensions\FirearmItemExtensions.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
+    <Compile Include="Extensions\RoomExtensions.cs" />
     <Compile Include="Extensions\PlayerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />

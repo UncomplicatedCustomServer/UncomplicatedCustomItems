@@ -411,7 +411,7 @@ error = $"The item has been flagged as 'Armor' but the CustomData class is not '
                         {
                             if (Spawn.ReplaceExistingPickup)
                             {
-                                List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                                List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Name == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
                                 if (Spawn.ForceItem)
                                     FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
@@ -422,10 +422,10 @@ error = $"The item has been flagged as 'Armor' but the CustomData class is not '
                                 return;
                             }
                             else
-                                new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).Position);
+                                new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).FirstOrDefault().Position);
                         }
                         else
-                            new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).WorldPosition(DynamicSpawn.Coords));
+                            new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).FirstOrDefault().WorldPosition(DynamicSpawn.Coords));
                     }
                 }
             }

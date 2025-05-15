@@ -1,4 +1,8 @@
-﻿namespace UncomplicatedCustomItems.Extensions
+﻿using InventorySystem;
+using InventorySystem.Items;
+using UncomplicatedCustomItems.Enums;
+
+namespace UncomplicatedCustomItems.Extensions
 {
     /// <summary>
     /// A set of extensions for <see cref="ItemType"/>.
@@ -61,5 +65,46 @@
         /// <param name="type">The item to be checked.</param>
         /// <returns>Returns whether the <see cref="ItemType"/> is a keycard.</returns>
         public static bool IsKeycard(this ItemType type) => GetCategory(type) == ItemCategory.Keycard;
+
+        public static ItemCategory GetCategory(this ItemType type) => GetItemBase(type).Category;
+
+        public static ItemBase GetItemBase(this ItemType type)
+        {
+            if (!InventoryItemLoader.AvailableItems.TryGetValue(type, out ItemBase itemBase))
+                return null;
+
+            return itemBase;
+        }
+
+        public static AmmoType GetAmmoType(this ItemType type) => type switch
+        {
+            ItemType.Ammo9x19 => AmmoType.Nato9,
+            ItemType.Ammo556x45 => AmmoType.Nato556,
+            ItemType.Ammo762x39 => AmmoType.Nato762,
+            ItemType.Ammo12gauge => AmmoType.Ammo12Gauge,
+            ItemType.Ammo44cal => AmmoType.Ammo44Cal,
+            _ => AmmoType.None,
+        };
+
+        public static FirearmType GetFirearmType(this ItemType type) => type switch
+        {
+            ItemType.GunCOM15 => FirearmType.Com15,
+            ItemType.GunCOM18 => FirearmType.Com18,
+            ItemType.GunE11SR => FirearmType.E11SR,
+            ItemType.GunCrossvec => FirearmType.Crossvec,
+            ItemType.GunFSP9 => FirearmType.FSP9,
+            ItemType.GunLogicer => FirearmType.Logicer,
+            ItemType.GunRevolver => FirearmType.Revolver,
+            ItemType.GunAK => FirearmType.AK,
+            ItemType.GunA7 => FirearmType.A7,
+            ItemType.GunShotgun => FirearmType.Shotgun,
+            ItemType.GunCom45 => FirearmType.Com45,
+            ItemType.GunFRMG0 => FirearmType.FRMG0,
+            ItemType.ParticleDisruptor => FirearmType.ParticleDisruptor,
+            ItemType.GunSCP127 => FirearmType.GunSCP127,
+            _ => FirearmType.None,
+        };
+
+
     }
 }

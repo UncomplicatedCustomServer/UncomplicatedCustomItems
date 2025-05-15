@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Exiled.API.Enums;
 using MapGeneration;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;

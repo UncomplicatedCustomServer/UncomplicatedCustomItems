@@ -1,5 +1,4 @@
-﻿using Exiled.API.Enums;
-using MapGeneration;
+﻿using MapGeneration;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UncomplicatedCustomItems.Interfaces;

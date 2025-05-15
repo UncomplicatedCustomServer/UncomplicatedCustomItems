@@ -1,10 +1,10 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Pickups;
+﻿using LabApi.Features.Wrappers;
 using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Interfaces;
-using EventSource = Exiled.Events.Handlers.Server;
+using EventSource = LabApi.Events.Handlers.ServerEvents;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -27,12 +27,12 @@ namespace UncomplicatedCustomItems.Events.Internal
         {
             foreach (ICustomItem CustomItem in CustomItem.List)
             {
-                Log.Debug($"{CustomItem.Name} DoSpawn is set to {CustomItem.Spawn.DoSpawn}");
+                LogManager.Debug($"{CustomItem.Name} DoSpawn is set to {CustomItem.Spawn.DoSpawn}");
                 if (CustomItem.Spawn is not null && CustomItem.Spawn.DoSpawn)
                 {
                     for (uint count = 0; count < CustomItem.Spawn.Count; count++)
                     {
-                        Log.Debug($"Spawning {CustomItem.Name} ({count + 1}/{CustomItem.Spawn.Count})");
+                        LogManager.Debug($"Spawning {CustomItem.Name} ({count + 1}/{CustomItem.Spawn.Count})");
                         Utilities.SummonCustomItem(CustomItem);
                     }
                 }
@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                     {
                         if (pickup.Serial == customItem.Serial)
                         {
-                            pickup.Scale = customItem.CustomItem.Scale;
+                            pickup.GameObject.transform.localScale = customItem.CustomItem.Scale;
                             pickup.Weight = customItem.CustomItem.Weight;
                         }
                     }
