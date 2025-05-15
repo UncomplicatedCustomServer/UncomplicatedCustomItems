@@ -1,3 +1,4 @@
+using CustomPlayerEffects;
 using System;
 
 namespace UncomplicatedCustomItems.Interfaces
@@ -6,7 +7,7 @@ namespace UncomplicatedCustomItems.Interfaces
     {
         public abstract string EffectEvent { get; set; }
 
-        public abstract Type Effect {get; set; }
+        public abstract string Effect {get; set; }
 
         public abstract byte EffectIntensity { get; set; }
 

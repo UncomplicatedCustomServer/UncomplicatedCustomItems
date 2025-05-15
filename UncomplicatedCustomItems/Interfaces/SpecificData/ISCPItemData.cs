@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP500Data
     {
-        public abstract Type Effect { get; set; }
+        public abstract string Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
     }
@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP207Data
     {
-        public abstract Type Effect { get; set; }
+        public abstract string Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
         public abstract bool Apply207Effect { get; set; }
@@ -75,7 +75,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP1853Data
     {
-        public abstract Type Effect { get; set; }
+        public abstract string Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
         public abstract bool Apply1853Effect { get; set; }
@@ -87,7 +87,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP1576Data
     {
-        public abstract Type Effect { get; set; }
+        public abstract string Effect { get; set; }
         public abstract float Duration { get; set; }
         public abstract byte Intensity { get; set; }
     }

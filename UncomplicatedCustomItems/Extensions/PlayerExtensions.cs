@@ -122,12 +122,5 @@ namespace UncomplicatedCustomItems.Extensions
             if (!skipJump)
                 player.Position += Vector3.up * 0.25f;
         }
-        public static StatusEffectBase? GetEffectDynamic(this Player player, Type effectType)
-        {
-            PlayerEffectsController controller = player.ReferenceHub.playerEffectsController;
-            System.Reflection.MethodInfo method = typeof(PlayerEffectsController).GetMethod("GetEffect")?.MakeGenericMethod(effectType);
-            return method?.Invoke(controller, null) as StatusEffectBase;
-        }
-
     }
 }

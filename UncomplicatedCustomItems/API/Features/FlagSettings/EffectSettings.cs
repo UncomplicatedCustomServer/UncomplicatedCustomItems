@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// Sets the <see cref="EffectType"/> that the <see cref="ICustomItem"/> will apply.
         /// </summary>
         [Description("Sets the effect that the custom item will apply.")]
-        public Type Effect { get; set; }
+        public string Effect { get; set; }
 
         /// <summary>
         /// Sets the intensity of the <see cref="EffectType"/> applied by the <see cref="ICustomItem"/>.

@@ -30,7 +30,6 @@ using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.Scp914Events;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem.Items.Keycards;
-using UncomplicatedCustomItems.Events.Internal;
 using Player = LabApi.Features.Wrappers.Player;
 using AdminToys;
 using PrimitiveObjectToy = LabApi.Features.Wrappers.PrimitiveObjectToy;
@@ -110,7 +109,7 @@ namespace UncomplicatedCustomItems.Events
                         {
                             if (EffectSettings.EffectEvent == "EffectShot")
                             {
-                                if (EffectSettings.Effect.ToString() == string.Empty)
+                                if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == EffectSettings.Effect))
                                 {
                                     LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {summonedCustomItem.CustomItem.Id} Name: {summonedCustomItem.CustomItem.Name}");
                                     return;
@@ -127,10 +126,10 @@ namespace UncomplicatedCustomItems.Events
                                 }
 
                                 LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player.Nickname}");
-                                StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
+                                string Effect = EffectSettings.Effect;
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player?.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                                ev.Player?.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                             }
                         }
                         else
@@ -252,12 +251,12 @@ namespace UncomplicatedCustomItems.Events
             {
                 foreach (EffectSettings EffectSettings in customItem.CustomItem.FlagSettings.EffectSettings)
                 {
+                    
                     if (EffectSettings.EffectEvent != null)
                     {
-
                         if (EffectSettings.EffectEvent == "EffectWhenUsed")
                         {
-                            if (EffectSettings.Effect.ToString() == string.Empty)
+                            if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == EffectSettings.Effect))
                             {
                                 LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                 return;
@@ -274,10 +273,10 @@ namespace UncomplicatedCustomItems.Events
                             }
 
                             LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                            StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
+                            string Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                            ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -302,9 +301,9 @@ namespace UncomplicatedCustomItems.Events
                 ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
                 ISCP1853Data SCP1853Data = CustomItem.CustomItem.CustomData as ISCP1853Data;
                 ISCP1576Data SCP1576Data = CustomItem.CustomItem.CustomData as ISCP1576Data;
-                if (ev.Item.Type == ItemType.SCP500)
+                if (ev.UsableItem.Type == ItemType.SCP500)
                 {
-                    if (SCP500Data.Effect.ToString() == string.Empty)
+                    if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == SCP500Data.Effect))
                     {
                         LogManager.Warn($"Invalid Effect: {SCP500Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
@@ -320,14 +319,14 @@ namespace UncomplicatedCustomItems.Events
                         return;
                     }
                     LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP500Data.Effect} at intensity {SCP500Data.Intensity}, duration is {SCP500Data.Duration} to {ev.Player.Nickname}");
-                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(SCP500Data.Effect);
+                    string Effect = SCP500Data.Effect;
                     float Duration = SCP500Data.Duration;
                     byte Intensity = SCP500Data.Intensity;
-                    ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                    ev.Player?.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, true);
                 }
                 if (ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207)
                 {
-                    if (SCP207Data.Effect.ToString() == string.Empty)
+                    if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == SCP207Data.Effect))
                     {
                         LogManager.Warn($"Invalid Effect: {SCP207Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
@@ -343,14 +342,14 @@ namespace UncomplicatedCustomItems.Events
                         return;
                     }
                     LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP207Data.Effect} at intensity {SCP207Data.Intensity}, duration is {SCP207Data.Duration} to {ev.Player.Nickname}");
-                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(SCP207Data.Effect);
+                    string Effect = SCP207Data.Effect;
                     float Duration = SCP207Data.Duration;
                     byte Intensity = SCP207Data.Intensity;
-                    ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                    ev.Player?.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, true);
                 }
                 if (ev.UsableItem.Type == ItemType.SCP1853)
                 {
-                    if (SCP1853Data.Effect.ToString() == string.Empty)
+                    if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == SCP1853Data.Effect))
                     {
                         LogManager.Warn($"Invalid Effect: {SCP1853Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
@@ -366,14 +365,14 @@ namespace UncomplicatedCustomItems.Events
                         return;
                     }
                     LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP1853Data.Effect} at intensity {SCP1853Data.Intensity}, duration is {SCP1853Data.Duration} to {ev.Player.Nickname}");
-                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(SCP1853Data.Effect);
+                    string Effect = SCP1853Data.Effect;
                     float Duration = SCP1853Data.Duration;
                     byte Intensity = SCP1853Data.Intensity;
-                    ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                    ev.Player?.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, true);
                 }
                 if (ev.UsableItem.Type == ItemType.SCP1576)
                 {
-                    if (SCP1576Data.Effect.ToString() == string.Empty)
+                    if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == SCP1576Data.Effect))
                     {
                         LogManager.Warn($"Invalid Effect: {SCP1576Data.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                         return;
@@ -389,15 +388,15 @@ namespace UncomplicatedCustomItems.Events
                         return;
                     }
                     LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {SCP1576Data.Effect} at intensity {SCP1576Data.Intensity}, duration is {SCP1576Data.Duration} to {ev.Player.Nickname}");
-                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(SCP1576Data.Effect);
+                    string Effect = SCP1576Data.Effect;
                     float Duration = SCP1576Data.Duration;
                     byte Intensity = SCP1576Data.Intensity;
-                    ev.Player?.EnableEffect(Effect, Intensity, Duration, true);
+                    ev.Player?.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, true);
                 }
-                if (ev.Item.Type == ItemType.SCP207 || ev.Item.Type == ItemType.AntiSCP207)
+                if (ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207)
                     if (SCP207Data.RemoveItemAfterUse == false)
                         new SummonedCustomItem(CustomItem.CustomItem, ev.Player);
-                if (ev.Item.Type == ItemType.SCP1853)
+                if (ev.UsableItem.Type == ItemType.SCP1853)
                     if (SCP1853Data.RemoveItemAfterUse == false)
                         new SummonedCustomItem(CustomItem.CustomItem, ev.Player);
                 if (CustomItem.Item.Type == ItemType.Adrenaline || CustomItem.Item.Type == ItemType.Medkit || CustomItem.Item.Type == ItemType.Painkillers)
@@ -429,7 +428,7 @@ namespace UncomplicatedCustomItems.Events
                         {
                             if (EffectSettings.EffectEvent == "EffectWhenEquiped")
                             {
-                                if (EffectSettings.Effect.ToString() == string.Empty)
+                                if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == EffectSettings.Effect))
                                 {
                                     LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                                     return;
@@ -446,10 +445,10 @@ namespace UncomplicatedCustomItems.Events
                                 }
 
                                 LogManager.Debug($"{nameof(OnChangedItem)}: Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
+                                string Effect = EffectSettings.Effect;
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                             }
                         }
                         else
@@ -557,7 +556,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         if (EffectSettings.EffectEvent == "EffectWhenEquiped")
                         {
-                            if (EffectSettings.Effect.ToString() == string.Empty)
+                            if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == EffectSettings.Effect))
                             {
                                 LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                                 return;
@@ -574,10 +573,10 @@ namespace UncomplicatedCustomItems.Events
                             }
 
                             LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                            StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
+                            string Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                            ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -1003,7 +1002,7 @@ namespace UncomplicatedCustomItems.Events
                             {
                                 if (EffectSettings.EffectEvent == "EffectWhenEquiped")
                                 {
-                                    if (EffectSettings.Effect == null)
+                                    if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == EffectSettings.Effect))
                                     {
                                         LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                                         return;
@@ -1020,10 +1019,10 @@ namespace UncomplicatedCustomItems.Events
                                     }
 
                                     LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                    StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
+                                    string Effect = EffectSettings.Effect;
                                     float Duration = EffectSettings.EffectDuration;
                                     byte Intensity = EffectSettings.EffectIntensity;
-                                    ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                                    ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                                 }
                             }
                             else
@@ -1205,7 +1204,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         if (EffectSettings.EffectEvent == "EffectWhenUsed")
                         {
-                            if (EffectSettings.Effect.ToString() == string.Empty)
+                            if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == EffectSettings.Effect))
                             {
                                 LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {CustomItem.CustomItem.Id} Name: {CustomItem.CustomItem.Name}");
                                 return;
@@ -1222,10 +1221,10 @@ namespace UncomplicatedCustomItems.Events
                             }
 
                             LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                            StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
+                            string Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                            ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -1587,7 +1586,7 @@ namespace UncomplicatedCustomItems.Events
                             if (EffectSettings.EffectEvent == "EffectWhenUsed")
                             {
                                 LogManager.Debug($"{EffectSettings.EffectEvent} = EffectWhenUsed");
-                                if (EffectSettings.Effect.ToString() == string.Empty)
+                                if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == EffectSettings.Effect))
                                 {
                                     LogManager.Warn($"Invalid Effect: {EffectSettings.Effect} for ID: {customItem.CustomItem.Id} Name: {customItem.CustomItem.Name}");
                                     return;
@@ -1603,10 +1602,10 @@ namespace UncomplicatedCustomItems.Events
                                     return;
                                 }
                                 LogManager.Debug($"Applying effect {EffectSettings.Effect} at intensity {EffectSettings.EffectIntensity}, duration is {EffectSettings.EffectDuration} to {ev.Player}");
-                                StatusEffectBase Effect = ev.Player.GetEffectDynamic(EffectSettings.Effect);
+                                string Effect = EffectSettings.Effect;
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player?.EnableEffect(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                                ev.Player?.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                             }
                         }
                         else
@@ -1741,7 +1740,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 LogManager.Debug($"{ev.Player.Nickname} is reciving {ev.Effect}.");
                 ISCP207Data SCP207Data = CustomItem.CustomItem.CustomData as ISCP207Data;
-                if (ev.Effect.GetType() == typeof(Scp207) || ev.Effect.GetType() == typeof(AntiScp207))
+                if (ev.Effect.GetType() == typeof(CustomPlayerEffects.Scp207) || ev.Effect.GetType() == typeof(CustomPlayerEffects.AntiScp207))
                 {
                     LogManager.Debug("Effect is from a 207 custom item.");
                     if (SCP207Data.Apply207Effect == false)

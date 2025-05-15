@@ -63,12 +63,12 @@ namespace UncomplicatedCustomItems
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.ShootingWeapon += Handler.OnShooting;
             PlayerEvent.UsedItem += Handler.OnItemUse;
-            //ItemEvent.PlayerChangingAttachments += Handler.OnChangingAttachments;
-            //PlayerEvent.PlayerActivatingWorkstation += Handler.OnWorkstationActivation;
+            //ItemEvent.PlayerChangingAttachments += Handler.OnChangingAttachments; No event for this :(
+            //PlayerEvent.PlayerActivatingWorkstation += Handler.OnWorkstationActivation; No event for this :(
             PlayerEvent.DroppedItem += Handler.OnDrop;
             MapEvent.PickupDestroyed += Handler.OnPickup;
             PlayerEvent.ShotWeapon += Handler.OnShot;
-            //ItemEvent.ChargingJailbird += Handler.OnCharge;
+            //ItemEvent.ChargingJailbird += Handler.OnCharge; No event for this :(
             PlayerEvent.UpdatingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrewProjectile += Handler.ThrownProjectile;
             MapEvent.ProjectileExploding += Handler.GrenadeExploding;

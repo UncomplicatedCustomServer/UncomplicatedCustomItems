@@ -2,6 +2,8 @@
 using System;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features.Helper;
+using CustomPlayerEffects;
+using System.Linq;
 
 namespace UncomplicatedCustomItems.Extensions
 {
@@ -60,6 +62,16 @@ namespace UncomplicatedCustomItems.Extensions
                 LogManager.Warn($"Input string '{inputString}' does not have at least 3 components for TryParseVector3.");
                 return false;
             }
+        }
+        
+        public static StatusEffectBase ToStatusEffect(this string effectTypeName)
+        {
+            Type effectType = AppDomain.CurrentDomain.GetAssemblies().SelectMany(asm => asm.GetTypes()).FirstOrDefault(t => typeof(StatusEffectBase).IsAssignableFrom(t) && t.Name.Equals(effectTypeName, StringComparison.OrdinalIgnoreCase));
+
+            if (effectType == null)
+                throw new InvalidOperationException($"No StatusEffectBase with type name '{effectTypeName}' was found.");
+
+            return Activator.CreateInstance(effectType) as StatusEffectBase;
         }
     }
 }

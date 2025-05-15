@@ -33,8 +33,8 @@ namespace UncomplicatedCustomItems.API.Features
             else
                 EnableAudioApi = true;
         }
-        private bool CheckForAudioPlayerApiDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly == "AudioPlayerApi");
-        private bool CheckForNVorbisDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly == "NVorbis");
+        private bool CheckForAudioPlayerApiDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("AudioPlayerApi", StringComparison.OrdinalIgnoreCase));
+        private bool CheckForNVorbisDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("NVorbis", StringComparison.OrdinalIgnoreCase));
         /// <summary>
         /// Clamps the value between the minimum and maximum.
         /// </summary>

@@ -35,7 +35,7 @@ namespace UncomplicatedCustomItems.API.Features
             new()
             {
                 EffectEvent = "EffectWhenUsed",
-                Effect = typeof(Blurred),
+                Effect = "Flashed",
                 EffectDuration = 1,
                 EffectIntensity = 1
             }
