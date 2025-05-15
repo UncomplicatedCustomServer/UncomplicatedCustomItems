@@ -69,7 +69,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value.Replace("%name%", ParentKeycard.Base.Owner.nicknameSync.ToString()) };
+                        object[] args = { value.Replace("%name%", ParentKeycard.Base.Owner.nicknameSync.MyNick) };
                         ArraySegment<object> arguments = new(args);
                         nametagDetail.SetArguments(arguments);
                         NameTagDic.TryAdd(ParentKeycard.Serial, value);

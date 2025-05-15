@@ -220,7 +220,9 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Weapon:
-                        /*List<string> attachmentList = GetAttachmentsList();
+                        /*
+                        I'll figure our firearms later.
+                        List<string> attachmentList = GetAttachmentsList();
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
                         if (!PropertiesSet)
@@ -238,34 +240,35 @@ namespace UncomplicatedCustomItems.API.Features
                             LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
                             
                         }
-                        PropertiesSet = true;*/
+                        PropertiesSet = true;
+                        */
                         break;
 
                     case CustomItemType.Jailbird:
-                        Jailbird Jailbird = Item as Jailbird;
-                        IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
+                        Jailbird jailbird = Item as Jailbird;
+                        IJailbirdData jailbirdData = CustomItem.CustomData as IJailbirdData;
 
-                        Jailbird.Base._hitreg._hitregRadius = JailbirdData.Radius;
-                        Jailbird.Base._hitreg._damageCharge = JailbirdData.ChargeDamage;
-                        Jailbird.Base._hitreg._damageMelee = JailbirdData.MeleeDamage;
-                        Jailbird.Base._hitreg._flashedDuration = JailbirdData.FlashDuration;
+                        jailbird.Base._hitreg._flashedDuration = jailbirdData.FlashDuration;
+                        jailbird.Base._hitreg._hitregRadius = jailbirdData.Radius;
+                        jailbird.Base._hitreg._damageCharge = jailbirdData.ChargeDamage;
+                        jailbird.Base._hitreg._damageMelee = jailbirdData.MeleeDamage;
                         PropertiesSet = true;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
-                            IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
-                            LabApi.Features.Wrappers.ThrowableItem ThrowableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
-                            ExplosionGrenade baseGrenade = ThrowableItem.Base.Projectile as ExplosionGrenade;
-                            ExplosiveGrenade ExplosiveGrenade = ExplosiveGrenadeProjectile.Get(baseGrenade);
+                        IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+                        LabApi.Features.Wrappers.ThrowableItem ThrowableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
+                        ExplosionGrenade baseGrenade = ThrowableItem.Base.Projectile as ExplosionGrenade;
+                        ExplosiveGrenade ExplosiveGrenade = ExplosiveGrenadeProjectile.Get(baseGrenade);
 
-                            ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
-                            ThrowableItem.Base._pinPullTime = ExplosiveGrenadeData.PinPullTime;
-                            ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
-                            ExplosiveGrenade.Base._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
-                            ExplosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
-                            ExplosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
-                            ThrowableItem.Base._repickupable = ExplosiveGrenadeData.Repickable;
-                            ExplosiveGrenade.RemainingTime = ExplosiveGrenadeData.FuseTime;
+                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        ThrowableItem.Base._pinPullTime = ExplosiveGrenadeData.PinPullTime;
+                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        ExplosiveGrenade.Base._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
+                        ExplosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
+                        ExplosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
+                        ThrowableItem.Base._repickupable = ExplosiveGrenadeData.Repickable;
+                        ExplosiveGrenade.RemainingTime = ExplosiveGrenadeData.FuseTime;
                         break;
 
                     case CustomItemType.FlashGrenade:
@@ -397,7 +400,9 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Weapon:
+                        LogManager.Warn($"Customizing Weapon Data currently is not available.");
                     /*
+                        I'll figure our firearms later.
                         List<string> attachmentList = GetAttachmentsList();
                         FirearmItem firearm = (FirearmItem)FirearmItem.Get((Firearm)Item.Base);
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
@@ -592,19 +597,6 @@ namespace UncomplicatedCustomItems.API.Features
                                 WeaponData.Inaccuracy = Firearm.Inaccuracy;
                                 WeaponData.DamageFalloffDistance = Firearm.DamageFalloffDistance;
                                 */
-                            }
-                            break;
-                        }
-                    case CustomItemType.Jailbird:
-                        {
-                            Jailbird Jailbird = Item as Jailbird;
-                            IJailbirdData JailbirdData = CustomItem.CustomData as IJailbirdData;
-                            if (Jailbird != null && JailbirdData != null)
-                            {
-                                JailbirdData.Radius = Jailbird.Base._hitreg._hitregRadius;
-                                JailbirdData.ChargeDamage = Jailbird.Base._hitreg._damageCharge;
-                                JailbirdData.MeleeDamage = Jailbird.Base._hitreg._damageMelee;
-                                JailbirdData.FlashDuration = Jailbird.Base._hitreg._flashedDuration;
                             }
                             break;
                         }

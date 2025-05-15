@@ -14,12 +14,12 @@ namespace UncomplicatedCustomItems.Enums
         LifeSteal = 1L << 2,
         InfiniteAmmo = 1L << 3,
         DieOnUse = 1L << 4,
-        WorkstationBan = 1L << 5,
+        WorkstationBan = 1L << 5, // Dosent work since theres no events for workstations.
         ItemGlow = 1L << 6,
         EffectWhenUsed = 1L << 7,
         EffectShot = 1L << 8,
         EffectWhenEquiped = 1L << 9,
-        NoCharge = 1L << 10,
+        NoCharge = 1L << 10, // Dosent work since theres no events for Jailbirds.
         CustomSound = 1L << 11,
         ExplosiveBullets = 1L << 12,
         ToolGun = 1L << 13,
@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems.Enums
         Disguise = 1L << 21,
         Craftable = 1L << 22,
         HealOnKill = 1L << 23,
-        Capybara = 1L << 24,
+        Capybara = 1L << 24, // Capybara
         Custom = 1L << 48, // This should only be used if your coding your own CustomFlag
     }
 }
