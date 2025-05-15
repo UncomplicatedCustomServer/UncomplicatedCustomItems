@@ -92,6 +92,7 @@ namespace UncomplicatedCustomItems
             Scp914Event.ProcessingInventoryItem += Handler.OnItemUpgrade;
             ServerEvent.RoundEnding += Handler.OnRoundEnd;
             MapEvent.PickupCreated += Handler.OnPickupCreation;
+            PlayerEvent.ToggledWeaponFlashlight += Handler.WeaponFlashLight;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -211,6 +212,7 @@ namespace UncomplicatedCustomItems
             Scp914Event.ProcessingInventoryItem -= Handler.OnItemUpgrade;
             ServerEvent.RoundEnding -= Handler.OnRoundEnd;
             MapEvent.PickupCreated -= Handler.OnPickupCreation;
+            PlayerEvent.ToggledWeaponFlashlight -= Handler.WeaponFlashLight;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

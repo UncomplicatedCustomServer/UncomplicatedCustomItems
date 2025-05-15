@@ -35,6 +35,7 @@ using AdminToys;
 using PrimitiveObjectToy = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using LabApi.Features.Extensions;
 using UncomplicatedCustomItems.API.Wrappers;
+using UncomplicatedCustomItems.Events.Internal;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -67,6 +68,7 @@ namespace UncomplicatedCustomItems.Events
         internal static Dictionary<PrimitiveObjectToy, int> ToolGunPrimitives = [];
 
         internal static Dictionary<int, LABAPI.CapybaraToy> Capybara = [];
+        private static readonly CachedLayerMask ToolGunMask = new("Default", "Door");
         public void OnHurt(PlayerHurtEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null)
@@ -182,13 +184,14 @@ namespace UncomplicatedCustomItems.Events
                 customItem.HitscanHitregModule.BaseBulletInaccuracy = data.Inaccuracy;
             }
 
-            if (!customItem.CustomItem.CustomFlags.HasValue || customItem.HasModule(CustomFlags.None))
+            if (!customItem.CustomItem.CustomFlags.HasValue || !customItem.HasModule(CustomFlags.None))
                 return;
 
             if (customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
                 IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
                 customItem.MagazineModule.AmmoStored = data.MaxMagazineAmmo;
+                customItem.MagazineModule.ServerResyncData();
                 LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
             }
             if (customItem.HasModule(CustomFlags.CustomSound))
@@ -920,7 +923,7 @@ namespace UncomplicatedCustomItems.Events
 
                     Extensions.StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
                     string hexcolor = Vector3Extensions.ToHexColor(color);
-                    string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{player.Nickname} - {player.Role.GetFullName()}</color></voffset>\n<pos=-10em>{player.Room} - <color=yellow>{player.Room.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
+                    string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{player.Nickname} - {player.Role.GetFullName()}</color></voffset>\n<pos=-10em>{player.Room.Name} - <color=yellow>{player.Room.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
                     player.SendHint($"<align=left>{hinttext}</align>", 0.5f);
                     yield return Timing.WaitForOneFrame;
                 }
@@ -1159,7 +1162,15 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
+        public void WeaponFlashLight(PlayerToggledWeaponFlashlightEventArgs ev)
+        {
+            if (ev.FirearmItem == null || ev.Player == null)
+                return;
+            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem CustomItem))
+                return;
 
+            CustomItem.FlashLightToggle = ev.NewState;
+        }
         public void FlippedCoin(PlayerFlippedCoinEventArgs ev)
         {
             if (ev.CoinItem == null || ev.Player == null)
@@ -1613,7 +1624,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (Physics.Raycast(ev.Player.GameObject.transform.position, ev.Player.GameObject.transform.forward, out RaycastHit hitInfo, 100f))
+            if (Physics.Raycast(ev.Player.Camera.position, ev.Player.Camera.forward, out RaycastHit hitInfo, 100f, ToolGunMask))
             {
                 if (customItem.HasModule(CustomFlags.ExplosiveBullets))
                 {
@@ -1642,7 +1653,7 @@ namespace UncomplicatedCustomItems.Events
                             }
                         }
                     }
-                    else if (deletionMode.SyncIsB && ev.FirearmItem.FlashLightStatus())
+                    else if (deletionMode.SyncIsB && customItem.FlashLightToggle)
                     {
                         foreach (PrimitiveObjectToy primitive in AdminToy.List.OfType<PrimitiveObjectToy>().ToList())
                         {

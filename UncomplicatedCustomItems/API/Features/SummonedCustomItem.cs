@@ -21,7 +21,6 @@ using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Modules;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
-using Firearm = LabApi.Features.Wrappers.FirearmItem;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using ExplosiveGrenade = LabApi.Features.Wrappers.ExplosiveGrenadeProjectile;
 using FlashGrenade = LabApi.Features.Wrappers.FlashbangProjectile;
@@ -30,6 +29,7 @@ using Scp2176 = LabApi.Features.Wrappers.Scp2176Projectile;
 using Scp244 = LabApi.Features.Wrappers.Scp244Item;
 using InventorySystem.Items.ThrowableProjectiles;
 using LabApi.Events.Arguments.PlayerEvents;
+using InventorySystem.Items.Firearms.Modules.Scp127;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -98,6 +98,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// Check if this item is a pickup
         /// </summary>
         public bool IsPickup => Pickup is not null;
+
+        internal bool FlashLightToggle { get; set; }
 
         internal bool PropertiesSet { get; set; }
 
@@ -220,28 +222,35 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Weapon:
-                        /*
-                        I'll figure our firearms later.
                         List<string> attachmentList = GetAttachmentsList();
-                        Firearm Firearm = Item as Firearm;
+                        FirearmItem firearm = Item as FirearmItem;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
-                        if (!PropertiesSet)
-                            MagCheck(Firearm, WeaponData);
-                        Firearm.MagazineAmmo = WeaponData.MaxAmmo;
-                        Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
-                        Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
-                        Firearm.AmmoDrain = WeaponData.AmmoDrain;
-                        Firearm.Penetration = WeaponData.Penetration;
-                        Firearm.Inaccuracy = WeaponData.Inaccuracy;
-                        Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        foreach (ModuleBase module in firearm.Base.Modules)
+                        {
+                            switch (module)
+                            {
+                                case MagazineModule magazine when MagazineModule == null:
+                                    MagazineModule = magazine;
+                                    break;
+
+                                case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
+                                    HitscanHitregModule = hitscan;
+                                    break;
+                            }
+                        }
+                        MagazineModule.AmmoStored = WeaponData.MaxAmmo;
+                        HitscanHitregModule.BaseDamage = WeaponData.Damage;
+                        MagazineModule._defaultCapacity = WeaponData.MaxMagazineAmmo;
+                        HitscanHitregModule.BasePenetration = WeaponData.Penetration;
+                        HitscanHitregModule.BaseBulletInaccuracy = WeaponData.Inaccuracy;
+                        HitscanHitregModule.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        MagazineModule.ServerResyncData();
                         foreach (string attachmentstring in attachmentList)
                         {
+                            // Ill figure out attachments later seems like a pain in the ass
                             Enum.TryParse(attachmentstring, out AttachmentName attachment);
                             LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                            
                         }
-                        PropertiesSet = true;
-                        */
                         break;
 
                     case CustomItemType.Jailbird:
@@ -303,34 +312,33 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             else if (Item.Type == ItemType.GunSCP127)
                             {
+                                Scp127MagazineModule Scp127MagazineModule = new();
+                                Scp127Hitscan Scp127Hitscan = new();
+
                                 LogManager.Debug($"SCPItem is SCP-127");
-                                Firearm ScpFirearm = Item as Firearm;
-                                if (ScpFirearm == null)
-                                    LogManager.Error($"ScpFirearm is Null!");
+                                FirearmItem ScpFirearm = Item as FirearmItem;
                                 ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
-                                if (Scp127Data == null)
-                                    LogManager.Error($"Scp127Data is null!");
-                                else
+                                foreach (ModuleBase module in ScpFirearm.Base.Modules)
                                 {
-                                    try
+                                    switch (module)
                                     {
-                                        /*
-                                        8ScpFirearm.MagazineAmmo = Scp127Data.MaxAmmo;
-                                        ScpFirearm.Damage = Scp127Data.Damage;
-                                        ScpFirearm.MaxMagazineAmmo = Scp127Data.MaxMagazineAmmo;
-                                        ScpFirearm.MaxBarrelAmmo = Scp127Data.MaxBarrelAmmo;
-                                        ScpFirearm.AmmoDrain = Scp127Data.AmmoDrain;
-                                        ScpFirearm.Penetration = Scp127Data.Penetration;
-                                        ScpFirearm.Inaccuracy = Scp127Data.Inaccuracy;
-                                        ScpFirearm.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
-                                        */
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        LogManager.Error($"Error when trying to parse Custom127 {ex.Message}\n{ex.StackTrace}");
+                                        case Scp127MagazineModule mag when Scp127MagazineModule == null:
+                                            Scp127MagazineModule = mag;
+                                            break;
+
+                                        case Scp127Hitscan hitscan when Scp127Hitscan == null:
+                                            Scp127Hitscan = hitscan;
+                                            break;
                                     }
                                 }
 
+                                Scp127MagazineModule.AmmoStored = Scp127Data.MaxAmmo;
+                                Scp127Hitscan.BaseDamage = Scp127Data.Damage;
+                                Scp127MagazineModule._defaultCapacity = Scp127Data.MaxMagazineAmmo;
+                                Scp127Hitscan.BasePenetration = Scp127Data.Penetration;
+                                Scp127Hitscan.BaseBulletInaccuracy = Scp127Data.Inaccuracy;
+                                Scp127Hitscan.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
+                                Scp127MagazineModule.ServerResyncData();
                             }
                             break;
                         }
@@ -400,9 +408,6 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Weapon:
-                        LogManager.Warn($"Customizing Weapon Data currently is not available.");
-                    /*
-                        I'll figure our firearms later.
                         List<string> attachmentList = GetAttachmentsList();
                         FirearmItem firearm = (FirearmItem)FirearmItem.Get((Firearm)Item.Base);
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
@@ -417,32 +422,27 @@ namespace UncomplicatedCustomItems.API.Features
                                 case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
                                     HitscanHitregModule = hitscan;
                                     break;
-
-                                case IAmmoContainerModule barrelammo when BarrelModule == null:
-                                    BarrelModule = barrelammo;
-                                    break;
                             }
                         }
 
-                        MagazineModule.AmmoMax = WeaponData.MaxAmmo;
+                        MagazineModule.AmmoStored = WeaponData.MaxAmmo;
                         HitscanHitregModule.BaseDamage = WeaponData.Damage;
-                        MagazineModule.AmmoMax = WeaponData.MaxMagazineAmmo;
-                        BarrelModule.AmmoMax = WeaponData.MaxBarrelAmmo;
-                        firearm.Base.AmmoDrain = WeaponData.AmmoDrain;
-                        firearm.Base.Penetration = WeaponData.Penetration;
-                        firearm.Base.Inaccuracy = WeaponData.Inaccuracy;
-                        firearm.Base.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        MagazineModule._defaultCapacity = WeaponData.MaxMagazineAmmo;
+                        HitscanHitregModule.BasePenetration = WeaponData.Penetration;
+                        HitscanHitregModule.BaseBulletInaccuracy = WeaponData.Inaccuracy;
+                        HitscanHitregModule.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        MagazineModule.ServerResyncData();
                         foreach (string attachmentstring in attachmentList)
                         {
+                            // Ill figure out attachments later seems like a pain in the ass
                             Enum.TryParse(attachmentstring, out AttachmentName attachment);
                             LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                            
                         }
                         LabApi.Features.Wrappers.FirearmPickup firearmpickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(firearm.Type, Pickup.Position);
                         Pickup.Destroy();
                         firearmpickup.Spawn();
                         Pickup = firearmpickup;
-                        Serial = Pickup.Serial;*/
+                        Serial = Pickup.Serial;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
@@ -534,22 +534,37 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             else if (Item.Type == ItemType.GunSCP127)
                             {
-                                /*
-                                Firearm ScpFirearm = (Firearm)Firearm.Create(CustomItem.Item);
+                                Scp127MagazineModule Scp127MagazineModule = new();
+                                Scp127Hitscan Scp127Hitscan = new();
+                                LogManager.Debug($"SCPItem is SCP-127");
+                                FirearmItem ScpFirearm = (FirearmItem)FirearmItem.Get((Firearm)Item.Base);
                                 ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
-                                ScpFirearm.MagazineAmmo = Scp127Data.MaxAmmo;
-                                ScpFirearm.Damage = Scp127Data.Damage;
-                                ScpFirearm.MaxMagazineAmmo = Scp127Data.MaxMagazineAmmo;
-                                ScpFirearm.MaxBarrelAmmo = Scp127Data.MaxBarrelAmmo;
-                                ScpFirearm.AmmoDrain = Scp127Data.AmmoDrain;
-                                ScpFirearm.Penetration = Scp127Data.Penetration;
-                                ScpFirearm.Inaccuracy = Scp127Data.Inaccuracy;
-                                ScpFirearm.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
-                                FirearmPickup SCP127Pickup = (FirearmPickup)ScpFirearm.CreatePickup(Pickup.Position);
+                                foreach (ModuleBase module in ScpFirearm.Base.Modules)
+                                {
+                                    switch (module)
+                                    {
+                                        case Scp127MagazineModule mag when Scp127MagazineModule == null:
+                                            Scp127MagazineModule = mag;
+                                            break;
+
+                                        case Scp127Hitscan hitscan when Scp127Hitscan == null:
+                                            Scp127Hitscan = hitscan;
+                                            break;
+                                    }
+                                }
+
+                                Scp127MagazineModule.AmmoStored = Scp127Data.MaxAmmo;
+                                Scp127Hitscan.BaseDamage = Scp127Data.Damage;
+                                Scp127MagazineModule._defaultCapacity = Scp127Data.MaxMagazineAmmo;
+                                Scp127Hitscan.BasePenetration = Scp127Data.Penetration;
+                                Scp127Hitscan.BaseBulletInaccuracy = Scp127Data.Inaccuracy;
+                                Scp127Hitscan.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
+                                Scp127MagazineModule.ServerResyncData();
+                                LabApi.Features.Wrappers.FirearmPickup scp127Pickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(ScpFirearm.Type, Pickup.Position);
                                 Pickup.Destroy();
-                                Pickup = SCP127Pickup;
+                                scp127Pickup.Spawn();
+                                Pickup = scp127Pickup;
                                 Serial = Pickup.Serial;
-                                */
                             }
                             break;
                         }
@@ -584,20 +599,29 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     case CustomItemType.Weapon:
                         {
-                            Firearm Firearm = Item as Firearm;
+                            FirearmItem firearm = (FirearmItem)FirearmItem.Get((Firearm)Item.Base);
                             IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
-                            if (Firearm != null && WeaponData != null)
+                            foreach (ModuleBase module in firearm.Base.Modules)
                             {
-                                /*
-                                WeaponData.MaxMagazineAmmo = Firearm.MaxMagazineAmmo;
-                                WeaponData.MaxBarrelAmmo = Firearm.MaxBarrelAmmo;
-                                WeaponData.Damage = Firearm.Damage;
-                                WeaponData.AmmoDrain = Firearm.AmmoDrain;
-                                WeaponData.Penetration = Firearm.Penetration;
-                                WeaponData.Inaccuracy = Firearm.Inaccuracy;
-                                WeaponData.DamageFalloffDistance = Firearm.DamageFalloffDistance;
-                                */
+                                switch (module)
+                                {
+                                    case MagazineModule magazine when MagazineModule == null:
+                                        MagazineModule = magazine;
+                                        break;
+
+                                    case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
+                                        HitscanHitregModule = hitscan;
+                                        break;
+                                }
                             }
+
+                            WeaponData.MaxAmmo = MagazineModule.AmmoStored;
+                            WeaponData.Damage = HitscanHitregModule.BaseDamage;
+                            WeaponData.MaxMagazineAmmo = MagazineModule._defaultCapacity;
+                            WeaponData.Penetration = HitscanHitregModule.BasePenetration;
+                            WeaponData.Inaccuracy = HitscanHitregModule.BaseBulletInaccuracy;
+                            WeaponData.DamageFalloffDistance = HitscanHitregModule.DamageFalloffDistance;
+                            MagazineModule.ServerResyncData();
                             break;
                         }
                     default:
