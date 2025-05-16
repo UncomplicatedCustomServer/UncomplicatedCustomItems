@@ -30,7 +30,7 @@ namespace UncomplicatedCustomItems
 
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 
-        public override Version RequiredApiVersion { get; } = new(0, 7, 0);
+        public override Version RequiredApiVersion { get; } = new(1, 0, 0);
 
         public override Version Version { get; } = new(3, 5, 0);
 
