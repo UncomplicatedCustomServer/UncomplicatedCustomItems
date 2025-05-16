@@ -30,6 +30,7 @@ using Scp244 = LabApi.Features.Wrappers.Scp244Item;
 using InventorySystem.Items.ThrowableProjectiles;
 using LabApi.Events.Arguments.PlayerEvents;
 using InventorySystem.Items.Firearms.Modules.Scp127;
+using InventorySystem;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -186,7 +187,7 @@ namespace UncomplicatedCustomItems.API.Features
                             return;
                         }
 
-                        CustomKeycard customKeycard = new CustomKeycard(keycard);
+                        CustomKeycard customKeycard = new CustomKeycard(keycard.Base);
                         if (!NameApplied)
                         {
                             customKeycard.NameTag = KeycardData.Name;
@@ -342,6 +343,134 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             break;
                         }
+                    default:
+                        break;
+                }
+            }
+            else if (IsPickup)
+            {
+                switch (CustomItem.CustomItemType)
+                {
+                    case CustomItemType.Keycard:
+                        LabApi.Features.Wrappers.KeycardPickup keycard = (LabApi.Features.Wrappers.KeycardPickup)LabApi.Features.Wrappers.KeycardPickup.Create(CustomItem.Item, Pickup.Position);
+                        IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
+                        ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
+                        ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
+                        ColorUtility.TryParseHtmlString(KeycardData.LabelColor, out Color LabelColor);
+                        Color32 PermissionsColor32 = PermissionsColor;
+                        Color32 TintColor32 = TintColor;
+                        Color32 LabelColor32 = LabelColor;
+                        KeycardLevels permissions = new(KeycardData.Containment, KeycardData.Armory, KeycardData.Admin);
+                        keycard.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var item);
+                        CustomKeycard customKeycard = new CustomKeycard(item);
+                        customKeycard.SerialNumber = KeycardData.SerialNumber;
+                        customKeycard.WearIndex = KeycardData.WearDetail;
+                        customKeycard.RankIndex = KeycardData.Rank;
+                        customKeycard.LabelColor = LabelColor32;
+                        customKeycard.LabelText = KeycardData.Label;
+                        customKeycard.ItemName = CustomItem.Name;
+                        customKeycard.CardColor = TintColor32;
+                        customKeycard.PermissionsColor = PermissionsColor32;
+                        customKeycard.Permissions = permissions;
+                        LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
+                        KeycardUtils.RemoveKeycardDetail(keycard.Serial);
+                        KeycardDetailSynchronizer.ServerProcessPickup(keycard.Base);
+                        Pickup.Destroy();
+                        keycard.Spawn();
+                        Pickup = keycard;
+                        Serial = Pickup.Serial;
+                        break;
+
+                    case CustomItemType.Weapon:
+                        List<string> attachmentList = GetAttachmentsList();
+                        LabApi.Features.Wrappers.FirearmPickup firearm = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
+                        firearm.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Firearms.Firearm>(out var Firearm);
+                        IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+                        foreach (ModuleBase module in Firearm.Modules)
+                        {
+                            switch (module)
+                            {
+                                case MagazineModule magazine when MagazineModule == null:
+                                    MagazineModule = magazine;
+                                    break;
+
+                                case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
+                                    HitscanHitregModule = hitscan;
+                                    break;
+                            }
+                        }
+
+                        MagazineModule.AmmoStored = WeaponData.MaxAmmo;
+                        HitscanHitregModule.BaseDamage = WeaponData.Damage;
+                        MagazineModule._defaultCapacity = WeaponData.MaxMagazineAmmo;
+                        HitscanHitregModule.BasePenetration = WeaponData.Penetration;
+                        HitscanHitregModule.BaseBulletInaccuracy = WeaponData.Inaccuracy;
+                        HitscanHitregModule.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        MagazineModule.ServerResyncData();
+                        foreach (string attachmentstring in attachmentList)
+                        {
+                            // Ill figure out attachments later seems like a pain in the ass
+                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
+                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                        }
+                        Pickup.Destroy();
+                        firearm.Spawn();
+                        Pickup = firearm;
+                        Serial = Pickup.Serial;
+                        break;
+                    case CustomItemType.SCPItem:
+                        {
+                            if (Pickup.Type == ItemType.SCP244a)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244 Scp244 = Item as Scp244;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.Base._primed = SCP244Data.Primed;
+                            }
+                            else if (Pickup.Type == ItemType.SCP244b)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244 Scp244 = Item as Scp244;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.Base._primed = SCP244Data.Primed;
+                            }
+                            else if (Pickup.Type == ItemType.GunSCP127)
+                            {
+                                Scp127MagazineModule Scp127MagazineModule = new();
+                                Scp127Hitscan Scp127Hitscan = new();
+                                // A little fucky idk why
+                                LogManager.Debug($"SCPItem is SCP-127");
+                                LabApi.Features.Wrappers.FirearmPickup scpfirearm = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
+                                scpfirearm.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Firearms.Firearm>(out var ScpFirearm);
+                                ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
+                                foreach (ModuleBase module in ScpFirearm.Modules)
+                                {
+                                    switch (module)
+                                    {
+                                        case Scp127MagazineModule mag when Scp127MagazineModule == null:
+                                            Scp127MagazineModule = mag;
+                                            break;
+
+                                        case Scp127Hitscan hitscan when Scp127Hitscan == null:
+                                            Scp127Hitscan = hitscan;
+                                            break;
+                                    }
+                                }
+
+                                Scp127MagazineModule.AmmoStored = Scp127Data.MaxAmmo;
+                                Scp127Hitscan.BaseDamage = Scp127Data.Damage;
+                                Scp127MagazineModule._defaultCapacity = Scp127Data.MaxMagazineAmmo;
+                                Scp127Hitscan.BasePenetration = Scp127Data.Penetration;
+                                Scp127Hitscan.BaseBulletInaccuracy = Scp127Data.Inaccuracy;
+                                Scp127Hitscan.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
+                                Scp127MagazineModule.ServerResyncData();
+                                Pickup.Destroy();
+                                scpfirearm.Spawn();
+                                Pickup = scpfirearm;
+                                Serial = Pickup.Serial;
+                            }
+                        }
+                        break;
                     default:
                         break;
                 }

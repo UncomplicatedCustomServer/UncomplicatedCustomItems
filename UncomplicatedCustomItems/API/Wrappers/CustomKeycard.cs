@@ -8,7 +8,6 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Extensions;
 using UnityEngine;
 using LabApi.Features.Wrappers;
-using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 
 namespace UncomplicatedCustomItems.API.Wrappers
 {
@@ -37,17 +36,17 @@ namespace UncomplicatedCustomItems.API.Wrappers
         /// <summary>
         /// The underlying Exiled <see cref="Keycard"/> instance being wrapped.
         /// </summary>
-        public KeycardItem ParentKeycard { get; private set; }
+        public InventorySystem.Items.Keycards.KeycardItem ParentKeycard { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomKeycard"/> class.
         /// </summary>
         /// <param name="keycard"> The <see cref="Keycard"/> to wrap.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CustomKeycard(KeycardItem keycard)
+        public CustomKeycard(InventorySystem.Items.Keycards.KeycardItem keycard)
         {
-            if (!keycard.Base.Customizable)
-                LogManager.Warn($"{keycard.Type} is not customizable!\nThe keycard type must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
+            if (!keycard.Customizable)
+                LogManager.Warn($"{keycard.ItemTypeId} is not customizable!\nThe keycard type must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
             else
                 ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
         }
@@ -59,21 +58,21 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                NameTagDic.TryGetValue(ParentKeycard.Serial, out string value);
+                NameTagDic.TryGetValue(ParentKeycard.ItemSerial, out string value);
                 return value;
             }
             set
             {
-                NametagDetail nametagDetail = ParentKeycard.Base.Details.OfType<NametagDetail>().FirstOrDefault();
+                NametagDetail nametagDetail = ParentKeycard.Details.OfType<NametagDetail>().FirstOrDefault();
                 if (nametagDetail != null)
                 {
                     try
                     {
-                        object[] args = { value.Replace("%name%", ParentKeycard.Base.Owner.nicknameSync.MyNick) };
+                        object[] args = { value.Replace("%name%", ParentKeycard.Owner.nicknameSync.MyNick) };
                         ArraySegment<object> arguments = new(args);
                         nametagDetail.SetArguments(arguments);
-                        NameTagDic.TryAdd(ParentKeycard.Serial, value);
-                        if (Utilities.TryGetSummonedCustomItem(ParentKeycard.Serial, out SummonedCustomItem summonedCustomItem))
+                        NameTagDic.TryAdd(ParentKeycard.ItemSerial, value);
+                        if (Utilities.TryGetSummonedCustomItem(ParentKeycard.ItemSerial, out SummonedCustomItem summonedCustomItem))
                             summonedCustomItem.NameApplied = true;
                     }
                     catch (Exception ex)
@@ -82,7 +81,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                     }
                 }
                 else
-                    LogManager.Error($"{nameof(CustomKeycard)}: This keycard {ParentKeycard.Type} doesn't have a NameTag section.");
+                    LogManager.Error($"{nameof(CustomKeycard)}: This keycard {ParentKeycard.ItemTypeId} doesn't have a NameTag section.");
             }
         }
 
@@ -93,12 +92,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                KeycardColorsDic.TryGetValue(ParentKeycard.Serial, out Color32 value);
+                KeycardColorsDic.TryGetValue(ParentKeycard.ItemSerial, out Color32 value);
                 return value;
             }
             set
             {
-                CustomTintDetail tintDetail = ParentKeycard.Base.Details.OfType<CustomTintDetail>().FirstOrDefault();
+                CustomTintDetail tintDetail = ParentKeycard.Details.OfType<CustomTintDetail>().FirstOrDefault();
                 if (tintDetail != null)
                 {
                     try
@@ -106,7 +105,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                         object[] args = { value };
                         ArraySegment<object> arguments = new(args);
                         tintDetail.SetArguments(arguments);
-                        KeycardColorsDic.TryAdd(ParentKeycard.Serial, value);
+                        KeycardColorsDic.TryAdd(ParentKeycard.ItemSerial, value);
                     }
                     catch (Exception ex)
                     {
@@ -123,12 +122,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                ItemNameDic.TryGetValue(ParentKeycard.Serial, out string value);
+                ItemNameDic.TryGetValue(ParentKeycard.ItemSerial, out string value);
                 return value;
             }
             set
             {
-                CustomItemNameDetail nameDetail = ParentKeycard.Base.Details.OfType<CustomItemNameDetail>().FirstOrDefault();
+                CustomItemNameDetail nameDetail = ParentKeycard.Details.OfType<CustomItemNameDetail>().FirstOrDefault();
                 if (nameDetail != null)
                 {
                     try
@@ -136,7 +135,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                         object[] args = { value };
                         ArraySegment<object> arguments = new(args);
                         nameDetail.SetArguments(arguments);
-                        ItemNameDic.TryAdd(ParentKeycard.Serial, value);
+                        ItemNameDic.TryAdd(ParentKeycard.ItemSerial, value);
                     }
                     catch (Exception ex)
                     {
@@ -153,17 +152,17 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                LabelColorsDic.TryGetValue(ParentKeycard.Serial, out Color32 value);
+                LabelColorsDic.TryGetValue(ParentKeycard.ItemSerial, out Color32 value);
                 return value;
             }
             set
             {
-                CustomLabelDetail labelDetail = ParentKeycard.Base.Details.OfType<CustomLabelDetail>().FirstOrDefault();
+                CustomLabelDetail labelDetail = ParentKeycard.Details.OfType<CustomLabelDetail>().FirstOrDefault();
                 if (labelDetail != null)
                 {
                     try
                     {
-                        LabelColorsDic.TryAdd(ParentKeycard.Serial, value);
+                        LabelColorsDic.TryAdd(ParentKeycard.ItemSerial, value);
                     }
                     catch (Exception ex)
                     {
@@ -180,12 +179,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                LabelTextDic.TryGetValue(ParentKeycard.Serial, out string value);
+                LabelTextDic.TryGetValue(ParentKeycard.ItemSerial, out string value);
                 return value;
             }
             set
             {
-                CustomLabelDetail labelDetail = ParentKeycard.Base.Details.OfType<CustomLabelDetail>().FirstOrDefault();
+                CustomLabelDetail labelDetail = ParentKeycard.Details.OfType<CustomLabelDetail>().FirstOrDefault();
                 if (labelDetail != null)
                 {
                     try
@@ -193,7 +192,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                         object[] args = { value, LabelColor };
                         ArraySegment<object> arguments = new(args);
                         labelDetail.SetArguments(arguments);
-                        LabelTextDic.TryAdd(ParentKeycard.Serial, value);
+                        LabelTextDic.TryAdd(ParentKeycard.ItemSerial, value);
                     }
                     catch (Exception ex)
                     {
@@ -211,12 +210,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                PermissionColorsDic.TryGetValue(ParentKeycard.Serial, out Color32 value);
+                PermissionColorsDic.TryGetValue(ParentKeycard.ItemSerial, out Color32 value);
                 return value;
             }
             set
             {
-                PermissionColorsDic.TryAdd(ParentKeycard.Serial, value);
+                PermissionColorsDic.TryAdd(ParentKeycard.ItemSerial, value);
             }
         }
 
@@ -227,12 +226,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                PermissionsDic.TryGetValue(ParentKeycard.Serial, out KeycardLevels value);
+                PermissionsDic.TryGetValue(ParentKeycard.ItemSerial, out KeycardLevels value);
                 return value;
             }
             set
             {
-                CustomPermsDetail permsDetail = ParentKeycard.Base.Details.OfType<CustomPermsDetail>().FirstOrDefault();
+                CustomPermsDetail permsDetail = ParentKeycard.Details.OfType<CustomPermsDetail>().FirstOrDefault();
                 if (permsDetail != null)
                 {
                     try
@@ -240,7 +239,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                         object[] args = { value, PermissionsColor };
                         ArraySegment<object> arguments = new(args);
                         permsDetail.SetArguments(arguments);
-                        PermissionsDic.TryAdd(ParentKeycard.Serial, value);
+                        PermissionsDic.TryAdd(ParentKeycard.ItemSerial, value);
                     }
                     catch (Exception ex)
                     {
@@ -258,20 +257,20 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                SerialNumberDic.TryGetValue(ParentKeycard.Serial, out string value);
+                SerialNumberDic.TryGetValue(ParentKeycard.ItemSerial, out string value);
                 return value;
             }
             set
             {
-                CustomSerialNumberDetail serialNumberDetail = ParentKeycard.Base.Details.OfType<CustomSerialNumberDetail>().FirstOrDefault();
-                if (serialNumberDetail != null && (ParentKeycard.Type == ItemType.KeycardCustomTaskForce || ParentKeycard.Type == ItemType.KeycardCustomMetalCase))
+                CustomSerialNumberDetail serialNumberDetail = ParentKeycard.Details.OfType<CustomSerialNumberDetail>().FirstOrDefault();
+                if (serialNumberDetail != null && (ParentKeycard.ItemTypeId == ItemType.KeycardCustomTaskForce || ParentKeycard.ItemTypeId == ItemType.KeycardCustomMetalCase))
                 {
                     try
                     {
                         object[] args = { value };
                         ArraySegment<object> arguments = new(args);
                         serialNumberDetail.SetArguments(arguments);
-                        SerialNumberDic.TryAdd(ParentKeycard.Serial, value);
+                        SerialNumberDic.TryAdd(ParentKeycard.ItemSerial, value);
                     }
                     catch (Exception ex)
                     {
@@ -291,12 +290,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                WearIndexDic.TryGetValue(ParentKeycard.Serial, out byte value);
+                WearIndexDic.TryGetValue(ParentKeycard.ItemSerial, out byte value);
                 return value;
             }
             set
             {
-                CustomWearDetail wearDetail = ParentKeycard.Base.Details.OfType<CustomWearDetail>().FirstOrDefault();
+                CustomWearDetail wearDetail = ParentKeycard.Details.OfType<CustomWearDetail>().FirstOrDefault();
                 if (wearDetail != null)
                 {
                     try
@@ -304,7 +303,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                         object[] args = { value };
                         ArraySegment<object> arguments = new(args);
                         wearDetail.SetArguments(arguments);
-                        WearIndexDic.TryAdd(ParentKeycard.Serial, value);
+                        WearIndexDic.TryAdd(ParentKeycard.ItemSerial, value);
                     }
                     catch (Exception ex)
                     {
@@ -322,12 +321,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         {
             get
             {
-                RankIndexDic.TryGetValue(ParentKeycard.Serial, out int value);
+                RankIndexDic.TryGetValue(ParentKeycard.ItemSerial, out int value);
                 return value;
             }
             set
             {
-                CustomRankDetail rankDetail = ParentKeycard.Base.Details.OfType<CustomRankDetail>().FirstOrDefault();
+                CustomRankDetail rankDetail = ParentKeycard.Details.OfType<CustomRankDetail>().FirstOrDefault();
                 if (rankDetail != null)
                 {
                     try
@@ -335,7 +334,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                         object[] args = { value };
                         ArraySegment<object> arguments = new(args);
                         rankDetail.SetArguments(arguments);
-                        RankIndexDic.TryAdd(ParentKeycard.Serial, value);
+                        RankIndexDic.TryAdd(ParentKeycard.ItemSerial, value);
                     }
                     catch (Exception ex)
                     {
