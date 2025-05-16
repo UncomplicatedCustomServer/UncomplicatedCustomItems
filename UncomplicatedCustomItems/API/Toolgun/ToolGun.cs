@@ -32,10 +32,8 @@ namespace UncomplicatedCustomItems.API.ToolGun
     public class CustomItemData : WeaponData
     {
         public override float Damage { get; set; } = 2.75f;
-        public override int MaxBarrelAmmo { get; set; } = 1;
         public override int MaxAmmo { get; set; } = 150;
         public override int MaxMagazineAmmo { get; set; } = 150;
-        public override int AmmoDrain { get; set; } = 1;
         public override float Penetration { get; set; } = 1.24f;
         public override float Inaccuracy { get; set; } = 1.24f;
         public override float AimingInaccuracy { get; set; } = 1.24f;

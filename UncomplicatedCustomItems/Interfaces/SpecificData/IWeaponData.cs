@@ -8,13 +8,9 @@
     {
         public abstract float Damage { get; set; }
 
-        public abstract int MaxBarrelAmmo { get; set; }
-
         public abstract int MaxAmmo { get; set; }
 
         public abstract int MaxMagazineAmmo { get; set; }
-
-        public abstract int AmmoDrain { get; set; }
 
         public abstract float Penetration { get; set; }
 

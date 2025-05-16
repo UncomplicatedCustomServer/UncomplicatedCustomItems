@@ -14,11 +14,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual float Damage { get; set; } = 2.75f;
 
         /// <summary>
-        /// The max number of ammunitions in the barrel. Shotgun like effect at higher numbers
-        /// </summary>
-        public virtual int MaxBarrelAmmo { get; set; } = 10;
-
-        /// <summary>
         /// The max number of ammunitions
         /// </summary>
         public virtual int MaxAmmo { get; set; } = 150;
@@ -27,11 +22,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// The max number of ammunitions in the magazine
         /// </summary>
         public virtual int MaxMagazineAmmo { get; set; } = 150;
-
-        /// <summary>
-        /// The amount of ammunitions drained per shot
-        /// </summary>
-        public virtual int AmmoDrain { get; set; } = 1;
 
         /// <summary>
         /// Gets or sets the penetration of the firearm

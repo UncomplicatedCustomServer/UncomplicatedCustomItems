@@ -104,7 +104,5 @@ namespace UncomplicatedCustomItems.Extensions
             ItemType.GunSCP127 => FirearmType.GunSCP127,
             _ => FirearmType.None,
         };
-
-
     }
 }

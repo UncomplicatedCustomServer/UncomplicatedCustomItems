@@ -107,6 +107,8 @@ namespace UncomplicatedCustomItems.API.Features
         internal MagazineModule MagazineModule { get; set; }
         internal HitscanHitregModuleBase HitscanHitregModule { get; set; }
         internal IAmmoContainerModule BarrelModule { get; set; }
+        internal Scp127MagazineModule Scp127MagazineModule { get; set; }
+        internal Scp127Hitscan Scp127Hitscan { get; set; }
 
         /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
@@ -242,11 +244,15 @@ namespace UncomplicatedCustomItems.API.Features
 
                         foreach (string attachmentstring in attachmentList)
                         {
-                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
-                            if (firearm.Base.TryApplyAttachment(attachment))
-                                LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                            if (Enum.TryParse(attachmentstring, out AttachmentName attachment))
+                            {
+                                if (firearm.Base.TryApplyAttachment(attachment))
+                                    LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                                else
+                                    LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                            }
                             else
-                                LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                                LogManager.Warn($"{attachment} is not a attachment valid for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
                         }
                         MagazineModule.AmmoStored = WeaponData.MaxAmmo;
                         HitscanHitregModule.BaseDamage = WeaponData.Damage;
@@ -389,6 +395,7 @@ namespace UncomplicatedCustomItems.API.Features
                         LabApi.Features.Wrappers.FirearmPickup firearm = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
                         firearm.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Firearms.Firearm>(out var Firearm);
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+                        Firearm.ItemSerial = firearm.Serial;
                         foreach (ModuleBase module in Firearm.Modules)
                         {
                             switch (module)
@@ -406,18 +413,26 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             foreach (string attachmentstring in attachmentList)
                             {
-                                Enum.TryParse(attachmentstring, out AttachmentName attachment);
-                                if (firearm.Base.TryApplyAttachment(attachment))
-                                    LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                                if (Enum.TryParse(attachmentstring, out AttachmentName attachment))
+                                {
+                                    if (firearm.Base.TryApplyAttachment(attachment))
+                                        LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                                    else
+                                        LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                                }
                                 else
-                                    LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                                    LogManager.Warn($"{attachment} is not a valid for {CustomItem.Name} - {CustomItem.Id} - {Pickup.Type}");
                             }
                         }
                         else
+                        {
+                            LogManager.Debug($"No attachments found for {CustomItem.Name} - {CustomItem.Id} applying random attachments...");
                             AttachmentCodeSync.ServerSetCode(firearm.Base.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearm.Base.Info.ItemId));
-                        MagazineModule.AmmoStored = WeaponData.MaxAmmo;
+                        }
+                        MagazineModule.MagazineInserted = true;
                         HitscanHitregModule.BaseDamage = WeaponData.Damage;
                         MagazineModule._defaultCapacity = WeaponData.MaxMagazineAmmo;
+                        MagazineModule.AmmoStored = WeaponData.MaxAmmo;
                         HitscanHitregModule.BasePenetration = WeaponData.Penetration;
                         HitscanHitregModule.BaseBulletInaccuracy = WeaponData.Inaccuracy;
                         HitscanHitregModule.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
@@ -426,6 +441,9 @@ namespace UncomplicatedCustomItems.API.Features
                         firearm.Spawn();
                         Pickup = firearm;
                         Serial = Pickup.Serial;
+                        if (!PropertiesSet)
+                            PickupAmmoCheck();
+                        PropertiesSet = true;
                         break;
                     case CustomItemType.SCPItem:
                         {
@@ -445,8 +463,6 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             else if (Pickup.Type == ItemType.GunSCP127)
                             {
-                                Scp127MagazineModule Scp127MagazineModule = new();
-                                Scp127Hitscan Scp127Hitscan = new();
                                 // A little fucky idk why
                                 LogManager.Debug($"SCPItem is SCP-127");
                                 LabApi.Features.Wrappers.FirearmPickup scpfirearm = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
@@ -466,6 +482,7 @@ namespace UncomplicatedCustomItems.API.Features
                                     }
                                 }
 
+                                Scp127MagazineModule.MagazineInserted = true;
                                 Scp127MagazineModule.AmmoStored = Scp127Data.MaxAmmo;
                                 Scp127Hitscan.BaseDamage = Scp127Data.Damage;
                                 Scp127MagazineModule._defaultCapacity = Scp127Data.MaxMagazineAmmo;
@@ -477,6 +494,9 @@ namespace UncomplicatedCustomItems.API.Features
                                 scpfirearm.Spawn();
                                 Pickup = scpfirearm;
                                 Serial = Pickup.Serial;
+                                if (!PropertiesSet)
+                                    PickupAmmoCheck();
+                                PropertiesSet = true;
                             }
                         }
                         break;
@@ -547,6 +567,34 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
+
+        private void PickupAmmoCheck()
+        {
+            if (Pickup.Type.IsWeapon() && Pickup.Type != ItemType.GunSCP127)
+            {
+                IWeaponData weaponData = CustomItem.CustomData as IWeaponData;
+                if (MagazineModule.AmmoStored != weaponData.MaxAmmo)
+                {
+                    LogManager.Debug($"{nameof(PickupAmmoCheck)}: Attempting to set {CustomItem.Name} - {CustomItem.Id} stored ammo to {weaponData.MaxAmmo}");
+                    MagazineModule.MagazineInserted = true;
+                    MagazineModule.AmmoStored = weaponData.MaxAmmo;
+                    MagazineModule.ServerResyncData();
+                }
+            }
+            else if (Pickup.Type == ItemType.GunSCP127)
+            {
+                ISCP127Data sCP127Data = CustomItem.CustomData as ISCP127Data;
+                if (Scp127MagazineModule.AmmoStored != sCP127Data.MaxAmmo)
+                {
+                    LogManager.Debug($"{nameof(PickupAmmoCheck)}: Attempting to set {CustomItem.Name} - {CustomItem.Id} stored ammo to {sCP127Data.MaxAmmo}");
+                    Scp127MagazineModule.MagazineInserted = true;
+                    Scp127MagazineModule.AmmoStored = sCP127Data.MaxAmmo;
+                    Scp127MagazineModule.ServerResyncData();
+                }
+            }
+            else
+                LogManager.Warn($"{nameof(PickupAmmoCheck)}: {Pickup.Type} is not a Weapon!");
+        }
         private List<string> GetAttachmentsList()
         {
             if (CustomItem.CustomData is IWeaponData weaponData)
