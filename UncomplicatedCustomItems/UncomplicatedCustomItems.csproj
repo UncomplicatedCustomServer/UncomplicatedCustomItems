@@ -546,6 +546,7 @@
     <Compile Include="Extensions\DictionaryExtension.cs" />
     <Compile Include="Extensions\FirearmItemExtensions.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
+    <Compile Include="Extensions\PickupExtensions.cs" />
     <Compile Include="Extensions\RoomExtensions.cs" />
     <Compile Include="Extensions\PlayerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
