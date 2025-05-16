@@ -36,6 +36,7 @@ using PrimitiveObjectToy = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using LabApi.Features.Extensions;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Events.Internal;
+using InventorySystem.Items.Firearms.Attachments;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -407,6 +408,8 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.NewItem is not null)
             {
+                AttachmentCodeSync.TryGet(ev.NewItem.Serial, out uint code);
+                LogManager.Debug($"{code}");
                 if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
                     return;
 

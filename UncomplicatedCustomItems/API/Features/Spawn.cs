@@ -52,7 +52,7 @@ namespace UncomplicatedCustomItems.API.Features
         ];
 
         /// <summary>
-        /// The <see cref="ZoneType"/> locations where the item is allowed to spawn.
+        /// The <see cref="FacilityZone"/> locations where the item is allowed to spawn.
         /// If <see cref="DynamicSpawn"/> is empty, this parameter will be used.
         /// </summary>
         [Description("The zone(s) where the custom item can spawn.")]

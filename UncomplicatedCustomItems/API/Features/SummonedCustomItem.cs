@@ -239,6 +239,15 @@ namespace UncomplicatedCustomItems.API.Features
                                     break;
                             }
                         }
+
+                        foreach (string attachmentstring in attachmentList)
+                        {
+                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
+                            if (firearm.Base.TryApplyAttachment(attachment))
+                                LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                            else
+                                LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                        }
                         MagazineModule.AmmoStored = WeaponData.MaxAmmo;
                         HitscanHitregModule.BaseDamage = WeaponData.Damage;
                         MagazineModule._defaultCapacity = WeaponData.MaxMagazineAmmo;
@@ -246,12 +255,6 @@ namespace UncomplicatedCustomItems.API.Features
                         HitscanHitregModule.BaseBulletInaccuracy = WeaponData.Inaccuracy;
                         HitscanHitregModule.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
                         MagazineModule.ServerResyncData();
-                        foreach (string attachmentstring in attachmentList)
-                        {
-                            // Ill figure out attachments later seems like a pain in the ass
-                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
-                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                        }
                         break;
 
                     case CustomItemType.Jailbird:
@@ -399,7 +402,19 @@ namespace UncomplicatedCustomItems.API.Features
                                     break;
                             }
                         }
-
+                        if (WeaponData.Attachments.Count() > 1)
+                        {
+                            foreach (string attachmentstring in attachmentList)
+                            {
+                                Enum.TryParse(attachmentstring, out AttachmentName attachment);
+                                if (firearm.Base.TryApplyAttachment(attachment))
+                                    LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                                else
+                                    LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                            }
+                        }
+                        else
+                            AttachmentCodeSync.ServerSetCode(firearm.Base.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearm.Base.Info.ItemId));
                         MagazineModule.AmmoStored = WeaponData.MaxAmmo;
                         HitscanHitregModule.BaseDamage = WeaponData.Damage;
                         MagazineModule._defaultCapacity = WeaponData.MaxMagazineAmmo;
@@ -407,12 +422,6 @@ namespace UncomplicatedCustomItems.API.Features
                         HitscanHitregModule.BaseBulletInaccuracy = WeaponData.Inaccuracy;
                         HitscanHitregModule.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
                         MagazineModule.ServerResyncData();
-                        foreach (string attachmentstring in attachmentList)
-                        {
-                            // Ill figure out attachments later seems like a pain in the ass
-                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
-                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                        }
                         Pickup.Destroy();
                         firearm.Spawn();
                         Pickup = firearm;
