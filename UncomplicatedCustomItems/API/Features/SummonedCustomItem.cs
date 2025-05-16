@@ -322,9 +322,6 @@ namespace UncomplicatedCustomItems.API.Features
                             }
                             else if (Item.Type == ItemType.GunSCP127)
                             {
-                                Scp127MagazineModule Scp127MagazineModule = new();
-                                Scp127Hitscan Scp127Hitscan = new();
-
                                 LogManager.Debug($"SCPItem is SCP-127");
                                 FirearmItem ScpFirearm = Item as FirearmItem;
                                 ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
@@ -371,6 +368,7 @@ namespace UncomplicatedCustomItems.API.Features
                         Color32 LabelColor32 = LabelColor;
                         KeycardLevels permissions = new(KeycardData.Containment, KeycardData.Armory, KeycardData.Admin);
                         keycard.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var item);
+                        item.ItemSerial = keycard.Serial;
                         CustomKeycard customKeycard = new CustomKeycard(item);
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
@@ -441,33 +439,46 @@ namespace UncomplicatedCustomItems.API.Features
                         firearm.Spawn();
                         Pickup = firearm;
                         Serial = Pickup.Serial;
-                        if (!PropertiesSet)
-                            PickupAmmoCheck();
-                        PropertiesSet = true;
                         break;
                     case CustomItemType.SCPItem:
                         {
                             if (Pickup.Type == ItemType.SCP244a)
                             {
                                 LogManager.Debug($"SCPItem is SCP-244");
-                                Scp244 Scp244 = Item as Scp244;
+                                Scp244Pickup Scp244Pickup = Pickup as Scp244Pickup;
                                 ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
-                                Scp244.Base._primed = SCP244Data.Primed;
+                                Scp244Pickup.Base.MaxDiameter = SCP244Data.MaxDiameter;
+                                Scp244Pickup.Base._activationDot = SCP244Data.ActivationDot;
+                                Scp244Pickup.Base._health = SCP244Data.Health;
+                                Scp244Pickup.Base.enabled = SCP244Data.Primed;
+                                Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
+                                Pickup.Destroy();
+                                Scp244Pickup.Spawn();
+                                Pickup = Scp244Pickup;
+                                Serial = Pickup.Serial;
                             }
                             else if (Pickup.Type == ItemType.SCP244b)
                             {
                                 LogManager.Debug($"SCPItem is SCP-244");
-                                Scp244 Scp244 = Item as Scp244;
+                                Scp244Pickup Scp244Pickup = Pickup as Scp244Pickup;
                                 ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
-                                Scp244.Base._primed = SCP244Data.Primed;
+                                Scp244Pickup.Base.MaxDiameter = SCP244Data.MaxDiameter;
+                                Scp244Pickup.Base._activationDot = SCP244Data.ActivationDot;
+                                Scp244Pickup.Base._health = SCP244Data.Health;
+                                Scp244Pickup.Base.enabled = SCP244Data.Primed;
+                                Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
+                                Pickup.Destroy();
+                                Scp244Pickup.Spawn();
+                                Pickup = Scp244Pickup;
+                                Serial = Pickup.Serial;
                             }
                             else if (Pickup.Type == ItemType.GunSCP127)
                             {
-                                // A little fucky idk why
                                 LogManager.Debug($"SCPItem is SCP-127");
                                 LabApi.Features.Wrappers.FirearmPickup scpfirearm = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
                                 scpfirearm.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Firearms.Firearm>(out var ScpFirearm);
                                 ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
+                                ScpFirearm.ItemSerial = scpfirearm.Serial;
                                 foreach (ModuleBase module in ScpFirearm.Modules)
                                 {
                                     switch (module)
@@ -494,9 +505,6 @@ namespace UncomplicatedCustomItems.API.Features
                                 scpfirearm.Spawn();
                                 Pickup = scpfirearm;
                                 Serial = Pickup.Serial;
-                                if (!PropertiesSet)
-                                    PickupAmmoCheck();
-                                PropertiesSet = true;
                             }
                         }
                         break;
@@ -567,34 +575,6 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
-
-        private void PickupAmmoCheck()
-        {
-            if (Pickup.Type.IsWeapon() && Pickup.Type != ItemType.GunSCP127)
-            {
-                IWeaponData weaponData = CustomItem.CustomData as IWeaponData;
-                if (MagazineModule.AmmoStored != weaponData.MaxAmmo)
-                {
-                    LogManager.Debug($"{nameof(PickupAmmoCheck)}: Attempting to set {CustomItem.Name} - {CustomItem.Id} stored ammo to {weaponData.MaxAmmo}");
-                    MagazineModule.MagazineInserted = true;
-                    MagazineModule.AmmoStored = weaponData.MaxAmmo;
-                    MagazineModule.ServerResyncData();
-                }
-            }
-            else if (Pickup.Type == ItemType.GunSCP127)
-            {
-                ISCP127Data sCP127Data = CustomItem.CustomData as ISCP127Data;
-                if (Scp127MagazineModule.AmmoStored != sCP127Data.MaxAmmo)
-                {
-                    LogManager.Debug($"{nameof(PickupAmmoCheck)}: Attempting to set {CustomItem.Name} - {CustomItem.Id} stored ammo to {sCP127Data.MaxAmmo}");
-                    Scp127MagazineModule.MagazineInserted = true;
-                    Scp127MagazineModule.AmmoStored = sCP127Data.MaxAmmo;
-                    Scp127MagazineModule.ServerResyncData();
-                }
-            }
-            else
-                LogManager.Warn($"{nameof(PickupAmmoCheck)}: {Pickup.Type} is not a Weapon!");
-        }
         private List<string> GetAttachmentsList()
         {
             if (CustomItem.CustomData is IWeaponData weaponData)

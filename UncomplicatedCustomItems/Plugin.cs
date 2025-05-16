@@ -222,7 +222,6 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ShootingWeapon -= Handler.Onshooting;
             PlayerEvent.ThrewProjectile -= Handler.Onthrown;
 
-            Handler.Appearance.Clear();
             Instance = null;
             Handler = null;
         }

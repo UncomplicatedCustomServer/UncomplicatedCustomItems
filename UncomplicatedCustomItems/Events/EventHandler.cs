@@ -53,11 +53,6 @@ namespace UncomplicatedCustomItems.Events
         public Vector3 DetonationPosition { get; set; } = Vector3.zero;
         private bool ChargeAttack { get; set; } = false;
         /// <summary>
-        /// The <see cref="Dictionary{TKey,TValue}"/> that stores appearances for the <see cref="CustomFlags.Disguise"/> and <see cref="CustomFlags.ChangeAppearanceOnKill"/> flags.
-        /// Triggered by the <see cref="OnDying"/> method.
-        /// </summary>
-        public static Dictionary<int, RoleTypeId> Appearance = [];
-        /// <summary>
         /// The <see cref="Dictionary{TKey,TValue}"/> that handles equiped keycards 
         /// Triggered by the <see cref="OnChangedItem"/> method.
         /// </summary>
@@ -171,7 +166,7 @@ namespace UncomplicatedCustomItems.Events
                 else
                 {
                     ISCP127Data data = customItem.CustomItem.CustomData as ISCP127Data;
-                    customItem.HitscanHitregModule.BaseBulletInaccuracy = data.AimingInaccuracy;
+                    customItem.Scp127Hitscan.BaseBulletInaccuracy = data.AimingInaccuracy;
                 }
             }
             else if (ev.FirearmItem.Type != ItemType.GunSCP127)
@@ -182,7 +177,7 @@ namespace UncomplicatedCustomItems.Events
             else
             {
                 ISCP127Data data = customItem.CustomItem.CustomData as ISCP127Data;
-                customItem.HitscanHitregModule.BaseBulletInaccuracy = data.Inaccuracy;
+                customItem.Scp127Hitscan.BaseBulletInaccuracy = data.Inaccuracy;
             }
 
             if (!customItem.CustomItem.CustomFlags.HasValue || !customItem.HasModule(CustomFlags.None))
@@ -584,22 +579,6 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (CustomItem.HasModule(CustomFlags.Disguise))
-            {
-                foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
-                {
-                    if (DisguiseSettings.RoleId == null)
-                        return;
-                    if (DisguiseSettings.DisguiseMessage == null)
-                        return;
-
-                    LogManager.Debug($"{nameof(Onpickup)}: Changing {ev.Player.Nickname} appearance to {DisguiseSettings.RoleId}");
-                    ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
-                    ev.Player.SendBroadcast($"{DisguiseSettings.DisguiseMessage}", 10, shouldClearPrevious: true);
-                    LogManager.Debug($"{nameof(Onpickup)}: Adding or updating {ev.Player.PlayerId} to appearance dictionary");
-                    Appearance.TryAdd(ev.Player.PlayerId, (RoleTypeId)DisguiseSettings.RoleId);
-                }
-            }
             if (CustomItem.HasModule(CustomFlags.Capybara))
             {
                 LABAPI.CapybaraToy capybara = LABAPI.CapybaraToy.Create(ev.Player.GameObject.transform);
@@ -617,7 +596,6 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             _damageTimes.Clear();
-            Appearance.Clear();
             Capybara.Clear();
         }
 
@@ -1030,22 +1008,6 @@ namespace UncomplicatedCustomItems.Events
                             }
                         }
                     }
-                    if (CustomItem.HasModule(CustomFlags.Disguise))
-                    {
-                        foreach (DisguiseSettings DisguiseSettings in CustomItem.CustomItem.FlagSettings.DisguiseSettings)
-                        {
-                            if (DisguiseSettings.RoleId == null)
-                                return;
-                            if (DisguiseSettings.DisguiseMessage == null)
-                                return;
-
-                            LogManager.Debug($"{nameof(OnSpawned)}: Changing {ev.Player.Nickname} appearance to {DisguiseSettings.RoleId}");
-                            ev.Player.ChangeAppearance((RoleTypeId)DisguiseSettings.RoleId);
-                            ev.Player.SendBroadcast($"{DisguiseSettings.DisguiseMessage}", 10, Broadcast.BroadcastFlags.Normal, true);
-                            LogManager.Debug($"{nameof(OnSpawned)}: Adding or updating {ev.Player.PlayerId} to appearance dictionary");
-                            Appearance.TryAdd(ev.Player.PlayerId, (RoleTypeId)DisguiseSettings.RoleId);
-                        }
-                    }
                     if (CustomItem.HasModule(CustomFlags.Capybara))
                     {
                         LABAPI.CapybaraToy capybara = LABAPI.CapybaraToy.Create(ev.Player.GameObject.transform);
@@ -1276,10 +1238,7 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
                 return;
-            if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.Disguise))
-            {
-                ev.Player.ChangeAppearance(ev.Player.Role);
-            }
+
             if (SummonedCustomItem.HasModule(CustomFlags.Capybara))
             {
                 if (Capybara.TryGetValue(ev.Player.PlayerId, out LABAPI.CapybaraToy capybara))
@@ -1527,13 +1486,6 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Error($"Couldnt Vaporize {ev.Player.Nickname}\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
                 }
             }
-            if (customItem.HasModule(CustomFlags.ChangeAppearanceOnKill))
-            {
-                LogManager.Debug($"{nameof(OnDying)}: Changing {ev.Attacker.Nickname} appearance to {ev.Player.Role.GetFullName()}");
-                ev.Attacker.ChangeAppearance(ev.Player.Role);
-                LogManager.Debug($"{nameof(OnDying)}: Adding {ev.Attacker.PlayerId} to appearance dictionary");
-                Appearance.TryAdd(ev.Attacker.PlayerId, ev.Player.Role);
-            }
             if (customItem.HasModule(CustomFlags.HealOnKill))
             {
                 foreach (HealOnKillSettings healOnKillSettings in customItem.CustomItem.FlagSettings.HealOnKillSettings)
@@ -1552,12 +1504,6 @@ namespace UncomplicatedCustomItems.Events
         public void OnVerified(PlayerJoinedEventArgs ev)
         {
             SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
-            foreach (KeyValuePair<int, RoleTypeId> entry in Appearance)
-            {
-                LogManager.Debug($"{nameof(OnVerified)}: Changing {entry.Key} appearance to {entry.Value}");
-                LABAPI.Player.TryGet(entry.Key, out LABAPI.Player player);
-                player.ChangeAppearance(entry.Value);
-            }
         }
         public void OnLeft(PlayerLeftEventArgs ev)
         {
@@ -1565,12 +1511,7 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Player.IsHost)
                 return;
-                
-            if (Appearance.ContainsKey(ev.Player.PlayerId))
-            {
-                LogManager.Debug($"{nameof(OnLeft)}: Removing {ev.Player.PlayerId} from appearance dictionary");
-                Appearance.TryRemove(ev.Player.PlayerId);
-            }
+
             if (Capybara.ContainsKey(ev.Player.PlayerId))
                 Capybara.TryRemove(ev.Player.PlayerId);
         }

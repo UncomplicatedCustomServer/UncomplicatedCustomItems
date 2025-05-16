@@ -29,11 +29,9 @@ namespace UncomplicatedCustomItems.Enums
         DieOnDrop = 1L << 17,
         VaporizeKills = 1L << 18,
         CantDrop = 1L << 19,
-        ChangeAppearanceOnKill = 1L << 20,
-        Disguise = 1L << 21,
-        Craftable = 1L << 22,
-        HealOnKill = 1L << 23,
-        Capybara = 1L << 24, // Capybara
+        Craftable = 1L << 20,
+        HealOnKill = 1L << 21,
+        Capybara = 1L << 22, // Capybara
         Custom = 1L << 48, // This should only be used if your coding your own CustomFlag
     }
 }

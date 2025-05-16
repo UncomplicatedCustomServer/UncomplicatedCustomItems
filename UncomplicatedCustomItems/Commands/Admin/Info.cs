@@ -174,15 +174,6 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     data.Add("    <color=#bf4eb6>󾓦</color> SpawnFlags:", string.Join(", ", SwitchRoleOnUseSettings.SpawnFlags));                    
                 }
             }
-            if (customItem.FlagSettings.DisguiseSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.Disguise))
-            {
-                data.Add("<color=#bf4eb6>📂</color> DisguiseSettings:", "");
-                foreach (DisguiseSettings DisguiseSettings in customItem.FlagSettings.DisguiseSettings)
-                {
-                    data.Add("    <color=#bf4eb6>🎲</color> Disguise Message:", string.Join(", ", DisguiseSettings.DisguiseMessage));
-                    data.Add("    <color=#bf4eb6>🔒</color> Disguise Role:", string.Join(", ", DisguiseSettings.RoleId));                  
-                }
-            }
             if (customItem.FlagSettings.DieOnDropSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.DieOnDrop))
             {
                 data.Add("<color=#bf4eb6>📂</color> DieOnDropSettings:", "");
