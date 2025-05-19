@@ -145,7 +145,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
                 ev.Firearm.MagazineAmmo = data.MaxMagazineAmmo;
-                LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
+                LogManager.Silent($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}");
             }
             if (customItem.HasModule(CustomFlags.CustomSound))
             {
@@ -1066,6 +1066,10 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Door.KeycardPermissions == KeycardPermissions.None)
                 return;
             if (ev.Player.CurrentItem == null)
+                return;
+            if (!ev.IsAllowed)
+                return;
+            if (ev.Door == null)
                 return;
             // This probably will throw a error with plugins like RemoteKeycard
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
