@@ -284,7 +284,7 @@ namespace UncomplicatedCustomItems.API.Features
                         ExplosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
                         ExplosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
                         ThrowableItem.Base._repickupable = ExplosiveGrenadeData.Repickable;
-                        ExplosiveGrenade.RemainingTime = ExplosiveGrenadeData.FuseTime;
+                        ExplosiveGrenade.Base._fuseTime = ExplosiveGrenadeData.FuseTime;
                         break;
 
                     case CustomItemType.FlashGrenade:
@@ -298,7 +298,7 @@ namespace UncomplicatedCustomItems.API.Features
                         FlashGrenade.BaseBlindTime = FlashGrenadeData.MinimalDurationEffect;
                         FlashGrenade.Base._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
                         FlashGrenade.Base._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
-                        FlashGrenade.RemainingTime = FlashGrenadeData.FuseTime;
+                        FlashGrenade.Base._fuseTime = FlashGrenadeData.FuseTime;
                         break;
 
                     case CustomItemType.SCPItem:
@@ -445,6 +445,29 @@ namespace UncomplicatedCustomItems.API.Features
                         Pickup = firearm;
                         Serial = Pickup.Serial;
                         break;
+
+                    case CustomItemType.ExplosiveGrenade:
+                        IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+                        LabApi.Features.Wrappers.ExplosiveGrenadeProjectile ExplosiveGrenade = (LabApi.Features.Wrappers.ExplosiveGrenadeProjectile)LabApi.Features.Wrappers.ExplosiveGrenadeProjectile.Create(CustomItem.Item, Pickup.Position);
+                        
+                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        ExplosiveGrenade.Base._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
+                        ExplosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
+                        ExplosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
+                        ExplosiveGrenade.RemainingTime = ExplosiveGrenadeData.FuseTime;
+                        break;
+
+                    case CustomItemType.FlashGrenade:
+                        IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
+                        LabApi.Features.Wrappers.FlashbangProjectile FlashGrenade = (LabApi.Features.Wrappers.FlashbangProjectile)LabApi.Features.Wrappers.FlashbangProjectile.Create(CustomItem.Item, Pickup.Position);
+
+                        FlashGrenade.BaseBlindTime = FlashGrenadeData.MinimalDurationEffect;
+                        FlashGrenade.Base._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
+                        FlashGrenade.Base._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        FlashGrenade.Base._fuseTime = FlashGrenadeData.FuseTime;
+                        break;
+
                     case CustomItemType.SCPItem:
                         {
                             if (Pickup.Type == ItemType.SCP244a)

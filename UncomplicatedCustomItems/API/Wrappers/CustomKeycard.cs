@@ -13,10 +13,21 @@ namespace UncomplicatedCustomItems.API.Wrappers
     /// <summary>
     /// A wrapper class for creating and customizing custom keycards via UCI.
     /// Provides easy-to-use properties to set name tags, colors, permissions, and other metadata.
-    /// <para>Example usage:</para>
+    /// <para>If the keycard is a item</para>
     /// <code>
-    /// Keycard keycard = Item as Keycard;
-    /// CustomKeycard customKeycard = new CustomKeycard(keycard);
+    /// KeycardItem keycard = Item as KeycardItem;
+    /// CustomKeycard customKeycard = new CustomKeycard(keycard.Base);
+    /// KeycardUtils.RemoveKeycardDetail(keycard.Serial);
+    /// KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
+    /// </code>
+    /// <para>If the keycard is a pickup</para>
+    /// <code>
+    /// KeycardPickup keycard = (KeycardPickup)KeycardPickup.Create(CustomItem.Item, Pickup.Position);
+    /// keycard.Base.Info.ItemId.TryGetTemplate<KeycardItem>(out KeycardItem item);
+    /// item.ItemSerial = keycard.Serial;
+    /// CustomKeycard customKeycard = new CustomKeycard(item);
+    /// KeycardUtils.RemoveKeycardDetail(keycard.Serial);
+    /// KeycardDetailSynchronizer.ServerProcessPickup(keycard.Base);
     /// </code>
     /// </summary>
     public class CustomKeycard
