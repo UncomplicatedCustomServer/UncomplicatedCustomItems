@@ -34,6 +34,7 @@ using System.Globalization;
 using Exiled.Events.EventArgs.Server;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Firearms;
+using UncomplicatedCustomItems.API.Wrappers;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -62,13 +63,6 @@ namespace UncomplicatedCustomItems.Events
         private static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
         private static Dictionary<Player, CoroutineHandle> _HumeShieldRegenCoroutine = [];
         private static Dictionary<Player, long> _damageTimes = [];
-        internal static IEnumerable<SettingBase> _ToolGunSettings = 
-        [
-            new HeaderSetting("UCI ToolGun Settings", hintDescription: "If multiple are created any will work"),
-            new UserTextInputSetting(21, "Primitive Color", placeHolder: "255, 0, 0, -1",  hintDescription: "The color of the primitives spawned by the ToolGun"),
-            new TwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hintDescription: "Sets the deletion mode of the ToolGun"),
-            new TwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
-        ];
 
         internal static Dictionary<Primitive, int> ToolGunPrimitives = [];
 
@@ -411,7 +405,7 @@ namespace UncomplicatedCustomItems.Events
                     EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
                 if (CustomItem.HasModule(CustomFlags.ToolGun))
                 {
-                    SettingBase.Register(ev.Player, _ToolGunSettings);
+                    SSS.AddToolGunSettingsToUser(ev.Player.ReferenceHub);
                     StartRelativePosCoroutine(ev.Player);
                 }
             }

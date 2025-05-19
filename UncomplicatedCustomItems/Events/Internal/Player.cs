@@ -14,6 +14,7 @@ using MEC;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
 using System.Collections.Generic;
+using UncomplicatedCustomItems.API.Wrappers;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -88,6 +89,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 Item.ResetBadge(ev.Player);
             if (Item.HasModule(Enums.CustomFlags.ToolGun))
             {
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
             
@@ -171,6 +173,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
 
@@ -231,6 +234,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                     customitem?.ResetBadge(ev.Player);
                     if (customitem.HasModule(Enums.CustomFlags.ToolGun))
                     {
+                        SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                         EventHandler.StopRelativePosCoroutine(ev.Player);
                     }
                 }
@@ -253,6 +257,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             item?.ResetBadge(ev.Player);
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
 

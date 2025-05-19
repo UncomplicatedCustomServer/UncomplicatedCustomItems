@@ -32,7 +32,7 @@ namespace UncomplicatedCustomItems
 
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 
-        public override Version RequiredExiledVersion { get; } = new(9, 5, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 6, 0);
 
         public override Version Version { get; } = new(3, 5, 0);
 
@@ -48,7 +48,9 @@ namespace UncomplicatedCustomItems
 
         internal FileConfig FileConfig;
 
-        internal IEnumerable<SettingBase> _playerSettings;
+        internal ServerSpecificSettingBase[] _playerSettings;
+        internal ServerSpecificSettingBase[] _ToolGunSettings;
+        internal List<ServerSpecificSettingBase> _settings;
 
         public override void OnEnabled()
         {
@@ -101,13 +103,31 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting += Handler.Onshooting;
             PlayerEvent.ThrownProjectile += Handler.Onthrown;
 
+            _ToolGunSettings =
+            [
+                new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
+                new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1", hint: "The color of the primitives spawned by the ToolGun"),
+                new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
+                new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
+            ];
             _playerSettings =
             [
-                new HeaderSetting("CustomItem Settings"),
-                new KeybindSetting(20, "Trigger CustomItem", KeyCode.K, hintDescription: "When pressed this will trigger the CustomItem your holding")
+                new SSGroupHeader("CustomItem Settings"),
+                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
+            ];
+            _settings = 
+            [
+                new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
+                new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1", hint: "The color of the primitives spawned by the ToolGun"),
+                new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
+                new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No"),
+
+                new SSGroupHeader("CustomItem Settings"),
+                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
             ];
 
-            SettingBase.Register(_playerSettings);
+            ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
+            ServerSpecificSettingsSync.SendToAll();
 
             LogManager.History.Clear();
 
@@ -156,9 +176,6 @@ namespace UncomplicatedCustomItems
         {
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
-
-            SettingBase.Unregister(settings: _playerSettings);
-            _playerSettings = null;
 
             HttpManager.UnregisterEvents();
             _harmony.UnpatchAll();
