@@ -14,7 +14,6 @@ using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Extensions;
-using System.Reflection;
 using LabApi.Features.Wrappers;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Modules;
@@ -172,7 +171,6 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         KeycardItem keycard = Item as KeycardItem;
-                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
                         ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
@@ -192,7 +190,6 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             customKeycard.NameTag = KeycardData.Name;
                         }
-                        openDoorsProperty.SetValue(keycard.Base, true);
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
                         customKeycard.RankIndex = KeycardData.Rank;
