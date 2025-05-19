@@ -78,7 +78,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ChangedItem += Handler.OnChangedItem;
             PlayerEvent.DroppingItem += Handler.OnDropping;
             PlayerEvent.Hurting += Handler.OnHurting;
-            PlayerEvent.InteractingDoor += Handler.OnDoorInteracting;
+            PlayerEvent.InteractedDoor += Handler.OnDoorInteracting;
             PlayerEvent.UnlockingGenerator += Handler.OnGeneratorUnlock;
             PlayerEvent.InteractingLocker += Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
@@ -198,7 +198,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ChangedItem -= Handler.OnChangedItem;
             PlayerEvent.DroppingItem -= Handler.OnDropping;
             PlayerEvent.Hurting -= Handler.OnHurting;
-            PlayerEvent.InteractingDoor -= Handler.OnDoorInteracting;
+            PlayerEvent.InteractedDoor -= Handler.OnDoorInteracting;
             PlayerEvent.UnlockingGenerator -= Handler.OnGeneratorUnlock;
             PlayerEvent.InteractingLocker -= Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;

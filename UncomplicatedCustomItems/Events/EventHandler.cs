@@ -1024,7 +1024,7 @@ namespace UncomplicatedCustomItems.Events
             });
         }
 
-        public void OnDoorInteracting(PlayerInteractingDoorEventArgs ev)
+        public void OnDoorInteracting(PlayerInteractedDoorEventArgs ev)
         {
             if (ev.Player == null)
                 return;
@@ -1034,27 +1034,22 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Player.CurrentItem == null)
                 return;
-            if (ev.IsAllowed == false)
-                return;
             // This probably will throw a error with plugins like RemoteKeycard
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
                     IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
-                    Timing.CallDelayed(0.1f, () =>
+                    if (ev.Door.Base.IsMoving && Data.OneTimeUse)
                     {
-                        bool doormoving = ev.Door.ExactState > 0.01f && ev.Door.ExactState < 0.99f;
-                        if (doormoving && Data.OneTimeUse)
+                        Timing.CallDelayed(0.5f, () =>
                         {
-                            Timing.CallDelayed(0.5f, () =>
-                            {
-                                ev.Player.SendHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
-                                LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
-                                ev.Player.RemoveItem(CustomItem.Item);
-                            });
-                        }
-                    });
+                            ev.Player.SendHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                            LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                            ev.Player.RemoveItem(CustomItem.Item);
+                            CustomItem.ResetBadge(ev.Player);
+                        });
+                    }
                 }
             }
         }
