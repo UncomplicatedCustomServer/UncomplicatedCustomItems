@@ -16,7 +16,6 @@ using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Extensions;
 using System.Reflection;
 using LabApi.Features.Wrappers;
-using InventorySystem.Items.Armor;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Modules;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
@@ -216,9 +215,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                         Armor.Base.HelmetEfficacy = ArmorData.HeadProtection;
                         Armor.Base.VestEfficacy = ArmorData.BodyProtection;
-                        // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
-                        // Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
-                        //Armor.Base.StaminaUsageMultiplier = ArmorData.StaminaUseMultiplier;
+                        Armor.Base._staminaUseMultiplier = ArmorData.StaminaUseMultiplier;
                         //Armor.Base.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
                         if (ArmorData.RemoveExcessOnDrop)
                             LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
@@ -306,7 +303,15 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.SCPItem:
                         {
-                            if (Item.Type == ItemType.SCP244a)
+                            if (Item.Type == ItemType.SCP018)
+                            {
+                                LabApi.Features.Wrappers.ThrowableItem scp018throwableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
+                                InventorySystem.Items.ThrowableProjectiles.Scp018Projectile scp018 = scp018throwableItem.Base.Projectile as InventorySystem.Items.ThrowableProjectiles.Scp018Projectile;
+                                ISCP018Data Scp018Data = CustomItem.CustomData as ISCP018Data;
+                                scp018._fuseTime = Scp018Data.FuseTime;
+                                scp018._friendlyFireTime = Scp018Data.FriendlyFireTime;
+                            }
+                            else if (Item.Type == ItemType.SCP244a)
                             {
                                 LogManager.Debug($"SCPItem is SCP-244");
                                 Scp244 Scp244 = Item as Scp244;
@@ -445,13 +450,12 @@ namespace UncomplicatedCustomItems.API.Features
                             if (Pickup.Type == ItemType.SCP244a)
                             {
                                 LogManager.Debug($"SCPItem is SCP-244");
-                                Scp244Pickup Scp244Pickup = Pickup as Scp244Pickup;
+                                Scp244Pickup Scp244Pickup = (Scp244Pickup)Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
                                 ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
                                 Scp244Pickup.Base.MaxDiameter = SCP244Data.MaxDiameter;
                                 Scp244Pickup.Base._activationDot = SCP244Data.ActivationDot;
                                 Scp244Pickup.Base._health = SCP244Data.Health;
                                 Scp244Pickup.Base.enabled = SCP244Data.Primed;
-                                Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
                                 Pickup.Destroy();
                                 Scp244Pickup.Spawn();
                                 Pickup = Scp244Pickup;
@@ -460,13 +464,12 @@ namespace UncomplicatedCustomItems.API.Features
                             else if (Pickup.Type == ItemType.SCP244b)
                             {
                                 LogManager.Debug($"SCPItem is SCP-244");
-                                Scp244Pickup Scp244Pickup = Pickup as Scp244Pickup;
+                                Scp244Pickup Scp244Pickup = (Scp244Pickup)Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
                                 ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
                                 Scp244Pickup.Base.MaxDiameter = SCP244Data.MaxDiameter;
                                 Scp244Pickup.Base._activationDot = SCP244Data.ActivationDot;
                                 Scp244Pickup.Base._health = SCP244Data.Health;
                                 Scp244Pickup.Base.enabled = SCP244Data.Primed;
-                                Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
                                 Pickup.Destroy();
                                 Scp244Pickup.Spawn();
                                 Pickup = Scp244Pickup;
@@ -721,24 +724,6 @@ namespace UncomplicatedCustomItems.API.Features
                 }
             });
         }
-        /*
-        /// <summary>
-        /// Checks the magazine of the held <see cref="Firearm"/> to remove the capacity modifier from a modification.
-        /// <param name="Firearm"></param>
-        /// <param name="WeaponData"></param>
-        /// </summary>
-        public void MagCheck(Firearm Firearm, IWeaponData WeaponData)
-        { 
-            LogManager.Debug($"Performing MagCheck for {CustomItem.Name}");
-            if (Firearm.MaxMagazineAmmo != WeaponData.MaxMagazineAmmo)
-            {
-                int Ammo = WeaponData.MaxMagazineAmmo - Firearm.MaxMagazineAmmo;
-                WeaponData.MaxMagazineAmmo += Ammo;
-                LogManager.Debug($"Added/Subtracted {Ammo} to/from MaxMagazineAmmo for {CustomItem.Name}");
-                LogManager.Debug($"MaxMagazineAmmo for {CustomItem.Name} is now {WeaponData.MaxMagazineAmmo}");
-            }
-        }
-        */
 
         /// <summary>
         /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomFlags"/>

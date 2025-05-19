@@ -148,37 +148,37 @@ namespace UncomplicatedCustomItems.API.Wrappers
             {
                 if (__result is not Scp127MagazineModule.RegenerationSettings original)
                     return;
-
-                if (!Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out SummonedCustomItem SCI) && SCI.CustomItem.CustomItemType == CustomItemType.SCPItem && SCI.Item.Type == ItemType.GunSCP127)
-                    return;
-                try
+                    
+                if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out SummonedCustomItem SCI) && SCI.CustomItem.CustomItemType == CustomItemType.SCPItem && SCI.Item.Type == ItemType.GunSCP127)
                 {
-                    Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(__instance.Item);
-                    ISCP127Data data = SCI.CustomItem.CustomData as ISCP127Data;
-
-                    __result = new Scp127MagazineModule.RegenerationSettings
+                    try
                     {
-                        BulletsPerSecond = tier
-                        switch
+                        Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(__instance.Item);
+                        ISCP127Data data = SCI.CustomItem.CustomData as ISCP127Data;
+                        __result = new Scp127MagazineModule.RegenerationSettings
                         {
-                            Scp127Tier.Tier1 => data.Tier1BulletRegenRate,
-                            Scp127Tier.Tier2 => data.Tier2BulletRegenRate,
-                            Scp127Tier.Tier3 => data.Tier3BulletRegenRate,
-                            _ => original.BulletsPerSecond
-                        },
-                        PostFireDelay = tier
-                        switch
-                        {
-                            Scp127Tier.Tier1 => data.Tier1BulletRegenPostFireDelay,
-                            Scp127Tier.Tier2 => data.Tier2BulletRegenPostFireDelay,
-                            Scp127Tier.Tier3 => data.Tier3BulletRegenPostFireDelay,
-                            _ => original.PostFireDelay
-                        }
-                    };
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Error($"{nameof(BulletRegenSettingsPatch)}: {ex.Message}\n{ex.StackTrace}");
+                            BulletsPerSecond = tier
+                            switch
+                            {
+                                Scp127Tier.Tier1 => data.Tier1BulletRegenRate,
+                                Scp127Tier.Tier2 => data.Tier2BulletRegenRate,
+                                Scp127Tier.Tier3 => data.Tier3BulletRegenRate,
+                                _ => original.BulletsPerSecond
+                            },
+                            PostFireDelay = tier
+                            switch
+                            {
+                                Scp127Tier.Tier1 => data.Tier1BulletRegenPostFireDelay,
+                                Scp127Tier.Tier2 => data.Tier2BulletRegenPostFireDelay,
+                                Scp127Tier.Tier3 => data.Tier3BulletRegenPostFireDelay,
+                                _ => original.PostFireDelay
+                            }
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Error($"{nameof(BulletRegenSettingsPatch)}: {ex.Message}\n{ex.StackTrace}");
+                    }
                 }
             }
         }

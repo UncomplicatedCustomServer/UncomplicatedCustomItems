@@ -63,6 +63,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                             if (ev.Player != null)
                             {
                                 ev.Player.Damage(WeaponData.Damage, ev.Attacker);
+                                ev.Attacker.SendHitMarker();
                             }
                         }
                     }
@@ -85,13 +86,14 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
                 return;
 
-                Item?.OnDrop(ev);
-                Item.ResetBadge(ev.Player);
+            Item?.OnDrop(ev);
+            Item.ResetBadge(ev.Player);
             if (Item.HasModule(Enums.CustomFlags.ToolGun))
             {
                 SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
+            EventHandler.StopHumeShieldRegen(ev.Player);
         }
 
         /// <summary>
@@ -233,9 +235,10 @@ namespace UncomplicatedCustomItems.Events.Internal
                         SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                         EventHandler.StopRelativePosCoroutine(ev.Player);
                     }
-                        
+
                 }
             }
+            EventHandler.StopHumeShieldRegen(ev.Player);
         }
 
         private static void RoleChangeEvent(PlayerChangingRoleEventArgs ev)
@@ -245,7 +248,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             if (!ev.Player.Connection.isReady)
                 return;
-                
+
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
@@ -255,6 +258,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
+            EventHandler.StopHumeShieldRegen(ev.Player);
         }
 
         private static void ThrownProjectile(PlayerThrewProjectileEventArgs ev)

@@ -7,7 +7,6 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Extensions;
 using UnityEngine;
-using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomItems.API.Wrappers
 {
@@ -34,16 +33,16 @@ namespace UncomplicatedCustomItems.API.Wrappers
         private Dictionary<ushort, int> RankIndexDic = [];
 
         /// <summary>
-        /// The underlying Exiled <see cref="Keycard"/> instance being wrapped.
+        /// The underlying Exiled <see cref="KeycardItem"/> instance being wrapped.
         /// </summary>
-        public InventorySystem.Items.Keycards.KeycardItem ParentKeycard { get; private set; }
+        public KeycardItem ParentKeycard { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomKeycard"/> class.
         /// </summary>
-        /// <param name="keycard"> The <see cref="Keycard"/> to wrap.</param>
+        /// <param name="keycard"> The <see cref="KeycardItem"/> to wrap.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public CustomKeycard(InventorySystem.Items.Keycards.KeycardItem keycard)
+        public CustomKeycard(KeycardItem keycard)
         {
             if (!keycard.Customizable)
                 LogManager.Warn($"{keycard.ItemTypeId} is not customizable!\nThe keycard type must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
@@ -52,7 +51,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
         }
 
         /// <summary>
-        /// Gets or sets the name text shown on the <see cref="Keycard"/>.
+        /// Gets or sets the name text shown on the <see cref="KeycardItem"/>.
         /// </summary>
         public string NameTag
         {
@@ -86,7 +85,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
         }
 
         /// <summary>
-        /// Gets or sets the background tint color of the <see cref="Keycard"/>.
+        /// Gets or sets the background tint color of the <see cref="KeycardItem"/>.
         /// </summary>
         public Color32 CardColor
         {
@@ -116,7 +115,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
         }
 
         /// <summary>
-        /// Gets or sets the display name of the <see cref="Keycard"/> in inventory.
+        /// Gets or sets the display name of the <see cref="KeycardItem"/> in inventory.
         /// </summary>
         public string ItemName
         {
@@ -145,7 +144,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
             }
         }
         /// <summary>
-        /// Gets or sets the color of the label text printed on the <see cref="Keycard"/>.
+        /// Gets or sets the color of the label text printed on the <see cref="KeycardItem"/>.
         /// Set this first before setting <see cref="LabelText"/>, or the label will not render.
         /// </summary>
         public Color32 LabelColor
@@ -173,7 +172,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
         }
 
         /// <summary>
-        /// Gets or sets the text printed on the label of the <see cref="Keycard"/>.
+        /// Gets or sets the text printed on the label of the <see cref="KeycardItem"/>.
         /// </summary>
         public string LabelText
         {
@@ -203,7 +202,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
         }
 
         /// <summary>
-        /// Gets or sets the color used when rendering permissions on the <see cref="Keycard"/>.
+        /// Gets or sets the color used when rendering permissions on the <see cref="KeycardItem"/>.
         /// Set this first before setting <see cref="Permissions"/>, or the color will not render.
         /// </summary>
         public Color32 PermissionsColor
@@ -220,7 +219,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="KeycardLevels"/> granted by this <see cref="Keycard"/>.
+        /// Gets or sets the <see cref="KeycardLevels"/> granted by this <see cref="KeycardItem"/>.
         /// </summary>
         public KeycardLevels Permissions
         {

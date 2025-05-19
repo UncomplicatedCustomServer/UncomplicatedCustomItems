@@ -1,17 +1,15 @@
-/*
-UCR isnt ported to LabApi yet
-using Exiled.API.Features;
-using Exiled.Loader;
 using System;
 using System.Linq;
 using System.Reflection;
+using LabApi.Features.Wrappers;
+using LabApi.Loader;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.Integrations
 {
     internal class UCR
     {
-        public static Assembly Assembly => Loader.Plugins.FirstOrDefault(p => p.Name is "UncomplicatedCustomRoles")?.Assembly;
+        public static Assembly Assembly => PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "UncomplicatedCustomRoles").Value;
 
         public static Type CustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.CustomRole");
 
@@ -78,4 +76,4 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
     }
-}*/
+}

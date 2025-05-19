@@ -29,14 +29,11 @@ using PlayerStatsSystem;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.Scp914Events;
 using Interactables.Interobjects.DoorUtils;
-using InventorySystem.Items.Keycards;
 using Player = LabApi.Features.Wrappers.Player;
 using AdminToys;
 using PrimitiveObjectToy = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using LabApi.Features.Extensions;
 using UncomplicatedCustomItems.API.Wrappers;
-using UncomplicatedCustomItems.Events.Internal;
-using InventorySystem.Items.Firearms.Attachments;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -47,11 +44,11 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public Dictionary<Pickup, Light> ActiveLights = [];
         /// <summary>
-        /// The <see cref="Vector3"/> coordinates of the latest detonation point for a <see cref="Exiled.API.Features.Pickups.Projectiles.EffectGrenadeProjectile"/>.
+        /// The <see cref="Vector3"/> coordinates of the latest detonation point for a <see cref="ExplosiveGrenadeProjectile"/>.
         /// Triggered by the <see cref="GrenadeExploding"/> method.
         /// </summary>
         public Vector3 DetonationPosition { get; set; } = Vector3.zero;
-        private bool ChargeAttack { get; set; } = false;
+
         /// <summary>
         /// The <see cref="Dictionary{TKey,TValue}"/> that handles equiped keycards 
         /// Triggered by the <see cref="OnChangedItem"/> method.
@@ -64,7 +61,7 @@ namespace UncomplicatedCustomItems.Events
         internal static Dictionary<PrimitiveObjectToy, int> ToolGunPrimitives = [];
 
         internal static Dictionary<int, LABAPI.CapybaraToy> Capybara = [];
-        private static readonly CachedLayerMask ToolGunMask = new("Default", "Door");
+        private static readonly CachedLayerMask ToolGunMask = new("Default", "Door", "Glass");
         public void OnHurt(PlayerHurtEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null)
@@ -145,7 +142,6 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
                 ev.IsAllowed = false;
-            else return;
         }
 
         public void OnShooting(PlayerShootingWeaponEventArgs ev)
@@ -188,7 +184,7 @@ namespace UncomplicatedCustomItems.Events
                 IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
                 customItem.MagazineModule.AmmoStored = data.MaxMagazineAmmo;
                 customItem.MagazineModule.ServerResyncData();
-                LogManager.Debug($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}"); // This will spam the console if debug is enabled and a customitem has the infinite ammo flag.
+                LogManager.Silent($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}");
             }
             if (customItem.HasModule(CustomFlags.CustomSound))
             {
@@ -403,8 +399,6 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.NewItem is not null)
             {
-                AttachmentCodeSync.TryGet(ev.NewItem.Serial, out uint code);
-                LogManager.Debug($"{code}");
                 if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
                     return;
 
@@ -722,6 +716,12 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnPickupUpgrade(Scp914ProcessingPickupEventArgs ev)
         {
+            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out _))
+            {
+                ev.Pickup.Position = ev.NewPosition;
+                ev.IsAllowed = false;
+            }
+
             LogManager.Debug($"{nameof(OnPickupUpgrade)}: Triggered");
             foreach (CustomItem customItem in CustomItem.List)
             {
@@ -773,6 +773,9 @@ namespace UncomplicatedCustomItems.Events
         
         public void OnItemUpgrade(Scp914ProcessingInventoryItemEventArgs ev)
         {
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out _))
+                ev.IsAllowed = false;
+
             LogManager.Debug($"{nameof(OnItemUpgrade)}: Triggered");
             foreach (CustomItem customItem in CustomItem.List)
             {
@@ -902,7 +905,7 @@ namespace UncomplicatedCustomItems.Events
                     else
                         deletioncolor = "#Ff0000";
 
-                    Extensions.StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
+                    StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
                     string hexcolor = Vector3Extensions.ToHexColor(color);
                     string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{player.Nickname} - {player.Role.GetFullName()}</color></voffset>\n<pos=-10em>{player.Room.Name} - <color=yellow>{player.Room.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
                     player.SendHint($"<align=left>{hinttext}</align>", 0.5f);
@@ -1031,6 +1034,8 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Player.CurrentItem == null)
                 return;
+            if (ev.IsAllowed == false)
+                return;
             // This probably will throw a error with plugins like RemoteKeycard
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
@@ -1039,28 +1044,15 @@ namespace UncomplicatedCustomItems.Events
                     IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
                     Timing.CallDelayed(0.1f, () =>
                     {
-                        KeycardLevels Keycardpermissions = new KeycardLevels();
-                        foreach (Item item in ev.Player.Items)
-                        {
-                            if (item is LabApi.Features.Wrappers.KeycardItem)
-                            {
-                                LabApi.Features.Wrappers.KeycardItem keycard = item as LabApi.Features.Wrappers.KeycardItem;
-                                Keycardpermissions = keycard.Base.Details.OfType<PredefinedPermsDetail>().FirstOrDefault().Levels;
-                            }
-
-                        }
                         bool doormoving = ev.Door.ExactState > 0.01f && ev.Door.ExactState < 0.99f;
-                        if (doormoving)
+                        if (doormoving && Data.OneTimeUse)
                         {
-                            if (Data.OneTimeUse)
+                            Timing.CallDelayed(0.5f, () =>
                             {
-                                Timing.CallDelayed(0.5f, () =>
-                                {
-                                    ev.Player.SendHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
-                                    LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
-                                    ev.Player.RemoveItem(CustomItem.Item);
-                                });
-                            }
+                                ev.Player.SendHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                                LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                                ev.Player.RemoveItem(CustomItem.Item);
+                            });
                         }
                     });
                 }
@@ -1071,6 +1063,8 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player == null)
                 return;
             if (ev.Player.CurrentItem == null)
+                return;
+            if (ev.IsAllowed == false)
                 return;
             // This probably will throw a error with plugins like RemoteKeycard
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
@@ -1096,33 +1090,22 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.Player.CurrentItem == null)
                 return;
+            if (ev.IsAllowed == false)
+                return;
             // This probably will throw a error with plugins like RemoteKeycard
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
             {
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
-                    KeycardLevels Keycardpermissions = new KeycardLevels();
-                    foreach (Item item in ev.Player.Items)
+                    IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
+                    if (ev.Chamber.IsOpen && Data.OneTimeUse)
                     {
-                        if (item is LabApi.Features.Wrappers.KeycardItem)
+                        Timing.CallDelayed(0.5f, () =>
                         {
-                            LabApi.Features.Wrappers.KeycardItem keycard = item as LabApi.Features.Wrappers.KeycardItem;
-                            Keycardpermissions = keycard.Base.Details.OfType<PredefinedPermsDetail>().FirstOrDefault().Levels;
-                        }
-
-                    }
-                    if (ev.Chamber.IsOpen)
-                    {
-                        IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
-                        if (Data.OneTimeUse)
-                        {
-                            Timing.CallDelayed(0.5f, () =>
-                            {
-                                ev.Player.SendHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
-                                LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
-                                ev.Player.RemoveItem(CustomItem.Item);
-                            });
-                        }
+                            ev.Player.SendHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                            LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                            ev.Player.RemoveItem(CustomItem.Item);
+                        });
                     }
                 }
             }
@@ -1161,10 +1144,7 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
                 return;
-            if (ev.Projectile.Type == ItemType.GrenadeHE)
-            {
-
-            }
+                
             if (CustomItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 foreach (EffectSettings EffectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
@@ -1568,7 +1548,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (Physics.Raycast(ev.Player.Camera.position, ev.Player.Camera.forward, out RaycastHit hitInfo, 100f, ToolGunMask))
+            if (Physics.Raycast(ev.Player.Camera.position, ev.Player.Camera.forward, out RaycastHit hitInfo, customItem.HitscanHitregModule.DamageFalloffDistance + customItem.HitscanHitregModule.FullDamageDistance, ToolGunMask))
             {
                 if (customItem.HasModule(CustomFlags.ExplosiveBullets))
                 {
@@ -1715,13 +1695,9 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Pickup != null)
             {
                 if (ev.Pickup != null)
-                {
                     DestroyLightOnPickup(ev.Pickup);
-                }
                 else
-                {
                     LogManager.Error($"Couldnt destroy light on {ev.Pickup.Type}.");
-                }
             }
         }
 
