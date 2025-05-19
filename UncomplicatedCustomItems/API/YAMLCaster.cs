@@ -8,7 +8,6 @@ using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Enums;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -95,6 +94,7 @@ namespace UncomplicatedCustomItems.API
                 (_, ItemType.SCP244b) => (Data)Decode(new SCP244Data(), data),
                 (_, ItemType.SCP1853) => (Data)Decode(new SCP1853Data(), data),
                 (_, ItemType.SCP1576) => (Data)Decode(new SCP1576Data(), data),
+                (_, ItemType.GunSCP127) => (Data)Decode(new SCP127Data(), data),
                 (CustomItemType.SCPItem, _) => (Data)Decode(new SCPItemData(), data),
 
                 _ => new Data(),
@@ -109,7 +109,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="data"></param>
         /// <param name="ExpectedKey"></param>
         /// <param name="KeyList"></param>
-        /// <returns><see cref="true"/> if everything is OK</returns>
+        /// <returns><see cref="bool"/> <see langword="true"/> if everything is OK</returns>
         public static bool Check(IData element, Dictionary<string, string> data, out string ExpectedKey, out string KeyList)
         {
             ExpectedKey = null;

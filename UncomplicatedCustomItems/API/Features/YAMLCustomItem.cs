@@ -41,7 +41,7 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Sets the custom flags of the custom item. Information about custom flags can be found in the UCI Information forum on Discord.")]
         public virtual CustomFlags? CustomFlags { get; set; } = Enums.CustomFlags.None;
 
-        [Description("Defines the flag settings for the custom item.")]
+        [Description("Settings for the CustomFlags. You can remove any unused settings.")]
         public FlagSettings FlagSettings { get; set; } = new();
 
         [Description("Sets the custom data type the item will use.")]

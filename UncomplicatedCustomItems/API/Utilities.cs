@@ -10,6 +10,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -23,13 +24,16 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="item"></param>
         /// <param name="error"></param>
-        /// <returns><see cref="bool"/> false if there's any problem. Every error will be outputted with <paramref name="error"/></returns>
+        /// <returns><see cref="bool"/> <see langword="false"/> if there's any problem. Every error will be outputted with <paramref name="error"/></returns>
         public static bool CustomItemValidator(ICustomItem item, out string error)
         {
             if (CustomItem.CustomItems.ContainsKey(item.Id))
             {
-                error = $"There's already another ICustomItem registered with the same Id ({item.Id})!";
-                return false;
+                uint OldId = item.Id;
+                uint NewId = CustomItem.GetFirstFreeId(1);
+                item.Id = NewId;
+                LogManager.Warn($"{item.Name} - {OldId} ID is already used asigning new ID...\n{item.Name} new ID is {NewId}");
+                CustomItem.Register(item);
             }
             
             switch (item.CustomItemType)
@@ -37,11 +41,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Item:
                     if (item.CustomData is null)
                     {
-error = @$"The item has been flagged as 'Item' but the CustomData class is not 'IData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1339667038750244979";
+                    error = $"The item has been flagged as 'Item' but the CustomData class is not 'IData', found '{item.CustomData.GetType().Name}' The CustomData formatting is incorrect. \n Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667038750244979";
                         return false;
                     }
 
@@ -50,11 +50,7 @@ https://discord.com/channels/1170301876990914631/1339667038750244979";
                 case CustomItemType.Weapon:
                     if (item.CustomData is not IWeaponData)
                     {
-error = @$"The item has been flagged as 'Weapon' but the CustomData class is not 'IWeaponData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1339666579251793960";
+                        error = $"The item has been flagged as 'Weapon' but the CustomData class is not 'IWeaponData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339666579251793960";
                         return false;
                     }
 
@@ -69,11 +65,7 @@ https://discord.com/channels/1170301876990914631/1339666579251793960";
                 case CustomItemType.Keycard:
                     if (item.CustomData is not IKeycardData)
                     {
-error = @$"The item has been flagged as 'Keycard' but the CustomData class is not 'IKeycardData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1339667184435073074";
+                        error = $"The item has been flagged as 'Keycard' but the CustomData class is not 'IKeycardData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667184435073074";
                         return false;
                     }
 
@@ -88,11 +80,7 @@ https://discord.com/channels/1170301876990914631/1339667184435073074";
                 case CustomItemType.Armor:
                     if (item.CustomData is not IArmorData)
                     {
-error = @$"The item has been flagged as 'Armor' but the CustomData class is not 'IArmorData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1339666435491762197";
+                        error = $"The item has been flagged as 'Armor' but the CustomData class is not 'IArmorData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339666435491762197";
                         return false;
                     }
 
@@ -107,11 +95,7 @@ https://discord.com/channels/1170301876990914631/1339666435491762197";
                 case CustomItemType.ExplosiveGrenade:
                     if (item.CustomData is not IExplosiveGrenadeData)
                     {
-error = @$"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'IExplosiveGrenadeData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1339667358398152798";
+                        error = $"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'IExplosiveGrenadeData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667358398152798";
                         return false;
                     }
 
@@ -126,11 +110,7 @@ https://discord.com/channels/1170301876990914631/1339667358398152798";
                 case CustomItemType.FlashGrenade:
                     if (item.CustomData is not IFlashGrenadeData)
                     {
-error = @$"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'IFlashGrenadeData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1339666785313755156";
+                        error = $"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'IFlashGrenadeData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339666785313755156";
                         return false;
                     }
 
@@ -145,11 +125,7 @@ https://discord.com/channels/1170301876990914631/1339666785313755156";
                 case CustomItemType.Jailbird:
                     if (item.CustomData is not IJailbirdData)
                     {
-error = @$"The item has been flagged as 'Jailbird' but the CustomData class is not 'IJailbirdData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1342257093629182002";
+                        error = $"The item has been flagged as 'Jailbird' but the CustomData class is not 'IJailbirdData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1342257093629182002";
                         return false;
                     }
 
@@ -164,11 +140,7 @@ https://discord.com/channels/1170301876990914631/1342257093629182002";
                 case CustomItemType.Medikit:
                     if (item.CustomData is not IMedikitData)
                     {
-error = @$"The item has been flagged as 'Medikit' but the CustomData class is not 'IMedikitData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1339667529366372443";
+                        error = $"The item has been flagged as 'Medikit' but the CustomData class is not 'IMedikitData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667529366372443";
                         return false;
                     }
 
@@ -183,11 +155,7 @@ https://discord.com/channels/1170301876990914631/1339667529366372443";
                 case CustomItemType.Painkillers:
                     if (item.CustomData is not IPainkillersData)
                     {
-error = @$"The item has been flagged as 'Painkillers' but the CustomData class is not 'IPainkillersData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/1170301876990914631/1354116780846612711";
+                        error = $"The item has been flagged as 'Painkillers' but the CustomData class is not 'IPainkillersData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1354116780846612711";
                         return false;
                     }
 
@@ -202,11 +170,7 @@ https://discord.com/channels/1170301876990914631/1354116780846612711";
                 case CustomItemType.Adrenaline:
                     if (item.CustomData is not IAdrenalineData)
                     {
-                        error = @$"The item has been flagged as 'Adrenaline' but the CustomData class is not 'IAdrenalineData', 
-found '{item.CustomData.GetType().Name}' 
-
-The CustomData formatting is incorrect. Please follow the format found here: 
-https://discord.com/channels/null";
+                        error = $"The item has been flagged as 'Adrenaline' but the CustomData class is not 'IAdrenalineData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
                         return false;
                     }
 
@@ -222,43 +186,51 @@ https://discord.com/channels/null";
 
                     if (item.Item is not ItemType.SCP500)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP500!";
                     }
                     else if (item.Item is not ItemType.SCP207)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP207!";
+                    }
+                    else if (item.Item is not ItemType.AntiSCP207)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not AntiSCP207!";
                     }
                     else if (item.Item is not ItemType.SCP018)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP018!";
                     }
                     else if (item.Item is not ItemType.SCP330)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP330!";
                     }
                     else if (item.Item is not ItemType.SCP2176)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP2176!";
                     }
                     else if (item.Item is not ItemType.SCP244a)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP244A!";
                     }
                     else if (item.Item is not ItemType.SCP244b)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP244B!";
                     }
                     else if (item.Item is not ItemType.SCP1853)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP1853!";
                     }
                     else if (item.Item is not ItemType.SCP1576)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP1576!";
+                    }
+                    else if (item.Item is not ItemType.GunSCP127)
+                    {
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not GunSCP127!";
                     }
                     else
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a SCP Item in the game!";
+                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a modifiable SCP Item!";
                         return false;
                     }
 
@@ -278,14 +250,14 @@ https://discord.com/channels/null";
         /// Does not return the error as text!
         /// </summary>
         /// <param name="item"></param>
-        /// <returns><see cref="bool"/> false if there's any problem.</returns>
+        /// <returns><see cref="bool"/> <see langword="false"/> if there's any problem.</returns>
         public static bool CustomItemValidator(ICustomItem item)
         {
             return CustomItemValidator(item, out _);
         }
 
         /// <summary>
-        /// Parse a <see cref="IResponse"/> object as response to a <see cref="Player"/>
+        /// Parse a <see cref="object"/> as response to a <see cref="Player"/>
         /// </summary>
         /// <param name="player"></param>
         /// <param name="response"></param>
@@ -312,21 +284,21 @@ https://discord.com/channels/null";
         /// </summary>
         /// <param name="serial"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="true"/> if succeeded</returns>
+        /// <returns><see cref="bool"/> <see langword="true"/> if succeeded</returns>
         public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem item) => SummonedCustomItem.TryGet(serial, out item);
 
         /// <summary>
         /// Get a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
         /// <param name="serial"></param>
-        /// <returns><see cref="SummonedCustomItem"/> if succeeded, <see cref="default"/> if not</returns>
+        /// <returns><see cref="SummonedCustomItem"/> if succeeded, <c>default</c> if not</returns>
         public static SummonedCustomItem GetSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial);
 
         /// <summary>
         /// Check if an item is a <see cref="SummonedCustomItem"/> by it's <see cref="Item.Serial"/>
         /// </summary>
         /// <param name="serial"></param>
-        /// <returns><see cref="bool"/> true if it is</returns>
+        /// <returns><see cref="bool"/> <see langword="true"/> if it is</returns>
         public static bool IsSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial) is not null;
 
         /// <summary>
@@ -334,7 +306,7 @@ https://discord.com/channels/null";
         /// </summary>
         /// <param name="id"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="bool"/> true if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
+        /// <returns><see cref="bool"/> <see langword="true"/> if the item exists and <paramref name="item"/> is not <see langword="null"/> or <see langword="default"/></returns>
         public static bool TryGetCustomItem(uint id, out ICustomItem item) => CustomItem.CustomItems.TryGetValue(id, out item);
 
         /// <summary>
@@ -342,7 +314,7 @@ https://discord.com/channels/null";
         /// </summary>
         /// <param name="Name"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="bool"/> true if the item exists and <paramref name="item"/> is not <see cref="null"/> or <see cref="default"/></returns>
+        /// <returns><see cref="bool"/> <see langword="true"/> if the item exists and <paramref name="item"/> is not <see langword="null"/> or <see langword="default"/></returns>
         public static bool TryGetCustomItemByName(string Name, out ICustomItem item)
         {
             item = CustomItem.List.FirstOrDefault(i => i.Name == Name);
@@ -353,7 +325,7 @@ https://discord.com/channels/null";
         /// Get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Id"/>
         /// </summary>
         /// <param name="id"></param>
-        /// <returns><see cref="ICustomItem"/> if it exists, otherwhise a <see cref="default"/> will be returned</returns>
+        /// <returns><see cref="ICustomItem"/> if it exists, otherwhise a <see langword="default"/> will be returned</returns>
         public static ICustomItem GetCustomItem(uint id) => CustomItem.CustomItems[id];
 
         /// <summary>
@@ -363,16 +335,66 @@ https://discord.com/channels/null";
         /// <returns></returns>
         public static bool IsCustomItem(uint id) => CustomItem.CustomItems.ContainsKey(id);
 
+        private static Dictionary<LabApi.Features.Wrappers.PedestalLocker, ICustomItem> usedLockers { get; set; } = [];
+
         /// <summary>
         /// Summon a <see cref="CustomItem"/>
         /// </summary>
         /// <param name="CustomItem"></param>
         internal static void SummonCustomItem(ICustomItem CustomItem)
         {
-
             ISpawn Spawn = CustomItem.Spawn;
 
-            if (Spawn.Coords.Count() > 0)
+            if (Spawn.PedestalSpawn ?? false)
+            {
+                if (Spawn.ReplaceExistingPickup)
+                {
+                    foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
+                    {
+                        LabApi.Features.Wrappers.Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                        if (pedestalLockerPickup != null && pedestalLockerPickup.Type == CustomItem.Item)
+                        {
+                            LogManager.Debug($"Removed {pedestalLockerPickup.Type} from {pedestalLockerPickup.Position}");
+                            pedestalLocker.RemoveItem(pedestalLockerPickup);
+                            LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
+                            if (pickup.Type == CustomItem.Item && !usedLockers.ContainsKey(pedestalLocker))
+                            {
+                                usedLockers.Add(pedestalLocker, CustomItem);
+                                LogManager.Debug($"Summoned {CustomItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
+                                SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
+                                break;
+                            }
+                            else if (usedLockers.ContainsKey(pedestalLocker))
+                            {
+                                LogManager.Debug($"Aborting spawn, locker used already.");
+                            }
+                        }
+                    }
+                }
+                else 
+                {
+                    foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
+                    {
+                        LabApi.Features.Wrappers.Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                        if (pedestalLockerPickup != null && !usedLockers.ContainsKey(pedestalLocker))
+                        {
+                            usedLockers.Add(pedestalLocker, CustomItem);
+                            LogManager.Debug($"Removed {pedestalLockerPickup.Type} from {pedestalLockerPickup.Position}");
+                            pedestalLocker.RemoveItem(pedestalLockerPickup);
+                            LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
+                            LogManager.Debug($"Summoned {CustomItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
+                            SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
+                            break;
+                        }
+                        else if (usedLockers.ContainsKey(pedestalLocker))
+                        {
+                            LogManager.Debug($"Aborting spawn, locker used already.");
+                        }
+                    }
+                }
+            }
+
+            else if (Spawn.Coords.Count() > 0)
             {
                 new SummonedCustomItem(CustomItem, Spawn.Coords.RandomItem());
                 return;
@@ -382,7 +404,7 @@ https://discord.com/channels/null";
             {
                 foreach (DynamicSpawn DynamicSpawn in Spawn.DynamicSpawn)
                 {
-                    int Chance = UnityEngine.Random.Range(0, 100);
+                    int Chance = Random.Range(0, 100);
 
                     if (Chance <= DynamicSpawn.Chance)
                     {
@@ -405,10 +427,7 @@ https://discord.com/channels/null";
                                 new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).Position);
                         }
                         else
-                        {
-                            Transform Position = Exiled.API.Features.Room.Get(Room).transform;
-                            new SummonedCustomItem(CustomItem, Position.transform.InverseTransformPoint(DynamicSpawn.Coords));
-                        }
+                            new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.Get(Room).WorldPosition(DynamicSpawn.Coords));
                     }
                 }
             }
@@ -435,7 +454,6 @@ https://discord.com/channels/null";
             }
         }
         
-
         /// <summary>
         /// Reproduce the SCP:SL <see cref="ItemType.Painkillers"/> healing process but with custom things :)
         /// </summary>

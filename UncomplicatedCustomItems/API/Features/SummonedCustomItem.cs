@@ -11,10 +11,14 @@ using UnityEngine;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System;
-using UncomplicatedCustomItems.API.Features.CustomModules;
 using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
-using HarmonyLib;
+using InventorySystem.Items.Keycards;
+using Interactables.Interobjects.DoorUtils;
+using UncomplicatedCustomItems.HarmonyElements.Utilities;
+using UncomplicatedCustomItems.API.Wrappers;
+using UncomplicatedCustomItems.Extensions;
+using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -34,6 +38,11 @@ namespace UncomplicatedCustomItems.API.Features
         private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
 
         /// <summary>
+        /// Stores the original badge status for players who have had a custom item badge applied. Key is Player ID, Value is true if the badge was hidden.
+        /// </summary>
+        public static Dictionary<int, bool> PlayerBadges = [];
+
+        /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
         /// </summary>
         public ICustomItem CustomItem { get; internal set; }
@@ -47,78 +56,9 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="SummonedCustomItem"/> as an <see cref="Exiled.API.Features.Items.Item"/>
         /// </summary>
         public Item Item { get; internal set; }
-        
-        internal static List<Tuple<string, string, string, string>> NotLoadedItems { get; } = new();
 
-        /// <summary>
-        /// Gets the badge of the player if it has one
-        /// </summary>
-        public Triplet<string, string, bool>? Badge { get; private set; }
+        internal bool NameApplied { get; set; } = false;
 
-        public IReadOnlyCollection<ICustomModule> CustomModules => _customModules;
-
-        private List<ICustomModule> _customModules { get; set; }
-
-        /// <summary>
-        /// List of all flag settings.
-        /// </summary>
-        public static readonly List<IFlagSettings> _flagSettings = new();
-
-        /// <summary>
-        /// Registers flag setting(s).
-        /// <param name="flagSettings"></param>
-        /// </summary>
-        public static void Register(IFlagSettings flagSettings)
-        {
-            if (flagSettings == null)
-                throw new ArgumentNullException(nameof(flagSettings));
-
-            if (!_flagSettings.Contains(flagSettings))
-            {
-                _flagSettings.Add(flagSettings);
-            }
-            LogManager.Debug($"added {string.Join(", ", _flagSettings)}");
-        }
-
-        /// <summary>
-        /// Unregisters a flag setting.
-        /// <param name="flagSettings"></param>
-        /// </summary>
-        public static bool Unregister(IFlagSettings flagSettings)
-        {
-            return _flagSettings.Remove(flagSettings);
-        }
-
-        /// <summary>
-        /// Retrieves all loaded flag settings and returns them as a read-only list.
-        /// </summary>
-        /// <returns>A read-only list of flag settings.</returns>
-        public static IReadOnlyList<IFlagSettings> GetAllFlagSettings()
-        {
-            LogManager.Debug("Retrieving all loaded Flag Settings");
-
-            return _flagSettings.AsReadOnly();
-        }
-        /// <summary>
-        /// Clears all flag settings
-        /// </summary>
-        public static void ClearAllFlagSettings()
-        {
-            _flagSettings.Clear();
-        }
-
-        /// <summary>
-        /// Converts the attachments custom weapon data to a list so it applies all attachments instead of one
-        /// </summary>
-        public static List<string> GetAttachmentsList(List<IWeaponData> items)
-        {
-            return items
-                .Where(item => !string.IsNullOrWhiteSpace(item.Attachments))
-                .SelectMany(item => item.Attachments.Split(',')
-                    .Select(attachment => new { AttachmentName = attachment.Trim() }))
-                .Select(x => x.AttachmentName)
-                .ToList();
-        }
         /// <summary>
         /// Converts the Command custom data from items into a list to allow multiple commands.
         /// </summary>
@@ -148,10 +88,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public bool IsPickup => Pickup is not null;
 
-        /// <summary>
-        /// Time since the last time a <see cref="Player"/> was damaged.
-        /// </summary>
-        public long LastDamageTime { get; internal set; }
+        internal bool PropertiesSet { get; set; }
 
         /// <summary>
         /// Create a new instance of <see cref="SummonedCustomItem"/>
@@ -167,7 +104,6 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
-            GetAllFlagSettings();
             SetProperties();
             List.Add(this);
         }
@@ -188,7 +124,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="position"></param>
         /// <param name="rotation"></param>
         public SummonedCustomItem(ICustomItem customItem, Vector3 position, Quaternion rotation = new()) : this(customItem, Pickup.CreateAndSpawn(customItem.Item, position, rotation)) { }
-
         /// <summary>
         /// Create an instance of <see cref="SummonedCustomItem"/> by spawning the item inside the player's inventory<br></br>
         /// From now on it will be considered a <see cref="ICustomItem"/>
@@ -208,20 +143,51 @@ namespace UncomplicatedCustomItems.API.Features
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
         private int Charges { get; set; }
-
         /// <summary>
         /// Applies the custom properties of the current <see cref="ICustomItem"/>
         /// </summary>
         public void SetProperties()
         {
             if (Item is not null)
+            {
                 switch (CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
-                        Keycard Keycard = Item as Keycard;
+                        Keycard keycard = Item as Keycard;
+                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
+                        ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
+                        ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
+                        ColorUtility.TryParseHtmlString(KeycardData.LabelColor, out Color LabelColor);
+                        Color32 PermissionsColor32 = PermissionsColor;
+                        Color32 TintColor32 = TintColor;
+                        Color32 LabelColor32 = LabelColor;
+                        KeycardLevels permissions = new(KeycardData.Containment, KeycardData.Armory, KeycardData.Admin);
+                        if (!keycard.Base.Customizable)
+                        {
+                            LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
+                            return;
+                        }
 
-                        Keycard.Permissions = KeycardData.Permissions;
+                        CustomKeycard customKeycard = new CustomKeycard(keycard);
+                        if (!NameApplied)
+                        {
+                            customKeycard.NameTag = KeycardData.Name;
+                        }
+                        openDoorsProperty.SetValue(keycard.Base, true);
+                        customKeycard.SerialNumber = KeycardData.SerialNumber;
+                        customKeycard.WearIndex = KeycardData.WearDetail;
+                        customKeycard.RankIndex = KeycardData.Rank;
+                        customKeycard.LabelColor = LabelColor32;
+                        customKeycard.LabelText = KeycardData.Label;
+                        customKeycard.ItemName = CustomItem.Name;
+                        customKeycard.CardColor = TintColor32;
+                        customKeycard.PermissionsColor = PermissionsColor32;
+                        customKeycard.Permissions = permissions;
+                        LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
+                        KeycardUtils.RemoveKeycardDetail(keycard.Serial);
+                        KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
+                        NameApplied = true;
                         break;
 
                     case CustomItemType.Armor:
@@ -230,15 +196,20 @@ namespace UncomplicatedCustomItems.API.Features
 
                         Armor.HelmetEfficacy = ArmorData.HeadProtection;
                         Armor.VestEfficacy = ArmorData.BodyProtection;
-                        Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
+                        // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
+                        // Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
                         Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
                         Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
+                        if (ArmorData.RemoveExcessOnDrop)
+                            LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
                         break;
 
                     case CustomItemType.Weapon:
+                        List<string> attachmentList = GetAttachmentsList();
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
-
+                        if (!PropertiesSet)
+                            MagCheck(Firearm, WeaponData);
                         Firearm.MagazineAmmo = WeaponData.MaxAmmo;
                         Firearm.Damage = WeaponData.Damage;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
@@ -247,17 +218,13 @@ namespace UncomplicatedCustomItems.API.Features
                         Firearm.Penetration = WeaponData.Penetration;
                         Firearm.Inaccuracy = WeaponData.Inaccuracy;
                         Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
-                        List<string> attachmentNames = GetAttachmentsList([WeaponData]);
-                        List<AttachmentName> attachmentsList = attachmentNames
-                            .Select(name => Enum.TryParse(name, true, out AttachmentName attachment) ? attachment : (AttachmentName?)null)
-                            .Where(attachment => attachment.HasValue)
-                            .Select(attachment => attachment.Value)
-                            .ToList();
-                        foreach (AttachmentName attachment in attachmentsList)
+                        foreach (string attachmentstring in attachmentList)
                         {
+                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
+                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
                             Firearm.AddAttachment(attachment);
                         }
-                        MagCheck(Firearm, WeaponData);
+                        PropertiesSet = true;
                         break;
 
                     case CustomItemType.Jailbird:
@@ -268,16 +235,7 @@ namespace UncomplicatedCustomItems.API.Features
                         Jailbird.ChargeDamage = JailbirdData.ChargeDamage;
                         Jailbird.MeleeDamage = JailbirdData.MeleeDamage;
                         Jailbird.FlashDuration = JailbirdData.FlashDuration;
-                        if (JailbirdData.TotalCharges > 3)
-                        {
-                            JailbirdData.TotalCharges = -(JailbirdData.TotalCharges + 3);
-                            Charges = JailbirdData.TotalCharges;
-                        }
-                        else
-                        {
-                            Charges = JailbirdData.TotalCharges;
-                        }
-                        Jailbird.TotalCharges = Charges;
+                        PropertiesSet = true;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
@@ -343,16 +301,228 @@ namespace UncomplicatedCustomItems.API.Features
                                 Scp244.MaxDiameter = SCP244Data.MaxDiameter;
                                 Scp244.Primed = SCP244Data.Primed;
                             }
+                            else if (Item.Type == ItemType.GunSCP127)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-127");
+                                Firearm ScpFirearm = Item as Firearm;
+                                if (ScpFirearm == null)
+                                    LogManager.Error($"ScpFirearm is Null!");
+                                ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
+                                if (Scp127Data == null)
+                                    LogManager.Error($"Scp127Data is null!");
+                                else
+                                {
+                                    try
+                                    {
+                                        ScpFirearm.MagazineAmmo = Scp127Data.MaxAmmo;
+                                        ScpFirearm.Damage = Scp127Data.Damage;
+                                        ScpFirearm.MaxMagazineAmmo = Scp127Data.MaxMagazineAmmo;
+                                        ScpFirearm.MaxBarrelAmmo = Scp127Data.MaxBarrelAmmo;
+                                        ScpFirearm.AmmoDrain = Scp127Data.AmmoDrain;
+                                        ScpFirearm.Penetration = Scp127Data.Penetration;
+                                        ScpFirearm.Inaccuracy = Scp127Data.Inaccuracy;
+                                        ScpFirearm.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogManager.Error($"Error when trying to parse Custom127 {ex.Message}\n{ex.StackTrace}");
+                                    }
+                                }
+
+                            }
                             break;
                         }
-
                     default:
                         break;
                 }
-            else if (Pickup is not null)
+            }
+            else if (IsPickup)
             {
-                Pickup.Scale = CustomItem.Scale;
-                Pickup.Weight = CustomItem.Weight;
+                switch (CustomItem.CustomItemType)
+                {
+                    case CustomItemType.Keycard:
+                        Keycard keycard = (Keycard)Keycard.Create(CustomItem.Item);
+                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                        IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
+                        ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
+                        ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
+                        ColorUtility.TryParseHtmlString(KeycardData.LabelColor, out Color LabelColor);
+                        Color32 PermissionsColor32 = PermissionsColor;
+                        Color32 TintColor32 = TintColor;
+                        Color32 LabelColor32 = LabelColor;
+                        KeycardLevels permissions = new(KeycardData.Containment, KeycardData.Armory, KeycardData.Admin);
+                        if (!keycard.Base.Customizable)
+                        {
+                            LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
+                            return;
+                        }
+
+                        openDoorsProperty.SetValue(keycard.Base, true);
+                        CustomKeycard customKeycard = new CustomKeycard(keycard);
+                        customKeycard.SerialNumber = KeycardData.SerialNumber;
+                        customKeycard.WearIndex = KeycardData.WearDetail;
+                        customKeycard.RankIndex = KeycardData.Rank;
+                        customKeycard.LabelColor = LabelColor32;
+                        customKeycard.LabelText = KeycardData.Label;
+                        customKeycard.ItemName = CustomItem.Name;
+                        customKeycard.CardColor = TintColor32;
+                        customKeycard.PermissionsColor = PermissionsColor32;
+                        customKeycard.Permissions = permissions;
+                        LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
+                        KeycardUtils.RemoveKeycardDetail(keycard.Serial);
+                        KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
+                        Exiled.API.Features.Pickups.KeycardPickup keycardpickup = (Exiled.API.Features.Pickups.KeycardPickup)keycard.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        Pickup = keycardpickup;
+                        Serial = Pickup.Serial;
+                        break;
+
+                    case CustomItemType.Armor:
+                        Armor Armor = (Armor)Armor.Create(CustomItem.Item);
+                        IArmorData ArmorData = CustomItem.CustomData as IArmorData;
+
+                        Armor.HelmetEfficacy = ArmorData.HeadProtection;
+                        Armor.VestEfficacy = ArmorData.BodyProtection;
+                        // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
+                        // Armor.RemoveExcessOnDrop = ArmorData.RemoveExcessOnDrop;
+                        Armor.StaminaUseMultiplier = ArmorData.StaminaUseMultiplier;
+                        Armor.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
+                        if (ArmorData.RemoveExcessOnDrop)
+                            LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
+                        BodyArmorPickup armorPickup = (BodyArmorPickup)Armor.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        Pickup = armorPickup;
+                        Serial = Pickup.Serial;
+                        break;
+
+                    case CustomItemType.Weapon:
+                        List<string> attachmentList = GetAttachmentsList();
+                        Firearm Firearm = (Firearm)Firearm.Create(CustomItem.Item);
+                        IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
+                        Firearm.MagazineAmmo = WeaponData.MaxAmmo;
+                        Firearm.Damage = WeaponData.Damage;
+                        Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
+                        Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
+                        Firearm.AmmoDrain = WeaponData.AmmoDrain;
+                        Firearm.Penetration = WeaponData.Penetration;
+                        Firearm.Inaccuracy = WeaponData.Inaccuracy;
+                        Firearm.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
+                        foreach (string attachmentstring in attachmentList)
+                        {
+                            Enum.TryParse(attachmentstring, out AttachmentName attachment);
+                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                            Firearm.AddAttachment(attachment);
+                        }
+                        FirearmPickup firearmpickup = (FirearmPickup)Firearm.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        Pickup = firearmpickup;
+                        Serial = Pickup.Serial;
+                        break;
+
+                    case CustomItemType.ExplosiveGrenade:
+                        ExplosiveGrenade ExplosiveGrenade = (ExplosiveGrenade)ExplosiveGrenade.Create(CustomItem.Item);
+                        IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
+
+                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        ExplosiveGrenade.PinPullTime = ExplosiveGrenadeData.PinPullTime;
+                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        ExplosiveGrenade.ConcussDuration = ExplosiveGrenadeData.ConcussDuration;
+                        ExplosiveGrenade.BurnDuration = ExplosiveGrenadeData.BurnDuration;
+                        ExplosiveGrenade.DeafenDuration = ExplosiveGrenadeData.DeafenDuration;
+                        ExplosiveGrenade.FuseTime = ExplosiveGrenadeData.FuseTime;
+                        ExplosiveGrenade.Repickable = ExplosiveGrenadeData.Repickable;
+                        Pickup ExplosiveGrenadePickup = ExplosiveGrenade.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        Pickup = ExplosiveGrenadePickup;
+                        Serial = Pickup.Serial;
+                        break;
+
+                    case CustomItemType.FlashGrenade:
+                        FlashGrenade FlashGrenade = (FlashGrenade)FlashGrenade.Create(CustomItem.Item);
+                        IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
+
+                        FlashGrenade.PinPullTime = FlashGrenadeData.PinPullTime;
+                        FlashGrenade.Repickable = FlashGrenadeData.Repickable;
+                        FlashGrenade.MinimalDurationEffect = FlashGrenadeData.MinimalDurationEffect;
+                        FlashGrenade.AdditionalBlindedEffect = FlashGrenadeData.AdditionalBlindedEffect;
+                        FlashGrenade.SurfaceDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        FlashGrenade.FuseTime = FlashGrenadeData.FuseTime;
+                        Pickup FlashGrenadePickup = FlashGrenade.CreatePickup(Pickup.Position);
+                        Pickup.Destroy();
+                        Pickup = FlashGrenadePickup;
+                        Serial = Pickup.Serial;
+                        break;
+
+                    case CustomItemType.SCPItem:
+                        {
+                            if (Item.Type == ItemType.SCP018)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-018");
+                                Scp018 Scp018 = (Scp018)Scp018.Create(CustomItem.Item);
+                                ISCP018Data SCP018Data = CustomItem.CustomData as ISCP018Data;
+                                Scp018.FriendlyFireTime = SCP018Data.FriendlyFireTime;
+                                Scp018.FuseTime = SCP018Data.FuseTime;
+                                Pickup Scp018Pickup = Scp018.CreatePickup(Pickup.Position);
+                                Pickup.Destroy();
+                                Pickup = Scp018Pickup;
+                                Serial = Pickup.Serial;
+                            }
+                            else if (Item.Type == ItemType.SCP244a)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244Pickup Scp244 = Pickup as Scp244Pickup;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.ActivationDot = SCP244Data.ActivationDot;
+                                Scp244.Health = SCP244Data.Health;
+                                Scp244.MaxDiameter = SCP244Data.MaxDiameter;
+                                if (SCP244Data.Primed)
+                                    Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Active;
+                                else
+                                    Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Idle;
+                                var scp244a = Scp244.Spawn(Pickup.Position);
+                                Pickup.Destroy();
+                                Pickup = scp244a;
+                                Serial = Pickup.Serial;
+                            }
+                            else if (Item.Type == ItemType.SCP244b)
+                            {
+                                LogManager.Debug($"SCPItem is SCP-244");
+                                Scp244Pickup Scp244 = Pickup as Scp244Pickup;
+                                ISCP244Data SCP244Data = CustomItem.CustomData as ISCP244Data;
+                                Scp244.ActivationDot = SCP244Data.ActivationDot;
+                                Scp244.Health = SCP244Data.Health;
+                                Scp244.MaxDiameter = SCP244Data.MaxDiameter;
+                                if (SCP244Data.Primed)
+                                    Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Active;
+                                else
+                                    Scp244.State = InventorySystem.Items.Usables.Scp244.Scp244State.Idle;
+                                var scp244b = Scp244.Spawn(Pickup.Position);
+                                Pickup.Destroy();
+                                Pickup = scp244b;
+                                Serial = Pickup.Serial;
+                            }
+                            else if (Item.Type == ItemType.GunSCP127)
+                            {
+                                Firearm ScpFirearm = (Firearm)Firearm.Create(CustomItem.Item);
+                                ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
+                                ScpFirearm.MagazineAmmo = Scp127Data.MaxAmmo;
+                                ScpFirearm.Damage = Scp127Data.Damage;
+                                ScpFirearm.MaxMagazineAmmo = Scp127Data.MaxMagazineAmmo;
+                                ScpFirearm.MaxBarrelAmmo = Scp127Data.MaxBarrelAmmo;
+                                ScpFirearm.AmmoDrain = Scp127Data.AmmoDrain;
+                                ScpFirearm.Penetration = Scp127Data.Penetration;
+                                ScpFirearm.Inaccuracy = Scp127Data.Inaccuracy;
+                                ScpFirearm.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
+                                FirearmPickup SCP127Pickup = (FirearmPickup)ScpFirearm.CreatePickup(Pickup.Position);
+                                Pickup.Destroy();
+                                Pickup = SCP127Pickup;
+                                Serial = Pickup.Serial;
+                            }
+                            break;
+                        }
+                    default:
+                        break;
+                }
             }
         }
         /// <summary>
@@ -364,16 +534,6 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 switch (CustomItem.CustomItemType)
                 {
-                    case CustomItemType.Keycard:
-                        {
-                            Keycard keycard = Item as Keycard;
-                            IKeycardData keycardData = CustomItem.CustomData as IKeycardData;
-                            if (keycard != null && keycardData != null)
-                            {
-                                keycardData.Permissions = keycard.Permissions;
-                            }
-                            break;
-                        }
                     case CustomItemType.Armor:
                         {
                             Armor Armor = Item as Armor;
@@ -382,7 +542,8 @@ namespace UncomplicatedCustomItems.API.Features
                             {
                                 ArmorData.HeadProtection = Armor.HelmetEfficacy;
                                 ArmorData.BodyProtection = Armor.VestEfficacy;
-                                ArmorData.RemoveExcessOnDrop = Armor.RemoveExcessOnDrop;
+                                // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
+                                // ArmorData.RemoveExcessOnDrop = Armor.RemoveExcessOnDrop;
                                 ArmorData.StaminaUseMultiplier = Armor.StaminaUseMultiplier;
                                 ArmorData.StaminaRegenMultiplier = Armor.StaminaRegenMultiplier;
                             }
@@ -505,13 +666,40 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
+        private List<string> GetAttachmentsList()
+        {
+            if (CustomItem.CustomData is IWeaponData weaponData)
+            {
+                string attachmentsString = weaponData.Attachments;
+
+                if (string.IsNullOrWhiteSpace(attachmentsString))
+                {
+                    return new List<string>();
+                }
+
+                List<string> attachmentsList = attachmentsString
+                    .Split(',')
+                    .Select(att => att.Trim())
+                    .Where(att => !string.IsNullOrEmpty(att))
+                    .ToList();
+
+                return attachmentsList;
+            }
+            else
+            {
+                LogManager.Warn("CustomData is not in the expected IWeaponData format or is null.");
+                return new List<string>();
+            }
+        }
+
         /// <summary>
         /// Sets the badge of the <see cref="Player"/> according to the <see cref="ICustomItem"/> BadgeName field.
         /// <param name="Player"></param>
         /// </summary>
         public string LoadBadge(Player Player)
         {
-            LogManager.Debug("LoadBadge() Triggered");
+            PlayerBadges.TryAdd(Player.Id, Player.BadgeHidden);
+            LogManager.Debug("LoadBadge Triggered");
             string output = "Badge: ";
 
             if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
@@ -557,12 +745,23 @@ namespace UncomplicatedCustomItems.API.Features
 
         /// <summary>
         /// Resets the badge of the <see cref="Player"/>.
-        /// <param name="Player"></param>
+        /// <param name="player"></param>
         /// </summary>
-        public void ResetBadge(Player Player)
+        public void ResetBadge(Player player)
         {
-            Player.ReferenceHub.serverRoles.RefreshLocalTag();
-            LogManager.Debug($"{Player.Nickname} Badge successfully reset");
+            if (CustomItem.BadgeName.Length == 0)
+                return;
+            
+            player.ReferenceHub.serverRoles.RefreshLocalTag();
+            if (PlayerBadges.TryGetValue(player.Id, out bool Hidden))
+            {
+                if (Hidden)
+                {
+                    LogManager.Debug($"Hid {player.DisplayNickname} badge.");
+                    player.ReferenceHub.serverRoles.TryHideTag();
+                }
+            }
+            LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }
 
         internal void OnPickup(ItemAddedEventArgs pickedUp)
@@ -570,10 +769,9 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = null;
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
-            GetAllFlagSettings();
             SetProperties();
             Serial = Item.Serial;
-            HandleEvent(pickedUp.Player, ItemEvents.Pickup);
+            HandleEvent(pickedUp.Player, ItemEvents.Pickup, pickedUp.Item.Serial);
         }
 
         /// <summary>
@@ -585,29 +783,34 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = dropped.Pickup;
             Item = null;
             Owner = null;
-            ClearAllFlagSettings();
             SaveProperties();
             Serial = Pickup.Serial;
-            HandleEvent(dropped.Player, ItemEvents.Drop);
+            HandleEvent(dropped.Player, ItemEvents.Drop, dropped.Pickup.Serial);
         }
 
         /// <summary>
-        /// loads the Item Flags for the <see cref="Player"/>.
+        /// Unloads all <see cref="ICustomItem"/> information for the <see cref="Player"/> who died with the custom item.
         /// </summary>
-        public string LoadItemFlags()
+        /// <param name="ev"></param><param name="customItem"></param>
+        public void OnDied(DyingEventArgs ev, SummonedCustomItem customItem)
         {
-
-            List<string> output = new();
-
-            if (_customModules.Count > 0)
-                output.Add("<color=#a343f7>[CUSTOM MODULES]</color>");
-
-            if (output.Count > 0)
+            Timing.CallDelayed(0.1f, () =>
             {
-                output.Insert(0, "                                ");
-            }
-
-            return string.Join(" ", output);
+                foreach (Pickup pickup in Pickup.List)
+                {
+                    if (pickup.Type == customItem.Item.Type)
+                    {
+                        if (pickup.Serial == customItem.Serial)
+                        {
+                            Pickup = pickup;
+                            Item = null;
+                            Owner = null;
+                            SaveProperties();
+                            Serial = pickup.Serial;
+                        }
+                    }
+                }
+            });
         }
 
         /// <summary>
@@ -637,94 +840,18 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Reloads the Flags for the <see cref="ICustomItem"/>.
+        /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomFlags"/>
         /// </summary>
-        public void ReloadItemFlags()
+        /// <returns><see langword="true"/> if the custom flag represented by the Enum <see cref="CustomFlags"/>; otherwise, <see langword="false"/>.</returns>
+        public bool HasModule(CustomFlags Flag)
         {
-            LogManager.Debug("Reload Item Flags Function Triggered");
-            _customModules = CustomModule.Load(CustomItem.CustomFlags ?? CustomFlags.None, this);
-            List.Add(this);
-
-            LogManager.Debug("Item Flag(s) Reloaded");
-        }
-
-        /// <summary>
-        /// Unloads the Flags for the <see cref="Player"/>.
-        /// </summary>
-        public void UnloadItemFlags()
-        {
-            LogManager.Debug("Unload Item Flags Triggered");
-            _customModules.Clear(); 
-            LogManager.Debug("Item Flags Cleared");
-        }
-
-        /// <summary>
-        /// Gets a <see cref="CustomModule"/> that this <see cref="ICustomItem"/> implements
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T GetModule<T>() where T : CustomModule => _customModules.Where(cm => cm.GetType() == typeof(T)).FirstOrDefault() as T;
-
-        /// <summary>
-        /// Gets a <see cref="CustomModule"/> array that contains every custom module with the same type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T[] GetModules<T>() where T : CustomModule
-        {
-            T[] result = new T[] { };
-            foreach (ICustomModule module in _customModules.Where(cm => cm.GetType() == typeof(T)))
-                result.AddItem(module);
-            return result;
-        }
-
-        /// <summary>
-        /// Try to get a <see cref="CustomModule"/> if its implemented
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="module"></param>
-        /// <returns></returns>
-        public bool GetModule<T>(out T module) where T : CustomModule
-        {
-            module = GetModule<T>();
-            return module != null;
-        }
-
-        /// <summary>
-        /// Gets if the current <see cref="SummonedCustomItem"/> implements the given <see cref="CustomModule"/>
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public bool HasModule<T>() where T : CustomModule => _customModules.Any(cm => cm.GetType() == typeof(T));
-
-        /// <summary>
-        /// Add a new <see cref="CustomModule"/> to the current <see cref="SummonedCustomItem"/> instance
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void AddModule<T>() where T : CustomModule => _customModules.Add(CustomModule.Load(typeof(T), this));
-
-        /// <summary>
-        /// Try to remove the first <see cref="CustomModule"/>
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void RemoveModule<T>() where T : CustomModule
-        {
-            if (GetModule(out T module))
+            if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(Flag))
             {
-                if (module is CoroutineModule coroutineModule && coroutineModule.CoroutineHandler.IsRunning)
-                    Timing.KillCoroutines(coroutineModule.CoroutineHandler);
-                _customModules.Remove(module);
+                LogManager.Silent($"{CustomItem.Name} has {Flag}");
+                return true;
             }
-        }
-
-        /// <summary>
-        /// Remove every <see cref="CustomModule"/> with the same given type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void RemoveModules<T>() where T : CustomModule
-        {
-            foreach (ICustomModule _ in GetModules<T>())
-                RemoveModule<T>();
+            else
+                return false;
         }
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();
@@ -733,12 +860,13 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         /// <param name="player"></param>
         /// <param name="itemEvent"></param>
-        public void HandleEvent(Player player, ItemEvents itemEvent)
+        /// <param name="playerItemSerial"></param>
+        public void HandleEvent(Player player, ItemEvents itemEvent, ushort playerItemSerial)
         {
             IItemData ItemData = CustomItem.CustomData as IItemData;
             if (CustomItem.CustomItemType == CustomItemType.Item && ItemData.Event == itemEvent)
             {
-                if (IsOnCooldown(player, player.CurrentItem.Serial))
+                if (IsOnCooldown(player, playerItemSerial))
                 {
                     LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
                     return;
@@ -765,12 +893,14 @@ namespace UncomplicatedCustomItems.API.Features
                             .Replace("{p_health}", player.Health.ToString())
                             .Replace("{p_zone}", player.Zone.ToString())
                             .Replace("{p_room}", player.CurrentRoom.ToString())
-                            .Replace("{p_rotation}", player.Rotation.ToString());
+                            .Replace("{p_rotation}", player.Rotation.ToString())
+                            .Replace("{pj_pos}", Plugin.Instance.Handler.DetonationPosition.ToString());
 
                         if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
                             cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
                             cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
-                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}"))
+                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}") ||
+                            cmd.Contains("{pj_pos}"))
                         {
                             Server.ExecuteCommand(processedCommand, player.Sender);
                         }
@@ -780,7 +910,7 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     }
                 }
-                StartCooldown(player, player.CurrentItem.Serial, ItemData.CoolDown);
+                StartCooldown(player, playerItemSerial, ItemData.CoolDown);
 
                 Utilities.ParseResponse(player, ItemData);
 
@@ -848,7 +978,7 @@ namespace UncomplicatedCustomItems.API.Features
                 Owner.ShowHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
         }
 
-        internal bool HandleCustomAction(InventorySystem.Items.Usables.Consumable item)
+        internal bool HandleCustomAction(Item item)
         {
             if (Owner is null) 
                 return false;
@@ -873,9 +1003,9 @@ namespace UncomplicatedCustomItems.API.Features
                 }
 
                 // Runs also the event as it gets suppressed
-                HandleEvent(Owner, ItemEvents.Use);
+                HandleEvent(Owner, ItemEvents.Use, Serial);
                 if (!CustomItem.Reusable)
-                    Item.Get(item).Destroy();
+                    Item.Get(item.Base).Destroy();
 
                 return true;
             }

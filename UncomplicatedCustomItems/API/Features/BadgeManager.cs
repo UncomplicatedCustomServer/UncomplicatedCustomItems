@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-
 namespace UncomplicatedCustomItems.API.Features
 {
     internal class BadgeManager

@@ -1,5 +1,4 @@
-﻿using Exiled.API.Enums;
-using Exiled.API.Features;
+﻿using Exiled.API.Features;
 using Exiled.API.Extensions;
 using Exiled.Loader;
 using System;
@@ -60,7 +59,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 {
                     HeadProtection = 150,
                     BodyProtection = 200,
-                    RemoveExcessOnDrop = false,
                     StaminaUseMultiplier = 2
                 })
             },
@@ -71,16 +69,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Description = "UWU owo keycard",
                 BadgeName = "Keycard",
                 BadgeColor = "pumpkin",
-                Item = ItemType.KeycardJanitor,
+                Item = ItemType.KeycardCustomSite02,
                 CustomItemType = CustomItemType.Keycard,
                 Scale = Vector3.one,
                 Spawn = new(),
                 CustomFlags = CustomFlags.None,
                 FlagSettings = new(),
-                CustomData = YAMLCaster.Encode(new KeycardData()
-                {
-                    Permissions = KeycardPermissions.AlphaWarhead | KeycardPermissions.Checkpoints
-                })
+                CustomData = YAMLCaster.Encode(new KeycardData())
             },
             new()
             {
@@ -304,6 +299,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = Vector3.one,
                 CustomData = YAMLCaster.Encode(new SCP1576Data())
+            },
+            new()
+            {
+                Id = 19,
+                Name = "SCP127",
+                Description = "SCP127",
+                Item = ItemType.GunSCP127,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new SCP127Data())
             }
         ];
 
@@ -356,6 +361,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             else if (itemType == ItemType.SCP1576 && customType == CustomItemType.SCPItem)
             {
                 SCP1576Data Data = new SCP1576Data();
+                customData = YAMLCaster.Encode(Data);
+            }
+            else if (itemType == ItemType.GunSCP127 && customType == CustomItemType.SCPItem)
+            {
+                SCP127Data Data = new SCP127Data();
                 customData = YAMLCaster.Encode(Data);
             }
             else if (ItemExtensions.GetCategory(itemType) == ItemCategory.Firearm && customType == CustomItemType.Weapon)
@@ -536,7 +546,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}");
+                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}\n{ex.HResult}");
                     if (Plugin.Instance.Config.Debug)
                     {
                         LogManager.Error($"Stack trace: {ex.StackTrace}");

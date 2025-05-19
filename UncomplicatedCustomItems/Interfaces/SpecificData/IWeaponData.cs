@@ -20,6 +20,8 @@
 
         public abstract float Inaccuracy { get; set; }
 
+        public float AimingInaccuracy { get; set; }
+
         public abstract float DamageFalloffDistance { get; set; }
 
         public abstract string Attachments { get; set; }

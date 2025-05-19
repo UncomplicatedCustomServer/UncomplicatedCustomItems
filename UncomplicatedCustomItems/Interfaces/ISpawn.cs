@@ -10,6 +10,8 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract bool DoSpawn { get; set; }
 
         public abstract uint Count { get; set; }
+
+        public abstract bool? PedestalSpawn { get; set; }
         
         public abstract List<Vector3> Coords { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using CommandSystem;
+using Exiled.API.Features;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
@@ -22,6 +23,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
+            if (!Round.IsStarted)
+            {
+                response = "<color=red>[⚠]</color> This command cannot be ran if the round isnt started!";
+                return false;
+            }
+
             if (arguments.Count < 1)
             {
                 response = $"No argument(s) found!\nSyntax: .ucr summon <CustomItem Id> (Player Id)";

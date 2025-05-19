@@ -2,6 +2,7 @@
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
+using MEC;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
@@ -24,7 +25,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string[] Aliases { get; } = ["reload"];
 
-        public Dictionary<ICustomItem, Player> CustomItems = [];
+        public Dictionary<uint, Player> CustomItems = [];
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
@@ -66,7 +67,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         ushort Serial = Item.Serial;
                         if (SummonedCustomItem.TryGet(Serial, out SummonedCustomItem CustomItem))
                         {
-                            CustomItems[CustomItem.CustomItem] = player;
+                            CustomItems[CustomItem.CustomItem.Id] = player;
                             LogManager.Debug($"Marked {Item.Type} from {player.DisplayNickname} for removal");
                             ItemsToRemove.Add(Serial);
                         }
@@ -89,27 +90,32 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 int NewItems = CustomItem.List.Count - Before;
                 SummonedCustomItem.List.Clear();
                 CustomItem.List.Clear();
+                CustomItem.UnregisteredList.Clear();
 
                 FileConfig.Welcome(loadExamples: true);
                 FileConfig.Welcome(Server.Port.ToString());
                 FileConfig.LoadAll();
                 FileConfig.LoadAll(Server.Port.ToString());
                 Events.Internal.Server.SpawnItemsOnRoundStarted();
+
                 foreach (var entry in CustomItems)
                 {
-                    Player player = entry.Value;
-                    ICustomItem Item = entry.Key;
-
-                    new SummonedCustomItem(Item, player);
+                    Timing.CallDelayed(1f, () =>
+                    {
+                        Player player = entry.Value;
+                        uint Id = entry.Key;
+                        Utilities.TryGetCustomItem(Id, out ICustomItem item);
+                        new SummonedCustomItem(item, player);
+                    });
                 }
                 if (NewItems > 0)
                 {
-                    response = $"Reloaded {CustomItem.List.Count} Added {NewItems} New Custom items.";
+                    response = $"\nReloaded {CustomItem.List.Count} Added {NewItems} New Custom items. \n Amount of unregistered Custom items: {CustomItem.UnregisteredList.Count}";
                     return true;
                 }
                 else
                 {
-                    response = $"Reloaded {CustomItem.List.Count} Custom items.";
+                    response = $"\nReloaded {CustomItem.List.Count} Custom items. \n Amount of unregistered Custom items: {CustomItem.UnregisteredList.Count}";
                     return true;
                 }
             }

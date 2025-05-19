@@ -72,7 +72,7 @@ namespace UncomplicatedCustomItems.Commands.User
                 Item.CustomItem.CustomData = Data;
             }
 
-            Item.HandleEvent(player, ItemEvents.Command);
+            Item.HandleEvent(player, ItemEvents.Command, player.CurrentItem.Serial);
 
             response = $"Item {Item.CustomItem.Name} successfully used!";
             return true;

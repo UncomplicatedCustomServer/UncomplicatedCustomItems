@@ -1,12 +1,16 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using UncomplicatedCustomItems.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features
 {
     public class SpawnItemWhenDetonatedSettings : ISpawnItemWhenDetonatedSettings
     {
-        public ItemType ItemToSpawn { get; set; } = ItemType.SCP244a;
+        [Description("Set this to UCI, ECI, or Normal.")]
+        public string? ItemType { get; set; } = "";
+        public uint? ItemId { get; set; } = 1;
         public float? TimeTillDespawn { get; set; } = 6f;
         public uint? Chance { get; set; } = 100;
+        public bool? Pickupable { get; set; } = false;
     }
 }

@@ -38,6 +38,6 @@ namespace UncomplicatedCustomItems
         public bool ServerTracking { get; set; } = true;
 
         [Description("Enables or disables the CommonUtilities intergration. (Set the item name in the CommonUtilities config to the customitem name)")]
-        public bool EnableCommonUtilitiesIntergration { get; set; } = false;
+        public bool EnableCommonUtilitiesIntergration { get; set; } = true;
     }
 }
