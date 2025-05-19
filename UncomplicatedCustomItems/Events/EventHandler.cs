@@ -439,7 +439,7 @@ namespace UncomplicatedCustomItems.Events
 
         internal static void StopHumeShieldRegen(Player player)
         {
-            if (_relativePosCoroutine.TryGetValue(player, out CoroutineHandle handle))
+            if (_HumeShieldRegenCoroutine.TryGetValue(player, out CoroutineHandle handle))
             {
                 Timing.KillCoroutines(handle);
                 _HumeShieldRegenCoroutine.Remove(player);

@@ -90,6 +90,8 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
+            
+            EventHandler.StopHumeShieldRegen(ev.Player);
         }
 
         /// <summary>
@@ -231,9 +233,10 @@ namespace UncomplicatedCustomItems.Events.Internal
                     {
                         EventHandler.StopRelativePosCoroutine(ev.Player);
                     }
-                        
                 }
             }
+
+            EventHandler.StopHumeShieldRegen(ev.Player);
         }
 
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)
@@ -252,6 +255,8 @@ namespace UncomplicatedCustomItems.Events.Internal
             {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
+
+            EventHandler.StopHumeShieldRegen(ev.Player);
         }
 
         private static void ThrownProjectile(ThrownProjectileEventArgs ev)
