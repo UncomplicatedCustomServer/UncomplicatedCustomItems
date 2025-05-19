@@ -537,7 +537,6 @@
     <Compile Include="Enums\FirearmType.cs" />
     <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Enums\CustomFlags.cs" />
-    <Compile Include="HarmonyElements\Patches\JailbirdPatch.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Events\Methods\SwitchRoleOnUseMethod.cs" />
     <Compile Include="Events\Internal\Player.cs" />
@@ -552,7 +551,6 @@
     <Compile Include="Extensions\PlayerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
-    <Compile Include="HarmonyElements\Patches\AttachmentPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="HarmonyElements\Utilities\KeycardUtils.cs" />
     <Compile Include="Interfaces\FlagSettings\IClusterSettings.cs" />
