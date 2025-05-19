@@ -14,7 +14,6 @@ using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Extensions;
-using System.Reflection;
 using LabApi.Features.Wrappers;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Modules;
@@ -172,7 +171,6 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         KeycardItem keycard = Item as KeycardItem;
-                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
                         ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
@@ -192,7 +190,6 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             customKeycard.NameTag = KeycardData.Name;
                         }
-                        openDoorsProperty.SetValue(keycard.Base, true);
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
                         customKeycard.RankIndex = KeycardData.Rank;
@@ -693,7 +690,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (CustomItem.BadgeName.Length == 0)
                 return;
-            
+
             player.ReferenceHub.serverRoles.RefreshLocalTag();
             if (PlayerBadges.TryGetValue(player.PlayerId, out bool Hidden))
             {
@@ -896,7 +893,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal bool HandleCustomAction(Item item)
         {
-            if (Owner is null) 
+            if (Owner is null)
                 return false;
 
             if (_managedItems.Contains(CustomItem.CustomItemType))
@@ -968,7 +965,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="owner"></param>
         /// <param name="serial"></param>
         /// <returns></returns>
-        public static SummonedCustomItem Get(Player owner, ushort serial) => List.Where(sci => sci.Owner is not null && sci.Owner.PlayerId ==  owner.PlayerId && sci.Serial == serial).FirstOrDefault();
+        public static SummonedCustomItem Get(Player owner, ushort serial) => List.Where(sci => sci.Owner is not null && sci.Owner.PlayerId == owner.PlayerId && sci.Serial == serial).FirstOrDefault();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomItem"/> by it's serial.
