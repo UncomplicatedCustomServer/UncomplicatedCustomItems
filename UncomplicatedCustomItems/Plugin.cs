@@ -23,7 +23,7 @@ namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public bool IsPrerelease = true;
+        public bool IsPrerelease = false;
         public override string Name => "UncomplicatedCustomItems";
 
         public override string Description => "Allows server owners to create CustomItems without the hassel of coding";
