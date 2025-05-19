@@ -11,25 +11,28 @@ using UnityEngine;
 namespace UncomplicatedCustomItems.API.Wrappers
 {
     /// <summary>
-    /// A wrapper class for creating and customizing custom keycards via UCI.
+    /// A wrapper class for creating and customizing keycards via UCI.
     /// Provides easy-to-use properties to set name tags, colors, permissions, and other metadata.
-    /// <para>If the keycard is a item</para>
+    /// </summary>
+    /// <remarks>
+    /// <para><b>If the keycard is an item:</b></para>
     /// <code>
     /// KeycardItem keycard = Item as KeycardItem;
     /// CustomKeycard customKeycard = new CustomKeycard(keycard.Base);
     /// KeycardUtils.RemoveKeycardDetail(keycard.Serial);
     /// KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
     /// </code>
-    /// <para>If the keycard is a pickup</para>
+    ///
+    /// <para><b>If the keycard is a pickup:</b></para>
     /// <code>
     /// KeycardPickup keycard = (KeycardPickup)KeycardPickup.Create(CustomItem.Item, Pickup.Position);
-    /// keycard.Base.Info.ItemId.TryGetTemplate<KeycardItem>(out KeycardItem item);
+    /// keycard.Base.Info.ItemId.TryGetTemplate&lt;KeycardItem&gt;(out KeycardItem item);
     /// item.ItemSerial = keycard.Serial;
     /// CustomKeycard customKeycard = new CustomKeycard(item);
     /// KeycardUtils.RemoveKeycardDetail(keycard.Serial);
     /// KeycardDetailSynchronizer.ServerProcessPickup(keycard.Base);
     /// </code>
-    /// </summary>
+    /// </remarks>
     public class CustomKeycard
     {
         private Dictionary<ushort, Color32> PermissionColorsDic = [];
