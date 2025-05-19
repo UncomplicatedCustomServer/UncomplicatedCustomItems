@@ -161,7 +161,6 @@ namespace UncomplicatedCustomItems.API.Features
         /// <returns></returns>
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
-        private int Charges { get; set; }
         /// <summary>
         /// Applies the custom properties of the current <see cref="ICustomItem"/>
         /// </summary>
@@ -449,13 +448,17 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.ExplosiveGrenade:
                         IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
                         LabApi.Features.Wrappers.ExplosiveGrenadeProjectile ExplosiveGrenade = (LabApi.Features.Wrappers.ExplosiveGrenadeProjectile)LabApi.Features.Wrappers.ExplosiveGrenadeProjectile.Create(CustomItem.Item, Pickup.Position);
-                        
+
                         ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
                         ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
                         ExplosiveGrenade.Base._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
                         ExplosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
                         ExplosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
-                        ExplosiveGrenade.RemainingTime = ExplosiveGrenadeData.FuseTime;
+                        ExplosiveGrenade.Base._fuseTime = ExplosiveGrenadeData.FuseTime;
+                        Pickup.Destroy();
+                        ExplosiveGrenade.Spawn();
+                        Pickup = ExplosiveGrenade;
+                        Serial = Pickup.Serial;
                         break;
 
                     case CustomItemType.FlashGrenade:
@@ -466,6 +469,10 @@ namespace UncomplicatedCustomItems.API.Features
                         FlashGrenade.Base._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
                         FlashGrenade.Base._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
                         FlashGrenade.Base._fuseTime = FlashGrenadeData.FuseTime;
+                        Pickup.Destroy();
+                        FlashGrenade.Spawn();
+                        Pickup = FlashGrenade;
+                        Serial = Pickup.Serial;
                         break;
 
                     case CustomItemType.SCPItem:
