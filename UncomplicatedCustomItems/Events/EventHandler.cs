@@ -34,7 +34,6 @@ using AdminToys;
 using PrimitiveObjectToy = LabApi.Features.Wrappers.PrimitiveObjectToy;
 using LabApi.Features.Extensions;
 using UncomplicatedCustomItems.API.Wrappers;
-using UncomplicatedCustomItems.Commands.Admin;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -636,7 +635,7 @@ namespace UncomplicatedCustomItems.Events
                             if ((ItemType)SpawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244a || (ItemType)SpawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244b)
                             {
                                 LogManager.Debug($"Item is SCP244a or SCP244b");
-                                LABAPI.Scp244Pickup scp244Pickup = (LABAPI.Scp244Pickup)LABAPI.Scp244Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
+                                Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
                                 scp244Pickup.Base.MaxDiameter = 0.1f;
                                 scp244Pickup.State = Scp244State.Active;
                                 scp244Pickup.Spawn();
@@ -650,7 +649,7 @@ namespace UncomplicatedCustomItems.Events
                             }
                             else
                             {
-                                LABAPI.Pickup pickup = LABAPI.Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
+                                Pickup pickup = Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
                                 Vector3 vector3 = new(0f, 1f, 0f);
                                 pickup.Transform.position = pickup.Transform.position + vector3;
                                 pickup.Spawn();

@@ -792,7 +792,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                 LogManager.Debug($"Firing events for item {CustomItem.Name}");
                 System.Random rand = new();
-                Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
+                Player randomPlayer = Player.ReadyList.OrderBy(p => rand.Next()).FirstOrDefault();
                 string randomPlayerId = randomPlayer?.PlayerId.ToString();
 
                 if (ItemData.Command is not null && ItemData.Command.Length > 2)

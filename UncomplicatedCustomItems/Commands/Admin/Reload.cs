@@ -55,7 +55,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     LogManager.Debug($"Destroyed {Pickup.Type}");
                     Pickup.Destroy();
                 }
-                foreach (Player player in Player.List)
+                foreach (Player player in Player.ReadyList)
                 {
                     List<ushort> ItemsToRemove = new List<ushort>();
 

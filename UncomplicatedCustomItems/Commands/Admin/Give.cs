@@ -34,7 +34,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             {
                 if (arguments[1].ToLower() == "all")
                 {
-                    foreach (Player player in Player.List)
+                    foreach (Player player in Player.ReadyList)
                     {
                         new SummonedCustomItem(customItem, player);
                     }

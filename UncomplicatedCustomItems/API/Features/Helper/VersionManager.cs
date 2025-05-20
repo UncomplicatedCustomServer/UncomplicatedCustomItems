@@ -50,8 +50,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
 
             // Check integrity
-            AssemblyUtils.TryGetLoadedAssembly(Plugin.Instance, out Assembly assembly);
-            string hash = HashFile(assembly.GetHashCode().ToString());
+            string hash = HashFile(Plugin.Instance.Assembly.GetHashCode().ToString());
             if (hash != VersionInfo.Hash)
             {
                 RecallMessageSender();

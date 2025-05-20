@@ -18,6 +18,7 @@ using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using MapEvent = LabApi.Events.Handlers.ServerEvents;
 using Scp914Event = LabApi.Events.Handlers.Scp914Events;
+using System.Reflection;
 
 namespace UncomplicatedCustomItems
 {
@@ -35,6 +36,8 @@ namespace UncomplicatedCustomItems
         public override Version Version { get; } = new(3, 5, 1);
 
         internal Handler Handler;
+
+        public Assembly Assembly => Assembly.GetExecutingAssembly();
 
         public override LoadPriority Priority => LoadPriority.Highest;
 
@@ -143,7 +146,7 @@ namespace UncomplicatedCustomItems
             LogManager.History.Clear();
 
             LogManager.Info("===========================================");
-            LogManager.Info(" Thanks for using UncomplicatedCustomItems");
+            LogManager.Info("Thanks for using UncomplicatedCustomItems");
             LogManager.Info($"    by {Author}");
             LogManager.Info("===========================================");
             LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
