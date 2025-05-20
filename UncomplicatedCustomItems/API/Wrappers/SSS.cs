@@ -38,7 +38,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 AddOrUpdateUserSetting(user, settingCopy);
             }
 
-            ServerSpecificSettingBase[] merged = ServerSpecificSettingsSync.DefinedSettings.Where(s => !Plugin.Instance._ToolGunSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).Concat(Plugin.Instance._ToolGunSettings).ToArray();
+            ServerSpecificSettingBase[] merged = ServerSpecificSettingsSync.DefinedSettings.Where(s => !Plugin.Instance._ToolGunSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label) && !Plugin.Instance._DebugSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).Concat(Plugin.Instance._ToolGunSettings).ToArray();
             ServerSpecificSettingsSync.SendToPlayer(user, merged);
         }
 
@@ -70,7 +70,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 AddOrUpdateUserSetting(user, settingCopy);
             }
 
-            ServerSpecificSettingBase[] merged = ServerSpecificSettingsSync.DefinedSettings.Where(s => !Plugin.Instance._DebugSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).Concat(Plugin.Instance._DebugSettings).ToArray();
+            ServerSpecificSettingBase[] merged = ServerSpecificSettingsSync.DefinedSettings.Where(s => !Plugin.Instance._DebugSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label) && !Plugin.Instance._ToolGunSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).Concat(Plugin.Instance._DebugSettings).ToArray();
             ServerSpecificSettingsSync.SendToPlayer(user, merged);
         }
     }
