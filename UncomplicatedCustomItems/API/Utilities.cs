@@ -434,7 +434,18 @@ namespace UncomplicatedCustomItems.API
                 FacilityZone Zone = Spawn.Zones.RandomItem();
                 if (Spawn.ReplaceExistingPickup)
                 {
-                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                    List<Pickup> FilteredPickups = [];
+                    List<uint> pedestalitems = [];
+                    foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
+                    {
+                        Pickup pickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                        pedestalitems.Add(pickup.Serial);
+                    }
+                    
+                    if (Spawn.ReplaceItemsInPedestals ?? false)
+                        FilteredPickups = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                    else
+                        FilteredPickups = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == Zone && !pedestalitems.Contains(pickup.Serial) && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
                     if (Spawn.ForceItem)
                         FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();

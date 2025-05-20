@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Enums;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {

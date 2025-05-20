@@ -12,7 +12,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string Description { get; } = "Give a Custom Item to a specific player or to yourself";
 
-        public string VisibleArgs { get; } = "<Item Id> (Player Id/Name or All)";
+        public string VisibleArgs { get; } = "<Item Id> <Player Id/All>";
 
         public int RequiredArgsCount { get; } = 1;
 
