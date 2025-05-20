@@ -912,7 +912,7 @@ namespace UncomplicatedCustomItems.Events
             if (settingBase is SSButton restartbuttonSetting && restartbuttonSetting.SettingId == 25 && player.RankName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
                 Server.ExecuteCommand("sr");
             else
-                LogManager.Warn($"{player.DisplayNickname} Attempted to spawn a restart the server with debugging SSS!");
+                LogManager.Warn($"{player.DisplayNickname} Attempted to restart the server with debugging SSS!");
             if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.RankName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
             {
                 Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customitem);
