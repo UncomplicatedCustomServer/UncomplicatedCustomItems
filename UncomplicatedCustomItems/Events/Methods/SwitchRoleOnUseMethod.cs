@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.Events.Methods
             {
                 foreach (SwitchRoleOnUseSettings SwitchRoleOnUseSettings in CustomItem.CustomItem.FlagSettings.SwitchRoleOnUseSettings)
                 {
-                    if (SwitchRoleOnUseSettings.RoleId == null || SwitchRoleOnUseSettings.RoleType == null)
+                    if (SwitchRoleOnUseSettings.RoleId == null || SwitchRoleOnUseSettings.RoleType == null || SwitchRoleOnUseSettings == null)
                     {
                         LogManager.Warn($"{nameof(Start)}: {CustomItem.CustomItem.Name} field role_id or role_type is null aborting...");
                         break;

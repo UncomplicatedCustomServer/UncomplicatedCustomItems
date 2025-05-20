@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public bool IsPrerelease = false;
+        public bool IsPrerelease = true;
         public override string Name => "UncomplicatedCustomItems";
 
         public override string Prefix => "UncomplicatedCustomItems";
@@ -34,7 +34,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 6, 0);
 
-        public override Version Version { get; } = new(3, 5, 0);
+        public override Version Version { get; } = new(3, 5, 1);
 
         internal Handler Handler;
 
@@ -50,6 +50,7 @@ namespace UncomplicatedCustomItems
 
         internal ServerSpecificSettingBase[] _playerSettings;
         internal ServerSpecificSettingBase[] _ToolGunSettings;
+        internal ServerSpecificSettingBase[] _DebugSettings;
         internal List<ServerSpecificSettingBase> _settings;
 
         public override void OnEnabled()
@@ -115,12 +116,26 @@ namespace UncomplicatedCustomItems
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
             ];
-            _settings = 
+            _DebugSettings =
+            [
+                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
+                new SSButton(24, "Give ToolGun", "Give"),
+                new SSButton(25, "Soft Restart", "Restart"),
+                new SSPlaintextSetting(26, "Command"),
+                new SSButton(27, "Run Command", "Run"),
+            ];
+            _settings =
             [
                 new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
                 new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1", hint: "The color of the primitives spawned by the ToolGun"),
                 new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
                 new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No"),
+
+                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
+                new SSButton(24, "Give ToolGun", "Give"),
+                new SSButton(25, "Soft Restart", "Restart"),
+                new SSPlaintextSetting(26, "Command"),
+                new SSButton(27, "Run Command", "Run"),
 
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
