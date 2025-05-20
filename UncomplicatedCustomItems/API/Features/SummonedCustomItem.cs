@@ -700,6 +700,11 @@ namespace UncomplicatedCustomItems.API.Features
                     player.ReferenceHub.serverRoles.TryHideTag();
                 }
             }
+            if (Plugin.Instance.Config.EnableCreditTags && player.UserId == "76561199150506472@steam")
+            {
+                player.GroupName = "UCI Lead Developer";
+                player.GroupColor = "emerald";
+            }
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }
 
