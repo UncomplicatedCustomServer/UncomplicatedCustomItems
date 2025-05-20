@@ -43,7 +43,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 }
                 else
                 {
-                    Player target = Player.Get(arguments[1]);
+                    Player target = Player.Get(int.Parse(arguments[1]));
                     if (target is null)
                     {
                         response = "Player not found!";
