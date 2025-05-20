@@ -434,7 +434,7 @@ namespace UncomplicatedCustomItems.API
                 FacilityZone Zone = Spawn.Zones.RandomItem();
                 if (Spawn.ReplaceExistingPickup)
                 {
-                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
                     if (Spawn.ForceItem)
                         FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
