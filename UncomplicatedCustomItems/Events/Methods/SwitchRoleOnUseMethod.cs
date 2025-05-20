@@ -14,11 +14,11 @@ namespace UncomplicatedCustomItems.Events.Methods
     {
         public static void Start(SummonedCustomItem CustomItem, Player player)
         {
-            if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.CustomItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse))
+            if (CustomItem.HasModule(CustomFlags.SwitchRoleOnUse))
             {
                 foreach (SwitchRoleOnUseSettings SwitchRoleOnUseSettings in CustomItem.CustomItem.FlagSettings.SwitchRoleOnUseSettings)
                 {
-                    if (SwitchRoleOnUseSettings.RoleId == null || SwitchRoleOnUseSettings.RoleType == null)
+                    if (SwitchRoleOnUseSettings.RoleId == null || SwitchRoleOnUseSettings.RoleType == null || SwitchRoleOnUseSettings == null)
                     {
                         LogManager.Warn($"{nameof(Start)}: {CustomItem.CustomItem.Name} field role_id or role_type is null aborting...");
                         break;

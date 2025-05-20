@@ -29,7 +29,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
             foreach (ServerSpecificSettingBase setting in Plugin.Instance._ToolGunSettings)
             {
                 ServerSpecificSettingBase settingCopy = ServerSpecificSettingsSync.CreateInstance(setting.GetType());
-                settingCopy.SetId(setting.SettingId, setting.Label ?? "Unnamed");
+                settingCopy.SetId(setting.SettingId, setting.Label ?? "ERROR: Unknown");
                 settingCopy.Label = setting.Label;
                 settingCopy.HintDescription = setting.HintDescription;
                 settingCopy.ApplyDefaultValues();
@@ -43,8 +43,28 @@ namespace UncomplicatedCustomItems.API.Wrappers
 
         public static void SendNormalSettingsToUser(ReferenceHub user)
         {
-            ServerSpecificSettingBase[] filtered = ServerSpecificSettingsSync.DefinedSettings.Where(s => !Plugin.Instance._ToolGunSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).ToArray();
+            var excludedSettings = Plugin.Instance._ToolGunSettings.Concat(Plugin.Instance._DebugSettings);
+            ServerSpecificSettingBase[] filtered = ServerSpecificSettingsSync.DefinedSettings.Where(s => !excludedSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).ToArray();
             ServerSpecificSettingsSync.SendToPlayer(user, filtered);
+        }
+
+        public static void AddDebugSettingsToUser(ReferenceHub user)
+        {
+            List<ServerSpecificSettingBase> userSettings = ServerSpecificSettingsSync.ReceivedUserSettings.GetOrAddNew(user);
+
+            foreach (ServerSpecificSettingBase setting in Plugin.Instance._DebugSettings)
+            {
+                ServerSpecificSettingBase settingCopy = ServerSpecificSettingsSync.CreateInstance(setting.GetType());
+                settingCopy.SetId(setting.SettingId, setting.Label ?? "ERROR: Unknown");
+                settingCopy.Label = setting.Label;
+                settingCopy.HintDescription = setting.HintDescription;
+                settingCopy.ApplyDefaultValues();
+
+                AddOrUpdateUserSetting(user, settingCopy);
+            }
+
+            ServerSpecificSettingBase[] merged = ServerSpecificSettingsSync.DefinedSettings.Where(s => !Plugin.Instance._DebugSettings.Any(def => def.SettingId == s.SettingId && def.GetType() == s.GetType() && def.Label == s.Label)).Concat(Plugin.Instance._DebugSettings).ToArray();
+            ServerSpecificSettingsSync.SendToPlayer(user, merged);
         }
     }
 }

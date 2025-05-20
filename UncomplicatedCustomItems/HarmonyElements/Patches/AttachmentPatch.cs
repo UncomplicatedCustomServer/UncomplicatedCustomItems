@@ -8,8 +8,9 @@ using LabApi.Features.Wrappers;
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
     [HarmonyPatch(typeof(AttachmentsServerHandler), nameof(AttachmentsServerHandler.ServerReceiveChangeRequest))]
-    public static class PreventAttachmentChangePatch
+    internal static class PreventAttachmentChangePatch
     {
+        [HarmonyPrefix]
         public static bool Prefix(NetworkConnection conn, AttachmentsChangeRequest msg)
         {
             if (!ReferenceHub.TryGetHub(conn, out ReferenceHub hub))

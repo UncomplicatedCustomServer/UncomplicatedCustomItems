@@ -84,7 +84,7 @@ namespace UncomplicatedCustomItems.Extensions
 
             return Data;
         }
-        
+
         /// <summary>
         /// Adds a range of key-value pairs to the dictionary.
         /// </summary>
@@ -105,6 +105,33 @@ namespace UncomplicatedCustomItems.Extensions
             {
                 dictionary[kvp.Key] = kvp.Value;
             }
+        }
+        
+        /// <summary>
+        /// Tries to get the first key that matches the specified value.
+        /// </summary>
+        /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
+        /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
+        /// <param name="dictionary">The dictionary to search.</param>
+        /// <param name="value">The value to find.</param>
+        /// <param name="key">When this method returns, contains the key with the specified value, if found; otherwise, the default value for TKey.</param>
+        /// <returns>true if a key with the specified value was found; otherwise, false.</returns>
+        public static bool TryGetKeyByValue<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TValue value, out TKey key)
+        {
+            if (dictionary == null)
+                throw new ArgumentNullException(nameof(dictionary));
+
+            foreach (var pair in dictionary)
+            {
+                if (EqualityComparer<TValue>.Default.Equals(pair.Value, value))
+                {
+                    key = pair.Key;
+                    return true;
+                }
+            }
+
+            key = default;
+            return false;
         }
     }
 }

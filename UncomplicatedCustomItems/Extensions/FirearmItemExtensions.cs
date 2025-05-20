@@ -64,7 +64,7 @@ namespace UncomplicatedCustomItems.Extensions
 
         public static bool TryApplyAttachment(this InventorySystem.Items.Firearms.FirearmPickup firearmPickup, AttachmentName name)
         {
-            firearmPickup.Info.ItemId.TryGetTemplate<InventorySystem.Items.Firearms.Firearm>(out var firearm);
+            firearmPickup.Info.ItemId.TryGetTemplate<Firearm>(out var firearm);
             if (firearm == null)
                 return false;
 
