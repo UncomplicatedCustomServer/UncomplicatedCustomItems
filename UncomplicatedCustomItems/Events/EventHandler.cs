@@ -877,6 +877,7 @@ namespace UncomplicatedCustomItems.Events
                     string deletioncolor = string.Empty;
                     bool deletionbool = false;
                     string DeletionMode = string.Empty;
+                    string room = string.Empty;
                     if (deletionMode.SyncIsA)
                     {
                         DeletionMode = "ADS";
@@ -898,10 +899,13 @@ namespace UncomplicatedCustomItems.Events
                         deletioncolor = "#00ff00";
                     else
                         deletioncolor = "#Ff0000";
-
+                    if (player.Room.Name.ToString() != "Unnamed")
+                        room = player.Room.Name.ToString();
+                    else
+                        room = player.Room.GameObject.name;
                     StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
                     string hexcolor = Vector3Extensions.ToHexColor(color);
-                    string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{player.Nickname} - {player.Role.GetFullName()}</color></voffset>\n<pos=-10em>{player.Room.Name} - <color=yellow>{player.Room.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
+                    string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{player.Nickname} - {player.Role.GetFullName()}</color></voffset>\n<pos=-10em>{room} - <color=yellow>{player.Room.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
                     player.SendHint($"<align=left>{hinttext}</align>", 0.5f);
                     yield return Timing.WaitForOneFrame;
                 }
