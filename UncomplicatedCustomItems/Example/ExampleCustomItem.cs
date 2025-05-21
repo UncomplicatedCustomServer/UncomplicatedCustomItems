@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using Exiled.API.Enums;
+using Exiled.Events.EventArgs.Player;
+using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
@@ -98,5 +101,13 @@ namespace UncomplicatedCustomItems.Examples
                 Duration = 10
             }
         ];
+    }
+    public class Events : CustomItemEventHandler
+    {
+        // Register with CustomItemEventHandler.Init<CUSTOMITEMNAMESPACE.Events>();
+        public override void OnShot(ShotEventArgs ev)
+        {
+            ev.Player.Kill(ev.Firearm.HitscanHitregModule.GetHandler(ev.Damage));
+        }
     }
 }

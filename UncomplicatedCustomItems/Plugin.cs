@@ -20,6 +20,7 @@ using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
 using Scp914Event = Exiled.Events.Handlers.Scp914;
 using LabAPIPlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using UncomplicatedCustomItems.Events;
 
 namespace UncomplicatedCustomItems
 {
@@ -103,6 +104,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
             PlayerEvent.Shooting += Handler.Onshooting;
             PlayerEvent.ThrownProjectile += Handler.Onthrown;
+
+            CustomItemEventHandler.Init<Examples.Events>();
 
             _ToolGunSettings =
             [
@@ -240,6 +243,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
             PlayerEvent.Shooting -= Handler.Onshooting;
             PlayerEvent.ThrownProjectile -= Handler.Onthrown;
+
+            CustomItemEventHandler.Dispose();
 
             Handler.Appearance.Clear();
             Instance = null;
