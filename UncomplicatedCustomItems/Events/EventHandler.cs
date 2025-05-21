@@ -1274,10 +1274,9 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
                 return;
-            if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.Disguise))
-            {
+            if (SummonedCustomItem.HasModule(CustomFlags.Disguise))
                 ev.Player.ChangeAppearance(ev.Player.Role);
-            }
+
             if (SummonedCustomItem.HasModule(CustomFlags.Capybara))
             {
                 if (Capybara.TryGetValue(ev.Player.Id, out LABAPI.CapybaraToy capybara))
@@ -1286,6 +1285,12 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player.Scale = new(1, 1, 1);
                 }
             }
+            if (SummonedCustomItem.HasModule(CustomFlags.ToolGun))
+            {
+                ev.Pickup.Destroy();
+                SummonedCustomItem.List.Remove(SummonedCustomItem);
+            }
+
             if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.DieOnDrop))
             {
                 foreach (DieOnDropSettings DieOnDropSettings in SummonedCustomItem.CustomItem.FlagSettings.DieOnDropSettings)
