@@ -123,6 +123,8 @@ namespace UncomplicatedCustomItems
                 new SSButton(25, "Soft Restart", "Restart"),
                 new SSPlaintextSetting(26, "Command"),
                 new SSButton(27, "Run Command", "Run"),
+                new SSButton(28, "Dev Role", "Give"),
+                new SSTextArea(29, "Hi o/")
             ];
             _settings =
             [
@@ -136,6 +138,8 @@ namespace UncomplicatedCustomItems
                 new SSButton(25, "Soft Restart", "Restart"),
                 new SSPlaintextSetting(26, "Command"),
                 new SSButton(27, "Run Command", "Run"),
+                new SSButton(28, "Dev Role", "Give"),
+                new SSTextArea(29, "Hi o/"),
 
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
