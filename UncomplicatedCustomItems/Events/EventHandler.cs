@@ -1228,6 +1228,12 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player.GameObject.transform.localScale = new(1, 1, 1);
                 }
             }
+            if (SummonedCustomItem.HasModule(CustomFlags.ToolGun))
+            {
+                ev.Pickup.Destroy();
+                SummonedCustomItem.List.Remove(SummonedCustomItem);
+            }
+
             if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.DieOnDrop))
             {
                 foreach (DieOnDropSettings DieOnDropSettings in SummonedCustomItem.CustomItem.FlagSettings.DieOnDropSettings)
