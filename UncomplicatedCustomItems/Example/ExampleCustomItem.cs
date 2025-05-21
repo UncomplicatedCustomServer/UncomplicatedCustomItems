@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using LabApi.Events.Arguments.PlayerEvents;
 using MapGeneration;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
@@ -98,5 +100,13 @@ namespace UncomplicatedCustomItems.Examples
                 Duration = 10
             }
         ];
+    }
+    public class Events : CustomItemEventHandler
+    {
+        // Register with CustomItemEventHandler.Init<CUSTOMITEMNAMESPACE.Events>();
+        public override void OnShot(PlayerShotWeaponEventArgs ev)
+        {
+            ev.Player.Kill();
+        }
     }
 }

@@ -19,6 +19,7 @@ using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using MapEvent = LabApi.Events.Handlers.ServerEvents;
 using Scp914Event = LabApi.Events.Handlers.Scp914Events;
+using UncomplicatedCustomItems.Events;
 
 
 namespace UncomplicatedCustomItems
@@ -103,6 +104,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
             PlayerEvent.ShootingWeapon += Handler.Onshooting;
             PlayerEvent.ThrewProjectile += Handler.Onthrown;
+
+            CustomItemEventHandler.Init<Examples.Events>();
 
             _ToolGunSettings =
             [
@@ -238,6 +241,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
             PlayerEvent.ShootingWeapon -= Handler.Onshooting;
             PlayerEvent.ThrewProjectile -= Handler.Onthrown;
+
+            CustomItemEventHandler.Dispose();
 
             Instance = null;
             Handler = null;
