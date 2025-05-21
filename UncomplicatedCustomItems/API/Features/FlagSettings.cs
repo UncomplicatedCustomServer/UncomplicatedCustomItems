@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.API.Features
         [
             new()
             {
-                AudioPath = "~.config/EXILED/Example.ogg",
+                AudioPath = "~.config/SCP Secret Laboratory/LabAPI/configs/UncomplicatedCustomItems/Example.ogg",
                 SoundVolume = 20f,
                 AudibleDistance = 20f
             }
@@ -88,7 +88,7 @@ namespace UncomplicatedCustomItems.API.Features
                 RoleType = "Normal",
                 RoleId = new(),
                 Delay = 6,
-                SpawnFlags = PlayerRoles.RoleSpawnFlags.None,
+                SpawnFlags = RoleSpawnFlags.None,
                 KeepLocation = true
             }
         ];

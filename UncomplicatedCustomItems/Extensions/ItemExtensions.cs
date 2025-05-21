@@ -32,10 +32,10 @@ namespace UncomplicatedCustomItems.Extensions
         public static bool IsWeapon(this ItemType type, bool checkMicro = true) => type.GetFirearmType() is not FirearmType.None || (checkMicro && type is ItemType.MicroHID);
 
         /// <summary>
-        /// Check if an <see cref="ItemType">item</see> is an SCP.
+        /// Check if an <see cref="ItemType">item</see> is an SCPItem.
         /// </summary>
         /// <param name="type">The item to be checked.</param>
-        /// <returns>Returns whether the <see cref="ItemType"/> is an SCP.</returns>
+        /// <returns>Returns whether the <see cref="ItemType"/> is an SCPItem.</returns>
         public static bool IsScp(this ItemType type) => GetCategory(type) == ItemCategory.SCPItem;
 
         /// <summary>

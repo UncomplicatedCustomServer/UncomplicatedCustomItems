@@ -52,7 +52,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
         [
             new()
             {
-                Room = RoomName.Lcz914,
+                Room = "Lcz914",
                 Chance = 30,
                 Coords = Vector3.zero
             }

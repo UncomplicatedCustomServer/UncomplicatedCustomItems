@@ -31,5 +31,9 @@ namespace UncomplicatedCustomItems.Extensions
                 return true;
             else return false;
         }
+        public static CommandSender GetSender(this Player player)
+        {
+            return player.ReferenceHub.queryProcessor._sender;
+        }
     }
 }

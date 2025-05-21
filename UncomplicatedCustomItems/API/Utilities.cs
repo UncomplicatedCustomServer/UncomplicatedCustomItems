@@ -9,6 +9,7 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Extensions;
 using LabApi.Features.Wrappers;
 using MapGeneration;
+using System;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -181,54 +182,9 @@ namespace UncomplicatedCustomItems.API
                     break;
 
                 case CustomItemType.SCPItem:
-
-                    if (item.Item is not ItemType.SCP500)
+                    if (!item.Item.IsScp() && item.Item != ItemType.GunSCP127)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP500!";
-                    }
-                    else if (item.Item is not ItemType.SCP207)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP207!";
-                    }
-                    else if (item.Item is not ItemType.AntiSCP207)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not AntiSCP207!";
-                    }
-                    else if (item.Item is not ItemType.SCP018)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP018!";
-                    }
-                    else if (item.Item is not ItemType.SCP330)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP330!";
-                    }
-                    else if (item.Item is not ItemType.SCP2176)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP2176!";
-                    }
-                    else if (item.Item is not ItemType.SCP244a)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP244A!";
-                    }
-                    else if (item.Item is not ItemType.SCP244b)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP244B!";
-                    }
-                    else if (item.Item is not ItemType.SCP1853)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP1853!";
-                    }
-                    else if (item.Item is not ItemType.SCP1576)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP1576!";
-                    }
-                    else if (item.Item is not ItemType.GunSCP127)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not GunSCP127!";
-                    }
-                    else
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a modifiable SCP Item!";
+                        error = $"The Item has been flagged as 'SCPItem' but the item {item.Item} is not an SCPItem!";
                         return false;
                     }
 
@@ -333,7 +289,7 @@ namespace UncomplicatedCustomItems.API
         /// <returns></returns>
         public static bool IsCustomItem(uint id) => CustomItem.CustomItems.ContainsKey(id);
 
-        private static Dictionary<LabApi.Features.Wrappers.PedestalLocker, ICustomItem> usedLockers { get; set; } = [];
+        private static Dictionary<PedestalLocker, ICustomItem> usedLockers { get; set; } = [];
 
         /// <summary>
         /// Summon a <see cref="CustomItem"/>
@@ -347,14 +303,14 @@ namespace UncomplicatedCustomItems.API
             {
                 if (Spawn.ReplaceExistingPickup)
                 {
-                    foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
+                    foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
                     {
-                        LabApi.Features.Wrappers.Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                        Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
                         if (pedestalLockerPickup != null && pedestalLockerPickup.Type == CustomItem.Item)
                         {
                             LogManager.Debug($"Removed {pedestalLockerPickup.Type} from {pedestalLockerPickup.Position}");
                             pedestalLocker.RemoveItem(pedestalLockerPickup);
-                            LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
+                            Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
                             if (pickup.Type == CustomItem.Item && !usedLockers.ContainsKey(pedestalLocker))
                             {
                                 usedLockers.Add(pedestalLocker, CustomItem);
@@ -371,15 +327,15 @@ namespace UncomplicatedCustomItems.API
                 }
                 else 
                 {
-                    foreach (LabApi.Features.Wrappers.PedestalLocker pedestalLocker in LabApi.Features.Wrappers.PedestalLocker.List)
+                    foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
                     {
-                        LabApi.Features.Wrappers.Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                        Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
                         if (pedestalLockerPickup != null && !usedLockers.ContainsKey(pedestalLocker))
                         {
                             usedLockers.Add(pedestalLocker, CustomItem);
                             LogManager.Debug($"Removed {pedestalLockerPickup.Type} from {pedestalLockerPickup.Position}");
                             pedestalLocker.RemoveItem(pedestalLockerPickup);
-                            LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
+                            Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
                             LogManager.Debug($"Summoned {CustomItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
                             SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
                             break;
@@ -402,30 +358,56 @@ namespace UncomplicatedCustomItems.API
             {
                 foreach (DynamicSpawn DynamicSpawn in Spawn.DynamicSpawn)
                 {
-                    int Chance = Random.Range(0, 100);
+                    int Chance = UnityEngine.Random.Range(0, 100);
 
                     if (Chance <= DynamicSpawn.Chance)
                     {
-                        RoomName Room = DynamicSpawn.Room;
-                        if (DynamicSpawn.Coords == Vector3.zero)
+                        string room = DynamicSpawn.Room;
+                        if (Enum.TryParse(room, out RoomName Room))
                         {
-                            if (Spawn.ReplaceExistingPickup)
+                            if (DynamicSpawn.Coords == Vector3.zero)
                             {
-                                List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Name == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                                if (Spawn.ReplaceExistingPickup)
+                                {
+                                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Name == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
-                                if (Spawn.ForceItem)
-                                    FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
+                                    if (Spawn.ForceItem)
+                                        FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
 
-                                if (FilteredPickups.Count() > 0)
-                                    new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
+                                    if (FilteredPickups.Count() > 0)
+                                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
 
-                                return;
+                                    return;
+                                }
+                                else
+                                    new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).FirstOrDefault().Position);
                             }
                             else
-                                new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).FirstOrDefault().Position);
+                                new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).FirstOrDefault().WorldPosition(DynamicSpawn.Coords));
                         }
                         else
-                            new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).FirstOrDefault().WorldPosition(DynamicSpawn.Coords));
+                        {
+                            Room roomgameobject = LabApi.Features.Wrappers.Room.List.GetByGameObjectName($"{room}");
+                            if (DynamicSpawn.Coords == Vector3.zero)
+                            {
+                                if (Spawn.ReplaceExistingPickup)
+                                {
+                                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room == roomgameobject && !IsSummonedCustomItem(pickup.Serial)).ToList();
+
+                                    if (Spawn.ForceItem)
+                                        FilteredPickups = [.. FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item)];
+
+                                    if (FilteredPickups.Count() > 0)
+                                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
+
+                                    return;
+                                }
+                                else
+                                    new SummonedCustomItem(CustomItem, roomgameobject.Position);
+                            }
+                            else
+                                new SummonedCustomItem(CustomItem, roomgameobject.WorldPosition(DynamicSpawn.Coords));
+                        }
                     }
                 }
             }

