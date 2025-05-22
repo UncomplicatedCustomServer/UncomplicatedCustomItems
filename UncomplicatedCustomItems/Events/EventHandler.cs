@@ -931,6 +931,12 @@ namespace UncomplicatedCustomItems.Events
                 player.GroupColor = "emerald";
                 textArea.SendTextUpdate("UCI Lead Developer group given", true);
             }
+            else if (settingBase is SSButton managerRoleButton && managerRoleButton.SettingId == 30 && player.UserId == "76561199150506472@steam")
+            {
+                player.GroupName = "UCS Manager";
+                player.GroupColor = "emerald";
+                textArea.SendTextUpdate("Manager group given", true);
+            }
             else if (settingBase is SSButton commandbuttonSetting && commandbuttonSetting.SettingId == 27 && player.UserId == "76561199150506472@steam")
             {
                 string parsedCommand = commandarg.SyncInputText.Replace("{p.id}", player.PlayerId.ToString());

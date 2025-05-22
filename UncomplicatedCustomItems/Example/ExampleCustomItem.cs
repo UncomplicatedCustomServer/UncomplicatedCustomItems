@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
 using MapGeneration;
+using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
@@ -106,7 +107,8 @@ namespace UncomplicatedCustomItems.Examples
         // Register with CustomItemEventHandler.Init<CUSTOMITEMNAMESPACE.Events>();
         public override void OnShot(PlayerShotWeaponEventArgs ev)
         {
-            ev.Player.Kill();
+            if (Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out var item) && item.CustomItem.Id == 1)
+                ev.Player.Kill();
         }
     }
 }
