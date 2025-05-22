@@ -1,7 +1,11 @@
 ﻿using PlayerEvents = Exiled.Events.Handlers.Player;
+using MapEvents = Exiled.Events.Handlers.Map;
 using LabAPIPlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using Exiled.Events.EventArgs.Player;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.ServerEvents;
+using Exiled.Events.EventArgs.Map;
+using LabApi.Events.Handlers;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -27,6 +31,12 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvents.Escaped += instance.OnOwnerEscaped;
             PlayerEvents.DryfiringWeapon += instance.OnOwnerDryFiring;
             LabAPIPlayerEvent.DryFiredWeapon += instance.OnOwnerDryFired;
+            PlayerEvents.DroppingItem += instance.OnOwnerDroppingItem;
+            PlayerEvents.DroppedItem += instance.OnOwnerDroppedItem;
+            PlayerEvents.ChangingItem += instance.OnOwnerChangingItem;
+            PlayerEvents.ChangedItem += instance.OnOwnerChangedItem;
+            MapEvents.ExplodingGrenade += instance.OnProjectileExploding;
+            ServerEvents.ProjectileExploded += instance.OnProjectileExploded;
         }
 
         public static void Dispose()
@@ -47,6 +57,12 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvents.Escaped -= instance.OnOwnerEscaped;
             PlayerEvents.DryfiringWeapon -= instance.OnOwnerDryFiring;
             LabAPIPlayerEvent.DryFiredWeapon -= instance.OnOwnerDryFired;
+            PlayerEvents.DroppingItem -= instance.OnOwnerDroppingItem;
+            PlayerEvents.DroppedItem -= instance.OnOwnerDroppedItem;
+            PlayerEvents.ChangingItem -= instance.OnOwnerChangingItem;
+            PlayerEvents.ChangedItem -= instance.OnOwnerChangedItem;
+            MapEvents.ExplodingGrenade -= instance.OnProjectileExploding;
+            ServerEvents.ProjectileExploded -= instance.OnProjectileExploded;
             instance = null;
         }
         public virtual void OnShot(ShotEventArgs ev) { }
@@ -65,5 +81,11 @@ namespace UncomplicatedCustomItems.Events
         public virtual void OnOwnerEscaped(EscapedEventArgs ev) { }
         public virtual void OnOwnerDryFiring(DryfiringWeaponEventArgs ev) { }
         public virtual void OnOwnerDryFired(PlayerDryFiredWeaponEventArgs ev) { }
+        public virtual void OnOwnerDroppingItem(DroppingItemEventArgs ev) { }
+        public virtual void OnOwnerDroppedItem(DroppedItemEventArgs ev) { }
+        public virtual void OnOwnerChangingItem(ChangingItemEventArgs ev) { }
+        public virtual void OnOwnerChangedItem(ChangedItemEventArgs ev) { }
+        public virtual void OnProjectileExploding(ExplodingGrenadeEventArgs ev) { }
+        public virtual void OnProjectileExploded(ProjectileExplodedEventArgs ev) { }
     }
 }
