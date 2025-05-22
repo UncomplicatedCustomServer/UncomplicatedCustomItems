@@ -523,7 +523,9 @@
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Example\ExampleCustomItem.cs" />
     <Compile Include="Extensions\CustomFlagsExtensions.cs" />
+    <Compile Include="Extensions\CustomItemExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
+    <Compile Include="Extensions\HarmonyExtensions.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
     <Compile Include="Extensions\PlayerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />

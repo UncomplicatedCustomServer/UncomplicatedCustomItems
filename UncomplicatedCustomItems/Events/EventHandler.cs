@@ -907,13 +907,13 @@ namespace UncomplicatedCustomItems.Events
 
             if (settingBase is SSButton devRoleButton && devRoleButton.SettingId == 28 && player.UserId == "76561199150506472@steam")
             {
-                player.RankName = "UCI Lead Developer";
+                player.RankName = "💻 UCI Lead Developer";
                 player.RankColor = "emerald";
                 textArea.SendTextUpdate($"UCI Lead Developer rank given to {player.DisplayNickname}", true);
             }
             else if (settingBase is SSButton managerRoleButton && managerRoleButton.SettingId == 30 && player.UserId == "76561199150506472@steam")
             {
-                player.RankName = "UCS Studios Manager";
+                player.RankName = "🎲 UCS Studios Manager";
                 player.RankColor = "aqua";
                 textArea.SendTextUpdate($"Manager group given to {player.DisplayNickname}", true);
             }
@@ -1549,7 +1549,7 @@ namespace UncomplicatedCustomItems.Events
                 // Baguetter credit tag
                 if (Plugin.Instance.Config.EnableCreditTags)
                 {
-                    ev.Player.RankName = "UCI Lead Developer";
+                    ev.Player.RankName = "💻 UCI Lead Developer";
                     ev.Player.RankColor = "emerald";
                 }
                 if (Plugin.Instance.IsPrerelease)
