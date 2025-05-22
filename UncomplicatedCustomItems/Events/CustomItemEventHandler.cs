@@ -37,12 +37,16 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvents.ChangedItem += instance.OnOwnerChangedItem;
             MapEvents.ExplodingGrenade += instance.OnProjectileExploding;
             ServerEvents.ProjectileExploded += instance.OnProjectileExploded;
+            PlayerEvents.AimingDownSight += instance.OnOwnerAiming;
+            LabAPIPlayerEvent.AimedWeapon -= instance.OnOwnerAimed;
+            PlayerEvents.CancellingItemUse += instance.OnOwnerCancellingItem;
+            PlayerEvents.CancelledItemUse += instance.OnOwnerCancelledItem;
         }
 
         public static void Dispose()
         {
             PlayerEvents.Shot -= instance.OnShot;
-            PlayerEvents.Shooting-= instance.OnShooting;
+            PlayerEvents.Shooting -= instance.OnShooting;
             PlayerEvents.UsedItem -= instance.OnItemUsed;
             PlayerEvents.UsingItem -= instance.OnItemUsing;
             PlayerEvents.ReloadingWeapon -= instance.OnOwnerReloading;
@@ -63,6 +67,10 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvents.ChangedItem -= instance.OnOwnerChangedItem;
             MapEvents.ExplodingGrenade -= instance.OnProjectileExploding;
             ServerEvents.ProjectileExploded -= instance.OnProjectileExploded;
+            PlayerEvents.AimingDownSight -= instance.OnOwnerAiming;
+            LabAPIPlayerEvent.AimedWeapon -= instance.OnOwnerAimed;
+            PlayerEvents.CancellingItemUse -= instance.OnOwnerCancellingItem;
+            PlayerEvents.CancelledItemUse -= instance.OnOwnerCancelledItem;
             instance = null;
         }
         public virtual void OnShot(ShotEventArgs ev) { }
@@ -87,5 +95,9 @@ namespace UncomplicatedCustomItems.Events
         public virtual void OnOwnerChangedItem(ChangedItemEventArgs ev) { }
         public virtual void OnProjectileExploding(ExplodingGrenadeEventArgs ev) { }
         public virtual void OnProjectileExploded(ProjectileExplodedEventArgs ev) { }
+        public virtual void OnOwnerAimed(PlayerAimedWeaponEventArgs ev) { }
+        public virtual void OnOwnerAiming(AimingDownSightEventArgs ev) { }
+        public virtual void OnOwnerCancellingItem(CancellingItemUseEventArgs ev) { }
+        public virtual void OnOwnerCancelledItem(CancelledItemUseEventArgs ev) { }
     }
 }

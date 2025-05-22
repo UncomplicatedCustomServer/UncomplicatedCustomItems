@@ -524,6 +524,7 @@
     <Compile Include="Example\ExampleCustomItem.cs" />
     <Compile Include="Extensions\CustomFlagsExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
+    <Compile Include="Extensions\ItemExtensions.cs" />
     <Compile Include="Extensions\PlayerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />

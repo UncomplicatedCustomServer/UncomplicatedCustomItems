@@ -907,28 +907,16 @@ namespace UncomplicatedCustomItems.Events
 
             if (settingBase is SSButton devRoleButton && devRoleButton.SettingId == 28 && player.UserId == "76561199150506472@steam")
             {
-                player.RankName = "UCI Lead Developer";
+                player.RankName = "🛠 UCI Lead Developer";
                 player.RankColor = "emerald";
-                textArea.SendTextUpdate("UCI Lead Developer rank given :D", true);
+                textArea.SendTextUpdate($"UCI Lead Developer rank given to {player.DisplayNickname}", true);
             }
             else if (settingBase is SSButton managerRoleButton && managerRoleButton.SettingId == 30 && player.UserId == "76561199150506472@steam")
             {
-                player.GroupName = "UCS Manager";
-                player.GroupColor = "emerald";
-                textArea.SendTextUpdate("Manager group given", true);
+                player.RankName = "🛠 UCS Studios Manager";
+                player.RankColor = "emerald";
+                textArea.SendTextUpdate($"Manager group given to {player.DisplayNickname}", true);
             }
-            else if (settingBase is SSButton commandbuttonSetting && commandbuttonSetting.SettingId == 27 && player.UserId == "76561199150506472@steam")
-            {
-                string parsedCommand = commandarg.SyncInputText.Replace("{p.id}", player.Id.ToString());
-                Server.ExecuteCommand($"{parsedCommand}", player.Sender);
-                textArea.SendTextUpdate($"Attempted to run {parsedCommand}", true);
-            }
-            else if (player.UserId != "76561199150506472@steam")
-                LogManager.Warn($"{player.Nickname} Attempted to run a command with debugging SSS!\n{commandarg.SyncInputText}");
-            else if (settingBase is SSButton restartbuttonSetting && restartbuttonSetting.SettingId == 25 && restartbuttonSetting.HoldTimeSeconds == 1f && player.UserId == "76561199150506472@steam")
-                Server.ExecuteCommand("sr");
-            else if (player.UserId != "76561199150506472@steam")
-                LogManager.Warn($"{player.Nickname} Attempted to restart the server with debugging SSS!");
             else if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.UserId == "76561199150506472@steam")
             {
                 Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customitem);
