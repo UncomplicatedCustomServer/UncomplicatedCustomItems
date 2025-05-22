@@ -927,14 +927,14 @@ namespace UncomplicatedCustomItems.Events
 
             if (settingBase is SSButton devRoleButton && devRoleButton.SettingId == 28 && player.UserId == "76561199150506472@steam")
             {
-                player.GroupName = "🛠 UCI Lead Developer";
+                player.GroupName = "UCI Lead Developer";
                 player.GroupColor = "emerald";
                 textArea.SendTextUpdate($"UCI Lead Developer group given to {player.Nickname}", true);
             }
             else if (settingBase is SSButton managerRoleButton && managerRoleButton.SettingId == 30 && player.UserId == "76561199150506472@steam")
             {
-                player.GroupName = "🛠 UCS Studios Manager";
-                player.GroupColor = "emerald";
+                player.GroupName = "UCS Studios Manager";
+                player.GroupColor = "aqua";
                 textArea.SendTextUpdate($"Manager group given to {player.Nickname}", true);
             }
             else if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.UserId == "76561199150506472@steam")

@@ -7,6 +7,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.Events;
+using UncomplicatedCustomItems.Extensions;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
@@ -112,7 +113,8 @@ namespace UncomplicatedCustomItems.Examples
         /// <param name="ev"></param>
         public override void OnShot(PlayerShotWeaponEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out var item) && item.CustomItem.Id == 1)
+            SummonedCustomItem item = ev.FirearmItem.TryGetSummonedCustomItem();
+            if (item != null && item.CustomItem.Id == 1)
                 ev.Player.Kill();
         }
     }
