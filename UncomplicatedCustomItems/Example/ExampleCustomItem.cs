@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
 using MapGeneration;
-using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
