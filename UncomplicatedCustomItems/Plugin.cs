@@ -127,6 +127,7 @@ namespace UncomplicatedCustomItems
                 new SSPlaintextSetting(26, "Command"),
                 new SSButton(27, "Run Command", "Run"),
                 new SSButton(28, "Dev Role", "Give"),
+                new SSButton(30, "Manager Role", "Give"),
                 new SSTextArea(29, "Hi o/")
             ];
             _settings =
@@ -142,6 +143,7 @@ namespace UncomplicatedCustomItems
                 new SSPlaintextSetting(26, "Command"),
                 new SSButton(27, "Run Command", "Run"),
                 new SSButton(28, "Dev Role", "Give"),
+                new SSButton(30, "Manager Role", "Give"),
                 new SSTextArea(29, "Hi o/"),
 
                 new SSGroupHeader("CustomItem Settings"),

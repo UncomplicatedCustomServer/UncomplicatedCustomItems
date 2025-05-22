@@ -15,18 +15,18 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvents.Shooting += instance.OnShooting;
             PlayerEvents.UsedItem += instance.OnItemUsed;
             PlayerEvents.UsingItem += instance.OnItemUsing;
-            PlayerEvents.ReloadingWeapon += instance.OnPlayerReloading;
-            PlayerEvents.ReloadedWeapon += instance.OnPlayerReloaded;
-            PlayerEvents.Dying += instance.OnPlayerDying;
-            PlayerEvents.Died += instance.OnPlayerDied;
-            PlayerEvents.Hurting += instance.OnPlayerHurting;
-            PlayerEvents.Hurt += instance.OnPlayerHurt;
-            PlayerEvents.FlippingCoin += instance.OnPlayerFlippingCoin;
-            LabAPIPlayerEvent.FlippedCoin += instance.OnPlayerFlippedCoin;
-            PlayerEvents.Escaping += instance.OnPlayerEscaping;
-            PlayerEvents.Escaped += instance.OnPlayerEscaped;
-            PlayerEvents.DryfiringWeapon += instance.OnPlayerDryFiring;
-            LabAPIPlayerEvent.DryFiredWeapon += instance.OnPlayerDryFired;
+            PlayerEvents.ReloadingWeapon += instance.OnOwnerReloading;
+            PlayerEvents.ReloadedWeapon += instance.OnOwnerReloaded;
+            PlayerEvents.Dying += instance.OnOwnerDying;
+            PlayerEvents.Died += instance.OnOwnerDied;
+            PlayerEvents.Hurting += instance.OnOwnerHurting;
+            PlayerEvents.Hurt += instance.OnOwnerHurt;
+            PlayerEvents.FlippingCoin += instance.OnOwnerFlippingCoin;
+            LabAPIPlayerEvent.FlippedCoin += instance.OnOwnerFlippedCoin;
+            PlayerEvents.Escaping += instance.OnOwnerEscaping;
+            PlayerEvents.Escaped += instance.OnOwnerEscaped;
+            PlayerEvents.DryfiringWeapon += instance.OnOwnerDryFiring;
+            LabAPIPlayerEvent.DryFiredWeapon += instance.OnOwnerDryFired;
         }
 
         public static void Dispose()
@@ -35,67 +35,35 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvents.Shooting-= instance.OnShooting;
             PlayerEvents.UsedItem -= instance.OnItemUsed;
             PlayerEvents.UsingItem -= instance.OnItemUsing;
-            PlayerEvents.ReloadingWeapon -= instance.OnPlayerReloading;
-            PlayerEvents.ReloadedWeapon -= instance.OnPlayerReloaded;
-            PlayerEvents.Dying -= instance.OnPlayerDying;
-            PlayerEvents.Died -= instance.OnPlayerDied;
-            PlayerEvents.Hurting -= instance.OnPlayerHurting;
-            PlayerEvents.Hurt -= instance.OnPlayerHurt;
-            PlayerEvents.FlippingCoin -= instance.OnPlayerFlippingCoin;
-            LabAPIPlayerEvent.FlippedCoin -= instance.OnPlayerFlippedCoin;
-            PlayerEvents.Escaping -= instance.OnPlayerEscaping;
-            PlayerEvents.Escaped -= instance.OnPlayerEscaped;
-            PlayerEvents.DryfiringWeapon -= instance.OnPlayerDryFiring;
-            LabAPIPlayerEvent.DryFiredWeapon -= instance.OnPlayerDryFired;
+            PlayerEvents.ReloadingWeapon -= instance.OnOwnerReloading;
+            PlayerEvents.ReloadedWeapon -= instance.OnOwnerReloaded;
+            PlayerEvents.Dying -= instance.OnOwnerDying;
+            PlayerEvents.Died -= instance.OnOwnerDied;
+            PlayerEvents.Hurting -= instance.OnOwnerHurting;
+            PlayerEvents.Hurt -= instance.OnOwnerHurt;
+            PlayerEvents.FlippingCoin -= instance.OnOwnerFlippingCoin;
+            LabAPIPlayerEvent.FlippedCoin -= instance.OnOwnerFlippedCoin;
+            PlayerEvents.Escaping -= instance.OnOwnerEscaping;
+            PlayerEvents.Escaped -= instance.OnOwnerEscaped;
+            PlayerEvents.DryfiringWeapon -= instance.OnOwnerDryFiring;
+            LabAPIPlayerEvent.DryFiredWeapon -= instance.OnOwnerDryFired;
             instance = null;
         }
-        public virtual void OnShot(ShotEventArgs ev)
-        {
-        }
-        public virtual void OnShooting(ShootingEventArgs ev)
-        {
-        }
-        public virtual void OnItemUsed(UsedItemEventArgs ev)
-        {
-        }
-        public virtual void OnItemUsing(UsingItemEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerReloading(ReloadingWeaponEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerReloaded(ReloadedWeaponEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerDying(DyingEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerDied(DiedEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerHurting(HurtingEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerHurt(HurtEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerFlippingCoin(FlippingCoinEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerFlippedCoin(PlayerFlippedCoinEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerEscaping(EscapingEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerEscaped(EscapedEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerDryFiring(DryfiringWeaponEventArgs ev)
-        {
-        }
-        public virtual void OnPlayerDryFired(PlayerDryFiredWeaponEventArgs ev)
-        {
-        }
+        public virtual void OnShot(ShotEventArgs ev) { }
+        public virtual void OnShooting(ShootingEventArgs ev) { }
+        public virtual void OnItemUsed(UsedItemEventArgs ev) { }
+        public virtual void OnItemUsing(UsingItemEventArgs ev) { }
+        public virtual void OnOwnerReloading(ReloadingWeaponEventArgs ev) { }
+        public virtual void OnOwnerReloaded(ReloadedWeaponEventArgs ev) { }
+        public virtual void OnOwnerDying(DyingEventArgs ev) { }
+        public virtual void OnOwnerDied(DiedEventArgs ev) { }
+        public virtual void OnOwnerHurting(HurtingEventArgs ev) { }
+        public virtual void OnOwnerHurt(HurtEventArgs ev) { }
+        public virtual void OnOwnerFlippingCoin(FlippingCoinEventArgs ev) { }
+        public virtual void OnOwnerFlippedCoin(PlayerFlippedCoinEventArgs ev) { }
+        public virtual void OnOwnerEscaping(EscapingEventArgs ev) { }
+        public virtual void OnOwnerEscaped(EscapedEventArgs ev) { }
+        public virtual void OnOwnerDryFiring(DryfiringWeaponEventArgs ev) { }
+        public virtual void OnOwnerDryFired(PlayerDryFiredWeaponEventArgs ev) { }
     }
 }
