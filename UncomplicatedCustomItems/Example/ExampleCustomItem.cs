@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using Exiled.API.Enums;
 using Exiled.Events.EventArgs.Player;
-using LabApi.Events.Arguments.PlayerEvents;
-using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
@@ -10,6 +8,7 @@ using UncomplicatedCustomItems.Enums;
 using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.Extensions;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.Examples
@@ -106,7 +105,7 @@ namespace UncomplicatedCustomItems.Examples
     public class Events : CustomItemEventHandler
     {
         // Register with CustomItemEventHandler.Init<CUSTOMITEMNAMESPACE.Events>();
-        
+
         /// <summary>
         /// This is a example of how to setup the OnShot event from <see cref="CustomItemEventHandler"/>
         /// Please note that the event will trigger for all items and you will have to add your own checks
@@ -114,7 +113,8 @@ namespace UncomplicatedCustomItems.Examples
         /// <param name="ev"></param>
         public override void OnShot(ShotEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out var item) && item.CustomItem.Id == 1)
+            SummonedCustomItem item = ev.Item.TryGetSummonedCustomItem();
+            if (item != null && item.CustomItem.Id == 1)
                 ev.Player.Kill(ev.Firearm.HitscanHitregModule.GetHandler(ev.Damage));
         }
     }
