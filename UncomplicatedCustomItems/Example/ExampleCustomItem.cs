@@ -105,6 +105,11 @@ namespace UncomplicatedCustomItems.Examples
     public class Events : CustomItemEventHandler
     {
         // Register with CustomItemEventHandler.Init<CUSTOMITEMNAMESPACE.Events>();
+        /// <summary>
+        /// This is a example of how to setup the OnShot event from <see cref="CustomItemEventHandler"/>
+        /// Please note that the event will trigger for all items and you will have to add your own checks
+        /// </summary>
+        /// <param name="ev"></param>
         public override void OnShot(PlayerShotWeaponEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out var item) && item.CustomItem.Id == 1)
