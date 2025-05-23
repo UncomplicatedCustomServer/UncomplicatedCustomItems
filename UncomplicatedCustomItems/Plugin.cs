@@ -252,6 +252,7 @@ namespace UncomplicatedCustomItems
         {
             ImportManager.Init();
             CommonUtilitiesPatch.Initialize();
+            Server.ExecuteCommand("uciupdatecheck");
         }
     }
 }
