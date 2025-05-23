@@ -246,6 +246,7 @@ namespace UncomplicatedCustomItems
         public void OnFinishedLoadingPlugins()
         {
             ImportManager.Init();
+            Server.RunCommand("uciupdatecheck");
         }
     }
 }

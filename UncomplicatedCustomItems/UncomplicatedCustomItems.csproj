@@ -515,6 +515,8 @@
     <Compile Include="Commands\Admin\Summon.cs" />
     <Compile Include="Commands\Admin\Summoned.cs" />
     <Compile Include="Commands\Admin\ToolGun.cs" />
+    <Compile Include="Commands\Admin\Update.cs" />
+    <Compile Include="Commands\Admin\UpdateCheck.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />

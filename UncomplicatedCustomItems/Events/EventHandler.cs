@@ -1292,16 +1292,19 @@ namespace UncomplicatedCustomItems.Events
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
             {
-                try
+                Timing.CallDelayed(1f, () =>
                 {
-                    ev.Pickup.GameObject.transform.localScale = SummonedCustomItem.CustomItem.Scale;
-                    ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
-                    LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                }
+                    try
+                    {
+                        ev.Pickup.GameObject.transform.localScale = SummonedCustomItem.CustomItem.Scale;
+                        ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                        LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                    }
+                });
             }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
