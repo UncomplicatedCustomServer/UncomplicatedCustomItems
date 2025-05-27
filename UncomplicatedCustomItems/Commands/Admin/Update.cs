@@ -119,7 +119,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                                     else
                                     {
                                         LogManager.Warn($"Linux LabAPI Port-Specific plugin path not found: {portSpecificLinuxPath}. Trying global LabAPI path.");
-                                        string globalLinuxPath = Path.Combine(homeDirectory, ".config", "SCP Secret Laboratory", "LabAPI", "plugins", PluginDllName);
+                                        string globalLinuxPath = Path.Combine(homeDirectory, ".config", "SCP Secret Laboratory", "LabAPI", "plugins", "global", PluginDllName);
                                         if (File.Exists(globalLinuxPath))
                                             pluginPath = globalLinuxPath;
                                         else
