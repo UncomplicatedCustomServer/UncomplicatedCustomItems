@@ -101,7 +101,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
 
-        private bool CheckForDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("Newtonsoft.Json", StringComparison.OrdinalIgnoreCase));
+        private bool CheckForDependency() => AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("Newtonsoft.Json", StringComparison.OrdinalIgnoreCase));
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -244,8 +244,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
-            AssemblyUtils.TryGetLoadedAssembly(Plugin.Instance, out Assembly assembly);
-            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&LabApi_version={LabApiProperties.CompiledVersion}&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(assembly.Location)}", data);
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CompiledVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}", data);
             httpContent = Status.Content;
             return Status.StatusCode;
         }

@@ -14,12 +14,12 @@ namespace UncomplicatedCustomItems.Enums
         LifeSteal = 1L << 2,
         InfiniteAmmo = 1L << 3,
         DieOnUse = 1L << 4,
-        WorkstationBan = 1L << 5, // Dosent work since theres no events for workstations.
+        WorkstationBan = 1L << 5,
         ItemGlow = 1L << 6,
         EffectWhenUsed = 1L << 7,
         EffectShot = 1L << 8,
         EffectWhenEquiped = 1L << 9,
-        NoCharge = 1L << 10, // Dosent work since theres no events for Jailbirds.
+        NoCharge = 1L << 10,
         CustomSound = 1L << 11,
         ExplosiveBullets = 1L << 12,
         ToolGun = 1L << 13,

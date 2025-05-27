@@ -13,7 +13,7 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract uint Count { get; set; }
 
         public abstract bool? PedestalSpawn { get; set; }
-        
+
         public abstract List<Vector3> Coords { get; set; }
 
         public abstract List<DynamicSpawn> DynamicSpawn { get; set; }
@@ -23,5 +23,7 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract bool ReplaceExistingPickup { get; set; }
 
         public abstract bool ForceItem { get; set; }
+        
+        public abstract bool? ReplaceItemsInPedestals { get; set; }
     }
 }

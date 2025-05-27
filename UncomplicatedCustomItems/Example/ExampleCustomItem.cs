@@ -1,12 +1,16 @@
 using System.Collections.Generic;
+using LabApi.Events.Arguments.PlayerEvents;
 using MapGeneration;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.Events;
+using UncomplicatedCustomItems.Extensions;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using InventorySystem.Items.Firearms.Attachments;
 
 namespace UncomplicatedCustomItems.Examples
 {
@@ -65,7 +69,7 @@ namespace UncomplicatedCustomItems.Examples
         [
             new()
             {
-                Room = RoomName.Lcz914,
+                Room = "Lcz914",
                 Chance = 30,
                 Coords = Vector3.zero
             }
@@ -98,5 +102,36 @@ namespace UncomplicatedCustomItems.Examples
                 Duration = 10
             }
         ];
+    }
+    public class Events : CustomItemEventHandler
+    {
+        // Register with CustomItemEventHandler.Init<CUSTOMITEMNAMESPACE.Events>();
+        /// <summary>
+        /// This is a example of how to setup the <see cref="CustomItemEventHandler.OnShot"/> event from <see cref="CustomItemEventHandler"/>
+        /// Please note that the event will trigger for all items and you will have to add your own checks
+        /// </summary>
+        /// <param name="ev"></param>
+        public override void OnShot(PlayerShotWeaponEventArgs ev)
+        {
+            SummonedCustomItem item = ev.FirearmItem.TryGetSummonedCustomItem();
+            if (item != null && item.CustomItem.Id == 1)
+                ev.Player.Kill();
+
+            base.OnShot(ev);
+        }
+
+        /// <summary>
+        /// This is a example of how to setup the <see cref="CustomItemEventHandler.OnOwnerDroppedItem"/> event to give the <see cref="ICustomItem"/> the <see cref="AttachmentName.HoloSight"/> attachment.
+        /// Please note that the event will trigger for all items and you will have to add your own checks
+        /// </summary>
+        /// <param name="ev"></param>
+        public override void OnOwnerDroppedItem(PlayerDroppedItemEventArgs ev)
+        {
+            SummonedCustomItem item = ev.Pickup.TryGetSummonedCustomItem();
+            if (item != null && item.CustomItem.Id == 1)
+                item.AddAttachment("HoloSight", true);
+
+            base.OnOwnerDroppedItem(ev);
+        }
     }
 }

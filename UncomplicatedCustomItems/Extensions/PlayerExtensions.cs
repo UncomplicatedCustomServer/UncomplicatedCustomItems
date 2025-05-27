@@ -1,21 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using GameCore;
+﻿using System.Linq;
 using Interactables.Interobjects.DoorUtils;
-using InventorySystem.Items.Keycards;
-using LabApi.Features.Extensions;
 using LabApi.Features.Wrappers;
-using Mirror;
-using PlayerRoles.FirstPersonControl;
-using PlayerRoles.PlayableScps.Scp049.Zombies;
-using PlayerRoles.PlayableScps.Scp1507;
-using PlayerRoles;
-using UnityEngine;
-using UncomplicatedCustomItems.API.Features.Helper;
-using RelativePositioning;
-using static UnityEngine.UI.GridLayoutGroup;
-using CustomPlayerEffects;
-using System;
 
 namespace UncomplicatedCustomItems.Extensions
 {
@@ -45,6 +30,10 @@ namespace UncomplicatedCustomItems.Extensions
             if (firearm.FlashLightStatus())
                 return true;
             else return false;
+        }
+        public static CommandSender GetSender(this Player player)
+        {
+            return player.ReferenceHub.queryProcessor._sender;
         }
     }
 }

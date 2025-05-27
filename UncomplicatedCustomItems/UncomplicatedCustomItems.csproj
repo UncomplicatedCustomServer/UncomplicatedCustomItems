@@ -515,6 +515,8 @@
     <Compile Include="Commands\Admin\Summon.cs" />
     <Compile Include="Commands\Admin\Summoned.cs" />
     <Compile Include="Commands\Admin\ToolGun.cs" />
+    <Compile Include="Commands\Admin\Update.cs" />
+    <Compile Include="Commands\Admin\UpdateCheck.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
@@ -537,13 +539,16 @@
     <Compile Include="Enums\FirearmType.cs" />
     <Compile Include="Enums\ItemEvents.cs" />
     <Compile Include="Enums\CustomFlags.cs" />
+    <Compile Include="Events\CustomItemEventHandler.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Events\Methods\SwitchRoleOnUseMethod.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Example\ExampleCustomItem.cs" />
     <Compile Include="Extensions\CustomFlagsExtensions.cs" />
+    <Compile Include="Extensions\CustomItemExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtension.cs" />
+    <Compile Include="Extensions\HarmonyExtensions.cs" />
     <Compile Include="Extensions\FirearmItemExtensions.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
     <Compile Include="Extensions\PickupExtensions.cs" />
@@ -551,6 +556,9 @@
     <Compile Include="Extensions\PlayerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
+    <Compile Include="HarmonyElements\Patches\ArmorPatches.cs" />
+    <Compile Include="HarmonyElements\Patches\AttachmentPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\JailbirdPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="HarmonyElements\Utilities\KeycardUtils.cs" />
     <Compile Include="Interfaces\FlagSettings\IClusterSettings.cs" />

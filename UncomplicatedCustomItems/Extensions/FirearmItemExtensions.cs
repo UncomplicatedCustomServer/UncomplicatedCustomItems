@@ -4,6 +4,7 @@ using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Attachments.Components;
 using InventorySystem.Items.Firearms.Modules;
 using LabApi.Features.Wrappers;
+using FirearmPickup = InventorySystem.Items.Firearms.FirearmPickup;
 
 namespace UncomplicatedCustomItems.Extensions
 {
@@ -29,8 +30,7 @@ namespace UncomplicatedCustomItems.Extensions
             if (targetAttachment == null)
                 return false;
 
-            uint currentCode = firearm.GetCurrentAttachmentsCode();
-            uint newCode = currentCode;
+            uint newCode = firearm.GetCurrentAttachmentsCode();
 
             for (int i = 0; i < firearm.Attachments.Length; i++)
             {
@@ -62,9 +62,9 @@ namespace UncomplicatedCustomItems.Extensions
             return true;
         }
 
-        public static bool TryApplyAttachment(this InventorySystem.Items.Firearms.FirearmPickup firearmPickup, AttachmentName name)
+        public static bool TryApplyAttachment(this FirearmPickup firearmPickup, AttachmentName name)
         {
-            firearmPickup.Info.ItemId.TryGetTemplate<InventorySystem.Items.Firearms.Firearm>(out var firearm);
+            firearmPickup.Info.ItemId.TryGetTemplate<Firearm>(out var firearm);
             if (firearm == null)
                 return false;
 

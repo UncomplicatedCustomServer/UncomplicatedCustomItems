@@ -6,6 +6,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     [HarmonyPatch(typeof(ServerConsole), nameof(ServerConsole.ReloadServerName))]
     internal static class ServerNamePatch
     {
+        [HarmonyPostfix]
         private static void Postfix()
         {
             if (!Plugin.Instance.Config.ServerTracking)

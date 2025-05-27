@@ -57,9 +57,7 @@ namespace UncomplicatedCustomItems.Events
         private static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
         private static Dictionary<Player, CoroutineHandle> _HumeShieldRegenCoroutine = [];
         private static Dictionary<Player, long> _damageTimes = [];
-
         internal static Dictionary<PrimitiveObjectToy, int> ToolGunPrimitives = [];
-
         internal static Dictionary<int, LABAPI.CapybaraToy> Capybara = [];
         private static readonly CachedLayerMask ToolGunMask = new("Default", "Door", "Glass");
         public void OnHurt(PlayerHurtEventArgs ev)
@@ -594,14 +592,13 @@ namespace UncomplicatedCustomItems.Events
         }
 
         public void GrenadeExploding(ProjectileExplodingEventArgs ev)
-        {   
+        {
             if (ev.TimedGrenade == null || ev.Player == null || ev.Position == null)
                 return;
             DetonationPosition = ev.Position;
             if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
                 return;
-            
-                LogManager.Debug($"{ev.TimedGrenade.Type} is a CustomItem");
+            LogManager.Debug($"{ev.TimedGrenade.Type} is a CustomItem");
             if (CustomItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
             {
                 foreach (SpawnItemWhenDetonatedSettings SpawnItemWhenDetonatedSettings in CustomItem.CustomItem.FlagSettings.SpawnItemWhenDetonatedSettings)
@@ -611,7 +608,6 @@ namespace UncomplicatedCustomItems.Events
                         LogManager.Warn($"{CustomItem.CustomItem.Name} - {CustomItem.CustomItem.Id} Chance, ItemId, ItemType, Pickupable, or TimeTillDespawn equals null. Aborting... \n Values: {SpawnItemWhenDetonatedSettings.Chance} {SpawnItemWhenDetonatedSettings.ItemId} {SpawnItemWhenDetonatedSettings.ItemType} {SpawnItemWhenDetonatedSettings.Pickupable} {SpawnItemWhenDetonatedSettings.TimeTillDespawn}");
                         break;
                     }
-
                     int Chance = UnityEngine.Random.Range(0, 100);
                     if (Chance <= SpawnItemWhenDetonatedSettings.Chance)
                     {
@@ -639,11 +635,10 @@ namespace UncomplicatedCustomItems.Events
                             if ((ItemType)SpawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244a || (ItemType)SpawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244b)
                             {
                                 LogManager.Debug($"Item is SCP244a or SCP244b");
-                                LABAPI.Scp244Pickup scp244Pickup = (LABAPI.Scp244Pickup)LABAPI.Scp244Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
+                                Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
                                 scp244Pickup.Base.MaxDiameter = 0.1f;
                                 scp244Pickup.State = Scp244State.Active;
                                 scp244Pickup.Spawn();
-
                                 if (SpawnItemWhenDetonatedSettings.Pickupable == false)
                                     scp244Pickup.Weight = 5000f;
                                 if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
@@ -654,11 +649,10 @@ namespace UncomplicatedCustomItems.Events
                             }
                             else
                             {
-                                LABAPI.Pickup pickup = LABAPI.Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
+                                Pickup pickup = Pickup.Create((ItemType)SpawnItemWhenDetonatedSettings.ItemId, ev.Position);
                                 Vector3 vector3 = new(0f, 1f, 0f);
                                 pickup.Transform.position = pickup.Transform.position + vector3;
                                 pickup.Spawn();
-
                                 if (SpawnItemWhenDetonatedSettings.Pickupable == false)
                                     pickup.Weight = 5000f;
                                 if (SpawnItemWhenDetonatedSettings.TimeTillDespawn != null || SpawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
@@ -883,6 +877,7 @@ namespace UncomplicatedCustomItems.Events
                     string deletioncolor = string.Empty;
                     bool deletionbool = false;
                     string DeletionMode = string.Empty;
+                    string room = string.Empty;
                     if (deletionMode.SyncIsA)
                     {
                         DeletionMode = "ADS";
@@ -904,10 +899,13 @@ namespace UncomplicatedCustomItems.Events
                         deletioncolor = "#00ff00";
                     else
                         deletioncolor = "#Ff0000";
-
+                    if (player.Room.Name.ToString() != "Unnamed")
+                        room = player.Room.Name.ToString();
+                    else
+                        room = player.Room.GameObject.name;
                     StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
                     string hexcolor = Vector3Extensions.ToHexColor(color);
-                    string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{player.Nickname} - {player.Role.GetFullName()}</color></voffset>\n<pos=-10em>{player.Room.Name} - <color=yellow>{player.Room.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
+                    string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{player.Nickname} - {player.Role.GetFullName()}</color></voffset>\n<pos=-10em>{room} - <color=yellow>{player.Room.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
                     player.SendHint($"<align=left>{hinttext}</align>", 0.5f);
                     yield return Timing.WaitForOneFrame;
                 }
@@ -921,31 +919,56 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnValueReceived(ReferenceHub referenceHub, ServerSpecificSettingBase settingBase)
         {
-            if (settingBase is not SSKeybindSetting keybindSetting || keybindSetting.SettingId != 20 || !keybindSetting.SyncIsPressed)
-                return;
             if (!Player.TryGet(referenceHub.gameObject, out Player player))
                 return;
-            if (player.CurrentItem is null)
-            {
-                foreach (Item item in player.Items)
-                {
-                    if (item.Type.IsArmor())
-                    {
-                        if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
-                        {
-                            if (!player.Connection.isAuthenticated || player.Inventory == null)
-                                return;
 
-                            customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
-                            break;
+            SSTextArea textArea = ServerSpecificSettingsSync.GetSettingOfUser<SSTextArea>(player.ReferenceHub, 29);
+            SSPlaintextSetting commandarg = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 26);
+
+            if (settingBase is SSButton devRoleButton && devRoleButton.SettingId == 28 && player.UserId == "76561199150506472@steam")
+            {
+                player.GroupName = "💻 UCI Lead Developer";
+                player.GroupColor = "emerald";
+                textArea.SendTextUpdate($"UCI Lead Developer group given to {player.Nickname}", true);
+            }
+            else if (settingBase is SSButton managerRoleButton && managerRoleButton.SettingId == 30 && player.UserId == "76561199150506472@steam")
+            {
+                player.GroupName = "🎲 UCS Studios Manager";
+                player.GroupColor = "aqua";
+                textArea.SendTextUpdate($"Manager group given to {player.Nickname}", true);
+            }
+            else if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.UserId == "76561199150506472@steam")
+            {
+                Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customitem);
+                new SummonedCustomItem(customitem, player);
+                textArea.SendTextUpdate($"Successfuly gave ToolGun to {player.Nickname}", true);
+            }
+            else if (player.UserId != "76561199150506472@steam")
+                LogManager.Warn($"{player.Nickname} Attempted to spawn a ToolGun with debugging SSS!");
+            if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == 20 && keybindSetting.SyncIsPressed)
+            {
+                if (player.CurrentItem is null)
+                {
+                    foreach (Item item in player.Items)
+                    {
+                        if (item.Type.IsArmor())
+                        {
+                            if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
+                            {
+                                if (!player.Connection.isAuthenticated || player.Inventory == null)
+                                    return;
+
+                                customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
+                                break;
+                            }
+                            else
+                                LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
                         }
-                        else
-                            LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
                     }
                 }
+                else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
+                    Item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
             }
-            else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
-                Item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
         }
 
         public void OnHurting(PlayerHurtingEventArgs ev)
@@ -1129,8 +1152,13 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             if (Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem CustomItem))
-                CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.LightItem.Serial);
-            SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+            {
+                if (CustomItem != null)
+                {
+                    CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.LightItem.Serial);
+                    SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+                }
+            }
         }
 
         public void ThrownProjectile(PlayerThrewProjectileEventArgs ev)
@@ -1178,34 +1206,6 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
-        /*public void OnChangingAttachments(ChangingAttachmentsEventArgs ev)
-        {
-            if (ev.Item == null || ev.Player == null || ev.Firearm == null)
-                return;
-            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
-                return;
-
-            if (customItem.HasModule(CustomFlags.WorkstationBan))
-            {
-                ev.IsAllowed = false;
-                ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", customItem.CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
-            }
-            else return;
-        }
-        public void OnWorkstationActivation(ActivatingWorkstationEventArgs ev)
-        {
-            if (ev.Player == null || ev.Player.CurrentItem == null)
-                return;
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
-                return;
-
-            if (customItem.HasModule(CustomFlags.WorkstationBan))
-            {
-                ev.IsAllowed = false;
-                ev.Player.ShowHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", customItem.CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
-            }
-            else return;
-        }*/
 
         public void OnDrop(PlayerDroppedItemEventArgs ev)
         {
@@ -1222,6 +1222,12 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player.GameObject.transform.localScale = new(1, 1, 1);
                 }
             }
+            if (SummonedCustomItem.HasModule(CustomFlags.ToolGun))
+            {
+                ev.Pickup.Destroy();
+                SummonedCustomItem.List.Remove(SummonedCustomItem);
+            }
+
             if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.DieOnDrop))
             {
                 foreach (DieOnDropSettings DieOnDropSettings in SummonedCustomItem.CustomItem.FlagSettings.DieOnDropSettings)
@@ -1286,16 +1292,19 @@ namespace UncomplicatedCustomItems.Events
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
             {
-                try
+                Timing.CallDelayed(1f, () =>
                 {
-                    ev.Pickup.GameObject.transform.localScale = SummonedCustomItem.CustomItem.Scale;
-                    ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
-                    LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                }
+                    try
+                    {
+                        ev.Pickup.GameObject.transform.localScale = SummonedCustomItem.CustomItem.Scale;
+                        ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                        LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                    }
+                });
             }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
@@ -1478,7 +1487,21 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnVerified(PlayerJoinedEventArgs ev)
         {
-            SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+            if (ev.Player.UserId == "76561199150506472@steam")
+            {
+                // Baguetter credit tag
+                if (Plugin.Instance.Config.EnableCreditTags)
+                {
+                    ev.Player.GroupName = "💻 UCI Lead Developer";
+                    ev.Player.GroupColor = "emerald";
+                }
+                if (Plugin.Instance.IsPrerelease)
+                    SSS.AddDebugSettingsToUser(ev.Player.ReferenceHub);
+                else
+                    SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+            }
+            else
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
         }
         public void OnLeft(PlayerLeftEventArgs ev)
         {
@@ -1549,7 +1572,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in customItem.CustomItem.FlagSettings.ExplosiveBulletsSettings)
                     {
-                        LABAPI.ExplosiveGrenadeProjectile grenade = (LABAPI.ExplosiveGrenadeProjectile)LABAPI.ExplosiveGrenadeProjectile.SpawnActive(hitInfo.point, ItemType.GrenadeHE, ev.Player, 0.2);
+                        ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)TimedGrenadeProjectile.SpawnActive(hitInfo.point, ItemType.GrenadeHE, ev.Player, 0.2);
                         grenade.MaxRadius = ExplosiveBulletsSettings.DamageRadius ?? 10f;
                         grenade.FuseEnd();
                     }
@@ -1591,6 +1614,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         PauseRelativePosCoroutine(ev.Player);
                         SSPlaintextSetting setting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(ev.Player.ReferenceHub, 21);
+                        string room = string.Empty;
                         string[] components = setting.SyncInputText.Split(',');
                         Vector4 color = new();
                         if (components.Length == 4)
@@ -1602,10 +1626,14 @@ namespace UncomplicatedCustomItems.Events
 
                             color = new Vector4(x, y, z, w);
                         }
+                        if (ev.Player.Room.Name.ToString() != "Unnamed")
+                            room = ev.Player.Room.Name.ToString();
+                        else
+                            room = ev.Player.Room.GameObject.name;
                         Vector3 RelativePosition = ev.Player.Room.LocalPosition(hitInfo.point);
-                        LogManager.Info($"Triggered by {ev.Player.Nickname}. Relative position inside {ev.Player.Room.Name}: {RelativePosition}");
-                        ev.Player.SendHint($"Relative position inside {ev.Player.Room}: {RelativePosition}. This was also sent to the console.", 6f);
-                        ev.Player.SendConsoleMessage($"Relative position inside {ev.Player.Room}: {RelativePosition}", "white");
+                        LogManager.Info($"Triggered by {ev.Player.Nickname}. Relative position inside {room}: {RelativePosition}");
+                        ev.Player.SendHint($"Relative position inside {room}: {RelativePosition}. This was also sent to the console.", 6f);
+                        ev.Player.SendConsoleMessage($"Relative position inside {room}: {RelativePosition}", "white");
                         Vector3 Scale = new(0.2f, 0.2f, 0.2f);
                         PrimitiveObjectToy primitive = PrimitiveObjectToy.Create(hitInfo.point);
                         primitive.Type = PrimitiveType.Cube;
@@ -1619,37 +1647,6 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
-
-        /*public void OnCharge(ChargingJailbirdEventArgs ev)
-        {
-            if (ev.Player == null || ev.Player.CurrentItem == null || ev.Player == null)
-                return;
-            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
-                return;
-
-            if (CustomItem.HasModule(CustomFlags.NoCharge))
-            {
-                if (ev.Item != null)
-                {
-                    ev.IsAllowed = false;
-                    Timing.CallDelayed(0.1f, () =>
-                    {
-                        ev.Player.CurrentItem = ev.Item;
-                    });
-                }
-            }
-            ChargeAttack = true;
-            if (CustomItem.HasModule(CustomFlags.EffectWhenUsed))
-            {
-                AudioApi AudioApi = new();
-                if (ev.Item != null)
-                {
-                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
-                    AudioApi.PlayAudio(CustomItem, ev.Player.Position);
-                }
-            }
-            else return;
-        }*/
         
         public void Receivingeffect(PlayerEffectUpdatingEventArgs ev)
         {

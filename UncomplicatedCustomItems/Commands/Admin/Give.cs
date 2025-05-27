@@ -12,7 +12,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string Description { get; } = "Give a Custom Item to a specific player or to yourself";
 
-        public string VisibleArgs { get; } = "<Item Id> (Player Id/Name or All)";
+        public string VisibleArgs { get; } = "<Item Id> <Player Id/All>";
 
         public int RequiredArgsCount { get; } = 1;
 
@@ -34,7 +34,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             {
                 if (arguments[1].ToLower() == "all")
                 {
-                    foreach (Player player in Player.List)
+                    foreach (Player player in Player.ReadyList)
                     {
                         new SummonedCustomItem(customItem, player);
                     }
@@ -43,7 +43,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 }
                 else
                 {
-                    Player target = Player.Get(arguments[1]);
+                    Player target = Player.Get(int.Parse(arguments[1]));
                     if (target is null)
                     {
                         response = "Player not found!";

@@ -14,7 +14,6 @@ using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Extensions;
-using System.Reflection;
 using LabApi.Features.Wrappers;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Modules;
@@ -172,7 +171,6 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         KeycardItem keycard = Item as KeycardItem;
-                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
                         ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
@@ -192,7 +190,6 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             customKeycard.NameTag = KeycardData.Name;
                         }
-                        openDoorsProperty.SetValue(keycard.Base, true);
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
                         customKeycard.RankIndex = KeycardData.Rank;
@@ -215,7 +212,6 @@ namespace UncomplicatedCustomItems.API.Features
                         Armor.Base.HelmetEfficacy = ArmorData.HeadProtection;
                         Armor.Base.VestEfficacy = ArmorData.BodyProtection;
                         Armor.Base._staminaUseMultiplier = ArmorData.StaminaUseMultiplier;
-                        //Armor.Base.StaminaRegenMultiplier = ArmorData.StaminaRegenMultiplier;
                         if (ArmorData.RemoveExcessOnDrop)
                             LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
                         break;
@@ -395,7 +391,7 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Weapon:
                         List<string> attachmentList = GetAttachmentsList();
                         LabApi.Features.Wrappers.FirearmPickup firearm = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
-                        firearm.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Firearms.Firearm>(out var Firearm);
+                        firearm.Base.Info.ItemId.TryGetTemplate<Firearm>(out Firearm Firearm);
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
                         Firearm.ItemSerial = firearm.Serial;
                         foreach (ModuleBase module in Firearm.Modules)
@@ -447,7 +443,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.ExplosiveGrenade:
                         IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
-                        LabApi.Features.Wrappers.ExplosiveGrenadeProjectile ExplosiveGrenade = (LabApi.Features.Wrappers.ExplosiveGrenadeProjectile)LabApi.Features.Wrappers.ExplosiveGrenadeProjectile.Create(CustomItem.Item, Pickup.Position);
+                        ExplosiveGrenade ExplosiveGrenade = (ExplosiveGrenade)ExplosiveGrenade.Create(CustomItem.Item, Pickup.Position);
 
                         ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
                         ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
@@ -463,7 +459,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.FlashGrenade:
                         IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
-                        LabApi.Features.Wrappers.FlashbangProjectile FlashGrenade = (LabApi.Features.Wrappers.FlashbangProjectile)LabApi.Features.Wrappers.FlashbangProjectile.Create(CustomItem.Item, Pickup.Position);
+                        FlashGrenade FlashGrenade = (FlashGrenade)FlashGrenade.Create(CustomItem.Item, Pickup.Position);
 
                         FlashGrenade.BaseBlindTime = FlashGrenadeData.MinimalDurationEffect;
                         FlashGrenade.Base._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
@@ -509,7 +505,7 @@ namespace UncomplicatedCustomItems.API.Features
                             {
                                 LogManager.Debug($"SCPItem is SCP-127");
                                 LabApi.Features.Wrappers.FirearmPickup scpfirearm = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
-                                scpfirearm.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Firearms.Firearm>(out var ScpFirearm);
+                                scpfirearm.Base.Info.ItemId.TryGetTemplate<Firearm>(out Firearm ScpFirearm);
                                 ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
                                 ScpFirearm.ItemSerial = scpfirearm.Serial;
                                 foreach (ModuleBase module in ScpFirearm.Modules)
@@ -558,13 +554,10 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Armor:
                         {
                             Armor Armor = Item as Armor;
-                            IArmorData ArmorData = CustomItem.CustomData as IArmorData;
-                            if (Armor != null && ArmorData != null)
+                            if (Armor != null && CustomItem.CustomData is IArmorData ArmorData)
                             {
                                 ArmorData.HeadProtection = Armor.Base.HelmetEfficacy;
                                 ArmorData.BodyProtection = Armor.Base.VestEfficacy;
-                                // Removed because EXILED deprecated Armor.RemoveExcessOnDrop
-                                // ArmorData.RemoveExcessOnDrop = Armor.RemoveExcessOnDrop;
                                 ArmorData.StaminaUseMultiplier = Armor.Base._staminaUseMultiplier;
                                 ArmorData.StaminaRegenMultiplier = Armor.Base.StaminaRegenMultiplier;
                             }
@@ -572,7 +565,7 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                     case CustomItemType.Weapon:
                         {
-                            FirearmItem firearm = (FirearmItem)FirearmItem.Get((Firearm)Item.Base);
+                            FirearmItem firearm = Item as FirearmItem;
                             IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
                             foreach (ModuleBase module in firearm.Base.Modules)
                             {
@@ -597,6 +590,34 @@ namespace UncomplicatedCustomItems.API.Features
                             MagazineModule.ServerResyncData();
                             break;
                         }
+                    case CustomItemType.SCPItem:
+                        if (Item.Type == ItemType.GunSCP127)
+                        {
+                            FirearmItem ScpFirearm = Item as FirearmItem;
+                            ISCP127Data Scp127Data = CustomItem.CustomData as ISCP127Data;
+                            foreach (ModuleBase module in ScpFirearm.Base.Modules)
+                            {
+                                switch (module)
+                                {
+                                    case Scp127MagazineModule mag when Scp127MagazineModule == null:
+                                        Scp127MagazineModule = mag;
+                                        break;
+
+                                    case Scp127Hitscan hitscan when Scp127Hitscan == null:
+                                        Scp127Hitscan = hitscan;
+                                        break;
+                                }
+                            }
+
+                            Scp127Data.MaxAmmo = Scp127MagazineModule.AmmoStored;
+                            Scp127Data.Damage = Scp127Hitscan.BaseDamage;
+                            Scp127Data.MaxMagazineAmmo = Scp127MagazineModule._defaultCapacity;
+                            Scp127Data.Penetration = Scp127Hitscan.BasePenetration;
+                            Scp127Data.Inaccuracy = Scp127Hitscan.BaseBulletInaccuracy;
+                            Scp127Data.DamageFalloffDistance = Scp127Hitscan.DamageFalloffDistance;
+                            Scp127MagazineModule.ServerResyncData();    
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -693,7 +714,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (CustomItem.BadgeName.Length == 0)
                 return;
-            
+
             player.ReferenceHub.serverRoles.RefreshLocalTag();
             if (PlayerBadges.TryGetValue(player.PlayerId, out bool Hidden))
             {
@@ -702,6 +723,11 @@ namespace UncomplicatedCustomItems.API.Features
                     LogManager.Debug($"Hid {player.Nickname} badge.");
                     player.ReferenceHub.serverRoles.TryHideTag();
                 }
+            }
+            if (Plugin.Instance.Config.EnableCreditTags && player.UserId == "76561199150506472@steam")
+            {
+                player.GroupName = "UCI Lead Developer";
+                player.GroupColor = "emerald";
             }
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }
@@ -790,7 +816,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                 LogManager.Debug($"Firing events for item {CustomItem.Name}");
                 System.Random rand = new();
-                Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
+                Player randomPlayer = Player.ReadyList.OrderBy(p => rand.Next()).FirstOrDefault();
                 string randomPlayerId = randomPlayer?.PlayerId.ToString();
 
                 if (ItemData.Command is not null && ItemData.Command.Length > 2)
@@ -818,7 +844,7 @@ namespace UncomplicatedCustomItems.API.Features
                             cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}") ||
                             cmd.Contains("{pj_pos}"))
                         {
-                            Server.RunCommand(processedCommand, player.ReferenceHub.queryProcessor._sender);
+                            Server.RunCommand(processedCommand, player.GetSender());
                         }
                         else
                         {
@@ -896,7 +922,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal bool HandleCustomAction(Item item)
         {
-            if (Owner is null) 
+            if (Owner is null)
                 return false;
 
             if (_managedItems.Contains(CustomItem.CustomItemType))
@@ -968,7 +994,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="owner"></param>
         /// <param name="serial"></param>
         /// <returns></returns>
-        public static SummonedCustomItem Get(Player owner, ushort serial) => List.Where(sci => sci.Owner is not null && sci.Owner.PlayerId ==  owner.PlayerId && sci.Serial == serial).FirstOrDefault();
+        public static SummonedCustomItem Get(Player owner, ushort serial) => List.Where(sci => sci.Owner is not null && sci.Owner.PlayerId == owner.PlayerId && sci.Serial == serial).FirstOrDefault();
 
         /// <summary>
         /// Gets a <see cref="SummonedCustomItem"/> by it's serial.

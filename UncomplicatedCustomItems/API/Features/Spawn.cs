@@ -46,7 +46,7 @@ namespace UncomplicatedCustomItems.API.Features
         [
             new()
             {
-                Room = RoomName.Lcz914,
+                Room = "Lcz914",
                 Chance = 30
             }
         ];
@@ -75,5 +75,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("If true, this item will only replace another pickup of the same item type as the custom item.")]
         public virtual bool ForceItem { get; set; } = false;
+
+        [Description("If true, this item can replace items in SCP Pedestals.")]
+        public virtual bool? ReplaceItemsInPedestals { get; set; } = false;
     }
 }

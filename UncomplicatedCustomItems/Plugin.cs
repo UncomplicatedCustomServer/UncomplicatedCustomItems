@@ -12,12 +12,15 @@ using LabApi.Loader.Features.Plugins.Enums;
 using LabApi.Features.Wrappers;
 using LabApi.Loader;
 using System.Collections.Generic;
+using System.Reflection;
 
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using MapEvent = LabApi.Events.Handlers.ServerEvents;
 using Scp914Event = LabApi.Events.Handlers.Scp914Events;
+using UncomplicatedCustomItems.Events;
+
 
 namespace UncomplicatedCustomItems
 {
@@ -32,9 +35,11 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredApiVersion { get; } = new(1, 0, 2);
 
-        public override Version Version { get; } = new(3, 5, 0);
+        public override Version Version { get; } = new(3, 5, 1);
 
         internal Handler Handler;
+
+        public Assembly Assembly => Assembly.GetExecutingAssembly();
 
         public override LoadPriority Priority => LoadPriority.Highest;
 
@@ -47,6 +52,7 @@ namespace UncomplicatedCustomItems
         internal FileConfig FileConfig;
         internal ServerSpecificSettingBase[] _playerSettings;
         internal ServerSpecificSettingBase[] _ToolGunSettings;
+        internal ServerSpecificSettingBase[] _DebugSettings;
         internal List<ServerSpecificSettingBase> _settings;
         internal bool DebugMode;
 
@@ -64,12 +70,9 @@ namespace UncomplicatedCustomItems
             PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
             PlayerEvent.ShootingWeapon += Handler.OnShooting;
             PlayerEvent.UsedItem += Handler.OnItemUse;
-            //ItemEvent.PlayerChangingAttachments += Handler.OnChangingAttachments; No event for this :(
-            //PlayerEvent.PlayerActivatingWorkstation += Handler.OnWorkstationActivation; No event for this :(
             PlayerEvent.DroppedItem += Handler.OnDrop;
             MapEvent.PickupDestroyed += Handler.OnPickup;
             PlayerEvent.ShotWeapon += Handler.OnShot;
-            //ItemEvent.ChargingJailbird += Handler.OnCharge; No event for this :(
             PlayerEvent.UpdatingEffect += Handler.Receivingeffect;
             PlayerEvent.ThrewProjectile += Handler.ThrownProjectile;
             MapEvent.ProjectileExploding += Handler.GrenadeExploding;
@@ -102,6 +105,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ShootingWeapon += Handler.Onshooting;
             PlayerEvent.ThrewProjectile += Handler.Onthrown;
 
+            CustomItemEventHandler.Init<Examples.Events>();
+
             _ToolGunSettings =
             [
                 new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
@@ -114,12 +119,26 @@ namespace UncomplicatedCustomItems
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
             ];
+            _DebugSettings =
+            [
+                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
+                new SSButton(24, "Give ToolGun", "Give"),
+                new SSButton(28, "Dev Role", "Give"),
+                new SSButton(30, "Manager Role", "Give"),
+                new SSTextArea(29, "Default Message")
+            ];
             _settings = 
             [
                 new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
                 new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1", hint: "The color of the primitives spawned by the ToolGun"),
                 new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
                 new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No"),
+
+                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
+                new SSButton(24, "Give ToolGun", "Give"),
+                new SSButton(28, "Dev Role", "Give"),
+                new SSButton(30, "Manager Role", "Give"),
+                new SSTextArea(29, "Default Message"),
 
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
@@ -131,7 +150,7 @@ namespace UncomplicatedCustomItems
             LogManager.History.Clear();
 
             LogManager.Info("===========================================");
-            LogManager.Info(" Thanks for using UncomplicatedCustomItems");
+            LogManager.Info("Thanks for using UncomplicatedCustomItems");
             LogManager.Info($"    by {Author}");
             LogManager.Info("===========================================");
             LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
@@ -184,11 +203,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
             PlayerEvent.ShootingWeapon -= Handler.OnShooting;
             PlayerEvent.UsedItem -= Handler.OnItemUse;
-            //ItemEvent.ChangingAttachments -= Handler.OnChangingAttachments;
-            //PlayerEvent.ActivatingWorkstation -= Handler.OnWorkstationActivation;
             PlayerEvent.DroppedItem -= Handler.OnDrop;
             PlayerEvent.ShotWeapon -= Handler.OnShot;
-            //ItemEvent.ChargingJailbird -= Handler.OnCharge;
             PlayerEvent.UpdatingEffect -= Handler.Receivingeffect;
             PlayerEvent.ThrewProjectile -= Handler.ThrownProjectile;
             MapEvent.ProjectileExploding -= Handler.GrenadeExploding;
@@ -222,13 +238,15 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ShootingWeapon -= Handler.Onshooting;
             PlayerEvent.ThrewProjectile -= Handler.Onthrown;
 
+            CustomItemEventHandler.Dispose();
+
             Instance = null;
             Handler = null;
         }
         public void OnFinishedLoadingPlugins()
         {
             ImportManager.Init();
-            //CommonUtilitiesPatch.Initialize();
+            Server.RunCommand("uciupdatecheck");
         }
     }
 }
