@@ -1,12 +1,17 @@
 using System.Collections.Generic;
 using Exiled.API.Enums;
+using Exiled.Events.EventArgs.Player;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.Extensions;
 using UnityEngine;
+using InventorySystem.Items.Firearms.Attachments;
+using LabApi.Events.Arguments.PlayerEvents;
 
 namespace UncomplicatedCustomItems.Examples
 {
@@ -98,5 +103,36 @@ namespace UncomplicatedCustomItems.Examples
                 Duration = 10
             }
         ];
+    }
+    public class Events : CustomItemEventHandler
+    {
+        // Register with CustomItemEventHandler.Init<CUSTOMITEMNAMESPACE.Events>();
+        /// <summary>
+        /// This is a example of how to setup the <see cref="CustomItemEventHandler.OnShot"/> event from <see cref="CustomItemEventHandler"/>
+        /// Please note that the event will trigger for all items and you will have to add your own checks
+        /// </summary>
+        /// <param name="ev"></param>
+        public override void OnShot(ShotEventArgs ev)
+        {
+            SummonedCustomItem item = ev.Item.TryGetSummonedCustomItem();
+            if (item != null && item.CustomItem.Id == 1)
+                ev.Player.Kill(ev.Firearm.HitscanHitregModule.GetHandler(ev.Damage));
+
+            base.OnShot(ev);
+        }
+
+        /// <summary>
+        /// This is a example of how to setup the <see cref="CustomItemEventHandler.OnOwnerDroppedItem"/> event to give the <see cref="ICustomItem"/> the <see cref="AttachmentName.HoloSight"/> attachment.
+        /// Please note that the event will trigger for all items and you will have to add your own checks
+        /// </summary>
+        /// <param name="ev"></param>
+        public override void OnOwnerDroppedItem(DroppedItemEventArgs ev)
+        {
+            SummonedCustomItem item = ev.Pickup.TryGetSummonedCustomItem();
+            if (item != null && item.CustomItem.Id == 1)
+                item.AddAttachment("HoloSight");
+
+            base.OnOwnerDroppedItem(ev);
+        }
     }
 }

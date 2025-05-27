@@ -1,5 +1,4 @@
-﻿using Exiled.API.Features;
-using Exiled.API.Features.Items;
+﻿using Exiled.API.Features.Items;
 using Exiled.API.Interfaces;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem.Items.Keycards;
@@ -8,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Extensions;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Wrappers

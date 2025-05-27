@@ -20,6 +20,7 @@ using ServerEvent = Exiled.Events.Handlers.Server;
 using MapEvent = Exiled.Events.Handlers.Map;
 using Scp914Event = Exiled.Events.Handlers.Scp914;
 using LabAPIPlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using UncomplicatedCustomItems.Events;
 
 namespace UncomplicatedCustomItems
 {
@@ -34,7 +35,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredExiledVersion { get; } = new(9, 6, 0);
 
-        public override Version Version { get; } = new(3, 5, 0);
+        public override Version Version { get; } = new(3, 5, 1);
 
         internal Handler Handler;
 
@@ -50,6 +51,7 @@ namespace UncomplicatedCustomItems
 
         internal ServerSpecificSettingBase[] _playerSettings;
         internal ServerSpecificSettingBase[] _ToolGunSettings;
+        internal ServerSpecificSettingBase[] _DebugSettings;
         internal List<ServerSpecificSettingBase> _settings;
 
         public override void OnEnabled()
@@ -103,6 +105,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting += Handler.Onshooting;
             PlayerEvent.ThrownProjectile += Handler.Onthrown;
 
+            CustomItemEventHandler.Init<Examples.Events>();
+
             _ToolGunSettings =
             [
                 new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
@@ -115,12 +119,26 @@ namespace UncomplicatedCustomItems
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
             ];
-            _settings = 
+            _DebugSettings =
+            [
+                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
+                new SSButton(24, "Give ToolGun", "Give"),
+                new SSButton(28, "Dev Role", "Give"),
+                new SSButton(30, "Manager Role", "Give"),
+                new SSTextArea(29, "Default Message")
+            ];
+            _settings =
             [
                 new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
                 new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1", hint: "The color of the primitives spawned by the ToolGun"),
                 new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
                 new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No"),
+
+                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
+                new SSButton(24, "Give ToolGun", "Give"),
+                new SSButton(28, "Dev Role", "Give"),
+                new SSButton(30, "Manager Role", "Give"),
+                new SSTextArea(29, "Default Message"),
 
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
@@ -222,6 +240,8 @@ namespace UncomplicatedCustomItems
             PlayerEvent.Shooting -= Handler.Onshooting;
             PlayerEvent.ThrownProjectile -= Handler.Onthrown;
 
+            CustomItemEventHandler.Dispose();
+
             Handler.Appearance.Clear();
             Instance = null;
             Handler = null;
@@ -232,6 +252,7 @@ namespace UncomplicatedCustomItems
         {
             ImportManager.Init();
             CommonUtilitiesPatch.Initialize();
+            Server.ExecuteCommand("uciupdatecheck");
         }
     }
 }

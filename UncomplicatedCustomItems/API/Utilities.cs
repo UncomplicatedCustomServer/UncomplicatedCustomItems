@@ -1,7 +1,6 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Exiled.API.Features.Pickups;
 using MEC;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +10,8 @@ using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features.Helper;
+using LabApi.Features.Wrappers;
+using Pickup = Exiled.API.Features.Pickups.Pickup;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -183,54 +184,9 @@ namespace UncomplicatedCustomItems.API
                     break;
 
                 case CustomItemType.SCPItem:
-
-                    if (item.Item is not ItemType.SCP500)
+                    if (!item.Item.IsScp() && item.Item != ItemType.GunSCP127)
                     {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP500!";
-                    }
-                    else if (item.Item is not ItemType.SCP207)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP207!";
-                    }
-                    else if (item.Item is not ItemType.AntiSCP207)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not AntiSCP207!";
-                    }
-                    else if (item.Item is not ItemType.SCP018)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP018!";
-                    }
-                    else if (item.Item is not ItemType.SCP330)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP330!";
-                    }
-                    else if (item.Item is not ItemType.SCP2176)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP2176!";
-                    }
-                    else if (item.Item is not ItemType.SCP244a)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP244A!";
-                    }
-                    else if (item.Item is not ItemType.SCP244b)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP244B!";
-                    }
-                    else if (item.Item is not ItemType.SCP1853)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP1853!";
-                    }
-                    else if (item.Item is not ItemType.SCP1576)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not SCP1576!";
-                    }
-                    else if (item.Item is not ItemType.GunSCP127)
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not GunSCP127!";
-                    }
-                    else
-                    {
-                        error = $"The item has been flagged as 'SCPItem' but the item {item.Item} is not a modifiable SCP Item!";
+                        error = $"The Item has been flagged as 'SCPItem' but the item {item.Item} is not an SCPItem!";
                         return false;
                     }
 
@@ -261,7 +217,7 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="player"></param>
         /// <param name="response"></param>
-        public static void ParseResponse(Player player, IItemData response)
+        public static void ParseResponse(Exiled.API.Features.Player player, IItemData response)
         {
             if (response.ConsoleMessage is not null && response.ConsoleMessage.Length > 1) // FUCK 1 char messages!
             {
@@ -436,7 +392,18 @@ namespace UncomplicatedCustomItems.API
                 ZoneType Zone = Spawn.Zones.RandomItem();
                 if (Spawn.ReplaceExistingPickup)
                 {
-                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                    List< Exiled.API.Features.Pickups.Pickup > FilteredPickups = [];
+                    List<uint> pedestalitems = [];
+                    foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
+                    {
+                        LabApi.Features.Wrappers.Pickup pickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                        pedestalitems.Add(pickup.Serial);
+                    }
+
+                    if (Spawn.ReplaceItemsInPedestals ?? false)
+                        FilteredPickups = Exiled.API.Features.Pickups.Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
+                    else
+                        FilteredPickups = Exiled.API.Features.Pickups.Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == Zone && !pedestalitems.Contains(pickup.Serial) && !IsSummonedCustomItem(pickup.Serial)).ToList();
 
                     if (Spawn.ForceItem)
                         FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
@@ -449,7 +416,7 @@ namespace UncomplicatedCustomItems.API
                 }
                 else
                 {
-                    new SummonedCustomItem(CustomItem, Room.List.Where(room => room.Zone == Zone).ToList().RandomItem().Position);
+                    new SummonedCustomItem(CustomItem, Exiled.API.Features.Room.List.Where(room => room.Zone == Zone).ToList().RandomItem().Position);
                 }
             }
         }
@@ -460,7 +427,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="player"></param>
         /// <param name="Data"></param>
         /// <returns></returns>
-        internal static IEnumerator<float> PainkillersCoroutine(Player player, IPainkillersData Data)
+        internal static IEnumerator<float> PainkillersCoroutine(Exiled.API.Features.Player player, IPainkillersData Data)
         {
             float TotalHealed = 0;
             yield return Timing.WaitForSeconds(Data.TimeBeforeStartHealing);

@@ -39,6 +39,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
             Log.Error(message);
         }
+        public static void Raw(string message, ConsoleColor color)
+        {
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message));
+            Log.SendRaw($"[Updater] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", color);
+        }
 
         public static void Silent(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SILENT", message));
 

@@ -154,7 +154,6 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         Keycard keycard = Item as Keycard;
-                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
                         ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
@@ -174,7 +173,6 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             customKeycard.NameTag = KeycardData.Name;
                         }
-                        openDoorsProperty.SetValue(keycard.Base, true);
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
                         customKeycard.RankIndex = KeycardData.Rank;
@@ -184,6 +182,7 @@ namespace UncomplicatedCustomItems.API.Features
                         customKeycard.CardColor = TintColor32;
                         customKeycard.PermissionsColor = PermissionsColor32;
                         customKeycard.Permissions = permissions;
+                        keycard.Base.OpenDoorsOnThrow = true;
                         LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
                         KeycardUtils.RemoveKeycardDetail(keycard.Serial);
                         KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
@@ -342,7 +341,6 @@ namespace UncomplicatedCustomItems.API.Features
                 {
                     case CustomItemType.Keycard:
                         Keycard keycard = (Keycard)Keycard.Create(CustomItem.Item);
-                        PropertyInfo openDoorsProperty = keycard.Base.GetType().GetProperty("OpenDoorsOnThrow", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         IKeycardData KeycardData = CustomItem.CustomData as IKeycardData;
                         ColorUtility.TryParseHtmlString(KeycardData.PermissionsColor, out Color PermissionsColor);
                         ColorUtility.TryParseHtmlString(KeycardData.TintColor, out Color TintColor);
@@ -357,7 +355,6 @@ namespace UncomplicatedCustomItems.API.Features
                             return;
                         }
 
-                        openDoorsProperty.SetValue(keycard.Base, true);
                         CustomKeycard customKeycard = new CustomKeycard(keycard);
                         customKeycard.SerialNumber = KeycardData.SerialNumber;
                         customKeycard.WearIndex = KeycardData.WearDetail;
@@ -368,6 +365,7 @@ namespace UncomplicatedCustomItems.API.Features
                         customKeycard.CardColor = TintColor32;
                         customKeycard.PermissionsColor = PermissionsColor32;
                         customKeycard.Permissions = permissions;
+                        keycard.Base.OpenDoorsOnThrow = true;
                         LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
                         KeycardUtils.RemoveKeycardDetail(keycard.Serial);
                         KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
@@ -753,6 +751,7 @@ namespace UncomplicatedCustomItems.API.Features
                 return;
             
             player.ReferenceHub.serverRoles.RefreshLocalTag();
+
             if (PlayerBadges.TryGetValue(player.Id, out bool Hidden))
             {
                 if (Hidden)
@@ -760,6 +759,11 @@ namespace UncomplicatedCustomItems.API.Features
                     LogManager.Debug($"Hid {player.DisplayNickname} badge.");
                     player.ReferenceHub.serverRoles.TryHideTag();
                 }
+            }
+            if (Plugin.Instance.Config.EnableCreditTags && player.UserId == "76561199150506472@steam")
+            {
+                player.RankName = "UCI Lead Developer";
+                player.RankColor = "emerald";
             }
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }

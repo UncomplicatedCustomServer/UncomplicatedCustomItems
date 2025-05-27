@@ -22,5 +22,7 @@ namespace UncomplicatedCustomItems.Interfaces
         public abstract bool ReplaceExistingPickup { get; set; }
 
         public abstract bool ForceItem { get; set; }
+
+        public abstract bool? ReplaceItemsInPedestals { get; set; }
     }
 }

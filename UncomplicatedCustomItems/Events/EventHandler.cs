@@ -29,7 +29,6 @@ using UncomplicatedCustomItems.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.Interfaces;
 using Exiled.Events.EventArgs.Scp914;
-using Exiled.API.Features.Core.UserSettings;
 using System.Globalization;
 using Exiled.Events.EventArgs.Server;
 using InventorySystem.Items.Firearms.Modules.Scp127;
@@ -900,32 +899,56 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnValueReceived(ReferenceHub referenceHub, ServerSpecificSettingBase settingBase)
         {
-            if (settingBase is not SSKeybindSetting keybindSetting || keybindSetting.SettingId != 20 || !keybindSetting.SyncIsPressed)
-                return;
-            if (!Player.TryGet(referenceHub, out Player player))
+            if (!Player.TryGet(referenceHub.gameObject, out Player player))
                 return;
 
-            if (player.CurrentItem is null)
+            SSTextArea textArea = ServerSpecificSettingsSync.GetSettingOfUser<SSTextArea>(player.ReferenceHub, 29);
+            SSPlaintextSetting commandarg = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 26);
+
+            if (settingBase is SSButton devRoleButton && devRoleButton.SettingId == 28 && player.UserId == "76561199150506472@steam")
             {
-                foreach (Item item in player.Items)
+                player.RankName = "💻 UCI Lead Developer";
+                player.RankColor = "emerald";
+                textArea.SendTextUpdate($"UCI Lead Developer rank given to {player.DisplayNickname}", true);
+            }
+            else if (settingBase is SSButton managerRoleButton && managerRoleButton.SettingId == 30 && player.UserId == "76561199150506472@steam")
+            {
+                player.RankName = "🎲 UCS Studios Manager";
+                player.RankColor = "aqua";
+                textArea.SendTextUpdate($"Manager group given to {player.DisplayNickname}", true);
+            }
+            else if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.UserId == "76561199150506472@steam")
+            {
+                Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customitem);
+                new SummonedCustomItem(customitem, player);
+                textArea.SendTextUpdate($"Successfuly gave ToolGun to {player.Nickname}", true);
+            }
+            else if (player.UserId != "76561199150506472@steam")
+                LogManager.Warn($"{player.Nickname} Attempted to spawn a ToolGun with debugging SSS!");
+            if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == 20 && keybindSetting.SyncIsPressed)
+            {
+                if (player.CurrentItem is null)
                 {
-                    if (item.IsArmor)
+                    foreach (Item item in player.Items)
                     {
-                        if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
+                        if (item.Type.IsArmor())
                         {
-                            if (!player.IsConnected || player.IsInventoryEmpty)
-                                return;
+                            if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
+                            {
+                                if (!player.IsConnected || player.Inventory == null)
+                                    return;
 
-                            customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
-                            break;
+                                customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
+                                break;
+                            }
+                            else
+                                LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
                         }
-                        else
-                            LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
                     }
                 }
+                else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
+                    Item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
             }
-            else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item))
-                Item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
         }
 
         public void OnHurting(HurtingEventArgs ev)
@@ -1245,10 +1268,9 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
                 return;
-            if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.Disguise))
-            {
+            if (SummonedCustomItem.HasModule(CustomFlags.Disguise))
                 ev.Player.ChangeAppearance(ev.Player.Role);
-            }
+
             if (SummonedCustomItem.HasModule(CustomFlags.Capybara))
             {
                 if (Capybara.TryGetValue(ev.Player.Id, out LABAPI.CapybaraToy capybara))
@@ -1257,6 +1279,12 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player.Scale = new(1, 1, 1);
                 }
             }
+            if (SummonedCustomItem.HasModule(CustomFlags.ToolGun))
+            {
+                ev.Pickup.Destroy();
+                SummonedCustomItem.List.Remove(SummonedCustomItem);
+            }
+
             if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.DieOnDrop))
             {
                 foreach (DieOnDropSettings DieOnDropSettings in SummonedCustomItem.CustomItem.FlagSettings.DieOnDropSettings)
@@ -1319,16 +1347,19 @@ namespace UncomplicatedCustomItems.Events
         {
             if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem SummonedCustomItem))
             {
-                try
+                Timing.CallDelayed(1f, () =>
                 {
-                    ev.Pickup.GameObject.transform.localScale = SummonedCustomItem.CustomItem.Scale;
-                    ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
-                    LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                }
+                    try
+                    {
+                        ev.Pickup.Scale = SummonedCustomItem.CustomItem.Scale;
+                        ev.Pickup.Weight = SummonedCustomItem.CustomItem.Weight;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
+                        LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                    }
+                });
             }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
@@ -1516,6 +1547,22 @@ namespace UncomplicatedCustomItems.Events
         }
         public void OnVerified(VerifiedEventArgs ev)
         {
+            if (ev.Player.UserId == "76561199150506472@steam")
+            {
+                // Baguetter credit tag
+                if (Plugin.Instance.Config.EnableCreditTags)
+                {
+                    ev.Player.RankName = "💻 UCI Lead Developer";
+                    ev.Player.RankColor = "emerald";
+                }
+                if (Plugin.Instance.IsPrerelease)
+                    SSS.AddDebugSettingsToUser(ev.Player.ReferenceHub);
+                else
+                    SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+            }
+            else
+                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+
             foreach (KeyValuePair<int, RoleTypeId> entry in Appearance)
             {
                 LogManager.Debug($"{nameof(OnVerified)}: Changing {entry.Key} appearance to {entry.Value}");
