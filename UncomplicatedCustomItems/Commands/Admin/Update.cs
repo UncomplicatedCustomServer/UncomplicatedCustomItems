@@ -23,7 +23,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
     [CommandHandler(typeof(GameConsoleCommandHandler))]
     public class Update : ParentCommand
     {
-        private const string PluginDllName = "UncomplicatedCustomItems-LabApi.dll";
+        private const string PluginDllName = "UncomplicatedCustomItems-Exiled.dll";
 
         public Update() => LoadGeneratedCommands();
 
@@ -100,8 +100,6 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         }
 
                         string pluginPath = string.Empty;
-                        ushort serverPort = 0;
-                        serverPort = Server.Port;
 
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                         {
@@ -112,23 +110,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
                                     LogManager.Error("Could not determine user home directory for Linux path.");
                                 else
                                 {
-                                    string portSpecificLinuxPath = Path.Combine(homeDirectory, ".config", "SCP Secret Laboratory", "LabAPI", "plugins", serverPort.ToString(), PluginDllName);
+                                    string portSpecificLinuxPath = Path.Combine(homeDirectory, ".config", "EXILED", "Plugins", PluginDllName);
                                     if (File.Exists(portSpecificLinuxPath))
                                         pluginPath = portSpecificLinuxPath;
-                                    else
-                                    {
-                                        LogManager.Warn($"Linux LabAPI Port-Specific plugin path not found: {portSpecificLinuxPath}. Trying global LabAPI path.");
-                                        string globalLinuxPath = Path.Combine(homeDirectory, ".config", "SCP Secret Laboratory", "LabAPI", "plugins", PluginDllName);
-                                        if (File.Exists(globalLinuxPath))
-                                            pluginPath = globalLinuxPath;
-                                        else
-                                            LogManager.Warn($"Linux LabAPI Global plugin path not found: {globalLinuxPath}");
-                                    }
                                 }
                             }
                             catch (Exception ex)
                             {
-                                LogManager.Error($"Error determining Linux LabAPI plugin paths: {ex.Message}");
+                                LogManager.Error($"Error determining Linux Exiled plugin paths: {ex.Message}");
                             }
                         }
                         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -140,29 +129,20 @@ namespace UncomplicatedCustomItems.Commands.Admin
                                     LogManager.Error("Could not determine AppData directory for Windows path.");
                                 else
                                 {
-                                    string portSpecificWindowsPath = Path.Combine(appDataDirectory, "SCP Secret Laboratory", "LabAPI", "plugins", serverPort.ToString(), PluginDllName);
+                                    string portSpecificWindowsPath = Path.Combine(appDataDirectory, "EXILED", "Plugins", PluginDllName);
                                     if (File.Exists(portSpecificWindowsPath))
                                         pluginPath = portSpecificWindowsPath;
-                                    else
-                                    {
-                                        LogManager.Warn($"Windows LabAPI Port-Specific plugin path not found: {portSpecificWindowsPath}. Trying global LabAPI path.");
-                                        string globalWindowsPath = Path.Combine(appDataDirectory, "SCP Secret Laboratory", "LabAPI", "plugins", PluginDllName);
-                                        if (File.Exists(globalWindowsPath))
-                                            pluginPath = globalWindowsPath;
-                                        else
-                                            LogManager.Warn($"Windows LabAPI Global plugin path not found: {globalWindowsPath}");
-                                    }
                                 }
                             }
                             catch (Exception ex)
                             {
-                                LogManager.Error($"Error determining Windows LabAPI plugin paths: {ex.Message}");
+                                LogManager.Error($"Error determining Windows Exiled plugin paths: {ex.Message}");
                             }
                         }
 
                         if (string.IsNullOrEmpty(pluginPath))
                         {
-                            LogManager.Error("Could not determine the path of the current plugin DLL using LabAPI paths. Update aborted.");
+                            LogManager.Error("Could not determine the path of the current plugin DLL using Exiled paths. Update aborted.");
                             return;
                         }
 
