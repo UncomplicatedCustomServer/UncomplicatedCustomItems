@@ -923,8 +923,6 @@ namespace UncomplicatedCustomItems.Events
                 new SummonedCustomItem(customitem, player);
                 textArea.SendTextUpdate($"Successfuly gave ToolGun to {player.Nickname}", true);
             }
-            else if (player.UserId != "76561199150506472@steam")
-                LogManager.Warn($"{player.Nickname} Attempted to spawn a ToolGun with debugging SSS!");
             if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == 20 && keybindSetting.SyncIsPressed)
             {
                 if (player.CurrentItem is null)
