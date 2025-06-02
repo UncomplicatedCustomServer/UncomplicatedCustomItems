@@ -520,9 +520,14 @@
     <Compile Include="API\Enums\CustomFlags.cs" />
     <Compile Include="Events\CustomItemEventHandler.cs" />
     <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Events\ItemHandler.cs" />
+    <Compile Include="Events\MapHandler.cs" />
     <Compile Include="Events\Methods\SwitchRoleOnUseMethod.cs" />
     <Compile Include="Events\Internal\Player.cs" />
     <Compile Include="Events\Internal\Server.cs" />
+    <Compile Include="Events\PlayerHandler.cs" />
+    <Compile Include="Events\SCPHandler.cs" />
+    <Compile Include="Events\ServerHandler.cs" />
     <Compile Include="Example\ExampleCustomItem.cs" />
     <Compile Include="API\Extensions\CustomFlagsExtensions.cs" />
     <Compile Include="API\Extensions\CustomItemExtensions.cs" />

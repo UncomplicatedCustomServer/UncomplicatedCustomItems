@@ -17,6 +17,7 @@ using InventorySystem.Items.Keycards;
 using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
+using UncomplicatedCustomItems.Events;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -896,7 +897,7 @@ namespace UncomplicatedCustomItems.API.Features
                             .Replace("{p_zone}", player.Zone.ToString())
                             .Replace("{p_room}", player.CurrentRoom.ToString())
                             .Replace("{p_rotation}", player.Rotation.ToString())
-                            .Replace("{pj_pos}", Plugin.Instance.Handler.DetonationPosition.ToString());
+                            .Replace("{pj_pos}", MapHandler.DetonationPosition.ToString());
 
                         if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
                             cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||

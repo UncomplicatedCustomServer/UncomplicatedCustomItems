@@ -91,10 +91,10 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (Item.HasModule(CustomFlags.ToolGun))
             {
                 SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
-                EventHandler.StopRelativePosCoroutine(ev.Player);
+                PlayerHandler.StopRelativePosCoroutine(ev.Player);
             }
-            
-            EventHandler.StopHumeShieldRegen(ev.Player);
+
+            PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 
         /// <summary>
@@ -162,20 +162,14 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
-            {
-                if (EventHandler.EquipedKeycards.ContainsKey(ev.Player.CurrentItem.Serial))
-                    EventHandler.EquipedKeycards.Remove(ev.Player.CurrentItem.Serial);
                 return;
-            }
-            if (EventHandler.EquipedKeycards.ContainsKey(item.Serial))
-                EventHandler.EquipedKeycards.Remove(item.Serial);
 
             item.ResetBadge(ev.Player);
 
             if (item.HasModule(CustomFlags.ToolGun))
             {
                 SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
-                EventHandler.StopRelativePosCoroutine(ev.Player);
+                PlayerHandler.StopRelativePosCoroutine(ev.Player);
             }
 
             if (item.Item.Type == ItemType.GunSCP127 && item.CustomItem.CustomItemType == CustomItemType.SCPItem)
@@ -199,7 +193,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 }
                 else
                     LogManager.Error($"{item.CustomItem.Name} - {item.Serial} has no tier?");
-                EventHandler.StopHumeShieldRegen(ev.Player);
+                PlayerHandler.StopHumeShieldRegen(ev.Player);
             }
         }
 
@@ -236,12 +230,12 @@ namespace UncomplicatedCustomItems.Events.Internal
                     if (customitem.HasModule(CustomFlags.ToolGun))
                     {
                         SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
-                        EventHandler.StopRelativePosCoroutine(ev.Player);
+                        PlayerHandler.StopRelativePosCoroutine(ev.Player);
                     }
                 }
             }
 
-            EventHandler.StopHumeShieldRegen(ev.Player);
+            PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 
         private static void RoleChangeEvent(ChangingRoleEventArgs ev)
@@ -259,10 +253,10 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (item.HasModule(CustomFlags.ToolGun))
             {
                 SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
-                EventHandler.StopRelativePosCoroutine(ev.Player);
+                PlayerHandler.StopRelativePosCoroutine(ev.Player);
             }
 
-            EventHandler.StopHumeShieldRegen(ev.Player);
+            PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 
         private static void ThrownProjectile(ThrownProjectileEventArgs ev)
