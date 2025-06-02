@@ -248,16 +248,7 @@ namespace UncomplicatedCustomItems.Events
         public static void OnPickup(PickupDestroyedEventArgs ev)
         {
             if (ev.Pickup != null)
-            {
-                if (ev.Pickup != null)
-                {
-                    DestroyLightOnPickup(ev.Pickup);
-                }
-                else
-                {
-                    LogManager.Error($"Couldnt destroy light on {ev.Pickup.Type}.");
-                }
-            }
+                DestroyLightOnPickup(ev.Pickup);
         }
 
         /// <summary>

@@ -86,15 +86,10 @@ namespace UncomplicatedCustomItems
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
             ];
-            if (IsPrerelease)
-                _DebugSettings =
-                [
-                    new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
-                    new SSButton(24, "Give ToolGun", "Give"),
-                    new SSButton(28, "Dev Role", "Give"),
-                    new SSButton(30, "Manager Role", "Give"),
-                    new SSTextArea(29, "Default Message")
-                ];
+            _DebugSettings =
+            [
+                new SSTextArea(29, "Default Message"),
+            ];
             _settings =
             [
                 new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
@@ -102,10 +97,6 @@ namespace UncomplicatedCustomItems
                 new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
                 new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No"),
 
-                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
-                new SSButton(24, "Give ToolGun", "Give"),
-                new SSButton(28, "Dev Role", "Give"),
-                new SSButton(30, "Manager Role", "Give"),
                 new SSTextArea(29, "Default Message"),
 
                 new SSGroupHeader("CustomItem Settings"),

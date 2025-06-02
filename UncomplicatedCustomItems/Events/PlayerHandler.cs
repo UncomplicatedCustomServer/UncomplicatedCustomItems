@@ -24,6 +24,7 @@ using System.Globalization;
 using Exiled.API.Features.Items;
 using CustomPlayerEffects;
 using Exiled.API.Features;
+using Exiled.CustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -123,12 +124,11 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.Player == null || ev.Player.CurrentItem == null || !ev.IsAllowed)
                 return;
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
-                return;
-
-            if (customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
-                ev.IsTriggerable = false;
-            else return;
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem))
+            {
+                if (customItem.HasModule(CustomFlags.DoNotTriggerTeslaGates))
+                    ev.IsTriggerable = false;
+            }
         }
 
         public static void OnShooting(ShootingEventArgs ev)
@@ -162,9 +162,6 @@ namespace UncomplicatedCustomItems.Events
                 ISCP127Data data = customItem.CustomItem.CustomData as ISCP127Data;
                 ev.Firearm.Inaccuracy = data.Inaccuracy;
             }
-
-            if (!customItem.CustomItem.CustomFlags.HasValue || customItem.HasModule(CustomFlags.None))
-                return;
 
             if (customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
@@ -670,8 +667,50 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else return;
+            if (SummonedCustomItem.HasModule(CustomFlags.ItemGlow))
+            {
+                foreach (ItemGlowSettings ItemGlowSettings in SummonedCustomItem.CustomItem.FlagSettings.ItemGlowSettings)
+                {
+                    LogManager.Debug("SpawnLightOnItem method triggered");
+
+                    if (ev.Pickup?.Base?.gameObject == null)
+                        return;
+
+                    GameObject itemGameObject = ev.Pickup.Base.gameObject;
+                    Color lightColor = Color.blue;
+
+                    if (ItemGlowSettings != null)
+                    {
+                        if (!string.IsNullOrEmpty(ItemGlowSettings.GlowColor))
+                        {
+                            if (ColorUtility.TryParseHtmlString(ItemGlowSettings.GlowColor, out Color parsedColor))
+                            {
+                                lightColor = parsedColor;
+                            }
+                            else
+                            {
+                                LogManager.Error($"Failed to parse color: {ItemGlowSettings.GlowColor} for {SummonedCustomItem.CustomItem.Name}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        LogManager.Error("No FlagSettings found on custom item");
+                    }
+
+                    var light = Exiled.API.Features.Toys.Light.Create(ev.Pickup.Position);
+                    light.Color = lightColor;
+                    light.Intensity = 0.7f;
+                    light.Range = 0.5f;
+                    light.ShadowType = LightShadows.None;
+
+                    light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
+                    LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
+                    MapHandler.ActiveLights[ev.Pickup] = light;
+                }
+            }
         }
+
         public static void FlippedCoin(PlayerFlippedCoinEventArgs ev)
         {
             if (ev.CoinItem == null || ev.Player == null)

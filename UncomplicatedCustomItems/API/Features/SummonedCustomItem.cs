@@ -207,8 +207,10 @@ namespace UncomplicatedCustomItems.API.Features
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
                         if (!PropertiesSet)
+                        {
+                            Firearm.MagazineAmmo = WeaponData.MaxAmmo;
                             MagCheck(Firearm, WeaponData);
-                        Firearm.MagazineAmmo = WeaponData.MaxAmmo;
+                        }
                         Firearm.Damage = WeaponData.Damage;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
                         Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
