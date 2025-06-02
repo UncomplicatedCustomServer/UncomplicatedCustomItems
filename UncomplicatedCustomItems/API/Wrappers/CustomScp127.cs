@@ -6,9 +6,10 @@ using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using Mirror;
 using System;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Wrappers

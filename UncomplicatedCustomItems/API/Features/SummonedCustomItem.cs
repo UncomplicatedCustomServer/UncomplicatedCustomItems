@@ -5,20 +5,18 @@ using Exiled.Events.EventArgs.Player;
 using MEC;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Keycards;
 using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
-using UncomplicatedCustomItems.Extensions;
-using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features
 {

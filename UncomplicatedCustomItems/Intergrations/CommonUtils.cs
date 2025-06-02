@@ -3,7 +3,7 @@ using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 using Exiled.API.Features;
 using System.Linq;
 using System;

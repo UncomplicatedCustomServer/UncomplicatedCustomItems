@@ -1,4 +1,4 @@
-﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
+﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using Exiled.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData

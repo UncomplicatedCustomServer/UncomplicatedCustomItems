@@ -2,7 +2,7 @@
 using Exiled.API.Features;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {

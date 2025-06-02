@@ -7,11 +7,9 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using System.Threading.Tasks;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using UncomplicatedCustomItems.Integration;
-using Exiled.API.Features.Core.UserSettings;
 using System.Collections.Generic;
 using UnityEngine;
 using UserSettings.ServerSpecific;
-using UncomplicatedCustomItems.Manager;
 
 // Events
 using PlayerEvent = Exiled.Events.Handlers.Player;

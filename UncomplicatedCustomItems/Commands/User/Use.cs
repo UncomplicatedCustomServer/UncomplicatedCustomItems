@@ -5,8 +5,8 @@ using System;
 using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.Commands.User
 {

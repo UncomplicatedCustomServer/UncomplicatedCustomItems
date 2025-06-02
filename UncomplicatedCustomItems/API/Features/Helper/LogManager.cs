@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 using Exiled.API.Features;
 
 namespace UncomplicatedCustomItems.API.Features.Helper

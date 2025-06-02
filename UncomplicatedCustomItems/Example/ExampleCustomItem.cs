@@ -4,14 +4,13 @@ using Exiled.Events.EventArgs.Player;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.Events;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
-using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Extensions;
 using UnityEngine;
 using InventorySystem.Items.Firearms.Attachments;
-using LabApi.Events.Arguments.PlayerEvents;
 
 namespace UncomplicatedCustomItems.Examples
 {
@@ -36,7 +35,7 @@ namespace UncomplicatedCustomItems.Examples
 
         public override ISpawn Spawn { get; set; } = new SpawnData();
 
-        public override CustomFlags? CustomFlags { get; set; } = Enums.CustomFlags.DieOnUse | Enums.CustomFlags.DieOnDrop;
+        public override CustomFlags? CustomFlags { get; set; } = API.Enums.CustomFlags.DieOnUse | API.Enums.CustomFlags.DieOnDrop;
 
         public override IFlagSettings FlagSettings { get; set; } = new FlagSettingsData();
 

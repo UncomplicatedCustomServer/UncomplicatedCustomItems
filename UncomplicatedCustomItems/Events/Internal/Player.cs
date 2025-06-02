@@ -3,7 +3,7 @@ using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using EventSource = Exiled.Events.Handlers.Player;
 using Exiled.API.Extensions;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using Exiled.API.Enums;
 using MapEventSource = Exiled.Events.Handlers.Map;
 using Exiled.Events.EventArgs.Map;
@@ -15,6 +15,7 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Wrappers;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -87,7 +88,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
                 Item?.OnDrop(ev);
                 Item.ResetBadge(ev.Player);
-            if (Item.HasModule(Enums.CustomFlags.ToolGun))
+            if (Item.HasModule(CustomFlags.ToolGun))
             {
                 SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
@@ -171,7 +172,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item.ResetBadge(ev.Player);
 
-            if (item.HasModule(Enums.CustomFlags.ToolGun))
+            if (item.HasModule(CustomFlags.ToolGun))
             {
                 SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
@@ -232,7 +233,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 {
                     customitem.OnDied(ev, customitem);
                     customitem?.ResetBadge(ev.Player);
-                    if (customitem.HasModule(Enums.CustomFlags.ToolGun))
+                    if (customitem.HasModule(CustomFlags.ToolGun))
                     {
                         SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                         EventHandler.StopRelativePosCoroutine(ev.Player);
@@ -255,7 +256,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            if (item.HasModule(Enums.CustomFlags.ToolGun))
+            if (item.HasModule(CustomFlags.ToolGun))
             {
                 SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
                 EventHandler.StopRelativePosCoroutine(ev.Player);

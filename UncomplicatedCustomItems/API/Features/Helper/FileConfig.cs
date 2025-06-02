@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using UnityEngine;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 using YamlDotNet.Core;
 
 namespace UncomplicatedCustomItems.API.Features.Helper

@@ -11,13 +11,13 @@ using Exiled.Events.EventArgs.Map;
 using Light = Exiled.API.Features.Toys.Light;
 using Mirror;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using CustomPlayerEffects;
 using Exiled.API.Features.Toys;
 using InventorySystem.Items.Usables.Scp244;
 using MEC;
 using PlayerRoles;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using System.Linq;
 using System;
 using UserSettings.ServerSpecific;
@@ -25,9 +25,9 @@ using Exiled.API.Features;
 using Exiled.API.Extensions;
 using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.Events.Methods;
-using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.API.Extensions;
 using LABAPI = LabApi.Features.Wrappers;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 using Exiled.Events.EventArgs.Scp914;
 using System.Globalization;
 using Exiled.Events.EventArgs.Server;
@@ -883,7 +883,7 @@ namespace UncomplicatedCustomItems.Events
                     else
                         deletioncolor = "#Ff0000";
 
-                    Extensions.StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
+                    UncomplicatedCustomItems.API.Extensions.StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
                     string hexcolor = Vector3Extensions.ToHexColor(color);
                     string hinttext = $"<pos=-10em><voffset=-12.3em><color={player.RankColor}>{player.DisplayNickname} - {player.Role.Name}</color></voffset>\n<pos=-10em>{player.CurrentRoom.Type} - <color=yellow>{player.CurrentRoom.LocalPosition(player.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
                     player.ShowHint($"<align=left>{hinttext}</align>", 0.5f);

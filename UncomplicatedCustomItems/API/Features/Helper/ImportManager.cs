@@ -2,15 +2,12 @@ using Exiled.API.Interfaces;
 using Exiled.Loader;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Attributes;
-using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Extensions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Extensions;
 
-namespace UncomplicatedCustomItems.Manager
+namespace UncomplicatedCustomItems.API.Features.Helper
 {
     internal class ImportManager
     {
