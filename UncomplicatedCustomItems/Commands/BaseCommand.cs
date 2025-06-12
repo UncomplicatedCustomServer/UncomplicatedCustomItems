@@ -26,9 +26,10 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Summon());
             Subcommands.Add(new Summoned());
             Subcommands.Add(new Generate());
-            Subcommands.Add(new Reload());
+            Subcommands.Add(new Reload());  
             Subcommands.Add(new Info());
             Subcommands.Add(new Get());
+            Subcommands.Add(new ToolGun());
         }
 
         private List<ISubcommand> Subcommands { get; } = [];

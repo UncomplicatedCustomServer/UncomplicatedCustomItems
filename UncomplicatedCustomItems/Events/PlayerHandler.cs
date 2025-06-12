@@ -719,6 +719,12 @@ namespace UncomplicatedCustomItems.Events
             if (Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem CustomItem))
                 CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.CoinItem.Serial);
             SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+            if (CustomItem.HasModule(CustomFlags.CustomSound))
+            {
+                AudioApi AudioApi = new();
+                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
+                AudioApi.PlayAudio(CustomItem, ev.Player.Position);
+            }
         }
         public static void ToggledFlashlight(PlayerToggledFlashlightEventArgs ev)
         {
@@ -728,6 +734,12 @@ namespace UncomplicatedCustomItems.Events
             if (Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem CustomItem))
                 CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.LightItem.Serial);
             SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+            if (CustomItem.HasModule(CustomFlags.CustomSound))
+            {
+                AudioApi AudioApi = new();
+                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
+                AudioApi.PlayAudio(CustomItem, ev.Player.Position);
+            }
         }
         public static void ThrownProjectile(ThrownProjectileEventArgs ev)
         {
