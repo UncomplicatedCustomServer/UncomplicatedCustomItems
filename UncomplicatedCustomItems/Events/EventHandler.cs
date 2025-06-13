@@ -710,10 +710,10 @@ namespace UncomplicatedCustomItems.Events
 
         public void OnPickupUpgrade(Scp914ProcessingPickupEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out _))
+            if (ev.Pickup.IsCustomItem())
             {
-                ev.Pickup.Position = ev.NewPosition;
                 ev.IsAllowed = false;
+                ev.Pickup.Position = ev.NewPosition;
             }
 
             LogManager.Debug($"{nameof(OnPickupUpgrade)}: Triggered");
@@ -764,60 +764,31 @@ namespace UncomplicatedCustomItems.Events
                 }    
             }
         }
-        
+
         public void OnItemUpgrade(Scp914ProcessingInventoryItemEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out _))
+            if (ev.Item.IsCustomItem())
                 ev.IsAllowed = false;
 
-            LogManager.Debug($"{nameof(OnItemUpgrade)}: Triggered");
             foreach (CustomItem customItem in CustomItem.List)
             {
-                LogManager.Debug($"{nameof(OnItemUpgrade)}: {customItem.Name}");
                 if (customItem.HasModule(CustomFlags.Craftable))
                 {
-                    LogManager.Debug($"{nameof(OnItemUpgrade)}: {customItem.Name} has Craftable CustomFlag");
                     foreach (CraftableSettings craftableSettings in customItem.FlagSettings.CraftableSettings)
                     {
-                        LogManager.Debug($"{nameof(OnItemUpgrade)}: Checking settings on {customItem.Name}");
-                        if (craftableSettings.OriginalItem == null || craftableSettings.KnobSetting == null || craftableSettings.Chance == null)
+                        if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
                         {
-                            LogManager.Warn($"{nameof(OnItemUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or Chance equals null. Aborting... \n Values: {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
-                            break;
-                        }
-                        else if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
-                        {
-                            try
+                            if (ev.Player.CurrentItem.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
                             {
-                                LogManager.Debug($"{nameof(OnItemUpgrade)}: Checking if {craftableSettings.OriginalItem} equals {ev.Player.CurrentItem.Type} and {craftableSettings.KnobSetting} equals {ev.KnobSetting}");
-                                if (ev.Player.CurrentItem.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
-                                {
-                                    LogManager.Debug($"{nameof(OnItemUpgrade)}: Check passed!");
-                                    LogManager.Debug($"{nameof(OnItemUpgrade)}: Giving {customItem.Name} to {ev.Player.Nickname}...");
-                                    try
-                                    {
-                                        ev.Player.RemoveItem(ev.Item);
-                                        new SummonedCustomItem(customItem, ev.Player);
-                                        LogManager.Debug($"{nameof(OnItemUpgrade)}: Gave {customItem.Name} to {ev.Player.Nickname}...");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        LogManager.Error($"{nameof(OnItemUpgrade)}: Error during CustomItem creation: {ex.Message}\n{ex.StackTrace}");
-                                    }
-                                }
-                                else
-                                    LogManager.Debug($"{nameof(OnItemUpgrade)}: {ev.KnobSetting} != {craftableSettings.KnobSetting} or {ev.Item} != {craftableSettings.OriginalItem}");
-                            }
-                            catch (Exception ex)
-                            {
-                                LogManager.Error($"{nameof(OnItemUpgrade)}: Exception: {ex.Message}\n{ex.StackTrace}");
+                                ev.Player.RemoveItem(ev.Item);
+                                new SummonedCustomItem(customItem, ev.Player);
+                                LogManager.Debug($"{nameof(OnItemUpgrade)}: Gave {customItem.Name} to {ev.Player.Nickname}...");
                             }
                         }
                     }
                 }
             }
         }
-
         /// <summary>
         /// A coroutine that destroys a pickup by its serial after a set amount of time.
         /// </summary>
@@ -1143,6 +1114,12 @@ namespace UncomplicatedCustomItems.Events
             if (Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem CustomItem))
                 CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.CoinItem.Serial);
             SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+            if (CustomItem.HasModule(CustomFlags.CustomSound))
+            {
+                AudioApi AudioApi = new();
+                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem .CustomItem.Name}.");
+                AudioApi.PlayAudio(CustomItem, ev.Player.Position);
+            }
         }
         public void ToggledFlashlight(PlayerToggledFlashlightEventArgs ev)
         {
@@ -1151,10 +1128,13 @@ namespace UncomplicatedCustomItems.Events
 
             if (Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem CustomItem))
             {
-                if (CustomItem != null)
+                CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.LightItem.Serial);
+                SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+                if (CustomItem.HasModule(CustomFlags.CustomSound))
                 {
-                    CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.LightItem.Serial);
-                    SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+                    AudioApi AudioApi = new();
+                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
+                    AudioApi.PlayAudio(CustomItem, ev.Player.Position);
                 }
             }
         }

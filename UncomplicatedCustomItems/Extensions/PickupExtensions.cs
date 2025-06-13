@@ -42,11 +42,7 @@ namespace UncomplicatedCustomItems.Extensions
         /// <returns>
         /// The corresponding <see cref="SummonedCustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static SummonedCustomItem TryGetSummonedCustomItem(this Pickup pickup)
-        {
-            return Utilities.TryGetSummonedCustomItem(pickup.Serial, out SummonedCustomItem customItem) ? customItem : null;
-        }
-
+        public static SummonedCustomItem TryGetSummonedCustomItem(this Pickup pickup) => Utilities.TryGetSummonedCustomItem(pickup.Serial, out SummonedCustomItem customItem) ? customItem : null;
         /// <summary>
         /// Attempts to retrieve the <see cref="ICustomItem"/> associated with the specified <see cref="Pickup"/>.
         /// </summary>
@@ -54,10 +50,7 @@ namespace UncomplicatedCustomItems.Extensions
         /// <returns>
         /// The corresponding <see cref="ICustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static ICustomItem TryGetCustomItem(this Pickup pickup)
-        {
-            return Utilities.TryGetCustomItem(pickup.Serial, out ICustomItem customItem) ? customItem : null;
-        }
+        public static ICustomItem TryGetCustomItem(this Pickup pickup) => Utilities.TryGetCustomItem(pickup.Serial, out ICustomItem customItem) ? customItem : null;
 
         /// <summary>
         /// Compares two <see cref="Pickup"/> instances to determine if they refer to the same CustomItem definition.

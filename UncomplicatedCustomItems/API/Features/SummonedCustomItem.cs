@@ -270,30 +270,28 @@ namespace UncomplicatedCustomItems.API.Features
                         IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
                         LabApi.Features.Wrappers.ThrowableItem ThrowableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
                         ExplosionGrenade baseGrenade = ThrowableItem.Base.Projectile as ExplosionGrenade;
-                        ExplosiveGrenade ExplosiveGrenade = ExplosiveGrenadeProjectile.Get(baseGrenade);
 
-                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        baseGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
                         ThrowableItem.Base._pinPullTime = ExplosiveGrenadeData.PinPullTime;
-                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
-                        ExplosiveGrenade.Base._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
-                        ExplosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
-                        ExplosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
+                        baseGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        baseGrenade._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
+                        baseGrenade._burnedDuration = ExplosiveGrenadeData.BurnDuration;
+                        baseGrenade._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
                         ThrowableItem.Base._repickupable = ExplosiveGrenadeData.Repickable;
-                        ExplosiveGrenade.Base._fuseTime = ExplosiveGrenadeData.FuseTime;
+                        baseGrenade._fuseTime = ExplosiveGrenadeData.FuseTime;
                         break;
 
                     case CustomItemType.FlashGrenade:
                         LabApi.Features.Wrappers.ThrowableItem throwableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
-                        ExplosionGrenade baseFlashGrenade = throwableItem.Base.Projectile as ExplosionGrenade;
-                        FlashGrenade FlashGrenade = (FlashGrenade)TimedGrenadeProjectile.Get(baseFlashGrenade);
+                        FlashbangGrenade baseFlashGrenade = throwableItem.Base.Projectile as FlashbangGrenade;
                         IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
 
                         throwableItem.Base._pinPullTime = FlashGrenadeData.PinPullTime;
                         throwableItem.Base._repickupable = FlashGrenadeData.Repickable;
-                        FlashGrenade.BaseBlindTime = FlashGrenadeData.MinimalDurationEffect;
-                        FlashGrenade.Base._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
-                        FlashGrenade.Base._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
-                        FlashGrenade.Base._fuseTime = FlashGrenadeData.FuseTime;
+                        baseFlashGrenade.BlindTime = FlashGrenadeData.MinimalDurationEffect;
+                        baseFlashGrenade._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
+                        baseFlashGrenade._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        baseFlashGrenade._fuseTime = FlashGrenadeData.FuseTime;
                         break;
 
                     case CustomItemType.SCPItem:
