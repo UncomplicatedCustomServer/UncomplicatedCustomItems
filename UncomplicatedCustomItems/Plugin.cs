@@ -84,7 +84,7 @@ namespace UncomplicatedCustomItems
             _playerSettings =
             [
                 new SSGroupHeader("CustomItem Settings"),
-                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
+                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
             ];
             _DebugSettings =
             [
@@ -100,7 +100,7 @@ namespace UncomplicatedCustomItems
                 new SSTextArea(29, "Default Message"),
 
                 new SSGroupHeader("CustomItem Settings"),
-                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding")
+                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
             ];
 
             ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();

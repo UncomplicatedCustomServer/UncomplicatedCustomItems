@@ -24,7 +24,6 @@ using System.Globalization;
 using Exiled.API.Features.Items;
 using CustomPlayerEffects;
 using Exiled.API.Features;
-using Exiled.CustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -808,17 +807,14 @@ namespace UncomplicatedCustomItems.Events
                     IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
                     Timing.CallDelayed(0.1f, () =>
                     {
-                        if (ev.Player.HasKeycardPermission((KeycardPermissions)ev.Door.RequiredPermissions))
+                        if (ev.Door.Base.IsMoving && Data.OneTimeUse)
                         {
-                            if (Data.OneTimeUse)
+                            Timing.CallDelayed(0.5f, () =>
                             {
-                                Timing.CallDelayed(0.5f, () =>
-                                {
-                                    ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
-                                    LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
-                                    ev.Player.RemoveItem(CustomItem.Item, true);
-                                });
-                            }
+                                ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                                LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                                ev.Player.RemoveItem(CustomItem.Item, true);
+                            });
                         }
                     });
                 }
@@ -859,18 +855,15 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (CustomItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
-                    if (ev.Player.HasKeycardPermission(ev.InteractingChamber.RequiredPermissions))
+                    IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
+                    if (ev.InteractingChamber.IsOpen && Data.OneTimeUse)
                     {
-                        IKeycardData Data = CustomItem.CustomItem.CustomData as IKeycardData;
-                        if (Data.OneTimeUse)
+                        Timing.CallDelayed(0.5f, () =>
                         {
-                            Timing.CallDelayed(0.5f, () =>
-                            {
-                                ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
-                                LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
-                                ev.Player.RemoveItem(CustomItem.Item, true);
-                            });
-                        }
+                            ev.Player.ShowHint($"{Data.OneTimeUseHint.Replace("%name%", CustomItem.CustomItem.Name)}", 8f);
+                            LogManager.Debug($"OneTimeUse is true removing {CustomItem.CustomItem.Name}...");
+                            ev.Player.RemoveItem(CustomItem.Item, true);
+                        });
                     }
                 }
             }

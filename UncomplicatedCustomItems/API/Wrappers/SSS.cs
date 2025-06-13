@@ -22,7 +22,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
 
             userSettings.Add(setting);
         }
-
+        
         public static void AddToolGunSettingsToUser(ReferenceHub user)
         {
             List<ServerSpecificSettingBase> userSettings = ServerSpecificSettingsSync.ReceivedUserSettings.GetOrAddNew(user);
