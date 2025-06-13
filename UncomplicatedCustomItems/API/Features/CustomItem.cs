@@ -2,12 +2,11 @@
 using System.ComponentModel;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Extensions;
 
 namespace UncomplicatedCustomItems.API.Features
 {

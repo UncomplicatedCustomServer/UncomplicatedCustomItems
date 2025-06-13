@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.API
 {

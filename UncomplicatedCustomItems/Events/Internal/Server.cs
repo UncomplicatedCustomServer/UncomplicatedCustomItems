@@ -3,7 +3,7 @@ using Exiled.API.Features.Pickups;
 using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 using EventSource = Exiled.Events.Handlers.Server;
 
 namespace UncomplicatedCustomItems.Events.Internal

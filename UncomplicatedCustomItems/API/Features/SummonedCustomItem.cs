@@ -5,20 +5,19 @@ using Exiled.Events.EventArgs.Player;
 using MEC;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Keycards;
 using Interactables.Interobjects.DoorUtils;
 using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
-using UncomplicatedCustomItems.Extensions;
-using System.Reflection;
+using UncomplicatedCustomItems.Events;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -208,8 +207,10 @@ namespace UncomplicatedCustomItems.API.Features
                         Firearm Firearm = Item as Firearm;
                         IWeaponData WeaponData = CustomItem.CustomData as IWeaponData;
                         if (!PropertiesSet)
+                        {
+                            Firearm.MagazineAmmo = WeaponData.MaxAmmo;
                             MagCheck(Firearm, WeaponData);
-                        Firearm.MagazineAmmo = WeaponData.MaxAmmo;
+                        }
                         Firearm.Damage = WeaponData.Damage;
                         Firearm.MaxMagazineAmmo = WeaponData.MaxMagazineAmmo;
                         Firearm.MaxBarrelAmmo = WeaponData.MaxBarrelAmmo;
@@ -898,7 +899,7 @@ namespace UncomplicatedCustomItems.API.Features
                             .Replace("{p_zone}", player.Zone.ToString())
                             .Replace("{p_room}", player.CurrentRoom.ToString())
                             .Replace("{p_rotation}", player.Rotation.ToString())
-                            .Replace("{pj_pos}", Plugin.Instance.Handler.DetonationPosition.ToString());
+                            .Replace("{pj_pos}", MapHandler.DetonationPosition.ToString());
 
                         if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
                             cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||

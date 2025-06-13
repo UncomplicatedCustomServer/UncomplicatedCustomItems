@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.Commands.Admin;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands
 {
@@ -26,9 +26,10 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Summon());
             Subcommands.Add(new Summoned());
             Subcommands.Add(new Generate());
-            Subcommands.Add(new Reload());
+            Subcommands.Add(new Reload());  
             Subcommands.Add(new Info());
             Subcommands.Add(new Get());
+            Subcommands.Add(new ToolGun());
         }
 
         private List<ISubcommand> Subcommands { get; } = [];

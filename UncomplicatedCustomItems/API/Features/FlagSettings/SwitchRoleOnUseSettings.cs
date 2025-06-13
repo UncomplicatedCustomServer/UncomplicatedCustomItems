@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using System.ComponentModel;
 using PlayerRoles;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features
 {

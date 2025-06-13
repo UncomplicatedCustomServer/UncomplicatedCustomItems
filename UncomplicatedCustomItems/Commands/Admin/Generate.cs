@@ -2,8 +2,8 @@ using CommandSystem;
 using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
