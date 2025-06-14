@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.Events.Methods
     {
         public static void Start(SummonedCustomItem CustomItem, Player player)
         {
-            if (CustomItem.CustomItem.CustomFlags.HasValue && CustomItem.CustomItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse))
+            if (CustomItem.HasModule(CustomFlags.SwitchRoleOnUse))
             {
                 foreach (SwitchRoleOnUseSettings SwitchRoleOnUseSettings in CustomItem.CustomItem.FlagSettings.SwitchRoleOnUseSettings)
                 {
