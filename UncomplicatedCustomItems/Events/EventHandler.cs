@@ -195,11 +195,8 @@ namespace UncomplicatedCustomItems.Events
                 foreach (DieOnUseSettings DieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
                 {
                     if (DieOnUseSettings.Vaporize ?? false)
-                    {
-                        Firearm firearm = new();
-                        firearm.ItemTypeId = ItemType.ParticleDisruptor;
-                        ev.Player.Damage(new DisruptorDamageHandler(new DisruptorShotEvent(FirearmItem.Get(firearm).Base, DisruptorActionModule.FiringState.FiringSingle), Vector3.up, -1));
-                    }
+                        ev.Player.Vaporize();
+
                     if (DieOnUseSettings.DeathMessage != null)
                         ev.Player.Kill($"{DieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
                     else
@@ -223,11 +220,8 @@ namespace UncomplicatedCustomItems.Events
                 foreach (DieOnUseSettings DieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
                 {
                     if (DieOnUseSettings.Vaporize ?? false)
-                    {
-                        Firearm firearm = new();
-                        firearm.ItemTypeId = ItemType.ParticleDisruptor;
-                        ev.Player.Damage(new DisruptorDamageHandler(new DisruptorShotEvent(FirearmItem.Get(firearm).Base, DisruptorActionModule.FiringState.FiringSingle), Vector3.up, -1));
-                    }
+                        ev.Player.Vaporize();
+
                     if (DieOnUseSettings.DeathMessage != null)
                         ev.Player.Kill($"{DieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
                     else
@@ -1218,9 +1212,7 @@ namespace UncomplicatedCustomItems.Events
                             LogManager.Silent("Name | Id | CustomFlag(s)");
                             LogManager.Silent($"{SummonedCustomItem.CustomItem.Name} - {SummonedCustomItem.CustomItem.Id} - {SummonedCustomItem.CustomItem.CustomFlags}");
                             LogManager.Debug($"{ev.Player.Nickname} is being vaporized by {SummonedCustomItem.CustomItem.Name}");
-                            Firearm firearm = new();
-                            firearm.ItemTypeId = ItemType.ParticleDisruptor;
-                            ev.Player.Damage(new DisruptorDamageHandler(new DisruptorShotEvent(FirearmItem.Get(firearm).Base, DisruptorActionModule.FiringState.FiringSingle), Vector3.up, -1));
+                            ev.Player.Vaporize();
                         }
                         catch (Exception ex)
                         {
@@ -1437,9 +1429,7 @@ namespace UncomplicatedCustomItems.Events
                     LogManager.Silent("Name | Id | CustomFlag(s)");
                     LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
                     LogManager.Debug($"Vaporizing {ev.Player.Nickname}");
-                    Firearm firearm = new();
-                    firearm.ItemTypeId = ItemType.ParticleDisruptor;
-                    ev.Player.Damage(new DisruptorDamageHandler(new DisruptorShotEvent(FirearmItem.Get(firearm).Base, DisruptorActionModule.FiringState.FiringSingle), Vector3.up, -1));
+                    ev.Player.Vaporize(ev.Attacker);
                 }
                 catch (Exception ex)
                 {

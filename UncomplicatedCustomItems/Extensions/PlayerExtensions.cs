@@ -1,6 +1,12 @@
 ﻿using System.Linq;
 using Interactables.Interobjects.DoorUtils;
+using InventorySystem.Items.Firearms.Modules;
+using InventorySystem.Items.Firearms.ShotEvents;
+using InventorySystem.Items.Firearms;
+using InventorySystem;
 using LabApi.Features.Wrappers;
+using PlayerStatsSystem;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.Extensions
 {
@@ -34,6 +40,25 @@ namespace UncomplicatedCustomItems.Extensions
         public static CommandSender GetSender(this Player player)
         {
             return player.ReferenceHub.queryProcessor._sender;
+        }
+
+        public static void Vaporize(this Player player, Player? attacker = null)
+        {
+            ParticleDisruptor tempDisruptor = UnityEngine.Object.Instantiate(InventoryItemLoader.AvailableItems[ItemType.ParticleDisruptor]) as ParticleDisruptor;
+
+            if (tempDisruptor != null)
+            {
+                if (attacker != null)
+                {
+                    tempDisruptor.Owner = attacker.ReferenceHub;
+                }
+
+                DisruptorShotEvent shotEvent = new DisruptorShotEvent(tempDisruptor, DisruptorActionModule.FiringState.FiringSingle);
+                DisruptorDamageHandler damageHandler = new DisruptorDamageHandler(shotEvent, Vector3.up, -1);
+                player.ReferenceHub.playerStats.KillPlayer(damageHandler);
+
+                UnityEngine.Object.Destroy(tempDisruptor.gameObject);
+            }
         }
     }
 }
