@@ -64,12 +64,19 @@ namespace UncomplicatedCustomItems.Extensions
 
         public static void GiveCustomItem(this Player player, CustomItem customitem) => new SummonedCustomItem(customitem, player);
 
-        public static bool HasCustomItem(this Player player)
+        public static bool HasCustomItem(this Player player, bool currentitem = false)
         {
-            foreach (Item item in player.Items)
+            if (!currentitem)
             {
-                if (item.IsCustomItem())
-                    return true;
+                foreach (Item item in player.Items)
+                {
+                    if (item.IsCustomItem())
+                        return true;
+                }
+            }
+            else if (player.CurrentItem.IsCustomItem())
+            {
+                return true;
             }
 
             return false;
