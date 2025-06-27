@@ -7,6 +7,7 @@ using InventorySystem;
 using LabApi.Features.Wrappers;
 using PlayerStatsSystem;
 using UnityEngine;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Extensions
 {
@@ -59,6 +60,19 @@ namespace UncomplicatedCustomItems.Extensions
 
                 UnityEngine.Object.Destroy(tempDisruptor.gameObject);
             }
+        }
+
+        public static void GiveCustomItem(this Player player, CustomItem customitem) => new SummonedCustomItem(customitem, player);
+
+        public static bool HasCustomItem(this Player player)
+        {
+            foreach (Item item in player.Items)
+            {
+                if (item.IsCustomItem())
+                    return true;
+            }
+
+            return false;
         }
     }
 }
