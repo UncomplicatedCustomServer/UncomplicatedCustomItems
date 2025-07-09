@@ -556,6 +556,7 @@
     <Compile Include="Extensions\PlayerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
+    <Compile Include="HarmonyElements\Patches\MaxAmmoPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ArmorPatches.cs" />
     <Compile Include="HarmonyElements\Patches\AttachmentPatch.cs" />
     <Compile Include="HarmonyElements\Patches\JailbirdPatch.cs" />

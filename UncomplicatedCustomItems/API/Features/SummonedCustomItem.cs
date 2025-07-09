@@ -246,13 +246,14 @@ namespace UncomplicatedCustomItems.API.Features
                             else
                                 LogManager.Warn($"{attachment} is not a attachment valid for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
                         }
-                        MagazineModule.AmmoStored = WeaponData.MaxAmmo;
+                        if (!PropertiesSet)
+                            MagazineModule.AmmoStored = WeaponData.MaxAmmo;
                         HitscanHitregModule.BaseDamage = WeaponData.Damage;
-                        MagazineModule._defaultCapacity = WeaponData.MaxMagazineAmmo;
                         HitscanHitregModule.BasePenetration = WeaponData.Penetration;
                         HitscanHitregModule.BaseBulletInaccuracy = WeaponData.Inaccuracy;
                         HitscanHitregModule.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
                         MagazineModule.ServerResyncData();
+                        PropertiesSet = true;
                         break;
 
                     case CustomItemType.Jailbird:
@@ -336,14 +337,14 @@ namespace UncomplicatedCustomItems.API.Features
                                             break;
                                     }
                                 }
-
-                                Scp127MagazineModule.AmmoStored = Scp127Data.MaxAmmo;
+                                if (!PropertiesSet)
+                                    Scp127MagazineModule.AmmoStored = Scp127Data.MaxAmmo;
                                 Scp127Hitscan.BaseDamage = Scp127Data.Damage;
-                                Scp127MagazineModule._defaultCapacity = Scp127Data.MaxMagazineAmmo;
                                 Scp127Hitscan.BasePenetration = Scp127Data.Penetration;
                                 Scp127Hitscan.BaseBulletInaccuracy = Scp127Data.Inaccuracy;
                                 Scp127Hitscan.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
                                 Scp127MagazineModule.ServerResyncData();
+                                PropertiesSet = true;
                             }
                             break;
                         }
@@ -427,8 +428,8 @@ namespace UncomplicatedCustomItems.API.Features
                         }
                         MagazineModule.MagazineInserted = true;
                         HitscanHitregModule.BaseDamage = WeaponData.Damage;
-                        MagazineModule._defaultCapacity = WeaponData.MaxMagazineAmmo;
-                        MagazineModule.AmmoStored = WeaponData.MaxAmmo;
+                        if (!PropertiesSet)
+                            MagazineModule.AmmoStored = WeaponData.MaxAmmo;
                         HitscanHitregModule.BasePenetration = WeaponData.Penetration;
                         HitscanHitregModule.BaseBulletInaccuracy = WeaponData.Inaccuracy;
                         HitscanHitregModule.DamageFalloffDistance = WeaponData.DamageFalloffDistance;
@@ -437,6 +438,7 @@ namespace UncomplicatedCustomItems.API.Features
                         firearm.Spawn();
                         Pickup = firearm;
                         Serial = Pickup.Serial;
+                        PropertiesSet = true;
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
@@ -521,9 +523,9 @@ namespace UncomplicatedCustomItems.API.Features
                                 }
 
                                 Scp127MagazineModule.MagazineInserted = true;
-                                Scp127MagazineModule.AmmoStored = Scp127Data.MaxAmmo;
+                                if (!PropertiesSet)
+                                    Scp127MagazineModule.AmmoStored = Scp127Data.MaxAmmo;
                                 Scp127Hitscan.BaseDamage = Scp127Data.Damage;
-                                Scp127MagazineModule._defaultCapacity = Scp127Data.MaxMagazineAmmo;
                                 Scp127Hitscan.BasePenetration = Scp127Data.Penetration;
                                 Scp127Hitscan.BaseBulletInaccuracy = Scp127Data.Inaccuracy;
                                 Scp127Hitscan.DamageFalloffDistance = Scp127Data.DamageFalloffDistance;
@@ -532,6 +534,7 @@ namespace UncomplicatedCustomItems.API.Features
                                 scpfirearm.Spawn();
                                 Pickup = scpfirearm;
                                 Serial = Pickup.Serial;
+                                PropertiesSet = true;
                             }
                         }
                         break;
@@ -581,7 +584,6 @@ namespace UncomplicatedCustomItems.API.Features
 
                             WeaponData.MaxAmmo = MagazineModule.AmmoStored;
                             WeaponData.Damage = HitscanHitregModule.BaseDamage;
-                            WeaponData.MaxMagazineAmmo = MagazineModule._defaultCapacity;
                             WeaponData.Penetration = HitscanHitregModule.BasePenetration;
                             WeaponData.Inaccuracy = HitscanHitregModule.BaseBulletInaccuracy;
                             WeaponData.DamageFalloffDistance = HitscanHitregModule.DamageFalloffDistance;
@@ -609,7 +611,6 @@ namespace UncomplicatedCustomItems.API.Features
 
                             Scp127Data.MaxAmmo = Scp127MagazineModule.AmmoStored;
                             Scp127Data.Damage = Scp127Hitscan.BaseDamage;
-                            Scp127Data.MaxMagazineAmmo = Scp127MagazineModule._defaultCapacity;
                             Scp127Data.Penetration = Scp127Hitscan.BasePenetration;
                             Scp127Data.Inaccuracy = Scp127Hitscan.BaseBulletInaccuracy;
                             Scp127Data.DamageFalloffDistance = Scp127Hitscan.DamageFalloffDistance;
