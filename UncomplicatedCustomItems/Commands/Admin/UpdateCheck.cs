@@ -42,7 +42,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
 
             response = $"Currently running UncomplicatedCustomItems version {version}. Checking for updates...";
-            LogManager.Raw($"Current version: {version}. Checking GitHub for latest release...", ConsoleColor.Blue);
+            LogManager.Updater($"Current version: {version}. Checking GitHub for latest release...");
 
             Task.Run(async () =>
             {
@@ -71,17 +71,17 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                                 if (Version.TryParse(latestVersionTag, out Version githubVersion))
                                 {
-                                    LogManager.Raw($"Latest version on GitHub: {githubVersion} (Tag: {latestRelease.TagName})", ConsoleColor.Blue);
+                                    LogManager.Updater($"Latest version on GitHub: {githubVersion} (Tag: {latestRelease.TagName})");
                                     if (githubVersion > version)
                                     {
-                                        LogManager.Raw($"An update is available for UncomplicatedCustomItems!", ConsoleColor.Blue);
-                                        LogManager.Raw($"Current version: {version}, Latest version: {githubVersion}.", ConsoleColor.Blue);
-                                        LogManager.Raw($"Please use the 'uciupdate' command to update the plugin.", ConsoleColor.Blue);
+                                        LogManager.Updater($"An update is available for UncomplicatedCustomItems!");
+                                        LogManager.Updater($"Current version: {version}, Latest version: {githubVersion}.");
+                                        LogManager.Updater($"Please use the 'uciupdate' command to update the plugin.");
                                     }
                                     else if (githubVersion == version)
-                                        LogManager.Raw($"You are running the latest version of UncomplicatedCustomItems ({version}).", ConsoleColor.Blue);
+                                        LogManager.Updater($"You are running the latest version of UncomplicatedCustomItems ({version}).");
                                     else
-                                        LogManager.Raw($"You are running a newer version ({version}) than the latest stable release on GitHub. This is a development or pre-release version.", ConsoleColor.Blue);
+                                        LogManager.Updater($"You are running a newer version ({version}) than the latest stable release on GitHub. This is a development or pre-release version.");
                                 }
                                 else
                                     LogManager.Error($"Failed to parse the latest version tag '{latestVersionTag}' from GitHub into a valid version format.");

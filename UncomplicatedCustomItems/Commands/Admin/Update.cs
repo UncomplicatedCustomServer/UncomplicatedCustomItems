@@ -84,10 +84,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                         if (Version.TryParse(latestVersionTag, out Version latestGitHubVersion))
                         {
-                            LogManager.Raw($"Latest version on GitHub: {latestGitHubVersion} (Tag: {latestRelease.TagName}). Current version: {version}.", ConsoleColor.Blue);
+                            LogManager.Updater($"Latest version on GitHub: {latestGitHubVersion} (Tag: {latestRelease.TagName}). Current version: {version}.");
                             if (latestGitHubVersion <= version && arguments.FirstOrDefault()?.ToLower() != "force")
                             {
-                                LogManager.Raw($"You are already running version {version} or newer. To force update, use 'uciupdate force'.", ConsoleColor.Blue);
+                                LogManager.Updater($"You are already running version {version} or newer. To force update, use 'uciupdate force'.");
                                 return;
                             }
                         }
@@ -95,7 +95,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                             LogManager.Warn($"Could not parse latest GitHub version tag '{latestRelease.TagName}'. Proceeding with download if forced or newer by asset name.");
 
 
-                        LogManager.Raw($"Downloading {PluginDllName} from {asset.BrowserDownloadUrl}...", ConsoleColor.Blue);
+                        LogManager.Updater($"Downloading {PluginDllName} from {asset.BrowserDownloadUrl}...");
                         byte[] fileBytes = await client.GetByteArrayAsync(asset.BrowserDownloadUrl);
 
                         if (fileBytes == null || fileBytes.Length == 0)
@@ -171,12 +171,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
                             return;
                         }
 
-                        LogManager.Raw("Attempting to overwrite plugin DLL. The server will attempt to restart the round after this.", ConsoleColor.Blue);
+                        LogManager.Updater("Attempting to overwrite plugin DLL. The server will attempt to restart the round after this.");
 
                         try
                         {
                             File.WriteAllBytes(pluginPath, fileBytes);
-                            LogManager.Raw($"{PluginDllName} downloaded and replaced successfully ({fileBytes.Length} bytes).", ConsoleColor.Blue);
+                            LogManager.Updater($"{PluginDllName} downloaded and replaced successfully ({fileBytes.Length} bytes).");
                             Server.RunCommand("rnr");
                         }
                         catch (IOException ex)

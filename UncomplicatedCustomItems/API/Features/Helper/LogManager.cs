@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net;
 using UncomplicatedCustomItems.Interfaces;
 using Logger = LabApi.Features.Console.Logger;
+using GameCore;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -39,12 +40,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
             Logger.Error(message);
         }
-        public static void Raw(string message, ConsoleColor color)
+        public static void Raw(string message, ConsoleColor color, string logLevel)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message));
-            Logger.Raw($"[Updater] [{ Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", color);
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), logLevel, message));
+            Logger.Raw($"[{ Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", color);
         }
-
+        public static void Updater(string message)
+        {
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Updater", message));
+            Logger.Raw($"[Updater] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Blue);
+        }
         public static void Silent(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SILENT", message));
 
         public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SYSTEM", message));
