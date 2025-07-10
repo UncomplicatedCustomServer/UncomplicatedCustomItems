@@ -35,7 +35,7 @@ namespace UncomplicatedCustomItems
 
         public override Version RequiredApiVersion { get; } = new(1, 0, 2);
 
-        public override Version Version { get; } = new(3, 5, 3);
+        public override Version Version { get; } = new(3, 5, 4);
 
         internal Handler Handler;
 

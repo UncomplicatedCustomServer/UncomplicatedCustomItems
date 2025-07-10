@@ -51,6 +51,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.Add("User-Agent", "UncomplicatedCustomItems-UpdateChecker/1.0");
+
+                        if (!string.IsNullOrEmpty(Plugin.Instance.Config.GithubToken))
+                            client.DefaultRequestHeaders.Add("Authorization", $"token {Plugin.Instance.Config.GithubToken}");
+
                         string apiUrl = "https://api.github.com/repos/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest";
                         HttpResponseMessage httpResponse = await client.GetAsync(apiUrl);
 

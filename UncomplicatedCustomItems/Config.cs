@@ -40,5 +40,8 @@ namespace UncomplicatedCustomItems
         [Description("Enables or disables the CommonUtilities intergration. (Set the item name in the CommonUtilities config to the customitem name)")]
         [Obsolete("Does nothing as CommonUtilities is a Exiled plugin")]
         public bool EnableCommonUtilitiesIntergration { get; set; } = true;
+
+        [Description("If filled the update checker will use the provided token. You can get a token from 'https://github.com/settings/tokens'")]
+        public string GithubToken { get; set; } = string.Empty;
     }
 }
