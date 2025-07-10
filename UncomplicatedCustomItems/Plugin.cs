@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems
 
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 
-        public override Version RequiredApiVersion { get; } = new(1, 0, 2);
+        public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 
         public override Version Version { get; } = new(3, 5, 4);
 
