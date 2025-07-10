@@ -32,5 +32,6 @@ namespace UncomplicatedCustomItems.API.Features
         public float EffectDuration { get; set; } = -1f;
         [Description("If true when the effect is applied while the current effect is active it will add the duration to the current effect duration")]
         public bool? AddDurationIfActive { get; set; } = true;
+        public bool? ClearOnUnequip { get; set; } = true;
     }
 }

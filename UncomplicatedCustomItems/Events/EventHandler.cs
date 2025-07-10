@@ -257,7 +257,10 @@ namespace UncomplicatedCustomItems.Events
                             string Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                            if (Duration <= -1)
+                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, float.MaxValue, EffectSettings.AddDurationIfActive ?? false);
+                            else
+                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -389,6 +392,27 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.Player == null || ev.Player.IsHost)
                 return;
+
+            if (ev.OldItem is not null)
+            {
+                if (!Utilities.TryGetSummonedCustomItem(ev.OldItem.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
+                    return;
+
+                if (CustomItem.HasModule(CustomFlags.EffectShot) || CustomItem.HasModule(CustomFlags.EffectWhenEquiped) || CustomItem.HasModule(CustomFlags.EffectWhenUsed))
+                {
+                    foreach (EffectSettings effectSettings in CustomItem.CustomItem.FlagSettings.EffectSettings)
+                    {
+                        foreach (StatusEffectBase effect in ev.Player.ActiveEffects)
+                        {
+                            if (effect.name == effectSettings.Effect.ToString() && (bool)effectSettings.ClearOnUnequip)
+                            {
+                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(effectSettings.Effect, 0, 0);
+                            }
+                        }
+                    }
+                }
+            }
+
             if (ev.NewItem is not null)
             {
                 if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem CustomItem) || !CustomItem.CustomItem.CustomFlags.HasValue)
@@ -429,7 +453,10 @@ namespace UncomplicatedCustomItems.Events
                                 string Effect = EffectSettings.Effect;
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                                if (Duration <= -1)
+                                    ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, float.MaxValue, EffectSettings.AddDurationIfActive ?? false);
+                                else
+                                    ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                             }
                         }
                         else
@@ -556,7 +583,10 @@ namespace UncomplicatedCustomItems.Events
                             string Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                            if (Duration <= -1)
+                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, float.MaxValue, EffectSettings.AddDurationIfActive ?? false);
+                            else
+                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -988,7 +1018,10 @@ namespace UncomplicatedCustomItems.Events
                                     string Effect = EffectSettings.Effect;
                                     float Duration = EffectSettings.EffectDuration;
                                     byte Intensity = EffectSettings.EffectIntensity;
-                                    ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                                    if (Duration <= -1)
+                                        ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, float.MaxValue, EffectSettings.AddDurationIfActive ?? false);
+                                    else
+                                        ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                                 }
                             }
                             else
@@ -1168,7 +1201,10 @@ namespace UncomplicatedCustomItems.Events
                             string Effect = EffectSettings.Effect;
                             float Duration = EffectSettings.EffectDuration;
                             byte Intensity = EffectSettings.EffectIntensity;
-                            ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                            if (Duration <= -1)
+                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, float.MaxValue, EffectSettings.AddDurationIfActive ?? false);
+                            else
+                                ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                         }
                     }
                     else
@@ -1199,7 +1235,19 @@ namespace UncomplicatedCustomItems.Events
                 ev.Pickup.Destroy();
                 SummonedCustomItem.List.Remove(SummonedCustomItem);
             }
-
+            if (SummonedCustomItem.HasModule(CustomFlags.EffectShot) || SummonedCustomItem.HasModule(CustomFlags.EffectWhenEquiped) || SummonedCustomItem.HasModule(CustomFlags.EffectWhenUsed))
+            {
+                foreach (EffectSettings effectSettings in SummonedCustomItem.CustomItem.FlagSettings.EffectSettings)
+                {
+                    foreach (StatusEffectBase effect in ev.Player.ActiveEffects)
+                    {
+                        if (effect.name == effectSettings.Effect && (bool)effectSettings.ClearOnUnequip)
+                        {
+                            ev.Player.ReferenceHub.playerEffectsController.ChangeState(effectSettings.Effect, 0, 0);
+                        }
+                    }
+                }
+            }
             if (SummonedCustomItem.CustomItem.CustomFlags.HasValue && SummonedCustomItem.HasModule(CustomFlags.DieOnDrop))
             {
                 foreach (DieOnDropSettings DieOnDropSettings in SummonedCustomItem.CustomItem.FlagSettings.DieOnDropSettings)
@@ -1520,7 +1568,10 @@ namespace UncomplicatedCustomItems.Events
                                 string Effect = EffectSettings.Effect;
                                 float Duration = EffectSettings.EffectDuration;
                                 byte Intensity = EffectSettings.EffectIntensity;
-                                ev.Player?.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
+                                if (Duration <= -1)
+                                    ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, float.MaxValue, EffectSettings.AddDurationIfActive ?? false);
+                                else
+                                    ev.Player.ReferenceHub.playerEffectsController.ChangeState(Effect, Intensity, Duration, EffectSettings.AddDurationIfActive ?? false);
                             }
                         }
                         else

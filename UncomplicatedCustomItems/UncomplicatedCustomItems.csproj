@@ -518,6 +518,7 @@
     <Compile Include="Commands\Admin\Update.cs" />
     <Compile Include="Commands\Admin\UpdateCheck.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
+    <Compile Include="Commands\User\Devtag.cs" />
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="API\Features\CustomItem.cs" />
