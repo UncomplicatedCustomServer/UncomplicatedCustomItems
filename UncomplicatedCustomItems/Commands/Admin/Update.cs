@@ -177,7 +177,6 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         {
                             File.WriteAllBytes(pluginPath, fileBytes);
                             LogManager.Raw($"{PluginDllName} downloaded and replaced successfully ({fileBytes.Length} bytes).", ConsoleColor.Blue);
-                            LogManager.Raw("Executing 'rnr' command to reload plugins and restart the round...", ConsoleColor.Blue);
                             Server.RunCommand("rnr");
                         }
                         catch (IOException ex)
