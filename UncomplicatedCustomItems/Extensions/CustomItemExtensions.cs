@@ -54,7 +54,7 @@ namespace UncomplicatedCustomItems.Extensions
         /// <param name="pickup"></param>
         public static void AddAttachment(this SummonedCustomItem customitem, string attachment, bool pickup = false)
         {
-            if (Enum.TryParse(attachment, ignoreCase: true, out AttachmentName attachmentname))
+            if (Enum.TryParse(attachment, ignoreCase: true, out AttachmentName attachmentname) && customitem.CustomItem.Item.IsWeapon())
             {
                 if (pickup)
                 {

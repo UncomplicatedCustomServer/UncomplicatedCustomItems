@@ -804,60 +804,63 @@ namespace UncomplicatedCustomItems.API.Features
         /// <param name="playerItemSerial"></param>
         public void HandleEvent(Player player, ItemEvents itemEvent, ushort playerItemSerial)
         {
-            IItemData ItemData = CustomItem.CustomData as IItemData;
-            if (CustomItem.CustomItemType == CustomItemType.Item && ItemData.Event == itemEvent)
+            if (CustomItem.CustomItemType == CustomItemType.Item)
             {
-                if (IsOnCooldown(player, playerItemSerial))
+                IItemData ItemData = CustomItem.CustomData as IItemData;
+                if (ItemData.Event == itemEvent)
                 {
-                    LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
-                    return;
-                }
-
-                LogManager.Debug($"Firing events for item {CustomItem.Name}");
-                System.Random rand = new();
-                Player randomPlayer = Player.ReadyList.OrderBy(p => rand.Next()).FirstOrDefault();
-                string randomPlayerId = randomPlayer?.PlayerId.ToString();
-
-                if (ItemData.Command is not null && ItemData.Command.Length > 2)
-                {
-                    List<string?> commandsList = CommandsList(new List<IItemData> { ItemData });
-                    foreach (string? cmd in commandsList)
+                    if (IsOnCooldown(player, playerItemSerial))
                     {
-                        if (string.IsNullOrWhiteSpace(cmd))
-                            continue;
+                        LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
+                        return;
+                    }
 
-                        string processedCommand = cmd
-                            .Replace("{p_id}", player.PlayerId.ToString())
-                            .Replace("{rp_id}", randomPlayerId)
-                            .Replace("{p_pos}", player.Position.ToString())
-                            .Replace("{p_role}", player.Role.ToString())
-                            .Replace("{p_health}", player.Health.ToString())
-                            .Replace("{p_zone}", player.Zone.ToString())
-                            .Replace("{p_room}", player.Room.ToString())
-                            .Replace("{p_rotation}", player.Rotation.ToString())
-                            .Replace("{pj_pos}", Plugin.Instance.Handler.DetonationPosition.ToString());
+                    LogManager.Debug($"Firing events for item {CustomItem.Name}");
+                    System.Random rand = new();
+                    Player randomPlayer = Player.List.OrderBy(p => rand.Next()).FirstOrDefault();
+                    string randomPlayerId = randomPlayer?.PlayerId.ToString();
 
-                        if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
-                            cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
-                            cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
-                            cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}") ||
-                            cmd.Contains("{pj_pos}"))
+                    if (ItemData.Command is not null && ItemData.Command.Length > 2)
+                    {
+                        List<string?> commandsList = CommandsList(new List<IItemData> { ItemData });
+                        foreach (string? cmd in commandsList)
                         {
-                            Server.RunCommand(processedCommand, player.GetSender());
-                        }
-                        else
-                        {
-                            Server.RunCommand(processedCommand);
+                            if (string.IsNullOrWhiteSpace(cmd))
+                                continue;
+
+                            string processedCommand = cmd
+                                .Replace("{p_id}", player.PlayerId.ToString())
+                                .Replace("{rp_id}", randomPlayerId)
+                                .Replace("{p_pos}", player.Position.ToString())
+                                .Replace("{p_role}", player.Role.ToString())
+                                .Replace("{p_health}", player.Health.ToString())
+                                .Replace("{p_zone}", player.Zone.ToString())
+                                .Replace("{p_room}", player.Room.ToString())
+                                .Replace("{p_rotation}", player.Rotation.ToString())
+                                .Replace("{pj_pos}", Plugin.Instance.Handler.DetonationPosition.ToString());
+
+                            if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
+                                cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
+                                cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
+                                cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}") ||
+                                cmd.Contains("{pj_pos}"))
+                            {
+                                Server.RunCommand(processedCommand, player.GetSender());
+                            }
+                            else
+                            {
+                                Server.RunCommand(processedCommand);
+                            }
                         }
                     }
+                    StartCooldown(player, playerItemSerial, ItemData.CoolDown);
+
+                    Utilities.ParseResponse(player, ItemData);
+
+                    // Destroy the item if needed.
+                    if (ItemData.DestroyAfterUse)
+                        Destroy();
                 }
-                StartCooldown(player, playerItemSerial, ItemData.CoolDown);
-
-                Utilities.ParseResponse(player, ItemData);
-
-                // Destroy the item if needed.
-                if (ItemData.DestroyAfterUse)
-                    Destroy();
             }
         }
 
