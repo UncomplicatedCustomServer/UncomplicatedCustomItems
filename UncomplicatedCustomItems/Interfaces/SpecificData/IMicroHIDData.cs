@@ -8,5 +8,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract float Damage { get; set; }
         public abstract float Energy { get; set; }
         public abstract bool CanExplode { get; set; }
+        public abstract bool InfiniteEnergy { get; set; }
+        public abstract bool Broken { get; set; }
     }
 }

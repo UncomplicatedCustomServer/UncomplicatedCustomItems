@@ -21,5 +21,9 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets if the MicroHID can explode/>
         /// </summary>
         public virtual bool CanExplode { get; set; } = true;
+
+        public virtual bool InfiniteEnergy { get; set; } = true;
+
+        public virtual bool Broken { get; set; } = true;
     }
 }

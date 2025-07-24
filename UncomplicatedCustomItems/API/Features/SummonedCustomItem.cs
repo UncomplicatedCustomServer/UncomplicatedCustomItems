@@ -1,32 +1,33 @@
-﻿using MEC;
+﻿using Interactables.Interobjects.DoorUtils;
+using InventorySystem;
+using InventorySystem.Items.Firearms;
+using InventorySystem.Items.Firearms.Attachments;
+using InventorySystem.Items.Firearms.Modules;
+using InventorySystem.Items.Firearms.Modules.Scp127;
+using InventorySystem.Items.Keycards;
+using InventorySystem.Items.MicroHID;
+using InventorySystem.Items.ThrowableProjectiles;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Features.Wrappers;
+using MEC;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Struct;
+using UncomplicatedCustomItems.API.Wrappers;
+using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.Extensions;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
-using UncomplicatedCustomItems.API.Struct;
-using UncomplicatedCustomItems.API.Features.Helper;
-using System;
-using UncomplicatedCustomItems.Enums;
-using InventorySystem.Items.Firearms.Attachments;
-using InventorySystem.Items.Keycards;
-using Interactables.Interobjects.DoorUtils;
-using UncomplicatedCustomItems.API.Wrappers;
-using UncomplicatedCustomItems.Extensions;
-using LabApi.Features.Wrappers;
-using InventorySystem.Items.Firearms;
-using InventorySystem.Items.Firearms.Modules;
-using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
-using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using FlashGrenade = LabApi.Features.Wrappers.FlashbangProjectile;
+using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
+using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 using Scp018 = LabApi.Features.Wrappers.Scp018Projectile;
 using Scp2176 = LabApi.Features.Wrappers.Scp2176Projectile;
 using Scp244 = LabApi.Features.Wrappers.Scp244Item;
-using InventorySystem.Items.ThrowableProjectiles;
-using LabApi.Events.Arguments.PlayerEvents;
-using InventorySystem.Items.Firearms.Modules.Scp127;
-using InventorySystem;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -298,9 +299,11 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
                     
                     case CustomItemType.MicroHID:
-                        MicroHIDItem microHID = Item as MicroHIDItem;
+                        LabApi.Features.Wrappers.MicroHIDItem microHID = Item as LabApi.Features.Wrappers.MicroHIDItem;
                         IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
                         microHID.Energy = microData.Energy;
+                        if (microData.Broken)
+                            microHID.Base.BrokenSync.ServerSetBroken();
                         break;
 
                     case CustomItemType.SCPItem:
@@ -480,7 +483,7 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.MicroHID:
-                        MicroHIDPickup microHID = Pickup as MicroHIDPickup;
+                        LabApi.Features.Wrappers.MicroHIDPickup microHID = Pickup as LabApi.Features.Wrappers.MicroHIDPickup;
                         IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
                         microHID.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out InventorySystem.Items.MicroHID.MicroHIDItem microHIDItem);
                         microHIDItem.ItemSerial = microHID.Serial;
@@ -607,6 +610,13 @@ namespace UncomplicatedCustomItems.API.Features
                             MagazineModule.ServerResyncData();
                             break;
                         }
+
+                    case CustomItemType.MicroHID:
+                        LabApi.Features.Wrappers.MicroHIDItem microHID = Item as LabApi.Features.Wrappers.MicroHIDItem;
+                        IMicroHIDData microHIDData = CustomItem.CustomData as IMicroHIDData;
+                        microHIDData.Energy = microHID.Energy;
+                        break;
+
                     case CustomItemType.SCPItem:
                         if (Item.Type == ItemType.GunSCP127)
                         {
