@@ -13,12 +13,20 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem))
                 return true;
-            if (customItem.CustomItem.CustomItemType is not CustomItemType.Weapon)
-                return true;
-            
+                
+            if (customItem.CustomItem.CustomItemType is CustomItemType.Weapon)
+            {
                 WeaponData weaponData = customItem.CustomItem.CustomData as WeaponData;
                 __result = weaponData.MaxMagazineAmmo;
                 __instance.ServerResyncData();
+            }
+
+            if (customItem.CustomItem.CustomItemType is CustomItemType.ParticalDisruptor)
+            {
+                ParticalDisruptorData weaponData = customItem.CustomItem.CustomData as ParticalDisruptorData;
+                __result = weaponData.Ammo;
+                __instance.ServerResyncData();
+            }
                 return false;
         }
     }

@@ -530,6 +530,7 @@
     <Compile Include="API\Features\SpecificData\Data.cs" />
     <Compile Include="API\Features\SpecificData\ExplosiveGrenadeData.cs" />
     <Compile Include="API\Features\SpecificData\FlashGrenadeData.cs" />
+    <Compile Include="API\Features\SpecificData\ParticalDisruptorData.cs" />
     <Compile Include="API\Features\SpecificData\SCPItemData.cs" />
     <Compile Include="API\Features\SpecificData\ItemData.cs" />
     <Compile Include="API\Features\SpecificData\JailbirdData.cs" />
@@ -556,6 +557,7 @@
     <Compile Include="Extensions\HarmonyExtensions.cs" />
     <Compile Include="Extensions\FirearmItemExtensions.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
+    <Compile Include="Extensions\MirrorExtensions.cs" />
     <Compile Include="Extensions\PickupExtensions.cs" />
     <Compile Include="Extensions\RoomExtensions.cs" />
     <Compile Include="Extensions\PlayerExtensions.cs" />
@@ -569,6 +571,9 @@
     <Compile Include="HarmonyElements\Patches\RevolverCylinderPatch.cs" />
     <Compile Include="HarmonyElements\Patches\AttachmentPatch.cs" />
     <Compile Include="HarmonyElements\Patches\JailbirdPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\SCP1344EffectPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\SCP1344UnEquipPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\MicroHIDAudioManagerPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerSetEnergyPatch.cs" />
     <Compile Include="Interfaces\FlagSettings\IClusterSettings.cs" />
@@ -604,6 +609,7 @@
     <Compile Include="Interfaces\SpecificData\ISCPItemData.cs" />
     <Compile Include="Interfaces\SpecificData\IJailbirdData.cs" />
     <Compile Include="Interfaces\SpecificData\IKeycardData.cs" />
+    <Compile Include="Interfaces\SpecificData\IParticalDisruptorData.cs" />
     <Compile Include="Interfaces\SpecificData\IMedikitData.cs" />
     <Compile Include="Interfaces\SpecificData\IMicroHIDData.cs" />
     <Compile Include="Interfaces\SpecificData\IPainkillersData.cs" />

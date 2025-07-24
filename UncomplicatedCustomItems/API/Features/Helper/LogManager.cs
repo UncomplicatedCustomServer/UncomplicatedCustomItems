@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public static void Debug(string message)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
-            if (Plugin.Instance.DebugMode)
+            if (Plugin.Instance.Config.Debug)
                 Logger.Raw($"[DEBUG] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Green); // Make the text green again like Exiled 📣
         }
 

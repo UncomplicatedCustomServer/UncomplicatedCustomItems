@@ -86,6 +86,7 @@ namespace UncomplicatedCustomItems.API
                 (CustomItemType.FlashGrenade, _) => (Data)Decode(new FlashGrenadeData(), data),
                 (CustomItemType.Adrenaline, _) => (Data)Decode(new AdrenalineData(), data),
                 (CustomItemType.MicroHID, _) => (Data)Decode(new MicroHIDData(), data),
+                (CustomItemType.ParticalDisruptor, _) => (Data)Decode(new MicroHIDData(), data),
                 (_, ItemType.SCP018) => (Data)Decode(new SCP018Data(), data),
                 (_, ItemType.SCP207) => (Data)Decode(new SCP207Data(), data),
                 (_, ItemType.SCP500) => (Data)Decode(new SCP500Data(), data),

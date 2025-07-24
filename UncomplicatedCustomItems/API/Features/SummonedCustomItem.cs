@@ -306,6 +306,12 @@ namespace UncomplicatedCustomItems.API.Features
                             microHID.Base.BrokenSync.ServerSetBroken();
                         break;
 
+                    case CustomItemType.ParticalDisruptor:
+                        ParticleDisruptorItem particleDisruptor = Item as ParticleDisruptorItem;
+                        IParticalDisruptorData particalDisruptorData = CustomItem.CustomData as IParticalDisruptorData;
+                        particleDisruptor.
+                        break;
+
                     case CustomItemType.SCPItem:
                         {
                             if (Item.Type == ItemType.SCP018)

@@ -202,6 +202,21 @@ namespace UncomplicatedCustomItems.API
                         error = $"The Item has been flagged as 'MicroHID' but the item {item.Item} is not a MicroHID!";
                         return false;
                     }
+                    
+                    break;
+
+                case CustomItemType.ParticalDisruptor:
+                    if (item.CustomData is not IParticalDisruptorData)
+                    {
+                        error = $"The item has been flagged as 'ParticalDisruptor' but the CustomData class is not 'IParticalDisruptorData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.ParticleDisruptor)
+                    {
+                        error = $"The Item has been flagged as 'ParticalDisruptor' but the item {item.Item} is not a Partical Disruptor!";
+                        return false;
+                    }
 
                     break;
 

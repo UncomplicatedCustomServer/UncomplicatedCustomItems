@@ -10,5 +10,7 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
         public abstract bool CanExplode { get; set; }
         public abstract bool InfiniteEnergy { get; set; }
         public abstract bool Broken { get; set; }
+        public abstract bool MuteChargeAudio { get; set; }
+        public abstract bool MuteFiringAudio { get; set; }
     }
 }

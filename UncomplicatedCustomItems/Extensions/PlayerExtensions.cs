@@ -8,6 +8,8 @@ using LabApi.Features.Wrappers;
 using PlayerStatsSystem;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features;
+using CustomPlayerEffects;
+using Mirror;
 
 namespace UncomplicatedCustomItems.Extensions
 {
@@ -80,6 +82,40 @@ namespace UncomplicatedCustomItems.Extensions
             }
 
             return false;
+        }
+
+        // Taken from https://github.com/MS-crew/ProjectSCRAMBLE/blob/master/Extensions/PlayerExtensions.cs
+        public static void SendFakeEffect(this Player effectOwner, byte intensity)
+        {
+            MirrorExtensions.SendFakeSyncObject(effectOwner, effectOwner.ReferenceHub.networkIdentity, typeof(PlayerEffectsController), (writer) =>
+            {
+                const ulong InitSyncObjectDirtyBit = 0b0001;
+                const uint ChangesCount = 1;
+                const byte OperationId = (byte)SyncList<byte>.Operation.OP_SET;
+
+                StatusEffectBase foundEffect = effectOwner.GetEffect<Scp1344>();
+                uint index = (uint)effectOwner.GetEffectIndex(foundEffect);
+                if (index < 0)
+                    return;
+
+                writer.WriteULong(InitSyncObjectDirtyBit);
+                writer.WriteUInt(ChangesCount);
+                writer.WriteByte(OperationId);
+                writer.WriteUInt(index);
+                writer.WriteByte(intensity);
+            });
+        }
+
+        private static int GetEffectIndex(this Player player, StatusEffectBase effect)
+        {
+            PlayerEffectsController controller = player.ReferenceHub.playerEffectsController;
+            for (int i = 0; i < controller.EffectsLength; i++)
+            {
+                if (ReferenceEquals(controller.AllEffects[i], effect))
+                    return i;
+            }
+
+            return -1;
         }
     }
 }
