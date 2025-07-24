@@ -1,25 +1,25 @@
-using System;
 using HarmonyLib;
-using System.IO;
-using UncomplicatedCustomItems.API.Features.Helper;
-using System.Threading.Tasks;
-using Handler = UncomplicatedCustomItems.Events.EventHandler;
-using UnityEngine;
-using UserSettings.ServerSpecific;
-using UncomplicatedCustomItems.Manager;
-using LabApi.Loader.Features.Plugins;
-using LabApi.Loader.Features.Plugins.Enums;
+using InventorySystem.Items.MicroHID.Modules;
 using LabApi.Features.Wrappers;
 using LabApi.Loader;
+using LabApi.Loader.Features.Plugins;
+using LabApi.Loader.Features.Plugins.Enums;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
-
+using System.Threading.Tasks;
+using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.Events;
+using UncomplicatedCustomItems.Manager;
+using UnityEngine;
+using UserSettings.ServerSpecific;
+using Handler = UncomplicatedCustomItems.Events.EventHandler;
+using MapEvent = LabApi.Events.Handlers.ServerEvents;
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
-using ServerEvent = LabApi.Events.Handlers.ServerEvents;
-using MapEvent = LabApi.Events.Handlers.ServerEvents;
 using Scp914Event = LabApi.Events.Handlers.Scp914Events;
-using UncomplicatedCustomItems.Events;
+using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 
 namespace UncomplicatedCustomItems
@@ -96,6 +96,8 @@ namespace UncomplicatedCustomItems
             ServerEvent.RoundEnding += Handler.OnRoundEnd;
             MapEvent.PickupCreated += Handler.OnPickupCreation;
             PlayerEvent.ToggledWeaponFlashlight += Handler.WeaponFlashLight;
+            PlayerEvent.ReloadingWeapon += Handler.OnReloading;
+            PlayerEvent.ReloadedWeapon += Handler.OnReloaded;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -229,6 +231,8 @@ namespace UncomplicatedCustomItems
             ServerEvent.RoundEnding -= Handler.OnRoundEnd;
             MapEvent.PickupCreated -= Handler.OnPickupCreation;
             PlayerEvent.ToggledWeaponFlashlight -= Handler.WeaponFlashLight;
+            PlayerEvent.ReloadingWeapon -= Handler.OnReloading;
+            PlayerEvent.ReloadedWeapon -= Handler.OnReloaded;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;

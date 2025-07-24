@@ -11,7 +11,6 @@ using UncomplicatedCustomItems.Enums;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Keycards;
 using Interactables.Interobjects.DoorUtils;
-using UncomplicatedCustomItems.HarmonyElements.Utilities;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Extensions;
 using LabApi.Features.Wrappers;
@@ -20,7 +19,6 @@ using InventorySystem.Items.Firearms.Modules;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
-using ExplosiveGrenade = LabApi.Features.Wrappers.ExplosiveGrenadeProjectile;
 using FlashGrenade = LabApi.Features.Wrappers.FlashbangProjectile;
 using Scp018 = LabApi.Features.Wrappers.Scp018Projectile;
 using Scp2176 = LabApi.Features.Wrappers.Scp2176Projectile;
@@ -200,7 +198,7 @@ namespace UncomplicatedCustomItems.API.Features
                         customKeycard.PermissionsColor = PermissionsColor32;
                         customKeycard.Permissions = permissions;
                         LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
-                        KeycardUtils.RemoveKeycardDetail(keycard.Serial);
+                        KeycardDetailSynchronizer.Database.Remove(keycard.Serial);
                         KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
                         NameApplied = true;
                         break;
@@ -269,30 +267,40 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.ExplosiveGrenade:
                         IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
-                        LabApi.Features.Wrappers.ThrowableItem ThrowableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
-                        ExplosionGrenade baseGrenade = ThrowableItem.Base.Projectile as ExplosionGrenade;
-
-                        baseGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
-                        ThrowableItem.Base._pinPullTime = ExplosiveGrenadeData.PinPullTime;
-                        baseGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
-                        baseGrenade._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
-                        baseGrenade._burnedDuration = ExplosiveGrenadeData.BurnDuration;
-                        baseGrenade._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
-                        ThrowableItem.Base._repickupable = ExplosiveGrenadeData.Repickable;
-                        baseGrenade._fuseTime = ExplosiveGrenadeData.FuseTime;
+                        Item.Base.ItemId.TryGetTemplate<InventorySystem.Items.ThrowableProjectiles.ThrowableItem>(out var grenadeThrowable);
+                        ExplosionGrenade grenade = grenadeThrowable.Projectile as ExplosionGrenade;
+                        grenadeThrowable.ItemSerial = Item.Serial;
+                        grenade.Info.Serial = Item.Serial;
+                        
+                        grenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        grenadeThrowable._pinPullTime = ExplosiveGrenadeData.PinPullTime;
+                        grenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        grenade._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
+                        grenade._burnedDuration = ExplosiveGrenadeData.BurnDuration;
+                        grenade._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
+                        grenadeThrowable._repickupable = ExplosiveGrenadeData.Repickable;
+                        grenade._fuseTime = ExplosiveGrenadeData.FuseTime;
                         break;
 
                     case CustomItemType.FlashGrenade:
-                        LabApi.Features.Wrappers.ThrowableItem throwableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
-                        FlashbangGrenade baseFlashGrenade = throwableItem.Base.Projectile as FlashbangGrenade;
+                        Item.Base.ItemId.TryGetTemplate<InventorySystem.Items.ThrowableProjectiles.ThrowableItem>(out var flashGrenadeThrowable);
+                        FlashbangGrenade flashGrenade = flashGrenadeThrowable.Projectile as FlashbangGrenade;
+                        flashGrenadeThrowable.ItemSerial = Item.Serial;
+                        flashGrenade.Info.Serial = Item.Serial;
                         IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
-
-                        throwableItem.Base._pinPullTime = FlashGrenadeData.PinPullTime;
-                        throwableItem.Base._repickupable = FlashGrenadeData.Repickable;
-                        baseFlashGrenade.BlindTime = FlashGrenadeData.MinimalDurationEffect;
-                        baseFlashGrenade._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
-                        baseFlashGrenade._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
-                        baseFlashGrenade._fuseTime = FlashGrenadeData.FuseTime;
+                        
+                        flashGrenadeThrowable._pinPullTime = FlashGrenadeData.PinPullTime;
+                        flashGrenadeThrowable._repickupable = FlashGrenadeData.Repickable;
+                        flashGrenade.BlindTime = FlashGrenadeData.MinimalDurationEffect;
+                        flashGrenade._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
+                        flashGrenade._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        flashGrenade._fuseTime = FlashGrenadeData.FuseTime;
+                        break;
+                    
+                    case CustomItemType.MicroHID:
+                        MicroHIDItem microHID = Item as MicroHIDItem;
+                        IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
+                        microHID.Energy = microData.Energy;
                         break;
 
                     case CustomItemType.SCPItem:
@@ -379,7 +387,7 @@ namespace UncomplicatedCustomItems.API.Features
                         customKeycard.PermissionsColor = PermissionsColor32;
                         customKeycard.Permissions = permissions;
                         LogManager.Debug($"{LabelColor32} {LabelColor} {KeycardData.LabelColor}");
-                        KeycardUtils.RemoveKeycardDetail(keycard.Serial);
+                        KeycardDetailSynchronizer.Database.Remove(keycard.Serial);
                         KeycardDetailSynchronizer.ServerProcessPickup(keycard.Base);
                         Pickup.Destroy();
                         keycard.Spawn();
@@ -442,33 +450,42 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.ExplosiveGrenade:
+                        ExplosiveGrenadeProjectile explosiveGrenade = (ExplosiveGrenadeProjectile)ExplosiveGrenadeProjectile.Create(CustomItem.Item, Pickup.Position);
                         IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
-                        ExplosiveGrenade ExplosiveGrenade = (ExplosiveGrenade)ExplosiveGrenade.Create(CustomItem.Item, Pickup.Position);
 
-                        ExplosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
-                        ExplosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
-                        ExplosiveGrenade.Base._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
-                        ExplosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
-                        ExplosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
-                        ExplosiveGrenade.Base._fuseTime = ExplosiveGrenadeData.FuseTime;
+                        explosiveGrenade.MaxRadius = ExplosiveGrenadeData.MaxRadius;
+                        explosiveGrenade.ScpDamageMultiplier = ExplosiveGrenadeData.ScpDamageMultiplier;
+                        explosiveGrenade.Base._concussedDuration = ExplosiveGrenadeData.ConcussDuration;
+                        explosiveGrenade.Base._burnedDuration = ExplosiveGrenadeData.BurnDuration;
+                        explosiveGrenade.Base._deafenedDuration = ExplosiveGrenadeData.DeafenDuration;
+                        explosiveGrenade.Base._fuseTime = ExplosiveGrenadeData.FuseTime;
+                        explosiveGrenade.Spawn();
                         Pickup.Destroy();
-                        ExplosiveGrenade.Spawn();
-                        Pickup = ExplosiveGrenade;
+                        Pickup = explosiveGrenade;
                         Serial = Pickup.Serial;
                         break;
 
                     case CustomItemType.FlashGrenade:
+                        FlashbangProjectile flashGrenade = (FlashbangProjectile)FlashbangProjectile.Create(CustomItem.Item, Pickup.Position);
                         IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
-                        FlashGrenade FlashGrenade = (FlashGrenade)FlashGrenade.Create(CustomItem.Item, Pickup.Position);
 
-                        FlashGrenade.BaseBlindTime = FlashGrenadeData.MinimalDurationEffect;
-                        FlashGrenade.Base._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
-                        FlashGrenade.Base._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
-                        FlashGrenade.Base._fuseTime = FlashGrenadeData.FuseTime;
+                        flashGrenade.BaseBlindTime = FlashGrenadeData.MinimalDurationEffect;
+                        flashGrenade.Base._additionalBlurDuration = FlashGrenadeData.AdditionalBlindedEffect;
+                        flashGrenade.Base._surfaceZoneDistanceIntensifier = FlashGrenadeData.SurfaceDistanceIntensifier;
+                        flashGrenade.Base._fuseTime = FlashGrenadeData.FuseTime;
+                        flashGrenade.Spawn();
                         Pickup.Destroy();
-                        FlashGrenade.Spawn();
-                        Pickup = FlashGrenade;
+                        Pickup = flashGrenade;
                         Serial = Pickup.Serial;
+                        break;
+
+                    case CustomItemType.MicroHID:
+                        MicroHIDPickup microHID = Pickup as MicroHIDPickup;
+                        IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
+                        microHID.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out InventorySystem.Items.MicroHID.MicroHIDItem microHIDItem);
+                        microHIDItem.ItemSerial = microHID.Serial;
+
+                        microHIDItem.EnergyManager.ServerSetEnergy(microHIDItem.ItemSerial, microData.Energy);
                         break;
 
                     case CustomItemType.SCPItem:

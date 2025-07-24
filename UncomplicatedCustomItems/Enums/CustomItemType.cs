@@ -16,4 +16,5 @@
         FlashGrenade,
         Adrenaline,
         SCPItem,
+        MicroHID,
     }

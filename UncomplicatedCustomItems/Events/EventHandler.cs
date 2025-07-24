@@ -142,6 +142,29 @@ namespace UncomplicatedCustomItems.Events
                 ev.IsAllowed = false;
         }
 
+        public void OnReloading(PlayerReloadingWeaponEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem))
+                return;
+
+            if (customItem.HasModule(CustomFlags.SingleFire))
+            {
+                if (customItem.MagazineModule.AmmoStored == 1)
+                    ev.IsAllowed = false;
+            }
+        }
+
+        public void OnReloaded(PlayerReloadedWeaponEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem))
+                return;
+
+            if (customItem.HasModule(CustomFlags.SingleFire))
+            {
+                customItem.MagazineModule.AmmoStored = 1;
+            }
+        }
+
         public void OnShooting(PlayerShootingWeaponEventArgs ev)
         {
             if (!ev.IsAllowed || ev.Player == null || ev.FirearmItem == null)
@@ -186,7 +209,6 @@ namespace UncomplicatedCustomItems.Events
             }
             if (customItem.HasModule(CustomFlags.CustomSound))
             {
-                AudioApi AudioApi = new();
                 LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
                 AudioApi.PlayAudio(customItem, ev.Player.Position);
             }
@@ -271,11 +293,10 @@ namespace UncomplicatedCustomItems.Events
             }
             if (customItem.HasModule(CustomFlags.CustomSound))
             {
-                AudioApi AudioApi = new();
                 LogManager.Debug($"{nameof(OnItemUse)}: Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
                 AudioApi.PlayAudio(customItem, ev.Player.Position);
             }
-            if (customItem.CustomItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse))
+            if (customItem.HasModule(CustomFlags.SwitchRoleOnUse))
                 SwitchRoleOnUseMethod.Start(customItem, ev.Player);
             // End of CustomFlags
 
@@ -974,6 +995,16 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             _damageTimes.TryAdd(ev.Player, DateTimeOffset.Now.ToUnixTimeMilliseconds());
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out var CustomItem))
+                return;
+
+            if (CustomItem.CustomItem.CustomItemType == CustomItemType.MicroHID)
+            {
+                IMicroHIDData microData = CustomItem.CustomItem.CustomData as IMicroHIDData;
+                MicroHidDamageHandler damageHandler = ev.DamageHandler as MicroHidDamageHandler;
+                damageHandler.Damage = microData.Damage;
+            }
         }
 
         public void OnSpawned(PlayerSpawnedEventArgs ev)
@@ -1138,13 +1169,18 @@ namespace UncomplicatedCustomItems.Events
             if (ev.CoinItem == null || ev.Player == null)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem CustomItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem CustomItem))
+                return;
+                
+            if (CustomItem.CustomItem.CustomItemType is CustomItemType.Item)
                 CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.CoinItem.Serial);
-            SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+
+            if (CustomItem.HasModule(CustomFlags.SwitchRoleOnUse))
+                SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
+                
             if (CustomItem.HasModule(CustomFlags.CustomSound))
             {
-                AudioApi AudioApi = new();
-                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem .CustomItem.Name}.");
+                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
                 AudioApi.PlayAudio(CustomItem, ev.Player.Position);
             }
         }
@@ -1153,16 +1189,19 @@ namespace UncomplicatedCustomItems.Events
             if (ev.LightItem == null || ev.Player == null)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem CustomItem))
-            {
+            if (!Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem CustomItem))
+                return;
+
+            if (CustomItem.CustomItem.CustomItemType is CustomItemType.Item)
                 CustomItem.HandleEvent(ev.Player, ItemEvents.Use, ev.LightItem.Serial);
+
+            if (CustomItem.HasModule(CustomFlags.SwitchRoleOnUse))
                 SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
-                if (CustomItem.HasModule(CustomFlags.CustomSound))
-                {
-                    AudioApi AudioApi = new();
-                    LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
-                    AudioApi.PlayAudio(CustomItem, ev.Player.Position);
-                }
+                
+            if (CustomItem.HasModule(CustomFlags.CustomSound))
+            {
+                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
+                AudioApi.PlayAudio(CustomItem, ev.Player.Position);
             }
         }
 

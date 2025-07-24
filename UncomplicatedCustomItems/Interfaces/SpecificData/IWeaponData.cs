@@ -12,6 +12,8 @@
 
         public abstract int MaxMagazineAmmo { get; set; }
 
+        public abstract int MaxBarrelAmmo { get; set; }
+
         public abstract float Penetration { get; set; }
 
         public abstract float Inaccuracy { get; set; }

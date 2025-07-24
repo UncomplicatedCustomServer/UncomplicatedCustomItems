@@ -85,6 +85,7 @@ namespace UncomplicatedCustomItems.API
                 (CustomItemType.ExplosiveGrenade, _) => (Data)Decode(new ExplosiveGrenadeData(), data),
                 (CustomItemType.FlashGrenade, _) => (Data)Decode(new FlashGrenadeData(), data),
                 (CustomItemType.Adrenaline, _) => (Data)Decode(new AdrenalineData(), data),
+                (CustomItemType.MicroHID, _) => (Data)Decode(new MicroHIDData(), data),
                 (_, ItemType.SCP018) => (Data)Decode(new SCP018Data(), data),
                 (_, ItemType.SCP207) => (Data)Decode(new SCP207Data(), data),
                 (_, ItemType.SCP500) => (Data)Decode(new SCP500Data(), data),
@@ -95,6 +96,7 @@ namespace UncomplicatedCustomItems.API
                 (_, ItemType.SCP1853) => (Data)Decode(new SCP1853Data(), data),
                 (_, ItemType.SCP1576) => (Data)Decode(new SCP1576Data(), data),
                 (_, ItemType.GunSCP127) => (Data)Decode(new SCP127Data(), data),
+                (_, ItemType.SCP1344) => (Data)Decode(new SCP1344Data(), data),
                 (CustomItemType.SCPItem, _) => (Data)Decode(new SCPItemData(), data),
 
                 _ => new Data(),

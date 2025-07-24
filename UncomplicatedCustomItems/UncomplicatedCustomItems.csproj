@@ -108,6 +108,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Release\Mono.Security.dll</HintPath>
     </Reference>
+    <Reference Include="NorthwoodLib">
+      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\NorthwoodLib.dll</HintPath>
+    </Reference>
     <Reference Include="NVorbis">
       <HintPath>$(EXILED_REFERENCES)\NVorbis.dll</HintPath>
     </Reference>
@@ -531,6 +534,7 @@
     <Compile Include="API\Features\SpecificData\ItemData.cs" />
     <Compile Include="API\Features\SpecificData\JailbirdData.cs" />
     <Compile Include="API\Features\SpecificData\MedikitData.cs" />
+    <Compile Include="API\Features\SpecificData\MicroHIDData.cs" />
     <Compile Include="API\Features\SpecificData\PainkillersData.cs" />
     <Compile Include="API\Features\SpecificData\WeaponData.cs" />
     <Compile Include="API\Features\SpecificData\KeycardData.cs" />
@@ -557,12 +561,15 @@
     <Compile Include="Extensions\PlayerExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\Vector3Extensions.cs" />
+    <Compile Include="HarmonyElements\Patches\ChargeFireModeModulePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\AutomaticActionModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\MaxAmmoPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ArmorPatches.cs" />
+    <Compile Include="HarmonyElements\Patches\PumpActionModulePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\RevolverCylinderPatch.cs" />
     <Compile Include="HarmonyElements\Patches\AttachmentPatch.cs" />
     <Compile Include="HarmonyElements\Patches\JailbirdPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
-    <Compile Include="HarmonyElements\Utilities\KeycardUtils.cs" />
     <Compile Include="Interfaces\FlagSettings\IClusterSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IDieOnDropSettings.cs" />
     <Compile Include="Interfaces\FlagSettings\IDieOnUseSettings.cs" />
@@ -597,6 +604,7 @@
     <Compile Include="Interfaces\SpecificData\IJailbirdData.cs" />
     <Compile Include="Interfaces\SpecificData\IKeycardData.cs" />
     <Compile Include="Interfaces\SpecificData\IMedikitData.cs" />
+    <Compile Include="Interfaces\SpecificData\IMicroHIDData.cs" />
     <Compile Include="Interfaces\SpecificData\IPainkillersData.cs" />
     <Compile Include="Interfaces\SpecificData\IWeaponData.cs" />
     <Compile Include="Plugin.cs" />

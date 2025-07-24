@@ -1,5 +1,6 @@
 using System;
 using CustomPlayerEffects;
+using InventorySystem.Items.Usables.Scp330;
 
 namespace UncomplicatedCustomItems.Interfaces.SpecificData
 {
@@ -48,7 +49,13 @@ namespace UncomplicatedCustomItems.Interfaces.SpecificData
     /// </summary>
     public interface ISCP330Data
     {
+    }
 
+    public interface ISCP1344Data
+    {
+        public abstract bool Apply1344Effect { get; set; }
+        public abstract bool ApplyBlindnessEffect { get; set; }
+        public abstract bool AllowUnequip { get; set; }
     }
 
     /// <summary>

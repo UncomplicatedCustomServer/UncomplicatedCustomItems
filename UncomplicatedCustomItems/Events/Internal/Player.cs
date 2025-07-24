@@ -53,18 +53,16 @@ namespace UncomplicatedCustomItems.Events.Internal
         {
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null || ev.Player.Role == RoleTypeId.Destroyed || ev.Player.Role == RoleTypeId.Spectator)
                 return;
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+
+            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem))
                 {
-                    IWeaponData WeaponData = CustomItem.CustomItem.CustomData as IWeaponData;
-                    if (CustomItem.Item.Type.IsWeapon())
+                    if (CustomItem.CustomItem.CustomItemType is CustomItemType.Weapon)
                     {
+                        IWeaponData WeaponData = CustomItem.CustomItem.CustomData as IWeaponData;
                         if (WeaponData.EnableFriendlyFire)
                         {
-                            if (ev.Player != null)
-                            {
-                                ev.Player.Damage(WeaponData.Damage, ev.Attacker);
-                                ev.Attacker.SendHitMarker();
-                            }
+                            ev.Player.Damage(WeaponData.Damage, ev.Attacker);
+                            ev.Attacker.SendHitMarker();
                         }
                     }
                 }

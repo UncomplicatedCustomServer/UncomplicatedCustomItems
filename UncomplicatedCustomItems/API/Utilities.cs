@@ -189,6 +189,21 @@ namespace UncomplicatedCustomItems.API
                     }
 
                     break;
+                
+                case CustomItemType.MicroHID:
+                    if (item.CustomData is not IMicroHIDData)
+                    {
+                        error = $"The item has been flagged as 'MicroHID' but the CustomData class is not 'IMicroHIDData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
+                        return false;
+                    }
+
+                    if (item.Item is not ItemType.MicroHID)
+                    {
+                        error = $"The Item has been flagged as 'MicroHID' but the item {item.Item} is not a MicroHID!";
+                        return false;
+                    }
+
+                    break;
 
                 default:
                     error = "Unknown error how did this happen? Anyway please report it on our discord server! D:\nhttps://discord.gg/5StRGu8EJV";

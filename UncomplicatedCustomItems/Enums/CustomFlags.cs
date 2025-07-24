@@ -32,6 +32,6 @@ namespace UncomplicatedCustomItems.Enums
         Craftable = 1L << 20,
         HealOnKill = 1L << 21,
         Capybara = 1L << 22, // Capybara
-        Custom = 1L << 48, // This should only be used if your coding your own CustomFlag
+        SingleFire = 1L << 23,
     }
 }

@@ -308,6 +308,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = Vector3.one,
                 CustomData = YAMLCaster.Encode(new SCP127Data())
+            },
+            new()
+            {
+                Id = 24,
+                Name = "MicroHID",
+                Description = "MicroHID",
+                Item = ItemType.MicroHID,
+                CustomItemType = CustomItemType.MicroHID,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new MicroHIDData())
             }
         ];
 

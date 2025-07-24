@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// If true it enables access to the custom sound custom flag.
         /// </summary>
-        public bool EnableAudioApi { get; set; } = false;
+        public static bool EnableAudioApi { get; set; } = false;
         /// <summary>
         /// Checks for dependencies that <see cref="AudioApi"/> requires.
         /// </summary>
@@ -51,7 +51,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         /// <param name="CustomItem"></param>
         /// <param name="Coords"></param>
-        public void PlayAudio(SummonedCustomItem CustomItem, Vector3 Coords)
+        public static void PlayAudio(SummonedCustomItem CustomItem, Vector3 Coords)
         {
             foreach (AudioSettings AudioSettings in CustomItem.CustomItem.FlagSettings.AudioSettings)
             {

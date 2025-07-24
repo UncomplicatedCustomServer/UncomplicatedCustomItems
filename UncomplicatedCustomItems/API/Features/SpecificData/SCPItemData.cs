@@ -1,5 +1,6 @@
 using System;
 using CustomPlayerEffects;
+using InventorySystem.Items.Usables.Scp330;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
@@ -47,9 +48,15 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// The data associated with <see cref="ItemType.SCP330"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// Currently unused
     /// </summary>
-    public class SCP330Data : Data, ISCP330Data // Dont really know what to do for this
+    public class SCP330Data : Data, ISCP330Data
     {
+    }
 
+    public class SCP1344Data : Data, ISCP1344Data
+    {
+        public virtual bool Apply1344Effect { get; set; }
+        public virtual bool ApplyBlindnessEffect { get; set; }
+        public virtual bool AllowUnequip { get; set; }
     }
 
     /// <summary>
