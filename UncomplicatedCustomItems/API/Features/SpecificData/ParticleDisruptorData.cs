@@ -6,19 +6,14 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="CustomItemType.ParticalDisruptor"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class ParticalDisruptorData : Data, IParticalDisruptorData
+    public class ParticleDisruptorData : Data, IParticleDisruptorData
     {
         /// <summary>
         /// The damage of the ammo. Negative to heal
         /// </summary>
-        public virtual float Damage { get; set; } = 2.75f;
+        public virtual float BurstDamage { get; set; } = 2.75f;
 
-        /// <summary>
-        /// The max number of ammunitions
-        /// </summary>
-        public virtual int Ammo { get; set; } = 150;
-
-        public virtual int LaserAmount { get; set; } = 100;
+        public virtual float ChargeDamage { get; set; } = 2.75f;
 
         /// <summary>
         /// Gets or sets the penetration of the firearm
@@ -39,8 +34,5 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets if the <see cref="CustomItem"/> can damage the friendly team.
         /// </summary>
         public virtual bool EnableFriendlyFire { get; set; } = false;
-
-        [Description("Set to Both, FiringRapid, or FiringSingle. Deafault is Both")]
-        public virtual string FiringState { get; set; } = "Both";
     }
 }

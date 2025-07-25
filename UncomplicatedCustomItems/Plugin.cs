@@ -10,7 +10,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Manager;
 using UnityEngine;
 using UserSettings.ServerSpecific;
@@ -98,6 +97,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ToggledWeaponFlashlight += Handler.WeaponFlashLight;
             PlayerEvent.ReloadingWeapon += Handler.OnReloading;
             PlayerEvent.ReloadedWeapon += Handler.OnReloaded;
+            PlayerEvent.TogglingFlashlight += Handler.TogglingFlashlight;
 
             // Debugging Events
             PlayerEvent.DroppingItem += Handler.Ondrop;
@@ -106,8 +106,6 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReloadingWeapon += Handler.Onreloading;
             PlayerEvent.ShootingWeapon += Handler.Onshooting;
             PlayerEvent.ThrewProjectile += Handler.Onthrown;
-
-            CustomItemEventHandler.Init<Examples.Events>();
 
             _ToolGunSettings =
             [
@@ -233,6 +231,7 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ToggledWeaponFlashlight -= Handler.WeaponFlashLight;
             PlayerEvent.ReloadingWeapon -= Handler.OnReloading;
             PlayerEvent.ReloadedWeapon -= Handler.OnReloaded;
+            PlayerEvent.TogglingFlashlight -= Handler.TogglingFlashlight;
 
             // Debugging Events
             PlayerEvent.DroppingItem -= Handler.Ondrop;
@@ -241,8 +240,6 @@ namespace UncomplicatedCustomItems
             PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
             PlayerEvent.ShootingWeapon -= Handler.Onshooting;
             PlayerEvent.ThrewProjectile -= Handler.Onthrown;
-
-            CustomItemEventHandler.Dispose();
 
             Instance = null;
             Handler = null;

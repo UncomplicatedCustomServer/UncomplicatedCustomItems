@@ -205,8 +205,8 @@ namespace UncomplicatedCustomItems.API
                     
                     break;
 
-                case CustomItemType.ParticalDisruptor:
-                    if (item.CustomData is not IParticalDisruptorData)
+                case CustomItemType.ParticleDisruptor:
+                    if (item.CustomData is not IParticleDisruptorData)
                     {
                         error = $"The item has been flagged as 'ParticalDisruptor' but the CustomData class is not 'IParticalDisruptorData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
                         return false;
@@ -215,6 +215,21 @@ namespace UncomplicatedCustomItems.API
                     if (item.Item is not ItemType.ParticleDisruptor)
                     {
                         error = $"The Item has been flagged as 'ParticalDisruptor' but the item {item.Item} is not a Partical Disruptor!";
+                        return false;
+                    }
+
+                    break;
+
+                case CustomItemType.Light:
+                    if (item.CustomData is not IFlashlightData)
+                    {
+                        error = $"The item has been flagged as 'Light' but the CustomData class is not 'IFlashlightData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
+                        return false;
+                    }
+
+                    if (!item.Item.IsLightItem())
+                    {
+                        error = $"The Item has been flagged as 'Light' but the item {item.Item} is not a Flashlight or Lantern!";
                         return false;
                     }
 

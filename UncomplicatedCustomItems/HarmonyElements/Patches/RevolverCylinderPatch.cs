@@ -2,6 +2,7 @@ using HarmonyLib;
 using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features.SpecificData;
+using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -17,7 +18,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             if (customItem.CustomItem.CustomItemType is not CustomItemType.Weapon)
                 return true;
             
-                WeaponData weaponData = customItem.CustomItem.CustomData as WeaponData;
+                IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
                 __result = weaponData.MaxMagazineAmmo;
                 __instance.ServerResync();
                 return false;

@@ -17,5 +17,6 @@ public enum CustomItemType
     Adrenaline,
     SCPItem,
     MicroHID,
-    ParticalDisruptor,
+    ParticleDisruptor,
+    Light,
     }

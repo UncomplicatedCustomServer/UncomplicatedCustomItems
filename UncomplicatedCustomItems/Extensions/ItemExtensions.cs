@@ -116,6 +116,13 @@ namespace UncomplicatedCustomItems.Extensions
             _ => FirearmType.None,
         };
 
+        public static bool IsLightItem(this ItemType item)
+        {
+            if (item is ItemType.Lantern || item is ItemType.Flashlight)
+                return true;
+            return false;
+        }
+
         /// <summary>
         /// Determines whether the specified <see cref="Item"/> is a custom item.
         /// </summary>

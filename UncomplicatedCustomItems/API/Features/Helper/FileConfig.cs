@@ -1,14 +1,15 @@
-﻿using System;
+﻿using InventorySystem.Items.Firearms;
+using LabApi.Features.Wrappers;
+using LabApi.Loader.Features.Misc;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.Enums;
-using UnityEngine;
 using UncomplicatedCustomItems.Interfaces;
+using UnityEngine;
 using YamlDotNet.Core;
-using LabApi.Features.Wrappers;
-using LabApi.Loader.Features.Misc;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -318,7 +319,37 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.MicroHID,
                 Scale = Vector3.one,
                 CustomData = YAMLCaster.Encode(new MicroHIDData())
-            }
+            },
+            new()
+            {
+                Id = 25,
+                Name = "Flashlight",
+                Description = "Flashlight",
+                Item = ItemType.Flashlight,
+                CustomItemType = CustomItemType.Light,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new FlashlightData())
+            },
+            new()
+            {
+                Id = 26,
+                Name = "Lantern",
+                Description = "Lantern",
+                Item = ItemType.Lantern,
+                CustomItemType = CustomItemType.Light,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new FlashlightData())
+            },
+            new()
+            {
+                Id = 27,
+                Name = "ParticleDisruptor",
+                Description = "ParticleDisruptor",
+                Item = ItemType.ParticleDisruptor,
+                CustomItemType = CustomItemType.ParticleDisruptor,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new ParticleDisruptorData())
+            },
         ];
 
         public uint NewId = new();

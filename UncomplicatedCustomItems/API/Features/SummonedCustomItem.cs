@@ -1,4 +1,5 @@
-﻿using Interactables.Interobjects.DoorUtils;
+﻿using Discord;
+using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
@@ -7,6 +8,7 @@ using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Keycards;
 using InventorySystem.Items.MicroHID;
 using InventorySystem.Items.ThrowableProjectiles;
+using InventorySystem.Items.ToggleableLights;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
@@ -14,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Enums;
@@ -21,10 +24,13 @@ using UncomplicatedCustomItems.Extensions;
 using UncomplicatedCustomItems.Interfaces;
 using UncomplicatedCustomItems.Interfaces.SpecificData;
 using UnityEngine;
+using Utils.Networking;
+using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
 using FlashGrenade = LabApi.Features.Wrappers.FlashbangProjectile;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
+using Light = LabApi.Features.Wrappers.LightSourceToy;
 using Scp018 = LabApi.Features.Wrappers.Scp018Projectile;
 using Scp2176 = LabApi.Features.Wrappers.Scp2176Projectile;
 using Scp244 = LabApi.Features.Wrappers.Scp244Item;
@@ -101,6 +107,11 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal bool PropertiesSet { get; set; }
 
+        /// <summary>
+        /// Gets or sets the light on a <see cref="Features.CustomItem"/> if its type is <see cref="CustomItemType.Light"/>.
+        /// </summary>
+        public Light Light { get; set; }
+        public bool Toggled { get; set; } = false;
         internal MagazineModule MagazineModule { get; set; }
         internal HitscanHitregModuleBase HitscanHitregModule { get; set; }
         internal IAmmoContainerModule BarrelModule { get; set; }
@@ -306,10 +317,58 @@ namespace UncomplicatedCustomItems.API.Features
                             microHID.Base.BrokenSync.ServerSetBroken();
                         break;
 
-                    case CustomItemType.ParticalDisruptor:
+                    case CustomItemType.ParticleDisruptor: // Todo: Test this and pickup version.
                         ParticleDisruptorItem particleDisruptor = Item as ParticleDisruptorItem;
-                        IParticalDisruptorData particalDisruptorData = CustomItem.CustomData as IParticalDisruptorData;
-                        particleDisruptor.
+                        IParticleDisruptorData disruptorData = CustomItem.CustomData as IParticleDisruptorData;
+                        particleDisruptor.Base.TryGetModule<DisruptorHitregModule>(out var hitregModule);
+
+                        hitregModule.BasePenetration = disruptorData.Penetration;
+                        break;
+
+                    case CustomItemType.Light:
+                        if (Item.Type is ItemType.Flashlight && !PropertiesSet)
+                        {
+                            FlashlightItem flashLight = Item as FlashlightItem;
+                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                            Light newLight = Light.Create(flashLight.CurrentOwner.GameObject.transform);
+                            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+
+                            newLight.Color = color;
+                            newLight.Type = data.LightType;
+                            newLight.Range = data.Range;
+                            newLight.ShadowType = data.ShadowType;
+                            newLight.ShadowStrength = data.ShadowStrength;
+                            newLight.Intensity = data.Intensity;
+                            newLight.Shape = data.Shape;
+                            newLight.SpotAngle = data.SpotLightAngle;
+                            newLight.Transform.localPosition = new Vector3(0.05f, 0.35f, 0.5f);
+                            newLight.SyncInterval = 0;
+                            Light = newLight;
+                            Timing.RunCoroutine(LightFacingForward());
+                            LogManager.Info($"{newLight.Position}, {newLight.Parent}, {flashLight.IsEmitting}, {newLight.Base.enabled}");
+                        }
+                        if (Item.Type is ItemType.Lantern && !PropertiesSet)
+                        {
+                            LanternItem lantern = Item as LanternItem;
+                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                            Light newLight = Light.Create(lantern.CurrentOwner.GameObject.transform);
+                            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+
+                            newLight.Color = color;
+                            newLight.Type = data.LightType;
+                            newLight.Range = data.Range;
+                            newLight.ShadowType = data.ShadowType;
+                            newLight.ShadowStrength = data.ShadowStrength;
+                            newLight.Intensity = data.Intensity;
+                            newLight.Shape = data.Shape;
+                            newLight.SpotAngle = data.SpotLightAngle;
+                            newLight.Position = newLight.Position + new Vector3(lantern.CurrentOwner.GameObject.transform.forward.x + .3f, .5f, 0f);
+                            newLight.Transform.forward = lantern.CurrentOwner.Camera.forward;
+                            newLight.Base.enabled = true;
+                            newLight.SyncInterval = 0;
+                            Light = newLight;
+                            Timing.RunCoroutine(LightFacingForward());
+                        }
                         break;
 
                     case CustomItemType.SCPItem:
@@ -458,6 +517,7 @@ namespace UncomplicatedCustomItems.API.Features
                         PropertiesSet = true;
                         break;
 
+                    // Todo: Figure out why this is broken.
                     case CustomItemType.ExplosiveGrenade:
                         ExplosiveGrenadeProjectile explosiveGrenade = (ExplosiveGrenadeProjectile)ExplosiveGrenadeProjectile.Create(CustomItem.Item, Pickup.Position);
                         IExplosiveGrenadeData ExplosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
@@ -474,6 +534,7 @@ namespace UncomplicatedCustomItems.API.Features
                         Serial = Pickup.Serial;
                         break;
 
+                    // Todo: Figure out why this is broken.
                     case CustomItemType.FlashGrenade:
                         FlashbangProjectile flashGrenade = (FlashbangProjectile)FlashbangProjectile.Create(CustomItem.Item, Pickup.Position);
                         IFlashGrenadeData FlashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
@@ -491,10 +552,61 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.MicroHID:
                         LabApi.Features.Wrappers.MicroHIDPickup microHID = Pickup as LabApi.Features.Wrappers.MicroHIDPickup;
                         IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
-                        microHID.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out InventorySystem.Items.MicroHID.MicroHIDItem microHIDItem);
+                        microHID.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
                         microHIDItem.ItemSerial = microHID.Serial;
 
                         microHIDItem.EnergyManager.ServerSetEnergy(microHIDItem.ItemSerial, microData.Energy);
+                        break;
+
+                    case CustomItemType.ParticleDisruptor:
+                        Pickup.Base.Info.ItemId.TryGetTemplate<ParticleDisruptor>(out var particleDisruptor);
+                        IParticleDisruptorData disruptorData = CustomItem.CustomData as IParticleDisruptorData;
+                        particleDisruptor.TryGetModule<DisruptorHitregModule>(out var hitregModule);
+
+                        hitregModule.BasePenetration = disruptorData.Penetration;
+                        break;
+
+                    case CustomItemType.Light:
+                        if (Pickup.Type is ItemType.Flashlight && !PropertiesSet)
+                        {
+                            Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Flashlight.FlashlightItem>(out var flashLight);
+                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                            Light newLight = Light.Create(flashLight.gameObject.transform.position);
+                            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+                            newLight.Color = color;
+                            newLight.Type = data.LightType;
+                            newLight.Range = data.Range;
+                            newLight.ShadowType = data.ShadowType;
+                            newLight.ShadowStrength = data.ShadowStrength;
+                            newLight.Intensity = data.Intensity;
+                            newLight.Shape = data.Shape;
+                            newLight.SpotAngle = data.SpotLightAngle;
+                            newLight.Parent = Pickup.Base.transform;
+                            newLight.Position = Pickup.Position;
+                            newLight.SyncInterval = 0;
+                            Light = newLight;
+                            newLight.Base.enabled = true;
+                        }
+                        if (Pickup.Type is ItemType.Lantern && !PropertiesSet)
+                        {
+                            Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Lantern.LanternItem>(out var lantern);
+                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                            Light newLight = Light.Create(lantern.gameObject.transform.position);
+                            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+                            newLight.Color = color;
+                            newLight.Type = data.LightType;
+                            newLight.Range = data.Range;
+                            newLight.ShadowType = data.ShadowType;
+                            newLight.ShadowStrength = data.ShadowStrength;
+                            newLight.Intensity = data.Intensity;
+                            newLight.Shape = data.Shape;
+                            newLight.SpotAngle = data.SpotLightAngle;
+                            newLight.Parent = Pickup.Base.transform;
+                            newLight.Position = Pickup.Position;
+                            newLight.SyncInterval = 0;
+                            Light = newLight;
+                            newLight.Base.enabled = true;
+                        }
                         break;
 
                     case CustomItemType.SCPItem:
@@ -623,6 +735,21 @@ namespace UncomplicatedCustomItems.API.Features
                         microHIDData.Energy = microHID.Energy;
                         break;
 
+                    case CustomItemType.Light:
+                        if (Item.Type is ItemType.Flashlight)
+                        {
+                            FlashlightItem flashLight = Item as FlashlightItem;
+                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                            Light.Intensity = 0;
+                        }
+                        if (Item.Type is ItemType.Lantern)
+                        {
+                            LanternItem lantern = Item as LanternItem;
+                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                            Light.Intensity = 0;
+                        }
+                        break;
+
                     case CustomItemType.SCPItem:
                         if (Item.Type == ItemType.GunSCP127)
                         {
@@ -684,6 +811,23 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 LogManager.Warn("CustomData is not in the expected IWeaponData format or is null.");
                 return new List<string>();
+            }
+        }
+
+        internal IEnumerator<float> LightFacingForward()
+        {
+            for (; ; )
+            {
+                if (Owner.CurrentItem == null || Serial != Owner.CurrentItem.Serial)
+                    Light.Intensity = 0;
+
+                else if (Toggled)
+                {
+                    IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                    Light.Intensity = data.Intensity;
+                    Light.Base.transform.forward = Owner.Camera.forward;
+                }
+                yield return Timing.WaitForOneFrame;
             }
         }
 

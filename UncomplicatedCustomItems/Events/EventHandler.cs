@@ -1,39 +1,41 @@
-﻿using System.Collections.Generic;
+﻿using AdminToys;
+using CustomPlayerEffects;
+using Interactables.Interobjects.DoorUtils;
+using InventorySystem.Items.Firearms;
+using InventorySystem.Items.Firearms.Modules;
+using InventorySystem.Items.Firearms.Modules.Scp127;
+using InventorySystem.Items.Firearms.ShotEvents;
+using InventorySystem.Items.Usables.Scp244;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.Scp914Events;
+using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Features.Extensions;
+using LabApi.Features.Wrappers;
+using MEC;
+using Mirror;
+using PlayerRoles;
+using PlayerStatsSystem;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UnityEngine;
-using Light = LabApi.Features.Wrappers.LightSourceToy;
-using Mirror;
-using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
-using CustomPlayerEffects;
-using InventorySystem.Items.Usables.Scp244;
-using MEC;
-using PlayerRoles;
+using UncomplicatedCustomItems.API.Features.SpecificData;
+using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Enums;
-using System.Linq;
-using System;
-using UserSettings.ServerSpecific;
-using LabApi.Events.Arguments.PlayerEvents;
 using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Extensions;
-using LABAPI = LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.Interfaces;
-using System.Globalization;
-using InventorySystem.Items.Firearms.Modules.Scp127;
-using InventorySystem.Items.Firearms;
-using LabApi.Features.Wrappers;
-using InventorySystem.Items.Firearms.Modules;
-using InventorySystem.Items.Firearms.ShotEvents;
-using PlayerStatsSystem;
-using LabApi.Events.Arguments.ServerEvents;
-using LabApi.Events.Arguments.Scp914Events;
-using Interactables.Interobjects.DoorUtils;
+using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UnityEngine;
+using UserSettings.ServerSpecific;
+using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
+using LABAPI = LabApi.Features.Wrappers;
+using Light = LabApi.Features.Wrappers.LightSourceToy;
 using Player = LabApi.Features.Wrappers.Player;
-using AdminToys;
 using PrimitiveObjectToy = LabApi.Features.Wrappers.PrimitiveObjectToy;
-using LabApi.Features.Extensions;
-using UncomplicatedCustomItems.API.Wrappers;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -1005,6 +1007,16 @@ namespace UncomplicatedCustomItems.Events
                 MicroHidDamageHandler damageHandler = ev.DamageHandler as MicroHidDamageHandler;
                 damageHandler.Damage = microData.Damage;
             }
+
+            if (CustomItem.CustomItem.CustomItemType == CustomItemType.ParticleDisruptor)
+            {
+                IParticleDisruptorData disruptorData = CustomItem.CustomItem.CustomData as IParticleDisruptorData;
+                DisruptorDamageHandler damageHandler = ev.DamageHandler as DisruptorDamageHandler;
+                if (damageHandler.FiringState == FiringState.FiringRapid)
+                    damageHandler.Damage = disruptorData.ChargeDamage;
+                if (damageHandler.FiringState == FiringState.FiringRapid)
+                    damageHandler.Damage = disruptorData.BurstDamage;
+            }
         }
 
         public void OnSpawned(PlayerSpawnedEventArgs ev)
@@ -1197,11 +1209,40 @@ namespace UncomplicatedCustomItems.Events
 
             if (CustomItem.HasModule(CustomFlags.SwitchRoleOnUse))
                 SwitchRoleOnUseMethod.Start(CustomItem, ev.Player);
-                
+
             if (CustomItem.HasModule(CustomFlags.CustomSound))
             {
                 LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {CustomItem.CustomItem.Name}.");
                 AudioApi.PlayAudio(CustomItem, ev.Player.Position);
+            }
+        }
+
+        public void TogglingFlashlight(PlayerTogglingFlashlightEventArgs ev)
+        {
+            if (ev.LightItem == null || ev.Player == null)
+                return;
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem CustomItem))
+                return;
+
+            if (CustomItem.CustomItem.CustomItemType is CustomItemType.Light)
+            {
+                ev.LightItem.IsEmitting = false;
+                IFlashlightData data = CustomItem.CustomItem.CustomData as IFlashlightData;
+                if (ev.NewState && CustomItem.Light.Intensity >= 0 && !CustomItem.Toggled)
+                {
+                    ev.IsAllowed = false;
+                    ev.LightItem.IsEmitting = false;
+                    CustomItem.Light.Intensity = data.Intensity;
+                    CustomItem.Toggled = true;
+                }
+                else if (CustomItem.Toggled && CustomItem.Light.Intensity >= 1)
+                {
+                    ev.IsAllowed = false;
+                    ev.LightItem.IsEmitting = false;
+                    CustomItem.Toggled = false;
+                    CustomItem.Light.Intensity = 0;
+                }
             }
         }
 

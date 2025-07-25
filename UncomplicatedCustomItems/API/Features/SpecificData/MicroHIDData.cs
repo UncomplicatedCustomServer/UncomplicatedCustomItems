@@ -25,9 +25,5 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual bool InfiniteEnergy { get; set; } = true;
 
         public virtual bool Broken { get; set; } = true;
-
-        public virtual bool MuteChargeAudio { get; set; } = true;
-
-        public virtual bool MuteFiringAudio { get; set; } = true;
     }
 }

@@ -21,12 +21,6 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 __instance.ServerResyncData();
             }
 
-            if (customItem.CustomItem.CustomItemType is CustomItemType.ParticalDisruptor)
-            {
-                ParticalDisruptorData weaponData = customItem.CustomItem.CustomData as ParticalDisruptorData;
-                __result = weaponData.Ammo;
-                __instance.ServerResyncData();
-            }
                 return false;
         }
     }

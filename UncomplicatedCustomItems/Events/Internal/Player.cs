@@ -149,6 +149,20 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item.HandleSelectedDisplayHint();
             item.LoadBadge(ev.Player);
+
+            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+            {
+                if (item.Item.Type is ItemType.Flashlight && item.CustomItem.CustomItemType is CustomItemType.Light)
+                {
+                    FlashlightItem flashlight = item.Item as FlashlightItem;
+                    flashlight.IsEmitting = false;
+                }
+                if (item.Item.Type is ItemType.Lantern && item.CustomItem.CustomItemType is CustomItemType.Light)
+                {
+                    LanternItem lantern = item.Item as LanternItem;
+                    lantern.IsEmitting = false;
+                }
+            });
         }
 
         private static void ChangingItemInHand(PlayerChangingItemEventArgs ev)
