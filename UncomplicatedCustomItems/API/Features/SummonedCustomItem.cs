@@ -362,8 +362,7 @@ namespace UncomplicatedCustomItems.API.Features
                             newLight.Intensity = data.Intensity;
                             newLight.Shape = data.Shape;
                             newLight.SpotAngle = data.SpotLightAngle;
-                            newLight.Position = newLight.Position + new Vector3(lantern.CurrentOwner.GameObject.transform.forward.x + .3f, .5f, 0f);
-                            newLight.Transform.forward = lantern.CurrentOwner.Camera.forward;
+                            newLight.Transform.localPosition = new Vector3(0.05f, 0f, 0.5f);
                             newLight.Base.enabled = true;
                             newLight.SyncInterval = 0;
                             Light = newLight;
@@ -818,9 +817,12 @@ namespace UncomplicatedCustomItems.API.Features
         {
             for (; ; )
             {
-                if (Owner.CurrentItem == null || Serial != Owner.CurrentItem.Serial)
+                if (Owner == null)
                     Light.Intensity = 0;
-
+                else if(Owner.CurrentItem == null)
+                    Light.Intensity = 0;
+                else if (Serial != Owner.CurrentItem.Serial)
+                    Light.Intensity = 0;
                 else if (Toggled)
                 {
                     IFlashlightData data = CustomItem.CustomData as IFlashlightData;
