@@ -497,6 +497,7 @@
     <Compile Include="API\Features\Helper\LogEntry.cs" />
     <Compile Include="API\Features\Helper\LogManager.cs" />
     <Compile Include="API\Features\Helper\VersionInfo.cs" />
+    <Compile Include="API\Features\Helper\UpdateChecker.cs" />
     <Compile Include="API\Features\Helper\VersionManager.cs" />
     <Compile Include="API\Features\Helper\ImportManager.cs" />
     <Compile Include="API\Features\Spawn.cs" />
@@ -584,6 +585,7 @@
     <Compile Include="Interfaces\IDynamicSpawn.cs" />
     <Compile Include="Interfaces\SpecificData\IFlashlightData.cs" />
     <Compile Include="Intergrations\CommonUtils.cs" />
+    <Compile Include="Intergrations\ECR.cs" />
     <Compile Include="Intergrations\UCR.cs" />
     <Compile Include="Extensions\ListExtension.cs" />
     <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />

@@ -43,5 +43,11 @@ namespace UncomplicatedCustomItems
 
         [Description("If filled the update checker will use the provided token. You can get a token from 'https://github.com/settings/tokens'")]
         public string GithubToken { get; set; } = string.Empty;
+
+        [Description("This displays logs that are usually only shown to developers.")]
+        public bool ShowSilentLogs { get; set; } = false;
+
+        [Description("Enables or disables the ToolGun from registering")]
+        public bool EnableToolGun { get; set; } = true;
     }
 }

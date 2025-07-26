@@ -29,86 +29,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Version version = null;
-            try
-            {
-                version = Plugin.Instance.Version;
-            }
-            catch (Exception ex)
-            {
-                response = $"Error: Could not retrieve local plugin version. Details: {ex.Message}";
-                LogManager.Error($"Exception while retrieving local plugin version: {ex}");
-                return false;
-            }
-
-            response = $"Currently running UncomplicatedCustomItems version {version}. Checking for updates...";
-            LogManager.Updater($"Current version: {version}. Checking GitHub for latest release...");
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    using (HttpClient client = new HttpClient())
-                    {
-                        client.DefaultRequestHeaders.Add("User-Agent", "UncomplicatedCustomItems-UpdateChecker/1.0");
-
-                        if (!string.IsNullOrEmpty(Plugin.Instance.Config.GithubToken))
-                            client.DefaultRequestHeaders.Add("Authorization", $"token {Plugin.Instance.Config.GithubToken}");
-
-                        string apiUrl = "https://api.github.com/repos/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest";
-                        HttpResponseMessage httpResponse = await client.GetAsync(apiUrl);
-
-                        if (httpResponse.IsSuccessStatusCode)
-                        {
-                            string jsonResponse = await httpResponse.Content.ReadAsStringAsync();
-                            GitHubReleaseInfo latestRelease = JsonConvert.DeserializeObject<GitHubReleaseInfo>(jsonResponse);
-
-                            if (latestRelease != null && !string.IsNullOrEmpty(latestRelease.TagName))
-                            {
-                                string latestVersionTag = latestRelease.TagName;
-                                if (latestVersionTag.StartsWith("v", StringComparison.OrdinalIgnoreCase))
-                                    latestVersionTag = latestVersionTag.Substring(1);
-
-                                if (Version.TryParse(latestVersionTag, out Version githubVersion))
-                                {
-                                    LogManager.Updater($"Latest version on GitHub: {githubVersion} (Tag: {latestRelease.TagName})");
-                                    if (githubVersion > version)
-                                    {
-                                        LogManager.Updater($"An update is available for UncomplicatedCustomItems!");
-                                        LogManager.Updater($"Current version: {version}, Latest version: {githubVersion}.");
-                                        LogManager.Updater($"Please use the 'uciupdate' command to update the plugin.");
-                                    }
-                                    else if (githubVersion == version)
-                                        LogManager.Updater($"You are running the latest version of UncomplicatedCustomItems ({version}).");
-                                    else
-                                        LogManager.Updater($"You are running a newer version ({version}) than the latest stable release on GitHub. This is a development or pre-release version.");
-                                }
-                                else
-                                    LogManager.Error($"Failed to parse the latest version tag '{latestVersionTag}' from GitHub into a valid version format.");
-                            }
-                            else
-                                LogManager.Error("Failed to parse release information from GitHub or tag name was empty.");
-                        }
-                        else
-                        {
-                            string errorContent = await httpResponse.Content.ReadAsStringAsync();
-                            LogManager.Error($"Failed to fetch latest release from GitHub. Status code: {httpResponse.StatusCode}. Response: {errorContent}");
-                        }
-                    }
-                }
-                catch (HttpRequestException ex)
-                {
-                    LogManager.Error($"A network error occurred while checking for updates: {ex.Message}");
-                }
-                catch (JsonException ex)
-                {
-                    LogManager.Error($"Error parsing JSON response from GitHub: {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Error($"An unexpected error occurred: {ex.ToString()}");
-                }
-            });
+            Version version = Plugin.Instance.Version;
+            response = $"Currently running version {version}. Checking for updates...";
+            
+            Task.Run(async () => await UpdateChecker.CheckForUpdatesAsync());
             return true;
         }
     }

@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Net;
 using UncomplicatedCustomItems.Interfaces;
 using Logger = LabApi.Features.Console.Logger;
-using GameCore;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -38,19 +37,24 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public static void Error(string message, string error = "CS0000")
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
-            Logger.Error(message);
+            Logger.Error(message + "\n\nIf you're seeing this, please run the `ucilogs` command in the server console to generate a log code. \n Then, post both the error and the log code in the #bug-reports forum in the UCI category of our Discord so we can help you faster. Thank you for reporting! \n Discord => 'https://discord.gg/5StRGu8EJV'");
         }
-        public static void Raw(string message, ConsoleColor color, string logLevel)
+        public static void Raw(string message, ConsoleColor color, string logLevel, string category)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), logLevel, message));
-            Logger.Raw($"[{ Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", color);
+            Logger.Raw($"[{category}] [{ Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", color);
         }
         public static void Updater(string message)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Updater", message));
             Logger.Raw($"[Updater] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Blue);
         }
-        public static void Silent(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SILENT", message));
+        public static void Silent(string message)
+        {
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SILENT", message));
+            if (Plugin.Instance.Config.ShowSilentLogs)
+                Logger.Raw($"[Silent] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.White);
+        }
 
         public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SYSTEM", message));
 

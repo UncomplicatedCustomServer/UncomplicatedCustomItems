@@ -1,6 +1,7 @@
 ﻿using CommandSystem;
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
+using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.Interfaces;
 
@@ -22,13 +23,17 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            if (!CustomItem.CustomItems.ContainsKey(uint.Parse(arguments[0])))
+            ICustomItem customItem = null;
+            if (uint.TryParse(arguments[0], out uint id))
             {
-                response = $"Sorry but there's no custom item with the Id {uint.Parse(arguments[0])}!";
-                return false;
+                Utilities.TryGetCustomItem(id, out ICustomItem iCustomItem);
+                customItem = iCustomItem;
             }
-
-            ICustomItem customItem = CustomItem.CustomItems[uint.Parse(arguments[0])];
+            else
+            {
+                Utilities.TryGetCustomItemByName(arguments[0], out ICustomItem iCustomItem);
+                customItem = iCustomItem;
+            }
 
             if (arguments.Count == 2)
             {

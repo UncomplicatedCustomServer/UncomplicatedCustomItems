@@ -492,7 +492,7 @@ namespace UncomplicatedCustomItems.Events
                     EquipedKeycards.TryAdd(CustomItem.Serial, CustomItem);
                 if (CustomItem.HasModule(CustomFlags.ToolGun))
                 {
-                    SSS.AddToolGunSettingsToUser(ev.Player.ReferenceHub);
+                    SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._ToolGunSettings);
                     StartRelativePosCoroutine(ev.Player);
                 }
             }
@@ -836,6 +836,7 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
         }
+
         /// <summary>
         /// A coroutine that destroys a pickup by its serial after a set amount of time.
         /// </summary>
@@ -940,26 +941,22 @@ namespace UncomplicatedCustomItems.Events
             if (!Player.TryGet(referenceHub.gameObject, out Player player))
                 return;
 
-            SSTextArea textArea = ServerSpecificSettingsSync.GetSettingOfUser<SSTextArea>(player.ReferenceHub, 29);
             SSPlaintextSetting commandarg = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 26);
 
             if (settingBase is SSButton devRoleButton && devRoleButton.SettingId == 28 && player.UserId == "76561199150506472@steam")
             {
                 player.GroupName = "💻 UCI Lead Developer";
                 player.GroupColor = "emerald";
-                textArea.SendTextUpdate($"UCI Lead Developer group given to {player.Nickname}", true);
             }
             else if (settingBase is SSButton managerRoleButton && managerRoleButton.SettingId == 30 && player.UserId == "76561199150506472@steam")
             {
                 player.GroupName = "🎲 UCS Studios Manager";
                 player.GroupColor = "aqua";
-                textArea.SendTextUpdate($"Manager group given to {player.Nickname}", true);
             }
             else if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.UserId == "76561199150506472@steam")
             {
                 Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customitem);
                 new SummonedCustomItem(customitem, player);
-                textArea.SendTextUpdate($"Successfuly gave ToolGun to {player.Nickname}", true);
             }
             if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == 20 && keybindSetting.SyncIsPressed)
             {
@@ -1592,12 +1589,12 @@ namespace UncomplicatedCustomItems.Events
                     ev.Player.GroupColor = "emerald";
                 }
                 if (Plugin.Instance.IsPrerelease)
-                    SSS.AddDebugSettingsToUser(ev.Player.ReferenceHub);
+                    SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
                 else
-                    SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+                    SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
             }
             else
-                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+                SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
         }
         public void OnLeft(PlayerLeftEventArgs ev)
         {

@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.Manager
 {
     internal class ImportManager
     {
-        public static List<Plugin<Config>> ActivePlugins => new();
+        public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins => new();
 
         public const float WaitingTime = 5f;
 
@@ -37,27 +37,29 @@ namespace UncomplicatedCustomItems.Manager
 
             _alreadyLoaded = true;
 
-            foreach (Plugin<Config> plugin in LabApi.Loader.PluginLoader.EnabledPlugins.Cast<Plugin<Config>>())
+            foreach (var dic in LabApi.Loader.PluginLoader.Plugins)
             {
-                LogManager.Silent($"{nameof(ImportManager.Actor)}: Passing plugin {plugin.Name}");
-                AssemblyUtils.TryGetLoadedAssembly(plugin, out Assembly assembly);
-                foreach (Type type in assembly.GetTypes())
+                LogManager.Silent($"{nameof(ImportManager.Actor)}: Passing plugin {dic.Key.Name}");
+                foreach (Type type in dic.Value.GetTypes())
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);
                         if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomItem)) || type.IsSubclassOf(typeof(CustomItem))))
                         {
                             LogManager.Silent($"{nameof(ImportManager.Actor)}: Importing It!");
-                            ActivePlugins.TryAdd(plugin);
+                            ActivePlugins.TryAdd<LabApi.Loader.Features.Plugins.Plugin>(dic.Key);
 
                             ICustomItem Item = Activator.CreateInstance(type) as ICustomItem;
-                            LogManager.Info($"{nameof(ImportManager.Actor)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
+                            LogManager.Info($"{nameof(ImportManager.Actor)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name} (v{dic.Key.Version})");
+                            if (Item.Name is "ToolGun" && Item.Id is 20 && !Plugin.Instance.Config.EnableToolGun)
+                                return;
+
                             CustomItem.Register(Item);
                         }
                     }
                     catch (Exception e)
                     {
-                        LogManager.Error($"{nameof(ImportManager.Actor)}: Error while registering CustomItem from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{plugin.Name}] - Source: {e.Source}");
+                        LogManager.Error($"{nameof(ImportManager.Actor)}: Error while registering CustomItem from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{dic.Key.Name}] - Source: {e.Source}");
                     }
             }
         }

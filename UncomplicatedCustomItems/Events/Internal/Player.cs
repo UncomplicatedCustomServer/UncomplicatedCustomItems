@@ -88,7 +88,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             Item.ResetBadge(ev.Player);
             if (Item.HasModule(Enums.CustomFlags.ToolGun))
             {
-                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+                SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
             EventHandler.StopHumeShieldRegen(ev.Player);
@@ -184,7 +184,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
                 EventHandler.StopRelativePosCoroutine(ev.Player);
-                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+                SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
             }
 
             if (item.Item.Type == ItemType.GunSCP127 && item.CustomItem.CustomItemType == CustomItemType.SCPItem)
@@ -244,7 +244,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                     customitem?.ResetBadge(ev.Player);
                     if (customitem.HasModule(Enums.CustomFlags.ToolGun))
                     {
-                        SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+                        SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
                         EventHandler.StopRelativePosCoroutine(ev.Player);
                     }
 
@@ -267,7 +267,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             item?.ResetBadge(ev.Player);
             if (item.HasModule(Enums.CustomFlags.ToolGun))
             {
-                SSS.SendNormalSettingsToUser(ev.Player.ReferenceHub);
+                SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
                 EventHandler.StopRelativePosCoroutine(ev.Player);
             }
             EventHandler.StopHumeShieldRegen(ev.Player);

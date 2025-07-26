@@ -6,7 +6,7 @@ using UncomplicatedCustomItems.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
-    // Todo: Test this.
+    // Neither are synced with client but still are applied.
     [HarmonyPatch(typeof(DisruptorAdsModule), nameof(DisruptorAdsModule.BaseAdsInaccuracy), MethodType.Getter)]
     public static class DisruptorAdsModuleAimingInaccuracyPatch
     {

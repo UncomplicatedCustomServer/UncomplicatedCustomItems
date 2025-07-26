@@ -1,5 +1,4 @@
 using HarmonyLib;
-using InventorySystem.Items.MicroHID.Modules;
 using LabApi.Features.Wrappers;
 using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
@@ -10,11 +9,13 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.Integrations;
 using UncomplicatedCustomItems.Manager;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using MapEvent = LabApi.Events.Handlers.ServerEvents;
+
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using Scp914Event = LabApi.Events.Handlers.Scp914Events;
@@ -28,7 +29,7 @@ namespace UncomplicatedCustomItems
         public bool IsPrerelease = false;
         public override string Name => "UncomplicatedCustomItems";
 
-        public override string Description => "Allows server owners to create CustomItems without the hassel of coding";
+        public override string Description => "Enables server owners to design and manage CustomItems with ease, no coding required.";
 
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 
@@ -122,12 +123,9 @@ namespace UncomplicatedCustomItems
             _DebugSettings =
             [
                 new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
-                //new SSButton(24, "Give ToolGun", "Give"),
-                new SSButton(28, "Dev Role", "Give"),
-                new SSButton(30, "Manager Role", "Give"),
-                new SSTextArea(29, "Default Message")
+
             ];
-            _settings = 
+            _settings =
             [
                 new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
                 new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1", hint: "The color of the primitives spawned by the ToolGun"),
@@ -138,13 +136,12 @@ namespace UncomplicatedCustomItems
                 //new SSButton(24, "Give ToolGun", "Give"),
                 new SSButton(28, "Dev Role", "Give"),
                 new SSButton(30, "Manager Role", "Give"),
-                new SSTextArea(29, "Default Message"),
 
                 new SSGroupHeader("CustomItem Settings"),
                 new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
             ];
 
-            ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
+            ServerSpecificSettingsSync.DefinedSettings = _playerSettings;
             ServerSpecificSettingsSync.SendToAll();
 
             LogManager.History.Clear();
@@ -186,10 +183,12 @@ namespace UncomplicatedCustomItems
 
             _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
+            ECRIntegration.Initialize(_harmony);
         }
 
         public override void Disable()
         {
+            ECRIntegration.Cleanup();
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
 
@@ -247,7 +246,7 @@ namespace UncomplicatedCustomItems
         public void OnFinishedLoadingPlugins()
         {
             ImportManager.Init();
-            Server.RunCommand("uciupdatecheck");
+            _ = UpdateChecker.CheckForUpdatesAsync();
         }
     }
 }

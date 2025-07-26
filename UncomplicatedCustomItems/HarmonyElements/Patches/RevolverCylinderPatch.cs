@@ -17,11 +17,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 return true;
             if (customItem.CustomItem.CustomItemType is not CustomItemType.Weapon)
                 return true;
-            
-                IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
-                __result = weaponData.MaxMagazineAmmo;
-                __instance.ServerResync();
-                return false;
+
+            IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
+            __result = weaponData.MaxMagazineAmmo;
+            __instance.ServerResync();
+            return false;
         }
     }
 }
