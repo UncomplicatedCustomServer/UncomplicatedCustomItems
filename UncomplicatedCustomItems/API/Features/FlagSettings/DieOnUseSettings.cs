@@ -1,4 +1,4 @@
-﻿using UncomplicatedCustomItems.Interfaces.FlagSettings;
+﻿using UncomplicatedCustomItems.API.Interfaces.FlagSettings;
 
 namespace UncomplicatedCustomItems.API.Features
 {

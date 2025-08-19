@@ -5,8 +5,9 @@ using InventorySystem.Items.Pickups;
 using InventorySystem.Items.Usables.Scp1344;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {

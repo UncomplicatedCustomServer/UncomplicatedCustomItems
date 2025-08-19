@@ -9,16 +9,14 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Integrations;
-using UncomplicatedCustomItems.Manager;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
-using MapEvent = LabApi.Events.Handlers.ServerEvents;
 
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
-using Scp914Event = LabApi.Events.Handlers.Scp914Events;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 
@@ -28,22 +26,30 @@ namespace UncomplicatedCustomItems
     {
         public bool IsPrerelease = false;
         public override string Name => "UncomplicatedCustomItems";
-
+#if LABAPI
         public override string Description => "Enables server owners to design and manage CustomItems with ease, no coding required.";
-
+#elif EXILED
+        public override string Prefix => "UncomplicatedCustomItems";
+#endif
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
-
+#if LABAPI
         public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
-
-        public override Version Version { get; } = new(3, 5, 4);
+#elif EXILED
+        public override Version RequiredExiledVersion { get; } = new(9, 6, 1);
+#endif
+        public override Version Version { get; } = new(4, 0, 0);
 
         internal Handler Handler;
 
         public Assembly Assembly => Assembly.GetExecutingAssembly();
-
+#if LABAPI
         public override LoadPriority Priority => LoadPriority.Highest;
-
+#elif EXILED
+        public override PluginPriority Priority => PluginPriority.First;
+#endif
         public static Plugin Instance { get; private set; }
+
+        internal Arguments arguments;
 
         internal Harmony _harmony;
 
@@ -66,47 +72,23 @@ namespace UncomplicatedCustomItems
 
             if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(Instance, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
 
-            PlayerEvent.Hurt += Handler.OnHurt;
-            PlayerEvent.TriggeringTesla += Handler.OnTriggeringTesla;
-            PlayerEvent.ShootingWeapon += Handler.OnShooting;
-            PlayerEvent.UsedItem += Handler.OnItemUse;
-            PlayerEvent.DroppedItem += Handler.OnDrop;
-            MapEvent.PickupDestroyed += Handler.OnPickup;
-            PlayerEvent.ShotWeapon += Handler.OnShot;
-            PlayerEvent.UpdatingEffect += Handler.Receivingeffect;
-            PlayerEvent.ThrewProjectile += Handler.ThrownProjectile;
-            MapEvent.ProjectileExploding += Handler.GrenadeExploding;
+            PlayerHandler.Register();
+            ServerHandler.Register();
+            ScpHandler.Register();
+
             ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
-            PlayerEvent.Dying += Handler.OnDying;
-            PlayerEvent.ChangedItem += Handler.OnChangedItem;
-            PlayerEvent.DroppingItem += Handler.OnDropping;
-            PlayerEvent.Hurting += Handler.OnHurting;
-            PlayerEvent.InteractedDoor += Handler.OnDoorInteracting;
-            PlayerEvent.UnlockingGenerator += Handler.OnGeneratorUnlock;
-            PlayerEvent.InteractingLocker += Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
-            PlayerEvent.Joined += Handler.OnVerified;
-            PlayerEvent.PickedUpItem += Handler.Onpickup;
-            PlayerEvent.Spawned += Handler.OnSpawned;
-            PlayerEvent.Left += Handler.OnLeft;
-            PlayerEvent.FlippedCoin += Handler.FlippedCoin;
-            PlayerEvent.ToggledFlashlight += Handler.ToggledFlashlight;
-            Scp914Event.ProcessingPickup += Handler.OnPickupUpgrade;
-            Scp914Event.ProcessingInventoryItem += Handler.OnItemUpgrade;
-            ServerEvent.RoundEnding += Handler.OnRoundEnd;
-            MapEvent.PickupCreated += Handler.OnPickupCreation;
-            PlayerEvent.ToggledWeaponFlashlight += Handler.WeaponFlashLight;
-            PlayerEvent.ReloadingWeapon += Handler.OnReloading;
-            PlayerEvent.ReloadedWeapon += Handler.OnReloaded;
-            PlayerEvent.TogglingFlashlight += Handler.TogglingFlashlight;
 
             // Debugging Events
-            PlayerEvent.DroppingItem += Handler.Ondrop;
-            PlayerEvent.PickedUpItem += Handler.OnDebuggingpickup;
-            PlayerEvent.UsingItem += Handler.Onuse;
-            PlayerEvent.ReloadingWeapon += Handler.Onreloading;
-            PlayerEvent.ShootingWeapon += Handler.Onshooting;
-            PlayerEvent.ThrewProjectile += Handler.Onthrown;
+            PlayerEvent.DroppingItem += Handler.OnDrop;
+            PlayerEvent.PickedUpItem += Handler.OnDebuggingPickup;
+            PlayerEvent.UsingItem += Handler.OnUse;
+            PlayerEvent.ReloadingWeapon += Handler.OnReloading;
+            PlayerEvent.ShootingWeapon += Handler.OnShooting;
+            PlayerEvent.ThrewProjectile += Handler.OnThrown;
+
+            Arguments.Initialize();
+            Arguments.Register();
 
             _ToolGunSettings =
             [
@@ -198,47 +180,23 @@ namespace UncomplicatedCustomItems
             _harmony.UnpatchAll();
             _harmony = null;
 
-            PlayerEvent.Hurt -= Handler.OnHurt;
-            PlayerEvent.TriggeringTesla -= Handler.OnTriggeringTesla;
-            PlayerEvent.ShootingWeapon -= Handler.OnShooting;
-            PlayerEvent.UsedItem -= Handler.OnItemUse;
-            PlayerEvent.DroppedItem -= Handler.OnDrop;
-            PlayerEvent.ShotWeapon -= Handler.OnShot;
-            PlayerEvent.UpdatingEffect -= Handler.Receivingeffect;
-            PlayerEvent.ThrewProjectile -= Handler.ThrownProjectile;
-            MapEvent.ProjectileExploding -= Handler.GrenadeExploding;
+            PlayerHandler.Unregister();
+            ServerHandler.Unregister();
+            ScpHandler.Unregister();
+
             ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
-            MapEvent.PickupDestroyed -= Handler.OnPickup;
-            PlayerEvent.Dying -= Handler.OnDying;
-            PlayerEvent.ChangedItem -= Handler.OnChangedItem;
-            PlayerEvent.DroppingItem -= Handler.OnDropping;
-            PlayerEvent.Hurting -= Handler.OnHurting;
-            PlayerEvent.InteractedDoor -= Handler.OnDoorInteracting;
-            PlayerEvent.UnlockingGenerator -= Handler.OnGeneratorUnlock;
-            PlayerEvent.InteractingLocker -= Handler.OnLockerInteracting;
             ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
-            PlayerEvent.Joined -= Handler.OnVerified;
-            PlayerEvent.PickedUpItem -= Handler.Onpickup;
-            PlayerEvent.Spawned -= Handler.OnSpawned;
-            PlayerEvent.Left -= Handler.OnLeft;
-            PlayerEvent.FlippedCoin -= Handler.FlippedCoin;
-            PlayerEvent.ToggledFlashlight -= Handler.ToggledFlashlight;
-            Scp914Event.ProcessingPickup -= Handler.OnPickupUpgrade;
-            Scp914Event.ProcessingInventoryItem -= Handler.OnItemUpgrade;
-            ServerEvent.RoundEnding -= Handler.OnRoundEnd;
-            MapEvent.PickupCreated -= Handler.OnPickupCreation;
-            PlayerEvent.ToggledWeaponFlashlight -= Handler.WeaponFlashLight;
-            PlayerEvent.ReloadingWeapon -= Handler.OnReloading;
-            PlayerEvent.ReloadedWeapon -= Handler.OnReloaded;
-            PlayerEvent.TogglingFlashlight -= Handler.TogglingFlashlight;
 
             // Debugging Events
-            PlayerEvent.DroppingItem -= Handler.Ondrop;
-            PlayerEvent.PickedUpItem -= Handler.OnDebuggingpickup;
-            PlayerEvent.UsingItem -= Handler.Onuse;
-            PlayerEvent.ReloadingWeapon -= Handler.Onreloading;
-            PlayerEvent.ShootingWeapon -= Handler.Onshooting;
-            PlayerEvent.ThrewProjectile -= Handler.Onthrown;
+            PlayerEvent.DroppingItem -= Handler.OnDrop;
+            PlayerEvent.PickedUpItem -= Handler.OnDebuggingPickup;
+            PlayerEvent.UsingItem -= Handler.OnUse;
+            PlayerEvent.ReloadingWeapon -= Handler.OnReloading;
+            PlayerEvent.ShootingWeapon -= Handler.OnShooting;
+            PlayerEvent.ThrewProjectile -= Handler.OnThrown;
+
+
+            Arguments.Cleanup();
 
             Instance = null;
             Handler = null;

@@ -2,12 +2,13 @@
 using System.ComponentModel;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.API.Extensions;
+using System;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -148,14 +149,18 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Custom flags of the item
         /// </summary>
+        [Obsolete("Replaced by the argument system")]
         [Description("Custom flags for the item")]
         public virtual CustomFlags? CustomFlags { get; set; } = new();
 
         /// <summary>
         /// Custom flag settings of the item
         /// </summary>
+        [Obsolete("Replaced by the argument system")]
         [Description("Settings for the CustomFlags. You can remove any unused settings.")]
-        public virtual IFlagSettings FlagSettings { get; set; } = new FlagSettings();
+        public virtual IFlagSettings? FlagSettings { get; set; } = new FlagSettings();
+
+        public virtual Dictionary<ArgumentType, string> Arguments { get; set; }
 
         /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item

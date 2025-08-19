@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData

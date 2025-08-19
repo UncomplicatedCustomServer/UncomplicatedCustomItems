@@ -3,7 +3,7 @@ using HarmonyLib;
 using InventorySystem.Items.Jailbird;
 using Mirror;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {

@@ -4,14 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
 using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Misc;
 using System.Reflection;
 
-namespace UncomplicatedCustomItems.Manager
+namespace UncomplicatedCustomItems.API.Features.Helper
 {
     internal class ImportManager
     {

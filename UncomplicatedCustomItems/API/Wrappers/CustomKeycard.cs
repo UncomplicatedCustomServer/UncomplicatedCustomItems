@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.API.Extensions;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Wrappers
@@ -35,16 +35,16 @@ namespace UncomplicatedCustomItems.API.Wrappers
     /// </remarks>
     public class CustomKeycard
     {
-        private Dictionary<ushort, Color32> PermissionColorsDic = [];
-        private Dictionary<ushort, Color32> LabelColorsDic = [];
-        private Dictionary<ushort, Color32> KeycardColorsDic = [];
-        private Dictionary<ushort, string> NameTagDic = [];
-        private Dictionary<ushort, string> ItemNameDic = [];
-        private Dictionary<ushort, string> LabelTextDic = [];
-        private Dictionary<ushort, KeycardLevels> PermissionsDic = [];
-        private Dictionary<ushort, string> SerialNumberDic = [];
-        private Dictionary<ushort, byte> WearIndexDic = [];
-        private Dictionary<ushort, int> RankIndexDic = [];
+        private readonly Dictionary<ushort, Color32> PermissionColorsDic = [];
+        private readonly Dictionary<ushort, Color32> LabelColorsDic = [];
+        private readonly Dictionary<ushort, Color32> KeycardColorsDic = [];
+        private readonly Dictionary<ushort, string> NameTagDic = [];
+        private readonly Dictionary<ushort, string> ItemNameDic = [];
+        private readonly Dictionary<ushort, string> LabelTextDic = [];
+        private readonly Dictionary<ushort, KeycardLevels> PermissionsDic = [];
+        private readonly Dictionary<ushort, string> SerialNumberDic = [];
+        private readonly Dictionary<ushort, byte> WearIndexDic = [];
+        private readonly Dictionary<ushort, int> RankIndexDic = [];
 
         /// <summary>
         /// The underlying Exiled <see cref="KeycardItem"/> instance being wrapped.

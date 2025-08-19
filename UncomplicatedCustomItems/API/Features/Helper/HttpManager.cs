@@ -1,4 +1,7 @@
-﻿using LabApi.Events.Arguments.PlayerEvents;
+﻿#if EXILED
+using Exiled.Loader;
+#endif
+using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features;
 using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Misc;
@@ -81,7 +84,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public HttpManager(string prefix)
         {
             if (!CheckForDependency())
-                Timing.CallContinuously(20f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON AS POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x406"));
+                Timing.CallContinuously(20f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x406"));
 
             Prefix = prefix;
             RegisterEvents();
@@ -242,12 +245,60 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return true;
         }
 
+        /// <summary>
+        /// Asynchronously shares logs with the server
+        /// </summary>
+        /// <param name="data">The log data to share</param>
+        /// <returns>A tuple containing the status code and response content</returns>
+        internal async Task<(HttpStatusCode statusCode, HttpContent content)> ShareLogsAsync(string data)
+        {
+            try
+            {
+        #if EXILED
+                string url = $"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&using_labapi=false&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}";
+        #elif LABAPI
+                string url = $"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CompiledVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}";
+        #endif
+
+                using StringContent content = new(data, Encoding.UTF8, "text/plain");
+                
+                using HttpResponseMessage response = await HttpClient.PutAsync(url, content).ConfigureAwait(false);
+                
+                HttpContent responseContent = null;
+                if (response.Content != null)
+                {
+                    string responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    responseContent = new StringContent(responseString, Encoding.UTF8, "application/json");
+                }
+                
+                return (response.StatusCode, responseContent);
+            }
+            catch (HttpRequestException)
+            {
+                throw;
+            }
+            catch (TaskCanceledException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         internal HttpStatusCode ShareLogs(string data, out HttpContent httpContent)
         {
+#if EXILED
+            HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&using_labapi=false&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
+#elif LABAPI
             HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CompiledVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}", data);
+#endif
             httpContent = Status.Content;
             return Status.StatusCode;
         }
+
+        public async Task<HttpResponseMessage> HttpPutRequestAsync(string url, string content) => await HttpClient.PutAsync(url, new StringContent(content, Encoding.UTF8, "text/plain"));
 
 #nullable enable
         internal async Task<Tuple<HttpStatusCode, string?>> VersionInfo()

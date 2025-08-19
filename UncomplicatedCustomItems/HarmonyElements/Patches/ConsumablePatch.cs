@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using InventorySystem.Items.Usables;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 

@@ -3,7 +3,8 @@ using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
 using UnityEngine;
 using System.Reflection;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -21,7 +22,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
 
             IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
 
-            var field = typeof(PumpActionModule).GetField("_numberOfBarrels", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo field = typeof(PumpActionModule).GetField("_numberOfBarrels", BindingFlags.NonPublic | BindingFlags.Instance);
             if (field != null)
             {
                 field.SetValue(__instance, Mathf.Max(weaponData.MaxBarrelAmmo, 1));

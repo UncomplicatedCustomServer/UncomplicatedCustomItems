@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using CustomPlayerEffects;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features
 {

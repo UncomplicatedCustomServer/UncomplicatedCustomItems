@@ -1,9 +1,10 @@
 ﻿using CommandSystem;
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -21,6 +22,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string[] Aliases { get; } = ["g"];
 
+        private static string StripTags(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+            return Regex.Replace(input, "<.*?>", "");
+        }
+
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
             ICustomItem customItem = null;
@@ -31,7 +38,8 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
             else
             {
-                Utilities.TryGetCustomItemByName(arguments[0], out ICustomItem iCustomItem);
+                string name = StripTags(arguments[0]);
+                Utilities.TryGetCustomItemByName(name, out ICustomItem iCustomItem);
                 customItem = iCustomItem;
             }
 
@@ -40,9 +48,8 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 if (arguments[1].ToLower() == "all")
                 {
                     foreach (Player player in Player.ReadyList)
-                    {
                         new SummonedCustomItem(customItem, player);
-                    }
+
                     response = $"Successfully gave '{customItem.Name}' to all players!";
                     return true;
                 }

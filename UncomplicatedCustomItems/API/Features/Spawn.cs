@@ -1,7 +1,7 @@
 ﻿using MapGeneration;
 using System.Collections.Generic;
 using System.ComponentModel;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features

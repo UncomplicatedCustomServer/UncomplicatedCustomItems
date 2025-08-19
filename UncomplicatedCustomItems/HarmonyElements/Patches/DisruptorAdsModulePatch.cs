@@ -2,7 +2,8 @@
 using HarmonyLib;
 using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {

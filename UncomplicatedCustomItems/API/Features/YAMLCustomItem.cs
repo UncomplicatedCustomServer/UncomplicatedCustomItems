@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
@@ -38,11 +40,15 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Defines the spawn settings for the custom item. Information on rooms can be found in the UCI Information forum on Discord.")]
         public Spawn Spawn { get; set; } = new();
 
+        [Obsolete("Replaced by the argument system")]
         [Description("Sets the custom flags of the custom item. Information about custom flags can be found in the UCI Information forum on Discord.")]
         public virtual CustomFlags? CustomFlags { get; set; } = Enums.CustomFlags.None;
 
+        [Obsolete("Replaced by the argument system")]
         [Description("Settings for the CustomFlags. You can remove any unused settings.")]
-        public FlagSettings FlagSettings { get; set; } = new();
+        public FlagSettings? FlagSettings { get; set; } = new();
+
+        public Dictionary<ArgumentType, string> Arguments { get; set; } = [];
 
         [Description("Sets the custom data type the item will use.")]
         public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 namespace UncomplicatedCustomItems
 {
@@ -49,5 +50,12 @@ namespace UncomplicatedCustomItems
 
         [Description("Enables or disables the ToolGun from registering")]
         public bool EnableToolGun { get; set; } = true;
+
+        [Description("Plugins that the Actions system will import from")]
+        public List<string> PluginsToImport { get; set; } =
+        [
+            "UncomplicatedCustomRoles",
+            "UncomplicatedCustomTeams",
+        ];
     }
 }

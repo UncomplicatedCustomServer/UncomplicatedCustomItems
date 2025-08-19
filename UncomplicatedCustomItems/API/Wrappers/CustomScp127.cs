@@ -5,9 +5,10 @@ using Mirror;
 using System;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 using LabApi.Features.Wrappers;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Wrappers
 {

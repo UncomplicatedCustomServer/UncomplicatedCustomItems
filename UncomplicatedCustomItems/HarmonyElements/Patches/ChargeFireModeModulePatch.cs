@@ -2,7 +2,7 @@
 using InventorySystem.Items.MicroHID.Modules;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             if (!Utilities.TryGetSummonedCustomItem(__instance.MicroHid.ItemSerial, out SummonedCustomItem customItem))
                 return true;
 
-            if (!(customItem.CustomItem.CustomData is IMicroHIDData data))
+            if (customItem.CustomItem.CustomData is not IMicroHIDData data)
                 return true;
 
             if (!data.CanExplode)

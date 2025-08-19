@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Enums;
-using UncomplicatedCustomItems.Extensions;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Extensions;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {

@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.API.Extensions;
 using LabApi.Features.Wrappers;
 using MapGeneration;
 using System;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -344,7 +345,7 @@ namespace UncomplicatedCustomItems.API
         {
             ISpawn Spawn = CustomItem.Spawn;
 
-            if (Spawn.PedestalSpawn ?? false)
+            if ((bool)Spawn.PedestalSpawn)
             {
                 if (Spawn.ReplaceExistingPickup)
                 {

@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.Enums;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 using YamlDotNet.Core;
 
@@ -31,13 +31,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 Id = 2,
                 Name = "FunnyGun",
-                Description = "A magic weapon that has a shotgun-like bullet spread",
+                Description = "A weapon that has a shotgun-like bullet spread",
                 BadgeName = "FunnyGun",
                 BadgeColor = "pumpkin",
                 Item = ItemType.GunFRMG0,
                 CustomItemType = CustomItemType.Weapon,
                 Scale = Vector3.one,
                 Spawn = new(),
+                Arguments = new Dictionary<ArgumentType, string>
+                {
+                    [ArgumentType.OnShotWeapon] = "if {Player.Health} < 100 then Heal {Player.UserId} 10"
+                },
                 CustomFlags = CustomFlags.InfiniteAmmo,
                 FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new WeaponData())

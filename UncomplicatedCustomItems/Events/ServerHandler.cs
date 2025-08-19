@@ -1,0 +1,271 @@
+﻿using InventorySystem.Items.Usables.Scp244;
+using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Features.Wrappers;
+using MEC;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Interfaces;
+using UnityEngine;
+using Light = LabApi.Features.Wrappers.LightSourceToy;
+using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+
+namespace UncomplicatedCustomItems.Events
+{
+    public class ServerHandler
+    {
+        public static void Register()
+        {
+            ServerEvent.PickupDestroyed += OnPickup;
+            ServerEvent.ProjectileExploding += OnGrenadeExploding;
+            ServerEvent.RoundEnding += OnRoundEnd;
+            ServerEvent.PickupCreated += OnPickupCreation;
+        }
+
+        public static void Unregister()
+        {
+            ServerEvent.PickupDestroyed -= OnPickup;
+            ServerEvent.ProjectileExploding -= OnGrenadeExploding;
+            ServerEvent.RoundEnding -= OnRoundEnd;
+            ServerEvent.PickupCreated -= OnPickupCreation;
+        }
+
+        public static void OnRoundEnd(RoundEndingEventArgs ev)
+        {
+            if (!ev.IsAllowed)
+                return;
+
+            PlayerHandler._damageTimes.Clear();
+            PlayerHandler._capybaras.Clear();
+        }
+
+        public static void OnGrenadeExploding(ProjectileExplodingEventArgs ev)
+        {
+            if (ev.TimedGrenade == null || ev.Player == null || ev.Position == null)
+                return;
+            PlayerHandler.DetonationPosition = ev.Position;
+            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+                return;
+            LogManager.Debug($"{ev.TimedGrenade.Type} is a CustomItem");
+            if (customItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
+            {
+                foreach (SpawnItemWhenDetonatedSettings spawnItemWhenDetonatedSettings in customItem.CustomItem.FlagSettings.SpawnItemWhenDetonatedSettings)
+                {
+                    if (spawnItemWhenDetonatedSettings.Chance == null || spawnItemWhenDetonatedSettings.ItemId == null || spawnItemWhenDetonatedSettings.ItemType == null || spawnItemWhenDetonatedSettings.Pickupable == null || spawnItemWhenDetonatedSettings.TimeTillDespawn == null)
+                    {
+                        LogManager.Warn($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} Chance, ItemId, ItemType, Pickupable, or TimeTillDespawn equals null. Aborting... \n Values: {spawnItemWhenDetonatedSettings.Chance} {spawnItemWhenDetonatedSettings.ItemId} {spawnItemWhenDetonatedSettings.ItemType} {spawnItemWhenDetonatedSettings.Pickupable} {spawnItemWhenDetonatedSettings.TimeTillDespawn}");
+                        break;
+                    }
+                    int chance = UnityEngine.Random.Range(0, 100);
+                    if (chance <= spawnItemWhenDetonatedSettings.Chance)
+                    {
+                        LogManager.Debug($"Loaded FlagSettings.");
+                        if (spawnItemWhenDetonatedSettings.ItemType == "UCI" || spawnItemWhenDetonatedSettings.ItemType == "uci")
+                        {
+                            if (Utilities.TryGetCustomItem((uint)spawnItemWhenDetonatedSettings.ItemId, out ICustomItem itemToSpawn))
+                            {
+                                SummonedCustomItem summonedItem = new(itemToSpawn, ev.Position);
+                                if (spawnItemWhenDetonatedSettings.Pickupable == false)
+                                {
+                                    summonedItem.Pickup.Weight = 5000f;
+                                }
+                                if (spawnItemWhenDetonatedSettings.TimeTillDespawn != null || spawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                                {
+                                    LogManager.Debug($"Starting Despawn Coroutine");
+                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(summonedItem.Serial, (float)spawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                }
+                            }
+                            else
+                                LogManager.Warn($"{spawnItemWhenDetonatedSettings.ItemId} is not a UCI CustomItem ID!");
+                        }
+                        else if (spawnItemWhenDetonatedSettings.ItemType == "Normal" || spawnItemWhenDetonatedSettings.ItemType == "normal")
+                        {
+                            if ((ItemType)spawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244a || (ItemType)spawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244b)
+                            {
+                                LogManager.Debug($"Item is SCP244a or SCP244b");
+                                Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create((ItemType)spawnItemWhenDetonatedSettings.ItemId, ev.Position);
+                                scp244Pickup.Base.MaxDiameter = 0.1f;
+                                scp244Pickup.State = Scp244State.Active;
+                                scp244Pickup.Spawn();
+                                if (spawnItemWhenDetonatedSettings.Pickupable == false)
+                                    scp244Pickup.Weight = 5000f;
+                                if (spawnItemWhenDetonatedSettings.TimeTillDespawn != null || spawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                                {
+                                    LogManager.Debug($"Starting Despawn Coroutine");
+                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(scp244Pickup.Serial, (float)spawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                }
+                            }
+                            else
+                            {
+                                Pickup pickup = Pickup.Create((ItemType)spawnItemWhenDetonatedSettings.ItemId, ev.Position);
+                                Vector3 vector3 = new(0f, 1f, 0f);
+                                pickup.Transform.position = pickup.Transform.position + vector3;
+                                pickup.Spawn();
+                                if (spawnItemWhenDetonatedSettings.Pickupable == false)
+                                    pickup.Weight = 5000f;
+                                if (spawnItemWhenDetonatedSettings.TimeTillDespawn != null || spawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                                {
+                                    LogManager.Debug($"Starting Despawn Coroutine");
+                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(pickup.Serial, (float)spawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                LogManager.Debug($"{ev.TimedGrenade.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.TimedGrenade.Serial}");
+            }
+            if (customItem.HasModule(CustomFlags.Cluster))
+            {
+                LogManager.Debug($"{ev.TimedGrenade.Type} is a CustomItem");
+                foreach (ClusterSettings clusterSettings in customItem.CustomItem.FlagSettings.ClusterSettings)
+                {
+                    Vector3 scale = customItem.CustomItem.Scale * 0.75f;
+                    if (clusterSettings.ItemToSpawn == ItemType.GrenadeHE || clusterSettings.ItemToSpawn == ItemType.GrenadeFlash || clusterSettings.ItemToSpawn == ItemType.SCP018)
+                    {
+                        Timing.CallDelayed(0.1f, () =>
+                        {
+                            ExplosiveGrenadeProjectile firstgrenade = (ExplosiveGrenadeProjectile)ExplosiveGrenadeProjectile.SpawnActive(ev.Position, ItemType.GrenadeHE, ev.Player, (double)clusterSettings.FuseTime / 2);
+                            for (int i = 0; i <= clusterSettings.AmountToSpawn; i++)
+                            {
+                                Vector3 position = ClusterOffset(ev.Position);
+                                ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)ExplosiveGrenadeProjectile.SpawnActive(position, clusterSettings.ItemToSpawn, ev.Player, (double)clusterSettings.FuseTime);
+                                grenade.GameObject.transform.localScale = scale;
+                                grenade.ScpDamageMultiplier = clusterSettings.ScpDamageMultiplier ?? 1f;
+                            }
+                        });
+                    }
+                    else
+                    {
+                        Timing.CallDelayed(0.1f, () =>
+                        {
+                            for (int i = 0; i <= clusterSettings.AmountToSpawn; i++)
+                            {
+                                Vector3 position = ClusterOffset(ev.Position);
+                                Pickup pickup = Pickup.Create(clusterSettings.ItemToSpawn, position, ev.Player.Rotation, scale);
+                                pickup.Spawn();
+                            }
+                        });
+                    }
+                }
+            }
+            else
+            {
+                LogManager.Debug($"{ev.TimedGrenade.Type} is not a CustomItem with the Cluster flag. Serial: {ev.TimedGrenade.Serial}");
+            }
+        }
+
+        public static void OnPickupCreation(PickupCreatedEventArgs ev)
+        {
+            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem summonedCustomItem))
+            {
+                Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                {
+                    try
+                    {
+                        if (ev.Pickup is not null)
+                        {
+                            ev.Pickup.GameObject.transform.localScale = summonedCustomItem.CustomItem.Scale;
+                            ev.Pickup.Weight = summonedCustomItem.CustomItem.Weight;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Silent($"{summonedCustomItem.CustomItem.Name} - {summonedCustomItem.CustomItem.Id} - {summonedCustomItem.CustomItem.CustomFlags}");
+                        LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                    }
+                });
+            }
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+                return;
+
+            if (customItem.HasModule(CustomFlags.ItemGlow))
+            {
+                Timing.CallDelayed(1f, () =>
+                {
+                    foreach (ItemGlowSettings itemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
+                    {
+                        LogManager.Debug("SpawnLightOnItem method triggered");
+
+                        if (ev.Pickup?.Base?.gameObject == null)
+                            return;
+
+                        GameObject itemGameObject = ev.Pickup.Base.gameObject;
+                        Color lightColor = Color.blue;
+
+                        if (itemGlowSettings != null)
+                        {
+                            if (!string.IsNullOrEmpty(itemGlowSettings.GlowColor))
+                            {
+                                if (ColorUtility.TryParseHtmlString(itemGlowSettings.GlowColor, out Color parsedColor))
+                                {
+                                    lightColor = parsedColor;
+                                }
+                                else
+                                {
+                                    LogManager.Error($"Failed to parse color: {itemGlowSettings.GlowColor} for {customItem.CustomItem.Name}");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            LogManager.Error("No FlagSettings found on custom item");
+                        }
+
+                        var light = Light.Create(ev.Pickup.Position);
+                        light.Color = lightColor;
+                        light.Intensity = 0.7f;
+                        light.Range = 0.5f;
+                        light.ShadowType = LightShadows.None;
+
+                        light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
+                        LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
+                        PlayerHandler.ActiveLights[ev.Pickup] = light;
+                    }
+                });
+            }
+        }
+        public static void OnPickup(PickupDestroyedEventArgs ev)
+        {
+            if (ev.Pickup != null)
+            {
+                if (ev.Pickup != null)
+                    PlayerHandler.DestroyLightOnPickup(ev.Pickup);
+                else
+                    LogManager.Error($"Couldnt destroy light on {ev.Pickup.Type}.");
+            }
+        }
+
+        /// <summary>
+        /// A coroutine that destroys a pickup by its serial after a set amount of time.
+        /// </summary>
+        public static IEnumerator<float> TimeTillDespawnCoroutine(ushort serial, float despawnTime)
+        {
+            yield return Timing.WaitForSeconds(despawnTime);
+            Pickup pickup = Pickup.Get(serial);
+            if (pickup != null)
+            {
+                pickup.Destroy();
+                LogManager.Debug($"Destroyed pickup. Type: {pickup.Type} Previous owner: {pickup.LastOwner} Serial: {pickup.Serial}");
+            }
+        }
+
+        private static Vector3 ClusterOffset(Vector3 position)
+        {
+            System.Random random = new System.Random();
+            float x = position.x - 1 + ((float)random.NextDouble() * random.Next(0, 3));
+            float y = position.y;
+            float z = position.z - 1 + ((float)random.NextDouble() * random.Next(0, 3));
+            return new Vector3(x, y, z);
+        }
+    }
+}

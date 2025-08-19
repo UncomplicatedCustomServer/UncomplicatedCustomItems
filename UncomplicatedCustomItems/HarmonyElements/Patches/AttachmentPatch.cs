@@ -2,8 +2,9 @@
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms;
 using Mirror;
-using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.API.Extensions;
 using LabApi.Features.Wrappers;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -16,15 +17,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             if (!ReferenceHub.TryGetHub(conn, out ReferenceHub hub))
                 return true;
 
-            Firearm firearm = hub.inventory.CurInstance as Firearm;
-            if (firearm == null)
+            if (hub.inventory.CurInstance is not Firearm firearm)
                 return true;
 
             if (API.Utilities.TryGetSummonedCustomItem(firearm.ItemSerial, out var customItem))
             {
-                if (customItem.Item.Type.IsWeapon() && customItem.HasModule(Enums.CustomFlags.WorkstationBan))
+                if (customItem.Item.Type.IsWeapon() && customItem.HasModule(CustomFlags.WorkstationBan))
                 {
-                    Player.TryGet(hub.gameObject, out var player);
+                    Player.TryGet(hub.gameObject, out Player player);
                     player.SendHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", customItem.CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
                     return false;
                 }

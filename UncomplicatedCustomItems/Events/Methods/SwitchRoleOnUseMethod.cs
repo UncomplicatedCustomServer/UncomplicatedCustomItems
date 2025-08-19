@@ -3,7 +3,7 @@ using MEC;
 using PlayerRoles;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
 

@@ -3,7 +3,7 @@ using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces;
 using EventSource = LabApi.Events.Handlers.ServerEvents;
 
 namespace UncomplicatedCustomItems.Events.Internal

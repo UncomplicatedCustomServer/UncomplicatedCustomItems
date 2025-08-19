@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.Interfaces;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -35,33 +36,81 @@ namespace UncomplicatedCustomItems.API
 
         /// <summary>
         /// As YAML is a big shit, decode the serialized <see cref="Dictionary{string, string}"/> into a fullified class, giving the <paramref name="baseElement"/>
+        /// Missing properties will be set to their default values.
         /// </summary>
         /// <param name="baseElement"></param>
         /// <param name="data"></param>
         /// <returns>The class</returns>
         public static IData Decode(Data baseElement, Dictionary<string, string> data)
         {
-            if (!Check(baseElement, data, out string Expected, out string KeyList))
-            {
-                LogManager.Error($"Error while decoding class!\nError code: 0x401\nExpected key: {Expected}\nKey list: {KeyList}");
-                return new Data();
-            }
+            SnakeCaseNamingStrategy snakeCaseStrategy = new();
 
-            foreach (KeyValuePair<string, string> Elements in data)
+            foreach (PropertyInfo property in baseElement.GetType().GetProperties())
             {
-                PropertyInfo PropertyInfo = baseElement.GetType().GetProperty(PascalCaseNamingConvention.Instance.Apply(Elements.Key));
-
-                if (PropertyInfo?.PropertyType.IsEnum ?? false)
+                string yamlKey = snakeCaseStrategy.GetPropertyName(property.Name, false);
+                
+                if (data.TryGetValue(yamlKey, out string value))
                 {
-                    PropertyInfo?.SetValue(baseElement, Enum.Parse(PropertyInfo.PropertyType, Elements.Value), null);
-                } 
+                    try
+                    {
+                        if (property.PropertyType.IsEnum)
+                        {
+                            try
+                            {
+                                object enumValue = Enum.Parse(property.PropertyType, value, true);
+                                property.SetValue(baseElement, enumValue, null);
+                            }
+                            catch
+                            {
+                                SetDefaultValue(baseElement, property);
+                                LogManager.Warn($"{nameof(YAMLCaster)}: Invalid enum value '{value}' for property '{property.Name}'. Using default value.");
+                            }
+                        }
+                        else
+                        {
+                            object convertedValue = Convert.ChangeType(value, property.PropertyType);
+                            property.SetValue(baseElement, convertedValue, null);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        SetDefaultValue(baseElement, property);
+                        LogManager.Warn($"{nameof(YAMLCaster)}: Failed to convert value '{value}' for property '{property.Name}': {ex.Message}. Using default value.");
+                    }
+                }
                 else
                 {
-                    PropertyInfo?.SetValue(baseElement, Convert.ChangeType(Elements.Value, PropertyInfo.PropertyType), null);
+                    SetDefaultValue(baseElement, property);
+                    LogManager.Debug($"{nameof(YAMLCaster)}: Property '{property.Name}' missing from YAML data. Using default value.");
                 }
             }
 
             return baseElement;
+        }
+
+        /// <summary>
+        /// Sets a property to its default value based on the property type
+        /// </summary>
+        /// <param name="obj">The object instance</param>
+        /// <param name="property">The property to set</param>
+        private static void SetDefaultValue(object obj, PropertyInfo property)
+        {
+            try
+            {
+                if (property.PropertyType.IsValueType)
+                {
+                    object defaultValue = Activator.CreateInstance(property.PropertyType);
+                    property.SetValue(obj, defaultValue, null);
+                }
+                else if (property.PropertyType == typeof(string))
+                    property.SetValue(obj, string.Empty, null);
+                else
+                    property.SetValue(obj, null, null);
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"{nameof(YAMLCaster)}: Failed to set default value for property '{property.Name}': {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -105,36 +154,6 @@ namespace UncomplicatedCustomItems.API
             };
         }
 
-
-        /// <summary>
-        /// Check if the given <paramref name="data"/> (<see cref="Dictionary{string, string}"/>) can fullify the class at <paramref name="element"/>
-        /// </summary>
-        /// <param name="element"></param>
-        /// <param name="data"></param>
-        /// <param name="ExpectedKey"></param>
-        /// <param name="KeyList"></param>
-        /// <returns><see cref="bool"/> <see langword="true"/> if everything is OK</returns>
-        public static bool Check(IData element, Dictionary<string, string> data, out string ExpectedKey, out string KeyList)
-        {
-            ExpectedKey = null;
-            KeyList = null;
-
-            SnakeCaseNamingStrategy snakeCaseStrategy = new();
-
-            foreach (PropertyInfo Property in element.GetType().GetProperties())
-            {
-                if (!data.ContainsKey(snakeCaseStrategy.GetPropertyName(Property.Name, false)))
-                {
-                    ExpectedKey = snakeCaseStrategy.GetPropertyName(Property.Name, false);
-                    KeyList = string.Join(", ", data.Keys);
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        
-
         /// <summary>
         /// Convert a basic <see cref="YAMLCustomItem"/> Item into a fullified <see cref="ICustomItem"/>
         /// </summary>
@@ -153,6 +172,7 @@ namespace UncomplicatedCustomItems.API
                 Weight = item.Weight,
                 Scale = item.Scale,
                 Spawn = item.Spawn,
+                Arguments = item.Arguments,
                 CustomFlags = item.CustomFlags,
                 FlagSettings = item.FlagSettings,
                 CustomItemType = item.CustomItemType,
@@ -162,4 +182,3 @@ namespace UncomplicatedCustomItems.API
         }
     }
 }
-

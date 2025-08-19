@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {

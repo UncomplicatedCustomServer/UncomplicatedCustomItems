@@ -1,5 +1,6 @@
-﻿using UncomplicatedCustomItems.Interfaces.SpecificData;
+﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using System;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {

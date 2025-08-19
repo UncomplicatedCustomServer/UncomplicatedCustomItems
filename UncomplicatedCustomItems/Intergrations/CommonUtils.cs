@@ -1,4 +1,5 @@
-﻿/*using HarmonyLib;
+﻿#if Exiled
+using HarmonyLib;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features;
@@ -272,4 +273,5 @@ namespace UncomplicatedCustomItems.Integration
             return rolledChance;
         }
     }
-}*/
+}
+#endif

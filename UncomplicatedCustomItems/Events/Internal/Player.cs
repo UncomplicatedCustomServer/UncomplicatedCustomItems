@@ -1,7 +1,7 @@
 ﻿using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using EventSource = LabApi.Events.Handlers.PlayerEvents;
-using UncomplicatedCustomItems.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using MapEventSource = LabApi.Events.Handlers.ServerEvents;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using MEC;
@@ -9,11 +9,12 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
 using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
-using UncomplicatedCustomItems.Extensions;
+using UncomplicatedCustomItems.API.Extensions;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Wrappers;
 using PlayerRoles;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -54,26 +55,26 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null || ev.Player.Role == RoleTypeId.Destroyed || ev.Player.Role == RoleTypeId.Spectator)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem CustomItem))
+            if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem))
+            {
+                if (customItem.CustomItem.CustomItemType is CustomItemType.Weapon)
                 {
-                    if (CustomItem.CustomItem.CustomItemType is CustomItemType.Weapon)
+                    IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
+                    if (weaponData.EnableFriendlyFire)
                     {
-                        IWeaponData WeaponData = CustomItem.CustomItem.CustomData as IWeaponData;
-                        if (WeaponData.EnableFriendlyFire)
-                        {
-                            ev.Player.Damage(WeaponData.Damage, ev.Attacker);
-                            ev.Attacker.SendHitMarker();
-                        }
+                        ev.Player.Damage(weaponData.Damage, ev.Attacker);
+                        ev.Attacker.SendHitMarker();
                     }
                 }
+            }
         }
 
         private static void GrenadeExploded(ProjectileExplodedEventArgs ev)
         {
-            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem Item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem item))
                 return;
 
-            Item?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial); // Untested
+            item?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
         }
 
         private static void DroppedItemEvent(PlayerDroppedItemEventArgs ev)
@@ -81,23 +82,18 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Pickup == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem Item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem item))
                 return;
 
-            Item?.OnDrop(ev);
-            Item.ResetBadge(ev.Player);
-            if (Item.HasModule(Enums.CustomFlags.ToolGun))
+            item?.OnDrop(ev);
+            item.ResetBadge(ev.Player);
+            if (item.HasModule(CustomFlags.ToolGun))
             {
                 SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
-                EventHandler.StopRelativePosCoroutine(ev.Player);
             }
-            EventHandler.StopHumeShieldRegen(ev.Player);
+            PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 
-        /// <summary>
-        /// Show item name if it is custom item
-        /// </summary>
-        /// <param name="ev"></param>
         private static void ShowItemInfoOnItemAdded(PlayerPickedUpItemEventArgs ev)
         {
             if (ev.Item is null)
@@ -105,10 +101,10 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player is null)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem Item))
+            if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem item))
             {
-                Item.OnPickup(ev);
-                Item.HandlePickedUpDisplayHint();
+                item.OnPickup(ev);
+                item.HandlePickedUpDisplayHint();
             }
         }
 
@@ -119,18 +115,18 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.UsableItem == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem Item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem item))
                 return;
 
-            if (Item is null)
+            if (item is null)
                 return;
-            
-            Item.HandleEvent(ev.Player, ItemEvents.Use, ev.UsableItem.Serial);
 
-            Item?.ResetBadge(ev.Player);
+            item.HandleEvent(ev.Player, ItemEvents.Use, ev.UsableItem.Serial);
 
-            if (Item.CustomItem.Reusable)
-                new SummonedCustomItem(Item.CustomItem, ev.Player);
+            item?.ResetBadge(ev.Player);
+
+            if (item.CustomItem.Reusable)
+                new SummonedCustomItem(item.CustomItem, ev.Player);
         }
 
         private static void ChangeItemInHand(PlayerChangedItemEventArgs ev)
@@ -172,18 +168,17 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
             {
-                if (EventHandler.EquipedKeycards.ContainsKey(ev.Player.CurrentItem.Serial))
-                    EventHandler.EquipedKeycards.Remove(ev.Player.CurrentItem.Serial);
+                if (PlayerHandler._equippedKeycards.ContainsKey(ev.Player.CurrentItem.Serial))
+                    PlayerHandler._equippedKeycards.Remove(ev.Player.CurrentItem.Serial);
                 return;
             }
-            if (EventHandler.EquipedKeycards.ContainsKey(item.Serial))
-                EventHandler.EquipedKeycards.Remove(item.Serial);
+            if (PlayerHandler._equippedKeycards.ContainsKey(item.Serial))
+                PlayerHandler._equippedKeycards.Remove(item.Serial);
 
             item.ResetBadge(ev.Player);
 
-            if (item.HasModule(Enums.CustomFlags.ToolGun))
+            if (item.HasModule(CustomFlags.ToolGun))
             {
-                EventHandler.StopRelativePosCoroutine(ev.Player);
                 SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
             }
 
@@ -208,17 +203,17 @@ namespace UncomplicatedCustomItems.Events.Internal
                 }
                 else
                     LogManager.Error($"{item.CustomItem.Name} - {item.Serial} has no tier?");
-                EventHandler.StopHumeShieldRegen(ev.Player);
+                PlayerHandler.StopHumeShieldRegen(ev.Player);
             }
         }
 
-        internal static IEnumerator<float> DecayRate(LabApi.Features.Wrappers.Player player, float DecayRate)
+        internal static IEnumerator<float> DecayRate(LabApi.Features.Wrappers.Player player, float decayRate)
         {
             for (; ; )
             {
                 if (player.HumeShield >= 0)
                 {
-                    player.HumeShield -= Time.deltaTime * DecayRate;
+                    player.HumeShield -= Time.deltaTime * decayRate;
                     yield return Timing.WaitForOneFrame;
                 }
                 else
@@ -238,19 +233,18 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             foreach (Item item in ev.Player.Items)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customitem))
+                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
                 {
-                    customitem.OnDied(ev, customitem);
-                    customitem?.ResetBadge(ev.Player);
-                    if (customitem.HasModule(Enums.CustomFlags.ToolGun))
+                    customItem.OnDied(ev, customItem);
+                    customItem?.ResetBadge(ev.Player);
+                    if (customItem.HasModule(CustomFlags.ToolGun))
                     {
                         SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
-                        EventHandler.StopRelativePosCoroutine(ev.Player);
                     }
 
                 }
             }
-            EventHandler.StopHumeShieldRegen(ev.Player);
+            PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 
         private static void RoleChangeEvent(PlayerChangingRoleEventArgs ev)
@@ -265,12 +259,11 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            if (item.HasModule(Enums.CustomFlags.ToolGun))
+            if (item.HasModule(CustomFlags.ToolGun))
             {
                 SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
-                EventHandler.StopRelativePosCoroutine(ev.Player);
             }
-            EventHandler.StopHumeShieldRegen(ev.Player);
+            PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 
         private static void ThrownProjectile(PlayerThrewProjectileEventArgs ev)
@@ -286,10 +279,10 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player.CurrentItem is null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem Item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
-            Item?.HandleEvent(ev.Player, ItemEvents.Noclip, ev.Player.CurrentItem.Serial);
+            item?.HandleEvent(ev.Player, ItemEvents.Noclip, ev.Player.CurrentItem.Serial);
         }
     }
 }
