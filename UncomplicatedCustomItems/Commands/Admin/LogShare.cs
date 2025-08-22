@@ -51,13 +51,13 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         long elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - start;
                         
                         Logger.Info($"[ShareTheLog] Data size being sent: {result.readableSize}");
-                        Logger.Info($"[ShareTheLog] Successfully shared the UCB logs with the developers!");
+                        Logger.Info($"[ShareTheLog] Successfully shared the UCI logs with the developers!");
                         Logger.Info($"[ShareTheLog] Send this ID to the developers: {data["id"]}");
                         Logger.Info($"[ShareTheLog] Operation completed in {elapsed}ms");
                     }
                     else
                     {
-                        Logger.Error($"[ShareTheLog] Failed to share the UCB logs with the developers. Server response: {result.statusCode}");
+                        Logger.Error($"[ShareTheLog] Failed to share the UCI logs with the developers. Server response: {result.statusCode}");
                     }
                 }
                 catch (JsonException jsonEx)

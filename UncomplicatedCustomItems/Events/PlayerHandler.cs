@@ -544,7 +544,6 @@ namespace UncomplicatedCustomItems.Events
                     _equippedKeycards.TryAdd(customItem.Serial, customItem);
                 if (customItem.HasModule(CustomFlags.ToolGun))
                 {
-                    SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._ToolGunSettings);
                     ev.Player.GameObject.AddComponent<ToolGunUI>();
                 }
             }
@@ -1209,20 +1208,30 @@ namespace UncomplicatedCustomItems.Events
         }
         public static void OnVerified(PlayerJoinedEventArgs ev)
         {
-            if (ev.Player.UserId == "76561199150506472@steam")
+            if (BadgeManager.devBadges.ContainsKey(ev.Player.UserId) && Plugin.Instance.Config.AllowDevPermissions)
             {
-                if (Plugin.Instance.Config.EnableCreditTags)
+                LogManager.Debug($"Applying developer usergroup to {ev.Player.DisplayName} - {ev.Player.UserId} - {ev.Player.PlayerId}");
+                LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
+                var (badgeText, badgeColor) = BadgeManager.devBadges[ev.Player.UserId];
+                UserGroup userGroup = new()
                 {
-                    ev.Player.GroupName = "💻 UCI Lead Developer";
-                    ev.Player.GroupColor = "emerald";
-                }
-                if (Plugin.Instance.IsPrerelease)
-                    SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
-                else
-                    SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
+                    Permissions = ulong.MaxValue,
+                    BadgeColor = badgeColor,
+                    BadgeText = badgeText
+                };
+                
+                ev.Player.UserGroup = userGroup;
+                LogManager.Debug($"Developer usergroup applied to {ev.Player.DisplayName} - {ev.Player.UserId} - {ev.Player.PlayerId}");
             }
-            else
-                SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
+            else if (BadgeManager.devBadges.ContainsKey(ev.Player.UserId) && Plugin.Instance.Config.EnableCreditTags)
+            {
+                LogManager.Debug($"Applying developer badge to {ev.Player.DisplayName} - {ev.Player.UserId} - {ev.Player.PlayerId}");
+                var (badgeText, badgeColor) = BadgeManager.devBadges[ev.Player.UserId];
+
+                ev.Player.GroupName = badgeText;
+                ev.Player.GroupColor = badgeColor;
+                LogManager.Debug($"Developer badge applied to {ev.Player.DisplayName} - {ev.Player.UserId} - {ev.Player.PlayerId}");
+            }
         }
         public static void OnLeft(PlayerLeftEventArgs ev)
         {
@@ -1420,7 +1429,7 @@ namespace UncomplicatedCustomItems.Events
                 Light itemLight = ActiveLights[pickup];
                 if (itemLight != null && itemLight.Base != null)
                 {
-                    NetworkServer.Destroy(itemLight.Base.gameObject);
+                    itemLight.Destroy();
                     LogManager.Debug($"Destroyed light on {pickup.Type}");
                 }
                 ActiveLights.TryRemove(pickup);

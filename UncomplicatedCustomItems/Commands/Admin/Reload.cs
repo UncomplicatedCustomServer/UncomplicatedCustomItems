@@ -2,6 +2,7 @@
 using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -23,7 +24,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string[] Aliases { get; } = ["reload"];
 
-        public Dictionary<uint, Player> CustomItems = [];
+        public Dictionary<ICustomItem, Player> CustomItems = [];
+
+        private int ReloadedItems;
+        private int ReloadedActions;
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
@@ -39,81 +43,80 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
             if (CustomItem.List.Count > 0)
             {
-                List<Pickup> PickupsToDestroy = new List<Pickup>();
+                CustomItems.Clear();
+                int BeforeItems = CustomItem.List.Count();
+                int BeforeActions = CustomAction.List.Count();
+                ReloadedItems = 0;
+                ReloadedActions = 0;
 
-                foreach (Pickup Pickup in Pickup.List)
+                foreach (SummonedCustomItem item in SummonedCustomItem.List.ToList())
                 {
-                    ushort Serial = Pickup.Serial;
-                    if (Utilities.IsSummonedCustomItem(Serial))
+                    if (item.IsPickup)
+                        item.Pickup.Destroy();
+                    else
                     {
-                        PickupsToDestroy.Add(Pickup);
+                        CustomItems.Add(item.CustomItem, item.Owner);
+                        item.Destroy();
                     }
                 }
 
-                foreach (Pickup Pickup in PickupsToDestroy)
-                {
-                    LogManager.Debug($"Destroyed {Pickup.Type}");
-                    Pickup.Destroy();
-                }
-                foreach (Player player in Player.ReadyList)
-                {
-                    List<ushort> ItemsToRemove = new List<ushort>();
-
-                    foreach (Item Item in player.Items)
-                    {
-                        int id = player.PlayerId;
-                        ushort Serial = Item.Serial;
-                        if (SummonedCustomItem.TryGet(Serial, out SummonedCustomItem CustomItem))
-                        {
-                            CustomItems[CustomItem.CustomItem.Id] = player;
-                            LogManager.Debug($"Marked {Item.Type} from {player.Nickname} for removal");
-                            ItemsToRemove.Add(Serial);
-                        }
-                    }
-
-                    foreach (ushort Serial in ItemsToRemove)
-                    {
-                        player.RemoveItem(Item.Get(Serial));
-                        LogManager.Debug($"Removed CustomItem with serial {Serial} from {player.Nickname}");
-                    }
-                }
-
-                foreach (ICustomItem customItem in CustomItem.List)
+                foreach (ICustomItem customItem in CustomItem.List.ToList())
                 {
                     CustomItem.Unregister(customItem.Id);
                     LogManager.Debug($"Unregistered {customItem.Name}.");
                 }
-                FileConfig FileConfig = Plugin.Instance.FileConfig;
-                int Before = CustomItem.List.Count;
-                int NewItems = CustomItem.List.Count - Before;
+
+                foreach (ICustomAction action in CustomAction.List.ToList())
+                {
+                    CustomAction.Unregister(action.Id);
+                    LogManager.Debug($"Unregistered action {action.Name}.");
+                }
+
                 SummonedCustomItem.List.Clear();
                 CustomItem.List.Clear();
                 CustomItem.UnregisteredList.Clear();
+                CustomAction.List.Clear();
+                CustomAction.UnregisteredList.Clear();
 
-                FileConfig.Welcome(loadExamples: true);
-                FileConfig.Welcome(Server.Port.ToString());
-                FileConfig.LoadAll();
-                FileConfig.LoadAll(Server.Port.ToString());
-                Events.Internal.Server.SpawnItemsOnRoundStarted();
+                Plugin.Instance.FileConfig.Welcome(loadExamples: true);
+                Plugin.Instance.FileConfig.Welcome(Server.Port.ToString());
+                Plugin.Instance.FileConfig.Welcome("Actions");
+                Plugin.Instance.FileConfig.LoadAll();
+                Plugin.Instance.FileConfig.LoadAll(Server.Port.ToString());
+                Plugin.Instance.FileConfig.LoadAll("Actions");
+
+                if (Round.IsRoundStarted)
+                    Events.Internal.Server.SpawnItemsOnRoundStarted();
+
+                foreach (ICustomItem item in CustomItem.List)
+                    ReloadedItems++;
+                foreach (ICustomAction action in CustomAction.List)
+                    ReloadedActions++;
+
+                int NewItems = BeforeItems - ReloadedItems;
+                int NewActions = BeforeActions - ReloadedActions;
 
                 foreach (var entry in CustomItems)
+                    Timing.CallDelayed(1f, () => new SummonedCustomItem(entry.Key, entry.Value));
+
+                if (NewItems > 0 && NewActions > 0)
                 {
-                    Timing.CallDelayed(1f, () =>
-                    {
-                        Player player = entry.Value;
-                        uint Id = entry.Key;
-                        Utilities.TryGetCustomItem(Id, out ICustomItem item);
-                        new SummonedCustomItem(item, player);
-                    });
+                    response = $"\nReloaded {CustomItem.List.Count} CustomItems ({NewItems} new). \nReloaded {CustomAction.List.Count} CustomActions ({NewActions} new).\nUnregistered - Items: {CustomItem.UnregisteredList.Count}, Actions: {CustomAction.UnregisteredList.Count}";
+                    return true;
                 }
-                if (NewItems > 0)
+                else if (NewItems > 0)
                 {
-                    response = $"\nReloaded {CustomItem.List.Count} Added {NewItems} New Custom items. \n Amount of unregistered Custom items: {CustomItem.UnregisteredList.Count}";
+                    response = $"\nReloaded {CustomItem.List.Count} CustomItems ({NewItems} new).\nReloaded {CustomAction.List.Count} CustomActions.\nUnregistered - Items: {CustomItem.UnregisteredList.Count}, Actions: {CustomAction.UnregisteredList.Count}";
+                    return true;
+                }
+                else if (NewActions > 0)
+                {
+                    response = $"\nReloaded {CustomAction.List.Count} CustomActions ({NewActions} new).\nUnregistered - Actions: {CustomAction.UnregisteredList.Count}";
                     return true;
                 }
                 else
                 {
-                    response = $"\nReloaded {CustomItem.List.Count} Custom items. \n Amount of unregistered Custom items: {CustomItem.UnregisteredList.Count}";
+                    response = $"\nReloaded {CustomItem.List.Count} CustomItems.\nReloaded {CustomAction.List.Count} CustomActions.\nUnregistered - Items: {CustomItem.UnregisteredList.Count}, Actions: {CustomAction.UnregisteredList.Count}";
                     return true;
                 }
             }

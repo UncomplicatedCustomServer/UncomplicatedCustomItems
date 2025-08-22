@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using Newtonsoft.Json.Serialization;
+using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Enums;
+using Newtonsoft.Json.Serialization;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -21,43 +23,53 @@ namespace UncomplicatedCustomItems.API
         /// As YAML is a big shit, serialize <see cref="Data"/> elements into manageable Dictionaries for YAML
         /// </summary>
         /// <param name="element"></param>
-        /// <returns>The <see cref="Dictionary{string, string}"/> of the class</returns>
-        public static Dictionary<string, string> Encode(Data element)
+        /// <returns>The <see cref="Dictionary{string, object}"/> of the class</returns>
+        public static Dictionary<string, object> Encode(Data element)
         {
-            Dictionary<string, string> serialized = new();
-            foreach (PropertyInfo Property in element.GetType().GetProperties())
+            Dictionary<string, object> serialized = new();
+            SnakeCaseNamingStrategy snakeCaseStrategy = new();
+
+            foreach (PropertyInfo property in element.GetType().GetProperties())
             {
-                //Log.Debug($"Encoding class {element.GetType().FullName} >> Property {Property.Name} as {Property.GetValue(element, null)}");
-                SnakeCaseNamingStrategy snakeCaseStrategy = new();
-                serialized.Add(snakeCaseStrategy.GetPropertyName(Property.Name, false), (Property.GetValue(element, null) ?? "error").ToString());
+                string yamlKey = snakeCaseStrategy.GetPropertyName(property.Name, false);
+                object value = property.GetValue(element, null);
+
+                serialized.Add(yamlKey, value ?? "");
             }
+
             return serialized;
         }
 
         /// <summary>
-        /// As YAML is a big shit, decode the serialized <see cref="Dictionary{string, string}"/> into a fullified class, giving the <paramref name="baseElement"/>
+        /// As YAML is a big shit, decode the serialized <see cref="Dictionary{string, object}"/> into a fullified class, giving the <paramref name="baseElement"/>
         /// Missing properties will be set to their default values.
         /// </summary>
         /// <param name="baseElement"></param>
         /// <param name="data"></param>
         /// <returns>The class</returns>
-        public static IData Decode(Data baseElement, Dictionary<string, string> data)
+        public static IData Decode(Data baseElement, Dictionary<string, object> data)
         {
             SnakeCaseNamingStrategy snakeCaseStrategy = new();
 
             foreach (PropertyInfo property in baseElement.GetType().GetProperties())
             {
                 string yamlKey = snakeCaseStrategy.GetPropertyName(property.Name, false);
-                
-                if (data.TryGetValue(yamlKey, out string value))
+
+                if (data.TryGetValue(yamlKey, out object value))
                 {
                     try
                     {
+                        if (value == null)
+                        {
+                            SetDefaultValue(baseElement, property);
+                            continue;
+                        }
+
                         if (property.PropertyType.IsEnum)
                         {
                             try
                             {
-                                object enumValue = Enum.Parse(property.PropertyType, value, true);
+                                object enumValue = Enum.Parse(property.PropertyType, value.ToString(), true);
                                 property.SetValue(baseElement, enumValue, null);
                             }
                             catch
@@ -66,10 +78,22 @@ namespace UncomplicatedCustomItems.API
                                 LogManager.Warn($"{nameof(YAMLCaster)}: Invalid enum value '{value}' for property '{property.Name}'. Using default value.");
                             }
                         }
-                        else
+                        else if (property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
                         {
                             object convertedValue = Convert.ChangeType(value, property.PropertyType);
                             property.SetValue(baseElement, convertedValue, null);
+                        }
+                        else
+                        {
+                            if (property.PropertyType.IsAssignableFrom(value.GetType()))
+                            {
+                                property.SetValue(baseElement, value, null);
+                            }
+                            else
+                            {
+                                object convertedValue = ConvertComplexValue(value, property.PropertyType);
+                                property.SetValue(baseElement, convertedValue, null);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -86,6 +110,71 @@ namespace UncomplicatedCustomItems.API
             }
 
             return baseElement;
+        }
+
+        /// <summary>
+        /// Convert complex values with proper type handling
+        /// </summary>
+        /// <param name="value">The value to convert</param>
+        /// <param name="targetType">The target type</param>
+        /// <returns>Converted value</returns>
+        private static object ConvertComplexValue(object value, Type targetType)
+        {
+            if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                Type elementType = targetType.GetGenericArguments()[0];
+
+                if (value is IList sourceList)
+                {
+                    IList targetList = (IList)Activator.CreateInstance(targetType);
+
+                    foreach (object item in sourceList)
+                    {
+                        if (item == null)
+                        {
+                            targetList.Add(null);
+                            continue;
+                        }
+
+                        if (elementType.IsAssignableFrom(item.GetType()))
+                        {
+                            targetList.Add(item);
+                        }
+                        else
+                        {
+                            ISerializer yamlSerializer = new SerializerBuilder()
+                                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                                .Build();
+                            IDeserializer yamlDeserializer = new DeserializerBuilder()
+                                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                                .Build();
+
+                            string yamlString = yamlSerializer.Serialize(item);
+                            object convertedItem = yamlDeserializer.Deserialize(yamlString, elementType);
+                            targetList.Add(convertedItem);
+                        }
+                    }
+
+                    return targetList;
+                }
+            }
+
+            try
+            {
+                ISerializer yamlSerializer = new SerializerBuilder()
+                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                    .Build();
+                IDeserializer yamlDeserializer = new DeserializerBuilder()
+                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                    .Build();
+
+                string yamlString = yamlSerializer.Serialize(value);
+                return yamlDeserializer.Deserialize(yamlString, targetType);
+            }
+            catch
+            {
+                return Convert.ChangeType(value, targetType);
+            }
         }
 
         /// <summary>
@@ -114,13 +203,13 @@ namespace UncomplicatedCustomItems.API
         }
 
         /// <summary>
-        /// Decode the serialized <see cref="Dictionary{string, string}"/> into a fullified class by it's <see cref="CustomItemType"/>
+        /// Decode the serialized <see cref="Dictionary{string, object}"/> into a fullified class by it's <see cref="CustomItemType"/>
         /// </summary>
         /// <param name="type"></param>
         /// <param name="data"></param>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static Data Decode(CustomItemType type, Dictionary<string, string> data, ItemType item)
+        public static Data Decode(CustomItemType type, Dictionary<string, object> data, ItemType item)
         {
             return (type, item) switch
             {
@@ -179,6 +268,18 @@ namespace UncomplicatedCustomItems.API
                 CustomData = Decode(item.CustomItemType, item.CustomData, item.Item)
             };
             return NewItem;
+        }
+
+        public static ICustomAction Converter(YAMLCustomAction action)
+        {
+            ICustomAction NewAction = new CustomAction
+            {
+                Id = action.Id,
+                Name = action.Name,
+                Description = action.Description,
+                Actions = action.Actions
+            };
+            return NewAction;
         }
     }
 }

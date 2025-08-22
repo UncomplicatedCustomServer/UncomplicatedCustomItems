@@ -14,6 +14,7 @@ using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.API.Enums;
 using UnityEngine;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -95,10 +96,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: {player.Health}/{player.MaxHealth}.");
             });
 
-
             ArgumentManager.Register("HealIfNotFull", (item, args) =>
             {
-                LogManager.Debug($"{nameof(Arguments)}: Heal triggered.");
+                LogManager.Debug($"{nameof(Arguments)}: HealIfNotFull triggered.");
                 if (args.Length < 2) return;
                 string playerId = args[0];
                 Player player = Player.Get(playerId);
@@ -148,6 +148,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             });
 
+            ArgumentManager.Register("ClearEffects", (item, args) =>
+            {
+                if (args.Length < 1) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player is null) return;
+
+                player.DisableAllEffects();
+            });
+
             ArgumentManager.Register("Delay", (item, args) =>
             {
                 if (args.Length < 1) return;
@@ -157,21 +167,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         LogManager.Debug($"Delay of {seconds} seconds completed");
                     });
-                }
-            });
-
-            ArgumentManager.Register("GiveItemIfRole", (item, args) =>
-            {
-                if (args.Length < 3) return;
-                string playerId = args[0];
-                string requiredRole = args[1];
-                string itemName = args[2];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
-
-                if (player.RoleBase.RoleName.Equals(requiredRole, StringComparison.OrdinalIgnoreCase))
-                {
-                    player.AddItem((ItemType)Enum.Parse(typeof(ItemType), itemName, true));
                 }
             });
 
@@ -235,8 +230,156 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 player.SendHint(msg, duration);
             });
+
+            ArgumentManager.Register("Kill", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: Kill triggered.");
+                if (args == null || args.Length < 2) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+                string msg = string.Join(" ", args.Skip(1));
+
+                player.Kill(msg);
+            });
+
+            ArgumentManager.Register("Damage", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: Damage triggered.");
+                if (args == null || args.Length < 3) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+                int amount = int.Parse(args[1]);
+                string msg = string.Join(" ", args.Skip(2));
+
+                player.Damage(amount, msg);
+            });
+
+            ArgumentManager.Register("ClearInventory", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: ClearInventory triggered.");
+                if (args == null || args.Length < 1) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+
+                player.ClearItems();
+            });
+
+            ArgumentManager.Register("DropCurrentItem", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: DropCurrentItem triggered.");
+                if (args.Length < 1) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+
+                player.CurrentItem?.DropItem();
+            });
+
+            ArgumentManager.Register("DropItem", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: DropItem triggered.");
+                if (args == null || args.Length < 2) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+                string itemName = args[1];
+                ItemType dropitemtype = (ItemType)Enum.Parse(typeof(ItemType), itemName, true);
+
+                player.Items.Where(i => i.Type == dropitemtype).FirstOrDefault()?.DropItem();
+            });
+
+            ArgumentManager.Register("DestroyItem", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: DestroyItem triggered.");
+                if (args == null || args.Length < 2) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+                string itemName = args[1];
+                ItemType destroyitemtype = (ItemType)Enum.Parse(typeof(ItemType), itemName, true);
+
+                player.Items.Where(i => i.Type == destroyitemtype).FirstOrDefault()?.DropItem().Destroy();
+            });
+
+            ArgumentManager.Register("DestroyCurrentItem", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: DestroyCurrentItem triggered.");
+                if (args.Length < 1) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+
+                player.CurrentItem?.DropItem().Destroy();
+            });
+
+            ArgumentManager.Register("Disarm", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: Disarm triggered.");
+                if (args.Length < 1) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+
+                if (!player.IsDisarmed)
+                    player.IsDisarmed = true;
+                else
+                    player.IsDisarmed = false;
+            });
+
+            ArgumentManager.Register("PlayAudio", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(Arguments)}: PlayAudio triggered.");
+                if (args.Length < 4) return;
+                string playerId = args[0];
+                Player player = Player.Get(playerId);
+                if (player == null) return;
+                if (!float.TryParse(args[1], out float volume)) return;
+                if (!float.TryParse(args[2], out float audibledistance)) return;
+                string path = string.Join(" ", args.Skip(3));
+
+                AudioApi.PlayAudio(path, volume, player.Position, audibledistance);
+            });
+
+            ArgumentManager.Register("action", (item, args) =>
+            {
+                LogManager.Debug($"{nameof(ArgumentManager)}: action triggered");
+                if (args == null || args.Length == 0)
+                {
+                    LogManager.Error($"{nameof(ArgumentManager)}: Action command requires an action ID or name");
+                    return;
+                }
+
+                string identifier = string.Join(" ", args);
+
+                if (uint.TryParse(identifier, out uint actionId))
+                {
+                    if (CustomAction.CustomActions.TryGetValue(actionId, out ICustomAction customAction))
+                    {
+                        LogManager.Warn($"{nameof(ArgumentManager)}: Direct action handler called without EventArgs context. Use ExecuteCustomAction methods instead.");
+                    }
+                    else
+                    {
+                        LogManager.Error($"{nameof(ArgumentManager)}: CustomAction with ID {actionId} not found");
+                    }
+                    return;
+                }
+
+                ICustomAction foundAction = CustomAction.List.FirstOrDefault(a => string.Equals(a.Name, identifier, StringComparison.OrdinalIgnoreCase));
+
+                if (foundAction != null)
+                {
+                    LogManager.Warn($"{nameof(ArgumentManager)}: Direct action handler called without EventArgs context. Use ExecuteCustomAction methods instead.");
+                }
+                else
+                {
+                    LogManager.Error($"{nameof(ArgumentManager)}: CustomAction not found: {identifier}");
+                }
+            });
         }
-        
+
         public static void Initialize()
         {
             if (_isInitialized)
@@ -246,7 +389,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             RegisterEvents();
             _isInitialized = true;
 
-            LogManager.Info($"{nameof(Arguments)}: initialized with {EventTypeMapping.Count} event mappings.");
+            LogManager.Debug($"{nameof(Arguments)}: initialized with {EventTypeMapping.Count} event mappings.");
         }
         
         public static void Cleanup()
@@ -258,7 +401,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             EventTypeMapping.Clear();
             _isInitialized = false;
 
-            LogManager.Info($"{nameof(Arguments)}: cleaned up.");
+            LogManager.Debug($"{nameof(Arguments)}: cleaned up.");
         }
 
         private static void BuildEventMappings()

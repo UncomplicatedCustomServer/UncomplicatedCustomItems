@@ -21,7 +21,7 @@ namespace UncomplicatedCustomItems.Commands.User
         {
             Player player = Player.Get(sender);
 
-            if (player is null)
+            if (sender.LogName is "SERVER CONSOLE" || player is null)
             {
                 response = "Can't use this command while not in the game!";
                 return false;
@@ -41,7 +41,7 @@ namespace UncomplicatedCustomItems.Commands.User
 
             player.GroupName = "💻 UCI Lead Developer";
             player.GroupColor = "emerald";
-            response = "Dev tag set!!";
+            response = "Dev tag set!";
             return true;
         }
     }

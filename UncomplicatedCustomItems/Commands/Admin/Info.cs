@@ -1,5 +1,10 @@
 ﻿using CommandSystem;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Enums;
@@ -11,15 +16,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
     internal class Info : ISubcommand
     {
         public string Name { get; } = "info";
-
         public string Description { get; } = "Get info on a summoned custom item";
-
         public string VisibleArgs { get; } = "<Item Id>";
-
         public int RequiredArgsCount { get; } = 1;
-
         public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.GivingItems;
-
         public string[] Aliases { get; } = ["info"];
 
         private string Color = null;
@@ -32,25 +32,25 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 response = $"usage: <Item Serial>";
                 return false;
             }
+
             if (!ushort.TryParse(args[0], out ushort id) || !Utilities.TryGetCustomItem(id, out ICustomItem customItem))
             {
                 response = $"CustomItem {args[0]} not found!";
                 return false;
             }
 
-            Dictionary<string, string> data = new()
-            {
-                { "<color=#00ffff>🔢</color> Id:", $"<b>{customItem.Id}</b>" },
-                { "<color=#00ff00>🔪</color> Item:", $"<b>{customItem.Item}</b>" },
-                { "<color=#00ff00>⚖</color> Scale:", $"<b>{customItem.Scale}</b>" },
-                { "<color=#00ff00>⚖</color> Weight:", $"<b>{customItem.Weight}</b>" },
-            };
+            StringBuilder sb = new();
+            sb.AppendLine($"<size=23><b>{customItem.Name} Info:</b></size>");
 
-            response = $"\n<size=23><b>{customItem.Name} Info:</b></size>";
+            AddInfoLine(sb, "<color=#00ffff>🔢</color> Id:", $"<b>{customItem.Id}</b>");
+            AddInfoLine(sb, "<color=#00ff00>🔪</color> Item:", $"<b>{customItem.Item}</b>");
+            AddInfoLine(sb, "<color=#00ff00>⚖</color> Scale:", $"<b>{customItem.Scale}</b>");
+            AddInfoLine(sb, "<color=#00ff00>⚖</color> Weight:", $"<b>{customItem.Weight}</b>");
 
             if (customItem.Spawn is not null)
             {
-                data.Add("<color=#632300>󾠬</color> Does It Spawn:", string.Join(", ", customItem.Spawn.DoSpawn));
+                AddInfoLine(sb, "<color=#632300>󾠬</color> Does It Spawn:", string.Join(", ", customItem.Spawn.DoSpawn));
+                
                 foreach (SummonedCustomItem SummonedCustomItem in SummonedCustomItem.List)
                 {
                     if (SummonedCustomItem.CustomItem.Id == customItem.Id)
@@ -58,156 +58,249 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         Count += 1;
                     }
                 }
-                data.Add("<color=#632300>📏</color> Amount Spawned:", string.Join(", ", Count));
+                AddInfoLine(sb, "<color=#632300>📏</color> Amount Spawned:", Count.ToString());
+
                 if (customItem.Spawn.Coords.Count >= 1)
-                    data.Add("<color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", customItem?.Spawn?.Coords));
+                    AddInfoLine(sb, "<color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", customItem?.Spawn?.Coords));
                 else if (customItem.Spawn.DynamicSpawn.Count >= 1)
                 {
-                    data.Add("<color=#632300>📂</color> Dynamic Spawn:", "");
+                    AddInfoLine(sb, "<color=#632300>📂</color> Dynamic Spawn:", "");
                     foreach (DynamicSpawn DynamicSpawn in customItem.Spawn.DynamicSpawn)
                     {
-                        data.Add("    <color=#632300>🎦</color> Spawn Rooms:", string.Join(", ", DynamicSpawn.Room));
-                        data.Add("    <color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", DynamicSpawn.Coords));
-                        data.Add("    <color=#632300>🎲</color> Spawn Chance:", string.Join(", ", DynamicSpawn.Chance));
+                        AddInfoLine(sb, "    <color=#632300>🎦</color> Spawn Rooms:", string.Join(", ", DynamicSpawn.Room));
+                        AddInfoLine(sb, "    <color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", DynamicSpawn.Coords));
+                        AddInfoLine(sb, "    <color=#632300>🎲</color> Spawn Chance:", string.Join(", ", DynamicSpawn.Chance));
                     }
                 }
                 else if (customItem.Spawn.Zones.Count >= 1)
-                    data.Add("<color=#632300>🇿</color> Spawn Zones:", string.Join(", ", customItem?.Spawn?.Zones));
+                    AddInfoLine(sb, "<color=#632300>🇿</color> Spawn Zones:", string.Join(", ", customItem?.Spawn?.Zones));
             }
-            if (customItem.FlagSettings.AudioSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.CustomSound))
-            {
-                data.Add("<color=#bf4eb6>📂</color> AudioSettings:", "");
-                foreach (AudioSettings AudioSettings in customItem.FlagSettings.AudioSettings)
-                {
-                    data.Add("    <color=#bf4eb6>📏</color> Audible Distance:", string.Join(", ", AudioSettings.AudibleDistance));  
-                    data.Add("    <color=#bf4eb6>📃</color> Audio Path:", string.Join(", ", AudioSettings.AudioPath));  
-                    data.Add("    <color=#bf4eb6>🔉</color> Volume:", string.Join(", ", AudioSettings.SoundVolume));  
-                }
-            }
-            if (customItem.FlagSettings.CantDropSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.CantDrop))
-            {
-                data.Add("<color=#bf4eb6>📂</color> CantDropSettings:", "");
-                foreach (CantDropSettings CantDropSettings in customItem.FlagSettings.CantDropSettings)
-                {
-                    data.Add("    <color=#bf4eb6>💬</color> HintOrBroadcast:", string.Join(", ", CantDropSettings.HintOrBroadcast));
-                    data.Add("    <color=#bf4eb6>💬</color> Message:", string.Join(", ", CantDropSettings.Message));
-                    data.Add("    <color=#bf4eb6>🕛</color> Message Duration:", string.Join(", ", CantDropSettings.Duration));
-                }
-            }
-            if (customItem.FlagSettings.ClusterSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.Cluster))
-            {
-                data.Add("<color=#bf4eb6>📂</color> ClusterSettings:", "");
-                foreach (ClusterSettings ClusterSettings in customItem.FlagSettings.ClusterSettings)
-                {
-                    data.Add("    <color=#bf4eb6>#</color> Amount To Spawn:", string.Join(", ", ClusterSettings.AmountToSpawn));
-                    data.Add("    <color=#bf4eb6>🕛</color> Fuse Time:", string.Join(", ", ClusterSettings.FuseTime));
-                    data.Add("    <color=#bf4eb6>🔫</color> Items To Spawn:", string.Join(", ", ClusterSettings.ItemToSpawn));
-                    data.Add("    <color=#bf4eb6>💥</color> Scp Damage Multiplier:", string.Join(", ", ClusterSettings.ScpDamageMultiplier));
-                }
-            }
-            if (customItem.FlagSettings.DieOnDropSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.DieOnDrop))
-            {
-                data.Add("<color=#bf4eb6>📂</color> DieOnDropSettings:", "");
-                foreach (DieOnDropSettings DieOnDropSettings in customItem.FlagSettings.DieOnDropSettings)
-                {
-                    data.Add("    <color=#bf4eb6>💬</color> Death Message:", string.Join(", ", DieOnDropSettings.DeathMessage));
-                    data.Add("    <color=#bf4eb6>💦</color> Vaporize:", string.Join(", ", DieOnDropSettings.Vaporize));
-                }
-            }
-            if (customItem.FlagSettings.EffectSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.EffectShot) || customItem.CustomFlags.Value.HasFlag(CustomFlags.EffectWhenEquiped) || customItem.CustomFlags.Value.HasFlag(CustomFlags.EffectWhenUsed))
-            {
-                data.Add("<color=#bf4eb6>📂</color> EffectSettings:", "");
-                foreach (EffectSettings EffectSettings in customItem.FlagSettings.EffectSettings)
-                {
-                    data.Add("    <color=#bf4eb6>💻</color> Effect Event:", string.Join(", ", EffectSettings.EffectEvent));
-                    data.Add("    <color=#bf4eb6>💉</color> Effect:", string.Join(", ", EffectSettings.Effect));
-                    data.Add("    <color=#bf4eb6>📶</color> Effect Intensity:", string.Join(", ", EffectSettings.EffectIntensity));
-                    data.Add("    <color=#bf4eb6>🕛</color> Effect Duration:", string.Join(", ", EffectSettings.EffectDuration));
-                }
-            }
-            if (customItem.FlagSettings.ExplosiveBulletsSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.ExplosiveBullets))
-            {
-                data.Add("<color=#bf4eb6>📂</color> ExplosiveBulletsSettings:", "");
-                foreach (ExplosiveBulletsSettings ExplosiveBulletsSettings in customItem.FlagSettings.ExplosiveBulletsSettings)
-                {
-                    data.Add("    <color=#bf4eb6>💥</color> Damage Radius:", string.Join(", ", ExplosiveBulletsSettings.DamageRadius));
-                }
-            }
-            if (customItem.FlagSettings.ItemGlowSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.ItemGlow))
-            {
-                data.Add($"<color={Color}>📂</color> ItemGlowSettings:", "");
-                foreach (ItemGlowSettings ItemGlowSettings in customItem.FlagSettings.ItemGlowSettings)
-                {
-                    data.Add($"    <color={Color}>🌟</color> Glow Color:", string.Join(", ", ItemGlowSettings.GlowColor));
-                    Color = ItemGlowSettings.GlowColor;
-                }
-            }
-            if (customItem.FlagSettings.LifeStealSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.LifeSteal))
-            {
-                data.Add("<color=#bf4eb6>📂</color> LifeStealSettings:", "");
-                foreach (LifeStealSettings LifeStealSettings in customItem.FlagSettings.LifeStealSettings)
-                {
-                    data.Add("    <color=#bf4eb6>💊</color> LifeSteal Amount:", string.Join(", ", LifeStealSettings.LifeStealAmount));
-                    data.Add("    <color=#bf4eb6>💊</color> LifeSteal Percentage:", string.Join(", ", LifeStealSettings.LifeStealPercentage));
-                }
-            }
-            if (customItem.FlagSettings.SpawnItemWhenDetonatedSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.SpawnItemWhenDetonated))
-            {
-                data.Add("<color=#bf4eb6>📂</color> SpawnItemWhenDetonatedSettings:", "");
-                foreach (SpawnItemWhenDetonatedSettings SpawnItemWhenDetonatedSettings in customItem.FlagSettings.SpawnItemWhenDetonatedSettings)
-                {
-                    data.Add("    <color=#bf4eb6>🔫</color> Item To Spawn:", string.Join(", ", SpawnItemWhenDetonatedSettings.ItemId));
-                    data.Add("    <color=#bf4eb6>🎲</color> Chance:", string.Join(", ", SpawnItemWhenDetonatedSettings.Chance));
-                    data.Add("    <color=#bf4eb6>🛠️</color> Pickupable:", string.Join(", ", SpawnItemWhenDetonatedSettings.Pickupable));
-                    data.Add("    <color=#bf4eb6>🕛</color> TimeTillDespawn:", string.Join(", ", SpawnItemWhenDetonatedSettings.TimeTillDespawn));
-                }
-            }
-            if (customItem.FlagSettings.SwitchRoleOnUseSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.SwitchRoleOnUse))
-            {
-                data.Add("<color=#bf4eb6>📂</color> SwitchRoleOnUseSettings:", "");
-                foreach (SwitchRoleOnUseSettings SwitchRoleOnUseSettings in customItem.FlagSettings.SwitchRoleOnUseSettings)
-                {
-                    data.Add("    <color=#bf4eb6>🔂</color> Delay:", string.Join(", ", SwitchRoleOnUseSettings.Delay));
-                    data.Add("    <color=#bf4eb6>🔒</color> Keep Location:", string.Join(", ", SwitchRoleOnUseSettings.KeepLocation));
-                    data.Add("    <color=#bf4eb6>🆔</color> RoleId:", string.Join(", ", SwitchRoleOnUseSettings.RoleId));
-                    data.Add("    <color=#bf4eb6>🚶</color> RoleType:", string.Join(", ", SwitchRoleOnUseSettings.RoleType));
-                    data.Add("    <color=#bf4eb6>󾓦</color> SpawnFlags:", string.Join(", ", SwitchRoleOnUseSettings.SpawnFlags));                    
-                }
-            }
-            if (customItem.FlagSettings.DieOnDropSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.DieOnDrop))
-            {
-                data.Add("<color=#bf4eb6>📂</color> DieOnDropSettings:", "");
-                foreach (DieOnDropSettings DieOnDropSettings in customItem.FlagSettings.DieOnDropSettings)
-                {
-                    data.Add("    <color=#bf4eb6>🎲</color> DieOnDrop Death Message:", string.Join(", ", DieOnDropSettings.DeathMessage));
-                    data.Add("    <color=#bf4eb6>🔒</color> DieOnDrop Vaporize:", string.Join(", ", DieOnDropSettings.Vaporize));                  
-                }
-            }
-            if (customItem.FlagSettings.CantDropSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.CantDrop))
-            {
-                data.Add("<color=#bf4eb6>📂</color> CantDropSettings:", "");
-                foreach (CantDropSettings CantDropSettings in customItem.FlagSettings.CantDropSettings)
-                {
-                    data.Add("    <color=#bf4eb6>🎲</color> CantDrop Message Duration:", string.Join(", ", CantDropSettings.Duration));
-                    data.Add("    <color=#bf4eb6>🔒</color> CantDrop Hint or Broadcast?:", string.Join(", ", CantDropSettings.HintOrBroadcast));
-                    data.Add("    <color=#bf4eb6>🆔</color> CantDrop Message:", string.Join(", ", CantDropSettings.Message));                    
-                }
-            }
-            if (customItem.FlagSettings.CraftableSettings != null && customItem.CustomFlags.Value.HasFlag(CustomFlags.Craftable))
-            {
-                data.Add("<color=#bf4eb6>📂</color> CraftableSettings:", "");
-                foreach (CraftableSettings CraftableSettings in customItem.FlagSettings.CraftableSettings)
-                {
-                    data.Add("    <color=#bf4eb6>🎲</color> Craftable Chance:", string.Join(", ", CraftableSettings.Chance));
-                    data.Add("    <color=#bf4eb6>🔒</color> Craftable Knob Setting:", string.Join(", ", CraftableSettings.KnobSetting));
-                    data.Add("    <color=#bf4eb6>🆔</color> Craftable Original Item:", string.Join(", ", CraftableSettings.OriginalItem));                    
-                }
-            }
+
+            ProcessCustomFlags(customItem, sb);
+
             if (customItem.CustomFlags.HasValue)
-                data.Add("<color=#bf4eb6>📄</color> Custom flags:", string.Join(", ", customItem.CustomFlags.ToString()));
-            foreach (KeyValuePair<string, string> kvp in data)
-                response += $"\n{kvp.Key.GenerateWithBuffer(40)} {kvp.Value}";
+                AddInfoLine(sb, "<color=#bf4eb6>📄</color> Custom flags:", customItem.CustomFlags.ToString());
+
+            response = sb.ToString();
             return true;
+        }
+
+        private void ProcessCustomFlags(ICustomItem customItem, StringBuilder sb)
+        {
+            if (customItem.FlagSettings == null || !customItem.CustomFlags.HasValue)
+                return;
+
+            Type flagSettingsType = customItem.FlagSettings.GetType();
+            PropertyInfo[] settingsProperties = flagSettingsType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            List<CustomFlags> activeFlags = GetActiveCustomFlags(customItem.CustomFlags.Value);
+
+            foreach (PropertyInfo settingsProperty in settingsProperties)
+            {
+                object settingsValue = settingsProperty.GetValue(customItem.FlagSettings);
+                if (settingsValue == null) continue;
+
+                string flagName = GetFlagNameFromSettingsProperty(settingsProperty.Name);
+                if (!IsRelevantForActiveFlags(flagName, activeFlags)) continue;
+
+                if (settingsValue is IEnumerable enumerable && settingsValue is not string)
+                {
+                    ProcessSettingsCollection(settingsProperty.Name, enumerable, sb);
+                }
+                else
+                {
+                    ProcessSingleSettings(settingsProperty.Name, settingsValue, sb);
+                }
+            }
+        }
+
+        private List<CustomFlags> GetActiveCustomFlags(CustomFlags flags)
+        {
+            List<CustomFlags> activeFlags = [];
+            foreach (CustomFlags flag in Enum.GetValues(typeof(CustomFlags)))
+            {
+                if (flag != CustomFlags.None && flags.HasFlag(flag))
+                {
+                    activeFlags.Add(flag);
+                }
+            }
+            return activeFlags;
+        }
+
+        private string GetFlagNameFromSettingsProperty(string propertyName)
+        {
+            if (propertyName.EndsWith("Settings"))
+                return propertyName.Substring(0, propertyName.Length - 8);
+            return propertyName;
+        }
+
+        private bool IsRelevantForActiveFlags(string flagName, List<CustomFlags> activeFlags)
+        {
+            Dictionary<string, CustomFlags[]> specialMappings = new()
+            {
+                { "Effect", new[] { CustomFlags.EffectShot, CustomFlags.EffectWhenEquiped, CustomFlags.EffectWhenUsed } },
+                { "Audio", new[] { CustomFlags.CustomSound } },
+                { "ItemGlow", new[] { CustomFlags.ItemGlow } },
+                { "CantDrop", new[] { CustomFlags.CantDrop } },
+                { "Cluster", new[] { CustomFlags.Cluster } },
+                { "DieOnDrop", new[] { CustomFlags.DieOnDrop } },
+                { "ExplosiveBullets", new[] { CustomFlags.ExplosiveBullets } },
+                { "LifeSteal", new[] { CustomFlags.LifeSteal } },
+                { "SpawnItemWhenDetonated", new[] { CustomFlags.SpawnItemWhenDetonated } },
+                { "SwitchRoleOnUse", new[] { CustomFlags.SwitchRoleOnUse } },
+                { "Craftable", new[] { CustomFlags.Craftable } }
+            };
+
+            if (specialMappings.ContainsKey(flagName))
+            {
+                return specialMappings[flagName].Any(activeFlags.Contains);
+            }
+
+            try
+            {
+                CustomFlags flag = (CustomFlags)Enum.Parse(typeof(CustomFlags), flagName, true);
+                return activeFlags.Contains(flag);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void ProcessSettingsCollection(string settingsName, IEnumerable collection, StringBuilder sb)
+        {
+            string displayName = GetDisplayName(settingsName);
+            string color = GetColorForSettings(settingsName);
+            
+            AddInfoLine(sb, $"<color={color}>📂</color> {displayName}:", "");
+
+            foreach (object item in collection)
+            {
+                if (item == null)
+                    continue;
+                ProcessSettingsObject(item, sb, color, "    ");
+            }
+        }
+
+        private void ProcessSingleSettings(string settingsName, object settings, StringBuilder sb)
+        {
+            string displayName = GetDisplayName(settingsName);
+            string color = GetColorForSettings(settingsName);
+            
+            AddInfoLine(sb, $"<color={color}>📂</color> {displayName}:", "");
+            ProcessSettingsObject(settings, sb, color, "    ");
+        }
+
+        private void ProcessSettingsObject(object settings, StringBuilder sb, string color, string indent)
+        {
+            Type settingsType = settings.GetType();
+            PropertyInfo[] properties = settingsType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (PropertyInfo prop in properties)
+            {
+                try
+                {
+                    object value = prop.GetValue(settings);
+                    if (value == null)
+                        continue;
+
+                    string displayName = GetPropertyDisplayName(prop.Name);
+                    string icon = GetIconForProperty(prop.Name);
+                    string formattedValue = FormatPropertyValue(value);
+
+                    if (prop.Name.Equals("GlowColor", StringComparison.OrdinalIgnoreCase) && value is string glowColor)
+                    {
+                        Color = glowColor;
+                        color = glowColor;
+                    }
+
+                    AddInfoLine(sb, $"{indent}<color={color}>{icon}</color> {displayName}:", formattedValue);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
+        }
+
+        private void AddInfoLine(StringBuilder sb, string label, string value)
+        {
+            sb.AppendLine($"{label.GenerateWithBuffer(40)} {value}");
+        }
+
+        private string GetDisplayName(string settingsName)
+        {
+            return settingsName.Replace("Settings", "")
+                              .Replace("_", " ");
+        }
+
+        private string GetColorForSettings(string settingsName)
+        {
+            if (settingsName.Contains("ItemGlow") && !string.IsNullOrEmpty(Color))
+                return Color;
+            
+            return "#bf4eb6";
+        }
+
+        private string GetPropertyDisplayName(string propertyName)
+        {
+            string result = System.Text.RegularExpressions.Regex.Replace(propertyName, "(\\B[A-Z])", " $1");
+            return result;
+        }
+
+        private string GetIconForProperty(string propertyName)
+        {
+            var iconMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "AudibleDistance", "📏" },
+                { "AudioPath", "📃" },
+                { "SoundVolume", "🔉" },
+                { "Volume", "🔉" },
+                { "HintOrBroadcast", "💬" },
+                { "Message", "💬" },
+                { "Duration", "🕛" },
+                { "DeathMessage", "💬" },
+                { "Vaporize", "💦" },
+                { "AmountToSpawn", "#" },
+                { "Amount", "#" },
+                { "FuseTime", "🕛" },
+                { "ItemToSpawn", "🔫" },
+                { "ItemId", "🔫" },
+                { "ScpDamageMultiplier", "💥" },
+                { "DamageRadius", "💥" },
+                { "EffectEvent", "💻" },
+                { "Effect", "💉" },
+                { "EffectIntensity", "📶" },
+                { "EffectDuration", "🕛" },
+                { "GlowColor", "🌟" },
+                { "LifeStealAmount", "💊" },
+                { "LifeStealPercentage", "💊" },
+                { "Chance", "🎲" },
+                { "Pickupable", "🛠️" },
+                { "TimeTillDespawn", "🕛" },
+                { "Delay", "🔂" },
+                { "KeepLocation", "🔒" },
+                { "RoleId", "🆔" },
+                { "RoleType", "🚶" },
+                { "SpawnFlags", "󾓦" },
+                { "KnobSetting", "🔒" },
+                { "OriginalItem", "🆔" }
+            };
+
+            return iconMap.TryGetValue(propertyName, out string icon) ? icon : "📋";
+        }
+
+        private string FormatPropertyValue(object value)
+        {
+            if (value == null) return "null";
+            
+            if (value is IEnumerable enumerable && !(value is string))
+            {
+                var items = enumerable.Cast<object>().Select(x => x?.ToString() ?? "null");
+                return string.Join(", ", items);
+            }
+            
+            return value.ToString();
         }
     }
 }

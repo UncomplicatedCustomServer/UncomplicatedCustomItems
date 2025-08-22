@@ -33,24 +33,24 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static void Actor()
         {
-            LogManager.Info($"{nameof(ImportManager.Actor)}: Checking for CustomItems registered in other plugins to import...");
+            LogManager.Info($"{nameof(ImportManager)}: Checking for CustomItems registered in other plugins to import...");
 
             _alreadyLoaded = true;
 
             foreach (var dic in LabApi.Loader.PluginLoader.Plugins)
             {
-                LogManager.Silent($"{nameof(ImportManager.Actor)}: Passing plugin {dic.Key.Name}");
+                LogManager.Silent($"{nameof(ImportManager)}: Passing plugin {dic.Key.Name}");
                 foreach (Type type in dic.Value.GetTypes())
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);
                         if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomItem)) || type.IsSubclassOf(typeof(CustomItem))))
                         {
-                            LogManager.Silent($"{nameof(ImportManager.Actor)}: Importing It!");
+                            LogManager.Silent($"{nameof(ImportManager)}: Importing It!");
                             ActivePlugins.TryAdd<LabApi.Loader.Features.Plugins.Plugin>(dic.Key);
 
                             ICustomItem Item = Activator.CreateInstance(type) as ICustomItem;
-                            LogManager.Info($"{nameof(ImportManager.Actor)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name} (v{dic.Key.Version})");
+                            LogManager.Info($"{nameof(ImportManager)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name} (v{dic.Key.Version})");
                             if (Item.Name is "ToolGun" && Item.Id is 20 && !Plugin.Instance.Config.EnableToolGun)
                                 return;
 
@@ -59,7 +59,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     }
                     catch (Exception e)
                     {
-                        LogManager.Error($"{nameof(ImportManager.Actor)}: Error while registering CustomItem from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{dic.Key.Name}] - Source: {e.Source}");
+                        LogManager.Error($"{nameof(ImportManager)}: Error while registering CustomItem from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{dic.Key.Name}] - Source: {e.Source}");
                     }
             }
         }

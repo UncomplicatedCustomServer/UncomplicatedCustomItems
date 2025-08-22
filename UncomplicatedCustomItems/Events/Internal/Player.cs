@@ -87,10 +87,6 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item?.OnDrop(ev);
             item.ResetBadge(ev.Player);
-            if (item.HasModule(CustomFlags.ToolGun))
-            {
-                SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
-            }
             PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 
@@ -123,7 +119,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             item.HandleEvent(ev.Player, ItemEvents.Use, ev.UsableItem.Serial);
 
-            item?.ResetBadge(ev.Player);
+            item.ResetBadge(ev.Player);
 
             if (item.CustomItem.Reusable)
                 new SummonedCustomItem(item.CustomItem, ev.Player);
@@ -131,16 +127,10 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void ChangeItemInHand(PlayerChangedItemEventArgs ev)
         {
-            if (ev.Player is null)
+            if (ev.Player?.CurrentItem == null || ev.NewItem == null)
                 return;
 
-            if (ev.NewItem is null)
-                return;
-
-            if (ev.Player.CurrentItem is null)
-                return;
-
-            if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out var item))
                 return;
 
             item.HandleSelectedDisplayHint();
@@ -148,16 +138,8 @@ namespace UncomplicatedCustomItems.Events.Internal
 
             Timing.CallDelayed(Timing.WaitForOneFrame, () =>
             {
-                if (item.Item.Type is ItemType.Flashlight && item.CustomItem.CustomItemType is CustomItemType.Light)
-                {
-                    FlashlightItem flashlight = item.Item as FlashlightItem;
-                    flashlight.IsEmitting = false;
-                }
-                if (item.Item.Type is ItemType.Lantern && item.CustomItem.CustomItemType is CustomItemType.Light)
-                {
-                    LanternItem lantern = item.Item as LanternItem;
-                    lantern.IsEmitting = false;
-                }
+                if (item.CustomItem.CustomItemType is CustomItemType.Light && item.Item is LightItem lightSource)
+                    lightSource.IsEmitting = false;
             });
         }
 
@@ -176,11 +158,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 PlayerHandler._equippedKeycards.Remove(item.Serial);
 
             item.ResetBadge(ev.Player);
-
-            if (item.HasModule(CustomFlags.ToolGun))
-            {
-                SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
-            }
 
             if (item.Item.Type == ItemType.GunSCP127 && item.CustomItem.CustomItemType == CustomItemType.SCPItem)
             {
@@ -237,11 +214,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 {
                     customItem.OnDied(ev, customItem);
                     customItem?.ResetBadge(ev.Player);
-                    if (customItem.HasModule(CustomFlags.ToolGun))
-                    {
-                        SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
-                    }
-
                 }
             }
             PlayerHandler.StopHumeShieldRegen(ev.Player);
@@ -259,10 +231,6 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             item?.ResetBadge(ev.Player);
-            if (item.HasModule(CustomFlags.ToolGun))
-            {
-                SSS.SendSettingsToUser(ev.Player.ReferenceHub, Plugin.Instance._playerSettings);
-            }
             PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 

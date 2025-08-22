@@ -39,30 +39,33 @@ namespace UncomplicatedCustomItems.Commands.User
             }
 
             // Ok now we have to check if the custom item command contains any & (= args)
-            IItemData Data = Item.CustomItem.CustomData as IItemData;
-            if (Data.Command is not null && Data.Command.Contains("#"))
+            IItemData itemData = Item.CustomItem.CustomData as IItemData;
+            foreach (ItemDataList data in itemData.Data)
             {
-                // yes, the command requires args
-                // Let's see how many
-                int count = Regex.Matches(Data.Command, "#").Count;
-                if (arguments.Count < count)
+                if (data.Command is not null && data.Command.Contains("#"))
                 {
-                    // Error: too few arguments!
-                    response = $"Sorry but this command requires {count} arguments, {arguments.Count} found.";
-                    return false;
-                }
-                else
-                {
-                    for (int i = 0; i < count; i++)
+                    // yes, the command requires args
+                    // Let's see how many
+                    int count = Regex.Matches(data.Command, "#").Count;
+                    if (arguments.Count < count)
                     {
-                        int IndexToReplace = Data.Command.IndexOf('#');
-                        if (IndexToReplace != -1) // Verifica se è stato trovato un indice valido
+                        // Error: too few arguments!
+                        response = $"Sorry but this command requires {count} arguments, {arguments.Count} found.";
+                        return false;
+                    }
+                    else
+                    {
+                        for (int i = 0; i < count; i++)
                         {
-                            Data.Command = Data.Command.Substring(0, IndexToReplace) + arguments.At(i) + Data.Command.Substring(IndexToReplace + 1);
+                            int IndexToReplace = data.Command.IndexOf('#');
+                            if (IndexToReplace != -1) // Verifica se è stato trovato un indice valido
+                            {
+                                data.Command = data.Command.Substring(0, IndexToReplace) + arguments.At(i) + data.Command.Substring(IndexToReplace + 1);
+                            }
                         }
                     }
+                    Item.CustomItem.CustomData = itemData;
                 }
-                Item.CustomItem.CustomData = Data;
             }
 
             Item.HandleEvent(player, ItemEvents.Command, player.CurrentItem.Serial);

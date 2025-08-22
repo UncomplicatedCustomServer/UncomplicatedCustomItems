@@ -7,20 +7,9 @@ namespace UncomplicatedCustomItems.Events
     public class CustomItemEventHandler
     {
         private static CustomItemEventHandler instance;
-
-        /// <summary>
-        /// Initializes a custom item event handler by creating an instance of the specified type and subscribing it to all relevant player and server events.
-        /// </summary>
-        /// <remarks>
-        /// <para><b>How to use:</b></para>
-        /// <code>
-        /// CustomItemEventHandler.Init&lt;NAMESPACE.Events&gt;();
-        /// </code>
-        /// </remarks>
-        /// <typeparam name="T">The custom item event handler type that implements CustomItemEventHandler and has a parameterless constructor.</typeparam>
-        public static void Init<T>() where T : CustomItemEventHandler, new()
+        public static void Register()
         {
-            instance = new T();
+            instance = new();
             PlayerEvents.ShotWeapon += instance.OnShot;
             PlayerEvents.ShootingWeapon += instance.OnShooting;
             PlayerEvents.UsedItem += instance.OnItemUsed;
@@ -48,7 +37,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvents.CancelledUsingItem += instance.OnOwnerCancelledItem;
         }
 
-        public static void Dispose()
+        public static void Unregister()
         {
             PlayerEvents.ShotWeapon -= instance.OnShot;
             PlayerEvents.ShootingWeapon -= instance.OnShooting;

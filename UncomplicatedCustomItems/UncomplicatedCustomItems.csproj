@@ -514,7 +514,9 @@
     <Compile Include="API\Attributes\EventTypeAttribute.cs" />
     <Compile Include="API\Attributes\PluginCustomItem.cs" />
     <Compile Include="API\Components\ToolGunUI.cs" />
+    <Compile Include="API\Enums\AssignmentOperator.cs" />
     <Compile Include="API\Features\AudioApi.cs" />
+    <Compile Include="API\Features\CustomAction.cs" />
     <Compile Include="API\Features\BadgeManager.cs" />
     <Compile Include="API\Features\DynamicSpawn.cs" />
     <Compile Include="API\Features\FlagSettings\ClusterSettings.cs" />
@@ -539,18 +541,18 @@
     <Compile Include="API\Features\Helper\LogEntry.cs" />
     <Compile Include="API\Features\Helper\LogManager.cs" />
     <Compile Include="API\Features\Helper\VersionInfo.cs" />
-    <Compile Include="API\Features\Helper\UpdateChecker.cs" />
+    <Compile Include="API\Features\Helper\Updater.cs" />
     <Compile Include="API\Features\Helper\VersionManager.cs" />
     <Compile Include="API\Features\Helper\ImportManager.cs" />
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SpecificData\FlashlightData.cs" />
+    <Compile Include="API\Features\ItemDataList.cs" />
     <Compile Include="API\Features\SummonedCustomItem.cs" />
     <Compile Include="API\Toolgun\ToolGun.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />
     <Compile Include="API\Wrappers\CustomKeycard.cs" />
     <Compile Include="API\Wrappers\CustomScp127.cs" />
-    <Compile Include="API\Wrappers\SSS.cs" />
     <Compile Include="API\YAMLCaster.cs" />
     <Compile Include="Commands\SilentCommandSender.cs" />
     <Compile Include="Commands\Admin\Generate.cs" />
@@ -565,6 +567,7 @@
     <Compile Include="Commands\Admin\ToolGun.cs" />
     <Compile Include="Commands\Admin\Update.cs" />
     <Compile Include="Commands\Admin\UpdateCheck.cs" />
+    <Compile Include="Commands\PresenceDebug.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
     <Compile Include="Commands\User\Devtag.cs" />
     <Compile Include="Commands\User\Use.cs" />
@@ -584,6 +587,7 @@
     <Compile Include="API\Features\SpecificData\PainkillersData.cs" />
     <Compile Include="API\Features\SpecificData\WeaponData.cs" />
     <Compile Include="API\Features\SpecificData\KeycardData.cs" />
+    <Compile Include="API\Features\YAMLCustomAction.cs" />
     <Compile Include="API\Features\YAMLCustomItem.cs" />
     <Compile Include="API\Enums\ArgumentType.cs" />
     <Compile Include="API\Enums\AmmoType.cs" />
@@ -623,6 +627,7 @@
     <Compile Include="HarmonyElements\Patches\SCP1344EffectPatch.cs" />
     <Compile Include="HarmonyElements\Patches\DisruptorAdsModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\SCP1344UnEquipPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\RemoteAdminPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerSetEnergyPatch.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IClusterSettings.cs" />
@@ -650,6 +655,7 @@
     <Compile Include="API\Interfaces\FlagSettings\IItemGlowSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IExplosiveBulletsSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\ISwitchRoleOnUseSettings.cs" />
+    <Compile Include="API\Interfaces\ICustomAction.cs" />
     <Compile Include="API\Interfaces\ISubcommand.cs" />
     <Compile Include="API\Interfaces\SpecificData\IAdrenalineData.cs" />
     <Compile Include="API\Interfaces\SpecificData\IArmorData.cs" />

@@ -29,9 +29,10 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Info());
             Subcommands.Add(new Get());
             Subcommands.Add(new ToolGun());
+            Subcommands.Add(new PresenceDebug());
         }
 
-        private List<ISubcommand> Subcommands { get; } = [];
+        internal static List<ISubcommand> Subcommands { get; } = [];
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {

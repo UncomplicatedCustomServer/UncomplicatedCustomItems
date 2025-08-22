@@ -22,9 +22,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new ItemData()
                 {
-                    Event = ItemEvents.Command,
-                    Command = "/SERVER_EVENT DETONATION_INSTANT",
-                    ConsoleMessage = "UHUHUHUH!"
+                    Data =
+                    [
+                        new()
+                        {
+                            Event = ItemEvents.Command,
+                            Command = "/SERVER_EVENT DETONATION_INSTANT",
+                            ConsoleMessage = "UHUHUHUH!"
+                        }
+                    ]
                 })
             },
             new()
@@ -40,7 +46,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Spawn = new(),
                 Arguments = new Dictionary<ArgumentType, string>
                 {
-                    [ArgumentType.OnShotWeapon] = "if {Player.Health} < 100 then Heal {Player.UserId} 10"
+                    [ArgumentType.OnShotWeapon] = "action Example"
                 },
                 CustomFlags = CustomFlags.InfiniteAmmo,
                 FlagSettings = new(),
@@ -360,7 +366,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void GenerateCustomItem(uint id, string name, ItemType itemType, CustomItemType customType, string description)
         {
-            Dictionary<string, string> customData = [];
+            Dictionary<string, object> customData = [];
             
             if (itemType == ItemType.SCP244a && customType == CustomItemType.SCPItem)
             {
@@ -512,12 +518,37 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return Directory.GetFiles(Path.Combine(Dir, localDir));
         }
 
+        private bool IsActionFile(string fileContent) => fileContent.Contains("actions:") || fileContent.Contains("parameters:");
+
         public void LoadAll(string localDir = "")
         {
-            LoadAction((YAMLCustomItem Item) =>
+            foreach (string fileName in List(localDir))
             {
-                CustomItem.Register(YAMLCaster.Converter(Item));
-            }, localDir);
+                try
+                {
+                    if (Directory.Exists(fileName))
+                        continue;
+
+                    string fileContent = File.ReadAllText(fileName);
+
+                    if (IsActionFile(fileContent))
+                    {
+                        YAMLCustomAction action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
+                        CustomAction.Register(YAMLCaster.Converter(action));
+                        LogManager.Debug($"Registering external action {action.Id} [{action.Name}]");
+                    }
+                    else
+                    {
+                        YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
+                        CustomItem.Register(YAMLCaster.Converter(item));
+                        LogManager.Debug($"Registering external item {item.Id} [{item.Name}]");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error($"Failed to process {fileName}: {ex.Message}");
+                }
+            }
         }
 
         public void LoadAction(Action<YAMLCustomItem> action, string localDir = "")
@@ -599,16 +630,55 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
+        public void LoadAction(Action<YAMLCustomAction> action, string localDir = "")
+        {
+            foreach (string FileName in List(localDir))
+            {
+                try
+                {
+                    if (Directory.Exists(FileName))
+                        continue;
+
+                    if (FileName.Split().First() == ".")
+                        return;
+
+                    string fileContent = File.ReadAllText(FileName);
+                    YAMLCustomAction Action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
+                    LogManager.Debug($"Proposed to the registerer the external action {Action.Id} [{Action.Name}] from file:\n{FileName}");
+                    action(Action);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}\n{ex.HResult}");
+                    if (Plugin.Instance.Config.Debug)
+                    {
+                        LogManager.Error($"Stack trace: {ex.StackTrace}");
+                    }
+                }
+            }
+        }
+
+
         public void Welcome(string localDir = "", bool loadExamples = false)
         {
             if (!Is(localDir))
             {
                 Directory.CreateDirectory(Path.Combine(Dir, localDir));
                 if (!loadExamples)
-                    File.WriteAllText(Path.Combine(Dir, localDir, "example-item.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(new YAMLCustomItem()
+                    if (localDir != "Actions")
                     {
-                        Id = CustomItem.GetFirstFreeId(1)
-                    }));
+                        File.WriteAllText(Path.Combine(Dir, localDir, "example-item.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(new YAMLCustomItem()
+                        {
+                            Id = CustomItem.GetFirstFreeId(1)
+                        }));
+                    }
+                    else
+                    {
+                        File.WriteAllText(Path.Combine(Dir, localDir, "example-action.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(new YAMLCustomAction()
+                        {
+                            Id = CustomAction.GetFirstFreeId(1)
+                        }));
+                    }
                 else
                     foreach (YAMLCustomItem customItem in _examples)
                         File.WriteAllText(Path.Combine(Dir, localDir, $"{customItem.Name.ToLower().Replace(" ", "-")}.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(customItem));

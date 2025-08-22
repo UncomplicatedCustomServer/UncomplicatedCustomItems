@@ -54,6 +54,6 @@ namespace UncomplicatedCustomItems.API.Features
         public CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
 
         [Description("Specifies the modifications the custom item will have.")]
-        public Dictionary<string, string> CustomData { get; set; } = YAMLCaster.Encode(new ItemData());
+        public Dictionary<string, object> CustomData { get; set; } = YAMLCaster.Encode(new ItemData());
     }
 }

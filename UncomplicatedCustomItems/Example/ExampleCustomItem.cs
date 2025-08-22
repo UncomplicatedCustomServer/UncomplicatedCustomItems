@@ -49,15 +49,21 @@ namespace UncomplicatedCustomItems.Examples
 
     public class CustomItemData : ItemData
     {
-        public override ItemEvents Event { get; set; } = ItemEvents.Use;
-        public override string? Command { get; set; } = "/customcommand %p_id%";
-        public override float CoolDown { get; set; } = 2.5f;
-        public override string ConsoleMessage { get; set; } = "Player has used the custom detonator!";
-        public override string BroadcastMessage { get; set; } = "A custom detonator has been activated!";
-        public override ushort BroadcastDuration { get; set; } = 5;
-        public override string HintMessage { get; set; } = "You've activated the custom detonator";
-        public override float HintDuration { get; set; } = 3.5f;
-        public override bool DestroyAfterUse { get; set; } = false;
+        public override List<ItemDataList> Data { get; set; } =
+        [
+            new ItemDataList
+            {
+                Event = ItemEvents.Use,
+                Command = "/customcommand %p_id%",
+                CoolDown = 2.5f,
+                ConsoleMessage = "Player has used the custom detonator!",
+                BroadcastMessage = "A custom detonator has been activated!",
+                BroadcastDuration = 5,
+                HintMessage = "You've activated the custom detonator",
+                HintDuration = 3.5f,
+                DestroyAfterUse = false
+            }
+        ];
     }
 
     public class SpawnData : Spawn

@@ -42,7 +42,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public static void Error(string message, string error = "CS0000")
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Error.ToString(), message, error));
             Logger.Error(message);
         }
         
@@ -66,7 +66,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         }
 
         public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SYSTEM", message));
-        
+
+        public static void Security(string message)
+        {
+            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Security", message));
+            Logger.Raw($"[Security] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Red);
+        }
+
         public static HttpStatusCode SendReport(out HttpContent content, out string readableSize)
         {
             content = null;
@@ -202,7 +208,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             StringBuilder sb = new();
 
             sb.AppendLine("╔═══════════════════════════════════════════════════════════════════╗");
-            sb.AppendLine("║                    UncomplicatedCustomBots                        ║");
+            sb.AppendLine("║                    UncomplicatedCustomItems                       ║");
             sb.AppendLine("║                           Log Report                              ║");
             sb.AppendLine("╚═══════════════════════════════════════════════════════════════════╝");
             sb.AppendLine();
@@ -313,14 +319,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             return level.ToUpper() switch
             {
-                "ERROR" => 0,
-                "WARN" => 1,
-                "INFO" => 2,
-                "DEBUG" => 3,
-                "UPDATER" => 4,
-                "SYSTEM" => 5,
-                "SILENT" => 6,
-                _ => 7
+                "SECURITY" => 0,
+                "ERROR" => 1,
+                "WARN" => 2,
+                "INFO" => 3,
+                "DEBUG" => 4,
+                "UPDATER" => 5,
+                "SYSTEM" => 6,
+                "SILENT" => 7,
+                _ => 8
             };
         }
     }

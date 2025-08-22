@@ -1,6 +1,7 @@
 ﻿using CommandSystem;
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
@@ -47,7 +48,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             {
                 if (arguments[1].ToLower() == "all")
                 {
-                    foreach (Player player in Player.ReadyList)
+                    foreach (Player player in Player.ReadyList.Where(p => !p.IsInventoryFull))
                         new SummonedCustomItem(customItem, player);
 
                     response = $"Successfully gave '{customItem.Name}' to all players!";

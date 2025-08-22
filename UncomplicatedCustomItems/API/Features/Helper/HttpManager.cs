@@ -25,6 +25,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
     internal class HttpManager
     {
+        private int _presenceIntervalSeconds = 60;
+        private bool _presenceRunning = false;
+        private int _presenceFailureCount = 0;
+
         /// <summary>
         /// Gets the <see cref="CoroutineHandle"/> of the presence coroutine.
         /// </summary>
@@ -49,6 +53,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// Gets the UCS APIs endpoint
         /// </summary>
         public string Endpoint { get; } = "https://api.ucserver.it/v2";
+
+        /// <summary>
+        /// Gets the UCI API endpoint
+        /// </summary>
+        public string UCIAPIEndpoint { get; } = "https://ucipluginapi.thaumielscpsl.site";
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
@@ -169,7 +178,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void LoadCreditTags()
         {
-            Credits = new();
+            Credits = [];
             try
             {
                 Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://api.ucserver.it/credits.json")));
@@ -254,23 +263,23 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             try
             {
-        #if EXILED
+#if EXILED
                 string url = $"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&using_labapi=false&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}";
-        #elif LABAPI
+#elif LABAPI
                 string url = $"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CompiledVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}";
-        #endif
+#endif
 
                 using StringContent content = new(data, Encoding.UTF8, "text/plain");
-                
+
                 using HttpResponseMessage response = await HttpClient.PutAsync(url, content).ConfigureAwait(false);
-                
+
                 HttpContent responseContent = null;
                 if (response.Content != null)
                 {
                     string responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     responseContent = new StringContent(responseString, Encoding.UTF8, "application/json");
                 }
-                
+
                 return (response.StatusCode, responseContent);
             }
             catch (HttpRequestException)
@@ -291,7 +300,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
 #if EXILED
             HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&using_labapi=false&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}", data);
-#elif LABAPI
+#else
             HttpResponseMessage Status = HttpPutRequest($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CompiledVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}", data);
 #endif
             httpContent = Status.Content;
@@ -309,6 +318,178 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return new(message.StatusCode, null);
 
             return new(message.StatusCode, await message.Content.ReadAsStringAsync());
+        }
+
+        /// <summary>
+        /// Start sending presence updates.
+        /// </summary>
+        public void StartPresence(int intervalSeconds = 60)
+        {
+            LogManager.Debug("Starting UCI API Presence");
+            if (string.IsNullOrWhiteSpace(UCIAPIEndpoint))
+                throw new ArgumentException("Presence Worker Url required", nameof(UCIAPIEndpoint));
+
+            if (_presenceRunning)
+                StopPresence();
+
+            _presenceIntervalSeconds = Math.Max(5, intervalSeconds);
+            _presenceRunning = true;
+            _presenceFailureCount = 0;
+
+            PresenceCoroutine = Timing.RunCoroutine(PresenceLoop(), Segment.RealtimeUpdate);
+        }
+
+        /// <summary>
+        /// Stop presence coroutine.
+        /// </summary>
+        public void StopPresence()
+        {
+            LogManager.Debug("Stopping UCI API Presence");
+            _presenceRunning = false;
+            try
+            {
+                Timing.KillCoroutines(PresenceCoroutine);
+            }
+            catch (Exception) { }
+        }
+
+        private IEnumerator<float> PresenceLoop()
+        {
+            while (_presenceRunning)
+            {
+                try
+                {
+                    LogManager.Debug("Sending UCI API Presence");
+                    
+                    var presenceTask = SendPresenceOnceAsync();
+                    
+                    _ = TrackPresenceResult(presenceTask);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error($"HttpManager: error while scheduling presence send: {ex}");
+                    _presenceFailureCount++;
+                    
+                    if (_presenceFailureCount >= 5)
+                    {
+                        LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
+                        _presenceRunning = false;
+                        break;
+                    }
+                }
+
+                yield return Timing.WaitForSeconds(_presenceIntervalSeconds);
+            }
+        }
+
+        /// <summary>
+        /// Tracks the result of a presence task and handles failure counting
+        /// </summary>
+        private async Task TrackPresenceResult(Task<bool> presenceTask)
+        {
+            try
+            {
+                bool success = await presenceTask;
+                
+                if (success)
+                {
+                    _presenceFailureCount = 0;
+                }
+                else
+                {
+                    _presenceFailureCount++;
+                    LogManager.Warn($"Presence failed ({_presenceFailureCount}/5)");
+                    
+                    if (_presenceFailureCount >= 5)
+                    {
+                        LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
+                        _presenceRunning = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Error tracking presence result: {ex}");
+                _presenceFailureCount++;
+                
+                if (_presenceFailureCount >= 5)
+                {
+                    LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
+                    _presenceRunning = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sends one presence POST to the worker's /connect endpoint.
+        /// </summary>
+        internal async Task<bool> SendPresenceOnceAsync()
+        {
+            if (string.IsNullOrWhiteSpace(UCIAPIEndpoint))
+                return false;
+                
+            try
+            {
+#if EXILED
+                List<TYPE> exiledPlugins = 
+                exiledPlugins.ForEach(p => pluginNames.Add(p.Name));
+#endif
+                List<LabApi.Loader.Features.Plugins.Plugin> plugins = LabApi.Loader.PluginLoader.EnabledPlugins.ToList();
+                List<string> pluginNames = [];
+                plugins.ForEach(p => pluginNames.Add(p.Name));
+
+                var payload = new
+                {
+                    serverName = Server.ServerListName,
+                    pluginVersion = Plugin.Instance?.Version?.ToString(3) ?? "unknown",
+                    serverPort = Server.Port,
+                    hideIP = Plugin.Instance.Config.HideipOnList.ToString(),
+                    scpslVersion = $"{GameCore.Version.Major}.{GameCore.Version.Minor}.{GameCore.Version.Revision}",
+                    showOnList = Plugin.Instance.Config.ShowOnuciList.ToString(),
+#if EXILED
+                    exiled = "true",
+#else
+                    exiled = "false",
+                    plugins = pluginNames,
+#endif
+                    extra = $"PlayerCount: {Server.PlayerCount}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}"
+                };
+
+                string json = JsonConvert.SerializeObject(payload);
+
+                using StringContent content = new(json, Encoding.UTF8, "application/json");
+                using HttpResponseMessage response = await HttpClient.PostAsync($"{UCIAPIEndpoint}/connect", content).ConfigureAwait(false);
+
+                string responseText = string.Empty;
+                if (response.Content != null)
+                    responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    LogManager.Debug($"Presence posted to {UCIAPIEndpoint} (server='{Server.ServerListName}') - status {(int)response.StatusCode}. Response: {responseText}");
+                    return true;
+                }
+                else
+                {
+                    LogManager.Warn($"Presence POST failed for {UCIAPIEndpoint} (server='{Server.ServerListName}') - status {(int)response.StatusCode}. Response: {responseText}");
+                    return false;
+                }
+            }
+            catch (HttpRequestException hre)
+            {
+                LogManager.Warn($"Presence POST HttpRequestException: {hre.Message}");
+                return false;
+            }
+            catch (TaskCanceledException tce)
+            {
+                LogManager.Warn($"Presence POST canceled/timed out: {tce.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Unexpected error sending presence: {ex.GetType().FullName}: {ex.Message}");
+                return false;
+            }
         }
     }
 }

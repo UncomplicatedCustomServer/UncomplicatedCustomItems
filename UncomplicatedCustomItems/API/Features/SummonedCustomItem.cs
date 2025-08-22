@@ -35,6 +35,7 @@ using Scp018 = LabApi.Features.Wrappers.Scp018Projectile;
 using Scp2176 = LabApi.Features.Wrappers.Scp2176Projectile;
 using Scp244 = LabApi.Features.Wrappers.Scp244Item;
 using UncomplicatedCustomItems.Events;
+using System.Collections.Concurrent;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -47,6 +48,23 @@ namespace UncomplicatedCustomItems.API.Features
         /// Gets the list of every active SummonedCustomItem
         /// </summary>
         public static List<SummonedCustomItem> List { get; } = [];
+
+        /// <summary>
+        /// Cache of all <see cref="SummonedCustomItem"/> instances mapped by their <see cref="SummonedCustomItem.Serial"/>.
+        /// Using ConcurrentDictionary for thread safety and better performance under concurrent access.
+        /// </summary>
+        public static readonly ConcurrentDictionary<ushort, SummonedCustomItem> bySerial = new();
+
+        /// <summary>
+        /// Cache of all <see cref="SummonedCustomItem"/> instances grouped by their owner's <see cref="Player.PlayerId"/>.
+        /// Using ConcurrentDictionary for thread safety and better performance under concurrent access.
+        /// </summary>
+        public static readonly ConcurrentDictionary<int, ConcurrentBag<SummonedCustomItem>> byPlayerId = new();
+
+        /// <summary>
+        /// HashSet for faster existence checks and removal operations
+        /// </summary>
+        private static readonly ConcurrentDictionary<ushort, byte> _activeSerials = new();
 
         /// <summary>
         /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
@@ -78,14 +96,14 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Converts the Command custom data from items into a list to allow multiple commands.
         /// </summary>
-        public static List<string?> CommandsList(List<IItemData> commands)
+        public static List<string?> CommandsList(List<ItemDataList> commands)
         {
-            return commands
-                .Where(itemData => !string.IsNullOrWhiteSpace(itemData.Command))
-                .SelectMany(itemData => itemData.Command.Split(',')
-                .Select(command => new { Command = command.Trim() }))
-                .Select(x => x.Command)
-                .ToList();
+            List<string?> result = [];
+            
+                foreach (ItemDataList data in commands)
+                    result.Add(data.Command);
+
+            return result;
         }
 
         /// <summary>
@@ -126,8 +144,10 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
+
             SetProperties();
-            List.Add(this);
+
+            AddToCollections(this);
         }
 
         public SummonedCustomItem(ICustomItem customItem, Pickup pickup) : this(customItem, null, null, pickup) { }
@@ -138,6 +158,22 @@ namespace UncomplicatedCustomItems.API.Features
 
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
+        private static void AddToCollections(SummonedCustomItem sci)
+        {
+            List.Add(sci);
+            bySerial[sci.Serial] = sci;
+            _activeSerials[sci.Serial] = 0;
+
+            if (sci.Owner != null)
+            {
+                byPlayerId.AddOrUpdate(
+                    sci.Owner.PlayerId,
+                    new ConcurrentBag<SummonedCustomItem> { sci },
+                    (key, existingBag) => { existingBag.Add(sci); return existingBag; }
+                );
+            }
+        }
+        
         public void SetProperties()
         {
             if (Item is not null)
@@ -931,27 +967,23 @@ namespace UncomplicatedCustomItems.API.Features
             if (CustomItem.CustomItemType == CustomItemType.Item)
             {
                 IItemData itemData = CustomItem.CustomData as IItemData;
-                if (itemData.Event == itemEvent)
+                foreach (ItemDataList data in itemData.Data)
                 {
-                    if (IsOnCooldown(player, playerItemSerial))
+                    if (data.Event == itemEvent)
                     {
-                        LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
-                        return;
-                    }
-
-                    LogManager.Debug($"Firing events for item {CustomItem.Name}");
-                    System.Random rand = new();
-                    Player randomPlayer = Player.ReadyList.ElementAt(rand.Next(Player.ReadyList.Count()));
-                    string randomPlayerId = randomPlayer.PlayerId.ToString();
-                    if (itemData.Command is not null && itemData.Command.Length > 2)
-                    {
-                        List<string?> commandsList = CommandsList(new List<IItemData> { itemData });
-                        foreach (string? cmd in commandsList)
+                        if (IsOnCooldown(player, playerItemSerial))
                         {
-                            if (string.IsNullOrWhiteSpace(cmd))
-                                continue;
+                            LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
+                            return;
+                        }
 
-                            string processedCommand = cmd
+                        LogManager.Debug($"Firing events for item {CustomItem.Name}");
+                        System.Random rand = new();
+                        Player randomPlayer = Player.ReadyList.ElementAt(rand.Next(Player.ReadyList.Count()));
+                        string randomPlayerId = randomPlayer.PlayerId.ToString();
+                        if (data.Command is not null && data.Command.Length > 2)
+                        {
+                            string processedCommand = data.Command
                                 .Replace("{p_id}", player.PlayerId.ToString())
                                 .Replace("{rp_id}", randomPlayerId)
                                 .Replace("{p_pos}", player.Position.ToString())
@@ -962,11 +994,11 @@ namespace UncomplicatedCustomItems.API.Features
                                 .Replace("{p_rotation}", player.Rotation.ToString())
                                 .Replace("{pj_pos}", PlayerHandler.DetonationPosition.ToString());
 
-                            if (cmd.Contains("{p_id}") || cmd.Contains("{rp_id}") ||
-                                cmd.Contains("{p_pos}") || cmd.Contains("{p_role}") ||
-                                cmd.Contains("{p_health}") || cmd.Contains("{p_zone}") ||
-                                cmd.Contains("{p_room}") || cmd.Contains("{p_rotation}") ||
-                                cmd.Contains("{pj_pos}"))
+                            if (data.Command.Contains("{p_id}") || data.Command.Contains("{rp_id}") ||
+                                data.Command.Contains("{p_pos}") || data.Command.Contains("{p_role}") ||
+                                data.Command.Contains("{p_health}") || data.Command.Contains("{p_zone}") ||
+                                data.Command.Contains("{p_room}") || data.Command.Contains("{p_rotation}") ||
+                                data.Command.Contains("{pj_pos}"))
                             {
                                 Server.RunCommand(processedCommand, player.GetSender());
                             }
@@ -975,13 +1007,13 @@ namespace UncomplicatedCustomItems.API.Features
                                 Server.RunCommand(processedCommand);
                             }
                         }
+                        StartCooldown(player, playerItemSerial, data.CoolDown);
+
+                        Utilities.ParseResponse(player, itemData);
+
+                        if (data.DestroyAfterUse)
+                            Destroy();
                     }
-                    StartCooldown(player, playerItemSerial, itemData.CoolDown);
-
-                    Utilities.ParseResponse(player, itemData);
-
-                    if (itemData.DestroyAfterUse)
-                        Destroy();
                 }
             }
         }
@@ -1066,10 +1098,22 @@ namespace UncomplicatedCustomItems.API.Features
         public void Destroy()
         {
             List.Remove(this);
+            bySerial.TryRemove(Serial, out _);
+            _activeSerials.TryRemove(Serial, out _);
+
+            if (Owner?.PlayerId != null && byPlayerId.TryGetValue(Owner.PlayerId, out var bag))
+            {
+                var newBag = new ConcurrentBag<SummonedCustomItem>(bag.Where(sci => sci.Serial != Serial));
+                if (newBag.IsEmpty)
+                    byPlayerId.TryRemove(Owner.PlayerId, out _);
+                else
+                    byPlayerId[Owner.PlayerId] = newBag;
+            }
+
             if (IsPickup)
-                Pickup.Destroy();
-            else
-                Owner.RemoveItem(Item.Base);
+                Pickup?.Destroy();
+            else if (Item != null)
+                Owner?.RemoveItem(Item.Base);
 
             Pickup = null;
             Item = null;
@@ -1078,24 +1122,47 @@ namespace UncomplicatedCustomItems.API.Features
             CustomItem = null;
         }
 
-        public static List<SummonedCustomItem> Get(ItemType item) => List.Where(sci => sci.CustomItem.Item == item).ToList();
-
-        public static List<SummonedCustomItem> Get(Player owner) => List.Where(sci => sci.Owner?.PlayerId == owner.PlayerId).ToList();
-
-        public static SummonedCustomItem Get(Player owner, ushort serial) => List.Where(sci => sci.Owner is not null && sci.Owner.PlayerId == owner.PlayerId && sci.Serial == serial).FirstOrDefault();
-
-        public static SummonedCustomItem Get(ushort serial) => List.Where(sci => sci.Serial == serial).FirstOrDefault();
-
         public static bool TryGet(ushort serial, out SummonedCustomItem item)
         {
-            item = Get(serial);
-            return item != null;
+            if (!_activeSerials.ContainsKey(serial))
+            {
+                item = null;
+                return false;
+            }
+
+            return bySerial.TryGetValue(serial, out item);
+        }
+        
+        public static SummonedCustomItem Get(ushort serial) => _activeSerials.ContainsKey(serial) && bySerial.TryGetValue(serial, out var item) ? item : null;
+
+        public static SummonedCustomItem Get(Player owner, ushort serial)
+        {
+            if (owner?.PlayerId == null || !_activeSerials.ContainsKey(serial))
+                return null;
+
+            if (!byPlayerId.TryGetValue(owner.PlayerId, out var bag))
+                return null;
+
+            return bag.FirstOrDefault(sci => sci.Serial == serial);
+        }
+        
+        public static List<SummonedCustomItem> Get(ItemType item)
+        {
+            var result = new List<SummonedCustomItem>();
+            var items = List.Count > 100 ? List.AsParallel().Where(sci => sci.CustomItem.Item == item).ToList() : List.Where(sci => sci.CustomItem.Item == item).ToList();
+
+            return items;
         }
 
-        public static bool TryGet(Player player, ushort serial, out SummonedCustomItem item)
+        public static List<SummonedCustomItem> Get(Player owner)
         {
-            item = Get(player, serial);
-            return item != null;
+            if (owner?.PlayerId == null)
+                return new List<SummonedCustomItem>();
+
+            if (byPlayerId.TryGetValue(owner.PlayerId, out var bag))
+                return bag.ToList();
+
+            return new List<SummonedCustomItem>();
         }
     }
 }

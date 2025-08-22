@@ -6,5 +6,6 @@ namespace UncomplicatedCustomItems.API.Interfaces.FlagSettings
     {
         public abstract RoleTypeId? RoleId { get; set; }
         public abstract string? DisguiseMessage { get; set; }
+        public string? CustomInfo { get; set; }
     }
 }

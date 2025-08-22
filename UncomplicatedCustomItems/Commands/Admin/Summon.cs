@@ -31,7 +31,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (arguments.Count < 1)
             {
-                response = $"No argument(s) found!\nSyntax: .ucr summon <CustomItem Id> (Player Id)";
+                response = $"No argument(s) found!\nSyntax: uci summon <CustomItem Id>";
                 return false;
             }
 

@@ -1,9 +1,8 @@
-﻿using CommandSystem;
+using CommandSystem;
 using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UncomplicatedCustomItems.API.Features.Helper;
+using System.Threading.Tasks;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -29,10 +28,16 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
+            if (sender.LogName is not "SERVER CONSOLE")
+            {
+                response = "Sorry but this command is reserved to the game console!";
+                return false;
+            }
+
             Version version = Plugin.Instance.Version;
             response = $"Currently running version {version}. Checking for updates...";
-            
-            Task.Run(async () => await UpdateChecker.CheckForUpdatesAsync());
+
+            _ = Task.Run(() => Updater.CheckForUpdatesAsync());
             return true;
         }
     }

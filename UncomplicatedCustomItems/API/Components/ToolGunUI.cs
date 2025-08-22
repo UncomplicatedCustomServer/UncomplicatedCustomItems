@@ -76,6 +76,7 @@ namespace UncomplicatedCustomItems.API.Components
                 room = Owner.Room.Name.ToString();
             else
                 room = Owner.Room.GameObject.name;
+                
             StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
             string hexcolor = Vector3Extensions.ToHexColor(color);
             string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{Owner.Nickname} - {Owner.Role.GetFullName()}</color></voffset>\n<pos=-10em>{room} - <color=yellow>{Owner.Room.LocalPosition(Owner.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";

@@ -245,6 +245,21 @@ namespace UncomplicatedCustomItems.API
             return true;
         }
 
+        public static bool CustomActionValidator(ICustomAction action, out string error)
+        {
+            if (CustomAction.CustomActions.ContainsKey(action.Id))
+            {
+                uint OldId = action.Id;
+                uint NewId = CustomAction.GetFirstFreeId(1);
+                action.Id = NewId;
+                LogManager.Warn($"{action.Name} - {OldId} ID is already used asigning new ID...\n{action.Name} new ID is {NewId}");
+                CustomAction.Register(action);
+            }
+            
+            error = "";
+            return true;
+        }
+
         /// <summary>
         /// Check if a <see cref="ICustomItem"/> is valid and can be registered.
         /// Does not return the error as text!
@@ -263,19 +278,22 @@ namespace UncomplicatedCustomItems.API
         /// <param name="response"></param>
         public static void ParseResponse(Player player, IItemData response)
         {
-            if (response.ConsoleMessage is not null && response.ConsoleMessage.Length > 1) // FUCK 1 char messages!
+            foreach (ItemDataList data in response.Data)
             {
-                player.SendConsoleMessage(response.ConsoleMessage, string.Empty);
-            }
+                if (data.ConsoleMessage is not null && data.ConsoleMessage.Length > 1) // FUCK 1 char messages!
+                {
+                    player.SendConsoleMessage(data.ConsoleMessage, string.Empty);
+                }
 
-            if (response.BroadcastMessage.Length > 1 && response.BroadcastDuration > 0)
-            {
-                player.SendBroadcast( response.BroadcastMessage, response.BroadcastDuration);
-            }
+                if (data.BroadcastMessage.Length > 1 && data.BroadcastDuration > 0)
+                {
+                    player.SendBroadcast( data.BroadcastMessage, data.BroadcastDuration);
+                }
 
-            if (response.HintMessage.Length > 1 && response.HintDuration > 0)
-            {
-                player.SendHint(response.HintMessage, response.HintDuration);
+                if (data.HintMessage.Length > 1 && data.HintDuration > 0)
+                {
+                    player.SendHint(data.HintMessage, data.HintDuration);
+                }
             }
         }
 
@@ -335,7 +353,7 @@ namespace UncomplicatedCustomItems.API
         /// <returns></returns>
         public static bool IsCustomItem(uint id) => CustomItem.CustomItems.ContainsKey(id);
 
-        private static Dictionary<PedestalLocker, ICustomItem> usedLockers { get; set; } = [];
+        private static Dictionary<PedestalLocker, ICustomItem> UsedLockers { get; set; } = [];
 
         /// <summary>
         /// Summon a <see cref="CustomItem"/>
@@ -343,154 +361,185 @@ namespace UncomplicatedCustomItems.API
         /// <param name="CustomItem"></param>
         internal static void SummonCustomItem(ICustomItem CustomItem)
         {
-            ISpawn Spawn = CustomItem.Spawn;
+            ISpawn spawn = CustomItem.Spawn;
 
-            if ((bool)Spawn.PedestalSpawn)
+            if (spawn.PedestalSpawn == true)
             {
-                if (Spawn.ReplaceExistingPickup)
-                {
-                    foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
-                    {
-                        Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
-                        if (pedestalLockerPickup != null && pedestalLockerPickup.Type == CustomItem.Item)
-                        {
-                            LogManager.Debug($"Removed {pedestalLockerPickup.Type} from {pedestalLockerPickup.Position}");
-                            pedestalLocker.RemoveItem(pedestalLockerPickup);
-                            Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
-                            if (pickup.Type == CustomItem.Item && !usedLockers.ContainsKey(pedestalLocker))
-                            {
-                                usedLockers.Add(pedestalLocker, CustomItem);
-                                LogManager.Debug($"Summoned {CustomItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
-                                SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
-                                break;
-                            }
-                            else if (usedLockers.ContainsKey(pedestalLocker))
-                            {
-                                LogManager.Debug($"Aborting spawn, locker used already.");
-                            }
-                        }
-                    }
-                }
-                else 
-                {
-                    foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
-                    {
-                        Pickup pedestalLockerPickup = pedestalLocker.GetAllItems().FirstOrDefault();
-                        if (pedestalLockerPickup != null && !usedLockers.ContainsKey(pedestalLocker))
-                        {
-                            usedLockers.Add(pedestalLocker, CustomItem);
-                            LogManager.Debug($"Removed {pedestalLockerPickup.Type} from {pedestalLockerPickup.Position}");
-                            pedestalLocker.RemoveItem(pedestalLockerPickup);
-                            Pickup pickup = pedestalLocker.AddItem(CustomItem.Item);
-                            LogManager.Debug($"Summoned {CustomItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
-                            SummonedCustomItem summonedCustomItem = new(CustomItem, Pickup.Get(pickup.Serial));
-                            break;
-                        }
-                        else if (usedLockers.ContainsKey(pedestalLocker))
-                        {
-                            LogManager.Debug($"Aborting spawn, locker used already.");
-                        }
-                    }
-                }
-            }
-
-            else if (Spawn.Coords.Count() > 0)
-            {
-                new SummonedCustomItem(CustomItem, Spawn.Coords.RandomItem());
+                HandlePedestalSpawn(CustomItem, spawn);
                 return;
             }
 
-            else if (Spawn.DynamicSpawn.Count() > 0)
+            if (spawn.Coords.Count() > 0)
             {
-                foreach (DynamicSpawn DynamicSpawn in Spawn.DynamicSpawn)
-                {
-                    int Chance = UnityEngine.Random.Range(0, 100);
-
-                    if (Chance <= DynamicSpawn.Chance)
-                    {
-                        string room = DynamicSpawn.Room;
-                        if (Enum.TryParse(room, out RoomName Room))
-                        {
-                            if (DynamicSpawn.Coords == Vector3.zero)
-                            {
-                                if (Spawn.ReplaceExistingPickup)
-                                {
-                                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room.Name == Room && !IsSummonedCustomItem(pickup.Serial)).ToList();
-
-                                    if (Spawn.ForceItem)
-                                        FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
-
-                                    if (FilteredPickups.Count() > 0)
-                                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
-
-                                    return;
-                                }
-                                else
-                                    new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).FirstOrDefault().Position);
-                            }
-                            else
-                                new SummonedCustomItem(CustomItem, LabApi.Features.Wrappers.Room.Get(Room).FirstOrDefault().WorldPosition(DynamicSpawn.Coords));
-                        }
-                        else
-                        {
-                            Room roomgameobject = LabApi.Features.Wrappers.Room.List.GetByGameObjectName($"{room}");
-                            if (DynamicSpawn.Coords == Vector3.zero)
-                            {
-                                if (Spawn.ReplaceExistingPickup)
-                                {
-                                    List<Pickup> FilteredPickups = Pickup.List.Where(pickup => pickup.Room == roomgameobject && !IsSummonedCustomItem(pickup.Serial)).ToList();
-
-                                    if (Spawn.ForceItem)
-                                        FilteredPickups = [.. FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item)];
-
-                                    if (FilteredPickups.Count() > 0)
-                                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
-
-                                    return;
-                                }
-                                else
-                                    new SummonedCustomItem(CustomItem, roomgameobject.Position);
-                            }
-                            else
-                                new SummonedCustomItem(CustomItem, roomgameobject.WorldPosition(DynamicSpawn.Coords));
-                        }
-                    }
-                }
+                SpawnAtRandomCoordinate(CustomItem, spawn);
+                return;
             }
-            else if (Spawn.Zones.Count() > 0)
+
+            if (spawn.DynamicSpawn.Count() > 0)
             {
-                FacilityZone Zone = Spawn.Zones.RandomItem();
-                if (Spawn.ReplaceExistingPickup)
+                HandleDynamicSpawn(CustomItem, spawn);
+                return;
+            }
+
+            if (spawn.Zones.Count() > 0)
+            {
+                HandleZoneSpawn(CustomItem, spawn);
+            }
+        }
+
+        private static void HandlePedestalSpawn(ICustomItem customItem, ISpawn spawn)
+        {
+            foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
+            {
+                if (UsedLockers.ContainsKey(pedestalLocker))
                 {
-                    List<Pickup> FilteredPickups = [];
-                    List<uint> pedestalitems = [];
-                    foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
-                    {
-                        Pickup pickup = pedestalLocker.GetAllItems().FirstOrDefault();
-                        pedestalitems.Add(pickup.Serial);
-                    }
-                    
-                    if (Spawn.ReplaceItemsInPedestals ?? false)
-                        FilteredPickups = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == Zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
-                    else
-                        FilteredPickups = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == Zone && !pedestalitems.Contains(pickup.Serial) && !IsSummonedCustomItem(pickup.Serial)).ToList();
-
-                    if (Spawn.ForceItem)
-                        FilteredPickups = FilteredPickups.Where(pickup => pickup.Type == CustomItem.Item).ToList();
-
-                    if (FilteredPickups.Count() > 0)
-                    {
-                        new SummonedCustomItem(CustomItem, FilteredPickups.RandomItem());
-                    }
-                    return;
+                    LogManager.Debug("Aborting spawn, locker used already.");
+                    continue;
                 }
-                else
+
+                Pickup existingPickup = pedestalLocker.GetAllItems().FirstOrDefault();
+                if (existingPickup == null)
+                    continue;
+
+                bool shouldReplace = !spawn.ReplaceExistingPickup || existingPickup.Type == customItem.Item;
+
+                if (shouldReplace)
                 {
-                    new SummonedCustomItem(CustomItem, Room.List.Where(room => room.Zone == Zone).ToList().RandomItem().Position);
+                    ReplacePedestalItem(pedestalLocker, existingPickup, customItem);
+                    break;
                 }
             }
         }
-        
+
+        private static void ReplacePedestalItem(PedestalLocker pedestalLocker, Pickup existingPickup, ICustomItem customItem)
+        {
+            LogManager.Debug($"Removed {existingPickup.Type} from {existingPickup.Position}");
+            pedestalLocker.RemoveItem(existingPickup);
+            
+            Pickup newPickup = pedestalLocker.AddItem(customItem.Item);
+            
+            if (newPickup.Type == customItem.Item)
+            {
+                UsedLockers.Add(pedestalLocker, customItem);
+                LogManager.Debug($"Summoned {customItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
+                new SummonedCustomItem(customItem, Pickup.Get(newPickup.Serial));
+            }
+        }
+
+        private static void SpawnAtRandomCoordinate(ICustomItem customItem, ISpawn spawn) => new SummonedCustomItem(customItem, spawn.Coords.RandomItem());
+
+        private static void HandleDynamicSpawn(ICustomItem customItem, ISpawn spawn)
+        {
+            foreach (DynamicSpawn dynamicSpawn in spawn.DynamicSpawn)
+            {
+                int chance = UnityEngine.Random.Range(0, 100);
+                if (chance > dynamicSpawn.Chance)
+                    continue;
+
+                Room room = GetRoomFromDynamicSpawn(dynamicSpawn);
+                if (room == null)
+                    continue;
+
+                Vector3 spawnPosition = GetDynamicSpawnPosition(room, dynamicSpawn, spawn, customItem);
+                if (spawnPosition != Vector3.zero)
+                {
+                    new SummonedCustomItem(customItem, spawnPosition);
+                }
+            }
+        }
+
+        private static Room GetRoomFromDynamicSpawn(DynamicSpawn dynamicSpawn)
+        {
+            if (Enum.TryParse(dynamicSpawn.Room, out RoomName roomName))
+            {
+                return Room.Get(roomName).FirstOrDefault();
+            }
+            
+            return Room.List.GetByGameObjectName($"{dynamicSpawn.Room}");
+        }
+
+        private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, ISpawn spawn, ICustomItem customItem)
+        {
+            if (dynamicSpawn.Coords != Vector3.zero)
+            {
+                return room.WorldPosition(dynamicSpawn.Coords);
+            }
+
+            if (spawn.ReplaceExistingPickup)
+            {
+                Pickup targetPickup = FindTargetPickupInRoom(room, spawn, customItem);
+                if (targetPickup != null)
+                {
+                    new SummonedCustomItem(customItem, targetPickup);
+                    return Vector3.zero;
+                }
+            }
+
+            return room.Position;
+        }
+
+        private static void HandleZoneSpawn(ICustomItem customItem, ISpawn spawn)
+        {
+            FacilityZone zone = spawn.Zones.RandomItem();
+
+            if (spawn.ReplaceExistingPickup)
+            {
+                Pickup targetPickup = FindTargetPickupInZone(zone, spawn, customItem);
+                if (targetPickup != null)
+                {
+                    new SummonedCustomItem(customItem, targetPickup);
+                    return;
+                }
+            }
+            
+            Room randomRoom = Room.List.Where(room => room.Zone == zone).ToList().RandomItem();
+            new SummonedCustomItem(customItem, randomRoom.Position);
+        }
+
+        private static Pickup FindTargetPickupInRoom(Room room, ISpawn spawn, ICustomItem customItem)
+        {
+            List<Pickup> pickupsInRoom = Pickup.List.Where(pickup => 
+                pickup.Room == room && 
+                !IsSummonedCustomItem(pickup.Serial))
+                .ToList();
+
+            return FilterAndSelectPickup(pickupsInRoom, spawn, customItem);
+        }
+
+        private static Pickup FindTargetPickupInZone(FacilityZone zone, ISpawn spawn, ICustomItem customItem)
+        {
+            List<Pickup> pickupsInZone = Pickup.List.Where(pickup => 
+                pickup.Room != null && 
+                pickup.Room.Zone == zone && 
+                !IsSummonedCustomItem(pickup.Serial))
+                .ToList();
+
+            if (!(spawn.ReplaceItemsInPedestals ?? false))
+            {
+                List<ushort> pedestalItemSerials = PedestalLocker.List
+                .Select(locker => locker.GetAllItems().FirstOrDefault())
+                .Where(pickup => pickup != null)
+                .Select(pickup => pickup.Serial)
+                .ToList();
+
+                pickupsInZone = pickupsInZone.Where(pickup => 
+                    !pedestalItemSerials.Contains(pickup.Serial))
+                    .ToList();
+            }
+
+            return FilterAndSelectPickup(pickupsInZone, spawn, customItem);
+        }
+
+        private static Pickup FilterAndSelectPickup(List<Pickup> pickups, ISpawn spawn, ICustomItem customItem)
+        {
+            if (spawn.ForceItem)
+            {
+                pickups = pickups.Where(pickup => pickup.Type == customItem.Item).ToList();
+            }
+
+            return pickups.Count > 0 ? pickups.RandomItem() : null;
+        }
+                
         /// <summary>
         /// Reproduce the SCP:SL <see cref="ItemType.Painkillers"/> healing process but with custom things :)
         /// </summary>

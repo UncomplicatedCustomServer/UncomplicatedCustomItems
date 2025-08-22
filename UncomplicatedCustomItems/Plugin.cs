@@ -1,14 +1,23 @@
+using CommandSystem;
 using HarmonyLib;
+#if EXILED
+using Exiled.API.Features;
+using Exiled.API.Enums;
+#else
 using LabApi.Features.Wrappers;
 using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
+#endif
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
@@ -19,33 +28,36 @@ using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
+// Building for remote development. You can ignore this :)
+// & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
+// & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=Exiled
 
 namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public bool IsPrerelease = false;
+        public bool IsPrerelease = true;
         public override string Name => "UncomplicatedCustomItems";
-#if LABAPI
-        public override string Description => "Enables server owners to design and manage CustomItems with ease, no coding required.";
-#elif EXILED
+#if EXILED
         public override string Prefix => "UncomplicatedCustomItems";
+#else
+        public override string Description => "Enables server owners to design and manage CustomItems with ease, no coding required.";
 #endif
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
-#if LABAPI
-        public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
-#elif EXILED
+#if EXILED
         public override Version RequiredExiledVersion { get; } = new(9, 6, 1);
+#else
+        public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
         public override Version Version { get; } = new(4, 0, 0);
 
         internal Handler Handler;
 
         public Assembly Assembly => Assembly.GetExecutingAssembly();
-#if LABAPI
-        public override LoadPriority Priority => LoadPriority.Highest;
-#elif EXILED
+#if EXILED
         public override PluginPriority Priority => PluginPriority.First;
+#else
+        public override LoadPriority Priority => LoadPriority.Highest;
 #endif
         public static Plugin Instance { get; private set; }
 
@@ -56,12 +68,154 @@ namespace UncomplicatedCustomItems
         internal static HttpManager HttpManager;
 
         internal FileConfig FileConfig;
-        internal ServerSpecificSettingBase[] _playerSettings;
-        internal ServerSpecificSettingBase[] _ToolGunSettings;
-        internal ServerSpecificSettingBase[] _DebugSettings;
+
         internal List<ServerSpecificSettingBase> _settings;
+
         internal bool DebugMode;
 
+#if EXILED
+        public override void OnEnabled()
+        {
+            Instance = this;
+
+            FileConfig = new();
+            HttpManager = new("uci");
+            Handler = new();
+
+            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
+
+            PlayerHandler.Register();
+            ServerHandler.Register();
+            ScpHandler.Register();
+
+            ServerEvent.WaitingForPlayers += OnFinishedLoadingPlugins;
+            ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
+
+            // Debugging Events
+            PlayerEvent.DroppingItem += Handler.OnDrop;
+            PlayerEvent.PickedUpItem += Handler.OnDebuggingPickup;
+            PlayerEvent.UsingItem += Handler.OnUse;
+            PlayerEvent.ReloadingWeapon += Handler.OnReloading;
+            PlayerEvent.ShootingWeapon += Handler.OnShooting;
+            PlayerEvent.ThrewProjectile += Handler.OnThrown;
+
+            Arguments.Initialize();
+            Arguments.Register();
+            try
+            {
+                _settings =
+                [
+                    new SSGroupHeader("CustomItem Settings"),
+                    new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
+                ];
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
+            }
+
+            try
+            {
+                ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
+                ServerSpecificSettingsSync.SendToAll();
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to send settings: {e.Message}\n{e.StackTrace}");
+            }
+
+            LogManager.History.Clear();
+
+            LogManager.Info("===========================================");
+            LogManager.Info("Thanks for using UncomplicatedCustomItems");
+            LogManager.Info($"    by {Author}");
+            LogManager.Info("===========================================");
+            LogManager.Info("Loaded from Exiled!");
+            LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+
+            if (IsPrerelease)
+            {
+                if (!Instance.Config.Debug)
+                {
+                    LogManager.Info("Debug logs have been activated!");
+                    Instance.Config.Debug = true;
+                    DebugMode = true;
+                }
+            }
+
+            Events.Internal.Player.Register();
+            Events.Internal.Server.Register();
+            Task.Run(delegate
+            {
+                if (HttpManager.LatestVersion.CompareTo(Version) > 0)
+                    LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomItems!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest");
+                VersionManager.Init();
+            });
+
+            FileConfig.Welcome(loadExamples: true);
+            FileConfig.Welcome(Server.Port.ToString());
+            FileConfig.Welcome("Actions");
+            FileConfig.LoadAll();
+            FileConfig.LoadAll(Server.Port.ToString());
+            FileConfig.LoadAll("Actions");
+
+            if (IsPrerelease)
+                Harmony.DEBUG = true;
+
+            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            _harmony.PatchAll();
+            ECRIntegration.Initialize(_harmony);
+            base.OnEnabled();
+        }
+
+        public override void OnDisabled()
+        {
+            HttpManager.StopPresence();
+            ECRIntegration.Cleanup();
+            Events.Internal.Player.Unregister();
+            Events.Internal.Server.Unregister();
+
+            CustomItem.List.Clear();
+            CustomItem.UnregisteredCustomItems.Clear();
+            CustomItem.CustomItems.Clear();
+            CustomItem.UnregisteredCustomItems.Clear();
+            CustomAction.CustomActions.Clear();
+            CustomAction.List.Clear();
+            CustomAction.UnregisteredCustomActions.Clear();
+            CustomAction.UnregisteredList.Clear();
+            SummonedCustomItem.List.ForEach(sci => sci.Destroy());
+            ArgumentManager._actionHandlers.Clear();
+            ArgumentManager._eventArgPropertyCache.Clear();
+            BaseCommand.Subcommands.Clear();
+
+            _settings = null;
+
+            HttpManager.UnregisterEvents();
+            _harmony.UnpatchAll();
+            _harmony = null;
+
+            PlayerHandler.Unregister();
+            ServerHandler.Unregister();
+            ScpHandler.Unregister();
+
+            ServerEvent.WaitingForPlayers -= OnFinishedLoadingPlugins;
+            ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
+
+            // Debugging Events
+            PlayerEvent.DroppingItem -= Handler.OnDrop;
+            PlayerEvent.PickedUpItem -= Handler.OnDebuggingPickup;
+            PlayerEvent.UsingItem -= Handler.OnUse;
+            PlayerEvent.ReloadingWeapon -= Handler.OnReloading;
+            PlayerEvent.ShootingWeapon -= Handler.OnShooting;
+            PlayerEvent.ThrewProjectile -= Handler.OnThrown;
+
+            Arguments.Cleanup();
+
+            Instance = null;
+            Handler = null;
+            base.OnDisabled();
+        }
+#else
         public override void Enable()
         {
             Instance = this;
@@ -89,42 +243,28 @@ namespace UncomplicatedCustomItems
 
             Arguments.Initialize();
             Arguments.Register();
+            try
+            {
+                _settings =
+                [
+                    new SSGroupHeader("CustomItem Settings"),
+                    new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
+                ];
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
+            }
 
-            _ToolGunSettings =
-            [
-                new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
-                new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1", hint: "The color of the primitives spawned by the ToolGun"),
-                new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
-                new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No")
-            ];
-            _playerSettings =
-            [
-                new SSGroupHeader("CustomItem Settings"),
-                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
-            ];
-            _DebugSettings =
-            [
-                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
-
-            ];
-            _settings =
-            [
-                new SSGroupHeader("UCI ToolGun Settings", hint: "If multiple are created any will work"),
-                new SSPlaintextSetting(21, "Primitive Color", placeholder: "255, 0, 0, -1", hint: "The color of the primitives spawned by the ToolGun"),
-                new SSTwoButtonsSetting(22, "Deletion Mode", "ADS", "FlashLight Toggle", hint: "Sets the deletion mode of the ToolGun"),
-                new SSTwoButtonsSetting(23, "Delete Primitives when unequipped?", "Yes", "No"),
-
-                new SSGroupHeader("UCI Debug Settings", hint: "If you can see this and are not a developer please notify the server staff or developers ASAP"),
-                //new SSButton(24, "Give ToolGun", "Give"),
-                new SSButton(28, "Dev Role", "Give"),
-                new SSButton(30, "Manager Role", "Give"),
-
-                new SSGroupHeader("CustomItem Settings"),
-                new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
-            ];
-
-            ServerSpecificSettingsSync.DefinedSettings = _playerSettings;
-            ServerSpecificSettingsSync.SendToAll();
+            try
+            {
+                ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
+                ServerSpecificSettingsSync.SendToAll();
+            }
+            catch (Exception e)
+            {
+                LogManager.Error($"Failed to send settings: {e.Message}\n{e.StackTrace}");
+            }
 
             LogManager.History.Clear();
 
@@ -132,6 +272,7 @@ namespace UncomplicatedCustomItems
             LogManager.Info("Thanks for using UncomplicatedCustomItems");
             LogManager.Info($"    by {Author}");
             LogManager.Info("===========================================");
+            LogManager.Info($"Loaded from LabAPI [{LabApi.Features.LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
             LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
             if (IsPrerelease)
@@ -153,28 +294,49 @@ namespace UncomplicatedCustomItems
                 VersionManager.Init();
             });
 
-            FileConfig.Welcome(loadExamples:true);
+            FileConfig.Welcome(loadExamples: true);
             FileConfig.Welcome(Server.Port.ToString());
+            FileConfig.Welcome("Actions");
             FileConfig.LoadAll();
             FileConfig.LoadAll(Server.Port.ToString());
+            FileConfig.LoadAll("Actions");
 
             if (IsPrerelease)
-            {
                 Harmony.DEBUG = true;
-            }
 
             _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
             ECRIntegration.Initialize(_harmony);
+
+            if (Round.IsRoundStarted)
+                Events.Internal.Server.SpawnItemsOnRoundStarted();
+
+            if (Instance.Config.AllowDevPermissions)
+                LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
         }
 
         public override void Disable()
         {
+            HttpManager.StopPresence();
             ECRIntegration.Cleanup();
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
 
-            _playerSettings = null;
+            // Cleanup
+            CustomItem.List.Clear();
+            CustomItem.UnregisteredCustomItems.Clear();
+            CustomItem.CustomItems.Clear();
+            CustomItem.UnregisteredCustomItems.Clear();
+            CustomAction.CustomActions.Clear();
+            CustomAction.List.Clear();
+            CustomAction.UnregisteredCustomActions.Clear();
+            CustomAction.UnregisteredList.Clear();
+            SummonedCustomItem.List.ForEach(sci => sci.Destroy());
+            ArgumentManager._actionHandlers.Clear();
+            ArgumentManager._eventArgPropertyCache.Clear();
+            BaseCommand.Subcommands.Clear();
+
+            _settings = null;
 
             HttpManager.UnregisterEvents();
             _harmony.UnpatchAll();
@@ -201,10 +363,16 @@ namespace UncomplicatedCustomItems
             Instance = null;
             Handler = null;
         }
+#endif
         public void OnFinishedLoadingPlugins()
         {
+            HttpManager.StartPresence();
+
+            if (Instance.Config.AllowDevPermissions)
+                LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
+
             ImportManager.Init();
-            _ = UpdateChecker.CheckForUpdatesAsync();
+            _ = Task.Run(() => Updater.CheckForUpdatesAsync());
         }
     }
 }
