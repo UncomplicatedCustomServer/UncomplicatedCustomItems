@@ -2,8 +2,6 @@
 using System;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features.Helper;
-using CustomPlayerEffects;
-using System.Linq;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {

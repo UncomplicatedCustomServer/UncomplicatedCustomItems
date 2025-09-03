@@ -32,14 +32,14 @@ namespace UncomplicatedCustomItems.Commands.User
                 return false;
             }
 
-            if (player.CurrentItem is null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem Item) || Item.CustomItem.CustomItemType != CustomItemType.Item)
+            if (player.CurrentItem is null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem item) || item.CustomItem.CustomItemType != CustomItemType.Item)
             {
                 response = "You must hold the custom item!";
                 return false;
             }
 
             // Ok now we have to check if the custom item command contains any & (= args)
-            IItemData itemData = Item.CustomItem.CustomData as IItemData;
+            IItemData itemData = item.CustomItem.CustomData as IItemData;
             foreach (ItemDataList data in itemData.Data)
             {
                 if (data.Command is not null && data.Command.Contains("#"))
@@ -64,13 +64,13 @@ namespace UncomplicatedCustomItems.Commands.User
                             }
                         }
                     }
-                    Item.CustomItem.CustomData = itemData;
+                    item.CustomItem.CustomData = itemData;
                 }
             }
 
-            Item.HandleEvent(player, ItemEvents.Command, player.CurrentItem.Serial);
+            item.HandleEvent(player, ItemEvents.Command, player.CurrentItem.Serial);
 
-            response = $"Item {Item.CustomItem.Name} successfully used!";
+            response = $"Item {item.CustomItem.Name} successfully used!";
             return true;
         }
     }

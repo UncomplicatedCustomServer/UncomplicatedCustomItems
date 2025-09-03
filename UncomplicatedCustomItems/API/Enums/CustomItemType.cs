@@ -21,5 +21,6 @@ namespace UncomplicatedCustomItems.API.Enums
         MicroHID,
         ParticleDisruptor,
         Light,
+        Candy,
     }
 }

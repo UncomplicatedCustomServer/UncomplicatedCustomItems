@@ -3,6 +3,7 @@ using Exiled.API.Features;
 #endif
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -16,9 +17,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         [JsonProperty("tag_name")]
         public string TagName { get; set; }
 
+        [JsonProperty("prerelease")]
+        public bool PreRelease { get; set; }
+
         [JsonProperty("assets")]
         public GitHubAssetInfo[] Assets { get; set; }
     }
+
 
     public class GitHubAssetInfo
     {
@@ -119,10 +124,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("UncomplicatedCustomItems-Updater/1.2");
                 if (!string.IsNullOrEmpty(Plugin.Instance.Config.GithubToken))
                 {
-                    HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", Plugin.Instance.Config.GithubToken);
+                    HttpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("token", Plugin.Instance.Config.GithubToken);
                 }
 
-                string apiUrl = "https://api.github.com/repos/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest";
+                string apiUrl = "https://api.github.com/repos/UncomplicatedCustomServer/UncomplicatedCustomItems/releases";
                 HttpResponseMessage httpResponse = await HttpClient.GetAsync(apiUrl);
 
                 if (!httpResponse.IsSuccessStatusCode)
@@ -132,7 +138,21 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
 
                 string jsonResponse = await httpResponse.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<GitHubReleaseInfo>(jsonResponse);
+                List<GitHubReleaseInfo> releases = JsonConvert.DeserializeObject<List<GitHubReleaseInfo>>(jsonResponse);
+
+                if (releases == null || releases.Count == 0) return null;
+
+                var filtered = Plugin.Instance.Config.AllowPreReleases
+                    ? releases
+                    : releases.Where(r => !r.PreRelease);
+
+                return filtered
+                    .OrderByDescending(r =>
+                    {
+                        string tag = r.TagName.TrimStart('v');
+                        return Version.TryParse(tag, out var v) ? v : new Version(0, 0);
+                    })
+                    .FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -140,6 +160,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return null;
             }
         }
+
 
         private static string GetPluginPath()
         {

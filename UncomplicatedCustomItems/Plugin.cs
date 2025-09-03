@@ -1,4 +1,3 @@
-using CommandSystem;
 using HarmonyLib;
 #if EXILED
 using Exiled.API.Features;
@@ -12,7 +11,6 @@ using LabApi.Loader.Features.Plugins.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features;
@@ -60,8 +58,6 @@ namespace UncomplicatedCustomItems
         public override LoadPriority Priority => LoadPriority.Highest;
 #endif
         public static Plugin Instance { get; private set; }
-
-        internal Arguments arguments;
 
         internal Harmony _harmony;
 
@@ -187,6 +183,9 @@ namespace UncomplicatedCustomItems
             ArgumentManager._actionHandlers.Clear();
             ArgumentManager._eventArgPropertyCache.Clear();
             BaseCommand.Subcommands.Clear();
+            PlayerHandler._capybaras.Clear();
+            PlayerHandler._damageTimes.Clear();
+            PlayerHandler._toolGunPrimitives.Clear();
 
             _settings = null;
 
@@ -335,6 +334,9 @@ namespace UncomplicatedCustomItems
             ArgumentManager._actionHandlers.Clear();
             ArgumentManager._eventArgPropertyCache.Clear();
             BaseCommand.Subcommands.Clear();
+            PlayerHandler._capybaras.Clear();
+            PlayerHandler._damageTimes.Clear();
+            PlayerHandler._toolGunPrimitives.Clear();
 
             _settings = null;
 

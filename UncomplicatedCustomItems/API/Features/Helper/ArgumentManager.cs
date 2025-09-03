@@ -5,56 +5,17 @@ using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Features.ArgumentHelpers;
+using System.Text;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
 #nullable enable
+    /// <summary>
+    /// Manages the action system for <see cref="CustomItem"/>s
+    /// </summary>
     public static class ArgumentManager
     {
-        private class ConditionalParts
-        {
-            public bool IsUnless { get; set; }
-            public string Condition { get; set; } = string.Empty;
-            public string[] ThenActions { get; set; } = [];
-            public string[]? ElseActions { get; set; }
-        }
-
-        private class PropertyTarget
-        {
-            public object Target { get; set; }
-            public PropertyInfo? PropertyInfo { get; set; }
-            public FieldInfo? FieldInfo { get; set; }
-            public string MemberName { get; set; } = string.Empty;
-
-            public object? GetValue()
-            {
-                if (PropertyInfo != null)
-                    return PropertyInfo.GetValue(Target);
-                if (FieldInfo != null)
-                    return FieldInfo.GetValue(Target);
-                return null;
-            }
-
-            public void SetValue(object? value)
-            {
-                if (PropertyInfo != null)
-                {
-                    object? convertedValue = Convert.ChangeType(value, PropertyInfo.PropertyType);
-                    PropertyInfo.SetValue(Target, convertedValue);
-                }
-                else if (FieldInfo != null)
-                {
-                    object? convertedValue = Convert.ChangeType(value, FieldInfo.FieldType);
-                    FieldInfo.SetValue(Target, convertedValue);
-                }
-            }
-
-            public Type? GetMemberType()
-            {
-                return PropertyInfo?.PropertyType ?? FieldInfo?.FieldType;
-            }
-        }
-
         internal static readonly Dictionary<string, Action<ICustomItem, string[]>> _actionHandlers = new(StringComparer.OrdinalIgnoreCase);
 
         internal static readonly ConcurrentDictionary<Type, HashSet<string>> _eventArgPropertyCache = new();
@@ -72,8 +33,19 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             { "=", AssignmentOperator.Assign }
         };
 
+        /// <summary>
+        /// Registers actions from <see cref="CustomItem"/>s
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="handler"></param>
         public static void Register(string name, Action<ICustomItem, string[]> handler) => _actionHandlers[name] = handler;
 
+        /// <summary>
+        /// Triggers the actions registered in <see cref="CustomItem"/>s
+        /// </summary>
+        /// <param name="customItem"></param>
+        /// <param name="type"></param>
+        /// <param name="eventArgs"></param>
         public static void Trigger(ICustomItem customItem, ArgumentType type, EventArgs eventArgs)
         {
             if (customItem.Arguments == null || customItem.Arguments.Count == 0)
@@ -87,8 +59,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 ExecuteAction(customItem, raw.Trim(), eventArgs);
             }
         }
-
-        internal static bool TryGetHandler(string command, out Action<ICustomItem, string[]> handler) => _actionHandlers.TryGetValue(command, out handler);
 
         internal static string ReplacePlaceholders(string action, EventArgs args)
         {
@@ -105,6 +75,120 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 action = action.Substring(0, start) + value + action.Substring(end + 1);
             }
             return action;
+        }
+
+        private static object ResolvePlaceholderToObject(string path, object root)
+        {
+            try
+            {
+                object current = root;
+                
+                foreach (string part in path.Split('.'))
+                {
+                    if (current == null)
+                        return null;
+
+                    Type type = current.GetType();
+
+                    PropertyInfo prop = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    if (prop != null)
+                    {
+                        current = prop.GetValue(current);
+                        continue;
+                    }
+
+                    FieldInfo field = type.GetField(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    if (field != null)
+                    {
+                        current = field.GetValue(current);
+                        continue;
+                    }
+
+                    MethodInfo method = type.GetMethod(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, Type.EmptyTypes, null);
+                    if (method != null)
+                    {
+                        current = method.Invoke(current, null);
+                        continue;
+                    }
+
+                    return null;
+                }
+
+                return current;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private static object[] ParseAndResolveParameters(string parametersPart, EventArgs eventArgs)
+        {
+            if (string.IsNullOrWhiteSpace(parametersPart))
+                return [];
+
+            List<object> parameters = [];
+            List<string> paramTokens = ParseParameterTokens(parametersPart);
+
+            foreach (string token in paramTokens)
+            {
+                string resolvedToken = ReplacePlaceholders(token, eventArgs);
+                parameters.Add(resolvedToken);
+            }
+
+            return parameters.ToArray();
+        }
+
+        private static List<string> ParseParameterTokens(string parametersPart)
+        {
+            List<string> tokens = [];
+            StringBuilder currentToken = new();
+            int parenthesesDepth = 0;
+            bool inQuotes = false;
+            char quoteChar = '\0';
+
+            for (int i = 0; i < parametersPart.Length; i++)
+            {
+                char c = parametersPart[i];
+
+                if (!inQuotes && (c == '"' || c == '\''))
+                {
+                    inQuotes = true;
+                    quoteChar = c;
+                    currentToken.Append(c);
+                }
+                else if (inQuotes && c == quoteChar)
+                {
+                    inQuotes = false;
+                    currentToken.Append(c);
+                }
+                else if (!inQuotes && c == '(')
+                {
+                    parenthesesDepth++;
+                    currentToken.Append(c);
+                }
+                else if (!inQuotes && c == ')')
+                {
+                    parenthesesDepth--;
+                    currentToken.Append(c);
+                }
+                else if (!inQuotes && c == ',' && parenthesesDepth == 0)
+                {
+                    tokens.Add(currentToken.ToString().Trim());
+                    currentToken.Clear();
+                }
+                else
+                {
+                    currentToken.Append(c);
+                }
+            }
+
+            if (currentToken.Length > 0)
+            {
+                tokens.Add(currentToken.ToString().Trim());
+            }
+
+            return tokens;
         }
 
         private static string ResolvePlaceholder(string path, object root)
@@ -169,8 +253,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private static bool IsConditionalStatement(string action)
         {
             string trimmed = action.TrimStart();
-            return trimmed.StartsWith("if ", StringComparison.OrdinalIgnoreCase) ||
-                   trimmed.StartsWith("unless ", StringComparison.OrdinalIgnoreCase);
+            return trimmed.StartsWith("if ", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("unless ", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void ExecuteConditional(ICustomItem item, string action, EventArgs eventArgs)
@@ -249,24 +332,23 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 // Note: condition should already have placeholders resolved when this is called
                 if (condition.Contains(" contains "))
                 {
-                    return EvaluateContainsCondition(condition, eventArgs);
+                    return EvaluateConditions.EvaluateContainsCondition(condition, eventArgs);
                 }
                 else if (condition.Contains(" is "))
                 {
-                    return EvaluateIsCondition(condition, eventArgs);
+                    return EvaluateConditions.EvaluateIsCondition(condition, eventArgs);
                 }
                 else if (condition.Contains(" equals "))
                 {
-                    return EvaluateEqualsCondition(condition, eventArgs);
+                    return EvaluateConditions.EvaluateEqualsCondition(condition, eventArgs);
                 }
-                else if (condition.Contains(" > ") || condition.Contains(" < ") ||
-                         condition.Contains(" >= ") || condition.Contains(" <= "))
+                else if (condition.Contains(" > ") || condition.Contains(" < ") || condition.Contains(" >= ") || condition.Contains(" <= "))
                 {
-                    return EvaluateNumericCondition(condition, eventArgs);
+                    return EvaluateConditions.EvaluateNumericCondition(condition, eventArgs);
                 }
                 else if (condition.Contains(" != ") || condition.Contains(" == "))
                 {
-                    return EvaluateEqualityCondition(condition, eventArgs);
+                    return EvaluateConditions.EvaluateEqualityCondition(condition, eventArgs);
                 }
                 else
                 {
@@ -278,86 +360,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Error($"{nameof(ArgumentManager)} Error evaluating condition '{condition}': {ex.Message}");
                 return false;
             }
-        }
-
-        private static bool EvaluateContainsCondition(string condition, EventArgs eventArgs)
-        {
-            string[] parts = condition.Split(new[] { " contains " }, (int)StringSplitOptions.None, (StringSplitOptions)StringComparison.OrdinalIgnoreCase);
-            if (parts.Length != 2) return false;
-
-            string leftValue = ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = ReplacePlaceholders(parts[1].Trim().Trim('"', '\''), eventArgs);
-
-            return leftValue.Contains(rightValue);
-        }
-
-        private static bool EvaluateIsCondition(string condition, EventArgs eventArgs)
-        {
-            string[] parts = condition.Split(new[] { " is " }, (int)StringSplitOptions.None, (StringSplitOptions)StringComparison.OrdinalIgnoreCase);
-            if (parts.Length != 2) return false;
-
-            string leftValue = ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = parts[1].Trim().Trim('"', '\'');
-
-            return string.Equals(leftValue, rightValue, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool EvaluateEqualsCondition(string condition, EventArgs eventArgs)
-        {
-            string[] parts = condition.Split(new[] { " equals " }, (int)StringSplitOptions.None, (StringSplitOptions)StringComparison.OrdinalIgnoreCase);
-            if (parts.Length != 2) return false;
-
-            string leftValue = ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = ReplacePlaceholders(parts[1].Trim().Trim('"', '\''), eventArgs);
-
-            return string.Equals(leftValue, rightValue, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool EvaluateNumericCondition(string condition, EventArgs eventArgs)
-        {
-            string[] operators = { " >= ", " <= ", " > ", " < " };
-            string? foundOperator = null;
-            string[]? parts = null;
-
-            foreach (string op in operators)
-            {
-                parts = condition.Split(new[] { op }, StringSplitOptions.None);
-                if (parts.Length == 2)
-                {
-                    foundOperator = op.Trim();
-                    break;
-                }
-            }
-
-            if (foundOperator == null || parts == null) return false;
-
-            string leftValue = ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = ReplacePlaceholders(parts[1].Trim(), eventArgs);
-
-            if (!double.TryParse(leftValue, out double left) || !double.TryParse(rightValue, out double right))
-                return false;
-
-            return foundOperator switch
-            {
-                ">" => left > right,
-                "<" => left < right,
-                ">=" => left >= right,
-                "<=" => left <= right,
-                _ => false
-            };
-        }
-
-        private static bool EvaluateEqualityCondition(string condition, EventArgs eventArgs)
-        {
-            bool isNotEquals = condition.Contains(" != ");
-            string[] parts = condition.Split(new[] { isNotEquals ? " != " : " == " }, StringSplitOptions.None);
-            if (parts.Length != 2) return false;
-
-            string leftValue = ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = ReplacePlaceholders(parts[1].Trim().Trim('"', '\''), eventArgs);
-
-            bool areEqual = string.Equals(leftValue, rightValue, StringComparison.OrdinalIgnoreCase);
-            return isNotEquals ? !areEqual : areEqual;
         }
 
         private static bool IsTruthy(string value)
@@ -376,7 +378,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (string.IsNullOrWhiteSpace(action))
                 return;
 
-            if (action.StartsWith("action ", StringComparison.OrdinalIgnoreCase))
+            if (action.Contains("::"))
+            {
+                ExecuteMethodCall(item, action, eventArgs);
+                return;
+            }
+
+            if (action.StartsWith("action ", StringComparison.OrdinalIgnoreCase) || action.StartsWith("execute ", StringComparison.OrdinalIgnoreCase) || action.StartsWith("run ", StringComparison.OrdinalIgnoreCase))
             {
                 HandleCustomActionExecution(action, eventArgs);
                 return;
@@ -542,6 +550,171 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return names.Contains(firstPart);
         }
 
+        private static void ExecuteMethod(object targetObject, string methodName, object[] parameters)
+        {
+            try
+            {
+                Type targetType = targetObject.GetType();
+                
+                Type[] parameterTypes = parameters.Select(p => p?.GetType() ?? typeof(string)).ToArray();
+                
+                MethodInfo method = targetType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, parameterTypes, null);
+                
+                if (method == null)
+                {
+                    MethodInfo[] methods = targetType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)
+                        .Where(m => m.Name.Equals(methodName, StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
+                    
+                    method = methods.FirstOrDefault(m => m.GetParameters().Length == parameters.Length);
+                    
+                    if (method == null && parameters.Length == 0)
+                    {
+                        method = methods.FirstOrDefault(m => m.GetParameters().Length == 0);
+                    }
+                }
+
+                if (method == null)
+                {
+                    LogManager.Error($"Method '{methodName}' not found on type '{targetType.Name}' with {parameters.Length} parameters");
+                    return;
+                }
+
+                ParameterInfo[] methodParams = method.GetParameters();
+                object[] convertedParams = new object[methodParams.Length];
+                
+                for (int i = 0; i < methodParams.Length && i < parameters.Length; i++)
+                {
+                    try
+                    {
+                        Type expectedType = methodParams[i].ParameterType;
+                        object value = parameters[i];
+
+                        if (value is string stringValue && stringValue.Length > 0 && ((stringValue.StartsWith("\"") && stringValue.EndsWith("\"")) || (stringValue.StartsWith("'") && stringValue.EndsWith("'"))))
+                        {
+                            stringValue = stringValue.Substring(1, stringValue.Length - 2);
+                            value = stringValue;
+                        }
+
+                        if (expectedType == typeof(string))
+                        {
+                            convertedParams[i] = value?.ToString() ?? "";
+                        }
+                        else if (expectedType.IsAssignableFrom(value?.GetType()))
+                        {
+                            convertedParams[i] = value;
+                        }
+                        else
+                        {
+                            convertedParams[i] = Convert.ChangeType(value, expectedType);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Error($"Failed to convert parameter {i} for method '{methodName}': {ex.Message}");
+                        convertedParams[i] = methodParams[i].HasDefaultValue ? methodParams[i].DefaultValue : null;
+                    }
+                }
+                
+                for (int i = parameters.Length; i < methodParams.Length; i++)
+                {
+                    convertedParams[i] = methodParams[i].HasDefaultValue ? methodParams[i].DefaultValue : null;
+                }
+
+                object result = method.Invoke(targetObject, convertedParams);
+                
+                LogManager.Debug($"Successfully executed method '{methodName}' on {targetType.Name}. Result: {result?.ToString() ?? "null"}");
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Failed to execute method '{methodName}': {ex.Message}");
+            }
+        }
+
+        private static void ExecuteMethodCall(ICustomItem item, string methodCall, EventArgs eventArgs)
+        {
+            try
+            {
+                if (!methodCall.Contains("::"))
+                {
+                    LogManager.Error($"Invalid method call syntax. Expected 'ObjectPath::MethodName(params)': {methodCall}");
+                    return;
+                }
+
+                string[] parts = methodCall.Split(["::"], StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != 2)
+                {
+                    LogManager.Error($"Invalid method call format: {methodCall}");
+                    return;
+                }
+
+                string objectPath = parts[0].Trim();
+                string methodCallPart = parts[1].Trim();
+
+                int openParen = methodCallPart.IndexOf('(');
+                int closeParen = methodCallPart.LastIndexOf(')');
+
+                if (openParen == -1 || closeParen == -1 || closeParen <= openParen)
+                {
+                    LogManager.Error($"Invalid method call syntax. Missing parentheses: {methodCall}");
+                    return;
+                }
+
+                string methodName = methodCallPart.Substring(0, openParen).Trim();
+                string parametersPart = methodCallPart.Substring(openParen + 1, closeParen - openParen - 1).Trim();
+
+                object targetObject = ResolveTargetObject(objectPath, item, eventArgs);
+                if (targetObject == null)
+                {
+                    LogManager.Error($"Could not resolve target object: {objectPath}");
+                    return;
+                }
+
+                object[] parameters = ParseAndResolveParameters(parametersPart, eventArgs);
+
+                ExecuteMethod(targetObject, methodName, parameters);
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Error executing method call '{methodCall}': {ex.Message}");
+            }
+        }
+
+        private static object ResolveTargetObject(string objectPath, ICustomItem item, EventArgs eventArgs)
+        {
+            // God help me if I have to update this.
+            HashSet<string> knownObjectTypes = new(StringComparer.OrdinalIgnoreCase)
+            {
+                "Player", "Target", "Attacker", "Item", "NewItem", "OldItem", "Pickup",
+                "ThrowableItem", "UsableItem", "FirearmItem", "KeycardItem", "Revolver",
+                "RadioItem", "JailbirdItem", "LightItem", "DamageHandler", "ShootingTarget",
+                "Tesla", "CoinItem", "Interactable", "Door", "Generator", "Locker", "Chamber",
+                "NewRoom", "OldRoom", "Hazard", "Window", "Rigidbody", "ProjectileSettings",
+                "AmmoPickup", "BodyArmorPickup", "CandyPickup", "CandyItem", "Role", "OldRole",
+                "NewRole", "Effect", "Group", "Issuer", "Sender", "Message"
+            };
+
+            if (knownObjectTypes.Contains(objectPath))
+            {
+                object resolvedFromArgs = ResolvePlaceholderToObject(objectPath, eventArgs);
+                if (resolvedFromArgs != null)
+                    return resolvedFromArgs;
+            }
+
+            object resolved = ResolvePlaceholderToObject(objectPath, eventArgs);
+            if (resolved != null)
+                return resolved;
+
+            if (item != null)
+            {
+                resolved = ResolvePlaceholderToObject(objectPath, item);
+                if (resolved != null)
+                    return resolved;
+            }
+
+            return null;
+        }
+        
         private static void HandlePlaceholderPropertyAssignment(ICustomItem item, string propertyPathPlaceholder, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
         {
             try
@@ -558,9 +731,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 object? currentValue = null;
                 if (operatorType != AssignmentOperator.Assign)
-                {
                     currentValue = propertyTarget.GetValue();
-                }
 
                 string resolvedValueExpression = ReplacePlaceholders(valueExpression, eventArgs);
 
@@ -644,6 +815,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
+        /// <summary>
+        /// Executes a <see cref="CustomAction"/> by the action Id
+        /// </summary>
+        /// <param name="actionId"></param>
+        /// <param name="eventArgs"></param>
         public static void ExecuteCustomAction(uint actionId, EventArgs eventArgs)
         {
             if (!CustomAction.CustomActions.TryGetValue(actionId, out ICustomAction customAction))
@@ -655,6 +831,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             ExecuteCustomAction(customAction, eventArgs);
         }
 
+        /// <summary>
+        /// Executes a <see cref="CustomAction"/> by the action
+        /// </summary>
+        /// <param name="customAction"></param>
+        /// <param name="eventArgs"></param>
         public static void ExecuteCustomAction(ICustomAction customAction, EventArgs eventArgs)
         {
             if (customAction?.Actions == null || customAction.Actions.Length == 0)
@@ -742,8 +923,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                    operatorType == AssignmentOperator.BitwiseXor;
         }
 
-        private static object? CalculateNumericValue(object? currentValue, string valueExpression,
-            AssignmentOperator operatorType)
+        private static object? CalculateNumericValue(object? currentValue, string valueExpression, AssignmentOperator operatorType)
         {
             if (currentValue == null)
                 throw new ArgumentException("Cannot perform numeric operation on null value");

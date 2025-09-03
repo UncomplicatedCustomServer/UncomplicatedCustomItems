@@ -8,7 +8,6 @@ using UnityEngine;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Extensions;
-using System;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -105,6 +104,9 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("The description of the custom item")]
         public virtual string Description { get; set; } = "25/06/2024";
 
+        [Description("The extended description of the custom item. Used by the `.customiteminfo` command")]
+        public virtual string ExtendedDescription { get; set; } = string.Empty;
+
         /// <summary>
         /// Gets or sets the badge name
         /// </summary>
@@ -149,14 +151,12 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Custom flags of the item
         /// </summary>
-        [Obsolete("Replaced by the argument system")]
         [Description("Custom flags for the item")]
         public virtual CustomFlags? CustomFlags { get; set; } = new();
 
         /// <summary>
         /// Custom flag settings of the item
         /// </summary>
-        [Obsolete("Replaced by the argument system")]
         [Description("Settings for the CustomFlags. You can remove any unused settings.")]
         public virtual IFlagSettings? FlagSettings { get; set; } = new FlagSettings();
 

@@ -85,30 +85,30 @@ namespace UncomplicatedCustomItems.API.Features
 
         public static void PlayAudio(string path, float volumefloat, Vector3 coords, float audibledistance = 1f)
         {
-                if (EnableAudioApi != false)
+            if (EnableAudioApi != false)
+            {
+                LogManager.Debug($"Audio API is enabled!");
+                if (!string.IsNullOrEmpty(path))
                 {
-                    LogManager.Debug($"Audio API is enabled!");
-                    if (!string.IsNullOrEmpty(path))
+                    string clipId = $"sound_{Guid.NewGuid()}";
+                    LogManager.Debug($"Succesfully loaded audio path {path}");
+                    AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{Guid.NewGuid()}", onIntialCreation: (p) =>
                     {
-                        string clipId = $"sound_{Guid.NewGuid()}";
-                        LogManager.Debug($"Succesfully loaded audio path {path}");
-                        AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Global_Audio_{Guid.NewGuid()}", onIntialCreation: (p) =>
-                        {
-                            Speaker speaker = p.AddSpeaker("Main", coords, isSpatial: true, maxDistance: audibledistance);
-                        });
-                        float volume = Clamp(volumefloat, 1f, 100f);
-                        audioPlayer.AddClip($"{clipId}", volume);
-                        AudioClipStorage.LoadClip(path, $"{clipId}");
-                        LogManager.Debug($"Playing {Path.GetFileName(path)}");
-                        LogManager.Debug($"Audio should have been played.");
-                    }
-                    else
-                    LogManager.Warn($"Audio path is null please fill out the config properly.");
+                        Speaker speaker = p.AddSpeaker("Main", coords, isSpatial: true, maxDistance: audibledistance);
+                    });
+                    float volume = Clamp(volumefloat, 1f, 100f);
+                    audioPlayer.AddClip($"{clipId}", volume);
+                    AudioClipStorage.LoadClip(path, $"{clipId}");
+                    LogManager.Debug($"Playing {Path.GetFileName(path)}");
+                    LogManager.Debug($"Audio should have been played.");
                 }
                 else
-                {
-                    LogManager.Warn("You don't have AudioPlayerApi or its dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
-                }
+                LogManager.Warn($"Audio path is null please fill out the config properly.");
+            }
+            else
+            {
+                LogManager.Warn("You don't have AudioPlayerApi or its dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
             }
         }
     }
+}

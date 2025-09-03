@@ -18,6 +18,7 @@ namespace UncomplicatedCustomItems.API.Features
             new()
             {
                 GlowColor = "#00FF00"
+                
             }
         ];
         [Description("Sets the settings for the LifeSteal flag.")]

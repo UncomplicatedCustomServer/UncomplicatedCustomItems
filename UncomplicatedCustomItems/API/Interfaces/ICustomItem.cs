@@ -14,6 +14,8 @@ namespace UncomplicatedCustomItems.API.Interfaces
 
         public abstract string Description { get; set; }
 
+        public string ExtendedDescription { get; set; }
+
         public abstract string BadgeName { get; set; }
 
         public abstract string BadgeColor { get; set; }

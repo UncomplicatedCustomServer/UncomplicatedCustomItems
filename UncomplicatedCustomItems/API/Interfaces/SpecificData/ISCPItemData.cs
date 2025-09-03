@@ -1,6 +1,4 @@
-using System;
-using CustomPlayerEffects;
-using InventorySystem.Items.Usables.Scp330;
+using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
 {
@@ -43,14 +41,7 @@ namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
 
         public abstract float FuseTime { get; set; }
     }
-
-    /// <summary>
-    /// The interface associated with <see cref="ItemType.SCP330"/> <see cref="CustomItemType.SCPItem"/>
-    /// </summary>
-    public interface ISCP330Data
-    {
-    }
-
+    
     public interface ISCP1344Data
     {
         public abstract bool Apply1344Effect { get; set; }

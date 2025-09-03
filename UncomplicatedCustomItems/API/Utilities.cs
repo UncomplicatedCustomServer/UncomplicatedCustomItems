@@ -188,9 +188,8 @@ namespace UncomplicatedCustomItems.API
                         error = $"The Item has been flagged as 'SCPItem' but the item {item.Item} is not an SCPItem!";
                         return false;
                     }
-
                     break;
-                
+
                 case CustomItemType.MicroHID:
                     if (item.CustomData is not IMicroHIDData)
                     {
@@ -236,6 +235,15 @@ namespace UncomplicatedCustomItems.API
 
                     break;
 
+                case CustomItemType.Candy:
+                    if (item.CustomData is not ICandyData)
+                    {
+                        error = $"The item has been flagged as 'Candy' with SCP330 but the CustomData class is not 'ICandyData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/[CANDY_DOCUMENTATION_LINK]";
+                        return false;
+                    }
+
+                    break;
+
                 default:
                     error = "Unknown error how did this happen? Anyway please report it on our discord server! D:\nhttps://discord.gg/5StRGu8EJV";
                     return false;
@@ -266,10 +274,7 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="item"></param>
         /// <returns><see cref="bool"/> <see langword="false"/> if there's any problem.</returns>
-        public static bool CustomItemValidator(ICustomItem item)
-        {
-            return CustomItemValidator(item, out _);
-        }
+        public static bool CustomItemValidator(ICustomItem item) => CustomItemValidator(item, out _);
 
         /// <summary>
         /// Parse a <see cref="object"/> as response to a <see cref="Player"/>
@@ -533,9 +538,7 @@ namespace UncomplicatedCustomItems.API
         private static Pickup FilterAndSelectPickup(List<Pickup> pickups, ISpawn spawn, ICustomItem customItem)
         {
             if (spawn.ForceItem)
-            {
                 pickups = pickups.Where(pickup => pickup.Type == customItem.Item).ToList();
-            }
 
             return pickups.Count > 0 ? pickups.RandomItem() : null;
         }

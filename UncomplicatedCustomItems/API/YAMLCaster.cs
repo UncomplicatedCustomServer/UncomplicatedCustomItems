@@ -11,11 +11,12 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Enums;
 using Newtonsoft.Json.Serialization;
+using UncomplicatedCustomItems.API.Attributes;
 
 namespace UncomplicatedCustomItems.API
 {
     /// <summary>
-    /// Casts the YAML data from <see cref="CustomItem"/> files into the plugin
+    /// Casts the YAML data from <see cref="YAMLCustomItem"/> or <see cref="YAMLCustomAction"/> files into the plugin
     /// </summary>
     public static class YAMLCaster
     {
@@ -31,6 +32,9 @@ namespace UncomplicatedCustomItems.API
 
             foreach (PropertyInfo property in element.GetType().GetProperties())
             {
+                if (property.GetCustomAttribute<YamlIgnoreAttribute>() != null)
+                    continue;
+
                 string yamlKey = snakeCaseStrategy.GetPropertyName(property.Name, false);
                 object value = property.GetValue(element, null);
 
@@ -217,26 +221,26 @@ namespace UncomplicatedCustomItems.API
                 (CustomItemType.Keycard, _) => (Data)Decode(new KeycardData(), data),
                 (CustomItemType.Armor, _) => (Data)Decode(new ArmorData(), data),
                 (CustomItemType.Weapon, _) => (Data)Decode(new WeaponData(), data),
-                (CustomItemType.Medikit, _) => (Data)Decode(new MedikitData(), data),
-                (CustomItemType.Painkillers, _) => (Data)Decode(new PainkillersData(), data),
-                (CustomItemType.Jailbird, _) => (Data)Decode(new JailbirdData(), data),
-                (CustomItemType.ExplosiveGrenade, _) => (Data)Decode(new ExplosiveGrenadeData(), data),
-                (CustomItemType.FlashGrenade, _) => (Data)Decode(new FlashGrenadeData(), data),
-                (CustomItemType.Adrenaline, _) => (Data)Decode(new AdrenalineData(), data),
-                (CustomItemType.MicroHID, _) => (Data)Decode(new MicroHIDData(), data),
-                (CustomItemType.ParticleDisruptor, _) => (Data)Decode(new ParticleDisruptorData(), data),
+                (CustomItemType.Medikit, ItemType.Medkit) => (Data)Decode(new MedikitData(), data),
+                (CustomItemType.Painkillers, ItemType.Painkillers) => (Data)Decode(new PainkillersData(), data),
+                (CustomItemType.Adrenaline, ItemType.Adrenaline) => (Data)Decode(new AdrenalineData(), data),
+                (CustomItemType.Jailbird, ItemType.Jailbird) => (Data)Decode(new JailbirdData(), data),
+                (CustomItemType.ExplosiveGrenade, ItemType.GrenadeHE) => (Data)Decode(new ExplosiveGrenadeData(), data),
+                (CustomItemType.FlashGrenade, ItemType.GrenadeFlash) => (Data)Decode(new FlashGrenadeData(), data),
+                (CustomItemType.MicroHID, ItemType.MicroHID) => (Data)Decode(new MicroHIDData(), data),
+                (CustomItemType.ParticleDisruptor, ItemType.ParticleDisruptor) => (Data)Decode(new ParticleDisruptorData(), data),
                 (CustomItemType.Light, _) => (Data)Decode(new FlashlightData(), data),
-                (_, ItemType.SCP018) => (Data)Decode(new SCP018Data(), data),
-                (_, ItemType.SCP207) => (Data)Decode(new SCP207Data(), data),
-                (_, ItemType.SCP500) => (Data)Decode(new SCP500Data(), data),
-                (_, ItemType.SCP330) => (Data)Decode(new SCP330Data(), data),
-                (_, ItemType.SCP2176) => (Data)Decode(new SCP2176Data(), data),
-                (_, ItemType.SCP244a) => (Data)Decode(new SCP244Data(), data),
-                (_, ItemType.SCP244b) => (Data)Decode(new SCP244Data(), data),
-                (_, ItemType.SCP1853) => (Data)Decode(new SCP1853Data(), data),
-                (_, ItemType.SCP1576) => (Data)Decode(new SCP1576Data(), data),
-                (_, ItemType.GunSCP127) => (Data)Decode(new SCP127Data(), data),
-                (_, ItemType.SCP1344) => (Data)Decode(new SCP1344Data(), data),
+                (CustomItemType.Candy, ItemType.SCP330) => (Data)Decode(new CandyData(), data),
+                (CustomItemType.SCPItem, ItemType.SCP018) => (Data)Decode(new SCP018Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP207) => (Data)Decode(new SCP207Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP500) => (Data)Decode(new SCP500Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP2176) => (Data)Decode(new SCP2176Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP244a) => (Data)Decode(new SCP244Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP244b) => (Data)Decode(new SCP244Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP1853) => (Data)Decode(new SCP1853Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP1576) => (Data)Decode(new SCP1576Data(), data),
+                (CustomItemType.SCPItem, ItemType.GunSCP127) => (Data)Decode(new SCP127Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP1344) => (Data)Decode(new SCP1344Data(), data),
                 (CustomItemType.SCPItem, _) => (Data)Decode(new SCPItemData(), data),
 
                 _ => new Data(),
@@ -255,6 +259,7 @@ namespace UncomplicatedCustomItems.API
                 Id = item.Id,
                 Name = item.Name,
                 Description = item.Description,
+                ExtendedDescription = item.ExtendedDescription,
                 Item = item.Item,
                 BadgeName = item.BadgeName,
                 BadgeColor = item.BadgeColor,
@@ -267,9 +272,15 @@ namespace UncomplicatedCustomItems.API
                 CustomItemType = item.CustomItemType,
                 CustomData = Decode(item.CustomItemType, item.CustomData, item.Item)
             };
+
             return NewItem;
         }
 
+        /// <summary>
+        /// Convert a basic <see cref="YAMLCustomAction"/> Action into a fullified <see cref="ICustomAction"/>
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
         public static ICustomAction Converter(YAMLCustomAction action)
         {
             ICustomAction NewAction = new CustomAction
@@ -279,6 +290,7 @@ namespace UncomplicatedCustomItems.API
                 Description = action.Description,
                 Actions = action.Actions
             };
+
             return NewAction;
         }
     }

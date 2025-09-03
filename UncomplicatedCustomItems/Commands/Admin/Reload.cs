@@ -3,6 +3,7 @@ using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -72,6 +73,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     LogManager.Debug($"Unregistered action {action.Name}.");
                 }
 
+                ImportManager.ActivePlugins.Clear();
                 SummonedCustomItem.List.Clear();
                 CustomItem.List.Clear();
                 CustomItem.UnregisteredList.Clear();
@@ -84,6 +86,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 Plugin.Instance.FileConfig.LoadAll();
                 Plugin.Instance.FileConfig.LoadAll(Server.Port.ToString());
                 Plugin.Instance.FileConfig.LoadAll("Actions");
+                Task.Run(ImportManager.Actor);
 
                 if (Round.IsRoundStarted)
                     Events.Internal.Server.SpawnItemsOnRoundStarted();

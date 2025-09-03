@@ -23,6 +23,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private static readonly Dictionary<Type, ArgumentType> EventTypeMapping = [];
         private static bool _isInitialized = false;
 
+        /// <summary>
+        /// Registers custom actions for use in <see cref="ArgumentManager"/> 
+        /// </summary>
         public static void Register()
         {
             ArgumentManager.Register("ServerBroadcast", (item, args) =>
@@ -380,6 +383,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             });
         }
 
+        /// <summary>
+        /// Registers all events and mappings for use in <see cref="ArgumentManager">
+        /// </summary>
         public static void Initialize()
         {
             if (_isInitialized)
@@ -392,6 +398,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             LogManager.Debug($"{nameof(Arguments)}: initialized with {EventTypeMapping.Count} event mappings.");
         }
         
+        /// <summary>
+        /// Unregisters all events and mappings for use in <see cref="ArgumentManager">
+        /// </summary>
         public static void Cleanup()
         {
             if (!_isInitialized)

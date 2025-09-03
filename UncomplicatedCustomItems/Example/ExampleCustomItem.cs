@@ -11,12 +11,16 @@ using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 using InventorySystem.Items.Firearms.Attachments;
-using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.ToolGun;
 
 namespace UncomplicatedCustomItems.Examples
 {
+    /// <summary>
+    /// Example of how to make a <see cref="CustomItem"/> in C#
+    /// You could also use the <see cref="ToolGun"/> as a example.
+    /// </summary>
     [PluginCustomItem]
-    public class ExampleCustomItem : CustomItem // You could also use the toolgun as a example.
+    public class ExampleCustomItem : CustomItem
     {
         public override uint Id { get; set; } = 1;
         

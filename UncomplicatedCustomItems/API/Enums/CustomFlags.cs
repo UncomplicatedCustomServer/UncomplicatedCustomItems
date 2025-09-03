@@ -20,6 +20,7 @@ namespace UncomplicatedCustomItems.API.Enums
         EffectShot = 1L << 8,
         EffectWhenEquiped = 1L << 9,
         NoCharge = 1L << 10,
+        CustomAudio = 1L << 11,
         CustomSound = 1L << 11,
         ExplosiveBullets = 1L << 12,
         ToolGun = 1L << 13,

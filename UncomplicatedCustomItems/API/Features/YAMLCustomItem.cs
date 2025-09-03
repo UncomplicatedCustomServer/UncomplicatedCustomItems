@@ -22,6 +22,9 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Sets the description of the custom item. This is shown as part of a hint when the item is equipped or picked up.")]
         public string Description { get; set; } = "An item that reminds me of 9/11";
 
+        [Description("The extended description of the custom item. Used by the `.customiteminfo` command")]
+        public string ExtendedDescription { get; set; } = string.Empty;
+
         [Description("Sets the badge name of the custom item. Remove the text in quotes to disable it.")]
         public string BadgeName { get; set; } = "Janitor";
 
@@ -40,11 +43,9 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Defines the spawn settings for the custom item. Information on rooms can be found in the UCI Information forum on Discord.")]
         public Spawn Spawn { get; set; } = new();
 
-        [Obsolete("Replaced by the argument system")]
         [Description("Sets the custom flags of the custom item. Information about custom flags can be found in the UCI Information forum on Discord.")]
-        public virtual CustomFlags? CustomFlags { get; set; } = Enums.CustomFlags.None;
+        public CustomFlags? CustomFlags { get; set; } = Enums.CustomFlags.None;
 
-        [Obsolete("Replaced by the argument system")]
         [Description("Settings for the CustomFlags. You can remove any unused settings.")]
         public FlagSettings? FlagSettings { get; set; } = new();
 

@@ -29,9 +29,6 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <param name="rooms">The collection of rooms to search through.</param>
         /// <param name="gameObjectName">The name of the GameObject to search for.</param>
         /// <returns>The room with the matching GameObject name, or null if not found.</returns>
-        public static Room GetByGameObjectName(this IReadOnlyCollection<Room> rooms, string gameObjectName)
-        {
-            return rooms.FirstOrDefault(room => room.GameObject.name == gameObjectName);
-        }
+        public static Room GetByGameObjectName(this IReadOnlyCollection<Room> rooms, string gameObjectName) => rooms.FirstOrDefault(room => room.GameObject.name == gameObjectName);
     }
 }

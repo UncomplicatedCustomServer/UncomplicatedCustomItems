@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net;
-using UncomplicatedCustomItems.API.Interfaces;
 using Logger = LabApi.Features.Console.Logger;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,7 +69,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public static void Security(string message)
         {
             History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Security", message));
-            Logger.Raw($"[Security] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Red);
+            Logger.Raw($"[Security] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.DarkMagenta);
         }
 
         public static HttpStatusCode SendReport(out HttpContent content, out string readableSize)
@@ -132,14 +131,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             try
             {
-                var result = await Plugin.HttpManager.ShareLogsAsync(formattedContent).ConfigureAwait(false);
+                var (statusCode, content) = await Plugin.HttpManager.ShareLogsAsync(formattedContent).ConfigureAwait(false);
 
-                if (result.statusCode == HttpStatusCode.OK)
+                if (statusCode == HttpStatusCode.OK)
                 {
                     MessageSent = true;
                 }
 
-                return (result.statusCode, result.content, readableSize);
+                return (statusCode, content, readableSize);
             }
             catch (HttpRequestException ex)
             {

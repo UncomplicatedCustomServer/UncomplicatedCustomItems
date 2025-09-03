@@ -1,23 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Attributes;
-using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features.Helper;
-using LabApi.Loader.Features.Plugins;
-using LabApi.Loader.Features.Misc;
-using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
     internal class ImportManager
     {
-        public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins => new();
-
-        public const float WaitingTime = 5f;
+        public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins => [];
 
         private static bool _alreadyLoaded = false;
 
@@ -31,7 +23,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Task.Run(Actor);
         }
 
-        private static void Actor()
+        internal static void Actor()
         {
             LogManager.Info($"{nameof(ImportManager)}: Checking for CustomItems registered in other plugins to import...");
 

@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using LabApi.Features.Wrappers;
-using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
@@ -54,7 +51,7 @@ namespace UncomplicatedCustomItems.API.Features
                 UnregisteredCustomActions.Remove(action);
             }
         }
-        
+
         public static uint GetFirstFreeId(uint from = 0)
         {
             for (uint i = from; i < uint.MaxValue; i++)

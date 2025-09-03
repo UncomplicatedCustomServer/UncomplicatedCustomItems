@@ -188,7 +188,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
             }
         }
 
-        [HarmonyPatch(typeof(Scp127VoiceTriggerBase), nameof(Scp127VoiceTriggerBase.ServerPlayVoiceLine), new Type[] { typeof(AudioClip), typeof(Action<NetworkWriter>), typeof(Scp127VoiceTriggerBase.VoiceLinePriority) })]
+        [HarmonyPatch(typeof(Scp127VoiceTriggerBase), nameof(Scp127VoiceTriggerBase.ServerPlayVoiceLine), [typeof(AudioClip), typeof(Action<NetworkWriter>), typeof(Scp127VoiceTriggerBase.VoiceLinePriority)])]
         public static class ServerPlayVoiceLineMutePatch
         {
             [HarmonyPrefix]

@@ -10,6 +10,7 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 using YamlDotNet.Core;
+using InventorySystem.Items.Usables.Scp330;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -46,7 +47,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Spawn = new(),
                 Arguments = new Dictionary<ArgumentType, string>
                 {
-                    [ArgumentType.OnShotWeapon] = "action Example"
+                    [ArgumentType.OnShotWeapon] = "action Example",
+                    [ArgumentType.OnAimedWeapon] = "Player::Damage(10, \"Test\", 'AIMING')",
                 },
                 CustomFlags = CustomFlags.InfiniteAmmo,
                 FlagSettings = new(),
@@ -359,6 +361,22 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.ParticleDisruptor,
                 Scale = Vector3.one,
                 CustomData = YAMLCaster.Encode(new ParticleDisruptorData())
+            },
+            new()
+            {
+                Id = 28,
+                Name = "SCP330",
+                Description = "SCP330",
+                Item = ItemType.SCP330,
+                CustomItemType = CustomItemType.Candy,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new CandyData()
+                {
+                    CandyType = CandyKindID.Rainbow,
+                    Chance = 100,
+                    DestroyOnUse = false,
+                    EatingMessage = ""
+                })
             },
         ];
 

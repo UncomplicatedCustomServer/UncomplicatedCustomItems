@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -43,6 +45,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 Utilities.TryGetCustomItemByName(name, out ICustomItem iCustomItem);
                 customItem = iCustomItem;
             }
+
+            if (customItem.Item == ItemType.SCP330 && customItem.CustomData is ICandyData candyData)
+            {
+                TryAddSpecificPatches.LastCustomItemId = customItem.Id;
+                TryAddSpecificPatches.CustomItem = customItem;
+                TryAddSpecificPatches.LastDesiredCandy = candyData.CandyType;
+            }
+
 
             if (arguments.Count == 2)
             {

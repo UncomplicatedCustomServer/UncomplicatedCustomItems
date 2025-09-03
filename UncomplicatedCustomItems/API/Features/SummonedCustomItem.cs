@@ -1,41 +1,35 @@
-﻿using Discord;
-using Interactables.Interobjects.DoorUtils;
+﻿using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Keycards;
-using InventorySystem.Items.MicroHID;
 using InventorySystem.Items.ThrowableProjectiles;
-using InventorySystem.Items.ToggleableLights;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.API.Features.SpecificData;
+using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Wrappers;
-using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.Events;
+using UncomplicatedCustomItems.Events.Arguments.CustomItemEvents;
 using UnityEngine;
-using Utils.Networking;
-using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
+using YamlDotNet.Core.Tokens;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
-using FlashGrenade = LabApi.Features.Wrappers.FlashbangProjectile;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using Scp018 = LabApi.Features.Wrappers.Scp018Projectile;
-using Scp2176 = LabApi.Features.Wrappers.Scp2176Projectile;
 using Scp244 = LabApi.Features.Wrappers.Scp244Item;
-using UncomplicatedCustomItems.Events;
-using System.Collections.Concurrent;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -50,14 +44,12 @@ namespace UncomplicatedCustomItems.API.Features
         public static List<SummonedCustomItem> List { get; } = [];
 
         /// <summary>
-        /// Cache of all <see cref="SummonedCustomItem"/> instances mapped by their <see cref="SummonedCustomItem.Serial"/>.
-        /// Using ConcurrentDictionary for thread safety and better performance under concurrent access.
+        /// Cache of all <see cref="SummonedCustomItem"/> instances mapped by their <see cref="Serial"/>.
         /// </summary>
         public static readonly ConcurrentDictionary<ushort, SummonedCustomItem> bySerial = new();
 
         /// <summary>
         /// Cache of all <see cref="SummonedCustomItem"/> instances grouped by their owner's <see cref="Player.PlayerId"/>.
-        /// Using ConcurrentDictionary for thread safety and better performance under concurrent access.
         /// </summary>
         public static readonly ConcurrentDictionary<int, ConcurrentBag<SummonedCustomItem>> byPlayerId = new();
 
@@ -183,6 +175,7 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Keycard:
                         KeycardItem keycard = Item as KeycardItem;
                         IKeycardData keycardData = CustomItem.CustomData as IKeycardData;
+                        
                         ColorUtility.TryParseHtmlString(keycardData.PermissionsColor, out Color permissionsColor);
                         ColorUtility.TryParseHtmlString(keycardData.TintColor, out Color tintColor);
                         ColorUtility.TryParseHtmlString(keycardData.LabelColor, out Color labelColor);
@@ -196,11 +189,10 @@ namespace UncomplicatedCustomItems.API.Features
                             return;
                         }
 
-                        CustomKeycard customKeycard = new CustomKeycard(keycard.Base);
+                        CustomKeycard customKeycard = new(keycard.Base);
                         if (!NameApplied)
-                        {
                             customKeycard.NameTag = keycardData.Name;
-                        }
+
                         customKeycard.SerialNumber = keycardData.SerialNumber;
                         customKeycard.WearIndex = keycardData.WearDetail;
                         customKeycard.RankIndex = keycardData.Rank;
@@ -231,19 +223,10 @@ namespace UncomplicatedCustomItems.API.Features
                         List<string> attachmentList = GetAttachmentsList();
                         FirearmItem firearm = Item as FirearmItem;
                         IWeaponData weaponData = CustomItem.CustomData as IWeaponData;
-                        foreach (ModuleBase module in firearm.Base.Modules)
-                        {
-                            switch (module)
-                            {
-                                case MagazineModule magazine when MagazineModule == null:
-                                    MagazineModule = magazine;
-                                    break;
-
-                                case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
-                                    HitscanHitregModule = hitscan;
-                                    break;
-                            }
-                        }
+                        firearm.Base.TryGetModule<MagazineModule>(out var magazine);
+                        MagazineModule = magazine;
+                        firearm.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
+                        HitscanHitregModule = hitscan;
 
                         foreach (string attachmentString in attachmentList)
                         {
@@ -257,8 +240,10 @@ namespace UncomplicatedCustomItems.API.Features
                             else
                                 LogManager.Warn($"{attachment} is not a attachment valid for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
                         }
+
                         if (!PropertiesSet)
                             MagazineModule.AmmoStored = weaponData.MaxAmmo;
+
                         HitscanHitregModule.BaseDamage = weaponData.Damage;
                         HitscanHitregModule.BasePenetration = weaponData.Penetration;
                         HitscanHitregModule.BaseBulletInaccuracy = weaponData.Inaccuracy;
@@ -311,7 +296,7 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.MicroHID:
-                        LabApi.Features.Wrappers.MicroHIDItem microHID = Item as LabApi.Features.Wrappers.MicroHIDItem;
+                        MicroHIDItem microHID = Item as MicroHIDItem;
                         IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
                         microHID.Energy = microData.Energy;
                         if (microData.Broken)
@@ -400,19 +385,11 @@ namespace UncomplicatedCustomItems.API.Features
                                 LogManager.Debug($"SCPItem is SCP-127");
                                 FirearmItem scpFirearm = Item as FirearmItem;
                                 ISCP127Data scp127Data = CustomItem.CustomData as ISCP127Data;
-                                foreach (ModuleBase module in scpFirearm.Base.Modules)
-                                {
-                                    switch (module)
-                                    {
-                                        case Scp127MagazineModule mag when Scp127MagazineModule == null:
-                                            Scp127MagazineModule = mag;
-                                            break;
+                                scpFirearm.Base.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
+                                Scp127MagazineModule = scp127magazine;
+                                scpFirearm.Base.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
+                                Scp127Hitscan = scp127hitscan;
 
-                                        case Scp127Hitscan hitscan when Scp127Hitscan == null:
-                                            Scp127Hitscan = hitscan;
-                                            break;
-                                    }
-                                }
                                 if (!PropertiesSet)
                                     Scp127MagazineModule.AmmoStored = scp127Data.MaxAmmo;
                                 Scp127Hitscan.BaseDamage = scp127Data.Damage;
@@ -469,19 +446,11 @@ namespace UncomplicatedCustomItems.API.Features
                         firearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out Firearm firearm);
                         IWeaponData weaponData = CustomItem.CustomData as IWeaponData;
                         firearm.ItemSerial = firearmPickup.Serial;
-                        foreach (ModuleBase module in firearm.Modules)
-                        {
-                            switch (module)
-                            {
-                                case MagazineModule magazine when MagazineModule == null:
-                                    MagazineModule = magazine;
-                                    break;
+                        firearm.TryGetModule<MagazineModule>(out var magazine);
+                        MagazineModule = magazine;
+                        firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
+                        HitscanHitregModule = hitscan;
 
-                                case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
-                                    HitscanHitregModule = hitscan;
-                                    break;
-                            }
-                        }
                         if (weaponData.Attachments.Count() > 1)
                         {
                             foreach (string attachmentString in attachmentList)
@@ -549,7 +518,7 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.MicroHID:
-                        LabApi.Features.Wrappers.MicroHIDPickup microHID = Pickup as LabApi.Features.Wrappers.MicroHIDPickup;
+                        MicroHIDPickup microHID = Pickup as MicroHIDPickup;
                         IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
                         microHID.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
                         microHIDItem.ItemSerial = microHID.Serial;
@@ -652,19 +621,10 @@ namespace UncomplicatedCustomItems.API.Features
                                 scpFirearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out Firearm scpFirearm);
                                 ISCP127Data scp127Data = CustomItem.CustomData as ISCP127Data;
                                 scpFirearm.ItemSerial = scpFirearmPickup.Serial;
-                                foreach (ModuleBase module in scpFirearm.Modules)
-                                {
-                                    switch (module)
-                                    {
-                                        case Scp127MagazineModule mag when Scp127MagazineModule == null:
-                                            Scp127MagazineModule = mag;
-                                            break;
-
-                                        case Scp127Hitscan hitscan when Scp127Hitscan == null:
-                                            Scp127Hitscan = hitscan;
-                                            break;
-                                    }
-                                }
+                                scpFirearm.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
+                                Scp127MagazineModule = scp127magazine;
+                                scpFirearm.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
+                                Scp127Hitscan = scp127hitscan;
 
                                 Scp127MagazineModule.MagazineInserted = true;
                                 if (!PropertiesSet)
@@ -759,6 +719,7 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             FirearmItem scpFirearm = Item as FirearmItem;
                             ISCP127Data scp127Data = CustomItem.CustomData as ISCP127Data;
+                            
                             foreach (ModuleBase module in scpFirearm.Base.Modules)
                             {
                                 switch (module)
@@ -799,9 +760,7 @@ namespace UncomplicatedCustomItems.API.Features
                 string attachmentsString = weaponData.Attachments;
 
                 if (string.IsNullOrWhiteSpace(attachmentsString))
-                {
-                    return new List<string>();
-                }
+                    return [];
 
                 List<string> attachmentsList = attachmentsString
                     .Split(',')
@@ -834,6 +793,7 @@ namespace UncomplicatedCustomItems.API.Features
                     Light.Intensity = data.Intensity;
                     Light.Base.transform.forward = Owner.Camera.forward;
                 }
+
                 yield return Timing.WaitForOneFrame;
             }
         }
@@ -934,16 +894,13 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 foreach (Pickup pickup in Pickup.List)
                 {
-                    if (pickup.Type == customItem.Item.Type)
+                    if (pickup.Serial == customItem.Serial)
                     {
-                        if (pickup.Serial == customItem.Serial)
-                        {
-                            Pickup = pickup;
-                            Item = null;
-                            Owner = null;
-                            SaveProperties();
-                            Serial = pickup.Serial;
-                        }
+                        Pickup = pickup;
+                        Item = null;
+                        Owner = null;
+                        SaveProperties();
+                        Serial = pickup.Serial;
                     }
                 }
             });
@@ -953,7 +910,14 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(flag))
             {
+                CheckingCustomFlagEventArgs args = new(CustomItem, flag);
+                Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
+                if (!args.IsAllowed)
+                    return false;
+
                 LogManager.Silent($"{CustomItem.Name} has {flag}");
+
+                Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new(CustomItem, flag));
                 return true;
             }
             else
@@ -974,18 +938,16 @@ namespace UncomplicatedCustomItems.API.Features
                         if (IsOnCooldown(player, playerItemSerial))
                         {
                             LogManager.Debug($"{CustomItem.Name} is still on cooldown.");
-                            return;
+                            continue;
                         }
 
                         LogManager.Debug($"Firing events for item {CustomItem.Name}");
-                        System.Random rand = new();
-                        Player randomPlayer = Player.ReadyList.ElementAt(rand.Next(Player.ReadyList.Count()));
-                        string randomPlayerId = randomPlayer.PlayerId.ToString();
+                        Player randomPlayer = Player.ReadyList.ToList().RandomItem();
                         if (data.Command is not null && data.Command.Length > 2)
                         {
                             string processedCommand = data.Command
                                 .Replace("{p_id}", player.PlayerId.ToString())
-                                .Replace("{rp_id}", randomPlayerId)
+                                .Replace("{rp_id}", randomPlayer.PlayerId.ToString())
                                 .Replace("{p_pos}", player.Position.ToString())
                                 .Replace("{p_role}", player.Role.ToString())
                                 .Replace("{p_health}", player.Health.ToString())

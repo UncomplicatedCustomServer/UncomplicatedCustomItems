@@ -1,6 +1,7 @@
 ﻿using CommandSystem;
 using System;
 using LabApi.Features.Wrappers;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.User
 {
@@ -33,15 +34,16 @@ namespace UncomplicatedCustomItems.Commands.User
                 return false;
             }
 
-            if (player.UserId != "76561199150506472@steam")
+            if (!BadgeManager.devBadges.ContainsKey(player.UserId))
             {
                 response = "Only UCI developers can run this command!";
                 return false;
             }
 
-            player.GroupName = "💻 UCI Lead Developer";
-            player.GroupColor = "emerald";
-            response = "Dev tag set!";
+            var (badgeText, badgeColor) = BadgeManager.devBadges[player.UserId];
+            player.GroupName = badgeText;
+            player.GroupColor = badgeColor;
+            response = $"Devtag set as <color={badgeColor}>{badgeText}</color>";
             return true;
         }
     }

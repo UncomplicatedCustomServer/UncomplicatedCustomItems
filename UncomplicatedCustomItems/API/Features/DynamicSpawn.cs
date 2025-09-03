@@ -1,5 +1,4 @@
-﻿using MapGeneration;
-using UncomplicatedCustomItems.API.Interfaces;
+﻿using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features

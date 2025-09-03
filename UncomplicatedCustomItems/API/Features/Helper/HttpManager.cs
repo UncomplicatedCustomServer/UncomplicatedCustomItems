@@ -1,4 +1,5 @@
 ﻿#if EXILED
+using Exiled.API.Interfaces;
 using Exiled.Loader;
 #endif
 using LabApi.Events.Arguments.PlayerEvents;
@@ -12,7 +13,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Struct;
@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public string Prefix { get; }
 
         /// <summary>
-        /// Gets the <see cref="HttpClient"/> public istance
+        /// Gets the <see cref="HttpClient"/> public instance
         /// </summary>
         public HttpClient HttpClient { get; }
 
@@ -265,7 +265,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
 #if EXILED
                 string url = $"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&using_labapi=false&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}";
-#elif LABAPI
+#else
                 string url = $"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CompiledVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}";
 #endif
 
@@ -381,16 +381,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 yield return Timing.WaitForSeconds(_presenceIntervalSeconds);
             }
         }
-
-        /// <summary>
-        /// Tracks the result of a presence task and handles failure counting
-        /// </summary>
+        
         private async Task TrackPresenceResult(Task<bool> presenceTask)
         {
             try
             {
                 bool success = await presenceTask;
-                
+
                 if (success)
                 {
                     _presenceFailureCount = 0;
@@ -399,7 +396,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 {
                     _presenceFailureCount++;
                     LogManager.Warn($"Presence failed ({_presenceFailureCount}/5)");
-                    
+
                     if (_presenceFailureCount >= 5)
                     {
                         LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
@@ -411,7 +408,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 LogManager.Error($"Error tracking presence result: {ex}");
                 _presenceFailureCount++;
-                
+
                 if (_presenceFailureCount >= 5)
                 {
                     LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
@@ -419,24 +416,19 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
         }
-
-        /// <summary>
-        /// Sends one presence POST to the worker's /connect endpoint.
-        /// </summary>
+        
         internal async Task<bool> SendPresenceOnceAsync()
         {
             if (string.IsNullOrWhiteSpace(UCIAPIEndpoint))
                 return false;
-                
+
             try
             {
-#if EXILED
-                List<TYPE> exiledPlugins = 
-                exiledPlugins.ForEach(p => pluginNames.Add(p.Name));
-#endif
-                List<LabApi.Loader.Features.Plugins.Plugin> plugins = LabApi.Loader.PluginLoader.EnabledPlugins.ToList();
                 List<string> pluginNames = [];
-                plugins.ForEach(p => pluginNames.Add(p.Name));
+#if EXILED
+                Loader.Plugins.ToList().ForEach(p => pluginNames.Add(p.Name));
+#endif
+                LabApi.Loader.PluginLoader.EnabledPlugins.ToList().ForEach(p => pluginNames.Add(p.Name));
 
                 var payload = new
                 {
@@ -444,13 +436,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     pluginVersion = Plugin.Instance?.Version?.ToString(3) ?? "unknown",
                     serverPort = Server.Port,
                     hideIP = Plugin.Instance.Config.HideipOnList.ToString(),
-                    scpslVersion = $"{GameCore.Version.Major}.{GameCore.Version.Minor}.{GameCore.Version.Revision}",
+                    scpslVersion = GameCore.Version.VersionString,
                     showOnList = Plugin.Instance.Config.ShowOnuciList.ToString(),
+                    plugins = pluginNames,
 #if EXILED
                     exiled = "true",
 #else
                     exiled = "false",
-                    plugins = pluginNames,
 #endif
                     extra = $"PlayerCount: {Server.PlayerCount}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}"
                 };
