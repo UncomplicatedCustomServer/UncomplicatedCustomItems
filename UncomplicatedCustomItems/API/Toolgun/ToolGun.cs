@@ -46,24 +46,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
     {
         public override bool DoSpawn { get; set; } = false;
         public override uint Count { get; set; } = 1;
-        public override bool? PedestalSpawn { get; set; } = false;
-        public override List<Vector3> Coords { get; set; } = new();
-        public override List<DynamicSpawn> DynamicSpawn { get; set; } =
-        [
-            new()
-            {
-                Room = "Lcz914",
-                Chance = 30,
-                Coords = Vector3.zero
-            }
-        ];
-        public override List<FacilityZone> Zones { get; set; } = new()
-        {
-            FacilityZone.HeavyContainment,
-            FacilityZone.Entrance
-        };
-        public override bool ReplaceExistingPickup { get; set; } = false;
-        public override bool ForceItem { get; set; } = false;
+        public override List<Features.SpawnData> SpawnSettings { get; set; } = new();
     }
 
     public class FlagSettingsData : FlagSettings

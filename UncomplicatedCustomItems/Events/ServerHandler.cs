@@ -4,21 +4,21 @@ using LabApi.Features.Wrappers;
 using MEC;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Components;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.Commands;
 using UnityEngine;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 namespace UncomplicatedCustomItems.Events
 {
-    public class ServerHandler
+    internal class ServerHandler
     {
         public static void Register()
         {
@@ -41,17 +41,34 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.IsAllowed)
                 return;
 
-            PlayerHandler._damageTimes.Clear();
+            CustomItem.List.Clear();
+            CustomItem.UnregisteredCustomItems.Clear();
+            CustomItem.CustomItems.Clear();
+            CustomItem.UnregisteredCustomItems.Clear();
+            CustomAction.CustomActions.Clear();
+            CustomAction.List.Clear();
+            CustomAction.UnregisteredCustomActions.Clear();
+            CustomAction.UnregisteredList.Clear();
+            SummonedCustomItem.List.ForEach(sci => sci.Destroy());
+            ArgumentManager._actionHandlers.Clear();
+            ArgumentManager._eventArgPropertyCache.Clear();
+            BaseCommand.Subcommands.Clear();
             PlayerHandler._capybaras.Clear();
+            PlayerHandler._damageTimes.Clear();
+            PlayerHandler._toolGunPrimitives.Clear();
+
         }
 
         public static void OnGrenadeExploding(ProjectileExplodingEventArgs ev)
         {
             if (ev.TimedGrenade == null || ev.Player == null || ev.Position == null)
                 return;
+
             PlayerHandler.DetonationPosition = ev.Position;
+
             if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
+                
             LogManager.Debug($"{ev.TimedGrenade.Type} is a CustomItem");
             if (customItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
             {
@@ -60,13 +77,14 @@ namespace UncomplicatedCustomItems.Events
                     if (spawnItemWhenDetonatedSettings.Chance == null || spawnItemWhenDetonatedSettings.ItemId == null || spawnItemWhenDetonatedSettings.ItemType == null || spawnItemWhenDetonatedSettings.Pickupable == null || spawnItemWhenDetonatedSettings.TimeTillDespawn == null)
                     {
                         LogManager.Warn($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} Chance, ItemId, ItemType, Pickupable, or TimeTillDespawn equals null. Aborting... \n Values: {spawnItemWhenDetonatedSettings.Chance} {spawnItemWhenDetonatedSettings.ItemId} {spawnItemWhenDetonatedSettings.ItemType} {spawnItemWhenDetonatedSettings.Pickupable} {spawnItemWhenDetonatedSettings.TimeTillDespawn}");
-                        break;
+                        continue;
                     }
-                    int chance = UnityEngine.Random.Range(0, 100);
+                    
+                    float chance = UnityEngine.Random.Range(0f, 100f);
                     if (chance <= spawnItemWhenDetonatedSettings.Chance)
                     {
                         LogManager.Debug($"Loaded FlagSettings.");
-                        if (spawnItemWhenDetonatedSettings.ItemType == "UCI" || spawnItemWhenDetonatedSettings.ItemType == "uci")
+                        if (spawnItemWhenDetonatedSettings.ItemType.ToLower() == "uci")
                         {
                             if (Utilities.TryGetCustomItem((uint)spawnItemWhenDetonatedSettings.ItemId, out ICustomItem itemToSpawn))
                             {
@@ -84,7 +102,7 @@ namespace UncomplicatedCustomItems.Events
                             else
                                 LogManager.Warn($"{spawnItemWhenDetonatedSettings.ItemId} is not a UCI CustomItem ID!");
                         }
-                        else if (spawnItemWhenDetonatedSettings.ItemType == "Normal" || spawnItemWhenDetonatedSettings.ItemType == "normal")
+                        else if (spawnItemWhenDetonatedSettings.ItemType.ToLower() == "normal")
                         {
                             if ((ItemType)spawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244a || (ItemType)spawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244b)
                             {
@@ -120,9 +138,8 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
             else
-            {
                 LogManager.Debug($"{ev.TimedGrenade.Type} is not a CustomItem with the SpawnItemWhenDetonated flag. Serial: {ev.TimedGrenade.Serial}");
-            }
+
             if (customItem.HasModule(CustomFlags.Cluster))
             {
                 LogManager.Debug($"{ev.TimedGrenade.Type} is a CustomItem");
@@ -150,8 +167,7 @@ namespace UncomplicatedCustomItems.Events
                             for (int i = 0; i <= clusterSettings.AmountToSpawn; i++)
                             {
                                 Vector3 position = ClusterOffset(ev.Position);
-                                Pickup pickup = Pickup.Create(clusterSettings.ItemToSpawn, position, ev.Player.Rotation, scale);
-                                pickup.Spawn();
+                                PickupExtensions.CreateAndSpawn(clusterSettings.ItemToSpawn, position, ev.Player.Rotation, scale);
                             }
                         });
                     }
@@ -165,32 +181,31 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnPickupCreation(PickupCreatedEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem summonedCustomItem))
-            {
-                Timing.CallDelayed(Timing.WaitForOneFrame, () =>
-                {
-                    try
-                    {
-                        if (ev.Pickup is not null)
-                        {
-                            ev.Pickup.GameObject.transform.localScale = summonedCustomItem.CustomItem.Scale;
-                            ev.Pickup.Weight = summonedCustomItem.CustomItem.Weight;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogManager.Silent($"{summonedCustomItem.CustomItem.Name} - {summonedCustomItem.CustomItem.Id} - {summonedCustomItem.CustomItem.CustomFlags}");
-                        LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
-                    }
-                });
-            }
-
-            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem customItem))
                 return;
 
-            if (customItem.HasModule(CustomFlags.ItemGlow))
+            customItem?.OnDrop(ev);
+
+            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
             {
-                Timing.CallDelayed(1f, () =>
+                try
+                {
+                    if (ev.Pickup is not null)
+                    {
+                        ev.Pickup.GameObject.transform.localScale = customItem.CustomItem.Scale;
+                        ev.Pickup.Weight = customItem.CustomItem.Weight;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Silent($"{customItem.CustomItem.Name} - {customItem.CustomItem.Id} - {customItem.CustomItem.CustomFlags}");
+                    LogManager.Error($"Couldnt set CustomItem Pickup Scale or CustomItem Pickup Weight\n Error: {ex.Message}\n Code: {ex.HResult}\n Please send this in the bug-report forum in our Discord!");
+                }
+
+                if (customItem.HasModule(CustomFlags.ToolGun))
+                    customItem.Destroy();
+
+                if (customItem.HasModule(CustomFlags.ItemGlow))
                 {
                     foreach (ItemGlowSettings itemGlowSettings in customItem.CustomItem.FlagSettings.ItemGlowSettings)
                     {
@@ -223,26 +238,28 @@ namespace UncomplicatedCustomItems.Events
 
                         var light = Light.Create(ev.Pickup.Position);
                         light.Color = lightColor;
-                        light.Intensity = 0.7f;
-                        light.Range = 0.5f;
+                        light.Intensity = itemGlowSettings.Intensity;
+                        light.Range = itemGlowSettings.Range;
                         light.ShadowType = LightShadows.None;
 
                         light.Base.gameObject.transform.SetParent(itemGameObject.transform, true);
-                        LogManager.Debug($"Item Light spawned at position: {light.Base.transform.position}");
+                        light.Position += Vector3.up * 0.1f;
+                        LogManager.Debug($"Item Light spawned at position: {light.Position}");
                         PlayerHandler.ActiveLights[ev.Pickup] = light;
                     }
-                });
-            }
+                }
+
+            if (customItem.HasModule(CustomFlags.InfiniteAmmo) && ev.Pickup.Base is InventorySystem.Items.Firearms.FirearmPickup pickup)
+                FirearmItem.Get(pickup.Template).Base.gameObject.AddComponent<RegenAmmo>().Init(FirearmItem.Get(pickup.Template));
+            });
         }
+
         public static void OnPickup(PickupDestroyedEventArgs ev)
         {
             if (ev.Pickup != null)
-            {
-                if (ev.Pickup != null)
-                    PlayerHandler.DestroyLightOnPickup(ev.Pickup);
-                else
-                    LogManager.Error($"Couldnt destroy light on {ev.Pickup.Type}.");
-            }
+                PlayerHandler.DestroyLightOnPickup(ev.Pickup);
+            else
+                LogManager.Error($"Couldnt destroy light on {ev.Pickup.Type}.");
         }
 
         /// <summary>
@@ -261,7 +278,7 @@ namespace UncomplicatedCustomItems.Events
 
         private static Vector3 ClusterOffset(Vector3 position)
         {
-            System.Random random = new System.Random();
+            System.Random random = new();
             float x = position.x - 1 + ((float)random.NextDouble() * random.Next(0, 3));
             float y = position.y;
             float z = position.z - 1 + ((float)random.NextDouble() * random.Next(0, 3));

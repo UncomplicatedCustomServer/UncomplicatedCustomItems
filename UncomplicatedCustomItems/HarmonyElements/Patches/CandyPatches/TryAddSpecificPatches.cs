@@ -19,21 +19,39 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
         [HarmonyPrefix]
         public static void TryAddSpecificPrefix(Scp330Bag __instance, ref CandyKindID kind)
         {
-            LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Original candy type: {kind}");
-            
-            if (LastCustomItemId != 0 && CustomItem != null && CustomItem.CustomData is ICandyData candyData)
+            try
             {
-                LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Using custom candy type {candyData.CandyType} for item {CustomItem.Name}");
-                kind = candyData.CandyType;
-                LastDesiredCandy = candyData.CandyType;
-                return;
-            }
+                LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: START - LastCustomItemId: {LastCustomItemId}, CustomItem: {CustomItem?.Name ?? "null"}");
+                LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Original candy type: {kind}");
 
-            if (LastDesiredCandy != CandyKindID.None && kind != LastDesiredCandy)
+                if (LastCustomItemId == 0 && CustomItem == null)
+                {
+                    SelectCustomCandyItem(kind);
+                }
+                else
+                {
+                    LogManager.Debug($"Skipping SelectCustomCandyItem - already have LastCustomItemId: {LastCustomItemId}");
+                }
+
+                if (LastCustomItemId != 0 && CustomItem != null && CustomItem.CustomData is ICandyData candyData)
+                {
+                    LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Using custom candy type {candyData.CandyType} for item {CustomItem.Name}");
+                    kind = candyData.CandyType;
+                    LastDesiredCandy = candyData.CandyType;
+                    return;
+                }
+
+                if (LastDesiredCandy != CandyKindID.None && kind != LastDesiredCandy)
+                {
+                    LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Replacing {kind} with desired {LastDesiredCandy}");
+                    kind = LastDesiredCandy;
+                    LastDesiredCandy = CandyKindID.None;
+                }
+            }
+            catch (Exception ex)
             {
-                LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Replacing {kind} with desired {LastDesiredCandy}");
-                kind = LastDesiredCandy;
-                LastDesiredCandy = CandyKindID.None;
+                LogManager.Error($"{nameof(TryAddSpecificPrefix)}:: {ex}");
+                ResetCustomCandyState();
             }
         }
 
@@ -48,18 +66,17 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                     return;
                 }
 
-                if (LastCustomItemId == 0 && CustomItem == null)
-                    SelectCustomCandyItem();
-
                 LogManager.Debug($"{nameof(TryAddSpecificPostfix)}: Adding {kind} to {__instance.Owner.nicknameSync.DisplayName} Inventory");
                 CandySerializationManager.AddCandyToBag(__instance, kind);
 
                 if (LastCustomItemId != 0 && CustomItem != null)
                 {
+                    CandyKindID finalCandyType = LastDesiredCandy != CandyKindID.None ? LastDesiredCandy : kind;
+
                     SerializedCandy sc = new()
                     {
                         Id = Guid.NewGuid(),
-                        CandyType = kind,
+                        CandyType = finalCandyType,
                         AddedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                         BagSerial = __instance.ItemSerial,
                         IsCustom = true,
@@ -69,7 +86,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                     if (CustomItem.CustomData is ICandyData candyData && candyData is CandyData candy)
                         candy.SerializedCandy = sc;
 
-                    LogManager.Debug($"{nameof(TryAddSpecificPostfix)}: Attaching custom candy id {LastCustomItemId} to bag {__instance.ItemSerial}");
+                    LogManager.Debug($"{nameof(TryAddSpecificPostfix)}: Attaching custom candy id {LastCustomItemId} to bag {__instance.ItemSerial} with candy type {finalCandyType}");
                     CandySerializationManager.ReplaceLastCandyInBag(__instance, sc);
                 }
 
@@ -77,13 +94,15 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
             }
             catch (Exception ex)
             {
-                LogManager.Error($"[CandySerialization] {nameof(TryAddSpecificPostfix)} error: {ex}");
+                LogManager.Error($"{nameof(TryAddSpecificPostfix)} error: {ex}");
                 ResetCustomCandyState();
             }
         }
 
-        private static void SelectCustomCandyItem()
+        private static void SelectCustomCandyItem(CandyKindID kind)
         {
+            LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Attempting to select custom candy for type {kind}");
+
             foreach (ICustomItem item in API.Features.CustomItem.List)
             {
                 if (item.Item is not ItemType.SCP330)
@@ -95,15 +114,22 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                 if (!item.Spawn.DoSpawn)
                     continue;
 
-                int chance = UnityEngine.Random.Range(0, 100);
+                if (kind != data.CandyType)
+                    continue;
+
+                float chance = UnityEngine.Random.Range(0f, 100f);
+                LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Rolling chance for {item.Name}: {chance}% (need < {data.Chance}%)");
+
                 if (chance >= data.Chance)
                     continue;
 
                 LastCustomItemId = item.Id;
                 CustomItem = item;
                 LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Selected custom candy {item.Name} (ID: {item.Id}) with candy type {data.CandyType}");
-                break;
+                return;
             }
+
+            LogManager.Debug($"{nameof(SelectCustomCandyItem)}: No custom candy selected for type {kind}");
         }
 
         private static void ResetCustomCandyState()

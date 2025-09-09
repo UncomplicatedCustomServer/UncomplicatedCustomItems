@@ -47,7 +47,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
         private readonly Dictionary<ushort, int> RankIndexDic = [];
 
         /// <summary>
-        /// The underlying Exiled <see cref="KeycardItem"/> instance being wrapped.
+        /// The underlying <see cref="KeycardItem"/> instance being wrapped.
         /// </summary>
         public KeycardItem ParentKeycard { get; private set; }
 
@@ -297,7 +297,6 @@ namespace UncomplicatedCustomItems.API.Wrappers
 
         /// <summary>
         /// Gets or sets the wear index.
-        /// I dont think this is applied currently in the 14.1 beta.
         /// </summary>
         public byte WearIndex
         {
@@ -328,7 +327,6 @@ namespace UncomplicatedCustomItems.API.Wrappers
 
         /// <summary>
         /// Gets or sets the rank shown on the card.
-        /// I dont think this is applied currently in the 14.1 beta.
         /// </summary>
         public int RankIndex
         {

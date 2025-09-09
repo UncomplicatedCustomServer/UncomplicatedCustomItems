@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Interactables.Interobjects.DoorUtils;
+﻿using Interactables.Interobjects.DoorUtils;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.ShotEvents;
 using InventorySystem.Items.Firearms;
@@ -8,12 +7,15 @@ using LabApi.Features.Wrappers;
 using PlayerStatsSystem;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features;
-using CustomPlayerEffects;
+using System.Collections.Generic;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
     public static class PlayerExtensions
     {
+        public static Dictionary<Player, int> PlayerKills { get; set; } = [];
+
         /// <summary>
         /// Checks whether the player has a keycard of a specific permission.
         /// </summary>
@@ -37,32 +39,25 @@ namespace UncomplicatedCustomItems.API.Extensions
             if (firearm.FlashLightStatus())
                 return true;
             else return false;
-        
+
         }
 
-        public static CommandSender GetSender(this Player player)
-        {
-            return player.ReferenceHub.queryProcessor._sender;
-        }
+        public static CommandSender GetSender(this Player player) => player.ReferenceHub.queryProcessor._sender;
 
         public static void Vaporize(this Player player, Player? attacker = null)
         {
-            ParticleDisruptor tempDisruptor = Object.Instantiate(InventoryItemLoader.AvailableItems[ItemType.ParticleDisruptor]) as ParticleDisruptor;
+            if (!InventoryItemLoader.TryGetItem(ItemType.ParticleDisruptor, out ParticleDisruptor disruptor))
+                return;
 
-            if (tempDisruptor != null)
-            {
-                if (attacker != null)
-                    tempDisruptor.Owner = attacker.ReferenceHub;
+            if (attacker != null)
+                disruptor.Owner = attacker.ReferenceHub;
 
-                DisruptorShotEvent shotEvent = new(tempDisruptor, DisruptorActionModule.FiringState.FiringSingle);
-                DisruptorDamageHandler damageHandler = new(shotEvent, Vector3.up, -1);
-                player.ReferenceHub.playerStats.KillPlayer(damageHandler);
-
-                Object.Destroy(tempDisruptor.gameObject);
-            }
+            DisruptorShotEvent shotEvent = new(disruptor, DisruptorActionModule.FiringState.FiringSingle);
+            DisruptorDamageHandler damageHandler = new(shotEvent, Vector3.up, -1);
+            player.ReferenceHub.playerStats.KillPlayer(damageHandler);
         }
 
-        public static void GiveCustomItem(this Player player, CustomItem customitem) => new SummonedCustomItem(customitem, player);
+        public static void GiveCustomItem(this Player player, ICustomItem customitem) => new SummonedCustomItem(customitem, player);
 
         public static bool HasCustomItem(this Player player, bool currentitem = false)
         {
@@ -82,16 +77,10 @@ namespace UncomplicatedCustomItems.API.Extensions
             return false;
         }
 
-        private static int GetEffectIndex(this Player player, StatusEffectBase effect)
+        public static int TotalKills(this Player player)
         {
-            PlayerEffectsController controller = player.ReferenceHub.playerEffectsController;
-            for (int i = 0; i < controller.EffectsLength; i++)
-            {
-                if (ReferenceEquals(controller.AllEffects[i], effect))
-                    return i;
-            }
-
-            return -1;
+            PlayerKills.TryGetValue(player, out int kills);
+            return kills;
         }
     }
 }

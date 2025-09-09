@@ -1,9 +1,13 @@
-﻿using CommandSystem;
+﻿#if EXILED
+using Exiled.Permissions.Extensions;
+#endif
+using CommandSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.Commands.Admin;
 using UncomplicatedCustomItems.API.Interfaces;
+using LabApi.Features.Permissions;
 
 namespace UncomplicatedCustomItems.Commands
 {
@@ -26,10 +30,12 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Summoned());
             Subcommands.Add(new Generate());
             Subcommands.Add(new Reload());
+            Subcommands.Add(new Random());
             Subcommands.Add(new Info());
             Subcommands.Add(new Get());
             Subcommands.Add(new ToolGun());
             Subcommands.Add(new PresenceDebug());
+            Subcommands.Add(new EquipCustomItemDebug());
         }
 
         internal static List<ISubcommand> Subcommands { get; } = [];
@@ -54,12 +60,19 @@ namespace UncomplicatedCustomItems.Commands
                 response = "Command not found!";
                 return false;
             }
-
+#if EXILED
             if (!sender.CheckPermission(cmd.RequiredPermission))
             {
-                response = "You don't have permission to access that command!";
+                response = "You don't have permission to access that command! \n Required permission: {cmd.RequiredPermission}";
                 return false;
             }
+#else
+            if (!sender.HasPermissions(cmd.RequiredPermission))
+            {
+                response = $"You don't have permission to access that command! \n Required permission: {cmd.RequiredPermission}";
+                return false;
+            }
+#endif
 
             if (arguments.Count < cmd.RequiredArgsCount)
             {

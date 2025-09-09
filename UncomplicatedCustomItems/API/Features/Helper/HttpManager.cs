@@ -9,10 +9,12 @@ using LabApi.Loader.Features.Misc;
 using MEC;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Struct;
@@ -346,11 +348,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             LogManager.Debug("Stopping UCI API Presence");
             _presenceRunning = false;
-            try
-            {
-                Timing.KillCoroutines(PresenceCoroutine);
-            }
-            catch (Exception) { }
+            Timing.KillCoroutines(PresenceCoroutine);
         }
 
         private IEnumerator<float> PresenceLoop()
@@ -360,16 +358,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 try
                 {
                     LogManager.Debug("Sending UCI API Presence");
-                    
+
                     var presenceTask = SendPresenceOnceAsync();
-                    
+
                     _ = TrackPresenceResult(presenceTask);
                 }
                 catch (Exception ex)
                 {
                     LogManager.Error($"HttpManager: error while scheduling presence send: {ex}");
                     _presenceFailureCount++;
-                    
+
                     if (_presenceFailureCount >= 5)
                     {
                         LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
@@ -381,7 +379,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 yield return Timing.WaitForSeconds(_presenceIntervalSeconds);
             }
         }
-        
+
         private async Task TrackPresenceResult(Task<bool> presenceTask)
         {
             try
@@ -416,34 +414,65 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
         }
-        
+
         internal async Task<bool> SendPresenceOnceAsync()
         {
             if (string.IsNullOrWhiteSpace(UCIAPIEndpoint))
                 return false;
 
+            List<string> pluginNames = [];
+            bool hasExiled = false;
+
             try
             {
-                List<string> pluginNames = [];
-#if EXILED
-                Loader.Plugins.ToList().ForEach(p => pluginNames.Add(p.Name));
-#endif
-                LabApi.Loader.PluginLoader.EnabledPlugins.ToList().ForEach(p => pluginNames.Add(p.Name));
+                Type loaderType = Type.GetType("Exiled.Loader.Loader, Exiled.Loader");
+                if (loaderType != null)
+                {
+                    PropertyInfo pluginsProperty = loaderType.GetProperty("Plugins", BindingFlags.Public | BindingFlags.Static);
+                    if (pluginsProperty != null)
+                    {
+                        if (pluginsProperty.GetValue(null) is IEnumerable plugins)
+                        {
+                            foreach (object plugin in plugins)
+                            {
+                                PropertyInfo nameProperty = plugin.GetType().GetProperty("Name");
+                                if (nameProperty != null)
+                                {
+                                    string name = nameProperty.GetValue(plugin) as string;
+                                    if (!string.IsNullOrEmpty(name))
+                                    {
+                                        if (name.StartsWith("Exiled", StringComparison.OrdinalIgnoreCase))
+                                            hasExiled = true;
+                                        else
+                                            pluginNames.Add(name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                LabApi.Loader.PluginLoader.EnabledPlugins.ToList().ForEach(p =>
+                {
+                    if (!p.Name.StartsWith("Exiled", StringComparison.OrdinalIgnoreCase))
+                        pluginNames.Add(p.Name);
+                    else
+                        hasExiled = true;
+                });
+
+                if (hasExiled)
+                    pluginNames.Add("Exiled");
 
                 var payload = new
                 {
                     serverName = Server.ServerListName,
-                    pluginVersion = Plugin.Instance?.Version?.ToString(3) ?? "unknown",
+                    pluginVersion = Plugin.Instance.Version.ToString(3) ?? "unknown",
                     serverPort = Server.Port,
                     hideIP = Plugin.Instance.Config.HideipOnList.ToString(),
                     scpslVersion = GameCore.Version.VersionString,
                     showOnList = Plugin.Instance.Config.ShowOnuciList.ToString(),
                     plugins = pluginNames,
-#if EXILED
-                    exiled = "true",
-#else
-                    exiled = "false",
-#endif
+                    exiled = hasExiled.ToString().ToLower(),
                     extra = $"PlayerCount: {Server.PlayerCount}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}"
                 };
 

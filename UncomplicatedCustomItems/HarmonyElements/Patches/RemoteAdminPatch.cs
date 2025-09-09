@@ -1,7 +1,7 @@
 using HarmonyLib;
 using LabApi.Features.Wrappers;
 using RemoteAdmin.Communication;
-using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {

@@ -3,7 +3,7 @@ using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.API.Interfaces
 {
-    #nullable enable
+#nullable enable
     public interface IFlagSettings
     {
         public abstract List<ItemGlowSettings?> ItemGlowSettings { get; set; }
@@ -20,5 +20,6 @@ namespace UncomplicatedCustomItems.API.Interfaces
         public abstract List<CraftableSettings?> CraftableSettings { get; set; }
         public abstract List<DieOnUseSettings?> DieOnUseSettings { get; set; }
         public abstract List<HealOnKillSettings?> HealOnKillSettings { get; set; }
+        public List<InfiniteAmmoSettings?> InfiniteAmmoSettings { get; set; }
     }
 }

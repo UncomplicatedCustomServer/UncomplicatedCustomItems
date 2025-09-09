@@ -15,6 +15,7 @@ using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Wrappers;
 using PlayerRoles;
 using UncomplicatedCustomItems.API.Enums;
+using PlayerStatsSystem;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -63,7 +64,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                     if (weaponData.EnableFriendlyFire)
                     {
                         ev.Player.Damage(weaponData.Damage, ev.Attacker);
-                        ev.Attacker.SendHitMarker();
+                        ev.Attacker.SendHitMarker(weaponData.Damage);
                     }
                 }
             }
@@ -85,7 +86,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem item))
                 return;
 
-            item?.OnDrop(ev);
+            item.OnDrop(ev);
             item.ResetBadge(ev.Player);
             PlayerHandler.StopHumeShieldRegen(ev.Player);
         }

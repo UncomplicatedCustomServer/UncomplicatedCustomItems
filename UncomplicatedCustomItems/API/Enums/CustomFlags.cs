@@ -8,7 +8,6 @@ namespace UncomplicatedCustomItems.API.Enums
     [Flags]
     public enum CustomFlags : long
     {
-        // CustomFlags added via CustomFlagsExtensions should use 49 to 62
         None = 0,
         DoNotTriggerTeslaGates = 1L << 1,
         LifeSteal = 1L << 2,
@@ -34,5 +33,7 @@ namespace UncomplicatedCustomItems.API.Enums
         HealOnKill = 1L << 21,
         Capybara = 1L << 22, // Capybara
         SingleFire = 1L << 23,
+        DistruptorTracer = 1L << 24,
+        Disguise = 1L << 25,
     }
 }

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
-namespace UncomplicatedCustomItems.API.Features
+namespace UncomplicatedCustomItems.API.Features.Helper
 {
     /// <summary>
     /// Handles all audio related methods for <see cref="CustomItem"/>

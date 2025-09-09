@@ -2,6 +2,7 @@ using System;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.User
 {
@@ -22,33 +23,42 @@ namespace UncomplicatedCustomItems.Commands.User
         {
             Player player = Player.Get(sender);
 
-            if (player is null || sender.LogName is "SERVER CONSOLE")
+            if (player is null || sender.LogName is "SERVER CONSOLE" || sender.LogName.Contains("Dedicated Server"))
             {
-                response = "Can't use this command while not in the game!";
+                response = "Cannot use this command while not in the game!";
                 return false;
             }
 
-            if (player.CurrentItem is null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out var item))
+            if (player.CurrentItem is null)
             {
-                response = "You must hold the custom item!";
+                foreach (Item item in player.Items)
+                {
+                    if (Utilities.TryGetSummonedCustomItem(item.Serial, out _))
+                    {
+                        response = "You must hold the CustomItem!";
+                        return false;
+                    }
+                }
+
+                response = $"You do not have a CustomItem!";
                 return false;
             }
 
-            if (!string.IsNullOrEmpty(item.CustomItem.ExtendedDescription))
+            if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out var customItem) && !string.IsNullOrEmpty(customItem.CustomItem.ExtendedDescription))
             {
-                string description = item.CustomItem.ExtendedDescription
-                .Replace("%name%", item.CustomItem.Name)
-                .Replace("%playername%", item.Owner.DisplayName)
-                .Replace("%player%", item.Owner.DisplayName)
-                .Replace("%id%", item.CustomItem.Id.ToString()
-                .Replace("%serial%", item.Serial.ToString()));
+                string description = customItem.CustomItem.ExtendedDescription
+                .Replace("%name%", customItem.CustomItem.Name)
+                .Replace("%playername%", customItem.Owner.DisplayName)
+                .Replace("%player%", customItem.Owner.DisplayName)
+                .Replace("%id%", customItem.CustomItem.Id.ToString()
+                .Replace("%serial%", customItem.Serial.ToString()));
 
                 response = description;
                 return true;
             }
             else
             {
-                response = $"{item.CustomItem.Name} Doesn't have a extended discription!";
+                response = $"{customItem.CustomItem.Name} Doesn't have a extended description!";
                 return false;
             }
         }

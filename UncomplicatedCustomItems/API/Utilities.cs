@@ -11,6 +11,7 @@ using LabApi.Features.Wrappers;
 using MapGeneration;
 using System;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.Events.Arguments.CustomItemEvents;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -183,7 +184,7 @@ namespace UncomplicatedCustomItems.API
                     break;
 
                 case CustomItemType.SCPItem:
-                    if (!item.Item.IsScp() && item.Item != ItemType.GunSCP127)
+                    if (!item.Item.IsScp())
                     {
                         error = $"The Item has been flagged as 'SCPItem' but the item {item.Item} is not an SCPItem!";
                         return false;
@@ -366,33 +367,46 @@ namespace UncomplicatedCustomItems.API
         /// <param name="CustomItem"></param>
         internal static void SummonCustomItem(ICustomItem CustomItem)
         {
-            ISpawn spawn = CustomItem.Spawn;
-
-            if (spawn.PedestalSpawn == true)
+            foreach (SpawnData spawn in CustomItem.Spawn.SpawnSettings)
             {
-                HandlePedestalSpawn(CustomItem, spawn);
-                return;
-            }
+                float chance = UnityEngine.Random.Range(0f, 100f);
+                if (chance < spawn.Chance)
+                    return;
 
-            if (spawn.Coords.Count() > 0)
-            {
-                SpawnAtRandomCoordinate(CustomItem, spawn);
-                return;
-            }
+                SummoningCustomItemEventArgs args = new(CustomItem);
+                Events.Handlers.CustomItemEvents.OnSummoningCustomItem(args);
+                if (!args.IsAllowed)
+                    return;
 
-            if (spawn.DynamicSpawn.Count() > 0)
-            {
-                HandleDynamicSpawn(CustomItem, spawn);
-                return;
-            }
+                if (spawn.PedestalSpawn == true)
+                {
+                    HandlePedestalSpawn(CustomItem, spawn);
+                    return;
+                }
 
-            if (spawn.Zones.Count() > 0)
-            {
-                HandleZoneSpawn(CustomItem, spawn);
+                if (spawn.Coords != Vector3.zero)
+                {
+                    SpawnAtCoordinate(CustomItem, spawn);
+                    return;
+                }
+
+                if (spawn.DynamicSpawn.Count() > 0)
+                {
+                    HandleDynamicSpawn(CustomItem, spawn);
+                    return;
+                }
+
+                if (spawn.Zones.Count() > 0)
+                {
+                    HandleZoneSpawn(CustomItem, spawn);
+                }
+                
+                SummonedCustomItemEventArgs args1 = new(CustomItem);
+                Events.Handlers.CustomItemEvents.OnSummonedCustomItem(args1);
             }
         }
 
-        private static void HandlePedestalSpawn(ICustomItem customItem, ISpawn spawn)
+        private static void HandlePedestalSpawn(ICustomItem customItem, SpawnData spawn)
         {
             foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
             {
@@ -431,25 +445,34 @@ namespace UncomplicatedCustomItems.API
             }
         }
 
-        private static void SpawnAtRandomCoordinate(ICustomItem customItem, ISpawn spawn) => new SummonedCustomItem(customItem, spawn.Coords.RandomItem());
+        private static void SpawnAtCoordinate(ICustomItem customItem, SpawnData spawn)
+        {
+            if (spawn.Rotation != Vector4.zero)
+            {
+                spawn.Rotation.Normalize();
+                Quaternion rotation = new(spawn.Rotation.x, spawn.Rotation.y, spawn.Rotation.z, spawn.Rotation.w);
+                new SummonedCustomItem(customItem, spawn.Coords, rotation);
+            }
+            else
+                new SummonedCustomItem(customItem, spawn.Coords);
+        }
 
-        private static void HandleDynamicSpawn(ICustomItem customItem, ISpawn spawn)
+        private static void HandleDynamicSpawn(ICustomItem customItem, SpawnData spawn)
         {
             foreach (DynamicSpawn dynamicSpawn in spawn.DynamicSpawn)
             {
-                int chance = UnityEngine.Random.Range(0, 100);
-                if (chance > dynamicSpawn.Chance)
-                    continue;
-
                 Room room = GetRoomFromDynamicSpawn(dynamicSpawn);
                 if (room == null)
                     continue;
 
+                spawn.Rotation.Normalize();
+                Quaternion rotation = new(spawn.Rotation.x, spawn.Rotation.y, spawn.Rotation.z, spawn.Rotation.w);
+
                 Vector3 spawnPosition = GetDynamicSpawnPosition(room, dynamicSpawn, spawn, customItem);
-                if (spawnPosition != Vector3.zero)
-                {
+                if (spawnPosition != Vector3.zero && spawn.Rotation != Vector4.zero)
+                    new SummonedCustomItem(customItem, spawnPosition, rotation);
+                else if (spawnPosition != Vector3.zero)
                     new SummonedCustomItem(customItem, spawnPosition);
-                }
             }
         }
 
@@ -463,7 +486,7 @@ namespace UncomplicatedCustomItems.API
             return Room.List.GetByGameObjectName($"{dynamicSpawn.Room}");
         }
 
-        private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, ISpawn spawn, ICustomItem customItem)
+        private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, SpawnData spawn, ICustomItem customItem)
         {
             if (dynamicSpawn.Coords != Vector3.zero)
             {
@@ -483,7 +506,7 @@ namespace UncomplicatedCustomItems.API
             return room.Position;
         }
 
-        private static void HandleZoneSpawn(ICustomItem customItem, ISpawn spawn)
+        private static void HandleZoneSpawn(ICustomItem customItem, SpawnData spawn)
         {
             FacilityZone zone = spawn.Zones.RandomItem();
 
@@ -501,7 +524,7 @@ namespace UncomplicatedCustomItems.API
             new SummonedCustomItem(customItem, randomRoom.Position);
         }
 
-        private static Pickup FindTargetPickupInRoom(Room room, ISpawn spawn, ICustomItem customItem)
+        private static Pickup FindTargetPickupInRoom(Room room, SpawnData spawn, ICustomItem customItem)
         {
             List<Pickup> pickupsInRoom = Pickup.List.Where(pickup => 
                 pickup.Room == room && 
@@ -511,7 +534,7 @@ namespace UncomplicatedCustomItems.API
             return FilterAndSelectPickup(pickupsInRoom, spawn, customItem);
         }
 
-        private static Pickup FindTargetPickupInZone(FacilityZone zone, ISpawn spawn, ICustomItem customItem)
+        private static Pickup FindTargetPickupInZone(FacilityZone zone, SpawnData spawn, ICustomItem customItem)
         {
             List<Pickup> pickupsInZone = Pickup.List.Where(pickup => 
                 pickup.Room != null && 
@@ -535,7 +558,7 @@ namespace UncomplicatedCustomItems.API
             return FilterAndSelectPickup(pickupsInZone, spawn, customItem);
         }
 
-        private static Pickup FilterAndSelectPickup(List<Pickup> pickups, ISpawn spawn, ICustomItem customItem)
+        private static Pickup FilterAndSelectPickup(List<Pickup> pickups, SpawnData spawn, ICustomItem customItem)
         {
             if (spawn.ForceItem)
                 pickups = pickups.Where(pickup => pickup.Type == customItem.Item).ToList();

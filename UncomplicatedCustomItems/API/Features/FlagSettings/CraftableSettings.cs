@@ -7,6 +7,6 @@ namespace UncomplicatedCustomItems.API.Features
     {
         public Scp914KnobSetting? KnobSetting { get; set; } = Scp914KnobSetting.Coarse;
         public ItemType? OriginalItem { get; set; } = ItemType.Adrenaline;
-        public int? Chance { get; set; } = 100;
+        public float? Chance { get; set; } = 100;
     }
 }

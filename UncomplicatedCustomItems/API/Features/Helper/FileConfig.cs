@@ -1,7 +1,4 @@
-﻿using InventorySystem.Items.Firearms;
-using LabApi.Features.Wrappers;
-using LabApi.Loader.Features.Misc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -38,7 +35,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 Id = 2,
                 Name = "FunnyGun",
-                Description = "A weapon that has a shotgun-like bullet spread",
+                Description = "A FRMG0 that has a shotgun-like bullet spread",
                 BadgeName = "FunnyGun",
                 BadgeColor = "pumpkin",
                 Item = ItemType.GunFRMG0,
@@ -136,6 +133,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Medikit,
                 Scale = new(2, 2, 2),
                 Spawn = new(),
+                Arguments = new Dictionary<ArgumentType, string>
+                {
+                    [ArgumentType.OnUsedItem] = "if {Player.Health} < 100 then Player::EnableEffect[CustomPlayerEffects.Flashed](2, 10, true)",
+                },
                 CustomFlags = CustomFlags.None,
                 FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new MedikitData()
@@ -669,9 +670,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 {
                     LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}\n{ex.HResult}");
                     if (Plugin.Instance.Config.Debug)
-                    {
                         LogManager.Error($"Stack trace: {ex.StackTrace}");
-                    }
                 }
             }
         }

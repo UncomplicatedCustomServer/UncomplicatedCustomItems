@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.Commands;
@@ -101,8 +102,8 @@ namespace UncomplicatedCustomItems
             {
                 _settings =
                 [
-                    new SSGroupHeader("CustomItem Settings"),
-                    new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
+                    new SSGroupHeader(Config.KeybingSettingHeaderName),
+                    new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
                 ];
             }
             catch (Exception e)
@@ -129,6 +130,7 @@ namespace UncomplicatedCustomItems
             LogManager.Info("Loaded from Exiled!");
             LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
+            /*
             if (IsPrerelease)
             {
                 if (!Instance.Config.Debug)
@@ -138,6 +140,7 @@ namespace UncomplicatedCustomItems
                     DebugMode = true;
                 }
             }
+            */
 
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
@@ -154,10 +157,7 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll();
             FileConfig.LoadAll(Server.Port.ToString());
             FileConfig.LoadAll("Actions");
-
-            if (IsPrerelease)
-                Harmony.DEBUG = true;
-
+            
             _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
             ECRIntegration.Initialize(_harmony);
@@ -186,6 +186,7 @@ namespace UncomplicatedCustomItems
             PlayerHandler._capybaras.Clear();
             PlayerHandler._damageTimes.Clear();
             PlayerHandler._toolGunPrimitives.Clear();
+            PlayerExtensions.PlayerKills.Clear();
 
             _settings = null;
 
@@ -246,8 +247,8 @@ namespace UncomplicatedCustomItems
             {
                 _settings =
                 [
-                    new SSGroupHeader("CustomItem Settings"),
-                    new SSKeybindSetting(20, "Trigger CustomItem", KeyCode.K, hint: "When pressed this will trigger the CustomItem your holding", allowSpectatorTrigger: false)
+                    new SSGroupHeader(Config.KeybingSettingHeaderName),
+                    new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
                 ];
             }
             catch (Exception e)
@@ -274,6 +275,7 @@ namespace UncomplicatedCustomItems
             LogManager.Info($"Loaded from LabAPI [{LabApi.Features.LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
             LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
+            /*
             if (IsPrerelease)
             {
                 if (!Instance.Config.Debug)
@@ -283,6 +285,7 @@ namespace UncomplicatedCustomItems
                     DebugMode = true;
                 }
             }
+            */
 
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
@@ -299,9 +302,6 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll();
             FileConfig.LoadAll(Server.Port.ToString());
             FileConfig.LoadAll("Actions");
-
-            if (IsPrerelease)
-                Harmony.DEBUG = true;
 
             _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
             _harmony.PatchAll();
@@ -337,6 +337,7 @@ namespace UncomplicatedCustomItems
             PlayerHandler._capybaras.Clear();
             PlayerHandler._damageTimes.Clear();
             PlayerHandler._toolGunPrimitives.Clear();
+            PlayerExtensions.PlayerKills.Clear();
 
             _settings = null;
 
@@ -375,6 +376,10 @@ namespace UncomplicatedCustomItems
 
             ImportManager.Init();
             _ = Task.Run(() => Updater.CheckForUpdatesAsync());
+
+#if EXILED
+            CommonUtilitiesPatch.Initialize();
+#endif
         }
     }
 }

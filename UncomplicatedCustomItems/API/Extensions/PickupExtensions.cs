@@ -13,10 +13,12 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// </summary>
         /// <param name="item"></param>
         /// <param name="pos"></param>
+        /// <param name="rot"></param>
+        /// <param name="scale"></param>
         /// <returns></returns>
-        public static Pickup CreateAndSpawn(this ItemType item, Vector3 pos)
+        public static Pickup CreateAndSpawn(this ItemType item, Vector3 pos, Quaternion rot = default, Vector3 scale = default)
         {
-            Pickup pickup = Pickup.Create(item, pos);
+            Pickup pickup = Pickup.Create(item, pos, rot, scale == default ? Vector3.one : scale);
             pickup.Spawn();
             return pickup;
         }

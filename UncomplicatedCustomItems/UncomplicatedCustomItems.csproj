@@ -100,6 +100,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\0Harmony.dll</HintPath>
     </Reference>
+    <Reference Include="LabApi-Publicized">
+      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\LabApi-Publicized.dll</HintPath>
+    </Reference>
     <Reference Include="Mirror-Publicized">
       <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\Mirror-Publicized.dll</HintPath>
     </Reference>
@@ -513,14 +516,16 @@
   <ItemGroup>
     <Compile Include="API\Attributes\EventTypeAttribute.cs" />
     <Compile Include="API\Attributes\PluginCustomItem.cs" />
+    <Compile Include="API\Components\RegenAmmo.cs" />
     <Compile Include="API\Components\ToolGunUI.cs" />
     <Compile Include="API\Enums\AssignmentOperator.cs" />
     <Compile Include="API\Features\CandySerialization\CandySerializationManager.cs" />
     <Compile Include="API\Features\CandySerialization\SerializedCandy.cs" />
-    <Compile Include="API\Features\AudioApi.cs" />
+    <Compile Include="API\Features\Helper\AudioApi.cs" />
     <Compile Include="API\Features\CustomAction.cs" />
-    <Compile Include="API\Features\BadgeManager.cs" />
+    <Compile Include="API\Features\Helper\BadgeManager.cs" />
     <Compile Include="API\Features\DynamicSpawn.cs" />
+    <Compile Include="API\Features\FlagSettings\InfiniteAmmoSettings.cs" />
     <Compile Include="API\Features\FlagSettings\ClusterSettings.cs" />
     <Compile Include="API\Features\FlagSettings\CraftableSettings.cs" />
     <Compile Include="API\Features\FlagSettings\CantDropSettings.cs" />
@@ -549,6 +554,7 @@
     <Compile Include="API\Features\Helper\Updater.cs" />
     <Compile Include="API\Features\Helper\VersionManager.cs" />
     <Compile Include="API\Features\Helper\ImportManager.cs" />
+    <Compile Include="API\Features\SpawnData.cs" />
     <Compile Include="API\Features\Spawn.cs" />
     <Compile Include="API\Features\SpecificData\FlashlightData.cs" />
     <Compile Include="API\Features\ItemDataList.cs" />
@@ -571,7 +577,9 @@
     <Compile Include="Commands\Admin\Summoned.cs" />
     <Compile Include="Commands\Admin\ToolGun.cs" />
     <Compile Include="Commands\Admin\Update.cs" />
+    <Compile Include="Commands\Admin\Random.cs" />
     <Compile Include="Commands\Admin\UpdateCheck.cs" />
+    <Compile Include="Commands\EquipCustomItemDebug.cs" />
     <Compile Include="Commands\PresenceDebug.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
     <Compile Include="Commands\User\Devtag.cs" />
@@ -597,12 +605,13 @@
     <Compile Include="API\Features\YAMLCustomAction.cs" />
     <Compile Include="API\Features\YAMLCustomItem.cs" />
     <Compile Include="API\Enums\ArgumentType.cs" />
-    <Compile Include="API\Enums\AmmoType.cs" />
     <Compile Include="API\Enums\CustomItemType.cs" />
     <Compile Include="API\Enums\FirearmType.cs" />
     <Compile Include="API\Enums\ItemEvents.cs" />
     <Compile Include="API\Enums\CustomFlags.cs" />
     <Compile Include="Events\Handlers\CustomItemEvents.cs" />
+    <Compile Include="Events\Arguments\CustomItemEvents\RunningCustomItemCommandEventArgs.cs" />
+    <Compile Include="Events\Arguments\CustomItemEvents\RanCustomItemCommandEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\CheckingCustomFlagEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\CheckedCustomFlagEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\SummonedCustomItemEventArgs.cs" />
@@ -616,7 +625,7 @@
     <Compile Include="Events\ScpHandler.cs" />
     <Compile Include="Events\ServerHandler.cs" />
     <Compile Include="Example\ExampleCustomItem.cs" />
-    <Compile Include="API\Extensions\CustomFlagsExtensions.cs" />
+    <Compile Include="API\Extensions\AnimationCurveExtensions.cs" />
     <Compile Include="API\Extensions\CustomItemExtensions.cs" />
     <Compile Include="API\Extensions\DictionaryExtension.cs" />
     <Compile Include="API\Extensions\HarmonyExtensions.cs" />
@@ -627,26 +636,31 @@
     <Compile Include="API\Extensions\PlayerExtensions.cs" />
     <Compile Include="API\Extensions\StringExtensions.cs" />
     <Compile Include="API\Extensions\Vector3Extensions.cs" />
+    <Compile Include="HarmonyElements\Patches\InspectionPatches\MicroHidInspectionPostfix.cs" />
+    <Compile Include="HarmonyElements\Patches\InspectionPatches\Scp1344InspectionPostfix.cs" />
+    <Compile Include="HarmonyElements\Patches\InspectionPatches\JailbirdInspectionPostfix.cs" />
+    <Compile Include="HarmonyElements\Patches\InspectionPatches\WeaponInspectionPostfix.cs" />
     <Compile Include="HarmonyElements\Patches\CandyPatches\GrantCandyPre.cs" />
     <Compile Include="HarmonyElements\Patches\CandyPatches\ServerProcessPickupPre.cs" />
     <Compile Include="HarmonyElements\Patches\CandyPatches\OnRemovedPost.cs" />
     <Compile Include="HarmonyElements\Patches\CandyPatches\ServerOnUsingCompletedPost.cs" />
     <Compile Include="HarmonyElements\Patches\CandyPatches\TryRemovePost.cs" />
     <Compile Include="HarmonyElements\Patches\CandyPatches\TryAddSpecificPatches.cs" />
-    <Compile Include="HarmonyElements\Patches\ChargeFireModeModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\AutomaticActionModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\MaxAmmoPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\ArmorPatches.cs" />
-    <Compile Include="HarmonyElements\Patches\PumpActionModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\RevolverCylinderPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\AttachmentPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\JailbirdPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\SCP1344EffectPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\DisruptorAdsModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\SCP1344UnEquipPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\MicroHIDPatches\ChargeFireModeModulePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\BarrelAmmoPatches\AutomaticActionModulePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\MaxAmmoPatches\MaxAmmoPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\ArmorPatches.cs" />
+    <Compile Include="HarmonyElements\Patches\BarrelAmmoPatches\PumpActionModulePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\MaxAmmoPatches\RevolverCylinderPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomFlagPatches\AttachmentPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomFlagPatches\JailbirdPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\SCP1344Patches\SCP1344EffectPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\DisruptorAdsModulePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\SCP1344Patches\SCP1344UnEquipPatch.cs" />
     <Compile Include="HarmonyElements\Patches\RemoteAdminPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\ServerSetEnergyPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\MicroHIDPatches\ServerSetEnergyPatch.cs" />
+    <Compile Include="API\Interfaces\FlagSettings\IInfiniteAmmoSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IClusterSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IDieOnDropSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IDieOnUseSettings.cs" />
@@ -657,7 +671,7 @@
     <Compile Include="Intergrations\ECR.cs" />
     <Compile Include="Intergrations\UCR.cs" />
     <Compile Include="API\Extensions\ListExtension.cs" />
-    <Compile Include="HarmonyElements\Patches\ConsumablePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\ConsumablePatch.cs" />
     <Compile Include="API\Interfaces\ICustomItem.cs" />
     <Compile Include="API\Interfaces\ICustomModule.cs" />
     <Compile Include="API\Interfaces\IFlagSettings.cs" />
@@ -699,9 +713,6 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.3</Version>
-    </PackageReference>
-    <PackageReference Include="Northwood.LabAPI">
-      <Version>1.1.1</Version>
     </PackageReference>
   </ItemGroup>
   <Target Name="PostBuildCopyExiledDll" AfterTargets="Build" Condition=" '$(Configuration)' == 'Exiled' ">

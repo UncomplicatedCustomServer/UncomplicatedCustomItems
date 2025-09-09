@@ -1,3 +1,6 @@
+#if EXILED
+using Exiled.CustomRoles.API.Features;
+#endif
 using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
@@ -16,29 +19,30 @@ namespace UncomplicatedCustomItems.Events.Methods
         {
             if (CustomItem.HasModule(CustomFlags.SwitchRoleOnUse))
             {
-                foreach (SwitchRoleOnUseSettings SwitchRoleOnUseSettings in CustomItem.CustomItem.FlagSettings.SwitchRoleOnUseSettings)
+                foreach (SwitchRoleOnUseSettings switchRoleOnUseSettings in CustomItem.CustomItem.FlagSettings.SwitchRoleOnUseSettings)
                 {
-                    if (SwitchRoleOnUseSettings.RoleId == null || SwitchRoleOnUseSettings.RoleType == null || SwitchRoleOnUseSettings == null)
+                    if (switchRoleOnUseSettings.RoleId == null || switchRoleOnUseSettings.RoleType == null || switchRoleOnUseSettings == null)
                     {
                         LogManager.Warn($"{nameof(Start)}: {CustomItem.CustomItem.Name} field role_id or role_type is null aborting...");
                         break;
                     }
-                    if (SwitchRoleOnUseSettings.RoleType == "UCR")
+
+                    if (switchRoleOnUseSettings.RoleType.ToLower() == "ucr")
                     {
-                        if (UCR.TryGetCustomRole((int)SwitchRoleOnUseSettings.RoleId, out _))
+                        if (UCR.TryGetCustomRole((int)switchRoleOnUseSettings.RoleId, out _))
                         {
-                            if (SwitchRoleOnUseSettings.Delay != null || SwitchRoleOnUseSettings.Delay > 0f)
+                            if (switchRoleOnUseSettings.Delay != null || switchRoleOnUseSettings.Delay > 0f)
                             {
-                                Timing.CallDelayed((float)SwitchRoleOnUseSettings.Delay, () =>
+                                Timing.CallDelayed((float)switchRoleOnUseSettings.Delay, () =>
                                 {
-                                    UCR.GiveCustomRole((int)SwitchRoleOnUseSettings.RoleId, player);
+                                    UCR.GiveCustomRole((int)switchRoleOnUseSettings.RoleId, player);
                                 });
                             }
                             else
                             {
-                                UCR.GiveCustomRole((int)SwitchRoleOnUseSettings.RoleId, player);
+                                UCR.GiveCustomRole((int)switchRoleOnUseSettings.RoleId, player);
                             }
-                            if (SwitchRoleOnUseSettings.KeepLocation != null || SwitchRoleOnUseSettings.KeepLocation != false)
+                            if (switchRoleOnUseSettings.KeepLocation != null || switchRoleOnUseSettings.KeepLocation != false)
                             {
                                 Vector3 OldPos = player.Position;
                                 Timing.CallDelayed(0.1f, () =>
@@ -46,34 +50,78 @@ namespace UncomplicatedCustomItems.Events.Methods
                                     player.Position = OldPos;
                                 });
                             }
+
                             break;
                         }
                         else
                         {
-                            LogManager.Warn($"{nameof(Start)}: {SwitchRoleOnUseSettings.RoleId} Is not a UCR role");
+                            LogManager.Warn($"{nameof(Start)}: {switchRoleOnUseSettings.RoleId} Is not a UCR role");
                         }
                     }
-                    else if (SwitchRoleOnUseSettings.RoleType == "Normal")
+#if EXILED
+                    else if (switchRoleOnUseSettings.RoleType.ToLower() == "ecr")
                     {
-                        if (player.Role != (RoleTypeId)SwitchRoleOnUseSettings.RoleId)
+                        if (CustomRole.TryGet((uint)switchRoleOnUseSettings.RoleId, out CustomRole? ECRRole))
                         {
-                            if (SwitchRoleOnUseSettings.Delay != null || SwitchRoleOnUseSettings.Delay > 0f)
+                            if (switchRoleOnUseSettings.Delay != null || switchRoleOnUseSettings.Delay > 0f)
                             {
-                                Timing.CallDelayed((float)SwitchRoleOnUseSettings.Delay, () =>
+                                Timing.CallDelayed((float)switchRoleOnUseSettings.Delay, () =>
                                 {
-                                    player.SetRole((RoleTypeId)SwitchRoleOnUseSettings.RoleId, RoleChangeReason.ItemUsage, (RoleSpawnFlags)SwitchRoleOnUseSettings.SpawnFlags);
+                                    ECRRole.AddRole(player);
                                 });
                             }
                             else
                             {
-                                player.SetRole((RoleTypeId)SwitchRoleOnUseSettings.RoleId, RoleChangeReason.ItemUsage, (RoleSpawnFlags)SwitchRoleOnUseSettings.SpawnFlags);
+                                ECRRole.AddRole(player);
                             }
+
+                            if (switchRoleOnUseSettings.KeepLocation != null || switchRoleOnUseSettings.KeepLocation != false)
+                            {
+                                Vector3 OldPos = player.Position;
+                                Timing.CallDelayed(0.1f, () =>
+                                {
+                                    player.Position = OldPos;
+                                });
+                            }
+                            
+                            break;
+                        }
+                        else
+                        {
+                            LogManager.Warn($"{nameof(Start)}: {switchRoleOnUseSettings.RoleId} Is not a ECR role");
+                        }
+                    }
+#endif
+                    else if (switchRoleOnUseSettings.RoleType.ToLower() == "normal")
+                    {
+                        if (player.Role != (RoleTypeId)switchRoleOnUseSettings.RoleId)
+                        {
+                            if (switchRoleOnUseSettings.Delay != null || switchRoleOnUseSettings.Delay > 0f)
+                            {
+                                Timing.CallDelayed((float)switchRoleOnUseSettings.Delay, () =>
+                                {
+                                    player.SetRole((RoleTypeId)switchRoleOnUseSettings.RoleId, RoleChangeReason.ItemUsage, (RoleSpawnFlags)switchRoleOnUseSettings.SpawnFlags);
+                                });
+                            }
+                            else
+                            {
+                                player.SetRole((RoleTypeId)switchRoleOnUseSettings.RoleId, RoleChangeReason.ItemUsage, (RoleSpawnFlags)switchRoleOnUseSettings.SpawnFlags);
+                            }
+
                             break;
                         }
                     }
-                    else if (SwitchRoleOnUseSettings.RoleType != "UCR" || SwitchRoleOnUseSettings.RoleType != "Normal")
+#if EXILED
+                    else if (SwitchRoleOnUseSettings.RoleType.ToLower() != "ucr" || SwitchRoleOnUseSettings.RoleType.ToLower() != "normal" || SwitchRoleOnUseSettings.RoleType.ToLower() != "ecr")
+#else
+                    else if (switchRoleOnUseSettings.RoleType.ToLower() != "ucr" || switchRoleOnUseSettings.RoleType.ToLower() != "normal")
+#endif
                     {
-                        LogManager.Warn($"{nameof(Start)}: The role_type field in {CustomItem.CustomItem.Name} is currently {SwitchRoleOnUseSettings.RoleType} and should be 'Normal', 'UCR', or 'ECR'");
+#if EXILED
+                        LogManager.Warn($"{nameof(Start)}: The role_type field in {CustomItem.CustomItem.Name} is currently {switchRoleOnUseSettings.RoleType} and should be 'Normal', 'UCR', or 'ECR'");
+#else
+                        LogManager.Warn($"{nameof(Start)}: The role_type field in {CustomItem.CustomItem.Name} is currently {switchRoleOnUseSettings.RoleType} and should be 'Normal' or 'UCR'");
+#endif      
                     }
                 }
             }

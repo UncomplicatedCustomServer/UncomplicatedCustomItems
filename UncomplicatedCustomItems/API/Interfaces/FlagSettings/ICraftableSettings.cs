@@ -6,6 +6,6 @@ namespace UncomplicatedCustomItems.API.Interfaces.FlagSettings
     {
         public abstract Scp914KnobSetting? KnobSetting { get; set; }
         public abstract ItemType? OriginalItem { get; set; }
-        public abstract int? Chance { get; set; }
+        public abstract float? Chance { get; set; }
     }
 }

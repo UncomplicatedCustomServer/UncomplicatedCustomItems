@@ -6,7 +6,6 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Interfaces;
 using UserSettings.ServerSpecific;
 using Player = LabApi.Features.Wrappers.Player;
 
@@ -19,24 +18,7 @@ namespace UncomplicatedCustomItems.Events
             if (!Player.TryGet(referenceHub.gameObject, out Player player))
                 return;
 
-            SSPlaintextSetting commandArg = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(player.ReferenceHub, 26);
-
-            if (settingBase is SSButton devRoleButton && devRoleButton.SettingId == 28 && player.UserId == "76561199150506472@steam")
-            {
-                player.GroupName = "💻 UCI Lead Developer";
-                player.GroupColor = "emerald";
-            }
-            else if (settingBase is SSButton managerRoleButton && managerRoleButton.SettingId == 30 && player.UserId == "76561199150506472@steam")
-            {
-                player.GroupName = "🎲 UCS Studios Manager";
-                player.GroupColor = "aqua";
-            }
-            else if (settingBase is SSButton buttonSetting && buttonSetting.SettingId == 24 && player.UserId == "76561199150506472@steam")
-            {
-                Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customItem);
-                new SummonedCustomItem(customItem, player);
-            }
-            if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == 20 && keybindSetting.SyncIsPressed)
+            if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == Plugin.Instance.Config.KeybindSettingId && keybindSetting.SyncIsPressed)
             {
                 if (player.CurrentItem is null)
                 {
@@ -46,7 +28,7 @@ namespace UncomplicatedCustomItems.Events
                         {
                             if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
                             {
-                                if (!player.Connection.isAuthenticated || player.Inventory == null)
+                                if (player.GameObject != null)
                                     return;
 
                                 customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
@@ -58,7 +40,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
                 else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem item))
-                    item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
+                    item.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
             }
         }
 

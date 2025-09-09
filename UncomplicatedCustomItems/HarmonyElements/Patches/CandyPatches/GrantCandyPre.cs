@@ -31,8 +31,8 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                     if (!custom.Spawn.DoSpawn)
                         continue;
 
-                    int chance = UnityEngine.Random.Range(0, 100);
-                    LogManager.Debug($"{nameof(GrantCandyPre)}: custom {custom} chance roll {chance} vs allowed {data.Chance}");
+                    float chance = UnityEngine.Random.Range(0f, 100f);
+                    LogManager.Debug($"{nameof(GrantCandyPre)}: custom {custom.Name} chance roll {chance} vs allowed {data.Chance}");
                     if (chance <= data.Chance)
                     {
                         TryAddSpecificPatches.CustomItem = custom;

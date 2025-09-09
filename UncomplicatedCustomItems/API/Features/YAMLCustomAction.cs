@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using UncomplicatedCustomItems.API.Enums;
-
 namespace UncomplicatedCustomItems.API.Features
 {
     public class YAMLCustomAction

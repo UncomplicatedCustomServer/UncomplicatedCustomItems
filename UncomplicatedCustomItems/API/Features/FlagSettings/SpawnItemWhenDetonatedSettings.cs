@@ -10,7 +10,7 @@ namespace UncomplicatedCustomItems.API.Features
         public string? ItemType { get; set; } = "";
         public uint? ItemId { get; set; } = 1;
         public float? TimeTillDespawn { get; set; } = 6f;
-        public uint? Chance { get; set; } = 100;
+        public float? Chance { get; set; } = 100;
         public bool? Pickupable { get; set; } = false;
     }
 }

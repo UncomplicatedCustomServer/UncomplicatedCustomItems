@@ -13,7 +13,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Sets the percentage of health regenerated if the <see cref="ICustomItem"/> has the HalfLifeSteal <see cref="ICustomModule"/>.
         /// </summary>
-        [Description("Sets the percentage of health regenerated if the item has the HalfLifeSteal custom flag. HealedAmount = Amount * Percentage")]
+        [Description("Sets the percentage of health regenerated if the item has the LifeSteal custom flag. HealedAmount = Amount * Percentage")]
         public float LifeStealPercentage { get; set; } = 0.5f;
     }
 }

@@ -21,10 +21,10 @@ namespace UncomplicatedCustomItems
         [Description("If true UCI developers can run commands on your server.")]
         public bool AllowDevPermissions { get; set; } = false;
 
-        [Description("If true your server will be listed at 'https://uci.thaumielscpsl.site/ServerList.html'.")]
+        [Description("If true your server will be listed at 'https://list.thaumielscpsl.site'.")]
         public bool ShowOnuciList { get; set; } = true;
 
-        [Description("If true your servers IP will be hidden at 'https://uci.thaumielscpsl.site/ServerList.html'.")]
+        [Description("If true your servers IP will be hidden at 'https://list.thaumielscpsl.site'.")]
         public bool HideipOnList { get; set; }
 
         [Description("The hint message displayed whenever you pick up a custom item. %name% is replaced with the item's name, and %desc% with its description.")]
@@ -69,5 +69,17 @@ namespace UncomplicatedCustomItems
 
         [Description("Enables or disables the ToolGun from registering")]
         public bool EnableToolGun { get; set; } = true;
+
+        [Description("The ID of the Keybind setting. 20 by default")]
+        public int KeybindSettingId { get; set; } = 20;
+
+        [Description("The text shown when hovering over the Keybind setting")]
+        public string KeybindSettingHint { get; set; } = "When pressed this will trigger the CustomItem your holding";
+
+        [Description("The name of the Keybind setting")]
+        public string KeybindSettingName { get; set; } = "Trigger CustomItem";
+
+        [Description("The name of the Keybind setting header")]
+        public string KeybingSettingHeaderName { get; set; } = "CustomItem Settings";
     }
 }

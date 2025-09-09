@@ -21,7 +21,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public int RequiredArgsCount { get; } = 0;
 
-        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.ServerConfigs;
+        public string[] RequiredPermission { get; } = ["uci.reload"];
 
         public string[] Aliases { get; } = ["reload"];
 

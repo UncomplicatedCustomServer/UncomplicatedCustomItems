@@ -6,7 +6,7 @@ using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features
 {
-    #nullable enable
+#nullable enable
     /// <summary>
     /// Flag settings for <see cref="ICustomItem"/>s
     /// </summary>
@@ -18,7 +18,7 @@ namespace UncomplicatedCustomItems.API.Features
             new()
             {
                 GlowColor = "#00FF00"
-                
+
             }
         ];
         [Description("Sets the settings for the LifeSteal flag.")]
@@ -31,7 +31,7 @@ namespace UncomplicatedCustomItems.API.Features
             }
         ];
         [Description("Sets the settings for the Effect flags.")]
-        public virtual List<EffectSettings?> EffectSettings { get; set; } = 
+        public virtual List<EffectSettings?> EffectSettings { get; set; } =
         [
             new()
             {
@@ -42,7 +42,7 @@ namespace UncomplicatedCustomItems.API.Features
             }
         ];
         [Description("Sets the settings for the CustomSound flag.")]
-        public virtual List<AudioSettings?> AudioSettings { get; set; } = 
+        public virtual List<AudioSettings?> AudioSettings { get; set; } =
         [
             new()
             {
@@ -52,7 +52,7 @@ namespace UncomplicatedCustomItems.API.Features
             }
         ];
         [Description("Sets the settings for the ExplosiveBullets flag.")]
-        public virtual List<ExplosiveBulletsSettings?> ExplosiveBulletsSettings { get; set; } = 
+        public virtual List<ExplosiveBulletsSettings?> ExplosiveBulletsSettings { get; set; } =
         [
             new()
             {
@@ -144,5 +144,17 @@ namespace UncomplicatedCustomItems.API.Features
                 ConvertToAhpIfFull = false,
             }
         ];
+        public virtual List<InfiniteAmmoSettings?> InfiniteAmmoSettings { get; set; } =
+        [
+            new()
+            {
+                    RegenOnShot = false,
+                    PassiveRegeneration = true,
+                    PostFireCooldown = 2f,
+                    RegenAmount = 4,
+                    RegenCoolDown = 1f,
+            }
+        ];
+
     }
 }

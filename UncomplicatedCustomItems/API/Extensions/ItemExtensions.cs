@@ -1,10 +1,10 @@
 ﻿using InventorySystem;
 using InventorySystem.Items;
 using LabApi.Features.Wrappers;
-using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Interfaces;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
@@ -13,13 +13,6 @@ namespace UncomplicatedCustomItems.API.Extensions
     /// </summary>
     public static class ItemExtensions
     {
-        /// <summary>
-        /// Check if an <see cref="ItemType">item</see> is an ammo.
-        /// </summary>
-        /// <param name="item">The item to be checked.</param>
-        /// <returns>Returns whether the <see cref="ItemType"/> is an ammo.</returns>
-        public static bool IsAmmo(this ItemType item) => item.GetAmmoType() is not AmmoType.None;
-
         /// <summary>
         /// Check if an <see cref="ItemType">item</see> is a weapon.
         /// </summary>
@@ -33,28 +26,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// </summary>
         /// <param name="type">The item to be checked.</param>
         /// <returns>Returns whether the <see cref="ItemType"/> is an SCPItem.</returns>
-        public static bool IsScp(this ItemType type) => GetCategory(type) == ItemCategory.SCPItem;
-
-        /// <summary>
-        /// Check if an <see cref="ItemType">item</see> is a throwable item.
-        /// </summary>
-        /// <param name="type">The item to be checked.</param>
-        /// <returns>Returns whether the <see cref="ItemType"/> is a throwable item.</returns>
-        public static bool IsThrowable(this ItemType type) => type is ItemType.SCP018 or ItemType.GrenadeHE or ItemType.GrenadeFlash or ItemType.SCP2176 or ItemType.Coal or ItemType.SpecialCoal or ItemType.Snowball;
-
-        /// <summary>
-        /// Check if an <see cref="ItemType">item</see> is a medical item.
-        /// </summary>
-        /// <param name="type">The item to be checked.</param>
-        /// <returns>Returns whether the <see cref="ItemType"/> is a medical item.</returns>
-        public static bool IsMedical(this ItemType type) => GetCategory(type) == ItemCategory.Medical;
-
-        /// <summary>
-        /// Check if an <see cref="ItemType">item</see> is a utility item.
-        /// </summary>
-        /// <param name="type">The item to be checked.</param>
-        /// <returns>Returns whether the <see cref="ItemType"/> is an utilty item.</returns>
-        public static bool IsUtility(this ItemType type) => type is ItemType.Flashlight or ItemType.Radio;
+        public static bool IsScp(this ItemType type) => GetCategory(type) == ItemCategory.SCPItem || type == ItemType.GunSCP127;
 
         /// <summary>
         /// Check if a <see cref="ItemType"/> is an armor item.
@@ -80,16 +52,6 @@ namespace UncomplicatedCustomItems.API.Extensions
             return itemBase;
         }
 
-        public static AmmoType GetAmmoType(this ItemType type) => type switch
-        {
-            ItemType.Ammo9x19 => AmmoType.Nato9,
-            ItemType.Ammo556x45 => AmmoType.Nato556,
-            ItemType.Ammo762x39 => AmmoType.Nato762,
-            ItemType.Ammo12gauge => AmmoType.Ammo12Gauge,
-            ItemType.Ammo44cal => AmmoType.Ammo44Cal,
-            _ => AmmoType.None,
-        };
-
         public static FirearmType GetFirearmType(this ItemType type) => type switch
         {
             ItemType.GunCOM15 => FirearmType.Com15,
@@ -113,6 +75,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         {
             if (item is ItemType.Lantern || item is ItemType.Flashlight)
                 return true;
+
             return false;
         }
 
@@ -167,5 +130,14 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <c>true</c> if both items refer to the same summoned custom item instance; otherwise, <c>false</c>.
         /// </returns>
         public static bool CompareSummonedCustomItems(this Item item1, Item item2) => TryGetSummonedCustomItem(item1) == TryGetSummonedCustomItem(item2);
+
+        public static Pickup Create(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default) => Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
+
+        public static Pickup CreateAndSpawn(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default)
+        {
+            Pickup pickup = Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
+            pickup.Spawn();
+            return pickup;
+        }
     }
 }

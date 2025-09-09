@@ -345,46 +345,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 AudioApi.PlayAudio(path, volume, player.Position, audibledistance);
             });
-
-            ArgumentManager.Register("action", (item, args) =>
-            {
-                LogManager.Debug($"{nameof(ArgumentManager)}: action triggered");
-                if (args == null || args.Length == 0)
-                {
-                    LogManager.Error($"{nameof(ArgumentManager)}: Action command requires an action ID or name");
-                    return;
-                }
-
-                string identifier = string.Join(" ", args);
-
-                if (uint.TryParse(identifier, out uint actionId))
-                {
-                    if (CustomAction.CustomActions.TryGetValue(actionId, out ICustomAction customAction))
-                    {
-                        LogManager.Warn($"{nameof(ArgumentManager)}: Direct action handler called without EventArgs context. Use ExecuteCustomAction methods instead.");
-                    }
-                    else
-                    {
-                        LogManager.Error($"{nameof(ArgumentManager)}: CustomAction with ID {actionId} not found");
-                    }
-                    return;
-                }
-
-                ICustomAction foundAction = CustomAction.List.FirstOrDefault(a => string.Equals(a.Name, identifier, StringComparison.OrdinalIgnoreCase));
-
-                if (foundAction != null)
-                {
-                    LogManager.Warn($"{nameof(ArgumentManager)}: Direct action handler called without EventArgs context. Use ExecuteCustomAction methods instead.");
-                }
-                else
-                {
-                    LogManager.Error($"{nameof(ArgumentManager)}: CustomAction not found: {identifier}");
-                }
-            });
         }
 
         /// <summary>
-        /// Registers all events and mappings for use in <see cref="ArgumentManager">
+        /// Registers all events and mappings for use in <see cref="ArgumentManager"/>
         /// </summary>
         public static void Initialize()
         {
@@ -399,7 +363,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         }
         
         /// <summary>
-        /// Unregisters all events and mappings for use in <see cref="ArgumentManager">
+        /// Unregisters all events and mappings for use in <see cref="ArgumentManager"/>
         /// </summary>
         public static void Cleanup()
         {
@@ -428,6 +392,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
+        // God help me if I have to remake this
+        // Only LabAPI events no Exiled too lazy
         private static void RegisterEvents()
         {
             PlayerEvent.Joined += OnPlayerJoined;

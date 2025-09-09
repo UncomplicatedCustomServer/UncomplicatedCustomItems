@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public override string Command { get; } = "ucilogs";
 
-        public override string[] Aliases { get; } = new string[] { };
+        public override string[] Aliases { get; } = [];
 
         public override string Description { get; } = "Share the UCI Debug logs with the developers.";
 

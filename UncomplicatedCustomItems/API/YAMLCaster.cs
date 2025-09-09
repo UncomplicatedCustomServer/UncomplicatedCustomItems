@@ -11,7 +11,6 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Enums;
 using Newtonsoft.Json.Serialization;
-using UncomplicatedCustomItems.API.Attributes;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -190,6 +189,9 @@ namespace UncomplicatedCustomItems.API
         {
             try
             {
+                if (property.GetCustomAttribute<YamlIgnoreAttribute>() != null)
+                    return;
+
                 if (property.PropertyType.IsValueType)
                 {
                     object defaultValue = Activator.CreateInstance(property.PropertyType);

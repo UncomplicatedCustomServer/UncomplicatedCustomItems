@@ -11,7 +11,7 @@
 
         public abstract float SurfaceDistanceIntensifier { get; set; }
 
-        public abstract float FuseTime {  get; set; }
+        public abstract float FuseTime { get; set; }
 
         public abstract float PinPullTime { get; set; }
 

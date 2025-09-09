@@ -12,18 +12,6 @@ namespace UncomplicatedCustomItems.API.Interfaces
 
         public abstract uint Count { get; set; }
 
-        public abstract bool? PedestalSpawn { get; set; }
-
-        public abstract List<Vector3> Coords { get; set; }
-
-        public abstract List<DynamicSpawn> DynamicSpawn { get; set; }
-
-        public abstract List<FacilityZone> Zones { get; set; }
-
-        public abstract bool ReplaceExistingPickup { get; set; }
-
-        public abstract bool ForceItem { get; set; }
-        
-        public abstract bool? ReplaceItemsInPedestals { get; set; }
+        public List<SpawnData> SpawnSettings { get; set; }
     }
 }

@@ -4,6 +4,8 @@ namespace UncomplicatedCustomItems.API.Interfaces
 {
     public interface IItemGlowSettings
     {
-        public abstract string GlowColor { get; set; }
+        public string GlowColor { get; set; }
+        public float Intensity { get; set; }
+        public float Range { get; set; }
     }
 }

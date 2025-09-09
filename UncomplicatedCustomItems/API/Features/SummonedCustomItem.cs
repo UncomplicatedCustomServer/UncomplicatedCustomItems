@@ -7,6 +7,7 @@ using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Keycards;
 using InventorySystem.Items.ThrowableProjectiles;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
 using System;
@@ -20,10 +21,10 @@ using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Wrappers;
+using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Events.Arguments.CustomItemEvents;
 using UnityEngine;
-using YamlDotNet.Core.Tokens;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
@@ -129,22 +130,23 @@ namespace UncomplicatedCustomItems.API.Features
         internal Scp127MagazineModule Scp127MagazineModule { get; set; }
         internal Scp127Hitscan Scp127Hitscan { get; set; }
 
-        public SummonedCustomItem(ICustomItem customItem, Player owner, Item item, Pickup pickup)
+        public SummonedCustomItem(ICustomItem customItem, Player owner, Item item, Pickup pickup, Quaternion rotation = new())
         {
             CustomItem = customItem;
             Owner = owner;
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
+            if (Pickup is not null)
+                Pickup.Rotation = rotation;
 
             SetProperties();
-
             AddToCollections(this);
         }
 
         public SummonedCustomItem(ICustomItem customItem, Pickup pickup) : this(customItem, null, null, pickup) { }
 
-        public SummonedCustomItem(ICustomItem customItem, Vector3 position, Quaternion rotation = new()) : this(customItem, customItem.Item.CreateAndSpawn(position)) { }
+        public SummonedCustomItem(ICustomItem customItem, Vector3 position, Quaternion rotation = new()) : this(customItem, null, null, customItem.Item.CreateAndSpawn(position), rotation) { }
 
         public SummonedCustomItem(ICustomItem customItem, Player player) : this(customItem, player, player.AddItem(customItem.Item), null) { }
 
@@ -160,7 +162,7 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 byPlayerId.AddOrUpdate(
                     sci.Owner.PlayerId,
-                    new ConcurrentBag<SummonedCustomItem> { sci },
+                    [sci],
                     (key, existingBag) => { existingBag.Add(sci); return existingBag; }
                 );
             }
@@ -888,6 +890,15 @@ namespace UncomplicatedCustomItems.API.Features
             HandleEvent(dropped.Player, ItemEvents.Drop, dropped.Pickup.Serial);
         }
 
+        public void OnDrop(PickupCreatedEventArgs created)
+        {
+            Pickup = created.Pickup;
+            Item = null;
+            Owner = null;
+            SaveProperties();
+            Serial = Pickup.Serial;
+        }
+
         public void OnDied(PlayerDyingEventArgs ev, SummonedCustomItem customItem)
         {
             Timing.CallDelayed(0.1f, () =>
@@ -962,11 +973,23 @@ namespace UncomplicatedCustomItems.API.Features
                                 data.Command.Contains("{p_room}") || data.Command.Contains("{p_rotation}") ||
                                 data.Command.Contains("{pj_pos}"))
                             {
-                                Server.RunCommand(processedCommand, player.GetSender());
+                                RunningCustomItemCommandEventArgs args = new(processedCommand, data.Command, this);
+                                Events.Handlers.CustomItemEvents.OnRunningCustomItemCommand(args);
+
+                                if (args.IsAllowed)
+                                    Server.RunCommand(processedCommand, player.GetSender());
+
+                                Events.Handlers.CustomItemEvents.OnRanCustomItemCommand(new(processedCommand, data.Command, this));
                             }
                             else
                             {
-                                Server.RunCommand(processedCommand);
+                                RunningCustomItemCommandEventArgs args = new(processedCommand, data.Command, this);
+                                Events.Handlers.CustomItemEvents.OnRunningCustomItemCommand(args);
+
+                                if (args.IsAllowed)
+                                    Server.RunCommand(processedCommand, new SilentCommandSender());
+
+                                Events.Handlers.CustomItemEvents.OnRanCustomItemCommand(new(processedCommand, data.Command, this));
                             }
                         }
                         StartCooldown(player, playerItemSerial, data.CoolDown);
@@ -1110,8 +1133,8 @@ namespace UncomplicatedCustomItems.API.Features
         
         public static List<SummonedCustomItem> Get(ItemType item)
         {
-            var result = new List<SummonedCustomItem>();
-            var items = List.Count > 100 ? List.AsParallel().Where(sci => sci.CustomItem.Item == item).ToList() : List.Where(sci => sci.CustomItem.Item == item).ToList();
+            List<SummonedCustomItem> result = [];
+            List<SummonedCustomItem> items = List.Count > 100 ? List.AsParallel().Where(sci => sci.CustomItem.Item == item).ToList() : List.Where(sci => sci.CustomItem.Item == item).ToList();
 
             return items;
         }
@@ -1119,12 +1142,12 @@ namespace UncomplicatedCustomItems.API.Features
         public static List<SummonedCustomItem> Get(Player owner)
         {
             if (owner?.PlayerId == null)
-                return new List<SummonedCustomItem>();
+                return [];
 
             if (byPlayerId.TryGetValue(owner.PlayerId, out var bag))
                 return bag.ToList();
 
-            return new List<SummonedCustomItem>();
+            return [];
         }
     }
 }

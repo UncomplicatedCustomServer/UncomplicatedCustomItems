@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.Commands
 
         public int RequiredArgsCount { get; } = 0;
 
-        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.ServerConfigs;
+        public string[] RequiredPermission { get; } = ["uci.sendpresence"];
 
         public string[] Aliases { get; } = ["sp"];
 

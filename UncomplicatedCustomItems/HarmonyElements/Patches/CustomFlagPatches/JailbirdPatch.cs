@@ -4,6 +4,7 @@ using InventorySystem.Items.Jailbird;
 using Mirror;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -15,14 +16,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             try
             {
-                reader.ReadByte();
-                reader.Position -= 1;
                 JailbirdMessageType messageType = (JailbirdMessageType)reader.ReadByte();
-                reader.Position -= 1;
 
                 if (messageType == JailbirdMessageType.ChargeLoadTriggered || messageType == JailbirdMessageType.ChargeStarted)
                 {
-                    if (API.Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem))
+                    if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem))
                     {
                         if (customItem.Item.Type == ItemType.Jailbird && customItem.HasModule(CustomFlags.NoCharge))
                         {

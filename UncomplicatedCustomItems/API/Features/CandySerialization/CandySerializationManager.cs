@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using InventorySystem.Items.Usables.Scp330;
-using InventorySystem.Items.Pickups;
 
 namespace UncomplicatedCustomItems.API.Features.CandySerialization
 {
@@ -21,10 +20,9 @@ namespace UncomplicatedCustomItems.API.Features.CandySerialization
                 list = [];
                 BagSerializedByInstance[bag] = list;
             }
+
             return list;
         }
-
-        public static IReadOnlyList<SerializedCandy> GetBagSerializedReadOnly(Scp330Bag bag) => EnsureBagList(bag).AsReadOnly();
 
         public static void AddCandyToBag(Scp330Bag bag, CandyKindID kind)
         {
@@ -36,21 +34,6 @@ namespace UncomplicatedCustomItems.API.Features.CandySerialization
                 AddedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 BagSerial = bag.ItemSerial,
                 IsCustom = false
-            };
-            list.Add(sc);
-        }
-
-        public static void AddCustomCandyToBag(Scp330Bag bag, CandyKindID kind, uint customItemId)
-        {
-            List<SerializedCandy> list = EnsureBagList(bag);
-            SerializedCandy sc = new()
-            {
-                Id = Guid.NewGuid(),
-                CandyType = kind,
-                AddedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                BagSerial = bag.ItemSerial,
-                IsCustom = true,
-                CustomItemId = customItemId
             };
             list.Add(sc);
         }
@@ -70,6 +53,7 @@ namespace UncomplicatedCustomItems.API.Features.CandySerialization
                 list.Add(replacement);
                 return;
             }
+            
             list[list.Count - 1] = replacement;
         }
 
@@ -100,8 +84,6 @@ namespace UncomplicatedCustomItems.API.Features.CandySerialization
             candy = list[index];
             return candy != null;
         }
-
-        public static void RemoveBagMapping(Scp330Bag bag) => BagSerializedByInstance.Remove(bag);
 
         public static void MoveBagToPickup(Scp330Pickup pickup, Scp330Bag bag)
         {

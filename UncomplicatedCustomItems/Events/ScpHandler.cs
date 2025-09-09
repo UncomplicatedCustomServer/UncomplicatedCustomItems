@@ -1,10 +1,5 @@
-﻿using LabApi.Events.Arguments.PlayerEvents;
-using LabApi.Events.Arguments.Scp914Events;
+﻿using LabApi.Events.Arguments.Scp914Events;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
@@ -13,7 +8,7 @@ using Scp914Event = LabApi.Events.Handlers.Scp914Events;
 
 namespace UncomplicatedCustomItems.Events
 {
-    public class ScpHandler
+    internal class ScpHandler
     {
         public static void Register()
         {
@@ -48,9 +43,9 @@ namespace UncomplicatedCustomItems.Events
                         if (craftableSettings.OriginalItem == null || craftableSettings.KnobSetting == null || craftableSettings.Chance == null)
                         {
                             LogManager.Warn($"{nameof(OnPickupUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or chance equal null. Aborting... \n Values: {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
-                            break;
+                            continue;
                         }
-                        else if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
+                        else if (UnityEngine.Random.Range(0f, 100f) <= craftableSettings.Chance)
                         {
                             LogManager.Debug($"{nameof(OnPickupUpgrade)}: {customItem.Name} Passed chance");
                             try
@@ -95,7 +90,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     foreach (CraftableSettings craftableSettings in customItem.FlagSettings.CraftableSettings)
                     {
-                        if (UnityEngine.Random.Range(0, 100) <= craftableSettings.Chance)
+                        if (UnityEngine.Random.Range(0f, 100f) <= craftableSettings.Chance)
                         {
                             if (ev.Player.CurrentItem.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
                             {

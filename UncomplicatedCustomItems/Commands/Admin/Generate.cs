@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public int RequiredArgsCount { get; } = 6;
 
-        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.ServerConfigs;
+        public string[] RequiredPermission { get; } = ["uci.generate"];
 
         public string[] Aliases { get; } = ["gen"];
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)

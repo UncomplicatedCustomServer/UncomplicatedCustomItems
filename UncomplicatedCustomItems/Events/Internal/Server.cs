@@ -4,6 +4,7 @@ using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UncomplicatedCustomItems.Events.Arguments.CustomItemEvents;
 using EventSource = LabApi.Events.Handlers.ServerEvents;
 
@@ -26,36 +27,21 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// </summary>
         public static void SpawnItemsOnRoundStarted() 
         {
-            foreach (ICustomItem CustomItem in CustomItem.List)
+            foreach (ICustomItem customItem in CustomItem.List)
             {
-                LogManager.Debug($"{CustomItem.Name} DoSpawn is set to {CustomItem.Spawn.DoSpawn}");
-                SummoningCustomItemEventArgs args = new(CustomItem);
-                Handlers.CustomItemEvents.OnSummoningCustomItem(args);
-                if (CustomItem.Spawn is not null && CustomItem.Spawn.DoSpawn && args.IsAllowed)
+                if (customItem.Item is ItemType.SCP330 && customItem.CustomData is ICandyData data && !data.AllowSpawningAsItem)
+                    continue;
+
+                LogManager.Debug($"{customItem.Name} DoSpawn is set to {customItem.Spawn.DoSpawn}");
+                if (customItem.Spawn is not null && customItem.Spawn.DoSpawn)
                 {
-                    for (uint count = 0; count < CustomItem.Spawn.Count; count++)
+                    for (uint count = 0; count < customItem.Spawn.Count; count++)
                     {
-                        LogManager.Debug($"Spawning {CustomItem.Name} ({count + 1}/{CustomItem.Spawn.Count})");
-                        Utilities.SummonCustomItem(CustomItem);
-                        SummonedCustomItemEventArgs args1 = new(CustomItem);
-                        Handlers.CustomItemEvents.OnSummonedCustomItem(args1);
+                        LogManager.Debug($"Spawning {customItem.Name} ({count + 1}/{customItem.Spawn.Count})");
+                        Utilities.SummonCustomItem(customItem);
                     }
                 }
             }
-            Timing.CallDelayed(1f, () =>
-            {
-                foreach (SummonedCustomItem customItem in SummonedCustomItem.List)
-                {
-                    foreach (Pickup pickup in Pickup.List)
-                    {
-                        if (pickup.Serial == customItem.Serial)
-                        {
-                            pickup.GameObject.transform.localScale = customItem.CustomItem.Scale;
-                            pickup.Weight = customItem.CustomItem.Weight;
-                        }
-                    }
-                }
-            });
         }
     }
 }

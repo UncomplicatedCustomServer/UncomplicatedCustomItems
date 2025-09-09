@@ -21,7 +21,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public UpdateCheck() => LoadGeneratedCommands();
 
         public override string Command { get; } = "uciupdatecheck";
-        public override string[] Aliases { get; } = new string[] { "ucicheckupdate" };
+        public override string[] Aliases { get; } = ["ucicheckupdate"];
         public override string Description { get; } = "Checks if a new version of UncomplicatedCustomItems is available.";
 
         public override void LoadGeneratedCommands() { }

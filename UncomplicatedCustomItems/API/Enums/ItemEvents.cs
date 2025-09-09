@@ -13,6 +13,7 @@ namespace UncomplicatedCustomItems.API.Enums
         Use,
         Noclip,
         Detonation,
-        SSSS
+        SSSS,
+        Inspect,
     }
 }

@@ -46,5 +46,9 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets a value indicating whether players can pickup grenade after throw.
         /// </summary>
         public virtual bool Repickable { get; set; } = false;
+
+        public virtual float PlayerDamageMultiplier { get; set; } = 3.5f;
+
+        public virtual float DoorDamageMultiplier { get; set; } = 2.5f;
     }
 }

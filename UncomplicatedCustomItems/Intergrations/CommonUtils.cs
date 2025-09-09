@@ -16,7 +16,7 @@ using System.Collections;
 
 // This code is probably terrible. But it works ¯\_(ツ)_/¯
 
-namespace UncomplicatedCustomItems.Integration
+namespace UncomplicatedCustomItems.Integrations
 {
     internal class CommonUtilitiesPatch
     {

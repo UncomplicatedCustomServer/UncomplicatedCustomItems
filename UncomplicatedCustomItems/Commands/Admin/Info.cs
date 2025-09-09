@@ -10,6 +10,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Interfaces;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -19,7 +20,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public string Description { get; } = "Get info on a summoned custom item";
         public string VisibleArgs { get; } = "<Item Id>";
         public int RequiredArgsCount { get; } = 1;
-        public PlayerPermissions RequiredPermission { get; } = PlayerPermissions.GivingItems;
+        public string[] RequiredPermission { get; } = ["uci.info"];
         public string[] Aliases { get; } = ["info"];
 
         private string Color = null;
@@ -59,21 +60,22 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     }
                 }
                 AddInfoLine(sb, "<color=#632300>📏</color> Amount Spawned:", Count.ToString());
-
-                if (customItem.Spawn.Coords.Count >= 1)
-                    AddInfoLine(sb, "<color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", customItem?.Spawn?.Coords));
-                else if (customItem.Spawn.DynamicSpawn.Count >= 1)
+                foreach (SpawnData spawn in customItem.Spawn.SpawnSettings)
                 {
-                    AddInfoLine(sb, "<color=#632300>📂</color> Dynamic Spawn:", "");
-                    foreach (DynamicSpawn DynamicSpawn in customItem.Spawn.DynamicSpawn)
+                    if (spawn.Coords != Vector3.zero)
+                        AddInfoLine(sb, "<color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", spawn?.Coords));
+                    else if (spawn.DynamicSpawn.Count >= 1)
                     {
-                        AddInfoLine(sb, "    <color=#632300>🎦</color> Spawn Rooms:", string.Join(", ", DynamicSpawn.Room));
-                        AddInfoLine(sb, "    <color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", DynamicSpawn.Coords));
-                        AddInfoLine(sb, "    <color=#632300>🎲</color> Spawn Chance:", string.Join(", ", DynamicSpawn.Chance));
+                        AddInfoLine(sb, "<color=#632300>📂</color> Dynamic Spawn:", "");
+                        foreach (DynamicSpawn DynamicSpawn in spawn.DynamicSpawn)
+                        {
+                            AddInfoLine(sb, "    <color=#632300>🎦</color> Spawn Rooms:", string.Join(", ", DynamicSpawn.Room));
+                            AddInfoLine(sb, "    <color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", DynamicSpawn.Coords));
+                        }
                     }
+                    else if (spawn.Zones.Count >= 1)
+                        AddInfoLine(sb, "<color=#632300>🇿</color> Spawn Zones:", string.Join(", ", spawn?.Zones));
                 }
-                else if (customItem.Spawn.Zones.Count >= 1)
-                    AddInfoLine(sb, "<color=#632300>🇿</color> Spawn Zones:", string.Join(", ", customItem?.Spawn?.Zones));
             }
 
             ProcessCustomFlags(customItem, sb);

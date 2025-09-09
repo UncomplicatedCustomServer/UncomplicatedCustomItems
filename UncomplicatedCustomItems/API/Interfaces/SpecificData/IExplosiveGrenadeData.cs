@@ -20,5 +20,9 @@
         public abstract float PinPullTime { get; set; }
 
         public abstract bool Repickable { get; set; }
+
+        public float PlayerDamageMultiplier { get; set; }
+
+        public float DoorDamageMultiplier { get; set; }
     }
 }

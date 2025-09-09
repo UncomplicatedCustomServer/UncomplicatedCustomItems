@@ -33,7 +33,8 @@ namespace UncomplicatedCustomItems.Integrations
 
         private static void OnAssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
-            if (_isPatched) return;
+            if (_isPatched)
+                return;
 
             if (args.LoadedAssembly.GetName().Name.Contains("Exiled.CustomRoles"))
             {
@@ -52,7 +53,8 @@ namespace UncomplicatedCustomItems.Integrations
 
         private static bool TryPatchECRIntegration()
         {
-            if (_isPatched) return true;
+            if (_isPatched)
+                return true;
 
             try
             {
