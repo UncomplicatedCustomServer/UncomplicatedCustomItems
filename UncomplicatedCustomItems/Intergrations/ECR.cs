@@ -7,48 +7,26 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API;
 using LabApi.Features.Wrappers;
 using UnityEngine;
-using MEC;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Integrations
 {
-    public static class ECRIntegration
+    internal static class ECRIntegration
     {
         private static bool _isPatched = false;
-        private static Harmony _harmonyInstance;
+        private static bool Found;
 
-        public static void Initialize(Harmony harmonyInstance)
+        public static void Init()
         {
-            _harmonyInstance = harmonyInstance;
-
             if (TryPatchECRIntegration())
             {
-                LogManager.Silent("ECR Integration patched successfully on initialization.");
+                LogManager.Silent("ECR Integration patched.");
+                Found = true;
                 return;
             }
 
-            AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
-            LogManager.Silent("ECR Integration waiting for Exiled.CustomRoles to load...");
-        }
-
-        private static void OnAssemblyLoad(object sender, AssemblyLoadEventArgs args)
-        {
-            if (_isPatched)
-                return;
-
-            if (args.LoadedAssembly.GetName().Name.Contains("Exiled.CustomRoles"))
-            {
-                LogManager.Silent($"Detected Exiled.CustomRoles assembly load: {args.LoadedAssembly.FullName}");
-
-                Timing.CallDelayed(1f, () =>
-                {
-                    if (TryPatchECRIntegration())
-                    {
-                        LogManager.Silent("ECR Integration patched successfully after assembly load.");
-                        AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
-                    }
-                });
-            }
+            if (Found)
+                LogManager.Silent($"ECR found! :D");
         }
 
         private static bool TryPatchECRIntegration()
@@ -61,13 +39,13 @@ namespace UncomplicatedCustomItems.Integrations
                 MethodBase targetMethod = GetTargetMethod();
                 if (targetMethod == null)
                 {
-                    LogManager.Silent("ECR target method not found - Exiled.CustomRoles may not be loaded yet.");
+                    LogManager.Silent("ECR target method not found.");
                     return false;
                 }
 
                 MethodInfo prefixMethod = typeof(ECRIntegration).GetMethod(nameof(Prefix), BindingFlags.Static | BindingFlags.Public);
 
-                _harmonyInstance.Patch(targetMethod, new HarmonyMethod(prefixMethod));
+                Plugin.Instance._harmony.Patch(targetMethod, new HarmonyMethod(prefixMethod));
                 _isPatched = true;
                 LogManager.Silent("ECR Integration successfully patched TryAddItem method.");
                 return true;
@@ -83,27 +61,21 @@ namespace UncomplicatedCustomItems.Integrations
         {
             try
             {
-                Type customRoleType = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(GetTypesFromAssembly)
-                    .FirstOrDefault(t => t.FullName == "Exiled.CustomRoles.API.Features.CustomRole");
-
+                Type customRoleType = AppDomain.CurrentDomain.GetAssemblies().SelectMany(GetTypesFromAssembly).FirstOrDefault(t => t.FullName == "Exiled.CustomRoles.API.Features.CustomRole");
                 if (customRoleType == null)
                     return null;
 
-                MethodInfo method = customRoleType.GetMethod("TryAddItem",
-                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
-                    null,
-                    [
-                        Type.GetType("Exiled.API.Features.Player, Exiled.API"),
-                        typeof(string)
-                    ],
-                    null);
+                Type[] paramTypes = [
+                    Type.GetType("Exiled.API.Features.Player, Exiled.API"),
+                    typeof(string)
+                ];
 
+                MethodInfo method = customRoleType.GetMethod("TryAddItem", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, paramTypes, null);
                 return method;
             }
             catch (Exception ex)
             {
-                LogManager.Debug($"Error in GetTargetMethod(): {ex.Message}");
+                LogManager.Debug($"{nameof(GetTargetMethod)}: {ex.Message}");
                 return null;
             }
         }
@@ -163,14 +135,13 @@ namespace UncomplicatedCustomItems.Integrations
             }
             catch (Exception ex)
             {
-                LogManager.Error($"Error in ECRIntegration.Prefix(): {ex}");
+                LogManager.Error($"{nameof(ECRIntegration)}: {ex}");
                 return true;
             }
         }
 
         public static void Cleanup()
         {
-            AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
             _isPatched = false;
         }
     }

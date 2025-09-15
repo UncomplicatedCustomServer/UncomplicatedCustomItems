@@ -34,7 +34,7 @@ namespace UncomplicatedCustomItems.Integrations
 
             if (Found)
             {
-                LogManager.Silent($"MER Found!");
+                LogManager.Silent($"MER Found! :D");
                 Register();
             }
             else

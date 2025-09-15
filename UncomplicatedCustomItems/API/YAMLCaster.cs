@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems.API
         /// <returns>The <see cref="Dictionary{string, object}"/> of the class</returns>
         public static Dictionary<string, object> Encode(Data element)
         {
-            Dictionary<string, object> serialized = new();
+            Dictionary<string, object> serialized = [];
             SnakeCaseNamingStrategy snakeCaseStrategy = new();
 
             foreach (PropertyInfo property in element.GetType().GetProperties())

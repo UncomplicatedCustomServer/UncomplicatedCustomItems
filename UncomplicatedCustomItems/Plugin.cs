@@ -44,7 +44,7 @@ namespace UncomplicatedCustomItems
 #endif
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 9, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 8, 1);
 #else
         public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
@@ -172,9 +172,12 @@ namespace UncomplicatedCustomItems
             FileConfig.LoadAll(Server.Port.ToString());
             FileConfig.LoadAll("Actions");
 
+#if EXILED
+            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+#else
             _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+#endif
             _harmony.PatchAll();
-            ECRIntegration.Initialize(_harmony);
 #if EXILED
             if (Round.IsStarted)
 #else
@@ -261,6 +264,7 @@ namespace UncomplicatedCustomItems
 
             LabAPIExtensions.Init();
             MERIntergration.Init();
+            ECRIntegration.Init();
 #if EXILED
             CommonUtilitiesPatch.Initialize();
 #endif
