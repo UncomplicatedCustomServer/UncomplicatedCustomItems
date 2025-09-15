@@ -26,23 +26,6 @@ namespace UncomplicatedCustomItems.API.Extensions
         internal static bool HasKeycardPermission(this Player player, IDoorPermissionRequester door) =>
             player.CurrentItem is KeycardItem keycard && player.CurrentItem.Base is IDoorPermissionProvider keycardProvider && door is IDoorPermissionRequester permissions && permissions.PermissionsPolicy.CheckPermissions(keycardProvider.GetPermissions(permissions));
 
-        public static bool IsAimingDownWeapon(this Player player)
-        {
-            FirearmItem firearm = player.CurrentItem as FirearmItem;
-            if (firearm.IsAiming())
-                return true;
-            else return false;
-        }
-
-        public static bool FlashLightModuleEnabled(this Player player)
-        {
-            FirearmItem firearm = player.CurrentItem as FirearmItem;
-            if (firearm.FlashLightStatus())
-                return true;
-            else return false;
-
-        }
-
         public static CommandSender GetSender(this Player player) => player.ReferenceHub.queryProcessor._sender;
 
         public static void Vaporize(this Player player, Player? attacker = null)

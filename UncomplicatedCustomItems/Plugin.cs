@@ -28,8 +28,8 @@ using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 // Building for remote development. You can ignore this :)
-// & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
-// & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=Exiled
+// & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
+// & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=Exiled
 
 namespace UncomplicatedCustomItems
 {
@@ -44,7 +44,7 @@ namespace UncomplicatedCustomItems
 #endif
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 8, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 9, 1);
 #else
         public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
@@ -104,27 +104,31 @@ namespace UncomplicatedCustomItems
 
             Arguments.Initialize();
             Arguments.Register();
-            try
+            
+            if (Config.EnablesssSettings)
             {
-                _settings =
-                [
-                    new SSGroupHeader(Config.KeybingSettingHeaderName),
-                    new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
-                ];
-            }
-            catch (Exception e)
-            {
-                LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
-            }
+                try
+                {
+                    _settings =
+                    [
+                        new SSGroupHeader(Config.KeybingSettingHeaderName),
+                        new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
+                    ];
+                }
+                catch (Exception e)
+                {
+                    LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
+                }
 
-            try
-            {
-                ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
-                ServerSpecificSettingsSync.SendToAll();
-            }
-            catch (Exception e)
-            {
-                LogManager.Error($"Failed to send settings: {e.Message}\n{e.StackTrace}");
+                try
+                {
+                    ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
+                    ServerSpecificSettingsSync.SendToAll();
+                }
+                catch (Exception e)
+                {
+                    LogManager.Error($"Failed to send settings: {e.Message}\n{e.StackTrace}");
+                }   
             }
 
             LogManager.History.Clear();

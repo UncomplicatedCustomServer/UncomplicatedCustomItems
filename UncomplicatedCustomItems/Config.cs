@@ -69,6 +69,9 @@ namespace UncomplicatedCustomItems
 
         [Description("Enables or disables the ToolGun from registering")]
         public bool EnableToolGun { get; set; } = true;
+        
+        [Description("Enables or Disables SSS Settings")]
+        public bool EnablesssSettings { get; set; } = true;
 
         [Description("The ID of the Keybind setting. 20 by default")]
         public int KeybindSettingId { get; set; } = 20;

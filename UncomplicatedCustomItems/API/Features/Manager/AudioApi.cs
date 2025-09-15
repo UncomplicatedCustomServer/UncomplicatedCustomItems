@@ -13,7 +13,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
     /// </summary>
     public class AudioApi
     {
-
         /// <summary>
         /// If true it enables access to the custom sound custom flag.
         /// </summary>
@@ -36,6 +35,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             else
                 EnableAudioApi = true;
         }
+        
 #if EXILED
         private bool CheckForAudioPlayerApiDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "AudioPlayerApi");
         private bool CheckForNVorbisDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "NVorbis");
@@ -43,6 +43,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private bool CheckForAudioPlayerApiDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("AudioPlayerApi", StringComparison.OrdinalIgnoreCase));
         private bool CheckForNVorbisDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("NVorbis", StringComparison.OrdinalIgnoreCase));
 #endif
+
         /// <summary>
         /// Clamps the value between the minimum and maximum.
         /// </summary>
@@ -54,8 +55,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             return (float)((value < min) ? min : (value > max) ? max : value);
         }
+
         /// <summary>
-        /// Plays audio for a <see cref="CustomItem"/> at the specified location.
+        /// Plays audio for a <see cref="SummonedCustomItem"/> at the specified location.
         /// </summary>
         /// <param name="CustomItem"></param>
         /// <param name="Coords"></param>
@@ -75,6 +77,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         {
                             Speaker speaker = p.AddSpeaker("Main", Coords, isSpatial: true, maxDistance: AudioSettings.AudibleDistance ?? 1f);
                         });
+
                         float volume = Clamp(AudioSettings.SoundVolume, 1f, 100f);
                         audioPlayer.AddClip($"{clipId}", volume);
                         AudioClipStorage.LoadClip(AudioSettings.AudioPath, $"{clipId}");
@@ -91,6 +94,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
+        /// <summary>
+        /// Plays audio for a <see cref="CustomItem"/> at the specified location.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="volumefloat"></param>
+        /// <param name="coords"></param>
+        /// <param name="audibledistance"></param>
         public static void PlayAudio(string path, float volumefloat, Vector3 coords, float audibledistance = 1f)
         {
             if (EnableAudioApi != false)
@@ -104,6 +114,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         Speaker speaker = p.AddSpeaker("Main", coords, isSpatial: true, maxDistance: audibledistance);
                     });
+
                     float volume = Clamp(volumefloat, 1f, 100f);
                     audioPlayer.AddClip($"{clipId}", volume);
                     AudioClipStorage.LoadClip(path, $"{clipId}");
@@ -111,7 +122,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     LogManager.Debug($"Audio should have been played.");
                 }
                 else
-                LogManager.Warn($"Audio path is null please fill out the config properly.");
+                    LogManager.Warn($"Audio path is null please fill out the config properly.");
             }
             else
             {
