@@ -9,6 +9,9 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UnityEngine;
 using UserSettings.ServerSpecific;
+using UncomplicatedCustomItems.API.ToolGun;
+using UncomplicatedCustomItems.API.Features.Helper;
+using PlayerRoles;
 
 namespace UncomplicatedCustomItems.API.Components
 {
@@ -16,18 +19,21 @@ namespace UncomplicatedCustomItems.API.Components
     {
         private Player Owner;
         private SummonedCustomItem CustomItem;
-        private StringBuilder Bulder;
+        private StringBuilder Builder;
         private bool Paused;
 
         public void Init(SummonedCustomItem customItem)
         {
             CustomItem = customItem;
             Owner = customItem.Owner;
-            Bulder = new();
+            Builder = new();
+            Settings.GiveToPlayers();
+            LogManager.Debug($"Starting ToolGun UI for {Owner.Nickname}");
         }
 
         private void Update()
         {
+            Builder.Clear();
             if (Paused)
                 return;
 
@@ -50,7 +56,9 @@ namespace UncomplicatedCustomItems.API.Components
             bool deletionbool = false;
             string DeletionMode = string.Empty;
             string room = string.Empty;
+
             if (Owner.CurrentItem is FirearmItem firearm)
+            {
                 if (deletionMode.SyncIsA)
                 {
                     DeletionMode = "ADS";
@@ -67,20 +75,26 @@ namespace UncomplicatedCustomItems.API.Components
                     else
                         deletionbool = false;
                 }
+            }
 
             if (deletionbool)
                 deletioncolor = "#00ff00";
             else
                 deletioncolor = "#Ff0000";
+                
             if (Owner.Room.Name.ToString() != "Unnamed")
                 room = Owner.Room.Name.ToString();
             else
                 room = Owner.Room.GameObject.name;
                 
-            StringExtensions.TryParseVector3(colorSetting.SyncInputText, out Vector3 color);
-            string hexcolor = Vector3Extensions.ToHexColor(color);
-            string hinttext = $"<pos=-10em><voffset=-12.3em><color=Red>{Owner.Nickname} - {Owner.Role.GetFullName()}</color></voffset>\n<pos=-10em>{room} - <color=yellow>{Owner.Room.LocalPosition(Owner.Position)}</color>\n<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>\n<pos=-10em>Deletion Mode: {DeletionMode}\n<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>";
-            Owner.SendHint($"<align=left>{hinttext}</align>", 0.5f);
+            colorSetting.SyncInputText.TryParseVector3(out Vector3 color);
+            string hexcolor = color.ToHexColor();
+            Builder.AppendLine($"<pos=-10em><voffset=-12.3em><color={Owner.RoleBase.GetColoredName()}>{Owner.Nickname} - {Owner.Role.GetFullName()}</color></voffset>");
+            Builder.AppendLine($"<pos=-10em>{room} - <color=yellow>{Owner.Room.LocalPosition(Owner.Position)}</color>");
+            Builder.AppendLine($"<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>");
+            Builder.AppendLine($"<pos=-10em>Deletion Mode: {DeletionMode}");
+            Builder.AppendLine($"<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>");
+            Owner.SendHint(Builder.ToString(), 0.5f);
         }
 
         public void Pause() => Paused = true;

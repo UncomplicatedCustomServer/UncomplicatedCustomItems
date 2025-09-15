@@ -2,6 +2,7 @@
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
+using Mirror;
 using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
@@ -56,6 +57,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerHandler._capybaras.Clear();
             PlayerHandler._damageTimes.Clear();
             PlayerHandler._toolGunPrimitives.Clear();
+            PlayerHandler.CustomScp268Effects.Clear();
 
         }
 
@@ -80,8 +82,8 @@ namespace UncomplicatedCustomItems.Events
                         continue;
                     }
                     
-                    float chance = UnityEngine.Random.Range(0f, 100f);
-                    if (chance <= spawnItemWhenDetonatedSettings.Chance)
+                    float chance = UnityEngine.Random.Range(0f, 101f);
+                    if (chance >= spawnItemWhenDetonatedSettings.Chance)
                     {
                         LogManager.Debug($"Loaded FlagSettings.");
                         if (spawnItemWhenDetonatedSettings.ItemType.ToLower() == "uci")
@@ -102,6 +104,24 @@ namespace UncomplicatedCustomItems.Events
                             else
                                 LogManager.Warn($"{spawnItemWhenDetonatedSettings.ItemId} is not a UCI CustomItem ID!");
                         }
+#if EXILED
+                        else if (spawnItemWhenDetonatedSettings.ItemType == "ECI" || spawnItemWhenDetonatedSettings.ItemType == "eci")
+                        {
+                            if (Exiled.CustomItems.API.Features.CustomItem.TryGet((uint)spawnItemWhenDetonatedSettings.ItemId, out Exiled.CustomItems.API.Features.CustomItem ExCustomItem))
+                            {
+                                Exiled.API.Features.Pickups.Pickup exCustomItem = ExCustomItem.Spawn(ev.Position);
+                                if (spawnItemWhenDetonatedSettings.Pickupable == false)
+                                    exCustomItem.Weight = 5000f;
+                                if (spawnItemWhenDetonatedSettings.TimeTillDespawn != null || spawnItemWhenDetonatedSettings.TimeTillDespawn > 0f)
+                                {
+                                    LogManager.Debug($"Starting Despawn Coroutine");
+                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(exCustomItem.Serial, (float)spawnItemWhenDetonatedSettings.TimeTillDespawn));
+                                }
+                            }
+                            else
+                                LogManager.Warn($"{spawnItemWhenDetonatedSettings.ItemId} is not a Exiled CustomItem ID!");
+                        }
+#endif
                         else if (spawnItemWhenDetonatedSettings.ItemType.ToLower() == "normal")
                         {
                             if ((ItemType)spawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244a || (ItemType)spawnItemWhenDetonatedSettings.ItemId == ItemType.SCP244b)
@@ -134,6 +154,7 @@ namespace UncomplicatedCustomItems.Events
                                 }
                             }
                         }
+
                     }
                 }
             }
@@ -190,11 +211,10 @@ namespace UncomplicatedCustomItems.Events
             {
                 try
                 {
-                    if (ev.Pickup is not null)
-                    {
-                        ev.Pickup.GameObject.transform.localScale = customItem.CustomItem.Scale;
-                        ev.Pickup.Weight = customItem.CustomItem.Weight;
-                    }
+                    NetworkServer.UnSpawn(ev.Pickup.GameObject);
+                    ev.Pickup.GameObject.transform.localScale = customItem.CustomItem.Scale;
+                    ev.Pickup.Weight = customItem.CustomItem.Weight;
+                    ev.Pickup.Spawn();
                 }
                 catch (Exception ex)
                 {
@@ -248,9 +268,6 @@ namespace UncomplicatedCustomItems.Events
                         PlayerHandler.ActiveLights[ev.Pickup] = light;
                     }
                 }
-
-            if (customItem.HasModule(CustomFlags.InfiniteAmmo) && ev.Pickup.Base is InventorySystem.Items.Firearms.FirearmPickup pickup)
-                FirearmItem.Get(pickup.Template).Base.gameObject.AddComponent<RegenAmmo>().Init(FirearmItem.Get(pickup.Template));
             });
         }
 

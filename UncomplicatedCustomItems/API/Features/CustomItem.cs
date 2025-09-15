@@ -119,7 +119,7 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Sets the badge color. This uses the badge colors available for server")]
         public virtual string BadgeColor { get; set; } = "pumpkin";
 
-        /// <summary>
+        /// <su/mmary>
         /// The weight of the item
         /// </summary>
         [Description("The weight of the custom item")]

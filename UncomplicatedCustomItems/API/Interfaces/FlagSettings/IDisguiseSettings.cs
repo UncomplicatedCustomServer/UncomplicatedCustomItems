@@ -1,4 +1,5 @@
-﻿using PlayerRoles;
+﻿using System.Collections.Generic;
+using PlayerRoles;
 
 namespace UncomplicatedCustomItems.API.Interfaces.FlagSettings
 {

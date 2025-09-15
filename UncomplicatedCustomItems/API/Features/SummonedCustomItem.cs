@@ -137,7 +137,8 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
-            if (Pickup is not null)
+            
+            if (IsPickup)
                 Pickup.Rotation = rotation;
 
             SetProperties();
@@ -240,7 +241,7 @@ namespace UncomplicatedCustomItems.API.Features
                                     LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
                             }
                             else
-                                LogManager.Warn($"{attachment} is not a attachment valid for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
+                                LogManager.Warn($"{nameof(SetProperties)}: [{attachment}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
                         }
 
                         if (!PropertiesSet)
@@ -465,7 +466,7 @@ namespace UncomplicatedCustomItems.API.Features
                                         LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
                                 }
                                 else
-                                    LogManager.Warn($"{attachment} is not a valid for {CustomItem.Name} - {CustomItem.Id} - {Pickup.Type}");
+                                    LogManager.Warn($"{nameof(SetProperties)}: [{attachment}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Pickup.Type}");
                             }
                         }
                         else
@@ -696,7 +697,7 @@ namespace UncomplicatedCustomItems.API.Features
                         }
 
                     case CustomItemType.MicroHID:
-                        LabApi.Features.Wrappers.MicroHIDItem microHID = Item as LabApi.Features.Wrappers.MicroHIDItem;
+                        MicroHIDItem microHID = Item as MicroHIDItem;
                         IMicroHIDData microHIDData = CustomItem.CustomData as IMicroHIDData;
                         microHIDData.Energy = microHID.Energy;
                         break;
@@ -721,7 +722,7 @@ namespace UncomplicatedCustomItems.API.Features
                         {
                             FirearmItem scpFirearm = Item as FirearmItem;
                             ISCP127Data scp127Data = CustomItem.CustomData as ISCP127Data;
-                            
+
                             foreach (ModuleBase module in scpFirearm.Base.Modules)
                             {
                                 switch (module)
@@ -747,11 +748,6 @@ namespace UncomplicatedCustomItems.API.Features
                     default:
                         break;
                 }
-            }
-            else if (Pickup is not null)
-            {
-                CustomItem.Scale = Pickup.GameObject.transform.localScale;
-                CustomItem.Weight = Pickup.Weight;
             }
         }
 
@@ -899,24 +895,6 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Pickup.Serial;
         }
 
-        public void OnDied(PlayerDyingEventArgs ev, SummonedCustomItem customItem)
-        {
-            Timing.CallDelayed(0.1f, () =>
-            {
-                foreach (Pickup pickup in Pickup.List)
-                {
-                    if (pickup.Serial == customItem.Serial)
-                    {
-                        Pickup = pickup;
-                        Item = null;
-                        Owner = null;
-                        SaveProperties();
-                        Serial = pickup.Serial;
-                    }
-                }
-            });
-        }
-
         public bool HasModule(CustomFlags flag)
         {
             if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(flag))
@@ -935,7 +913,7 @@ namespace UncomplicatedCustomItems.API.Features
                 return false;
         }
 
-        private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = new();
+        private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = [];
 
         public void HandleEvent(Player player, ItemEvents itemEvent, ushort playerItemSerial)
         {
@@ -1088,7 +1066,7 @@ namespace UncomplicatedCustomItems.API.Features
 
             if (Owner?.PlayerId != null && byPlayerId.TryGetValue(Owner.PlayerId, out var bag))
             {
-                var newBag = new ConcurrentBag<SummonedCustomItem>(bag.Where(sci => sci.Serial != Serial));
+                ConcurrentBag<SummonedCustomItem> newBag = new(bag.Where(sci => sci.Serial != Serial));
                 if (newBag.IsEmpty)
                     byPlayerId.TryRemove(Owner.PlayerId, out _);
                 else

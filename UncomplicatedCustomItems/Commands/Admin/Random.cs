@@ -20,7 +20,7 @@ namespace UncomplicatedCustomItems.Commands
 
         public int RequiredArgsCount { get; } = 1;
 
-        public string[] RequiredPermission { get; } = ["uci.random"];
+        public string RequiredPermission { get; } = "uci.random";
 
         public string[] Aliases { get; } = ["ran"];
 

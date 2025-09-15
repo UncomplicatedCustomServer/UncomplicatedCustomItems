@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Enums;
 using UnityEngine;

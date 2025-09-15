@@ -20,7 +20,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public string Description { get; } = "Get info on a summoned custom item";
         public string VisibleArgs { get; } = "<Item Id>";
         public int RequiredArgsCount { get; } = 1;
-        public string[] RequiredPermission { get; } = ["uci.info"];
+        public string RequiredPermission { get; } = "uci.info";
         public string[] Aliases { get; } = ["info"];
 
         private string Color = null;

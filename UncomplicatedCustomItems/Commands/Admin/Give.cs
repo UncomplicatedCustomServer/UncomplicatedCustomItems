@@ -21,7 +21,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public int RequiredArgsCount { get; } = 1;
 
-        public string[] RequiredPermission { get; } = ["uci.give"];
+        public string RequiredPermission { get; } = "uci.give";
 
         public string[] Aliases { get; } = ["g"];
 

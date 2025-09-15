@@ -33,6 +33,20 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual bool RemoveItemAfterUse { get; set; } = true;
     }
 
+    public class SCP268Data : Data, ISCP268Data
+    {
+        public bool ApplyScp268Effect { get; set; }
+        public float Duration { get; set; }
+        public bool AllowOpeningDoors { get; set; }
+        public bool AllowUsingElevators { get; set; }
+        public bool AllowOpeningLockers { get; set; }
+        public bool AllowOpeningGenerators { get; set; }
+        public bool AllowShooting { get; set; }
+        public bool AllowEquipingItems { get; set; }
+        public bool OneTimeUse { get; set; }
+        public float Cooldown { get; set; }
+    }
+
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP018"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>

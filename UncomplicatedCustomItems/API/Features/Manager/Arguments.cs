@@ -14,7 +14,6 @@ using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.API.Enums;
 using UnityEngine;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {

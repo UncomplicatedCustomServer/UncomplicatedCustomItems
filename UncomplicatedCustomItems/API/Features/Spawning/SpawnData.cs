@@ -14,13 +14,6 @@ namespace UncomplicatedCustomItems.API.Features
         public virtual float Chance { get; set; } = 30;
 
         /// <summary>
-        /// Specifies if the CustomItem will spawn in a SCP Pedestal.
-        /// If this is false, the <see cref="Coords"/> parameter will be used instead.
-        /// </summary>
-        [Description("Replace a existing item in a SCP Pedestal with this CustomItem.")]
-        public virtual bool? PedestalSpawn { get; set; } = false;
-
-        /// <summary>
         /// The <see cref="Vector3"/> positions where the item is allowed to spawn.
         /// If this is empty, the <see cref="DynamicSpawn"/> parameter will be used instead.
         /// </summary>
@@ -32,6 +25,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         [Description("The rotation of the CustomItem when spawned")]
         public virtual Vector4 Rotation { get; set; } = Vector4.zero;
+
+        public virtual LockerSpawn LockerSettings { get; set; } = new();
 
         /// <summary>
         /// The <see cref="IDynamicSpawn"/> locations where the item is allowed to spawn.

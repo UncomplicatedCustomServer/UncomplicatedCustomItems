@@ -14,6 +14,7 @@ namespace UncomplicatedCustomItems.API.Extensions
 
             return str;
         }
+
         /// <summary>
         /// Converts a comma-separated string into a Vector3.
         /// The string is expected to have exactly 3 components (e.g., "r,g,b"),

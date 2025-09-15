@@ -32,6 +32,13 @@ namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
         public abstract bool RemoveItemAfterUse { get; set; }
     }
 
+    public interface ISCP268Data
+    {
+        public bool ApplyScp268Effect { get; set; }
+        public bool AllowOpeningDoors { get; set; }
+        public bool OneTimeUse { get; set; }
+    }
+
     /// <summary>
     /// The interface associated with <see cref="ItemType.SCP018"/> <see cref="CustomItemType.SCPItem"/>
     /// </summary>

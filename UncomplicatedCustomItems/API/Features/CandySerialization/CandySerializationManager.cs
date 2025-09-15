@@ -7,8 +7,8 @@ namespace UncomplicatedCustomItems.API.Features.CandySerialization
 {
     public static class CandySerializationManager
     {
-        private static readonly Dictionary<Scp330Bag, List<SerializedCandy>> BagSerializedByInstance = new();
-        private static readonly Dictionary<Scp330Pickup, List<SerializedCandy>> PickupSerializedByInstance = new();
+        private static readonly Dictionary<Scp330Bag, List<SerializedCandy>> BagSerializedByInstance = [];
+        private static readonly Dictionary<Scp330Pickup, List<SerializedCandy>> PickupSerializedByInstance = [];
 
         public static List<SerializedCandy> EnsureBagList(Scp330Bag bag)
         {

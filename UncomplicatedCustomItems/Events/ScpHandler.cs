@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.Events
                             LogManager.Warn($"{nameof(OnPickupUpgrade)}: {customItem.Name} - {customItem.Id} has OriginalItem, KnobSetting, or chance equal null. Aborting... \n Values: {craftableSettings.OriginalItem} {craftableSettings.KnobSetting} {craftableSettings.Chance}");
                             continue;
                         }
-                        else if (UnityEngine.Random.Range(0f, 100f) <= craftableSettings.Chance)
+                        else if (UnityEngine.Random.Range(0f, 101f) >= craftableSettings.Chance)
                         {
                             LogManager.Debug($"{nameof(OnPickupUpgrade)}: {customItem.Name} Passed chance");
                             try
@@ -90,7 +90,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     foreach (CraftableSettings craftableSettings in customItem.FlagSettings.CraftableSettings)
                     {
-                        if (UnityEngine.Random.Range(0f, 100f) <= craftableSettings.Chance)
+                        if (UnityEngine.Random.Range(0f, 101f) >= craftableSettings.Chance)
                         {
                             if (ev.Player.CurrentItem.Type == craftableSettings.OriginalItem && ev.KnobSetting == craftableSettings.KnobSetting)
                             {

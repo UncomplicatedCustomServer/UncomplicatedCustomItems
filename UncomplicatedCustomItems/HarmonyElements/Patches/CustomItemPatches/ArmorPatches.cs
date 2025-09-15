@@ -1,6 +1,7 @@
 using System;
 using HarmonyLib;
 using InventorySystem.Items.Armor;
+using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
@@ -14,7 +15,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             try
             {
-                if (!API.Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem))
+                if (!Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem))
                     return true;
                 if (customItem.CustomItem.CustomItemType is not CustomItemType.Armor)
                     return true;

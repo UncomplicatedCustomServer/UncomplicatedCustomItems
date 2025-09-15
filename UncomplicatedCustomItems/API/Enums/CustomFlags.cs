@@ -35,5 +35,9 @@ namespace UncomplicatedCustomItems.API.Enums
         SingleFire = 1L << 23,
         DistruptorTracer = 1L << 24,
         Disguise = 1L << 25,
+        HumeShield = 1L << 26,
+        TantrumOnUse = 1L << 27,
+        Tantrum = 1L << 27,
+        MERSpawn = 1L << 28,
     }
 }

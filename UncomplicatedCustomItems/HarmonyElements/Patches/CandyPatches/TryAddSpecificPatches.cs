@@ -117,7 +117,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                 if (kind != data.CandyType)
                     continue;
 
-                float chance = UnityEngine.Random.Range(0f, 100f);
+                float chance = UnityEngine.Random.Range(0f, 101f);
                 LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Rolling chance for {item.Name}: {chance}% (need < {data.Chance}%)");
 
                 if (chance >= data.Chance)

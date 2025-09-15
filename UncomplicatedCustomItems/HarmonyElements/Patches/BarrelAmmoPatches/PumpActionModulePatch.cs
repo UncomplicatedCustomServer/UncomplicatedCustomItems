@@ -6,10 +6,9 @@ using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
-    [HarmonyPatch(typeof(PumpActionModule), "_numberOfBarrels")]
-    internal static class PumpActionModulePatch
+    [HarmonyPatch(typeof(PumpActionModule), "ShotsPerTriggerPull", MethodType.Getter)]
+    public static class PumpActionShotsPerTriggerPatch
     {
-        [HarmonyPrefix]
         public static bool Prefix(PumpActionModule __instance, ref int __result)
         {
             if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem))

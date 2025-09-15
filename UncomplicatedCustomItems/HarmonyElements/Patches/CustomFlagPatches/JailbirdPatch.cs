@@ -29,6 +29,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         }
                     }
                 }
+                
                 return true;
             }
             catch (Exception ex)

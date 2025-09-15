@@ -28,7 +28,7 @@ namespace UncomplicatedCustomItems.Events
                         {
                             if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
                             {
-                                if (player.GameObject != null)
+                                if (player.GameObject == null)
                                     return;
 
                                 customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);

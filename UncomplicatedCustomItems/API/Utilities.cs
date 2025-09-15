@@ -364,84 +364,39 @@ namespace UncomplicatedCustomItems.API
         /// <summary>
         /// Summon a <see cref="CustomItem"/>
         /// </summary>
-        /// <param name="CustomItem"></param>
-        internal static void SummonCustomItem(ICustomItem CustomItem)
+        /// <param name="customItem"></param>
+        internal static void SummonCustomItem(ICustomItem customItem)
         {
-            foreach (SpawnData spawn in CustomItem.Spawn.SpawnSettings)
+            foreach (SpawnData spawn in customItem.Spawn.SpawnSettings)
             {
-                float chance = UnityEngine.Random.Range(0f, 100f);
-                if (chance < spawn.Chance)
-                    return;
+                float chance = UnityEngine.Random.Range(0f, 101f);
+                if (chance >= spawn.Chance)
+                    continue;
 
-                SummoningCustomItemEventArgs args = new(CustomItem);
+                SummoningCustomItemEventArgs args = new(customItem);
                 Events.Handlers.CustomItemEvents.OnSummoningCustomItem(args);
                 if (!args.IsAllowed)
-                    return;
-
-                if (spawn.PedestalSpawn == true)
-                {
-                    HandlePedestalSpawn(CustomItem, spawn);
-                    return;
-                }
+                    continue;
 
                 if (spawn.Coords != Vector3.zero)
                 {
-                    SpawnAtCoordinate(CustomItem, spawn);
-                    return;
+                    SpawnAtCoordinate(customItem, spawn);
+                    continue;
                 }
 
                 if (spawn.DynamicSpawn.Count() > 0)
                 {
-                    HandleDynamicSpawn(CustomItem, spawn);
-                    return;
+                    HandleDynamicSpawn(customItem, spawn);
+                    continue;
                 }
 
                 if (spawn.Zones.Count() > 0)
                 {
-                    HandleZoneSpawn(CustomItem, spawn);
+                    HandleZoneSpawn(customItem, spawn);
                 }
                 
-                SummonedCustomItemEventArgs args1 = new(CustomItem);
+                SummonedCustomItemEventArgs args1 = new(customItem);
                 Events.Handlers.CustomItemEvents.OnSummonedCustomItem(args1);
-            }
-        }
-
-        private static void HandlePedestalSpawn(ICustomItem customItem, SpawnData spawn)
-        {
-            foreach (PedestalLocker pedestalLocker in PedestalLocker.List)
-            {
-                if (UsedLockers.ContainsKey(pedestalLocker))
-                {
-                    LogManager.Debug("Aborting spawn, locker used already.");
-                    continue;
-                }
-
-                Pickup existingPickup = pedestalLocker.GetAllItems().FirstOrDefault();
-                if (existingPickup == null)
-                    continue;
-
-                bool shouldReplace = !spawn.ReplaceExistingPickup || existingPickup.Type == customItem.Item;
-
-                if (shouldReplace)
-                {
-                    ReplacePedestalItem(pedestalLocker, existingPickup, customItem);
-                    break;
-                }
-            }
-        }
-
-        private static void ReplacePedestalItem(PedestalLocker pedestalLocker, Pickup existingPickup, ICustomItem customItem)
-        {
-            LogManager.Debug($"Removed {existingPickup.Type} from {existingPickup.Position}");
-            pedestalLocker.RemoveItem(existingPickup);
-            
-            Pickup newPickup = pedestalLocker.AddItem(customItem.Item);
-            
-            if (newPickup.Type == customItem.Item)
-            {
-                UsedLockers.Add(pedestalLocker, customItem);
-                LogManager.Debug($"Summoned {customItem.Name} to {pedestalLocker.Room.Zone} - {pedestalLocker.Room} - {pedestalLocker.Position}");
-                new SummonedCustomItem(customItem, Pickup.Get(newPickup.Serial));
             }
         }
 
@@ -461,7 +416,7 @@ namespace UncomplicatedCustomItems.API
         {
             foreach (DynamicSpawn dynamicSpawn in spawn.DynamicSpawn)
             {
-                Room room = GetRoomFromDynamicSpawn(dynamicSpawn);
+                Room room = GetRoomFromDynamicSpawn(dynamicSpawn.Room);
                 if (room == null)
                     continue;
 
@@ -476,14 +431,14 @@ namespace UncomplicatedCustomItems.API
             }
         }
 
-        private static Room GetRoomFromDynamicSpawn(DynamicSpawn dynamicSpawn)
+        internal static Room GetRoomFromDynamicSpawn(string room)
         {
-            if (Enum.TryParse(dynamicSpawn.Room, out RoomName roomName))
+            if (Enum.TryParse(room, out RoomName roomName))
             {
                 return Room.Get(roomName).FirstOrDefault();
             }
             
-            return Room.List.GetByGameObjectName($"{dynamicSpawn.Room}");
+            return Room.List.GetByGameObjectName($"{room}");
         }
 
         private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, SpawnData spawn, ICustomItem customItem)

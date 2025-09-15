@@ -17,8 +17,9 @@ namespace UncomplicatedCustomItems.API.Features
         [
             new()
             {
-                GlowColor = "#00FF00"
-
+                GlowColor = "#00FF00",
+                Range = 2f,
+                Intensity = 1f,
             }
         ];
         [Description("Sets the settings for the LifeSteal flag.")]
@@ -144,17 +145,21 @@ namespace UncomplicatedCustomItems.API.Features
                 ConvertToAhpIfFull = false,
             }
         ];
-        public virtual List<InfiniteAmmoSettings?> InfiniteAmmoSettings { get; set; } =
+        public virtual List<HumeShieldSettings?> HumeShieldSettings { get; set; } =
         [
             new()
             {
-                    RegenOnShot = false,
-                    PassiveRegeneration = true,
-                    PostFireCooldown = 2f,
-                    RegenAmount = 4,
-                    RegenCoolDown = 1f,
+                RegenRate = 2f,
+                RegenCoolDown = 1f,
+                MaxHumeShield = 90f
             }
         ];
-
+        public virtual List<MERSpawnSettings> MerSpawnSettings { get; set; } =
+        [
+            new()
+            {
+                SchematicName = "Test"
+            }
+        ];
     }
 }

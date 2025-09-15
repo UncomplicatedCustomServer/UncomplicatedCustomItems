@@ -48,28 +48,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="type"></param>
         /// <param name="eventArgs"></param>
         public static void Trigger(ICustomItem customItem, ArgumentType type, EventArgs eventArgs)
-        {
-            LogManager.Debug($"Trigger called for {type}");
-            
+        {   
             if (customItem.Arguments == null || customItem.Arguments.Count == 0)
-            {
-                LogManager.Debug("No arguments found");
                 return;
-            }
 
             if (!customItem.Arguments.TryGetValue(type, out string? actionString))
-            {
-                LogManager.Debug($"No action string found for {type}");
                 return;
-            }
 
             LogManager.Debug($"Executing action: {actionString}");
             
             foreach (string raw in actionString.Split(['\n', ';'], StringSplitOptions.RemoveEmptyEntries))
-            {
-                LogManager.Debug($"Processing action: {raw.Trim()}");
                 ExecuteAction(customItem, raw.Trim(), eventArgs);
-            }
         }
 
         internal static string ReplacePlaceholders(string action, EventArgs args)
@@ -692,6 +681,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     return (kvp.Value, index, kvp.Key.Length);
                 }
             }
+            
             return null;
         }
 
@@ -820,7 +810,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                                 {
                                     Type? expected = methodParams[i].ParameterType;
                                     Type? actual = parameters[i]?.GetType() ?? typeof(string);
-                                    if (!expected.IsAssignableFrom(actual) && !(parameters[i] is string))
+                                    if (!expected.IsAssignableFrom(actual) && parameters[i] is not string)
                                         return false;
                                 }
                                 return true;

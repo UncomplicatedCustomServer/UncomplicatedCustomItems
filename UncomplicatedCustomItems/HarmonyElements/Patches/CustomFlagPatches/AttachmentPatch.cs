@@ -5,6 +5,7 @@ using Mirror;
 using UncomplicatedCustomItems.API.Extensions;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -20,7 +21,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             if (hub.inventory.CurInstance is not Firearm firearm)
                 return true;
 
-            if (API.Utilities.TryGetSummonedCustomItem(firearm.ItemSerial, out var customItem))
+            if (Utilities.TryGetSummonedCustomItem(firearm.ItemSerial, out var customItem))
             {
                 if (customItem.Item.Type.IsWeapon() && customItem.HasModule(CustomFlags.WorkstationBan))
                 {
@@ -29,6 +30,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                     return false;
                 }
             }
+            
             return true;
         }
     }

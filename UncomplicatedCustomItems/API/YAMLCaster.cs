@@ -243,6 +243,7 @@ namespace UncomplicatedCustomItems.API
                 (CustomItemType.SCPItem, ItemType.SCP1576) => (Data)Decode(new SCP1576Data(), data),
                 (CustomItemType.SCPItem, ItemType.GunSCP127) => (Data)Decode(new SCP127Data(), data),
                 (CustomItemType.SCPItem, ItemType.SCP1344) => (Data)Decode(new SCP1344Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP268) => (Data)Decode(new SCP268Data(), data),
                 (CustomItemType.SCPItem, _) => (Data)Decode(new SCPItemData(), data),
 
                 _ => new Data(),

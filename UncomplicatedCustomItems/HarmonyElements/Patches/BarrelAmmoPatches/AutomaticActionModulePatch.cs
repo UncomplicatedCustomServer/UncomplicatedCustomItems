@@ -3,7 +3,6 @@ using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UnityEngine;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -20,7 +19,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 return true;
 
             IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
-            __result = Mathf.Clamp(weaponData.MaxBarrelAmmo, 0, 16);
+            __result = weaponData.MaxBarrelAmmo;
 
             return false;
         }

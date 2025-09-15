@@ -357,8 +357,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 try
                 {
-                    LogManager.Debug("Sending UCI API Presence");
-
                     var presenceTask = SendPresenceOnceAsync();
 
                     _ = TrackPresenceResult(presenceTask);
@@ -487,12 +485,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 if (response.IsSuccessStatusCode)
                 {
-                    LogManager.Debug($"Presence posted to {UCIAPIEndpoint} (server='{Server.ServerListName}') - status {(int)response.StatusCode}. Response: {responseText}");
+                    LogManager.Silent($"Presence posted to {UCIAPIEndpoint} - status {(int)response.StatusCode}. Response: {responseText}");
                     return true;
                 }
                 else
                 {
-                    LogManager.Warn($"Presence POST failed for {UCIAPIEndpoint} (server='{Server.ServerListName}') - status {(int)response.StatusCode}. Response: {responseText}");
+                    LogManager.Warn($"Presence POST failed for {UCIAPIEndpoint} - status {(int)response.StatusCode}. Response: {responseText}");
                     return false;
                 }
             }

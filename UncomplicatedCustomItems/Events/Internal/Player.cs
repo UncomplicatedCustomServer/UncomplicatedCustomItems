@@ -150,14 +150,8 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
-            {
-                if (PlayerHandler._equippedKeycards.ContainsKey(ev.Player.CurrentItem.Serial))
-                    PlayerHandler._equippedKeycards.Remove(ev.Player.CurrentItem.Serial);
                 return;
-            }
-            if (PlayerHandler._equippedKeycards.ContainsKey(item.Serial))
-                PlayerHandler._equippedKeycards.Remove(item.Serial);
-
+                
             item.ResetBadge(ev.Player);
 
             if (item.Item.Type == ItemType.GunSCP127 && item.CustomItem.CustomItemType == CustomItemType.SCPItem)
@@ -209,14 +203,6 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player == null)
                 return;
 
-            foreach (Item item in ev.Player.Items)
-            {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
-                {
-                    customItem.OnDied(ev, customItem);
-                    customItem?.ResetBadge(ev.Player);
-                }
-            }
             PlayerHandler.StopHumeShieldRegen(ev.Player);
         }
 

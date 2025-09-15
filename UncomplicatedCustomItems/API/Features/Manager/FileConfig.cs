@@ -325,6 +325,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             },
             new()
             {
+                Id = 20,
+                Name = "SCP268",
+                Description = "SCP268",
+                Item = ItemType.SCP268,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new SCP268Data())
+            },
+            new()
+            {
                 Id = 24,
                 Name = "MicroHID",
                 Description = "MicroHID",

@@ -1,10 +1,9 @@
-﻿#if Exiled
+﻿#if EXILED
 using HarmonyLib;
 using PlayerRoles;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.Interfaces;
 using Exiled.API.Features;
 using System.Linq;
 using System;
@@ -13,6 +12,7 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using System.Reflection;
 using Exiled.Loader;
 using System.Collections;
+using UncomplicatedCustomItems.API.Interfaces;
 
 // This code is probably terrible. But it works ¯\_(ツ)_/¯
 

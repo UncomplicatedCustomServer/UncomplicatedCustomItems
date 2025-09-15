@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using UncomplicatedCustomItems.Commands;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -62,10 +63,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 string latestVersionTag = latestRelease.TagName.TrimStart('v');
                 if (Version.TryParse(latestVersionTag, out Version githubVersion))
                 {
-                    LogManager.Updater($"Latest version on GitHub: {githubVersion}.");
+                    LogManager.Updater($"Latest version: {githubVersion}.");
                     if (githubVersion > currentVersion)
                     {
-                        LogManager.Updater($"An update is available! Use the 'usfupdate' command to install it.");
+                        LogManager.Updater($"An update is available! Use the 'uciupdate' command to install it.");
+                    }
+                    else if (githubVersion < currentVersion)
+                    {
+                        LogManager.Updater("You are on a Pre Release or Developer version! :D");
                     }
                     else
                     {
@@ -109,7 +114,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Updater($"{PluginDllName} updated successfully ({fileBytes.Length} bytes). Restarting round to apply changes.");
 
                 await Task.Run(() => File.WriteAllBytes(GetPluginPath(), fileBytes));
-                LabApi.Features.Wrappers.Server.RunCommand("rnr");
+                LabApi.Features.Wrappers.Server.RunCommand("rnr", new SilentCommandSender());
             }
             catch (Exception ex)
             {

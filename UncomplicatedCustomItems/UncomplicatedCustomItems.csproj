@@ -96,6 +96,10 @@
       <HintPath>$(EXILED_REFERENCES)\Exiled.CustomRoles.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Exiled.Permissions" Condition=" '$(Configuration)' == 'Exiled' ">
+      <HintPath>$(EXILED_REFERENCES)\Exiled.Permissions.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\0Harmony.dll</HintPath>
@@ -516,16 +520,16 @@
   <ItemGroup>
     <Compile Include="API\Attributes\EventTypeAttribute.cs" />
     <Compile Include="API\Attributes\PluginCustomItem.cs" />
-    <Compile Include="API\Components\RegenAmmo.cs" />
     <Compile Include="API\Components\ToolGunUI.cs" />
+    <Compile Include="API\Enums\LockerType.cs" />
     <Compile Include="API\Enums\AssignmentOperator.cs" />
     <Compile Include="API\Features\CandySerialization\CandySerializationManager.cs" />
     <Compile Include="API\Features\CandySerialization\SerializedCandy.cs" />
-    <Compile Include="API\Features\Helper\AudioApi.cs" />
+    <Compile Include="API\Features\Manager\AudioApi.cs" />
     <Compile Include="API\Features\CustomAction.cs" />
-    <Compile Include="API\Features\Helper\BadgeManager.cs" />
-    <Compile Include="API\Features\DynamicSpawn.cs" />
-    <Compile Include="API\Features\FlagSettings\InfiniteAmmoSettings.cs" />
+    <Compile Include="API\Features\Manager\BadgeManager.cs" />
+    <Compile Include="API\Features\Spawning\DynamicSpawn.cs" />
+    <Compile Include="API\Features\FlagSettings\HumeShieldSettings.cs" />
     <Compile Include="API\Features\FlagSettings\ClusterSettings.cs" />
     <Compile Include="API\Features\FlagSettings\CraftableSettings.cs" />
     <Compile Include="API\Features\FlagSettings\CantDropSettings.cs" />
@@ -536,6 +540,7 @@
     <Compile Include="API\Features\FlagSettings\EffectSettings.cs" />
     <Compile Include="API\Features\FlagSettings\AudioSettings.cs" />
     <Compile Include="API\Features\FlagSettings\LifeStealSettings.cs" />
+    <Compile Include="API\Features\FlagSettings\MERSpawnSettings.cs" />
     <Compile Include="API\Features\FlagSettings\ExplosiveBulletsSettings.cs" />
     <Compile Include="API\Features\FlagSettings\HealOnKillSettings.cs" />
     <Compile Include="API\Features\FlagSettings\ItemGlowSettings.cs" />
@@ -544,26 +549,27 @@
     <Compile Include="API\Features\ArgumentHelpers\EvaluateConditions.cs" />
     <Compile Include="API\Features\ArgumentHelpers\ConditionalParts.cs" />
     <Compile Include="API\Features\ArgumentHelpers\PropertyTarget.cs" />
-    <Compile Include="API\Features\Helper\FileConfig.cs" />
-    <Compile Include="API\Features\Helper\Arguments.cs" />
-    <Compile Include="API\Features\Helper\ArgumentManager.cs" />
-    <Compile Include="API\Features\Helper\HttpManager.cs" />
-    <Compile Include="API\Features\Helper\LogEntry.cs" />
-    <Compile Include="API\Features\Helper\LogManager.cs" />
-    <Compile Include="API\Features\Helper\VersionInfo.cs" />
-    <Compile Include="API\Features\Helper\Updater.cs" />
-    <Compile Include="API\Features\Helper\VersionManager.cs" />
-    <Compile Include="API\Features\Helper\ImportManager.cs" />
-    <Compile Include="API\Features\SpawnData.cs" />
-    <Compile Include="API\Features\Spawn.cs" />
+    <Compile Include="API\Features\Manager\FileConfig.cs" />
+    <Compile Include="API\Features\Manager\Arguments.cs" />
+    <Compile Include="API\Features\Manager\ArgumentManager.cs" />
+    <Compile Include="API\Features\Manager\HttpManager.cs" />
+    <Compile Include="API\Features\Manager\LogEntry.cs" />
+    <Compile Include="API\Features\Manager\LogManager.cs" />
+    <Compile Include="API\Features\Manager\VersionInfo.cs" />
+    <Compile Include="API\Features\Manager\Updater.cs" />
+    <Compile Include="API\Features\Manager\VersionManager.cs" />
+    <Compile Include="API\Features\Manager\ImportManager.cs" />
+    <Compile Include="API\Features\Spawning\SpawnData.cs" />
+    <Compile Include="API\Features\Spawning\LockerSpawn.cs" />
+    <Compile Include="API\Features\Spawning\Spawn.cs" />
     <Compile Include="API\Features\SpecificData\FlashlightData.cs" />
     <Compile Include="API\Features\ItemDataList.cs" />
     <Compile Include="API\Features\SummonedCustomItem.cs" />
+    <Compile Include="API\Toolgun\Settings.cs" />
     <Compile Include="API\Toolgun\ToolGun.cs" />
     <Compile Include="API\Struct\Triplet.cs" />
     <Compile Include="API\Utilities.cs" />
     <Compile Include="API\Wrappers\CustomKeycard.cs" />
-    <Compile Include="API\Wrappers\CustomScp127.cs" />
     <Compile Include="API\YAMLCaster.cs" />
     <Compile Include="Commands\SilentCommandSender.cs" />
     <Compile Include="Commands\Admin\Generate.cs" />
@@ -636,6 +642,14 @@
     <Compile Include="API\Extensions\PlayerExtensions.cs" />
     <Compile Include="API\Extensions\StringExtensions.cs" />
     <Compile Include="API\Extensions\Vector3Extensions.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\VoiceTriggerPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\MagazineModulePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\ActionModulePatch.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\HumeShieldPatches.cs" />
+    <Compile Include="HarmonyElements\Patches\ExiledFixes\LinearAdsModuleTranspilers.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\LockerSpawningItemPrefix.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\LinearADSModulePostfix.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP268CooldownTimeTranspiler.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\MicroHidInspectionPostfix.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\Scp1344InspectionPostfix.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\JailbirdInspectionPostfix.cs" />
@@ -660,14 +674,16 @@
     <Compile Include="HarmonyElements\Patches\RemoteAdminPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="HarmonyElements\Patches\MicroHIDPatches\ServerSetEnergyPatch.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IInfiniteAmmoSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IClusterSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IDieOnDropSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IDieOnUseSettings.cs" />
     <Compile Include="API\Interfaces\FlagSettings\IDisguiseSettings.cs" />
     <Compile Include="API\Interfaces\IDynamicSpawn.cs" />
     <Compile Include="API\Interfaces\SpecificData\IFlashlightData.cs" />
+    <Compile Include="Intergrations\ReflectionEventRegistrar.cs" />
+    <Compile Include="Intergrations\MER.cs" />
     <Compile Include="Intergrations\CommonUtils.cs" />
+    <Compile Include="Intergrations\LabAPIExtensions.cs" />
     <Compile Include="Intergrations\ECR.cs" />
     <Compile Include="Intergrations\UCR.cs" />
     <Compile Include="API\Extensions\ListExtension.cs" />

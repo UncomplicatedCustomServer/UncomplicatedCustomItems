@@ -312,7 +312,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         wearDetail.SetArguments(arguments);
                         WearIndexDic.TryAdd(ParentKeycard.ItemSerial, value);

@@ -112,7 +112,7 @@ namespace UncomplicatedCustomItems.Events.Methods
                         }
                     }
 #if EXILED
-                    else if (SwitchRoleOnUseSettings.RoleType.ToLower() != "ucr" || SwitchRoleOnUseSettings.RoleType.ToLower() != "normal" || SwitchRoleOnUseSettings.RoleType.ToLower() != "ecr")
+                    else if (switchRoleOnUseSettings.RoleType.ToLower() != "ucr" || switchRoleOnUseSettings.RoleType.ToLower() != "normal" || switchRoleOnUseSettings.RoleType.ToLower() != "ecr")
 #else
                     else if (switchRoleOnUseSettings.RoleType.ToLower() != "ucr" || switchRoleOnUseSettings.RoleType.ToLower() != "normal")
 #endif

@@ -11,22 +11,20 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <summary>
         /// Finds the index of the first instruction that matches the predicate
         /// </summary>
-        public static int FindIndex(this List<CodeInstruction> instructions, Predicate<CodeInstruction> match)
-        {
-            return instructions.FindIndex(match);
-        }
+        public static int FindIndex(this List<CodeInstruction> instructions, Predicate<CodeInstruction> match) => instructions.FindIndex(match);
 
         /// <summary>
         /// Finds all indices where instructions match the predicate
         /// </summary>
         public static List<int> FindAllIndices(this List<CodeInstruction> instructions, Predicate<CodeInstruction> match)
         {
-            var indices = new List<int>();
+            List<int> indices = [];
             for (int i = 0; i < instructions.Count; i++)
             {
                 if (match(instructions[i]))
                     indices.Add(i);
             }
+
             return indices;
         }
 
@@ -46,9 +44,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         {
             int index = instructions.FindIndex(match);
             if (index >= 0)
-            {
                 instructions.InsertRange(index + 1, newInstructions);
-            }
         }
 
         /// <summary>
@@ -58,9 +54,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         {
             int index = instructions.FindIndex(match);
             if (index >= 0)
-            {
                 instructions.InsertRange(index, newInstructions);
-            }
         }
 
         /// <summary>
@@ -68,7 +62,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// </summary>
         public static CodeInstruction[] CallStatic(MethodInfo method, params CodeInstruction[] loadInstructions)
         {
-            var result = new List<CodeInstruction>(loadInstructions);
+            List<CodeInstruction> result = new(loadInstructions);
             result.Add(new CodeInstruction(OpCodes.Call, method));
             return result.ToArray();
         }
@@ -106,8 +100,10 @@ namespace UncomplicatedCustomItems.API.Extensions
                         break;
                     }
                 }
-                if (match) return i;
+                if (match)
+                    return i;
             }
+
             return -1;
         }
     }
