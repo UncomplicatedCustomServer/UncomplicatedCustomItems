@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using MEC;
 using UncomplicatedCustomItems.API.Enums;
 using UserSettings.ServerSpecific;
@@ -24,7 +23,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
 
             ServerSpecificSettingsSync.SendOnJoinFilter = (_) => false;
             ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
-            ServerSpecificSettingsSync.SendToPlayersConditionally(x => x.inventory.UserInventory.Items.Values.Any(x => Utilities.TryGetSummonedCustomItem(x.ItemSerial, out var item) && item.HasModule(CustomFlags.ToolGun)));
+            ServerSpecificSettingsSync.SendToPlayersConditionally(x => Utilities.TryGetSummonedCustomItem(x.inventory.CurInstance.ItemSerial, out var item) && item.HasModule(CustomFlags.ToolGun));
             Timing.RunCoroutine(ResetSettings());
         }
 
@@ -32,7 +31,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
         {
             for (; ; )
             {
-                ResetPlayer();    
+                ResetPlayer();
                 yield return 5f;
             }
         }
@@ -41,7 +40,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
         {
             ServerSpecificSettingsSync.SendOnJoinFilter = (_) => false;
             ServerSpecificSettingsSync.DefinedSettings = PreviousDefinedSettings;
-            ServerSpecificSettingsSync.SendToPlayersConditionally(x => x.inventory.UserInventory.Items.Values.All(x => !Utilities.TryGetSummonedCustomItem(x.ItemSerial, out var item) || !item.HasModule(CustomFlags.ToolGun)));
+            ServerSpecificSettingsSync.SendToPlayersConditionally(x => !Utilities.TryGetSummonedCustomItem(x.inventory.CurInstance.ItemSerial, out var item) || !item.HasModule(CustomFlags.ToolGun));
         }
     }
 }

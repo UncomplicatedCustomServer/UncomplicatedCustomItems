@@ -1,7 +1,11 @@
-﻿using System;
+﻿#if EXILED
+using Exiled.Loader;
+#endif
+using System;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
     /// <summary>
@@ -32,8 +36,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             else
                 EnableAudioApi = true;
         }
+#if EXILED
+        private bool CheckForAudioPlayerApiDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "AudioPlayerApi");
+        private bool CheckForNVorbisDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "NVorbis");
+#else
         private bool CheckForAudioPlayerApiDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("AudioPlayerApi", StringComparison.OrdinalIgnoreCase));
         private bool CheckForNVorbisDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("NVorbis", StringComparison.OrdinalIgnoreCase));
+#endif
         /// <summary>
         /// Clamps the value between the minimum and maximum.
         /// </summary>

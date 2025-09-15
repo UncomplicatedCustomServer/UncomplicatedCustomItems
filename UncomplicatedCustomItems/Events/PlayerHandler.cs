@@ -183,7 +183,7 @@ namespace UncomplicatedCustomItems.Events
 #if EXILED
                                 if (customItem.HasModule(CustomFlags.Disguise))
                                 {
-                                    foreach (DisguiseSettings disguiseSettings in customItem.FlagSettings.DisguiseSettings)
+                                    foreach (DisguiseSettings disguiseSettings in customItem.CustomItem.FlagSettings.DisguiseSettings)
                                     {
                                         if (disguiseSettings.RoleId == null)
                                             continue;
@@ -673,7 +673,7 @@ namespace UncomplicatedCustomItems.Events
 
                 if (ev.FirearmItem._actionModule is AutomaticActionModule autoModule)
                 {
-                    for (int i = 0; i <= autoModule._serverChambered; i++)
+                    for (int i = 0; i <= autoModule._clientChambered.Value; i++)
                     {
                         Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
 
@@ -693,7 +693,7 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else if (ev.FirearmItem._actionModule is PumpActionModule pumpModule)
                 {
-                    for (int i = 0; i <= pumpModule.SyncChambered; i++)
+                    for (int i = 0; i <= pumpModule._clientChambered.Value; i++)
                     {
                         Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
 
@@ -1519,7 +1519,6 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-        
         }
 
         public static void OnWeaponFlashlightToggled(PlayerToggledWeaponFlashlightEventArgs ev)

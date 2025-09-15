@@ -114,9 +114,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         }
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
-
+#if EXILED
+        private bool CheckForDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
+#else
         private bool CheckForDependency() => AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("Newtonsoft.Json", StringComparison.OrdinalIgnoreCase));
-
+#endif
         public HttpResponseMessage HttpGetRequest(string url)
         {
             try
