@@ -26,6 +26,8 @@ using HarmonyLib;
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using MEC;
+using UncomplicatedCustomItems.API.ToolGun;
 
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
@@ -44,7 +46,7 @@ namespace UncomplicatedCustomItems
 #endif
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 8, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 9, 1);
 #else
         public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
@@ -252,6 +254,7 @@ namespace UncomplicatedCustomItems
             base.OnDisabled();
 #endif
         }
+        
         public void OnFinishedLoading()
         {
             HttpManager.StartPresence();
@@ -265,6 +268,7 @@ namespace UncomplicatedCustomItems
             LabAPIExtensions.Init();
             MERIntergration.Init();
             ECRIntegration.Init();
+            Timing.RunCoroutine(Settings.ResetSettings());
 #if EXILED
             CommonUtilitiesPatch.Initialize();
 #endif

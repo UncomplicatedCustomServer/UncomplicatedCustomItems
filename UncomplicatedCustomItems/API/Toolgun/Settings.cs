@@ -23,8 +23,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
 
             ServerSpecificSettingsSync.SendOnJoinFilter = (_) => false;
             ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
-            ServerSpecificSettingsSync.SendToPlayersConditionally(x => Utilities.TryGetSummonedCustomItem(x.inventory.CurInstance.ItemSerial, out var item) && item.HasModule(CustomFlags.ToolGun));
-            Timing.RunCoroutine(ResetSettings());
+            Timing.CallDelayed(1, () => ServerSpecificSettingsSync.SendToPlayersConditionally(x => Utilities.TryGetSummonedCustomItem(x.inventory.CurInstance.ItemSerial, out var item) && item.HasModule(CustomFlags.ToolGun)));
         }
 
         internal static IEnumerator<float> ResetSettings()
@@ -32,7 +31,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
             for (; ; )
             {
                 ResetPlayer();
-                yield return 5f;
+                yield return 1f;
             }
         }
 

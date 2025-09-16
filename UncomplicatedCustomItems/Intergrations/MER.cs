@@ -29,10 +29,11 @@ namespace UncomplicatedCustomItems.Integrations
                 {
                     Found = true;
                     plugin.TryGetLoadedAssembly(out MERAssembly);
+                    break;
                 }
             }
 
-            if (Found)
+            if (Found && MERAssembly != null)
             {
                 LogManager.Silent($"MER Found! :D");
                 Register();
@@ -49,7 +50,7 @@ namespace UncomplicatedCustomItems.Integrations
                     LogManager.Debug($"MER SchematicSpawned Event Triggered");
                     string name = obj?.GetType().GetProperty("Name")?.GetValue(obj)?.ToString() ?? "<unknown>";
                     object schematicObject = obj?.GetType().GetProperty("Schematic")?.GetValue(obj);
-                    
+
                     foreach (CustomItem item in CustomItem.List)
                     {
                         if (item.HasModule(CustomFlags.MERSpawn))
@@ -86,7 +87,7 @@ namespace UncomplicatedCustomItems.Integrations
 
         internal static void Unregister()
         {
-            EventToken.Unregister();
+            EventToken?.Unregister();
         }
 
         private static List<Locker> GetLockers(object schematicObj)

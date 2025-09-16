@@ -2,6 +2,7 @@
 using Exiled.API.Interfaces;
 using Exiled.Loader;
 #endif
+using CentralAuth;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features;
 using LabApi.Features.Wrappers;
@@ -329,6 +330,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// </summary>
         public void StartPresence(int intervalSeconds = 60)
         {
+            if (!CustomNetworkManager.IsVerified || !PlayerAuthenticationManager.OnlineMode || CentralServer.Abort)
+                return;
+
             LogManager.Debug("Starting UCI API Presence");
             if (string.IsNullOrWhiteSpace(UCIAPIEndpoint))
                 throw new ArgumentException("Presence Worker Url required", nameof(UCIAPIEndpoint));
@@ -385,7 +389,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             try
             {
                 bool success = await presenceTask;
-
+                
                 if (success)
                 {
                     _presenceFailureCount = 0;
@@ -473,7 +477,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     showOnList = Plugin.Instance.Config.ShowOnuciList.ToString(),
                     plugins = pluginNames,
                     exiled = hasExiled.ToString().ToLower(),
-                    extra = $"PlayerCount: {Server.PlayerCount}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}"
+                    extra = $"PlayerCount: {Player.ReadyList.Where(p => p.IsReady && p.IsPlayer).Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}"
                 };
 
                 string json = JsonConvert.SerializeObject(payload);

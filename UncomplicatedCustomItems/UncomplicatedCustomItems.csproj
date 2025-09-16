@@ -102,13 +102,13 @@
     </Reference>
     <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\0Harmony.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="LabApi-Publicized">
-      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\LabApi-Publicized.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\LabApi-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="Mirror-Publicized">
-      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\Mirror-Publicized.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Mirror-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="NorthwoodLib, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -116,7 +116,7 @@
     </Reference>
     <Reference Include="Assembly-CSharp-Publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Downloads\Release\Assembly-CSharp-Publicized.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -151,10 +151,10 @@
     </Reference>
     <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Release\Mono.Security.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="NorthwoodLib">
-      <HintPath>..\..\..\..\Downloads\EXILED_REFERENCES\NorthwoodLib.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
     </Reference>
     <Reference Include="NVorbis">
       <HintPath>$(EXILED_REFERENCES)\NVorbis.dll</HintPath>

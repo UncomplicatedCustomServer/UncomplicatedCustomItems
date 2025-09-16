@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (arguments.Count == 1)
             {
-                Player target = Player.Get(arguments[0]);
+                Player target = Player.Get(int.Parse(arguments[0]));
                 if (target is null)
                 {
                     response = "Player not found!";
