@@ -1042,7 +1042,7 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
                     case CustomItemType.Adrenaline:
                         IAdrenalineData adrenalineData = CustomItem.CustomData as IAdrenalineData;
-                        Owner.CreateAhpProcess(adrenalineData.Amount, limit: 1000f, decay: adrenalineData.Decay, efficacy: adrenalineData.Efficacy, sustain: adrenalineData.Sustain, persistant: adrenalineData.Persistant);
+                        Owner.CreateAhpProcess(adrenalineData.Amount, limit: 1000f, decay: adrenalineData.Decay, efficacy: adrenalineData.Efficacy, sustain: adrenalineData.Sustain, adrenalineData.Persistant);
                         break;
                     default:
                         return false;

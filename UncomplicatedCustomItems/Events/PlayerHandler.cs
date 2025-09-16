@@ -671,7 +671,7 @@ namespace UncomplicatedCustomItems.Events
 
                 Ray baseRay = new(ev.Player.Camera.position + ev.Player.Camera.forward, ev.Player.Camera.forward);
 
-                if (ev.FirearmItem._actionModule is AutomaticActionModule autoModule)
+                if (ev.FirearmItem.ActionModule is AutomaticActionModule autoModule)
                 {
                     for (int i = 0; i <= autoModule._clientChambered.Value; i++)
                     {
@@ -691,7 +691,7 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                 }
-                else if (ev.FirearmItem._actionModule is PumpActionModule pumpModule)
+                else if (ev.FirearmItem.ActionModule is PumpActionModule pumpModule)
                 {
                     for (int i = 0; i <= pumpModule._clientChambered.Value; i++)
                     {
