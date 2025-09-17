@@ -734,6 +734,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     }
                     else
                     {
+
+                        
                         File.WriteAllText(Path.Combine(Dir, localDir, "example-action.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(new YAMLCustomAction()
                         {
                             Id = CustomAction.GetFirstFreeId(1)

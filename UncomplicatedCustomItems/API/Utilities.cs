@@ -254,7 +254,7 @@ namespace UncomplicatedCustomItems.API
             return true;
         }
 
-        public static bool CustomActionValidator(ICustomAction action, out string error)
+        internal static bool CustomActionValidator(ICustomAction action, out string error)
         {
             if (CustomAction.CustomActions.ContainsKey(action.Id))
             {

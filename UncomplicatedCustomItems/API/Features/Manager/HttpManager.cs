@@ -18,6 +18,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Struct;
 
 using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
@@ -330,7 +331,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// </summary>
         public void StartPresence(int intervalSeconds = 60)
         {
-            if (!CustomNetworkManager.IsVerified || !PlayerAuthenticationManager.OnlineMode || CentralServer.Abort)
+            if (!PlayerAuthenticationManager.OnlineMode)
                 return;
 
             LogManager.Debug("Starting UCI API Presence");
@@ -477,7 +478,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     showOnList = Plugin.Instance.Config.ShowOnuciList.ToString(),
                     plugins = pluginNames,
                     exiled = hasExiled.ToString().ToLower(),
-                    extra = $"PlayerCount: {Player.ReadyList.Where(p => p.IsReady && p.IsPlayer).Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}"
+                    extra = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}"
                 };
 
                 string json = JsonConvert.SerializeObject(payload);

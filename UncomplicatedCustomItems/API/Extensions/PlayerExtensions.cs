@@ -7,6 +7,7 @@ using InventorySystem.Items.Firearms.ShotEvents;
 using LabApi.Features.Wrappers;
 using PlayerStatsSystem;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
@@ -66,5 +67,7 @@ namespace UncomplicatedCustomItems.API.Extensions
             PlayerKills.TryGetValue(player, out int kills);
             return kills;
         }
+
+        public static IEnumerable<Player> RealList(this IEnumerable<Player> players) => players.Where(p => p.IsReady && p.IsPlayer && !p.IsHost && !p.IsDummy && !p.IsNpc);
     }
 }
