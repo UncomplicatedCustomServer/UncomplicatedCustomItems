@@ -21,6 +21,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal static readonly ConcurrentDictionary<Type, HashSet<string>> _eventArgPropertyCache = new();
 
+        private static readonly Random _random = new();
+
+        private static readonly Dictionary<string, Func<IEnumerable, object?>> _collectionOperations = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Random", GetRandomFromCollection },
+            { "First", collection => collection.Cast<object?>().FirstOrDefault() },
+            { "Last", collection => collection.Cast<object?>().LastOrDefault() },
+            { "Count", collection => collection.Cast<object?>().Count() },
+            { "Any", collection => collection.Cast<object?>().Any() }
+        };
+
         private static readonly Dictionary<string, AssignmentOperator> _compoundOperators = new()
         {
             { "+=", AssignmentOperator.Add },
@@ -125,7 +136,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 {
                     string part = parts[i];
 
-                    // allow fully qualified types like "My.Namespace.TypeName.SomeStaticMember".
+                    // Handle fully qualified types like "My.Namespace.TypeName.SomeStaticMember"
                     if (i == 0)
                     {
                         string candidate = parts[0];
@@ -154,6 +165,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             continue;
                     }
 
+                    if (i == parts.Length - 1 && _collectionOperations.ContainsKey(part))
+                    {
+                        if (current is IEnumerable enumerable && current is not string)
+                        {
+                            return _collectionOperations[part](enumerable);
+                        }
+                    }
+
                     int openBracket = part.IndexOf('[');
                     if (openBracket >= 0)
                     {
@@ -171,6 +190,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         if (memberContainer is IEnumerable enumerable && !(memberContainer is string))
                         {
                             List<object?> list = enumerable.Cast<object?>().ToList();
+                            
+                            if (_collectionOperations.ContainsKey(inner))
+                            {
+                                current = _collectionOperations[inner](list);
+                                continue;
+                            }
+                            
                             if (int.TryParse(inner, out int idx))
                             {
                                 current = (idx >= 0 && idx < list.Count) ? list[idx] : null;
@@ -268,6 +294,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
         
+        private static object? GetRandomFromCollection(IEnumerable collection)
+        {
+            List<object?> list = collection.Cast<object?>().ToList();
+            if (list.Count == 0)
+                return null;
+            
+            int randomIndex = _random.Next(list.Count);
+            return list[randomIndex];
+        }
+
         private static object[] ParseAndResolveParameters(string parametersPart, EventArgs eventArgs, ICustomItem? item)
         {
             if (string.IsNullOrWhiteSpace(parametersPart))
