@@ -180,7 +180,7 @@ namespace UncomplicatedCustomItems
             _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #endif
             _harmony.PatchAll();
-#if EXILED
+#if EXILEDr
             if (Round.IsStarted)
 #else
             if (Round.IsRoundStarted)

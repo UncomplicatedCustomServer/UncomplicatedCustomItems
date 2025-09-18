@@ -8,6 +8,7 @@ using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Features.ArgumentHelpers;
 using System.Text;
 using System.Collections;
+using UncomplicatedCustomItems.API.Attributes;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -17,6 +18,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
     /// </summary>
     public static class ArgumentManager
     {
+        private static readonly Dictionary<string, Type> _commonTypeMap = BuildCommonTypeMap();
+
         internal static readonly Dictionary<string, Action<ICustomItem, string[]>> _actionHandlers = new(StringComparer.OrdinalIgnoreCase);
 
         internal static readonly ConcurrentDictionary<Type, HashSet<string>> _eventArgPropertyCache = new();
@@ -59,7 +62,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="type"></param>
         /// <param name="eventArgs"></param>
         public static void Trigger(ICustomItem customItem, ArgumentType type, EventArgs eventArgs)
-        {   
+        {
             if (customItem.Arguments == null || customItem.Arguments.Count == 0)
                 return;
 
@@ -67,9 +70,46 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return;
 
             LogManager.Debug($"Executing action: {actionString}");
-            
+
             foreach (string raw in actionString.Split(['\n', ';'], StringSplitOptions.RemoveEmptyEntries))
                 ExecuteAction(customItem, raw.Trim(), eventArgs);
+        }
+
+        private static Dictionary<string, Type> BuildCommonTypeMap()
+        {
+            Dictionary<string, Type> map = new(StringComparer.OrdinalIgnoreCase);
+
+            try
+            {
+                Type enumType = typeof(CommonTypes);
+                foreach (FieldInfo? field in enumType.GetFields(BindingFlags.Public | BindingFlags.Static))
+                {
+                    CommonTypesAttribute attr = field.GetCustomAttribute<CommonTypesAttribute>();
+                    if (attr?.CommonType != null)
+                    {
+                        string name = field.Name;
+                        if (!map.ContainsKey(name))
+                            map[name] = attr.CommonType;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Failed to build common type map: {ex.Message}");
+            }
+
+            return map;
+        }
+
+        private static bool TryGetCommonType(string name, out Type? type)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                type = null;
+                return false;
+            }
+
+            return _commonTypeMap.TryGetValue(name.Trim(), out type);
         }
 
         internal static string ReplacePlaceholders(string action, EventArgs args)
@@ -102,6 +142,19 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return true;
             }
 
+            if (TryGetCommonType(fullName, out Type? common) && common != null)
+            {
+                found = common;
+                return true;
+            }
+
+            string lastToken = fullName.Split('.').LastOrDefault() ?? fullName;
+            if (TryGetCommonType(lastToken, out Type? common2) && common2 != null)
+            {
+                found = common2;
+                return true;
+            }
+
             foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
@@ -113,7 +166,24 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         return true;
                     }
                 }
-                catch (Exception)
+                catch
+                {
+                    continue;
+                }
+            }
+
+            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    t = asm.GetTypes().FirstOrDefault(tt => string.Equals(tt.Name, fullName, StringComparison.OrdinalIgnoreCase));
+                    if (t != null)
+                    {
+                        found = t;
+                        return true;
+                    }
+                }
+                catch
                 {
                     continue;
                 }
@@ -121,6 +191,51 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             return false;
         }
+
+        private static readonly char[] _identifierDelimiters = ['.', '(', ')', '[', ']', ',', ' ', '\t'];
+
+        private static string ExpandCommonTypeNamesInPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return path;
+
+            bool anyKeyPresent = _commonTypeMap.Keys.Any(k => path.IndexOf(k, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (!anyKeyPresent)
+                return path;
+
+            StringBuilder sb = new(path);
+            foreach (var kvp in _commonTypeMap)
+            {
+                string shortName = kvp.Key;
+                string fullName = kvp.Value.FullName ?? kvp.Value.Name;
+
+                int startIndex = 0;
+                while (true)
+                {
+                    int idx = sb.ToString().IndexOf(shortName, startIndex, StringComparison.OrdinalIgnoreCase);
+                    if (idx == -1)
+                        break;
+
+                    bool okBefore = (idx == 0) || _identifierDelimiters.Contains(sb[idx - 1]);
+                    int afterIdx = idx + shortName.Length;
+                    bool okAfter = (afterIdx >= sb.Length) || _identifierDelimiters.Contains(sb[afterIdx]);
+
+                    if (okBefore && okAfter)
+                    {
+                        sb.Remove(idx, shortName.Length);
+                        sb.Insert(idx, fullName);
+                        startIndex = idx + fullName.Length;
+                    }
+                    else
+                    {
+                        startIndex = idx + shortName.Length;
+                    }
+                }
+            }
+
+            return sb.ToString();
+        }
+
 
         internal static object? ResolvePlaceholderToObject(string path, object root)
         {
@@ -165,12 +280,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             continue;
                     }
 
-                    if (i == parts.Length - 1 && _collectionOperations.ContainsKey(part))
+                    if (current is IEnumerable enumerable && current is not string && _collectionOperations.TryGetValue(part, out var op))
                     {
-                        if (current is IEnumerable enumerable && current is not string)
-                        {
-                            return _collectionOperations[part](enumerable);
-                        }
+                        current = op(enumerable);
+                        continue;
                     }
 
                     int openBracket = part.IndexOf('[');
@@ -187,16 +300,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         if (memberContainer == null)
                             return null;
 
-                        if (memberContainer is IEnumerable enumerable && !(memberContainer is string))
+                        if (memberContainer is IEnumerable enumContainer && !(memberContainer is string))
                         {
-                            List<object?> list = enumerable.Cast<object?>().ToList();
-                            
+                            List<object?> list = enumContainer.Cast<object?>().ToList();
+
                             if (_collectionOperations.ContainsKey(inner))
                             {
                                 current = _collectionOperations[inner](list);
                                 continue;
                             }
-                            
+
                             if (int.TryParse(inner, out int idx))
                             {
                                 current = (idx >= 0 && idx < list.Count) ? list[idx] : null;
@@ -207,7 +320,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             {
                                 current = list.FirstOrDefault(el =>
                                 {
-                                    if (el == null) return false;
+                                    if (el == null)
+                                        return false;
                                     if (EvaluateConditions.TryGetMemberStringValue(el, predProp, out string? memberVal))
                                         return string.Equals(memberVal, predVal, StringComparison.OrdinalIgnoreCase);
                                     return false;
@@ -235,7 +349,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return null;
             }
         }
-
 
         private static object? GetMemberValue(object targetOrType, string name)
         {
@@ -293,13 +406,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return null;
             }
         }
-        
+
         private static object? GetRandomFromCollection(IEnumerable collection)
         {
             List<object?> list = collection.Cast<object?>().ToList();
             if (list.Count == 0)
                 return null;
-            
+
             int randomIndex = _random.Next(list.Count);
             return list[randomIndex];
         }
@@ -315,6 +428,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             foreach (string token in paramTokens)
             {
                 string replaced = ReplacePlaceholders(token, eventArgs);
+                replaced = ExpandCommonTypeNamesInPath(replaced); 
 
                 if ((replaced.Length >= 2) && ((replaced.StartsWith("\"") && replaced.EndsWith("\"")) || (replaced.StartsWith("'") && replaced.EndsWith("'"))))
                 {
@@ -622,21 +736,29 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             try
             {
                 object? resolvedValue = null;
-                
+
                 if (valueExpression.Contains('.') && !valueExpression.StartsWith("\"") && !valueExpression.StartsWith("'"))
                 {
                     resolvedValue = ResolveTargetObject(valueExpression, item, eventArgs);
                 }
-                
+
+                if (resolvedValue == null && valueExpression.Contains('(') && !valueExpression.StartsWith("\"") && !valueExpression.StartsWith("'"))
+                {
+                    resolvedValue = ResolveTargetObject(valueExpression, item, eventArgs);
+                }
+
                 if (resolvedValue == null)
                 {
                     string resolvedValueExpression = ReplacePlaceholders(valueExpression, eventArgs);
-                    
-                    if (resolvedValueExpression != valueExpression)
+
+                    if (!string.Equals(resolvedValueExpression, valueExpression, StringComparison.Ordinal))
                     {
-                        resolvedValue = ResolveTargetObject(resolvedValueExpression, item, eventArgs);
+                        if (resolvedValueExpression.Contains('.') || resolvedValueExpression.Contains('('))
+                        {
+                            resolvedValue = ResolveTargetObject(resolvedValueExpression, item, eventArgs);
+                        }
                     }
-                    
+
                     if (resolvedValue == null)
                     {
                         resolvedValue = resolvedValueExpression;
@@ -661,7 +783,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     }
                 }
 
-                object? newValue = CalculateNewValue(currentValue, resolvedValue?.ToString() ?? "null", operatorType, propertyPath);
+                object? newValue;
+                if (operatorType == AssignmentOperator.Assign)
+                {
+                    newValue = resolvedValue;
+                }
+                else
+                {
+                    string valueExprStr = resolvedValue?.ToString() ?? "null";
+                    newValue = CalculateNewValue(currentValue, valueExprStr, operatorType, propertyPath);
+                }
 
                 if (ShouldResolveFromEventArgs(propertyPath, eventArgs))
                 {
@@ -777,47 +908,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     return (kvp.Value, index, kvp.Key.Length);
                 }
             }
-            
+
             return null;
-        }
-
-        private static void SetPropertyWithOperator(object root, string propertyPath, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
-        {
-            try
-            {
-                if (ShouldResolveFromEventArgs(propertyPath, eventArgs))
-                {
-                    object? currentValue = null;
-                    if (operatorType != AssignmentOperator.Assign)
-                    {
-                        string currentValueStr = ResolvePlaceholder(propertyPath, eventArgs);
-                        if (currentValueStr != "null" && !currentValueStr.StartsWith("<error:") && !currentValueStr.StartsWith("<invalid:"))
-                        {
-                            if (double.TryParse(currentValueStr, out double numValue))
-                                currentValue = numValue;
-                            else
-                                currentValue = currentValueStr;
-                        }
-                    }
-
-                    object? newValue = CalculateNewValue(currentValue, valueExpression, operatorType, propertyPath);
-
-                    SetProperty(eventArgs, propertyPath, newValue, eventArgs);
-                    return;
-                }
-
-                object? currentValue2 = null;
-                if (operatorType != AssignmentOperator.Assign)
-                    currentValue2 = GetPropertyValue(root, propertyPath);
-
-                object? newValue2 = CalculateNewValue(currentValue2, valueExpression, operatorType, propertyPath);
-
-                SetProperty(root, propertyPath, newValue2, eventArgs);
-            }
-            catch (Exception ex)
-            {
-                LogManager.Error($"Failed to execute compound assignment '{propertyPath}': {ex.Message}");
-            }
         }
 
         private static bool ShouldResolveFromEventArgs(string propertyPath, object? eventArgs)
@@ -971,11 +1063,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Error($"Failed to execute method '{methodName}': {ex.Message}");
             }
         }
-        
+
         private static void ExecuteMethodCall(ICustomItem item, string methodCall, EventArgs eventArgs)
         {
             try
             {
+                methodCall = ExpandCommonTypeNamesInPath(methodCall);
+
                 if (!methodCall.Contains("::"))
                 {
                     LogManager.Error($"Invalid method call syntax. Expected 'ObjectPath::MethodName(params)': {methodCall}");
@@ -1023,11 +1117,40 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static object ResolveTargetObject(string objectPath, ICustomItem item, EventArgs eventArgs)
         {
-
+            objectPath = ExpandCommonTypeNamesInPath(objectPath);
             LogManager.Debug($"Attempting to resolve: {objectPath}");
 
             LogManager.Debug($"EventArgs type: {eventArgs.GetType().Name}");
             LogManager.Debug($"EventArgs properties: {string.Join(", ", eventArgs.GetType().GetProperties().Select(p => p.Name))}");
+
+            int newIndex = objectPath.IndexOf(".new(", StringComparison.OrdinalIgnoreCase);
+            if (newIndex >= 0)
+            {
+                string typeName = objectPath.Substring(0, newIndex);
+                int openParen = objectPath.IndexOf('(', newIndex);
+                int closeParen = FindClosingParen(objectPath, openParen);
+                if (closeParen > openParen)
+                {
+                    string paramsPart = objectPath.Substring(openParen + 1, closeParen - openParen - 1);
+                    string remainder = objectPath.Length > closeParen + 1 ? objectPath.Substring(closeParen + 1) : "";
+
+                    if (TryResolveType(typeName, out Type? resolvedType) && resolvedType != null)
+                    {
+                        object? instance = CreateInstanceFromType(resolvedType, paramsPart, eventArgs, item);
+                        if (instance == null)
+                            return null;
+
+                        if (!string.IsNullOrWhiteSpace(remainder))
+                        {
+                            string suffix = remainder.Trim();
+                            if (suffix.StartsWith(".")) suffix = suffix.Substring(1);
+                            return ResolvePlaceholderToObject(suffix, instance);
+                        }
+
+                        return instance;
+                    }
+                }
+            }
 
             // God help me if I have to update this.
             HashSet<string> knownObjectTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -1040,7 +1163,64 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 "AmmoPickup", "BodyArmorPickup", "CandyPickup", "CandyItem", "Role", "OldRole",
                 "NewRole", "Effect", "Group", "Issuer", "Sender", "Message"
             };
-            
+
+            int parenIndex = objectPath.IndexOf('(');
+            if (parenIndex >= 0)
+            {
+                string firstToken = objectPath.Substring(0, parenIndex).Split('.')[0].Trim();
+                int closeParen = FindClosingParen(objectPath, parenIndex);
+                if (closeParen > parenIndex)
+                {
+                    string beforeParen = objectPath.Substring(0, parenIndex).Trim();
+                    string paramsPart = objectPath.Substring(parenIndex + 1, closeParen - parenIndex - 1);
+                    string remainder = objectPath.Length > closeParen + 1 ? objectPath.Substring(closeParen + 1) : "";
+
+                    string[] nameParts = beforeParen.Split('.', (char)StringSplitOptions.RemoveEmptyEntries);
+                    Type? resolvedType = null;
+                    int matchedParts = 0;
+
+                    for (int j = nameParts.Length; j >= 1; j--)
+                    {
+                        string candidate = string.Join(".", nameParts.Take(j));
+                        if (TryResolveType(candidate, out Type? t) && t != null)
+                        {
+                            resolvedType = t;
+                            matchedParts = j;
+                            break;
+                        }
+                    }
+
+                    if (resolvedType != null)
+                    {
+                        object? instance = CreateInstanceFromType(resolvedType, paramsPart, eventArgs, item);
+                        if (instance == null)
+                            return null;
+
+                        string suffix = "";
+                        if (matchedParts < nameParts.Length)
+                        {
+                            suffix = string.Join(".", nameParts.Skip(matchedParts));
+                            if (!string.IsNullOrWhiteSpace(remainder))
+                                suffix += remainder.StartsWith(".") ? remainder : "." + remainder;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(remainder))
+                        {
+                            suffix = remainder;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(suffix))
+                        {
+                            suffix = suffix.Trim();
+                            if (suffix.StartsWith(".")) suffix = suffix.Substring(1);
+                            return ResolvePlaceholderToObject(suffix, instance);
+                        }
+
+                        return instance;
+                    }
+                }
+            }
+
+
             if (knownObjectTypes.Contains(objectPath))
             {
                 object resolvedFromArgs = ResolvePlaceholderToObject(objectPath, eventArgs);
@@ -1064,7 +1244,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             return null;
         }
-        
+
         private static void HandlePlaceholderPropertyAssignment(ICustomItem item, string propertyPathPlaceholder, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
         {
             try
@@ -1408,33 +1588,87 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 PropertyInfo? finalProp = target.GetType().GetProperty(finalPart, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (finalProp != null)
                 {
-                    object? convertedValue;
+                    if (newValue == null)
+                    {
+                        finalProp.SetValue(target, null);
+                        return;
+                    }
+
+                    Type propType = finalProp.PropertyType;
+
+                    if (newValue != null && propType.IsAssignableFrom(newValue.GetType()))
+                    {
+                        finalProp.SetValue(target, newValue);
+                        return;
+                    }
+
                     if (newValue is string stringValue)
                     {
-                        convertedValue = Convert.ChangeType(stringValue, finalProp.PropertyType);
+                        object convertedValue = Convert.ChangeType(stringValue, propType);
+                        finalProp.SetValue(target, convertedValue);
+                        return;
                     }
-                    else
+
+                    try
                     {
-                        convertedValue = Convert.ChangeType(newValue, finalProp.PropertyType);
+                        object convertedValue = Convert.ChangeType(newValue, propType);
+                        finalProp.SetValue(target, convertedValue);
+                        return;
                     }
-                    finalProp.SetValue(target, convertedValue);
-                    return;
+                    catch
+                    {
+                        if (newValue != null && propType.IsAssignableFrom(newValue.GetType()))
+                        {
+                            finalProp.SetValue(target, newValue);
+                            return;
+                        }
+
+                        LogManager.Error($"Failed to convert value of type '{newValue?.GetType().Name}' to property type '{propType.Name}' for {finalPart}");
+                        return;
+                    }
                 }
 
                 FieldInfo? finalField = target.GetType().GetField(finalPart, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (finalField != null)
                 {
-                    object? convertedValue;
-                    if (newValue is string stringValue)
+                    if (newValue == null)
                     {
-                        convertedValue = Convert.ChangeType(stringValue, finalField.FieldType);
+                        finalField.SetValue(target, null);
+                        return;
                     }
-                    else
+
+                    Type fieldType = finalField.FieldType;
+
+                    if (newValue != null && fieldType.IsAssignableFrom(newValue.GetType()))
                     {
-                        convertedValue = Convert.ChangeType(newValue, finalField.FieldType);
+                        finalField.SetValue(target, newValue);
+                        return;
                     }
-                    finalField.SetValue(target, convertedValue);
-                    return;
+
+                    if (newValue is string sVal)
+                    {
+                        object convertedValue = Convert.ChangeType(sVal, fieldType);
+                        finalField.SetValue(target, convertedValue);
+                        return;
+                    }
+
+                    try
+                    {
+                        object convertedValue = Convert.ChangeType(newValue, fieldType);
+                        finalField.SetValue(target, convertedValue);
+                        return;
+                    }
+                    catch
+                    {
+                        if (newValue != null && fieldType.IsAssignableFrom(newValue.GetType()))
+                        {
+                            finalField.SetValue(target, newValue);
+                            return;
+                        }
+
+                        LogManager.Error($"Failed to convert value of type '{newValue?.GetType().Name}' to field type '{fieldType.Name}' for {finalPart}");
+                        return;
+                    }
                 }
 
                 LogManager.Error($"Final property or field not found: {finalPart}");
@@ -1442,6 +1676,108 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             catch (Exception ex)
             {
                 LogManager.Error($"Failed to set property '{propertyPath}': {ex.Message}");
+            }
+        }
+
+        private static int FindClosingParen(string s, int openIndex)
+        {
+            int depth = 0;
+            for (int i = openIndex; i < s.Length; i++)
+            {
+                if (s[i] == '(')
+                    depth++;
+                else if (s[i] == ')')
+                {
+                    depth--;
+                    if (depth == 0) return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private static object? CreateInstanceFromType(Type type, string parametersPart, EventArgs eventArgs, ICustomItem? item)
+        {
+            try
+            {
+                object[] parameters = ParseAndResolveParameters(parametersPart, eventArgs, item);
+
+                ConstructorInfo[] ctors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+                ConstructorInfo? ctor = ctors.FirstOrDefault(c => c.GetParameters().Length == parameters.Length &&
+                    c.GetParameters().Select((p, i) =>
+                    {
+                        Type expected = p.ParameterType;
+                        object? actual = parameters[i];
+                        if (actual == null)
+                            return !expected.IsValueType || (Nullable.GetUnderlyingType(expected) != null);
+
+                        return expected.IsAssignableFrom(actual.GetType()) || (actual is string);
+                    }).All(b => b));
+
+                if (ctor == null)
+                {
+                    ctor = ctors.FirstOrDefault(c => c.GetParameters().Length == parameters.Length);
+                }
+
+                if (ctor == null)
+                {
+                    LogManager.Error($"No matching constructor found on type '{type.FullName}' with {parameters.Length} parameters");
+                    return null;
+                }
+
+                ParameterInfo[] ctorParams = ctor.GetParameters();
+                object[] converted = new object[ctorParams.Length];
+
+                for (int i = 0; i < ctorParams.Length; i++)
+                {
+                    Type expected = ctorParams[i].ParameterType;
+                    object? value = parameters[i];
+
+                    if (value == null)
+                    {
+                        converted[i] = ctorParams[i].HasDefaultValue ? ctorParams[i].DefaultValue : (expected.IsValueType ? Activator.CreateInstance(expected) : null);
+                        continue;
+                    }
+
+                    if (expected.IsAssignableFrom(value.GetType()))
+                    {
+                        converted[i] = value;
+                        continue;
+                    }
+
+                    if (value is string sVal && ((sVal.StartsWith("\"") && sVal.EndsWith("\"")) || (sVal.StartsWith("'") && sVal.EndsWith("'"))))
+                        sVal = sVal.Substring(1, sVal.Length - 2);
+
+                    try
+                    {
+                        if (expected == typeof(float) || expected == typeof(float?))
+                            converted[i] = Convert.ChangeType(value, typeof(float));
+                        else if (expected == typeof(double) || expected == typeof(double?))
+                            converted[i] = Convert.ChangeType(value, typeof(double));
+                        else if (expected == typeof(int) || expected == typeof(int?))
+                            converted[i] = Convert.ChangeType(value, typeof(int));
+                        else
+                            converted[i] = Convert.ChangeType(value, expected);
+                    }
+                    catch
+                    {
+                        if (expected.IsAssignableFrom(value.GetType()))
+                            converted[i] = value;
+                        else
+                        {
+                            LogManager.Error($"Failed to convert constructor parameter {i} from '{value?.GetType().Name}' to '{expected.Name}' for type '{type.Name}'");
+                            converted[i] = ctorParams[i].HasDefaultValue ? ctorParams[i].DefaultValue : (expected.IsValueType ? Activator.CreateInstance(expected) : null);
+                        }
+                    }
+                }
+
+                return ctor.Invoke(converted);
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Failed to create instance of type '{type.FullName}': {ex.Message}");
+                return null;
             }
         }
     }

@@ -518,9 +518,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Attributes\CommonTypesAttribute.cs" />
     <Compile Include="API\Attributes\EventTypeAttribute.cs" />
     <Compile Include="API\Attributes\PluginCustomItem.cs" />
     <Compile Include="API\Components\ToolGunUI.cs" />
+    <Compile Include="API\Enums\CommonTypes.cs" />
     <Compile Include="API\Enums\LockerType.cs" />
     <Compile Include="API\Enums\AssignmentOperator.cs" />
     <Compile Include="API\Features\CandySerialization\CandySerializationManager.cs" />
