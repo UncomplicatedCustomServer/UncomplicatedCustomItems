@@ -617,6 +617,68 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return true;
         }
 
+        private static void HandleComplexAssignment(ICustomItem item, string propertyPath, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
+        {
+            try
+            {
+                object? resolvedValue = null;
+                
+                if (valueExpression.Contains('.') && !valueExpression.StartsWith("\"") && !valueExpression.StartsWith("'"))
+                {
+                    resolvedValue = ResolveTargetObject(valueExpression, item, eventArgs);
+                }
+                
+                if (resolvedValue == null)
+                {
+                    string resolvedValueExpression = ReplacePlaceholders(valueExpression, eventArgs);
+                    
+                    if (resolvedValueExpression != valueExpression)
+                    {
+                        resolvedValue = ResolveTargetObject(resolvedValueExpression, item, eventArgs);
+                    }
+                    
+                    if (resolvedValue == null)
+                    {
+                        resolvedValue = resolvedValueExpression;
+                    }
+                }
+
+                object? currentValue = null;
+                if (operatorType != AssignmentOperator.Assign)
+                {
+                    if (ShouldResolveFromEventArgs(propertyPath, eventArgs))
+                    {
+                        string currentValueStr = ResolvePlaceholder(propertyPath, eventArgs);
+                        if (currentValueStr != "null" && !currentValueStr.StartsWith("<error:") && !currentValueStr.StartsWith("<invalid:"))
+                        {
+                            currentValue = currentValueStr;
+                        }
+                    }
+                    else
+                    {
+                        object root = item != null ? (object)item : eventArgs;
+                        currentValue = GetPropertyValue(root, propertyPath);
+                    }
+                }
+
+                object? newValue = CalculateNewValue(currentValue, resolvedValue?.ToString() ?? "null", operatorType, propertyPath);
+
+                if (ShouldResolveFromEventArgs(propertyPath, eventArgs))
+                {
+                    SetProperty(eventArgs, propertyPath, newValue, eventArgs);
+                }
+                else
+                {
+                    object root = item != null ? (object)item : eventArgs;
+                    SetProperty(root, propertyPath, newValue, eventArgs);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Failed to handle complex assignment '{propertyPath} = {valueExpression}': {ex.Message}");
+            }
+        }
+
         private static void ExecuteRegularAction(ICustomItem item, string action, EventArgs eventArgs)
         {
             if (string.IsNullOrWhiteSpace(action))
@@ -648,9 +710,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
                 else
                 {
-                    string resolvedValueExpression = ReplacePlaceholders(valueExpression, eventArgs);
-                    object root = item != null ? (object)item : eventArgs;
-                    SetPropertyWithOperator(root, propertyPath, resolvedValueExpression, operatorType, eventArgs);
+                    HandleComplexAssignment(item, propertyPath, valueExpression, operatorType, eventArgs);
                 }
                 return;
             }
