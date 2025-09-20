@@ -9,13 +9,11 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
 using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
-using UncomplicatedCustomItems.API.Extensions;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
-using UncomplicatedCustomItems.API.Wrappers;
 using PlayerRoles;
 using UncomplicatedCustomItems.API.Enums;
-using PlayerStatsSystem;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 namespace UncomplicatedCustomItems.Events.Internal
 {
@@ -56,6 +54,15 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null || ev.Player.Role == RoleTypeId.Destroyed || ev.Player.Role == RoleTypeId.Spectator)
                 return;
 
+            if (SummonedBaseCustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem.CustomItem is CustomWeapon customWeapon)
+            {
+                if (customWeapon.EnableFriendlyFire)
+                {
+                    ev.Player.Damage(customWeapon.Damage, ev.Attacker);
+                    ev.Attacker.SendHitMarker(customWeapon.Damage);
+                }
+            }
+
             if (Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem))
             {
                 if (customItem.CustomItem.CustomItemType is CustomItemType.Weapon)
@@ -83,6 +90,13 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Pickup == null)
                 return;
 
+            if (SummonedBaseCustomItem.TryGet(ev.Pickup.Serial, out var summonedItem))
+            {
+                summonedItem.OnDrop(ev);
+                summonedItem.ResetBadge(ev.Player);
+                PlayerHandler.StopHumeShieldRegen(ev.Player);
+            }
+
             if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem item))
                 return;
 
@@ -98,6 +112,12 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player is null)
                 return;
 
+            if (SummonedBaseCustomItem.TryGet(ev.Item.Serial, out var summonedItem))
+            {
+                summonedItem.OnPickup(ev);
+                summonedItem.HandlePickedUpDisplayHint();
+            }
+
             if (Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem item))
             {
                 item.OnPickup(ev);
@@ -111,6 +131,9 @@ namespace UncomplicatedCustomItems.Events.Internal
                 return;
             if (ev.UsableItem == null)
                 return;
+
+            if (SummonedBaseCustomItem.TryGet(ev.UsableItem.Serial, out var summonedItem))
+                summonedItem.ResetBadge(ev.Player);
 
             if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem item))
                 return;
@@ -131,6 +154,12 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player?.CurrentItem == null || ev.NewItem == null)
                 return;
 
+            if (SummonedBaseCustomItem.TryGet(ev.NewItem.Serial, out var summonedItem))
+            {
+                summonedItem.LoadBadge(ev.Player);
+                summonedItem.HandleSelectedDisplayHint();
+            }
+
             if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out var item))
                 return;
 
@@ -148,6 +177,34 @@ namespace UncomplicatedCustomItems.Events.Internal
         {
             if (ev.Player.CurrentItem is null)
                 return;
+
+            if (SummonedBaseCustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
+            {
+                summonedItem.ResetBadge(ev.Player);
+
+                if (summonedItem.Item.Type == ItemType.GunSCP127 && summonedItem.CustomItem is CustomSCP127 customSCP127)
+                {
+                    Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(summonedItem.Item.Base);
+                    if (tier == Scp127Tier.Tier1)
+                    {
+                        ev.Player.HumeShieldRegenRate = 0f;
+                        Timing.RunCoroutine(DecayRate(ev.Player, customSCP127.Tier1ShieldDecayRate));
+                    }
+                    else if (tier == Scp127Tier.Tier2)
+                    {
+                        ev.Player.HumeShieldRegenRate = 0f;
+                        Timing.RunCoroutine(DecayRate(ev.Player, customSCP127.Tier2ShieldDecayRate));
+                    }
+                    else if (tier == Scp127Tier.Tier3)
+                    {
+                        ev.Player.HumeShieldRegenRate = 0f;
+                        Timing.RunCoroutine(DecayRate(ev.Player, customSCP127.Tier3ShieldDecayRate));
+                    }
+                    else
+                        LogManager.Error($"{summonedItem.CustomItem.Name} - {summonedItem.Serial} has no tier?");
+                    PlayerHandler.StopHumeShieldRegen(ev.Player);
+                }
+            }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
@@ -214,6 +271,12 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!ev.Player.Connection.isReady)
                 return;
 
+            if (SummonedBaseCustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
+            {
+                PlayerHandler.StopHumeShieldRegen(ev.Player);
+                summonedItem.ResetBadge(ev.Player);
+            }
+
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
                 return;
 
@@ -223,6 +286,9 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void ThrownProjectile(PlayerThrewProjectileEventArgs ev)
         {
+            if (SummonedBaseCustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
+                summonedItem.ResetBadge(ev.Player);
+
             if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem item))
                 return;
 

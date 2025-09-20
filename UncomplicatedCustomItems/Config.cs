@@ -24,6 +24,9 @@ namespace UncomplicatedCustomItems
         [Description("If true your server will be listed at 'https://list.thaumielscpsl.site'.")]
         public bool ShowOnuciList { get; set; } = true;
 
+        [Description("If true your servers plugins will be shown at 'https://list.thaumielscpsl.site' (This does not hide UCS plugins).")]
+        public bool ShowPluginsOnList { get; set; } = true;
+
         [Description("If true your servers IP will be hidden at 'https://list.thaumielscpsl.site'.")]
         public bool HideipOnList { get; set; }
 

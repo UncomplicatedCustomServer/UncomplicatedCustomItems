@@ -12,20 +12,31 @@ using UserSettings.ServerSpecific;
 using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.Helper;
 using PlayerRoles;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 namespace UncomplicatedCustomItems.API.Components
 {
     public class ToolGunUI : MonoBehaviour
     {
         private Player Owner;
+        private SummonedBaseCustomItem BaseCustomItem;
         private SummonedCustomItem CustomItem;
         private StringBuilder Builder;
         private bool Paused;
 
-        public void Init(SummonedCustomItem customItem)
+        public void Init(object customItemobj)
         {
-            CustomItem = customItem;
-            Owner = customItem.Owner;
+            if (customItemobj is SummonedCustomItem customItem)
+            {
+                CustomItem = customItem;
+                Owner = customItem.Owner;
+            }
+            if (customItemobj is SummonedBaseCustomItem summonedItem)
+            {
+                BaseCustomItem = summonedItem;
+                Owner = summonedItem.Owner;
+            }
+
             Builder = new();
             Settings.GiveToPlayers();
             LogManager.Debug($"Starting ToolGun UI for {Owner.Nickname}");
@@ -40,14 +51,26 @@ namespace UncomplicatedCustomItems.API.Components
             if (Owner.Room == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(Owner.CurrentItem.Serial, out var item) || item != CustomItem)
-                Destroy(this);
-
             if (Owner.CurrentItem == null)
                 Destroy(this);
 
-            if (!CustomItem.HasModule(CustomFlags.ToolGun))
-                Destroy(this);
+            if (CustomItem != null)
+            {
+                if (!Utilities.TryGetSummonedCustomItem(Owner.CurrentItem.Serial, out var item) || item != CustomItem)
+                    Destroy(this);
+
+                if (!CustomItem.HasModule(CustomFlags.ToolGun))
+                    Destroy(this);
+            }
+
+            if (BaseCustomItem != null)
+            {
+                if (!SummonedBaseCustomItem.TryGet(Owner.CurrentItem.Serial, out var item) || item != BaseCustomItem)
+                    Destroy(this);
+                
+                if (BaseCustomItem.CustomItem is not Features.CustomItemAPI.ToolGun)
+                    Destroy(this);
+            }
 
             SSPlaintextSetting colorSetting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(Owner.ReferenceHub, 21);
             SSTwoButtonsSetting deletionMode = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(Owner.ReferenceHub, 22);

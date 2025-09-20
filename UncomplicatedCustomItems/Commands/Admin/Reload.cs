@@ -4,8 +4,8 @@ using MEC;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
 
@@ -29,6 +29,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         private int ReloadedItems;
         private int ReloadedActions;
+        private int ReloadedBaseItems;
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
@@ -47,19 +48,16 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 CustomItems.Clear();
                 int BeforeItems = CustomItem.List.Count();
                 int BeforeActions = CustomAction.List.Count();
+                int BeforeBaseItems = BaseCustomItem.List.Count();
                 ReloadedItems = 0;
                 ReloadedActions = 0;
+                ReloadedBaseItems = 0;
 
                 foreach (SummonedCustomItem item in SummonedCustomItem.List.ToList())
-                {
-                    if (item.IsPickup)
-                        item.Pickup.Destroy();
-                    else
-                    {
-                        CustomItems.Add(item.CustomItem, item.Owner);
-                        item.Destroy();
-                    }
-                }
+                    item.Destroy();
+
+                foreach (SummonedBaseCustomItem item in SummonedBaseCustomItem.List.ToList())
+                    item.Destroy();
 
                 foreach (ICustomItem customItem in CustomItem.List.ToList())
                 {
@@ -73,12 +71,25 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     LogManager.Debug($"Unregistered action {action.Name}.");
                 }
 
-                ImportManager.ActivePlugins.Clear();
-                SummonedCustomItem.List.Clear();
+                foreach (BaseCustomItem baseitem in BaseCustomItem.List.ToList())
+                {
+                    BaseCustomItem.Unregister(baseitem.Id);
+                    LogManager.Debug($"Unregistered API CustomItem: {baseitem.Name}.");
+                }
+
+                BaseCustomItem.CustomItems.Clear();
+                CustomItem.CustomItems.Clear();
+                CustomItem.UnregisteredCustomItems.Clear();
+                CustomAction.CustomActions.Clear();
+                CustomAction.UnregisteredCustomActions.Clear();
+                SummonedBaseCustomItem.SummonedCustomItems.Clear();
                 CustomItem.List.Clear();
                 CustomItem.UnregisteredList.Clear();
                 CustomAction.List.Clear();
                 CustomAction.UnregisteredList.Clear();
+                ImportManager.ActivePlugins.Clear();
+                SummonedCustomItem.List.Clear();
+                SummonedBaseCustomItem.List.Clear();
 
                 Plugin.Instance.FileConfig.Welcome(loadExamples: true);
                 Plugin.Instance.FileConfig.Welcome(Server.Port.ToString());
@@ -95,33 +106,26 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     ReloadedItems++;
                 foreach (ICustomAction action in CustomAction.List)
                     ReloadedActions++;
+                foreach (BaseCustomItem item in BaseCustomItem.List)
+                    ReloadedBaseItems++;
 
                 int NewItems = BeforeItems - ReloadedItems;
                 int NewActions = BeforeActions - ReloadedActions;
+                int NewBaseItems = BeforeBaseItems - ReloadedBaseItems;
 
                 foreach (var entry in CustomItems)
                     Timing.CallDelayed(1f, () => new SummonedCustomItem(entry.Key, entry.Value));
 
-                if (NewItems > 0 && NewActions > 0)
-                {
-                    response = $"\nReloaded {CustomItem.List.Count} CustomItems ({NewItems} new). \nReloaded {CustomAction.List.Count} CustomActions ({NewActions} new).\nUnregistered - Items: {CustomItem.UnregisteredList.Count}, Actions: {CustomAction.UnregisteredList.Count}";
-                    return true;
-                }
-                else if (NewItems > 0)
-                {
-                    response = $"\nReloaded {CustomItem.List.Count} CustomItems ({NewItems} new).\nReloaded {CustomAction.List.Count} CustomActions.\nUnregistered - Items: {CustomItem.UnregisteredList.Count}, Actions: {CustomAction.UnregisteredList.Count}";
-                    return true;
-                }
-                else if (NewActions > 0)
-                {
-                    response = $"\nReloaded {CustomAction.List.Count} CustomActions ({NewActions} new).\nUnregistered - Actions: {CustomAction.UnregisteredList.Count}";
-                    return true;
-                }
-                else
-                {
-                    response = $"\nReloaded {CustomItem.List.Count} CustomItems.\nReloaded {CustomAction.List.Count} CustomActions.\nUnregistered - Items: {CustomItem.UnregisteredList.Count}, Actions: {CustomAction.UnregisteredList.Count}";
-                    return true;
-                }
+                List<string> reloadedLines =
+                [
+                    $"Reloaded {CustomItem.List.Count} CustomItems{(NewItems > 0 ? $" ({NewItems} new)" : "")}.",
+                    $"Reloaded {CustomAction.List.Count} CustomActions{(NewActions > 0 ? $" ({NewActions} new)" : "")}.",
+                    $"Reloaded {BaseCustomItem.List.Count} BaseItems{(NewBaseItems > 0 ? $" ({NewBaseItems} new)" : "")}."
+                ];
+
+                response = "\n" + string.Join("\n", reloadedLines)
+                    + $"\nUnregistered - Items: {BeforeItems}, Actions: {BeforeActions}, BaseItems: {BeforeBaseItems}";
+                return true;
             }
             else
             {

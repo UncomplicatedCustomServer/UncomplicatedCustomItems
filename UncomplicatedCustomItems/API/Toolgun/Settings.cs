@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using InventorySystem.Items;
 using LabApi.Features.Wrappers;
 using MEC;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UserSettings.ServerSpecific;
 
 namespace UncomplicatedCustomItems.API.ToolGun
@@ -27,7 +29,17 @@ namespace UncomplicatedCustomItems.API.ToolGun
             ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
 
             if (Player.ReadyList.Count() > 0)
-                Timing.CallDelayed(1, () => ServerSpecificSettingsSync.SendToPlayersConditionally(x => Utilities.TryGetSummonedCustomItem(x.inventory.CurInstance.ItemSerial, out var item) && item.HasModule(CustomFlags.ToolGun)));
+                Timing.CallDelayed(1, () => ServerSpecificSettingsSync.SendToPlayersConditionally(player =>
+                {
+                    ItemBase itemBase = player.inventory?.CurInstance;
+                    if (itemBase == null)
+                        return false;
+
+                    bool hasSummoned = Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var summoned) && summoned is not null && summoned.HasModule(CustomFlags.ToolGun);
+                    bool hasBase = SummonedBaseCustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
+
+                    return hasSummoned || hasBase;
+                }));
         }
 
         internal static IEnumerator<float> ResetSettings()
@@ -45,7 +57,17 @@ namespace UncomplicatedCustomItems.API.ToolGun
             ServerSpecificSettingsSync.DefinedSettings = PreviousDefinedSettings;
 
             if (Player.ReadyList.Count() > 0)
-                ServerSpecificSettingsSync.SendToPlayersConditionally(x => !Utilities.TryGetSummonedCustomItem(x.inventory.CurInstance.ItemSerial, out var item) || !item.HasModule(CustomFlags.ToolGun));
+                ServerSpecificSettingsSync.SendToPlayersConditionally(player =>
+                {
+                    ItemBase itemBase = player.inventory?.CurInstance;
+                    if (itemBase == null)
+                        return true;
+
+                    bool hasSummoned = Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var summoned) && summoned is not null && summoned.HasModule(CustomFlags.ToolGun);
+                    bool hasBase = SummonedBaseCustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
+
+                    return !(hasSummoned || hasBase);
+                });
         }
     }
 }

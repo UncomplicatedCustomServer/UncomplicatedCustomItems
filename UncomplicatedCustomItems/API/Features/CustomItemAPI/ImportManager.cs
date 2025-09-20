@@ -2,14 +2,18 @@
 using Exiled.API.Interfaces;
 using Exiled.Loader;
 #endif
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Attributes;
-using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Extensions;
+using System.Reflection;
+using UncomplicatedCustomItems.API.Features.Helper;
+using System.Linq;
+using UncomplicatedCustomItems.API.Interfaces;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
     internal class ImportManager
     {
@@ -30,6 +34,22 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Task.Run(Actor);
         }
 
+        internal static Type[] CustomItemTypes =
+        [
+            typeof(CustomArmor),
+            typeof(CustomCandy),
+            typeof(CustomExplosiveGrenade),
+            typeof(CustomFlashGrenade),
+            typeof(CustomKeycard),
+            typeof(CustomWeapon),
+            typeof(CustomSCP127),
+            typeof(CustomSCP207),
+            typeof(CustomSCP244),
+            typeof(CustomSCP268),
+            typeof(CustomSCP1853),
+            typeof(ToolGun)
+        ];
+
         internal static void Actor()
         {
             LogManager.Info($"{nameof(ImportManager.Actor)}: Checking for CustomItems registered in other plugins to import...");
@@ -43,17 +63,21 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);
-                        if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomItem)) || type.IsSubclassOf(typeof(CustomItem))))
+                        if (attribs != null && attribs.Length > 0 && CustomItemTypes.Any(baseType => baseType.IsAssignableFrom(type)))
                         {
                             LogManager.Silent($"{nameof(ImportManager.Actor)}: Importing It!");
                             ActivePlugins.TryAdd(plugin);
 
-                            ICustomItem Item = Activator.CreateInstance(type) as ICustomItem;
+                            BaseCustomItem Item = Activator.CreateInstance(type) as BaseCustomItem;
                             LogManager.Info($"{nameof(ImportManager.Actor)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
                             if (Item.Name is "ToolGun" && !Plugin.Instance.Config.EnableToolGun)
                                 continue;
 
-                            CustomItem.Register(Item);
+                            BaseCustomItem.Register(Item);
+                        }
+                        if (attribs != null && attribs.Length > 0 && type.IsSubclassOf(typeof(CustomItem)) || type.IsSubclassOf(typeof(ICustomItem)))
+                        {
+                            LogManager.Warn($"{type.FullName} is using a old version of the CustomItem API. For the CustomItem to be loaded and registered it MUST be updated to the new version");
                         }
                     }
                     catch (Exception e)
@@ -77,6 +101,22 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Task.Run(Actor);
         }
 
+        internal static Type[] CustomItemTypes =
+        [
+            typeof(CustomArmor),
+            typeof(CustomCandy),
+            typeof(CustomExplosiveGrenade),
+            typeof(CustomFlashGrenade),
+            typeof(CustomKeycard),
+            typeof(CustomWeapon),
+            typeof(CustomSCP127),
+            typeof(CustomSCP207),
+            typeof(CustomSCP244),
+            typeof(CustomSCP268),
+            typeof(CustomSCP1853),
+            typeof(ToolGun)
+        ];
+
         internal static void Actor()
         {
             LogManager.Info($"{nameof(ImportManager)}: Checking for CustomItems registered in other plugins to import...");
@@ -87,26 +127,32 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 LogManager.Silent($"{nameof(ImportManager)}: Passing plugin {dic.Key.Name}");
                 foreach (Type type in dic.Value.GetTypes())
+                {
                     try
                     {
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);
-                        if (attribs != null && attribs.Length > 0 && (type.IsSubclassOf(typeof(ICustomItem)) || type.IsSubclassOf(typeof(CustomItem))))
+                        if (attribs != null && attribs.Length > 0 && CustomItemTypes.Any(baseType => baseType.IsAssignableFrom(type)))
                         {
                             LogManager.Silent($"{nameof(ImportManager)}: Importing It!");
-                            ActivePlugins.TryAdd<LabApi.Loader.Features.Plugins.Plugin>(dic.Key);
+                            ActivePlugins.TryAdd(dic.Key);
 
-                            ICustomItem Item = Activator.CreateInstance(type) as ICustomItem;
-                            LogManager.Info($"{nameof(ImportManager)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name} (v{dic.Key.Version})");
+                            BaseCustomItem Item = Activator.CreateInstance(type) as BaseCustomItem;
+                            LogManager.Info($"{nameof(ImportManager)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name}");
                             if (Item.Name is "ToolGun" && !Plugin.Instance.Config.EnableToolGun)
                                 continue;
 
-                            CustomItem.Register(Item);
+                            BaseCustomItem.Register(Item);
+                        }
+                        if (attribs != null && attribs.Length > 0 && type.IsSubclassOf(typeof(CustomItem)) || type.IsSubclassOf(typeof(ICustomItem)))
+                        {
+                            LogManager.Warn($"{type.FullName} is using a old version of the CustomItem API. For the CustomItem to be loaded and registered it MUST be updated to the new version");
                         }
                     }
                     catch (Exception e)
                     {
                         LogManager.Error($"{nameof(ImportManager)}: Error while registering CustomItem from class by Attribute: {e.GetType().FullName} - {e.Message}\nType: {type.FullName} [{dic.Key.Name}] - Source: {e.Source}");
                     }
+                }
             }
         }
 #endif

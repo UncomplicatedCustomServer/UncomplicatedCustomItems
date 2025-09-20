@@ -1,8 +1,10 @@
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -23,7 +25,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            Utilities.TryGetCustomItemByName("ToolGun", out ICustomItem customItem);
+            BaseCustomItem customItem = BaseCustomItem.CustomItems.Values.Where(c => c.Name == "ToolGun").FirstOrDefault();
 
             if (arguments.Count == 1)
             {
@@ -43,7 +45,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
-                new SummonedCustomItem(customItem, target);
+                new SummonedBaseCustomItem(customItem, target);
                 response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                 return true;
             }
@@ -65,7 +67,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
-                new SummonedCustomItem(customItem, target);
+                new SummonedBaseCustomItem(customItem, target);
                 response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                 return true;
             }

@@ -2,6 +2,7 @@ using System;
 using HarmonyLib;
 using InventorySystem.Items.Usables.Scp330;
 using UncomplicatedCustomItems.API.Features.CandySerialization;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
@@ -14,17 +15,17 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
     {
         public static CandyKindID LastDesiredCandy = CandyKindID.None;
         public static uint LastCustomItemId = 0;
-        public static ICustomItem CustomItem = null;
+        public static object CustomItemobj = null;
 
         [HarmonyPrefix]
         public static void TryAddSpecificPrefix(Scp330Bag __instance, ref CandyKindID kind)
         {
             try
             {
-                LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: START - LastCustomItemId: {LastCustomItemId}, CustomItem: {CustomItem?.Name ?? "null"}");
+                LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: START - LastCustomItemId: {LastCustomItemId}, CustomItemobj: {GetItemName(CustomItemobj)}");
                 LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Original candy type: {kind}");
 
-                if (LastCustomItemId == 0 && CustomItem == null)
+                if (LastCustomItemId == 0 && CustomItemobj == null)
                 {
                     SelectCustomCandyItem(kind);
                 }
@@ -33,11 +34,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                     LogManager.Debug($"Skipping SelectCustomCandyItem - already have LastCustomItemId: {LastCustomItemId}");
                 }
 
-                if (LastCustomItemId != 0 && CustomItem != null && CustomItem.CustomData is ICandyData candyData)
+                var candyType = GetCandyTypeFromItem(CustomItemobj);
+                if (candyType.HasValue)
                 {
-                    LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Using custom candy type {candyData.CandyType} for item {CustomItem.Name}");
-                    kind = candyData.CandyType;
-                    LastDesiredCandy = candyData.CandyType;
+                    LogManager.Debug($"{nameof(TryAddSpecificPrefix)}: Using custom candy type {candyType.Value} for item {GetItemName(CustomItemobj)}");
+                    kind = candyType.Value;
+                    LastDesiredCandy = candyType.Value;
                     return;
                 }
 
@@ -69,25 +71,9 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                 LogManager.Debug($"{nameof(TryAddSpecificPostfix)}: Adding {kind} to {__instance.Owner.nicknameSync.DisplayName} Inventory");
                 CandySerializationManager.AddCandyToBag(__instance, kind);
 
-                if (LastCustomItemId != 0 && CustomItem != null)
+                if (LastCustomItemId != 0 && CustomItemobj != null)
                 {
-                    CandyKindID finalCandyType = LastDesiredCandy != CandyKindID.None ? LastDesiredCandy : kind;
-
-                    SerializedCandy sc = new()
-                    {
-                        Id = Guid.NewGuid(),
-                        CandyType = finalCandyType,
-                        AddedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                        BagSerial = __instance.ItemSerial,
-                        IsCustom = true,
-                        CustomItemId = LastCustomItemId
-                    };
-
-                    if (CustomItem.CustomData is ICandyData candyData && candyData is CandyData candy)
-                        candy.SerializedCandy = sc;
-
-                    LogManager.Debug($"{nameof(TryAddSpecificPostfix)}: Attaching custom candy id {LastCustomItemId} to bag {__instance.ItemSerial} with candy type {finalCandyType}");
-                    CandySerializationManager.ReplaceLastCandyInBag(__instance, sc);
+                    ProcessCustomCandy(__instance, kind);
                 }
 
                 ResetCustomCandyState();
@@ -99,9 +85,83 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
             }
         }
 
+        private static void ProcessCustomCandy(Scp330Bag bag, CandyKindID kind)
+        {
+            CandyKindID finalCandyType = LastDesiredCandy != CandyKindID.None ? LastDesiredCandy : kind;
+
+            SerializedCandy sc = new()
+            {
+                Id = Guid.NewGuid(),
+                CandyType = finalCandyType,
+                AddedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                BagSerial = bag.ItemSerial,
+                IsCustom = true,
+                CustomItemId = LastCustomItemId
+            };
+
+            switch (CustomItemobj)
+            {
+                case ICustomItem customItem when customItem.CustomData is ICandyData candyData && candyData is CandyData candy:
+                    candy.SerializedCandy = sc;
+                    break;
+                case BaseCustomItem baseCustomItem when baseCustomItem is CustomCandy customCandy:
+                    customCandy.SerializedCandy = sc;
+                    break;
+            }
+
+            LogManager.Debug($"{nameof(ProcessCustomCandy)}: Attaching custom candy id {LastCustomItemId} to bag {bag.ItemSerial} with candy type {finalCandyType}");
+            CandySerializationManager.ReplaceLastCandyInBag(bag, sc);
+        }
+
+        private static CandyKindID? GetCandyTypeFromItem(object item)
+        {
+            return item switch
+            {
+                ICustomItem customItem when customItem.CustomData is ICandyData candyData => candyData.CandyType,
+                BaseCustomItem baseCustomItem when baseCustomItem is CustomCandy customCandy => customCandy.CandyType,
+                _ => null
+            };
+        }
+
+        private static string GetItemName(object item)
+        {
+            return item switch
+            {
+                ICustomItem customItem => customItem.Name,
+                BaseCustomItem baseCustomItem => baseCustomItem.Name,
+                _ => "null"
+            };
+        }
+
         private static void SelectCustomCandyItem(CandyKindID kind)
         {
             LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Attempting to select custom candy for type {kind}");
+
+            foreach (BaseCustomItem baseCustomItem in BaseCustomItem.List)
+            {
+                if (baseCustomItem.Item is not ItemType.SCP330)
+                    continue;
+
+                if (baseCustomItem is not CustomCandy customCandy)
+                    continue;
+
+                if (!baseCustomItem.Spawn)
+                    continue;
+
+                if (kind != customCandy.CandyType)
+                    continue;
+
+                float chance = UnityEngine.Random.Range(0f, 101f);
+                LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Rolling chance for {baseCustomItem.Name}: {chance}% (need < {customCandy.Chance}%)");
+
+                if (chance >= customCandy.Chance)
+                    continue;
+
+                LastCustomItemId = baseCustomItem.Id;
+                CustomItemobj = baseCustomItem;
+                LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Selected custom candy {baseCustomItem.Name} (ID: {baseCustomItem.Id}) with candy type {customCandy.CandyType}");
+                return;
+            }
 
             foreach (ICustomItem item in API.Features.CustomItem.List)
             {
@@ -124,7 +184,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                     continue;
 
                 LastCustomItemId = item.Id;
-                CustomItem = item;
+                CustomItemobj = item;
                 LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Selected custom candy {item.Name} (ID: {item.Id}) with candy type {data.CandyType}");
                 return;
             }
@@ -136,7 +196,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
         {
             LastDesiredCandy = CandyKindID.None;
             LastCustomItemId = 0;
-            CustomItem = null;
+            CustomItemobj = null;
         }
     }
 }

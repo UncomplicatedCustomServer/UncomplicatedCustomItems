@@ -35,7 +35,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                     LogManager.Debug($"{nameof(GrantCandyPre)}: custom {custom.Name} chance roll {chance} vs allowed {data.Chance}");
                     if (chance >= data.Chance)
                     {
-                        TryAddSpecificPatches.CustomItem = custom;
+                        TryAddSpecificPatches.CustomItemobj = custom;
                         TryAddSpecificPatches.LastCustomItemId = custom.Id;
                         LogManager.Debug($"{nameof(GrantCandyPre)}: Selected custom item id {TryAddSpecificPatches.LastCustomItemId} to attach");
                         break;

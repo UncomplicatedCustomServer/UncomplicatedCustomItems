@@ -28,6 +28,7 @@ using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using MEC;
 using UncomplicatedCustomItems.API.ToolGun;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
@@ -160,13 +161,7 @@ namespace UncomplicatedCustomItems
 
             Events.Internal.Player.Register();
             Events.Internal.Server.Register();
-            Task.Run(delegate
-            {
-                if (HttpManager.LatestVersion.CompareTo(Version) > 0)
-                    LogManager.Warn($"You are NOT using the latest version of UncomplicatedCustomItems!\nCurrent: v{Version} | Latest available: v{HttpManager.LatestVersion}\nDownload it from GitHub: https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest");
-                VersionManager.Init();
-            });
-
+            
             FileConfig.Welcome(loadExamples: true);
             FileConfig.Welcome(Server.Port.ToString());
             FileConfig.Welcome("Actions");

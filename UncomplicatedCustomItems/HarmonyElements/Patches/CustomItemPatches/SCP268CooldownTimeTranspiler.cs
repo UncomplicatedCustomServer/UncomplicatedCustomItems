@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 
@@ -30,10 +31,10 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
                 }
             }
 
-            foreach (CodeInstruction code in codes)
+           foreach (CodeInstruction code in codes)
                 text += "\n" + code.ToString();
             LogManager.Silent($"{nameof(SCP268CooldownTimeTranspiler)}: Codes: {text}");
-            
+             
             return codes;
         }
 
@@ -43,6 +44,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
             {
                 LogManager.Debug($"{nameof(SCP268CooldownTimeTranspiler)}: Total cooldown: {data.Cooldown}");
                 return data.Cooldown;
+            }
+            if (SummonedBaseCustomItem.TryGet(instance.ItemSerial, out var baseitem) && baseitem.CustomItem is CustomSCP268 customSCP268)
+            {
+                LogManager.Debug($"{nameof(SCP268CooldownTimeTranspiler)}: Total cooldown: {customSCP268.Cooldown}");
+                return customSCP268.Cooldown;
             }
 
             return 120f;

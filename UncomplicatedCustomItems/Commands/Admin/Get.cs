@@ -4,6 +4,7 @@ using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -28,14 +29,19 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 response = $"usage: <Item Serial>";
                 return false;
             }
-            if (!Utilities.TryGetSummonedCustomItem(ushort.Parse(args[0]), out SummonedCustomItem CustomItem))
+            if (Utilities.TryGetSummonedCustomItem(ushort.Parse(args[0]), out SummonedCustomItem customItem))
             {
-                response = $"{ushort.Parse(args[0])} is not a custom item serial.";
-                return false;
+                response = $"\nData for {customItem.CustomItem.Name} - Serial {customItem.Serial}:\n[\U0001F4C1] Position: {customItem.Pickup.Position}\n[\U0001F4CC] Relative Position Inside Room: {customItem.Pickup.Room.LocalPosition(customItem.Pickup.Position)}\n[\U0001F4C4] Room: {customItem.Pickup.Room.Name}";
+                return true;
+            }
+            if (SummonedBaseCustomItem.TryGet(ushort.Parse(args[0]), out var baseCustomItem))
+            {
+                response = $"\nData for {baseCustomItem.CustomItem.Name} - Serial {baseCustomItem.Serial}:\n[\U0001F4C1] Position: {baseCustomItem.Pickup.Position}\n[\U0001F4CC] Relative Position Inside Room: {baseCustomItem.Pickup.Room.LocalPosition(customItem.Pickup.Position)}\n[\U0001F4C4] Room: {baseCustomItem.Pickup.Room.Name}";
+                return true;
             }
 
-            response = $"\nData for {CustomItem.CustomItem.Name} - Serial {CustomItem.Serial}:\n[\U0001F4C1] Position: {CustomItem.Pickup.Position}\n[\U0001F4CC] Relative Position Inside Room: {CustomItem.Pickup.Room.LocalPosition(CustomItem.Pickup.Position)}\n[\U0001F4C4] Room: {CustomItem.Pickup.Room.Name}";
-            return true;
+            response = $"{ushort.Parse(args[0])} is not a custom item serial.";
+            return false;
         }
     }
 }

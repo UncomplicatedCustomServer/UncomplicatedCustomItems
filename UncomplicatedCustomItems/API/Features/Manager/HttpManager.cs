@@ -468,18 +468,30 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (hasExiled)
                     pluginNames.Add("Exiled");
 
-                var payload = new
+                HashSet<string> ucsPlugins = new(StringComparer.OrdinalIgnoreCase)
                 {
-                    serverName = Server.ServerListName,
-                    pluginVersion = Plugin.Instance.Version.ToString(3) ?? "unknown",
-                    serverPort = Server.Port,
-                    hideIP = Plugin.Instance.Config.HideipOnList.ToString(),
-                    scpslVersion = GameCore.Version.VersionString,
-                    showOnList = Plugin.Instance.Config.ShowOnuciList.ToString(),
-                    plugins = pluginNames,
-                    exiled = hasExiled.ToString().ToLower(),
-                    extra = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}"
+                    "uncomplicatedcustomitems",
+                    "uncomplicatedcustomroles",
+                    "uncomplicatedcustomescapezones",
+                    "uncomplicatedcustomteams",
+                    "uncomplicatedcustombots"
                 };
+
+                Dictionary<string, object> payload = new()
+                {
+                    ["serverName"] = Server.ServerListName,
+                    ["pluginVersion"] = Plugin.Instance.Version.ToString(3) ?? "unknown",
+                    ["serverPort"] = Server.Port,
+                    ["hideIP"] = Plugin.Instance.Config.HideipOnList.ToString(),
+                    ["scpslVersion"] = GameCore.Version.VersionString,
+                    ["showOnList"] = Plugin.Instance.Config.ShowOnuciList.ToString(),
+                    ["exiled"] = hasExiled.ToString().ToLower(),
+                    ["extra"] = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}",
+                    ["plugins"] = pluginNames.Where(p => ucsPlugins.Contains(p)).ToList()
+                };
+
+                if (Plugin.Instance.Config.ShowPluginsOnList)
+                    payload["plugins"] = pluginNames;
 
                 string json = JsonConvert.SerializeObject(payload);
 

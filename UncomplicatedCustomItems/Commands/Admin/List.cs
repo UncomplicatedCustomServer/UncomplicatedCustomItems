@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -43,6 +44,15 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (CustomItem.UnregisteredList.Count > 0)
                 sb.AppendLine($"<color=#ffff00>[⚠]</color> {CustomItem.UnregisteredList.Count} Unregistered CustomItems.");
+
+            if (BaseCustomItem.List.Count() >= 1)
+            {
+                sb.AppendLine("API CustomItems:");
+                foreach (BaseCustomItem Item in BaseCustomItem.List.OrderBy(item => item.Id))
+                    sb.AppendLine($"<size=23><color=#00ff00>✔</color></size> <size=21>[{Item.Id}]</size> <size=19>{Item.GetType()} - <color=green>{Item.Name}</color></size>");
+
+                sb.AppendLine($"<color=#00ff00>[✔]</color> {BaseCustomItem.List.Count} Registered API CustomItems.");
+            }
 
             sb.AppendLine("CustomActions:");
             foreach (ICustomAction action in CustomAction.List.OrderBy(action => action.Id))

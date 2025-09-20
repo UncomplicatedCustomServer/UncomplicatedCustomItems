@@ -800,7 +800,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
                 else
                 {
-                    object root = item != null ? (object)item : eventArgs;
+                    object root = item != null ? item : eventArgs;
                     SetProperty(root, propertyPath, newValue, eventArgs);
                 }
             }
@@ -960,8 +960,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             LogManager.Error($"Generic type '{tname}' could not be resolved for method '{methodName}'.");
                             return;
                         }
+
                         genTypes.Add(resolved);
                     }
+
                     genericTypeArgs = genTypes.ToArray();
                 }
 
@@ -974,42 +976,72 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (genericTypeArgs != null)
                 {
                     MethodInfo[]? genericDefs = methods.Where(m => m.IsGenericMethodDefinition && m.GetGenericArguments().Length == genericTypeArgs.Length).ToArray();
-                    method = genericDefs.FirstOrDefault(m => m.GetParameters().Length == parameters.Length);
+                    method = genericDefs.FirstOrDefault(m => 
+                    {
+                        ParameterInfo[]? methodParams = m.GetParameters();
+                        int requiredParams = methodParams.Count(p => !p.HasDefaultValue);
+                        return parameters.Length >= requiredParams && parameters.Length <= methodParams.Length;
+                    });
 
                     if (method != null)
                         method = method.MakeGenericMethod(genericTypeArgs);
                 }
                 else
                 {
-                    Type[] parameterTypes = parameters.Select(p => p?.GetType() ?? typeof(string)).ToArray();
-                    method = targetType.GetMethod(rawName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, parameterTypes, null);
-
+                    method = methods.FirstOrDefault(m => m.GetParameters().Length == parameters.Length);
+                    
                     if (method == null)
                     {
-                        MethodInfo[]? byCount = methods.Where(m => m.GetParameters().Length == parameters.Length).ToArray();
-                        if (byCount.Length == 1)
-                            method = byCount[0];
-                        else if (byCount.Length > 1)
+                        method = methods.FirstOrDefault(m => 
                         {
-                            method = byCount.FirstOrDefault(m =>
+                            ParameterInfo[]? methodParams = m.GetParameters();
+                            int requiredParams = methodParams.Count(p => !p.HasDefaultValue);
+                            return parameters.Length >= requiredParams && parameters.Length <= methodParams.Length;
+                        });
+                    }
+                    
+                    if (method == null)
+                    {
+                        Type[] parameterTypes = parameters.Select(p => p?.GetType() ?? typeof(string)).ToArray();
+                        method = targetType.GetMethod(rawName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, parameterTypes, null);
+                    }
+                    
+                    if (method == null)
+                    {
+                        method = methods.FirstOrDefault(m =>
+                        {
+                            ParameterInfo[] methodParams = m.GetParameters();
+                            if (methodParams.Length < parameters.Length)
+                                return false;
+
+                            int requiredParams = methodParams.Count(p => !p.HasDefaultValue);
+                            if (parameters.Length < requiredParams)
+                                return false;
+                            
+                            for (int i = 0; i < parameters.Length; i++)
                             {
-                                ParameterInfo[]? methodParams = m.GetParameters();
-                                for (int i = 0; i < methodParams.Length; i++)
-                                {
-                                    Type? expected = methodParams[i].ParameterType;
-                                    Type? actual = parameters[i]?.GetType() ?? typeof(string);
-                                    if (!expected.IsAssignableFrom(actual) && parameters[i] is not string)
-                                        return false;
-                                }
-                                return true;
-                            }) ?? byCount.First();
-                        }
+                                Type expected = methodParams[i].ParameterType;
+                                Type actual = parameters[i]?.GetType() ?? typeof(string);
+                                
+                                if (!expected.IsAssignableFrom(actual) && parameters[i] is not string)
+                                    return false;
+                            }
+                            return true;
+                        });
                     }
                 }
 
                 if (method == null)
                 {
                     LogManager.Error($"Method '{methodName}' not found on type '{targetType.Name}' with {parameters.Length} parameters");
+                    
+                    LogManager.Debug($"Available methods named '{rawName}':");
+                    foreach (MethodInfo? m in methods)
+                    {
+                        String? paramInfo = string.Join(", ", m.GetParameters().Select(p => 
+                            $"{p.ParameterType.Name} {p.Name}" + (p.HasDefaultValue ? $" = {p.DefaultValue}" : "")));
+                        LogManager.Debug($"  {m.Name}({paramInfo})");
+                    }
                     return;
                 }
 
@@ -1029,13 +1061,18 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             continue;
                         }
 
-                        if (value is string stringValue && stringValue.Length > 0 && ((stringValue.StartsWith("\"") && stringValue.EndsWith("\"")) || (stringValue.StartsWith("'") && stringValue.EndsWith("'"))))
+                        if (value is string stringValue && stringValue.Length > 0 && 
+                            ((stringValue.StartsWith("\"") && stringValue.EndsWith("\"")) || 
+                            (stringValue.StartsWith("'") && stringValue.EndsWith("'"))))
+                        {
                             stringValue = stringValue.Substring(1, stringValue.Length - 2);
+                        }
 
                         if (value is string sVal && expectedType == typeof(string))
                         {
                             convertedParams[i] = sVal;
                         }
+
                         else if (value is string sVal2)
                         {
                             convertedParams[i] = Convert.ChangeType(sVal2, expectedType);
@@ -1053,7 +1090,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
 
                 for (int i = parameters.Length; i < methodParams.Length; i++)
+                {
                     convertedParams[i] = methodParams[i].HasDefaultValue ? methodParams[i].DefaultValue : null;
+                }
 
                 object? result = method.Invoke(targetObject, convertedParams);
                 LogManager.Debug($"Successfully executed method '{methodName}' on {targetType.Name}. Result: {result?.ToString() ?? "null"}");
@@ -1063,7 +1102,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Error($"Failed to execute method '{methodName}': {ex.Message}");
             }
         }
-
+        
         private static void ExecuteMethodCall(ICustomItem item, string methodCall, EventArgs eventArgs)
         {
             try
@@ -1117,12 +1156,75 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static object ResolveTargetObject(string objectPath, ICustomItem item, EventArgs eventArgs)
         {
-            objectPath = ExpandCommonTypeNamesInPath(objectPath);
-            LogManager.Debug($"Attempting to resolve: {objectPath}");
+            string originalPath = objectPath;
+            LogManager.Debug($"Attempting to resolve: {originalPath}");
 
             LogManager.Debug($"EventArgs type: {eventArgs.GetType().Name}");
             LogManager.Debug($"EventArgs properties: {string.Join(", ", eventArgs.GetType().GetProperties().Select(p => p.Name))}");
 
+            var availableProperties = GetEventArgsProperties(eventArgs);
+            LogManager.Debug($"Available EventArgs properties: {string.Join(", ", availableProperties.Keys)}");
+
+            string firstToken = originalPath.Split('.')[0];
+            
+            if (availableProperties.ContainsKey(firstToken) && originalPath == firstToken)
+            {
+                try
+                {
+                    PropertyInfo? propertyInfo = availableProperties[firstToken];
+                    Object? directValue = propertyInfo.GetValue(eventArgs);
+                    LogManager.Debug($"Direct property access for '{firstToken}': {directValue?.GetType()?.Name ?? "null"}");
+
+                    if (directValue != null && directValue is not Type)
+                    {
+                        LogManager.Debug($"Resolved '{originalPath}' directly from EventArgs: {directValue.GetType().Name}");
+                        return directValue;
+                    }
+                    else if (directValue is Type typeResult)
+                    {
+                        LogManager.Error($"Direct property '{firstToken}' returned a Type instead of an instance: {typeResult.Name}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error($"Error in direct property access for '{firstToken}': {ex.Message}");
+                }
+
+                object? resolvedFromArgs = ResolvePlaceholderToObject(originalPath, eventArgs);
+                if (resolvedFromArgs != null)
+                {
+                    if (resolvedFromArgs is Type typeResult)
+                    {
+                        LogManager.Debug($"Got Type instead of instance for '{originalPath}': {typeResult.Name}");
+                        foreach (var kvp in availableProperties)
+                        {
+                            try
+                            {
+                                Object? propValue = kvp.Value.GetValue(eventArgs);
+                                if (propValue != null && typeResult.IsAssignableFrom(propValue.GetType()))
+                                {
+                                    LogManager.Debug($"Found instance of {typeResult.Name} in property '{kvp.Key}': {propValue.GetType().Name}");
+                                    return propValue;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                LogManager.Debug($"Error checking property '{kvp.Key}': {ex.Message}");
+                            }
+                        }
+                        
+                        LogManager.Error($"Property '{firstToken}' returned a Type instead of an instance, and no instance was found in other properties");
+                        return null;
+                    }
+                    
+                    LogManager.Debug($"Resolved '{originalPath}' from EventArgs: {resolvedFromArgs.GetType().Name}");
+                    return resolvedFromArgs;
+                }
+                
+                LogManager.Debug($"Expected to find '{firstToken}' in EventArgs but it wasn't found");
+            }
+
+            objectPath = ExpandCommonTypeNamesInPath(objectPath);
             int newIndex = objectPath.IndexOf(".new(", StringComparison.OrdinalIgnoreCase);
             if (newIndex >= 0)
             {
@@ -1152,22 +1254,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
 
-            // God help me if I have to update this.
-            HashSet<string> knownObjectTypes = new(StringComparer.OrdinalIgnoreCase)
-            {
-                "Player", "Target", "Attacker", "Item", "NewItem", "OldItem", "Pickup",
-                "ThrowableItem", "UsableItem", "FirearmItem", "KeycardItem", "Revolver",
-                "RadioItem", "JailbirdItem", "LightItem", "DamageHandler", "ShootingTarget",
-                "Tesla", "CoinItem", "Interactable", "Door", "Generator", "Locker", "Chamber",
-                "NewRoom", "OldRoom", "Hazard", "Window", "Rigidbody", "ProjectileSettings",
-                "AmmoPickup", "BodyArmorPickup", "CandyPickup", "CandyItem", "Role", "OldRole",
-                "NewRole", "Effect", "Group", "Issuer", "Sender", "Message"
-            };
-
             int parenIndex = objectPath.IndexOf('(');
             if (parenIndex >= 0)
             {
-                string firstToken = objectPath.Substring(0, parenIndex).Split('.')[0].Trim();
+                string firstTokenParen = objectPath.Substring(0, parenIndex).Split('.')[0].Trim();
                 int closeParen = FindClosingParen(objectPath, parenIndex);
                 if (closeParen > parenIndex)
                 {
@@ -1220,29 +1310,52 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
 
-
-            if (knownObjectTypes.Contains(objectPath))
+            if (!availableProperties.ContainsKey(firstToken))
             {
-                object resolvedFromArgs = ResolvePlaceholderToObject(objectPath, eventArgs);
-                if (resolvedFromArgs != null)
-                    return resolvedFromArgs;
+                if (TryResolveType(objectPath, out Type? type))
+                {
+                    LogManager.Debug($"Resolved '{objectPath}' as static type: {type.Name}");
+                    return type;
+                }
             }
-
-            if (TryResolveType(objectPath, out Type? type))
-                return type;
 
             object? resolved = ResolvePlaceholderToObject(objectPath, eventArgs);
             if (resolved != null)
+            {
+                LogManager.Debug($"Resolved '{objectPath}' from EventArgs: {resolved.GetType().Name}");
                 return resolved;
+            }
 
             if (item != null)
             {
                 resolved = ResolvePlaceholderToObject(objectPath, item);
                 if (resolved != null)
+                {
+                    LogManager.Debug($"Resolved '{objectPath}' from CustomItem: {resolved.GetType().Name}");
                     return resolved;
+                }
             }
 
+            LogManager.Error($"Could not resolve object path: {objectPath}");
             return null;
+        }
+
+        private static Dictionary<string, PropertyInfo> GetEventArgsProperties(EventArgs eventArgs)
+        {
+            var properties = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
+            
+            Type eventArgsType = eventArgs.GetType();
+            PropertyInfo[] propertyInfos = eventArgsType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            
+            foreach (PropertyInfo prop in propertyInfos)
+            {
+                if (prop.GetIndexParameters().Length == 0)
+                {
+                    properties[prop.Name] = prop;
+                }
+            }
+            
+            return properties;
         }
 
         private static void HandlePlaceholderPropertyAssignment(ICustomItem item, string propertyPathPlaceholder, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)

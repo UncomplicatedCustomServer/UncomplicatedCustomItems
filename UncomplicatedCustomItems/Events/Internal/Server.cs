@@ -1,7 +1,9 @@
-﻿using LabApi.Features.Wrappers;
+﻿using System.Linq;
+using LabApi.Features.Wrappers;
 using MEC;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
@@ -25,7 +27,7 @@ namespace UncomplicatedCustomItems.Events.Internal
         /// <summary>
         /// Spawn items on round started
         /// </summary>
-        public static void SpawnItemsOnRoundStarted() 
+        public static void SpawnItemsOnRoundStarted()
         {
             foreach (ICustomItem customItem in CustomItem.List)
             {
@@ -39,6 +41,29 @@ namespace UncomplicatedCustomItems.Events.Internal
                     {
                         LogManager.Debug($"Spawning {customItem.Name} ({count + 1}/{customItem.Spawn.Count})");
                         Utilities.SummonCustomItem(customItem);
+                    }
+                }
+            }
+
+            if (BaseCustomItem.List.Count() > 0)
+            {
+                foreach (BaseCustomItem item in BaseCustomItem.List)
+                {
+                    if (item is CustomCandy data && !data.AllowSpawningAsItem)
+                        continue;
+
+                    LogManager.Debug($"{item.Name} DoSpawn is set to {item.Spawn}");
+                    if (item.Spawn)
+                    {
+                        for (uint count = 0; count < item.AmountToSpawn; count++)
+                        {
+                            float chance = UnityEngine.Random.Range(0f, 101f);
+                            if (chance >= item.ChanceToSpawn)
+                            {
+                                LogManager.Debug($"Spawning {item.Name} ({count + 1}/{item.AmountToSpawn})");
+                                BaseCustomItem.SummonItem(item);
+                            }
+                        }
                     }
                 }
             }

@@ -80,7 +80,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual float Health { get; set; } = 1f;
         public virtual float MaxDiameter { get; set; } = 1f;
         public virtual bool Primed { get; set; } = false;
-
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using HarmonyLib;
 using InventorySystem.Items.Armor;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
@@ -15,16 +16,24 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             try
             {
-                if (!Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem))
+                if (!Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem) || !SummonedBaseCustomItem.TryGet(__instance.ItemSerial, out var summonItem))
                     return true;
-                if (customItem.CustomItem.CustomItemType is not CustomItemType.Armor)
+                if (customItem.CustomItem.CustomItemType is not CustomItemType.Armor || summonItem.CustomItem is not CustomArmor customArmor)
                     return true;
-                if (customItem.IsPickup)
+                if (customItem.IsPickup || summonItem.IsPickup)
                     return true;
-                    
-                IArmorData data = customItem.CustomItem.CustomData as IArmorData;
-                __result = __instance.ProcessMultiplier(data.StaminaRegenMultiplier);
-                return false;
+
+                if (customItem != null)
+                {
+                    IArmorData data = customItem.CustomItem.CustomData as IArmorData;
+                    __result = __instance.ProcessMultiplier(data.StaminaRegenMultiplier);
+                    return false;
+                }
+                else if (summonItem != null)
+                {
+                    __result = __instance.ProcessMultiplier(customArmor.StaminaRegenMultiplier);
+                    return false;
+                }
             }
             catch (Exception ex)
             {

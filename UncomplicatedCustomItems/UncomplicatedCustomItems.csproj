@@ -518,6 +518,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Features\CustomItemAPI\ToolGun.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP244.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP207.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP1853.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP268.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP127.cs" />
+    <Compile Include="API\Features\CustomItemAPI\ImportManager.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SummonedBaseCustomItem.cs" />
+    <Compile Include="API\Features\CustomItemAPI\CustomItemUtils.cs" />
+    <Compile Include="API\Features\CustomItemAPI\CustomFlashGrenade.cs" />
+    <Compile Include="API\Features\CustomItemAPI\CustomExplosiveGrenade.cs" />
+    <Compile Include="API\Features\CustomItemAPI\CustomCandy.cs" />
+    <Compile Include="API\Features\CustomItemAPI\CustomKeycard.cs" />
+    <Compile Include="API\Features\CustomItemAPI\CustomArmor.cs" />
+    <Compile Include="API\Features\CustomItemAPI\CustomWeapon.cs" />
+    <Compile Include="API\Features\CustomItemAPI\BaseCustomItem.cs" />
     <Compile Include="API\Attributes\CommonTypesAttribute.cs" />
     <Compile Include="API\Attributes\EventTypeAttribute.cs" />
     <Compile Include="API\Attributes\PluginCustomItem.cs" />
@@ -560,7 +576,6 @@
     <Compile Include="API\Features\Manager\VersionInfo.cs" />
     <Compile Include="API\Features\Manager\Updater.cs" />
     <Compile Include="API\Features\Manager\VersionManager.cs" />
-    <Compile Include="API\Features\Manager\ImportManager.cs" />
     <Compile Include="API\Features\Spawning\SpawnData.cs" />
     <Compile Include="API\Features\Spawning\LockerSpawn.cs" />
     <Compile Include="API\Features\Spawning\Spawn.cs" />
@@ -632,7 +647,10 @@
     <Compile Include="Events\PlayerHandler.cs" />
     <Compile Include="Events\ScpHandler.cs" />
     <Compile Include="Events\ServerHandler.cs" />
-    <Compile Include="Example\ExampleCustomItem.cs" />
+    <Compile Include="Example\ExampleCustomArmor.cs" />
+    <Compile Include="Example\ExampleCustomGrenade.cs" />
+    <Compile Include="Example\ExampleCustomKeycard.cs" />
+    <Compile Include="Example\ExampleCustomWeapon.cs" />
     <Compile Include="API\Extensions\AnimationCurveExtensions.cs" />
     <Compile Include="API\Extensions\CustomItemExtensions.cs" />
     <Compile Include="API\Extensions\DictionaryExtension.cs" />
@@ -648,7 +666,6 @@
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\MagazineModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\ActionModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\HumeShieldPatches.cs" />
-    <Compile Include="HarmonyElements\Patches\ExiledFixes\LinearAdsModuleTranspilers.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\LockerSpawningItemPrefix.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\LinearADSModulePostfix.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP268CooldownTimeTranspiler.cs" />
