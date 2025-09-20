@@ -4,6 +4,7 @@ using InventorySystem.Items.Firearms.Modules.Scp127;
 using Mirror;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UnityEngine;
@@ -16,6 +17,19 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPrefix]
         public static bool Prefix(Scp127VoiceTriggerBase __instance, AudioClip clip, Action<NetworkWriter> extraData, Scp127VoiceTriggerBase.VoiceLinePriority priority)
         {
+            if (BaseCustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
+            {
+                try
+                {
+                    if (custom127.MuteVoiceLines)
+                        return false;
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error($"{nameof(VoiceTriggerPatch)} Error checking MuteVoiceLines for item {__instance.Item.ItemSerial}: {ex.Message}\n{ex.StackTrace}");
+                }
+            }
+
             if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out var item))
             {
                 if (item.CustomItem.CustomItemType == CustomItemType.SCPItem && item.Item.Type == ItemType.GunSCP127)
