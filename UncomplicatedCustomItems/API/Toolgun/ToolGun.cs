@@ -32,10 +32,10 @@ namespace UncomplicatedCustomItems.API.ToolGun
         public override float Damage { get; set; } = 0f;
 
         /// <inheritdoc/>
-        public override int MaxAmmo { get; set; } = 200;
+        public override int MaxAmmo { get; set; } = 2000;
 
         /// <inheritdoc/>
-        public override int MaxMagazineAmmo { get; set; } = 200;
+        public override int MaxMagazineAmmo { get; set; } = 2000;
 
         /// <inheritdoc/>
         public override int MaxBarrelAmmo { get; set; } = 1;

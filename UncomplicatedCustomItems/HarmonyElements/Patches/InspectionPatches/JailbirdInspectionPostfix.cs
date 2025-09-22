@@ -4,68 +4,28 @@ using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using InventorySystem.Items.Jailbird;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Reflection;
-using System;
-using UncomplicatedCustomItems.API.Features.Helper;
+using Mirror;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches.InspectionPatches
 {
     [HarmonyPatch(typeof(JailbirdItem), nameof(JailbirdItem.ServerProcessCmd))]
-    public static class JailbirdInspectionTranspiler
+    public static class JailbirdInspectionPostfix
     {
-        [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        [HarmonyPostfix]
+        public static void Postfix(JailbirdItem __instance, NetworkReader reader)
         {
-            var codes = new List<CodeInstruction>(instructions);
-            bool found = false;
 
-            for (int i = 0; i < codes.Count; i++)
-            {
-                if (!found && codes[i].opcode == OpCodes.Stloc_S && codes[i].operand.ToString() == "4" && i > 0 && codes[i - 1].opcode == OpCodes.Ldloc_0)
-                {
-                    codes.Insert(i + 1, new CodeInstruction(OpCodes.Ldarg_0)); // Load this
-                    codes.Insert(i + 2, new CodeInstruction(OpCodes.Ldloc_0)); // Load messageType
-                    codes.Insert(i + 3, new CodeInstruction(OpCodes.Call, typeof(JailbirdInspectionTranspiler).GetMethod(nameof(HandleInspection), BindingFlags.Static | BindingFlags.NonPublic)));
-                    found = true;
-                    break;
-                }
-            }
+            reader.ReadByte();
+            reader.Position -= 1;
+            JailbirdMessageType messageType = (JailbirdMessageType)reader.ReadByte();
+            reader.Position -= 1;
 
-            if (!found)
-            {
-                for (int i = 0; i < codes.Count; i++)
-                {
-                    if (codes[i].opcode == OpCodes.Stloc_0)
-                    {
-                        codes.Insert(i + 1, new CodeInstruction(OpCodes.Ldarg_0)); // Load this
-                        codes.Insert(i + 2, new CodeInstruction(OpCodes.Ldloc_0)); // Load messageType
-                        codes.Insert(i + 3, new CodeInstruction(OpCodes.Call, typeof(JailbirdInspectionTranspiler).GetMethod(nameof(HandleInspection), BindingFlags.Static | BindingFlags.NonPublic)));
-                        break;
-                    }
-                }
-            }
+            if (messageType != JailbirdMessageType.Inspect)
+                return;
+            if (!Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem))
+                return;
 
-            return codes;
-        }
-
-        private static void HandleInspection(JailbirdItem instance, JailbirdMessageType messageType)
-        {
-            try
-            {
-                if (messageType != JailbirdMessageType.Inspect)
-                    return;
-
-                if (!Utilities.TryGetSummonedCustomItem(instance.ItemSerial, out var customItem))
-                    return;
-
-                customItem.HandleEvent(Player.Get(instance.Owner), ItemEvents.Inspect, instance.ItemSerial);
-            }
-            catch (Exception ex)
-            {
-                LogManager.Error($"{nameof(JailbirdInspectionTranspiler)}: {ex}");
-            }
+            customItem.HandleEvent(Player.Get(__instance.Owner), ItemEvents.Inspect, __instance.ItemSerial);
         }
     }
 }
