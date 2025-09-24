@@ -796,29 +796,10 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
-        public string LoadBadge(Player player)
+        public void LoadBadge(Player player)
         {
             PlayerBadges.TryAdd(player.PlayerId, player.UserGroup.HiddenByDefault);
-            LogManager.Debug("LoadBadge Triggered");
-            string output = "Badge: ";
-
-            if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
-            {
-                if (BadgeManager.colorMap.ContainsKey(CustomItem.BadgeColor))
-                    output += $"<color={BadgeManager.colorMap[CustomItem.BadgeColor]}>{CustomItem.BadgeName}</color>";
-                else
-                    output += $"{CustomItem.BadgeName.Replace("@hidden", "")}";
-            }
-            else
-            {
-                output += "None";
-            }
-
-            LogManager.Debug($"Badge loaded: {output}");
-
             CustomItemBadgeApplier(player, CustomItem);
-
-            return output;
         }
 
         private void CustomItemBadgeApplier(Player player, ICustomItem item)

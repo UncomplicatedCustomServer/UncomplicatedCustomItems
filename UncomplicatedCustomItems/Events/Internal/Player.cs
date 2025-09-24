@@ -151,7 +151,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void ChangeItemInHand(PlayerChangedItemEventArgs ev)
         {
-            if (ev.Player?.CurrentItem == null || ev.NewItem == null)
+            if (ev.Player == null || ev.NewItem == null)
                 return;
 
             if (SummonedBaseCustomItem.TryGet(ev.NewItem.Serial, out var summonedItem))
