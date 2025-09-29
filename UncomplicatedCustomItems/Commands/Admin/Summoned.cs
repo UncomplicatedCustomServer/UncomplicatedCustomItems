@@ -31,7 +31,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 response += $"\n   {Item.Serial}    {Item.CustomItem.Id}   {Status}   {Item.CustomItem.Name}   {Owner}";
             }
             
-            foreach (SummonedBaseCustomItem item in SummonedBaseCustomItem.List)
+            foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List)
             {
                 string Status = item.IsPickup ? "Pickup" : " Item ";
                 string Owner = (item.Owner is null) ? "null" : item.Owner.Nickname;

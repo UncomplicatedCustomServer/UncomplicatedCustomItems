@@ -1,6 +1,6 @@
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomArmor : BaseCustomItem
+    public abstract class CustomArmor : APICustomItem
     {
         /// <summary>
         /// Gets or sets the armor's Head Protection value

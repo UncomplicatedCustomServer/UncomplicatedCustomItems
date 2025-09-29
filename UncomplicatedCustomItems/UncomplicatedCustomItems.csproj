@@ -525,7 +525,7 @@
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP268.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP127.cs" />
     <Compile Include="API\Features\CustomItemAPI\ImportManager.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SummonedBaseCustomItem.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SummonedAPICustomItem.cs" />
     <Compile Include="API\Features\CustomItemAPI\CustomItemUtils.cs" />
     <Compile Include="API\Features\CustomItemAPI\CustomFlashGrenade.cs" />
     <Compile Include="API\Features\CustomItemAPI\CustomExplosiveGrenade.cs" />
@@ -533,7 +533,7 @@
     <Compile Include="API\Features\CustomItemAPI\CustomKeycard.cs" />
     <Compile Include="API\Features\CustomItemAPI\CustomArmor.cs" />
     <Compile Include="API\Features\CustomItemAPI\CustomWeapon.cs" />
-    <Compile Include="API\Features\CustomItemAPI\BaseCustomItem.cs" />
+    <Compile Include="API\Features\CustomItemAPI\APICustomItem.cs" />
     <Compile Include="API\Attributes\CommonTypesAttribute.cs" />
     <Compile Include="API\Attributes\EventTypeAttribute.cs" />
     <Compile Include="API\Attributes\PluginCustomItem.cs" />

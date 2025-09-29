@@ -13,7 +13,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPrefix]
         public static bool Prefix(MagazineModule __instance, ref int __result)
         {
-            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var summonedCustomItem) || !SummonedBaseCustomItem.TryGet(__instance.ItemSerial, out var summonItem))
+            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var summonedCustomItem) || !SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem))
                 return true;
             if (summonedCustomItem.CustomItem.CustomItemType is not CustomItemType.Weapon || summonItem.CustomItem is not CustomWeapon customWeapon)
                 return true;

@@ -21,42 +21,42 @@ using Scp244 = LabApi.Features.Wrappers.Scp244Item;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public class SummonedBaseCustomItem
+    public class SummonedAPICustomItem
     {
         /// <summary>
-        /// Gets a list of every summoned <see cref="BaseCustomItem"/>
+        /// Gets a list of every summoned <see cref="APICustomItem"/>
         /// </summary>
-        public static List<SummonedBaseCustomItem> List => SummonedCustomItems.Values.ToList();
+        public static List<SummonedAPICustomItem> List => SummonedCustomItems.Values.ToList();
 
-        internal static Dictionary<ushort, SummonedBaseCustomItem> SummonedCustomItems { get; set; } = [];
+        internal static Dictionary<ushort, SummonedAPICustomItem> SummonedCustomItems { get; set; } = [];
 
         /// <summary>
-        /// The owner of this <see cref="SummonedBaseCustomItem"/> instance
+        /// The owner of this <see cref="SummonedAPICustomItem"/> instance
         /// </summary>
         public Player Owner;
 
         /// <summary>
-        /// The <see cref="Item"/> of this <see cref="SummonedBaseCustomItem"/> instance
+        /// The <see cref="Item"/> of this <see cref="SummonedAPICustomItem"/> instance
         /// </summary>
         public Item Item;
 
         /// <summary>
-        /// The <see cref="Pickup"/> of this <see cref="SummonedBaseCustomItem"/> instance
+        /// The <see cref="Pickup"/> of this <see cref="SummonedAPICustomItem"/> instance
         /// </summary>
         public Pickup Pickup;
 
         /// <summary>
-        /// The serial of this <see cref="SummonedBaseCustomItem"/> instance
+        /// The serial of this <see cref="SummonedAPICustomItem"/> instance
         /// </summary>
         public ushort Serial;
 
         /// <summary>
-        /// The <see cref="BaseCustomItem"/> that this <see cref="SummonedBaseCustomItem"/> instance represents. 
+        /// The <see cref="APICustomItem"/> that this <see cref="SummonedAPICustomItem"/> instance represents. 
         /// </summary>
-        public BaseCustomItem CustomItem;
+        public APICustomItem CustomItem;
 
         /// <summary>
-        /// Gets whether or not the <see cref="SummonedBaseCustomItem"/> instance is a <see cref="Pickup"/>
+        /// Gets whether or not the <see cref="SummonedAPICustomItem"/> instance is a <see cref="Pickup"/>
         /// </summary>
         public bool IsPickup => Pickup is not null;
 
@@ -64,7 +64,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private bool PropertiesSet;
 
-        public SummonedBaseCustomItem(BaseCustomItem customItem, Player owner, Item item, Pickup pickup, Quaternion rotation = new())
+        public SummonedAPICustomItem(APICustomItem customItem, Player owner, Item item, Pickup pickup, Quaternion rotation = new())
         {
             CustomItem = customItem;
             Owner = owner;
@@ -81,41 +81,41 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SummonedBaseCustomItem"/> class
+        /// Initializes a new instance of the <see cref="SummonedAPICustomItem"/> class
         /// using an existing <see cref="Pickup"/>.
         /// </summary>
-        /// <param name="customItem">The <see cref="BaseCustomItem"/> definition this instance represents.</param>
+        /// <param name="customItem">The <see cref="APICustomItem"/> definition this instance represents.</param>
         /// <param name="pickup">The world <see cref="Pickup"/> that represents the item.</param>
-        public SummonedBaseCustomItem(BaseCustomItem customItem, Pickup pickup)
+        public SummonedAPICustomItem(APICustomItem customItem, Pickup pickup)
             : this(customItem, null, null, pickup) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SummonedBaseCustomItem"/> class
+        /// Initializes a new instance of the <see cref="SummonedAPICustomItem"/> class
         /// by spawning the item in the world at the specified position and rotation.
         /// </summary>
-        /// <param name="customItem">The <see cref="BaseCustomItem"/> definition this instance represents.</param>
+        /// <param name="customItem">The <see cref="APICustomItem"/> definition this instance represents.</param>
         /// <param name="position">The world position to spawn the pickup at.</param>
         /// <param name="rotation">The rotation to apply to the spawned pickup. Defaults to <see cref="Quaternion.identity"/>.</param>
-        public SummonedBaseCustomItem(BaseCustomItem customItem, Vector3 position, Quaternion rotation = new())
+        public SummonedAPICustomItem(APICustomItem customItem, Vector3 position, Quaternion rotation = new())
             : this(customItem, null, null, customItem.Item.CreateAndSpawn(position), rotation) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SummonedBaseCustomItem"/> class
+        /// Initializes a new instance of the <see cref="SummonedAPICustomItem"/> class
         /// by giving the item directly to a player.
         /// </summary>
-        /// <param name="customItem">The <see cref="BaseCustomItem"/> definition this instance represents.</param>
+        /// <param name="customItem">The <see cref="APICustomItem"/> definition this instance represents.</param>
         /// <param name="player">The player who will receive the item.</param>
-        public SummonedBaseCustomItem(BaseCustomItem customItem, Player player)
+        public SummonedAPICustomItem(APICustomItem customItem, Player player)
             : this(customItem, player, player.AddItem(customItem.Item), null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SummonedBaseCustomItem"/> class
+        /// Initializes a new instance of the <see cref="SummonedAPICustomItem"/> class
         /// using a pre-created <see cref="Item"/> that belongs to a player.
         /// </summary>
-        /// <param name="customItem">The <see cref="BaseCustomItem"/> definition this instance represents.</param>
+        /// <param name="customItem">The <see cref="APICustomItem"/> definition this instance represents.</param>
         /// <param name="player">The player who owns the item.</param>
         /// <param name="item">The in-inventory <see cref="Item"/> that represents the custom item.</param>
-        public SummonedBaseCustomItem(BaseCustomItem customItem, Player player, Item item)
+        public SummonedAPICustomItem(APICustomItem customItem, Player player, Item item)
             : this(customItem, player, item, null) { }
 
         public void Destroy()
@@ -495,7 +495,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             return output;
         }
 
-        private void CustomItemBadgeApplier(Player player, BaseCustomItem item)
+        private void CustomItemBadgeApplier(Player player, APICustomItem item)
         {
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
@@ -547,32 +547,32 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
 
         /// <summary>
-        /// Tries to get the <see cref="SummonedBaseCustomItem"/> by its <see cref="Serial"/>
+        /// Tries to get the <see cref="SummonedAPICustomItem"/> by its <see cref="Serial"/>
         /// </summary>
         /// <param name="serial"></param>
         /// <param name="item"></param>
         /// <returns><see langword="false"/> if not found : <see langword="true"/> if found</returns>
-        public static bool TryGet(ushort serial, out SummonedBaseCustomItem item) => SummonedCustomItems.TryGetValue(serial, out item);
+        public static bool TryGet(ushort serial, out SummonedAPICustomItem item) => SummonedCustomItems.TryGetValue(serial, out item);
 
         /// <summary>
-        /// Gets a <see cref="SummonedBaseCustomItem"/> by its <see cref="Serial"/>
+        /// Gets a <see cref="SummonedAPICustomItem"/> by its <see cref="Serial"/>
         /// </summary>
         /// <param name="serial"></param>
-        /// <returns><see cref="SummonedBaseCustomItem"/></returns>
-        public static SummonedBaseCustomItem Get(ushort serial) => SummonedCustomItems[serial];
+        /// <returns><see cref="SummonedAPICustomItem"/></returns>
+        public static SummonedAPICustomItem Get(ushort serial) => SummonedCustomItems[serial];
 
         /// <summary>
-        /// Gets a list of every summoned <see cref="BaseCustomItem"/> where the <see cref="Owner"/> equals the parameter
+        /// Gets a list of every summoned <see cref="APICustomItem"/> where the <see cref="Owner"/> equals the parameter
         /// </summary>
         /// <param name="owner"></param>
         /// <returns>SummonedCustomItem List</returns>
-        public static List<SummonedBaseCustomItem> Get(Player owner) => List.Where(i => i.Owner == owner).ToList();
+        public static List<SummonedAPICustomItem> Get(Player owner) => List.Where(i => i.Owner == owner).ToList();
 
         /// <summary>
-        /// Gets a list of every summoned <see cref="BaseCustomItem"/> where the <see cref="CustomItem.Item"/> equals the parameter
+        /// Gets a list of every summoned <see cref="APICustomItem"/> where the <see cref="CustomItem.Item"/> equals the parameter
         /// </summary>
         /// <param name="item"></param>
         /// <returns>SummonedCustomItem List</returns>
-        public static List<SummonedBaseCustomItem> Get(ItemType item) => List.Where(i => i.CustomItem.Item == item).ToList();
+        public static List<SummonedAPICustomItem> Get(ItemType item) => List.Where(i => i.CustomItem.Item == item).ToList();
     }
 }

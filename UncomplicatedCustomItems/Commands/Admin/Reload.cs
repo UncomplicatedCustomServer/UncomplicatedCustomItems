@@ -48,7 +48,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 CustomItems.Clear();
                 int BeforeItems = CustomItem.List.Count();
                 int BeforeActions = CustomAction.List.Count();
-                int BeforeBaseItems = BaseCustomItem.List.Count();
+                int BeforeBaseItems = APICustomItem.List.Count();
                 ReloadedItems = 0;
                 ReloadedActions = 0;
                 ReloadedBaseItems = 0;
@@ -56,7 +56,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 foreach (SummonedCustomItem item in SummonedCustomItem.List.ToList())
                     item.Destroy();
 
-                foreach (SummonedBaseCustomItem item in SummonedBaseCustomItem.List.ToList())
+                foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List.ToList())
                     item.Destroy();
 
                 foreach (ICustomItem customItem in CustomItem.List.ToList())
@@ -71,25 +71,25 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     LogManager.Debug($"Unregistered action {action.Name}.");
                 }
 
-                foreach (BaseCustomItem baseitem in BaseCustomItem.List.ToList())
+                foreach (APICustomItem baseitem in APICustomItem.List.ToList())
                 {
-                    BaseCustomItem.Unregister(baseitem.Id);
+                    APICustomItem.Unregister(baseitem.Id);
                     LogManager.Debug($"Unregistered API CustomItem: {baseitem.Name}.");
                 }
 
-                BaseCustomItem.CustomItems.Clear();
+                APICustomItem.CustomItems.Clear();
                 CustomItem.CustomItems.Clear();
                 CustomItem.UnregisteredCustomItems.Clear();
                 CustomAction.CustomActions.Clear();
                 CustomAction.UnregisteredCustomActions.Clear();
-                SummonedBaseCustomItem.SummonedCustomItems.Clear();
+                SummonedAPICustomItem.SummonedCustomItems.Clear();
                 CustomItem.List.Clear();
                 CustomItem.UnregisteredList.Clear();
                 CustomAction.List.Clear();
                 CustomAction.UnregisteredList.Clear();
                 ImportManager.ActivePlugins.Clear();
                 SummonedCustomItem.List.Clear();
-                SummonedBaseCustomItem.List.Clear();
+                SummonedAPICustomItem.List.Clear();
 
                 Plugin.Instance.FileConfig.Welcome(loadExamples: true);
                 Plugin.Instance.FileConfig.Welcome(Server.Port.ToString());
@@ -106,7 +106,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     ReloadedItems++;
                 foreach (ICustomAction action in CustomAction.List)
                     ReloadedActions++;
-                foreach (BaseCustomItem item in BaseCustomItem.List)
+                foreach (APICustomItem item in APICustomItem.List)
                     ReloadedBaseItems++;
 
                 int NewItems = BeforeItems - ReloadedItems;
@@ -120,7 +120,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 [
                     $"Reloaded {CustomItem.List.Count} CustomItems{(NewItems > 0 ? $" ({NewItems} new)" : "")}.",
                     $"Reloaded {CustomAction.List.Count} CustomActions{(NewActions > 0 ? $" ({NewActions} new)" : "")}.",
-                    $"Reloaded {BaseCustomItem.List.Count} BaseItems{(NewBaseItems > 0 ? $" ({NewBaseItems} new)" : "")}."
+                    $"Reloaded {APICustomItem.List.Count} BaseItems{(NewBaseItems > 0 ? $" ({NewBaseItems} new)" : "")}."
                 ];
 
                 response = "\n" + string.Join("\n", reloadedLines)

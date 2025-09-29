@@ -43,7 +43,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     customItemobj = iCustomItem;
                 }
 
-                else if (BaseCustomItem.CustomItems.TryGetValue(id, out var baseItem))
+                else if (APICustomItem.CustomItems.TryGetValue(id, out var baseItem))
                 {
                     customItemobj = baseItem;
                 }
@@ -57,9 +57,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     customItemobj = iCustomItem;
                 }
 
-                else if (BaseCustomItem.CustomItems.Values.Any(c => c.Name == name))
+                else if (APICustomItem.CustomItems.Values.Any(c => c.Name == name))
                 {
-                    customItemobj = BaseCustomItem.CustomItems.Values.FirstOrDefault(c => c.Name == name);
+                    customItemobj = APICustomItem.CustomItems.Values.FirstOrDefault(c => c.Name == name);
                 }
             }
 
@@ -136,7 +136,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         return true;
                     }
 
-                case BaseCustomItem baseCustomItem:
+                case APICustomItem baseCustomItem:
                     if (baseCustomItem.Item == ItemType.SCP330 && baseCustomItem is CustomCandy customCandy)
                     {
                         TryAddSpecificPatches.LastCustomItemId = baseCustomItem.Id;
@@ -150,7 +150,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         if (arguments[1].ToLower() == "all")
                         {
                             foreach (Player player in Player.ReadyList.Where(p => !p.IsInventoryFull))
-                                new SummonedBaseCustomItem(baseCustomItem, player);
+                                new SummonedAPICustomItem(baseCustomItem, player);
 
                             response = $"Successfully gave '{baseCustomItem.Name}' to all players!";
                             return true;
@@ -173,7 +173,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                                 response = $"{target.Nickname} Inventory is full!";
                                 return false;
                             }
-                            new SummonedBaseCustomItem(baseCustomItem, target);
+                            new SummonedAPICustomItem(baseCustomItem, target);
                             response = $"Successfully gave '{baseCustomItem.Name}' to player {target.Nickname}";
                             return true;
                         }
@@ -196,7 +196,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                             response = $"{target.Nickname} Inventory is full!";
                             return false;
                         }
-                        new SummonedBaseCustomItem(baseCustomItem, target);
+                        new SummonedAPICustomItem(baseCustomItem, target);
                         response = $"Successfully gave '{baseCustomItem.Name}' to player {target.Nickname}";
                         return true;
                     }

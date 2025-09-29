@@ -35,7 +35,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             {
                 customItemobj = iCustomItem;
             }
-            else if (BaseCustomItem.CustomItems.TryGetValue(uint.Parse(arguments[0]), out var baseCustomItem))
+            else if (APICustomItem.CustomItems.TryGetValue(uint.Parse(arguments[0]), out var baseCustomItem))
             {
                 customItemobj = baseCustomItem;
             }
@@ -45,10 +45,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 Utilities.SummonCustomItem(customItem);
                 return true;
             }
-            if (customItemobj is BaseCustomItem baseCustom)
+            if (customItemobj is APICustomItem baseCustom)
             {
                 response = $"Successfully summoned 1 '{baseCustom.Name}' to it's spawn point";
-                BaseCustomItem.SummonItem(baseCustom);
+                APICustomItem.SummonItem(baseCustom);
                 return true;
             }
 

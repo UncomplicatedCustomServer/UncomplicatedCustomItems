@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnPickupUpgrade(Scp914ProcessingPickupEventArgs ev)
         {
-            if (ev.Pickup.IsCustomItem() || BaseCustomItem.CustomItems.ContainsKey(SummonedBaseCustomItem.Get(ev.Pickup.Serial).CustomItem.Id))
+            if (ev.Pickup.IsCustomItem() || APICustomItem.CustomItems.ContainsKey(SummonedAPICustomItem.Get(ev.Pickup.Serial).CustomItem.Id))
             {
                 ev.IsAllowed = false;
                 ev.Pickup.Position = ev.NewPosition;
@@ -82,7 +82,7 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnItemUpgrade(Scp914ProcessingInventoryItemEventArgs ev)
         {
-            if (ev.Item.IsCustomItem() || BaseCustomItem.CustomItems.ContainsKey(SummonedBaseCustomItem.Get(ev.Item.Serial).CustomItem.Id))
+            if (ev.Item.IsCustomItem() || APICustomItem.CustomItems.ContainsKey(SummonedAPICustomItem.Get(ev.Item.Serial).CustomItem.Id))
                 ev.IsAllowed = false;
 
             foreach (CustomItem customItem in CustomItem.List)

@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             try
             {
-                if (!Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem) || !SummonedBaseCustomItem.TryGet(__instance.ItemSerial, out var summonItem))
+                if (!Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var customItem) || !SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem))
                     return true;
                 if (customItem.CustomItem.CustomItemType is not CustomItemType.Armor || summonItem.CustomItem is not CustomArmor customArmor)
                     return true;

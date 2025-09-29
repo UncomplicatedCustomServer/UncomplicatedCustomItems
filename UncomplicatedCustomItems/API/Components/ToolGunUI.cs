@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.API.Components
     public class ToolGunUI : MonoBehaviour
     {
         private Player Owner;
-        private SummonedBaseCustomItem BaseCustomItem;
+        private SummonedAPICustomItem BaseCustomItem;
         private SummonedCustomItem CustomItem;
         private StringBuilder Builder;
         private bool Paused;
@@ -31,7 +31,7 @@ namespace UncomplicatedCustomItems.API.Components
                 CustomItem = customItem;
                 Owner = customItem.Owner;
             }
-            if (customItemobj is SummonedBaseCustomItem summonedItem)
+            if (customItemobj is SummonedAPICustomItem summonedItem)
             {
                 BaseCustomItem = summonedItem;
                 Owner = summonedItem.Owner;
@@ -65,7 +65,7 @@ namespace UncomplicatedCustomItems.API.Components
 
             if (BaseCustomItem != null)
             {
-                if (!SummonedBaseCustomItem.TryGet(Owner.CurrentItem.Serial, out var item) || item != BaseCustomItem)
+                if (!SummonedAPICustomItem.TryGet(Owner.CurrentItem.Serial, out var item) || item != BaseCustomItem)
                     Destroy(this);
                 
                 if (BaseCustomItem.CustomItem is not Features.CustomItemAPI.ToolGun)

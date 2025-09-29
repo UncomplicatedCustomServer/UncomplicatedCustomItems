@@ -34,7 +34,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 response = $"\nData for {customItem.CustomItem.Name} - Serial {customItem.Serial}:\n[\U0001F4C1] Position: {customItem.Pickup.Position}\n[\U0001F4CC] Relative Position Inside Room: {customItem.Pickup.Room.LocalPosition(customItem.Pickup.Position)}\n[\U0001F4C4] Room: {customItem.Pickup.Room.Name}";
                 return true;
             }
-            if (SummonedBaseCustomItem.TryGet(ushort.Parse(args[0]), out var baseCustomItem))
+            if (SummonedAPICustomItem.TryGet(ushort.Parse(args[0]), out var baseCustomItem))
             {
                 response = $"\nData for {baseCustomItem.CustomItem.Name} - Serial {baseCustomItem.Serial}:\n[\U0001F4C1] Position: {baseCustomItem.Pickup.Position}\n[\U0001F4CC] Relative Position Inside Room: {baseCustomItem.Pickup.Room.LocalPosition(customItem.Pickup.Position)}\n[\U0001F4C4] Room: {baseCustomItem.Pickup.Room.Name}";
                 return true;

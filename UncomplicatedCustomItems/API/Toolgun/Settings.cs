@@ -36,7 +36,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
                         return false;
 
                     bool hasSummoned = Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var summoned) && summoned is not null && summoned.HasModule(CustomFlags.ToolGun);
-                    bool hasBase = SummonedBaseCustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
+                    bool hasBase = SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
 
                     return hasSummoned || hasBase;
                 }));
@@ -64,7 +64,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
                         return true;
 
                     bool hasSummoned = Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var summoned) && summoned is not null && summoned.HasModule(CustomFlags.ToolGun);
-                    bool hasBase = SummonedBaseCustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
+                    bool hasBase = SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
 
                     return !(hasSummoned || hasBase);
                 });

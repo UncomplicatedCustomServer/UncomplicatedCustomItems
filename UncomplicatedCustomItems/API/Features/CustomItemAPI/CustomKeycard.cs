@@ -1,6 +1,6 @@
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomKeycard : BaseCustomItem
+    public abstract class CustomKeycard : APICustomItem
     {
         /// <summary>
         /// Sets the Containment access level. Valid range 0-3.

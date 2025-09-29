@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPatch("BaseFireRate", MethodType.Getter)]
         public static void Postfix(Scp127ActionModule __instance, ref float __result)
         {
-            if (BaseCustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
+            if (APICustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
             {
                 __result = Scp127TierManagerModule.GetTierForItem(__instance.Item)
                 switch

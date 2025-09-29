@@ -3,7 +3,7 @@ using PlayerRoles;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomExplosiveGrenade : BaseCustomItem
+    public abstract class CustomExplosiveGrenade : APICustomItem
     {
         /// <summary>
         /// Gets or sets the maximum radius of the grenade.

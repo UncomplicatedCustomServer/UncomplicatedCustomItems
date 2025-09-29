@@ -104,7 +104,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
                 case ICustomItem customItem when customItem.CustomData is ICandyData candyData && candyData is CandyData candy:
                     candy.SerializedCandy = sc;
                     break;
-                case BaseCustomItem baseCustomItem when baseCustomItem is CustomCandy customCandy:
+                case APICustomItem baseCustomItem when baseCustomItem is CustomCandy customCandy:
                     customCandy.SerializedCandy = sc;
                     break;
             }
@@ -118,7 +118,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
             return item switch
             {
                 ICustomItem customItem when customItem.CustomData is ICandyData candyData => candyData.CandyType,
-                BaseCustomItem baseCustomItem when baseCustomItem is CustomCandy customCandy => customCandy.CandyType,
+                APICustomItem baseCustomItem when baseCustomItem is CustomCandy customCandy => customCandy.CandyType,
                 _ => null
             };
         }
@@ -128,7 +128,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
             return item switch
             {
                 ICustomItem customItem => customItem.Name,
-                BaseCustomItem baseCustomItem => baseCustomItem.Name,
+                APICustomItem baseCustomItem => baseCustomItem.Name,
                 _ => "null"
             };
         }
@@ -137,7 +137,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches
         {
             LogManager.Debug($"{nameof(SelectCustomCandyItem)}: Attempting to select custom candy for type {kind}");
 
-            foreach (BaseCustomItem baseCustomItem in BaseCustomItem.List)
+            foreach (APICustomItem baseCustomItem in APICustomItem.List)
             {
                 if (baseCustomItem.Item is not ItemType.SCP330)
                     continue;

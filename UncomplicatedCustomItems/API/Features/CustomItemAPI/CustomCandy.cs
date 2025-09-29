@@ -3,7 +3,7 @@ using UncomplicatedCustomItems.API.Features.CandySerialization;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomCandy : BaseCustomItem
+    public abstract class CustomCandy : APICustomItem
     {
         /// <summary>
         /// Set when the user gets the candy

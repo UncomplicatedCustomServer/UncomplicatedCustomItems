@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPatch("HsMax", MethodType.Getter)]
         public static void Postfix(Scp127HumeModule __instance, ref float __result)
         {
-            if (BaseCustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
+            if (APICustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
             {
                 try
                 {

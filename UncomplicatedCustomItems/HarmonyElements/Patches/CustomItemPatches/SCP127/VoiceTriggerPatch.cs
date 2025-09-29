@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPrefix]
         public static bool Prefix(Scp127VoiceTriggerBase __instance, AudioClip clip, Action<NetworkWriter> extraData, Scp127VoiceTriggerBase.VoiceLinePriority priority)
         {
-            if (BaseCustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
+            if (APICustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
             {
                 try
                 {

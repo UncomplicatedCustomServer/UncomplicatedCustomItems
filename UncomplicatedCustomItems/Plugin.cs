@@ -87,7 +87,7 @@ namespace UncomplicatedCustomItems
 #if EXILED
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
 #else
-            if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(Instance, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
+            if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(this, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
 #endif
 
             PlayerHandler.Register();

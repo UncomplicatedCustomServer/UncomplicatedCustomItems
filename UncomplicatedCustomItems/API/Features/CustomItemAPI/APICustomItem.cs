@@ -1,54 +1,51 @@
 using LabApi.Features.Wrappers;
 using MapGeneration;
-using Org.BouncyCastle.Math.EC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
     /// <summary>
-    /// The API version of <see cref="CustomItem"/>
+    /// The API version of a <see cref="CustomItem"/>
     /// Aims to simplify the process of making CustomItems in C#
     /// </summary>
-    public abstract class BaseCustomItem
+    public abstract class APICustomItem
     {
         /// <summary>
-        /// Gets a list of every registered <see cref="BaseCustomItem"/>
+        /// Gets a list of every registered <see cref="APICustomItem"/>
         /// </summary>
-        public static IReadOnlyCollection<BaseCustomItem> List => CustomItems.Values.ToList();
+        public static IReadOnlyCollection<APICustomItem> List => CustomItems.Values.ToList();
 
-        internal static Dictionary<uint, BaseCustomItem> CustomItems { get; set; } = [];
+        internal static Dictionary<uint, APICustomItem> CustomItems { get; set; } = [];
 
-        public static void Register(BaseCustomItem item)
+        public static void Register(APICustomItem item)
         {
             if (CustomItems.ContainsKey(item.Id) || CustomItem.CustomItems.ContainsKey(item.Id))
             {
                 uint id = GetFirstFreeId();
                 item.Id = id;
                 CustomItems.TryAdd(item.Id, item);
-                LogManager.Info($"{nameof(BaseCustomItem)}: Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
+                LogManager.Info($"{nameof(APICustomItem)}: Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
             }
             else
             {
                 CustomItems.TryAdd(item.Id, item);
-                LogManager.Info($"{nameof(BaseCustomItem)}: Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
+                LogManager.Info($"{nameof(APICustomItem)}: Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
             }
         }
 
         /// <summary>
-        /// Unregister a <see cref="BaseCustomItem"/> from the plugin by its class
+        /// Unregister a <see cref="APICustomItem"/> from the plugin by its class
         /// </summary>
         /// <param name="item"></param>
-        public static void Unregister(BaseCustomItem item) => Unregister(item.Id);
+        public static void Unregister(APICustomItem item) => Unregister(item.Id);
 
         /// <summary>
-        /// Unregister a <see cref="BaseCustomItem"/> from the plugin by its Id
+        /// Unregister a <see cref="APICustomItem"/> from the plugin by its Id
         /// </summary>
         /// <param name="item"></param>
         public static void Unregister(uint item)
@@ -73,7 +70,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             return 0;
         }
         
-        public static void SummonItem(BaseCustomItem item)
+        public static void SummonItem(APICustomItem item)
         {
             if (item.SpawnLocations.Count() >= 1)
             {
@@ -89,7 +86,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     {
                         Pickup targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
                         if (targetPickup != null)
-                            new SummonedBaseCustomItem(item, targetPickup);
+                            new SummonedAPICustomItem(item, targetPickup);
                     }
 
                 }
@@ -106,7 +103,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                         {
                             Pickup targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
                             if (targetPickup != null)
-                                new SummonedBaseCustomItem(item, targetPickup);
+                                new SummonedAPICustomItem(item, targetPickup);
                         }
                     }
                     else
@@ -123,20 +120,20 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     {
                         item.Rotation.Normalize();
                         Quaternion rotation = new(item.Rotation.x, item.Rotation.y, item.Rotation.z, item.Rotation.w);
-                        new SummonedBaseCustomItem(item, coords, rotation);
+                        new SummonedAPICustomItem(item, coords, rotation);
                     }
                     else
-                        new SummonedBaseCustomItem(item, coords);
+                        new SummonedAPICustomItem(item, coords);
                 }
             }
         }
 
         /// <summary>
-        /// Gets the <see cref="BaseCustomItem"/> by its unique Id
+        /// Gets the <see cref="APICustomItem"/> by its unique Id
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>An <see cref="BaseCustomItem"/></returns>
-        public static BaseCustomItem? Get(uint id)
+        /// <returns>An <see cref="APICustomItem"/></returns>
+        public static APICustomItem? Get(uint id)
         {
             if (!CustomItems.ContainsKey(id))
                 return null;
@@ -145,19 +142,19 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
 
         /// <summary>
-        /// Gets the <see cref="BaseCustomItem"/> by its class type
+        /// Gets the <see cref="APICustomItem"/> by its class type
         /// </summary>
         /// <param name="t"></param>
         /// <returns><see cref="IEnumerable{BaseCustomItem}"/></returns>
-        public static IEnumerable<BaseCustomItem> Get(Type t) => List.Where(i => i.GetType() == t);
+        public static IEnumerable<APICustomItem> Get(Type t) => List.Where(i => i.GetType() == t);
 
         /// <summary>
-        /// Tries to get a list of <see cref="BaseCustomItem"/> by its class type
+        /// Tries to get a list of <see cref="APICustomItem"/> by its class type
         /// </summary>
         /// <param name="t"></param>
         /// <param name="items"></param>
         /// <returns><see langword="true"/> if found otherwise <see langword="false"/> if not found</returns>
-        public static bool TryGet(Type t, out IEnumerable<BaseCustomItem> items)
+        public static bool TryGet(Type t, out IEnumerable<APICustomItem> items)
         {
             items = Get(t);
 
@@ -165,12 +162,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
 
         /// <summary>
-        /// Tries to get a <see cref="BaseCustomItem"/> by its unique Id
+        /// Tries to get a <see cref="APICustomItem"/> by its unique Id
         /// </summary>
         /// <param name="id"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="BaseCustomItem"/> instance</returns>
-        public static bool TryGet(uint id, out BaseCustomItem? item)
+        /// <returns><see cref="APICustomItem"/> instance</returns>
+        public static bool TryGet(uint id, out APICustomItem? item)
         {
             item = null;
             if (CustomItems.ContainsKey(id))
@@ -218,7 +215,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public abstract float Weight { get; set; }
 
         /// <summary>
-        /// Gets or sets the scale of the <see cref="BaseCustomItem"/> as a <see cref="Pickup"/>
+        /// Gets or sets the scale of the <see cref="APICustomItem"/> as a <see cref="Pickup"/>
         /// </summary>
         public virtual Vector3 Scale { get; set; }
 
@@ -228,22 +225,22 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public virtual bool Spawn { get; set; }
 
         /// <summary>
-        /// Gets or sets the amount of <see cref="BaseCustomItem"/>s to spawn
+        /// Gets or sets the amount of <see cref="APICustomItem"/>s to spawn
         /// </summary>
         public virtual int AmountToSpawn { get; set; }
 
         /// <summary>
-        /// Gets or sets the chance for the <see cref="BaseCustomItem"/> to spawn.
+        /// Gets or sets the chance for the <see cref="APICustomItem"/> to spawn.
         /// </summary>
         public virtual float ChanceToSpawn { get; set; }
 
         /// <summary>
-        /// Gets or sets the rotation of the <see cref="BaseCustomItem"/> when first spawned as a <see cref="Pickup"/>
+        /// Gets or sets the rotation of the <see cref="APICustomItem"/> when first spawned as a <see cref="Pickup"/>
         /// </summary>
         public virtual Vector4 Rotation { get; set; }
 
         /// <summary>
-        /// Gets or sets the locations that the <see cref="BaseCustomItem"/> can spawn.
+        /// Gets or sets the locations that the <see cref="APICustomItem"/> can spawn.
         /// The dictionary maps a <see cref="RoomName"/> or GameObject name (key) to a local <see cref="Vector3"/> position
         /// </summary>
         /// <remarks>
@@ -252,8 +249,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public virtual Dictionary<string, Vector3> SpawnLocations { get; set; } = [];
 
         /// <summary>
-        /// Gets or sets the zones the <see cref="BaseCustomItem"/> can spawn.
-        /// Selects a random room in the <see cref="FacilityZone"/> to spawn the <see cref="BaseCustomItem"/> in.
+        /// Gets or sets the zones the <see cref="APICustomItem"/> can spawn.
+        /// Selects a random room in the <see cref="FacilityZone"/> to spawn the <see cref="APICustomItem"/> in.
         /// </summary>
         /// <remarks>
         /// Has the second highest priority
@@ -261,7 +258,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public virtual List<FacilityZone> Zones { get; set; } = [];
 
         /// <summary>
-        /// Gets or sets the coordinates that the <see cref="BaseCustomItem"/> can spawn.
+        /// Gets or sets the coordinates that the <see cref="APICustomItem"/> can spawn.
         /// </summary>
         /// <remarks>
         /// The only static coordinates are in the suface zone
@@ -270,12 +267,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public virtual List<Vector3> Coordinates { get; set; } = [];
 
         /// <summary>
-        /// Gets or sets wether the <see cref="BaseCustomItem"/> will replace a <see cref="Pickup"/> when it spawns.
+        /// Gets or sets wether the <see cref="APICustomItem"/> will replace a <see cref="Pickup"/> when it spawns.
         /// </summary>
         public virtual bool ReplaceExistingPickup { get; set; }
 
         /// <summary>
-        /// Gets or sets wether the <see cref="BaseCustomItem"/> can only replace a <see cref="Pickup"/> of the same <see cref="ItemType"/>
+        /// Gets or sets wether the <see cref="APICustomItem"/> can only replace a <see cref="Pickup"/> of the same <see cref="ItemType"/>
         /// </summary>
         public virtual bool ForceSameItemType { get; set; }
 

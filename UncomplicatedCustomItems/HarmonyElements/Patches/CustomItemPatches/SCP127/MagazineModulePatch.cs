@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             if (__result is not Scp127MagazineModule.RegenerationSettings original)
                 return;
-            if (BaseCustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
+            if (APICustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
             {
                 try
                 {

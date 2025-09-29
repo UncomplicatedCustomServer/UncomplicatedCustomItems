@@ -3,7 +3,7 @@ using CustomPlayerEffects;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomFlashGrenade : BaseCustomItem
+    public abstract class CustomFlashGrenade : APICustomItem
     {
         /// <summary>
         /// Gets or sets the minimum duration of player can take the effect.

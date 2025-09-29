@@ -45,9 +45,9 @@ namespace UncomplicatedCustomItems.Events.Internal
                 }
             }
 
-            if (BaseCustomItem.List.Count() > 0)
+            if (APICustomItem.List.Count() > 0)
             {
-                foreach (BaseCustomItem item in BaseCustomItem.List)
+                foreach (APICustomItem item in APICustomItem.List)
                 {
                     if (item is CustomCandy data && !data.AllowSpawningAsItem)
                         continue;
@@ -61,7 +61,7 @@ namespace UncomplicatedCustomItems.Events.Internal
                             if (chance >= item.ChanceToSpawn)
                             {
                                 LogManager.Debug($"Spawning {item.Name} ({count + 1}/{item.AmountToSpawn})");
-                                BaseCustomItem.SummonItem(item);
+                                APICustomItem.SummonItem(item);
                             }
                         }
                     }

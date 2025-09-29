@@ -10,25 +10,25 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
     public class CustomItemUtils
     {
-        public static Pickup FindTargetPickupInRoom(Room room, BaseCustomItem customItem)
+        public static Pickup FindTargetPickupInRoom(Room room, APICustomItem customItem)
         {
             List<Pickup> pickupsInRoom = [];
             if (customItem.ForceSameItemType)
             {
                 pickupsInRoom = Pickup.List.Where(pickup =>
-                    pickup.Room == room && pickup.Type == customItem.Item && !SummonedBaseCustomItem.TryGet(pickup.Serial, out _)).ToList();
+                    pickup.Room == room && pickup.Type == customItem.Item && !SummonedAPICustomItem.TryGet(pickup.Serial, out _)).ToList();
             }
             else
             {
                 pickupsInRoom = Pickup.List.Where(pickup =>
-                    pickup.Room == room && !SummonedBaseCustomItem.TryGet(pickup.Serial, out _)).ToList();
+                    pickup.Room == room && !SummonedAPICustomItem.TryGet(pickup.Serial, out _)).ToList();
             }
 
             return FilterAndSelectPickup(pickupsInRoom, customItem);
         }
 
 
-        public static Pickup FilterAndSelectPickup(List<Pickup> pickups, BaseCustomItem customItem)
+        public static Pickup FilterAndSelectPickup(List<Pickup> pickups, APICustomItem customItem)
         {
             if (customItem.ForceSameItemType)
                 pickups = pickups.Where(pickup => pickup.Type == customItem.Item).ToList();

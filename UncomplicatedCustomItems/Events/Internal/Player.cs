@@ -54,7 +54,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Attacker == null || ev.Attacker.CurrentItem == null || ev.Player == null || ev.Player.Role == RoleTypeId.Destroyed || ev.Player.Role == RoleTypeId.Spectator)
                 return;
 
-            if (SummonedBaseCustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem.CustomItem is CustomWeapon customWeapon)
+            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem.CustomItem is CustomWeapon customWeapon)
             {
                 if (customWeapon.EnableFriendlyFire)
                 {
@@ -90,7 +90,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Pickup == null)
                 return;
 
-            if (SummonedBaseCustomItem.TryGet(ev.Pickup.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.Pickup.Serial, out var summonedItem))
             {
                 summonedItem.OnDrop(ev);
                 summonedItem.ResetBadge(ev.Player);
@@ -112,7 +112,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player is null)
                 return;
 
-            if (SummonedBaseCustomItem.TryGet(ev.Item.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.Item.Serial, out var summonedItem))
             {
                 summonedItem.OnPickup(ev);
                 summonedItem.HandlePickedUpDisplayHint();
@@ -132,7 +132,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.UsableItem == null)
                 return;
 
-            if (SummonedBaseCustomItem.TryGet(ev.UsableItem.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var summonedItem))
                 summonedItem.ResetBadge(ev.Player);
 
             if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem item))
@@ -154,7 +154,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player == null || ev.NewItem == null)
                 return;
 
-            if (SummonedBaseCustomItem.TryGet(ev.NewItem.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.NewItem.Serial, out var summonedItem))
             {
                 summonedItem.LoadBadge(ev.Player);
                 summonedItem.HandleSelectedDisplayHint();
@@ -178,7 +178,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (ev.Player.CurrentItem is null)
                 return;
 
-            if (SummonedBaseCustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
             {
                 summonedItem.ResetBadge(ev.Player);
 
@@ -271,7 +271,7 @@ namespace UncomplicatedCustomItems.Events.Internal
             if (!ev.Player.Connection.isReady)
                 return;
 
-            if (SummonedBaseCustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
             {
                 PlayerHandler.StopHumeShieldRegen(ev.Player);
                 summonedItem.ResetBadge(ev.Player);
@@ -286,7 +286,7 @@ namespace UncomplicatedCustomItems.Events.Internal
 
         private static void ThrownProjectile(PlayerThrewProjectileEventArgs ev)
         {
-            if (SummonedBaseCustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
                 summonedItem.ResetBadge(ev.Player);
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem item))

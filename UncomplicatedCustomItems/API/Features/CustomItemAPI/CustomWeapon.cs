@@ -3,7 +3,7 @@ using InventorySystem.Items.Firearms.Attachments;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomWeapon : BaseCustomItem
+    public abstract class CustomWeapon : APICustomItem
     {
         /// <summary>
         /// Gets or sets the damage of the firearm. Negative to heal

@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            BaseCustomItem customItem = BaseCustomItem.CustomItems.Values.Where(c => c.Name == "ToolGun").FirstOrDefault();
+            APICustomItem customItem = APICustomItem.CustomItems.Values.Where(c => c.Name == "ToolGun").FirstOrDefault();
 
             if (arguments.Count == 1)
             {
@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
-                new SummonedBaseCustomItem(customItem, target);
+                new SummonedAPICustomItem(customItem, target);
                 response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                 return true;
             }
@@ -67,7 +67,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
-                new SummonedBaseCustomItem(customItem, target);
+                new SummonedAPICustomItem(customItem, target);
                 response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                 return true;
             }

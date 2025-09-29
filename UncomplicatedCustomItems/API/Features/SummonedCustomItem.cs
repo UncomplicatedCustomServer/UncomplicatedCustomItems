@@ -801,7 +801,7 @@ namespace UncomplicatedCustomItems.API.Features
             PlayerBadges.TryAdd(player.PlayerId, player.UserGroup.HiddenByDefault);
             CustomItemBadgeApplier(player, CustomItem);
         }
-
+        
         private void CustomItemBadgeApplier(Player player, ICustomItem item)
         {
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
