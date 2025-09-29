@@ -12,9 +12,8 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.InspectionPatches
     public static class JailbirdInspectionPostfix
     {
         [HarmonyPostfix]
-        public static void Postfix(JailbirdItem __instance, NetworkReader reader)
+        public static void Prefix(JailbirdItem __instance, NetworkReader reader)
         {
-
             reader.ReadByte();
             reader.Position -= 1;
             JailbirdMessageType messageType = (JailbirdMessageType)reader.ReadByte();
