@@ -123,7 +123,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// Gets or sets the light on a <see cref="Features.CustomItem"/> if its type is <see cref="CustomItemType.Light"/>.
         /// </summary>
         public Light Light { get; set; }
-        public bool Toggled { get; set; } = false;
+        internal bool Toggled { get; set; } = false;
         internal MagazineModule MagazineModule { get; set; }
         internal HitscanHitregModuleBase HitscanHitregModule { get; set; }
         internal IAmmoContainerModule BarrelModule { get; set; }
@@ -154,9 +154,9 @@ namespace UncomplicatedCustomItems.API.Features
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
 #if EXILED
-        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player) : this(customItem, player, Player.Get(player.Id).AddItem(customItem.Item), null) { }
+        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player) : this(customItem, Player.Get(player.Id), Player.Get(player.Id).AddItem(customItem.Item), null) { }
 
-        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, player, item, null) { }
+        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, Player.Get(player.Id), item, null) { }
 #endif
 
         private static void AddToCollections(SummonedCustomItem sci)
