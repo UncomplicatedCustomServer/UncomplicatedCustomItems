@@ -153,6 +153,12 @@ namespace UncomplicatedCustomItems.API.Features
 
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
+#if EXILED
+        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player) : this(customItem, player, Player.Get(player.Id).AddItem(customItem.Item), null) { }
+
+        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, player, item, null) { }
+#endif
+
         private static void AddToCollections(SummonedCustomItem sci)
         {
             List.Add(sci);

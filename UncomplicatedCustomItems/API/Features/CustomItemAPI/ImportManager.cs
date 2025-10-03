@@ -136,12 +136,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                             LogManager.Silent($"{nameof(ImportManager)}: Importing It!");
                             ActivePlugins.TryAdd(dic.Key);
 
-                            BaseCustomItem Item = Activator.CreateInstance(type) as BaseCustomItem;
+                            APICustomItem Item = Activator.CreateInstance(type) as APICustomItem;
                             LogManager.Info($"{nameof(ImportManager)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name}");
                             if (Item.Name is "ToolGun" && !Plugin.Instance.Config.EnableToolGun)
                                 continue;
 
-                            BaseCustomItem.Register(Item);
+                            APICustomItem.Register(Item);
                         }
                         if (attribs != null && attribs.Length > 0 && type.IsSubclassOf(typeof(CustomItem)) || type.IsSubclassOf(typeof(ICustomItem)))
                         {
