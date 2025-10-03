@@ -1,4 +1,5 @@
 ﻿using CommandSystem;
+using Exiled.CustomItems;
 using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
@@ -8,6 +9,8 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
+using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -25,7 +28,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string[] Aliases { get; } = ["reload"];
 
-        public Dictionary<ICustomItem, Player> CustomItems = [];
+        public Dictionary<APICustomItem, List<Vector3>> APICustomItemsPickups = [];
+        public Dictionary<ICustomItem, List<Vector3>> CustomItemsPickups = [];
+        public Dictionary<Player, List<ICustomItem>> CustomItems = [];
+        public Dictionary<Player, List<APICustomItem>> APICustomItems = [];
 
         private int ReloadedItems;
         private int ReloadedActions;
@@ -54,10 +60,36 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 ReloadedBaseItems = 0;
 
                 foreach (SummonedCustomItem item in SummonedCustomItem.List.ToList())
+                {
+                    if (item.Owner != null && !CustomItems.ContainsKey(item.Owner))
+                        CustomItems[item.Owner] = [];
+
+                    if (!CustomItemsPickups.ContainsKey(item.CustomItem))
+                        CustomItemsPickups[item.CustomItem] = [];
+
+                    if (!item.IsPickup)
+                        CustomItems[item.Owner].Add(item.CustomItem);
+                    else
+                        CustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
+
                     item.Destroy();
+                }
 
                 foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List.ToList())
+                {
+                    if (item.Owner != null && !APICustomItems.ContainsKey(item.Owner))
+                        APICustomItems[item.Owner] = [];
+
+                    if (!APICustomItemsPickups.ContainsKey(item.CustomItem))
+                        APICustomItemsPickups[item.CustomItem] = [];
+
+                    if (!item.IsPickup)
+                        APICustomItems[item.Owner].Add(item.CustomItem);
+                    else
+                        APICustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
+
                     item.Destroy();
+                }
 
                 foreach (ICustomItem customItem in CustomItem.List.ToList())
                 {
@@ -99,9 +131,6 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 Plugin.Instance.FileConfig.LoadAll("Actions");
                 Task.Run(ImportManager.Actor);
 
-                if (Round.IsRoundStarted)
-                    Events.Internal.Server.SpawnItemsOnRoundStarted();
-
                 foreach (ICustomItem item in CustomItem.List)
                     ReloadedItems++;
                 foreach (ICustomAction action in CustomAction.List)
@@ -113,8 +142,29 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 int NewActions = BeforeActions - ReloadedActions;
                 int NewBaseItems = BeforeBaseItems - ReloadedBaseItems;
 
+                foreach (var entry in CustomItemsPickups)
+                {
+                    foreach (Vector3 pos in entry.Value)
+                        Timing.CallDelayed(1f, () => new SummonedCustomItem(entry.Key, pos));
+                }
+
+                foreach (var entry in APICustomItemsPickups)
+                {
+                    foreach (Vector3 pos in entry.Value)
+                        Timing.CallDelayed(1f, () => new SummonedAPICustomItem(entry.Key, pos));
+                }
+
                 foreach (var entry in CustomItems)
-                    Timing.CallDelayed(1f, () => new SummonedCustomItem(entry.Key, entry.Value));
+                {
+                    foreach (ICustomItem customItem in entry.Value)
+                        Timing.CallDelayed(1f, () => new SummonedCustomItem(customItem, entry.Key));
+                }
+
+                foreach (var entry in APICustomItems)
+                {
+                    foreach (APICustomItem customItem in entry.Value)
+                        Timing.CallDelayed(1f, () => new SummonedAPICustomItem(customItem, entry.Key));
+                }
 
                 List<string> reloadedLines =
                 [

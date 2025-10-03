@@ -9,9 +9,9 @@ using Mirror;
 namespace UncomplicatedCustomItems.HarmonyElements.Patches.InspectionPatches
 {
     [HarmonyPatch(typeof(JailbirdItem), nameof(JailbirdItem.ServerProcessCmd))]
-    public static class JailbirdInspectionPostfix
+    public static class JailbirdInspectionPrefix
     {
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         public static void Prefix(JailbirdItem __instance, NetworkReader reader)
         {
             reader.ReadByte();

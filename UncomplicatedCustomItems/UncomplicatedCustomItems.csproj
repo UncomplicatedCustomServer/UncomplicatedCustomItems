@@ -671,7 +671,7 @@
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP268CooldownTimeTranspiler.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\MicroHidInspectionPostfix.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\Scp1344InspectionPostfix.cs" />
-    <Compile Include="HarmonyElements\Patches\InspectionPatches\JailbirdInspectionPostfix.cs" />
+    <Compile Include="HarmonyElements\Patches\InspectionPatches\JailbirdInspectionPrefix.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\WeaponInspectionPostfix.cs" />
     <Compile Include="HarmonyElements\Patches\CandyPatches\GrantCandyPre.cs" />
     <Compile Include="HarmonyElements\Patches\CandyPatches\ServerProcessPickupPre.cs" />
