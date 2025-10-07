@@ -21,6 +21,7 @@ namespace UncomplicatedCustomItems.API.Interfaces
         public abstract List<DieOnUseSettings?> DieOnUseSettings { get; set; }
         public abstract List<HealOnKillSettings?> HealOnKillSettings { get; set; }
         public List<HumeShieldSettings?> HumeShieldSettings { get; set; }
-        public List<MERSpawnSettings> MerSpawnSettings { get; set; } 
+        public List<MERSpawnSettings> MerSpawnSettings { get; set; }
+        public List<AmmoRegenSettings?> AmmoRegenSettings { get; set; }
     }
 }

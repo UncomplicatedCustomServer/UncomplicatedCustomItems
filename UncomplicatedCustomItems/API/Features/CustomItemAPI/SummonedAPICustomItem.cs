@@ -572,6 +572,27 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public static bool TryGet(ushort serial, out SummonedAPICustomItem item) => SummonedCustomItems.TryGetValue(serial, out item);
 
         /// <summary>
+        /// Tries to get the <see cref="SummonedAPICustomItem"/> by its <see cref="APICustomItem"/>
+        /// </summary>
+        /// <param name="serial"></param>
+        /// <param name="item"></param>
+        /// <returns><see langword="false"/> if not found : <see langword="true"/> if found</returns>
+        public static bool TryGet(APICustomItem baseitem, out SummonedAPICustomItem item)
+        {
+            foreach (SummonedAPICustomItem summoneditem in List)
+            {
+                if (summoneditem.CustomItem == baseitem)
+                {
+                    item = summoneditem;
+                    return true;
+                }
+            }
+
+            item = null;
+            return false;
+        }
+
+        /// <summary>
         /// Gets a <see cref="SummonedAPICustomItem"/> by its <see cref="Serial"/>
         /// </summary>
         /// <param name="serial"></param>

@@ -161,5 +161,14 @@ namespace UncomplicatedCustomItems.API.Features
                 SchematicName = "Test"
             }
         ];
+        public virtual List<AmmoRegenSettings?> AmmoRegenSettings { get; set; } =
+        [
+            new()
+            {
+                RegenDelay = 5f,
+                RegenInterval = 1f,
+                AmmoPerInterval = 1
+            }
+        ];
     }
 }

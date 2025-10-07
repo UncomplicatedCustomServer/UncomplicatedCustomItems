@@ -73,8 +73,21 @@ namespace UncomplicatedCustomItems.API.ToolGun
 
         internal static readonly CachedLayerMask ToolGunMask = new("Default", "Door", "Glass");
 
+        protected override void OnChangedItem(PlayerChangedItemEventArgs ev)
+        {
+            if (!Check(ev.NewItem))
+                return;
+
+            ev.Player.GameObject.AddComponent<ToolGunUI>().Init(this);
+
+            base.OnChangedItem(ev);
+        }
+
         protected override void OnShot(PlayerShotWeaponEventArgs ev)
         {
+            if (!Check(ev.FirearmItem))
+                return;
+
             LogManager.Debug("ToolGun triggered");
             ev.FirearmItem.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscanreg);
             if (Physics.Raycast(ev.Player.Camera.position + ev.Player.Camera.forward, ev.Player.Camera.forward, out RaycastHit hitInfo1, hitscanreg.DamageFalloffDistance + hitscanreg.FullDamageDistance, ToolGunMask))

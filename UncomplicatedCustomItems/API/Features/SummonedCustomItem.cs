@@ -64,6 +64,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
 
+        internal static CoroutineHandle RegenHandle;
+
         /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
         /// </summary>
@@ -138,6 +140,8 @@ namespace UncomplicatedCustomItems.API.Features
 
             SetProperties();
             AddToCollections(this);
+            if (Item is not null && Item is FirearmItem firearm)
+                StartAmmoRegen(firearm);
         }
 
         public SummonedCustomItem(ICustomItem customItem, Pickup pickup) : this(customItem, null, null, pickup) { }
@@ -773,6 +777,43 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 LogManager.Warn("CustomData is not in the expected IWeaponData format or is null.");
                 return [];
+            }
+        }
+
+        internal void StopAmmoRegen()
+        {
+            if (RegenHandle.IsRunning)
+                Timing.KillCoroutines(RegenHandle);
+        }
+
+        internal void PauseAmmoRegen(FirearmItem firearm, float pauseTime)
+        {
+            if (RegenHandle.IsRunning)
+            {
+                Timing.KillCoroutines(RegenHandle);
+                Timing.CallDelayed(pauseTime, () => StartAmmoRegen(firearm));
+            }
+
+        }
+
+        internal void StartAmmoRegen(FirearmItem firearm)
+        {
+            if (HasModule(CustomFlags.AmmoRegen))
+                RegenHandle = Timing.RunCoroutine(AmmoRegen(firearm));
+        }
+
+        internal IEnumerator<float> AmmoRegen(FirearmItem firearm)
+        {
+            for (; ; )
+            {
+                if (!HasModule(CustomFlags.AmmoRegen))
+                    yield break;
+
+                AmmoRegenSettings regen = CustomItem.FlagSettings.AmmoRegenSettings?.FirstOrDefault();
+                if (firearm.StoredAmmo != firearm.MaxAmmo)
+                    firearm.StoredAmmo = Math.Min(firearm.StoredAmmo + regen.AmmoPerInterval, firearm.MaxAmmo);
+
+                yield return regen.RegenInterval;
             }
         }
 

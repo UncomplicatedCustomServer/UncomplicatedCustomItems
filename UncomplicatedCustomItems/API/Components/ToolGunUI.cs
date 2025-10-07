@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.API.Components
     public class ToolGunUI : MonoBehaviour
     {
         private Player Owner;
-        private SummonedAPICustomItem BaseCustomItem;
+        private APICustomItem BaseCustomItem;
         private SummonedCustomItem CustomItem;
         private StringBuilder Builder;
         private bool Paused;
@@ -31,15 +31,12 @@ namespace UncomplicatedCustomItems.API.Components
                 CustomItem = customItem;
                 Owner = customItem.Owner;
             }
-            if (customItemobj is SummonedAPICustomItem summonedItem)
-            {
+            if (customItemobj is APICustomItem summonedItem)
                 BaseCustomItem = summonedItem;
-                Owner = summonedItem.Owner;
-            }
 
             Builder = new();
             Settings.GiveToPlayers();
-            LogManager.Debug($"Starting ToolGun UI for {Owner.Nickname}");
+            LogManager.Debug($"Starting ToolGun UI");
         }
 
         private void Update()
@@ -47,12 +44,6 @@ namespace UncomplicatedCustomItems.API.Components
             Builder.Clear();
             if (Paused)
                 return;
-
-            if (Owner.Room == null)
-                return;
-
-            if (Owner.CurrentItem == null)
-                Destroy(this);
 
             if (CustomItem != null)
             {
@@ -65,12 +56,20 @@ namespace UncomplicatedCustomItems.API.Components
 
             if (BaseCustomItem != null)
             {
-                if (!SummonedAPICustomItem.TryGet(Owner.CurrentItem.Serial, out var item) || item != BaseCustomItem)
+                if (!SummonedAPICustomItem.TryGet(BaseCustomItem, out var item) || item.CustomItem != BaseCustomItem)
                     Destroy(this);
                 
-                if (BaseCustomItem.CustomItem is not Features.CustomItemAPI.ToolGun)
+                if (BaseCustomItem is not Features.CustomItemAPI.ToolGun)
                     Destroy(this);
+
+                Owner = item.Owner;
             }
+
+            if (Owner.Room == null)
+                return;
+
+            if (Owner.CurrentItem == null)
+                Destroy(this);
 
             SSPlaintextSetting colorSetting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(Owner.ReferenceHub, 21);
             SSTwoButtonsSetting deletionMode = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(Owner.ReferenceHub, 22);
@@ -112,7 +111,7 @@ namespace UncomplicatedCustomItems.API.Components
                 
             colorSetting.SyncInputText.TryParseVector3(out Vector3 color);
             string hexcolor = color.ToHexColor();
-            Builder.AppendLine($"<pos=-10em><voffset=-12.3em><color={Owner.RoleBase.GetColoredName()}>{Owner.Nickname} - {Owner.Role.GetFullName()}</color></voffset>");
+            Builder.AppendLine($"<pos=-10em><voffset=-12.3em><color={Owner.RoleBase.RoleColor.ToHex()}>{Owner.Nickname} - {Owner.Role.GetFullName()}</color></voffset>");
             Builder.AppendLine($"<pos=-10em>{room} - <color=yellow>{Owner.Room.LocalPosition(Owner.Position)}</color>");
             Builder.AppendLine($"<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>");
             Builder.AppendLine($"<pos=-10em>Deletion Mode: {DeletionMode}");

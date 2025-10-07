@@ -1107,8 +1107,6 @@ namespace UncomplicatedCustomItems.Events
                         Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(summonedItem.Item.Base);
                         StartHumeShieldRegen(ev.Player, data, tier, summonedItem);
                     }
-                    if (summonedItem.CustomItem is ToolGun)
-                        ev.Player.GameObject.AddComponent<ToolGunUI>().Init(summonedItem);
                 }
 
                 if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
@@ -1171,9 +1169,6 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                 }
-
-                if (customItem.HasModule(CustomFlags.ToolGun))
-                    ev.Player.GameObject.AddComponent<ToolGunUI>().Init(customItem);
             }
             if (ev.OldItem != null)
             {
@@ -2315,6 +2310,12 @@ namespace UncomplicatedCustomItems.Events
             if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
                 return;
 
+            if (customItem.HasModule(CustomFlags.AmmoRegen))
+            {
+                AmmoRegenSettings regen = customItem.CustomItem.FlagSettings.AmmoRegenSettings.FirstOrDefault();
+                customItem.PauseAmmoRegen(ev.FirearmItem, regen.RegenDelay);
+            }
+
             if (customItem.HasModule(CustomFlags.EffectWhenUsed))
             {
                 foreach (EffectSettings effectSettings in customItem.CustomItem.FlagSettings.EffectSettings)
@@ -2363,79 +2364,6 @@ namespace UncomplicatedCustomItems.Events
                         ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)TimedGrenadeProjectile.SpawnActive(hitInfo.point, ItemType.GrenadeHE, ev.Player, 0.2);
                         grenade.MaxRadius = explosiveBulletsSettings.DamageRadius ?? 10f;
                         grenade.FuseEnd();
-                    }
-                }
-                if (customItem.HasModule(CustomFlags.ToolGun))
-                {
-                    SSTwoButtonsSetting deletionMode = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(ev.Player.ReferenceHub, 22);
-                    if (deletionMode.SyncIsA && ev.FirearmItem.IsAiming())
-                    {
-                        foreach (PrimitiveObjectToy primitive in AdminToy.List.OfType<PrimitiveObjectToy>().ToList())
-                        {
-                            if (primitive.GameObject.name.Contains("UCI"))
-                            {
-                                Vector3 halfSize = primitive.Scale / 2f;
-                                Vector3 minBounds = primitive.Position - halfSize;
-                                Vector3 maxBounds = primitive.Position + halfSize;
-
-                                if (hitInfo.point.x >= minBounds.x && hitInfo.point.x <= maxBounds.x && hitInfo.point.y >= minBounds.y && hitInfo.point.y <= maxBounds.y && hitInfo.point.z >= minBounds.z && hitInfo.point.z <= maxBounds.z)
-                                    primitive.Destroy();
-                            }
-                        }
-                    }
-                    else if (deletionMode.SyncIsB && ev.FirearmItem.FlashlightEnabled)
-                    {
-                        foreach (PrimitiveObjectToy primitive in AdminToy.List.OfType<PrimitiveObjectToy>().ToList())
-                        {
-                            if (primitive.GameObject.name.Contains("UCI"))
-                            {
-                                Vector3 halfSize = primitive.Scale / 2f;
-                                Vector3 minBounds = primitive.Position - halfSize;
-                                Vector3 maxBounds = primitive.Position + halfSize;
-
-                                if (hitInfo.point.x >= minBounds.x && hitInfo.point.x <= maxBounds.x && hitInfo.point.y >= minBounds.y && hitInfo.point.y <= maxBounds.y && hitInfo.point.z >= minBounds.z && hitInfo.point.z <= maxBounds.z)
-                                    primitive.Destroy();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ev.Player.GameObject.GetComponent<ToolGunUI>().Pause();
-                        Timing.CallDelayed(5f, () => ev.Player.GameObject.GetComponent<ToolGunUI>().Unpause());
-                        
-                        SSPlaintextSetting setting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(ev.Player.ReferenceHub, 21);
-                        string room = string.Empty;
-                        string[] components = setting.SyncInputText.Split(',');
-                        Vector4 color = new();
-
-                        if (components.Length == 4)
-                        {
-                            float x = float.Parse(components[0].Trim(), CultureInfo.InvariantCulture);
-                            float y = float.Parse(components[1].Trim(), CultureInfo.InvariantCulture);
-                            float z = float.Parse(components[2].Trim(), CultureInfo.InvariantCulture);
-                            float w = float.Parse(components[3].Trim(), CultureInfo.InvariantCulture);
-
-                            color = new Vector4(x, y, z, w);
-                        }
-
-                        if (ev.Player.Room.Name.ToString() != "Unnamed")
-                            room = ev.Player.Room.Name.ToString();
-                        else
-                            room = ev.Player.Room.GameObject.name;
-
-                        Vector3 relativePosition = ev.Player.Room.LocalPosition(hitInfo.point);
-                        LogManager.Info($"Triggered by {ev.Player.Nickname}. Relative position inside {room}: {relativePosition}");
-                        ev.Player.SendHint($"Relative position inside {room}: {relativePosition}. This was also sent to the console.", 6f);
-                        ev.Player.SendConsoleMessage($"Relative position inside {room}: {relativePosition}", "white");
-                        Vector3 scale = new(0.2f, 0.2f, 0.2f);
-                        PrimitiveObjectToy primitive = PrimitiveObjectToy.Create(hitInfo.point);
-                        primitive.Type = PrimitiveType.Cube;
-                        primitive.Color = color;
-                        primitive.Scale = scale;
-                        primitive.Flags = AdminToys.PrimitiveFlags.Visible;
-                        primitive.Rotation = ev.Player.Room.Rotation;
-                        primitive.GameObject.name = $"UCI {relativePosition}";
-                        _toolGunPrimitives.TryAdd(primitive, ev.Player.PlayerId);
                     }
                 }
             }

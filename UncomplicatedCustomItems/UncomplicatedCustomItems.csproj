@@ -545,6 +545,7 @@
     <Compile Include="API\Enums\AssignmentOperator.cs" />
     <Compile Include="API\Features\CandySerialization\CandySerializationManager.cs" />
     <Compile Include="API\Features\CandySerialization\SerializedCandy.cs" />
+    <Compile Include="API\Features\FlagSettings\AmmoRegenSettings.cs" />
     <Compile Include="API\Features\Manager\AudioApi.cs" />
     <Compile Include="API\Features\CustomAction.cs" />
     <Compile Include="API\Features\Manager\BadgeManager.cs" />
