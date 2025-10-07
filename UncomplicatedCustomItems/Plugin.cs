@@ -22,13 +22,14 @@ using UnityEngine;
 using UserSettings.ServerSpecific;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using HarmonyLib;
+using MEC;
+using UncomplicatedCustomItems.API.ToolGun;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
-using MEC;
-using UncomplicatedCustomItems.API.ToolGun;
-using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+
 
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
@@ -71,124 +72,124 @@ namespace UncomplicatedCustomItems
 
         internal List<ServerSpecificSettingBase> _settings;
 
-        internal bool DebugMode;
+        internal Dictionary<string, List<string>> ItemErrors;
         
 #if EXILED
         public override void OnEnabled()
 #else
-        public override void Enable()
+                public override void Enable()
 #endif
-        {
-            Instance = this;
+                {
+                        Instance = this;
 
-            FileConfig = new();
-            HttpManager = new("uci");
-            Handler = new();
+                        FileConfig = new();
+                        HttpManager = new("uci");
+                        Handler = new();
 #if EXILED
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
 #else
-            if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(this, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
+                        if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(this, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
 #endif
 
-            PlayerHandler.Register();
-            ServerHandler.Register();
-            ScpHandler.Register();
+                        PlayerHandler.Register();
+                        ServerHandler.Register();
+                        ScpHandler.Register();
 
-            ServerEvent.WaitingForPlayers += OnFinishedLoading;
-            ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
+                        ServerEvent.WaitingForPlayers += OnFinishedLoading;
+                        ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
 
-            // Debugging Events
-            PlayerEvent.DroppingItem += Handler.OnDrop;
-            PlayerEvent.PickedUpItem += Handler.OnDebuggingPickup;
-            PlayerEvent.UsingItem += Handler.OnUse;
-            PlayerEvent.ReloadingWeapon += Handler.OnReloading;
-            PlayerEvent.ShootingWeapon += Handler.OnShooting;
-            PlayerEvent.ThrewProjectile += Handler.OnThrown;
+                        // Debugging Events
+                        PlayerEvent.DroppingItem += Handler.OnDrop;
+                        PlayerEvent.PickedUpItem += Handler.OnDebuggingPickup;
+                        PlayerEvent.UsingItem += Handler.OnUse;
+                        PlayerEvent.ReloadingWeapon += Handler.OnReloading;
+                        PlayerEvent.ShootingWeapon += Handler.OnShooting;
+                        PlayerEvent.ThrewProjectile += Handler.OnThrown;
 
-            Arguments.Initialize();
-            Arguments.Register();
-            
-            if (Config.EnablesssSettings)
-            {
-                try
-                {
-                    _settings =
-                    [
-                        new SSGroupHeader(Config.KeybingSettingHeaderName),
+                        Arguments.Initialize();
+                        Arguments.Register();
+
+                        if (Config.EnablesssSettings)
+                        {
+                                try
+                                {
+                                        _settings =
+                                        [
+                                            new SSGroupHeader(Config.KeybingSettingHeaderName),
                         new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
-                    ];
-                }
-                catch (Exception e)
-                {
-                    LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
-                }
+                                        ];
+                                }
+                                catch (Exception e)
+                                {
+                                        LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
+                                }
 
-                try
-                {
-                    ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
-                    ServerSpecificSettingsSync.SendToAll();
-                }
-                catch (Exception e)
-                {
-                    LogManager.Error($"Failed to send settings: {e.Message}\n{e.StackTrace}");
-                }   
-            }
+                                try
+                                {
+                                        ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
+                                        ServerSpecificSettingsSync.SendToAll();
+                                }
+                                catch (Exception e)
+                                {
+                                        LogManager.Error($"Failed to send settings: {e.Message}\n{e.StackTrace}");
+                                }
+                        }
 
-            LogManager.History.Clear();
+                        LogManager.History.Clear();
 
-            LogManager.Info("===========================================");
-            LogManager.Info("Thanks for using UncomplicatedCustomItems");
-            LogManager.Info($"    by {Author}");
-            LogManager.Info("===========================================");
+                        LogManager.Info("===========================================");
+                        LogManager.Info("Thanks for using UncomplicatedCustomItems");
+                        LogManager.Info($"    by {Author}");
+                        LogManager.Info("===========================================");
 #if EXILED
             LogManager.Info($"Loaded from Exiled! [{Exiled.Loader.Loader.Version} - {RequiredExiledVersion}]");
 #else
-            LogManager.Info($"Loaded from LabAPI [{LabApi.Features.LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
+                        LogManager.Info($"Loaded from LabAPI [{LabApi.Features.LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
 #endif
-            LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+                        LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
-            /*
-            if (IsPrerelease)
-            {
-                if (!Instance.Config.Debug)
-                {
-                    LogManager.Info("Debug logs have been activated!");
-                    Instance.Config.Debug = true;
-                    DebugMode = true;
-                }
-            }
-            */
+                        /*
+                        if (IsPrerelease)
+                        {
+                            if (!Instance.Config.Debug)
+                            {
+                                LogManager.Info("Debug logs have been activated!");
+                                Instance.Config.Debug = true;
+                                DebugMode = true;
+                            }
+                        }
+                        */
 
-            Events.Internal.Player.Register();
-            Events.Internal.Server.Register();
-            
-            FileConfig.Welcome(loadExamples: true);
-            FileConfig.Welcome(Server.Port.ToString());
-            FileConfig.Welcome("Actions");
-            FileConfig.LoadAll();
-            FileConfig.LoadAll(Server.Port.ToString());
-            FileConfig.LoadAll("Actions");
+                        Events.Internal.Player.Register();
+                        Events.Internal.Server.Register();
+
+                        FileConfig.Welcome(loadExamples: true);
+                        FileConfig.Welcome(Server.Port.ToString());
+                        FileConfig.Welcome("Actions");
+                        FileConfig.LoadAll();
+                        FileConfig.LoadAll(Server.Port.ToString());
+                        FileConfig.LoadAll("Actions");
 
 #if EXILED
             _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #else
-            _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+                        _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #endif
-            _harmony.PatchAll();
+                        _harmony.PatchAll();
 #if EXILED
             if (Round.IsStarted)
 #else
-            if (Round.IsRoundStarted)
+                        if (Round.IsRoundStarted)
 #endif
-                Events.Internal.Server.SpawnItemsOnRoundStarted();
+                                Events.Internal.Server.SpawnItemsOnRoundStarted();
 
-            if (Instance.Config.AllowDevPermissions)
-                LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
+                        if (Instance.Config.AllowDevPermissions)
+                                LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 
 #if EXILED
             base.OnEnabled();
 #endif
-        }
+                }
 #if EXILED
         public override void OnDisabled()
 #else
@@ -199,7 +200,7 @@ namespace UncomplicatedCustomItems
             ECRIntegration.Cleanup();
             Events.Internal.Player.Unregister();
             Events.Internal.Server.Unregister();
-
+            
             // Cleanup
             CustomItem.List.Clear();
             CustomItem.UnregisteredCustomItems.Clear();

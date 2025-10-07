@@ -24,6 +24,8 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public static List<ICustomItem> UnregisteredList => UnregisteredCustomItems.Values.ToList();
 
+        internal static List<ErrorCustomItem> ErrorCustomItems { get; set; } = [];
+
         internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = new();
         internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = new();
 

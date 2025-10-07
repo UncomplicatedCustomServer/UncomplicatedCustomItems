@@ -34,6 +34,7 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Info());
             Subcommands.Add(new Get());
             Subcommands.Add(new ToolGun());
+            Subcommands.Add(new Errors());
 
             Subcommands.Add(new PresenceDebug());
             Subcommands.Add(new EquipCustomItemDebug());

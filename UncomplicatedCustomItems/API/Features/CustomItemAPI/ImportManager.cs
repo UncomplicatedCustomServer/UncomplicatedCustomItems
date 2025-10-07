@@ -17,11 +17,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
     internal class ImportManager
     {
-#if EXILED
-        public static List<IPlugin<IConfig>> ActivePlugins => new();
-
-        public const float WaitingTime = 5f;
-
         private static bool _alreadyLoaded = false;
 
         public static void Init()
@@ -37,7 +32,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         internal static Type[] CustomItemTypes =
         [
             typeof(CustomArmor),
-            typeof(CustomCandy),
             typeof(CustomExplosiveGrenade),
             typeof(CustomFlashGrenade),
             typeof(CustomKeycard),
@@ -50,10 +44,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             typeof(ToolGun)
         ];
 
+#if EXILED
+        public static List<IPlugin<IConfig>> ActivePlugins => new();
+
         internal static void Actor()
         {
             LogManager.Info($"{nameof(ImportManager.Actor)}: Checking for CustomItems registered in other plugins to import...");
-
             _alreadyLoaded = true;
 
             foreach (IPlugin<IConfig> plugin in Loader.Plugins)
@@ -75,10 +71,9 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                             APICustomItem.Register(Item);
                         }
+
                         if (attribs != null && attribs.Length > 0 && type.IsSubclassOf(typeof(CustomItem)) || type.IsSubclassOf(typeof(ICustomItem)))
-                        {
                             LogManager.Warn($"{type.FullName} is using a old version of the CustomItem API. For the CustomItem to be loaded and registered it MUST be updated to the new version");
-                        }
                     }
                     catch (Exception e)
                     {
@@ -88,39 +83,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
 #else
         public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins => [];
-
-        private static bool _alreadyLoaded = false;
-
-        public static void Init()
-        {
-            if (_alreadyLoaded)
-                return;
-
-            ActivePlugins.Clear();
-            // Call a delayed task
-            Task.Run(Actor);
-        }
-
-        internal static Type[] CustomItemTypes =
-        [
-            typeof(CustomArmor),
-            typeof(CustomCandy),
-            typeof(CustomExplosiveGrenade),
-            typeof(CustomFlashGrenade),
-            typeof(CustomKeycard),
-            typeof(CustomWeapon),
-            typeof(CustomSCP127),
-            typeof(CustomSCP207),
-            typeof(CustomSCP244),
-            typeof(CustomSCP268),
-            typeof(CustomSCP1853),
-            typeof(ToolGun)
-        ];
-
+        
         internal static void Actor()
         {
             LogManager.Info($"{nameof(ImportManager)}: Checking for CustomItems registered in other plugins to import...");
-
             _alreadyLoaded = true;
 
             foreach (var dic in LabApi.Loader.PluginLoader.Plugins)
@@ -143,10 +109,9 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                             APICustomItem.Register(Item);
                         }
+
                         if (attribs != null && attribs.Length > 0 && type.IsSubclassOf(typeof(CustomItem)) || type.IsSubclassOf(typeof(ICustomItem)))
-                        {
                             LogManager.Warn($"{type.FullName} is using a old version of the CustomItem API. For the CustomItem to be loaded and registered it MUST be updated to the new version");
-                        }
                     }
                     catch (Exception e)
                     {

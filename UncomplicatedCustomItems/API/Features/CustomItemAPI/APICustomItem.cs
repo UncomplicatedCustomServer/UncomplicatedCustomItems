@@ -1,3 +1,5 @@
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.Scp914Events;
 using LabApi.Features.Wrappers;
 using MapGeneration;
 using System;
@@ -5,7 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.Events.Arguments.ItemInspectionEvents;
 using UnityEngine;
+using UncomplicatedCustomItems.Events.Handlers;
+using MEC;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
@@ -69,7 +74,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
             return 0;
         }
-        
+
         public static void SummonItem(APICustomItem item)
         {
             if (item.SpawnLocations.Count() >= 1)
@@ -179,6 +184,28 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             return false;
         }
 
+#nullable enable
+
+        public virtual bool Check(Pickup? pickup)
+        {
+            if (pickup != null)
+                return SummonedAPICustomItem.SerialList.Contains(pickup.Serial);
+
+            return false;
+        }
+
+        public virtual bool Check(Item? item)
+        {
+            if (item != null)
+                return SummonedAPICustomItem.SerialList.Contains(item.Serial);
+
+            return false;
+        }
+
+        public virtual bool Check(Player? player) => Check(player?.CurrentItem);
+
+#nullable disable
+
         /// <summary>
         /// The unique Id of the Custom Item. Can't be less than 1
         /// </summary>
@@ -285,5 +312,194 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// The <see cref="ItemType"/> (Base) of the Custom Item
         /// </summary>
         public abstract ItemType Item { get; set; }
+
+        public virtual void RegisterEvents()
+        {
+            ItemInspectionEvents.InspectingItem += new LabApi.Events.LabEventHandler<InspectingItemEventArgs>(InternalOnInspecting);
+            LabApi.Events.Handlers.PlayerEvents.Dying += new LabApi.Events.LabEventHandler<PlayerDyingEventArgs>(InternalOnDying);
+            LabApi.Events.Handlers.PlayerEvents.DroppingItem += new LabApi.Events.LabEventHandler<PlayerDroppingItemEventArgs>(InternalOnDropping);
+            LabApi.Events.Handlers.PlayerEvents.ChangingItem += new LabApi.Events.LabEventHandler<PlayerChangingItemEventArgs>(InternalOnChangingItem);
+            LabApi.Events.Handlers.PlayerEvents.Escaping += new LabApi.Events.LabEventHandler<PlayerEscapingEventArgs>(InternalOnOwnerEscaping);
+            LabApi.Events.Handlers.PlayerEvents.PickingUpItem += new LabApi.Events.LabEventHandler<PlayerPickingUpItemEventArgs>(InternalOnPickingUp);
+            LabApi.Events.Handlers.PlayerEvents.PickedUpItem += new LabApi.Events.LabEventHandler<PlayerPickedUpItemEventArgs>(InternalOnPickup);
+            LabApi.Events.Handlers.Scp914Events.ProcessingPickup += new LabApi.Events.LabEventHandler<Scp914ProcessingPickupEventArgs>(InternalOnUpgradingPickup);
+            LabApi.Events.Handlers.PlayerEvents.Cuffed -= new LabApi.Events.LabEventHandler<PlayerCuffedEventArgs>(InternalOnOwnerHandCuffed);
+            LabApi.Events.Handlers.PlayerEvents.Cuffing += new LabApi.Events.LabEventHandler<PlayerCuffingEventArgs>(InternalOnOwnerHandcuffing);
+            LabApi.Events.Handlers.PlayerEvents.ChangingRole += new LabApi.Events.LabEventHandler<PlayerChangingRoleEventArgs>(InternalOnOwnerChangingRole);
+            LabApi.Events.Handlers.Scp914Events.ProcessingInventoryItem += new LabApi.Events.LabEventHandler<Scp914ProcessingInventoryItemEventArgs>(InternalOnUpgradingInventoryItem);
+            ItemInspectionEvents.InspectedItem += new LabApi.Events.LabEventHandler<InspectedItemEventArgs>(InternalOnInspected);
+            LabApi.Events.Handlers.PlayerEvents.ThrowingItem += new LabApi.Events.LabEventHandler<PlayerThrowingItemEventArgs>(InternalOnThrowingItem);
+            LabApi.Events.Handlers.PlayerEvents.ThrewItem += new LabApi.Events.LabEventHandler<PlayerThrewItemEventArgs>(InternalOnThrownItem);
+            LabApi.Events.Handlers.PlayerEvents.DroppedItem += new LabApi.Events.LabEventHandler<PlayerDroppedItemEventArgs>(InternalOnDropped);
+            LabApi.Events.Handlers.PlayerEvents.ChangedItem += new LabApi.Events.LabEventHandler<PlayerChangedItemEventArgs>(InternalOnChangedItem);
+            LabApi.Events.Handlers.PlayerEvents.Death += new LabApi.Events.LabEventHandler<PlayerDeathEventArgs>(InternalOnDied);
+        }
+
+        public virtual void UnregisterEvents()
+        {
+            ItemInspectionEvents.InspectingItem += new LabApi.Events.LabEventHandler<InspectingItemEventArgs>(InternalOnInspecting);
+            LabApi.Events.Handlers.PlayerEvents.Dying -= new LabApi.Events.LabEventHandler<PlayerDyingEventArgs>(InternalOnDying);
+            LabApi.Events.Handlers.PlayerEvents.DroppingItem -= new LabApi.Events.LabEventHandler<PlayerDroppingItemEventArgs>(InternalOnDropping);
+            LabApi.Events.Handlers.PlayerEvents.ChangingItem -= new LabApi.Events.LabEventHandler<PlayerChangingItemEventArgs>(InternalOnChangingItem);
+            LabApi.Events.Handlers.PlayerEvents.Escaping -= new LabApi.Events.LabEventHandler<PlayerEscapingEventArgs>(InternalOnOwnerEscaping);
+            LabApi.Events.Handlers.PlayerEvents.PickingUpItem -= new LabApi.Events.LabEventHandler<PlayerPickingUpItemEventArgs>(InternalOnPickingUp);
+            LabApi.Events.Handlers.PlayerEvents.PickedUpItem -= new LabApi.Events.LabEventHandler<PlayerPickedUpItemEventArgs>(InternalOnPickup);
+            LabApi.Events.Handlers.Scp914Events.ProcessingPickup -= new LabApi.Events.LabEventHandler<Scp914ProcessingPickupEventArgs>(InternalOnUpgradingPickup);
+            LabApi.Events.Handlers.PlayerEvents.Cuffed -= new LabApi.Events.LabEventHandler<PlayerCuffedEventArgs>(InternalOnOwnerHandCuffed);
+            LabApi.Events.Handlers.PlayerEvents.Cuffing -= new LabApi.Events.LabEventHandler<PlayerCuffingEventArgs>(InternalOnOwnerHandcuffing);
+            LabApi.Events.Handlers.PlayerEvents.ChangingRole -= new LabApi.Events.LabEventHandler<PlayerChangingRoleEventArgs>(InternalOnOwnerChangingRole);
+            LabApi.Events.Handlers.Scp914Events.ProcessingInventoryItem -= new LabApi.Events.LabEventHandler<Scp914ProcessingInventoryItemEventArgs>(InternalOnUpgradingInventoryItem);
+            ItemInspectionEvents.InspectedItem -= new LabApi.Events.LabEventHandler<InspectedItemEventArgs>(InternalOnInspected);
+            LabApi.Events.Handlers.PlayerEvents.ThrowingItem -= new LabApi.Events.LabEventHandler<PlayerThrowingItemEventArgs>(InternalOnThrowingItem);
+            LabApi.Events.Handlers.PlayerEvents.ThrewItem -= new LabApi.Events.LabEventHandler<PlayerThrewItemEventArgs>(InternalOnThrownItem);
+            LabApi.Events.Handlers.PlayerEvents.DroppedItem -= new LabApi.Events.LabEventHandler<PlayerDroppedItemEventArgs>(InternalOnDropped);
+            LabApi.Events.Handlers.PlayerEvents.ChangedItem -= new LabApi.Events.LabEventHandler<PlayerChangedItemEventArgs>(InternalOnChangedItem);
+            LabApi.Events.Handlers.PlayerEvents.Death -= new LabApi.Events.LabEventHandler<PlayerDeathEventArgs>(InternalOnDied);
+        }
+
+        private void InternalOnOwnerHandCuffed(PlayerCuffedEventArgs ev)
+        {
+            if (Check(ev.Player))
+                OnCuffed(ev);
+        }
+        private void InternalOnOwnerHandcuffing(PlayerCuffingEventArgs ev)
+        {
+            if (Check(ev.Player))
+                OnCuffing(ev);
+        }
+
+        private void InternalOnUpgradingInventoryItem(Scp914ProcessingInventoryItemEventArgs ev)
+        {
+            if (Check(ev.Item))
+            {
+                ev.IsAllowed = false;
+                OnUpgradingItem(ev);
+            }
+        }
+
+        private void InternalOnUpgradingPickup(Scp914ProcessingPickupEventArgs ev) 
+        {
+            if (Check(ev.Pickup))
+            {
+                ev.IsAllowed = false;
+                Timing.CallDelayed(3.5f, delegate
+                {
+                    ev.Pickup.Position = ev.NewPosition;
+                    OnUpgradingPickup(ev);
+                });
+            }
+        }
+
+        private void InternalOnOwnerChangingRole(PlayerChangingRoleEventArgs ev)
+        {
+            foreach (Item item in ev.Player.Items.ToList())
+            {
+                if (Check(item))
+                    OnChangingRole(ev);
+            }
+        }
+
+        private void InternalOnOwnerEscaping(PlayerEscapingEventArgs ev)
+        {
+            foreach (Item item in ev.Player.Items.ToList())
+            {
+                if (Check(item))
+                    OnEscaping(ev);
+            }
+            
+        }
+        private void InternalOnInspecting(InspectingItemEventArgs ev)
+        {
+            if (Check(ev.Item))
+                OnInspecting(ev);
+
+        }
+        private void InternalOnInspected(InspectedItemEventArgs ev)
+        {
+            if (Check(ev.Item))
+                OnInspected(ev);
+
+        }
+        private void InternalOnThrowingItem(PlayerThrowingItemEventArgs ev)
+        {
+            if (Check(ev.Pickup))
+                OnThrowingItem(ev);
+
+        }
+        private void InternalOnThrownItem(PlayerThrewItemEventArgs ev)
+        {
+            if (Check(ev.Pickup))
+                OnThrownItem(ev);
+
+        }
+        private void InternalOnPickingUp(PlayerPickingUpItemEventArgs ev)
+        {
+            if (Check(ev.Pickup))
+                OnPickingUp(ev);
+
+        }
+        private void InternalOnPickup(PlayerPickedUpItemEventArgs ev)
+        {
+            if (Check(ev.Item))
+                OnPickup(ev);
+        }
+        private void InternalOnDropping(PlayerDroppingItemEventArgs ev)
+        {
+            if (Check(ev.Item))
+                OnDropping(ev);
+
+        }
+        private void InternalOnDropped(PlayerDroppedItemEventArgs ev)
+        {
+            if (Check(ev.Pickup))
+                OnDropped(ev);
+
+        }
+        private void InternalOnChangedItem(PlayerChangedItemEventArgs ev)
+        {
+            if (Check(ev.NewItem))
+                OnChangedItem(ev);
+
+        }
+        private void InternalOnChangingItem(PlayerChangingItemEventArgs ev)
+        {
+            if (Check(ev.NewItem))
+                OnChangingItem(ev);
+        }
+        private void InternalOnDying(PlayerDyingEventArgs ev) 
+        {
+            foreach (Item item in ev.Player.Items.ToList())
+            {
+                if (Check(item))
+                    OnDying(ev);
+            }
+        }
+        private void InternalOnDied(PlayerDeathEventArgs ev) 
+        {
+            foreach (Item item in ev.Player.Items.ToList())
+            {
+                if (Check(item))
+                    OnDied(ev);
+            }
+        }
+
+        protected virtual void OnEscaping(PlayerEscapingEventArgs ev) { }
+        protected virtual void OnChangingRole(PlayerChangingRoleEventArgs ev) { }
+        protected virtual void OnCuffed(PlayerCuffedEventArgs ev) { }
+        protected virtual void OnCuffing(PlayerCuffingEventArgs ev) { }
+        protected virtual void OnUpgradingItem(Scp914ProcessingInventoryItemEventArgs ev) { }
+        protected virtual void OnUpgradingPickup(Scp914ProcessingPickupEventArgs ev) { }
+        protected virtual void OnInspecting(InspectingItemEventArgs ev) { }
+        protected virtual void OnInspected(InspectedItemEventArgs ev) { }
+        protected virtual void OnThrowingItem(PlayerThrowingItemEventArgs ev) { }
+        protected virtual void OnThrownItem(PlayerThrewItemEventArgs ev) { }
+        protected virtual void OnPickingUp(PlayerPickingUpItemEventArgs ev) { }
+        protected virtual void OnPickup(PlayerPickedUpItemEventArgs ev) { }
+        protected virtual void OnDropping(PlayerDroppingItemEventArgs ev) { }
+        protected virtual void OnDropped(PlayerDroppedItemEventArgs ev) { }
+        protected virtual void OnChangedItem(PlayerChangedItemEventArgs ev) { }
+        protected virtual void OnChangingItem(PlayerChangingItemEventArgs ev) { }
+        protected virtual void OnDying(PlayerDyingEventArgs ev) { }
+        protected virtual void OnDied(PlayerDeathEventArgs ev) { }
     }
 }

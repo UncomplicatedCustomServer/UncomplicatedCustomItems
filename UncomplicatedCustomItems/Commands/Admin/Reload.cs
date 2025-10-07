@@ -1,5 +1,4 @@
 ﻿using CommandSystem;
-using Exiled.CustomItems;
 using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
@@ -10,7 +9,6 @@ using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {

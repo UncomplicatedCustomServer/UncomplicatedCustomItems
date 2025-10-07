@@ -519,6 +519,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Features\CustomItemAPI\ToolGun.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\SCPCustomitem.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP244.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP207.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP1853.cs" />
@@ -537,6 +538,7 @@
     <Compile Include="API\Attributes\CommonTypesAttribute.cs" />
     <Compile Include="API\Attributes\EventTypeAttribute.cs" />
     <Compile Include="API\Attributes\PluginCustomItem.cs" />
+    <Compile Include="API\Components\CollisionHandler.cs" />
     <Compile Include="API\Components\ToolGunUI.cs" />
     <Compile Include="API\Enums\CommonTypes.cs" />
     <Compile Include="API\Enums\LockerType.cs" />
@@ -589,6 +591,7 @@
     <Compile Include="API\Wrappers\CustomKeycard.cs" />
     <Compile Include="API\YAMLCaster.cs" />
     <Compile Include="Commands\SilentCommandSender.cs" />
+    <Compile Include="Commands\Admin\Errors.cs" />
     <Compile Include="Commands\Admin\Generate.cs" />
     <Compile Include="Commands\Admin\Get.cs" />
     <Compile Include="Commands\Admin\Info.cs" />
@@ -609,6 +612,7 @@
     <Compile Include="Commands\User\Info.cs" />
     <Compile Include="Commands\User\Use.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="API\Features\ErrorCustomItem.cs" />
     <Compile Include="API\Features\CustomItem.cs" />
     <Compile Include="API\Features\SpecificData\AdrenalineData.cs" />
     <Compile Include="API\Features\SpecificData\CandyData.cs" />
@@ -632,7 +636,10 @@
     <Compile Include="API\Enums\FirearmType.cs" />
     <Compile Include="API\Enums\ItemEvents.cs" />
     <Compile Include="API\Enums\CustomFlags.cs" />
+    <Compile Include="Events\Handlers\ItemInspectionEvents.cs" />
     <Compile Include="Events\Handlers\CustomItemEvents.cs" />
+    <Compile Include="Events\Arguments\ItemInspectionEvents\InspectingItemEventArgs.cs" />
+    <Compile Include="Events\Arguments\ItemInspectionEvents\InspectedItemEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\RunningCustomItemCommandEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\RanCustomItemCommandEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\CheckingCustomFlagEventArgs.cs" />
@@ -666,6 +673,7 @@
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\MagazineModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\ActionModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\HumeShieldPatches.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\GrenadePatches.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\LockerSpawningItemPrefix.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\LinearADSModulePostfix.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP268CooldownTimeTranspiler.cs" />

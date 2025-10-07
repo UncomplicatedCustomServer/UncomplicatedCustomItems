@@ -1,3 +1,5 @@
+using LabApi.Events.Arguments.PlayerEvents;
+
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
     public abstract class CustomKeycard : APICustomItem

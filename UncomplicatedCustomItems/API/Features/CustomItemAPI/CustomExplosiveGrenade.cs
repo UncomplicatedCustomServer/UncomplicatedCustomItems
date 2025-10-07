@@ -1,5 +1,11 @@
 using CustomPlayerEffects;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Features.Wrappers;
 using PlayerRoles;
+using UncomplicatedCustomItems.API.Components;
+using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
@@ -59,5 +65,62 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// Gets or sets the door damage multiplier applied.
         /// </summary>
         public abstract float DoorDamageMultiplier { get; set; }
+
+        public override void RegisterEvents()
+        {
+            ServerEvent.ProjectileExploding += new LabApi.Events.LabEventHandler<ProjectileExplodingEventArgs>(InternalOnDetonating);
+            ServerEvent.ProjectileExploded += new LabApi.Events.LabEventHandler<ProjectileExplodedEventArgs>(InternalOnDetonated);
+            PlayerEvent.ThrowingProjectile += new LabApi.Events.LabEventHandler<PlayerThrowingProjectileEventArgs>(InternalOnThrowing);
+            PlayerEvent.ThrewProjectile += new LabApi.Events.LabEventHandler<PlayerThrewProjectileEventArgs>(InternalOnThrown);
+
+            base.RegisterEvents();
+        }
+
+        public override void UnregisterEvents()
+        {
+            ServerEvent.ProjectileExploding -= new LabApi.Events.LabEventHandler<ProjectileExplodingEventArgs>(InternalOnDetonating);
+            ServerEvent.ProjectileExploded -= new LabApi.Events.LabEventHandler<ProjectileExplodedEventArgs>(InternalOnDetonated);
+            PlayerEvent.ThrowingProjectile -= new LabApi.Events.LabEventHandler<PlayerThrowingProjectileEventArgs>(InternalOnThrowing);
+            PlayerEvent.ThrewProjectile -= new LabApi.Events.LabEventHandler<PlayerThrewProjectileEventArgs>(InternalOnThrown);
+
+            base.UnregisterEvents();
+        }
+
+        private void InternalOnDetonating(ProjectileExplodingEventArgs ev)
+        {
+            if (Check(ev.TimedGrenade))
+                OnDetonating(ev);
+        }
+
+        private void InternalOnDetonated(ProjectileExplodedEventArgs ev)
+        {
+            if (Check(ev.TimedGrenade))
+                OnDetonated(ev);
+        }
+
+        private void InternalOnThrowing(PlayerThrowingProjectileEventArgs ev)
+        {
+            if (Check(ev.ThrowableItem))
+                OnThrowing(ev);
+        }
+
+        private void InternalOnThrown(PlayerThrewProjectileEventArgs ev)
+        {
+            if (Check(ev.ThrowableItem))
+            {
+                OnThrown(ev);
+                if (ev.Projectile is TimedGrenadeProjectile timedprojectile)
+                    timedprojectile.RemainingTime = FuseTime;
+                if (ExplodeOnImpact)
+                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? LabApi.Features.Wrappers.Player.Host).GameObject, ev.Projectile.Base);         
+            }
+
+        }
+
+
+        protected virtual void OnDetonating(ProjectileExplodingEventArgs ev) { }
+        protected virtual void OnDetonated(ProjectileExplodedEventArgs ev) { }
+        protected virtual void OnThrowing(PlayerThrowingProjectileEventArgs ev) { }
+        protected virtual void OnThrown(PlayerThrewProjectileEventArgs ev) { }
     }
 }

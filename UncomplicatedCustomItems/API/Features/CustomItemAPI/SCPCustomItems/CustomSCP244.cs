@@ -1,6 +1,6 @@
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomSCP244 : APICustomItem
+    public abstract class CustomSCP244 : SCPCustomItem
     {
         public abstract float ActivationDot { get; set; }
         public abstract float Health { get; set; }

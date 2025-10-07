@@ -3,13 +3,13 @@ using UncomplicatedCustomItems.API.Features.CandySerialization;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomCandy : APICustomItem
+    internal abstract class CustomCandy : APICustomItem
     {
         /// <summary>
         /// Set when the user gets the candy
         /// </summary>
         public SerializedCandy SerializedCandy { get; internal set; }
-        
+
         /// <summary>
         /// Gets or sets the Candy Type to spawn as
         /// </summary>

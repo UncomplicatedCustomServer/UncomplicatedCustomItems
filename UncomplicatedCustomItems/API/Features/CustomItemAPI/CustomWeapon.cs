@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using InventorySystem.Items.Firearms.Attachments;
+using LabApi.Events.Arguments.PlayerEvents;
+using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
@@ -54,5 +56,94 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// Gets or sets if the <see cref="CustomItem"/> can damage the friendly team.
         /// </summary>
         public abstract bool EnableFriendlyFire { get; set; }
+
+        public override void RegisterEvents()
+        {
+            PlayerEvent.ShotWeapon += new LabApi.Events.LabEventHandler<PlayerShotWeaponEventArgs>(InternalOnShot);
+            PlayerEvent.ShootingWeapon += new LabApi.Events.LabEventHandler<PlayerShootingWeaponEventArgs>(InternalOnShooting);
+            PlayerEvent.Hurt += new LabApi.Events.LabEventHandler<PlayerHurtEventArgs>(InternalOnHurt);
+            PlayerEvent.Hurting += new LabApi.Events.LabEventHandler<PlayerHurtingEventArgs>(InternalOnHurting);
+            PlayerEvent.ReloadedWeapon += new LabApi.Events.LabEventHandler<PlayerReloadedWeaponEventArgs>(InternalOnReloaded);
+            PlayerEvent.ReloadingWeapon += new LabApi.Events.LabEventHandler<PlayerReloadingWeaponEventArgs>(InternalOnReloading);
+            PlayerEvent.ChangingAttachments += new LabApi.Events.LabEventHandler<PlayerChangingAttachmentsEventArgs>(InternalOnChangingAttachments);
+            PlayerEvent.ChangedAttachments += new LabApi.Events.LabEventHandler<PlayerChangedAttachmentsEventArgs>(InternalOnChangedAttachments);
+
+            base.RegisterEvents();
+        }
+
+        public override void UnregisterEvents()
+        {
+            PlayerEvent.ShotWeapon -= new LabApi.Events.LabEventHandler<PlayerShotWeaponEventArgs>(InternalOnShot);
+            PlayerEvent.ShootingWeapon -= new LabApi.Events.LabEventHandler<PlayerShootingWeaponEventArgs>(InternalOnShooting);
+            PlayerEvent.Hurt -= new LabApi.Events.LabEventHandler<PlayerHurtEventArgs>(InternalOnHurt);
+            PlayerEvent.Hurting -= new LabApi.Events.LabEventHandler<PlayerHurtingEventArgs>(InternalOnHurting);
+            PlayerEvent.ReloadedWeapon -= new LabApi.Events.LabEventHandler<PlayerReloadedWeaponEventArgs>(InternalOnReloaded);
+            PlayerEvent.ReloadingWeapon -= new LabApi.Events.LabEventHandler<PlayerReloadingWeaponEventArgs>(InternalOnReloading);
+            PlayerEvent.ChangingAttachments -= new LabApi.Events.LabEventHandler<PlayerChangingAttachmentsEventArgs>(InternalOnChangingAttachments);
+            PlayerEvent.ChangedAttachments -= new LabApi.Events.LabEventHandler<PlayerChangedAttachmentsEventArgs>(InternalOnChangedAttachments);
+
+            base.UnregisterEvents();
+        }
+
+        private void InternalOnShooting(PlayerShootingWeaponEventArgs ev)
+        {
+            if (Check(ev.FirearmItem))
+                OnShooting(ev);
+        }
+
+        private void InternalOnShot(PlayerShotWeaponEventArgs ev)
+        {
+            if (Check(ev.FirearmItem))
+                OnShot(ev);
+        }
+
+        private void InternalOnHurt(PlayerHurtEventArgs ev)
+        {
+            if (Check(ev.Attacker))
+                OnHurt(ev);
+
+        }
+
+        private void InternalOnHurting(PlayerHurtingEventArgs ev)
+        {
+            if (Check(ev.Attacker))
+                OnHurting(ev);
+
+        }
+
+        private void InternalOnReloaded(PlayerReloadedWeaponEventArgs ev)
+        {
+            if (Check(ev.FirearmItem))
+                OnReloaded(ev);
+
+        }
+        
+        private void InternalOnReloading(PlayerReloadingWeaponEventArgs ev)
+        {
+            if (Check(ev.FirearmItem))
+                OnReloading(ev);
+        }
+        
+        private void InternalOnChangingAttachments(PlayerChangingAttachmentsEventArgs ev)
+        {
+            if (Check(ev.FirearmItem))
+                OnChangingAttachments(ev);
+        }
+        
+        private void InternalOnChangedAttachments(PlayerChangedAttachmentsEventArgs ev)
+        {
+            if (Check(ev.FirearmItem))
+                OnChangedAttachments(ev);
+        }
+        
+
+        protected virtual void OnShooting(PlayerShootingWeaponEventArgs ev) { }
+        protected virtual void OnShot(PlayerShotWeaponEventArgs ev) { }
+        protected virtual void OnHurt(PlayerHurtEventArgs ev) { }
+        protected virtual void OnHurting(PlayerHurtingEventArgs ev) { }
+        protected virtual void OnReloaded(PlayerReloadedWeaponEventArgs ev) { }
+        protected virtual void OnReloading(PlayerReloadingWeaponEventArgs ev) { }
+        protected virtual void OnChangingAttachments(PlayerChangingAttachmentsEventArgs ev) { }
+        protected virtual void OnChangedAttachments(PlayerChangedAttachmentsEventArgs ev) { }
     }
 }

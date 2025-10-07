@@ -65,11 +65,6 @@ namespace UncomplicatedCustomItems.API.Features
         private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
 
         /// <summary>
-        /// Stores the original badge status for players who have had a custom item badge applied. Key is Player ID, Value is true if the badge was hidden.
-        /// </summary>
-        public static Dictionary<int, bool> PlayerBadges = [];
-
-        /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item
         /// </summary>
         public ICustomItem CustomItem { get; internal set; }
@@ -787,11 +782,12 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 if (Owner == null)
                     Light.Intensity = 0;
-                else if (Owner.CurrentItem == null)
+                if (Owner.CurrentItem == null)
                     Light.Intensity = 0;
-                else if (Serial != Owner.CurrentItem.Serial)
+                if (Serial != Owner.CurrentItem.Serial)
                     Light.Intensity = 0;
-                else if (Toggled)
+
+                if (Toggled)
                 {
                     IFlashlightData data = CustomItem.CustomData as IFlashlightData;
                     Light.Intensity = data.Intensity;
@@ -801,28 +797,22 @@ namespace UncomplicatedCustomItems.API.Features
                 yield return Timing.WaitForOneFrame;
             }
         }
-
-        public void LoadBadge(Player player)
-        {
-            PlayerBadges.TryAdd(player.PlayerId, player.UserGroup.HiddenByDefault);
-            CustomItemBadgeApplier(player, CustomItem);
-        }
         
-        private void CustomItemBadgeApplier(Player player, ICustomItem item)
+        public void LoadBadge(Player player)
         {
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
 
             Triplet<string, string, bool>? badge = null;
-            if (item.BadgeName is not null && item.BadgeName.Length > 1 && item.BadgeColor is not null && item.BadgeColor.Length > 2)
+            if (CustomItem.BadgeName is not null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor is not null && CustomItem.BadgeColor.Length > 2)
             {
                 badge = new(player.GroupName ?? "", player.GroupColor ?? "", player.ReferenceHub.serverRoles.HasBadgeHidden);
-                LogManager.Debug($"Badge detected, putting {item.BadgeName}@{item.BadgeColor} to player {player.PlayerId}");
+                LogManager.Debug($"Badge detected, putting {CustomItem.BadgeName}@{CustomItem.BadgeColor} to player {player.PlayerId}");
 
-                player.GroupName = item.BadgeName.Replace("@hidden", "");
-                player.GroupColor = item.BadgeColor;
+                player.GroupName = CustomItem.BadgeName.Replace("@hidden", "");
+                player.GroupColor = CustomItem.BadgeColor;
 
-                if (item.BadgeName.Contains("@hidden"))
+                if (CustomItem.BadgeName.Contains("@hidden"))
                     if (player.ReferenceHub.serverRoles.TryHideTag())
                         LogManager.Debug("Tag successfully hidden!");
             }
@@ -833,18 +823,11 @@ namespace UncomplicatedCustomItems.API.Features
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
 
-            if (CustomItem.BadgeName.Length == 0)
-                return;
+            if (player.ReferenceHub.serverRoles.HasBadgeHidden)
+                player.ReferenceHub.serverRoles.RefreshHiddenTag();
+            else
+                player.ReferenceHub.serverRoles.RefreshLocalTag();
 
-            player.ReferenceHub.serverRoles.RefreshLocalTag();
-            if (PlayerBadges.TryGetValue(player.PlayerId, out bool hidden))
-            {
-                if (hidden)
-                {
-                    LogManager.Debug($"Hid {player.Nickname} badge.");
-                    player.ReferenceHub.serverRoles.TryHideTag();
-                }
-            }
             if (Plugin.Instance.Config.EnableCreditTags && player.UserId == "76561199150506472@steam")
             {
                 player.GroupName = "UCI Lead Developer";

@@ -28,6 +28,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// </summary>
         public static List<SummonedAPICustomItem> List => SummonedCustomItems.Values.ToList();
 
+        public static List<ushort> SerialList => SummonedCustomItems.Keys.ToList();
+
         internal static Dictionary<ushort, SummonedAPICustomItem> SummonedCustomItems { get; set; } = [];
 
         /// <summary>
@@ -73,6 +75,25 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             Pickup = pickup;
 
             SetProperties();
+            
+            switch (CustomItem)
+            {
+                case CustomWeapon weapon:
+                    weapon.RegisterEvents();
+                    break;
+                case CustomFlashGrenade flash:
+                    flash.RegisterEvents();
+                    break;
+                case CustomExplosiveGrenade grenade:
+                    grenade.RegisterEvents();
+                    break;
+                case SCPCustomItem scp:
+                    scp.RegisterEvents();
+                    break;
+                default:
+                    CustomItem.RegisterEvents();
+                    break;
+            }
 
             if (IsPickup)
                 Pickup.Rotation = rotation;
@@ -122,6 +143,24 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         {
             List.Remove(this);
             SummonedCustomItems.Remove(Serial);
+            switch (CustomItem)
+            {
+                case CustomWeapon weapon:
+                    weapon.UnregisterEvents();
+                    break;
+                case CustomFlashGrenade flash:
+                    flash.UnregisterEvents();
+                    break;
+                case CustomExplosiveGrenade grenade:
+                    grenade.UnregisterEvents();
+                    break;
+                case SCPCustomItem scp:
+                    scp.UnregisterEvents();
+                    break;
+                default:
+                    CustomItem.UnregisterEvents();
+                    break;
+            }
 
             if (IsPickup)
                 Pickup?.Destroy();
@@ -472,44 +511,21 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             SaveProperties();
         }
 
-
-        public string LoadBadge(Player player)
-        {
-            LogManager.Debug("LoadBadge Triggered");
-            string output = "Badge: ";
-
-            if (CustomItem.BadgeColor != string.Empty && CustomItem.BadgeName != string.Empty)
-            {
-                if (BadgeManager.colorMap.ContainsKey(CustomItem.BadgeColor))
-                    output += $"<color={BadgeManager.colorMap[CustomItem.BadgeColor]}>{CustomItem.BadgeName}</color>";
-                else
-                    output += $"{CustomItem.BadgeName.Replace("@hidden", "")}";
-            }
-            else
-                output += "None";
-
-            LogManager.Debug($"Badge loaded: {output}");
-
-            CustomItemBadgeApplier(player, CustomItem);
-
-            return output;
-        }
-
-        private void CustomItemBadgeApplier(Player player, APICustomItem item)
+        public void LoadBadge(Player player)
         {
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
 
             Triplet<string, string, bool>? badge = null;
-            if (item.BadgeName is not null && item.BadgeName.Length > 1 && item.BadgeColor is not null && item.BadgeColor.Length > 2)
+            if (CustomItem.BadgeName is not null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor is not null && CustomItem.BadgeColor.Length > 2)
             {
                 badge = new(player.GroupName ?? "", player.GroupColor ?? "", player.ReferenceHub.serverRoles.HasBadgeHidden);
-                LogManager.Debug($"Badge detected, putting {item.BadgeName}@{item.BadgeColor} to player {player.PlayerId}");
+                LogManager.Debug($"Badge detected, putting {CustomItem.BadgeName}@{CustomItem.BadgeColor} to player {player.PlayerId}");
 
-                player.GroupName = item.BadgeName.Replace("@hidden", "");
-                player.GroupColor = item.BadgeColor;
+                player.GroupName = CustomItem.BadgeName.Replace("@hidden", "");
+                player.GroupColor = CustomItem.BadgeColor;
 
-                if (item.BadgeName.Contains("@hidden"))
+                if (CustomItem.BadgeName.Contains("@hidden"))
                     if (player.ReferenceHub.serverRoles.TryHideTag())
                         LogManager.Debug("Tag successfully hidden!");
             }
@@ -520,10 +536,11 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
 
-            if (CustomItem.BadgeName.Length == 0)
-                return;
-
-            player.ReferenceHub.serverRoles.RefreshHiddenTag();
+            if (player.ReferenceHub.serverRoles.HasBadgeHidden)
+                player.ReferenceHub.serverRoles.RefreshHiddenTag();
+            else
+                player.ReferenceHub.serverRoles.RefreshLocalTag();
+                
             if (Plugin.Instance.Config.EnableCreditTags && player.UserId == "76561199150506472@steam")
             {
                 player.GroupName = "UCI Lead Developer";

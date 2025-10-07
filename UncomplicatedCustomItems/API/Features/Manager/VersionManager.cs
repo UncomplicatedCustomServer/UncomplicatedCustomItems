@@ -35,11 +35,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (VersionInfo.PreRelease)
             {
                 LogManager.Info($"\nNOTICE!\nYou are currently using version v{Plugin.Instance.Version.ToString(3)}, which is a PRE-RELEASE or an EXPERIMENTAL RELEASE of UncomplicatedCustomItems!\nLatest stable release: {Plugin.HttpManager.LatestVersion}\nNOTE: This is NOT a stable version, so there may be bugs and errors. For this reason, we do not recommend its use in production.");
-                if (VersionInfo.ForceDebug && !Plugin.Instance.DebugMode)
+                if (VersionInfo.ForceDebug)
                 {
                     LogManager.Info("Debug logs have been activated!");
                     Plugin.Instance.Config.Debug = true;
-                    Plugin.Instance.DebugMode = true;
                 }
             }
             else

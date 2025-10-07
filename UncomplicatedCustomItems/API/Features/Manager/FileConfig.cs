@@ -597,13 +597,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         YAMLCustomAction action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
                         CustomAction.Register(YAMLCaster.Converter(action));
-                        LogManager.Debug($"Registering external action {action.Id} [{action.Name}]");
+                        LogManager.Debug($"Registering action {action.Id} [{action.Name}]");
                     }
                     else
                     {
                         YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
                         CustomItem.Register(YAMLCaster.Converter(item));
-                        LogManager.Debug($"Registering external item {item.Id} [{item.Name}]");
+                        LogManager.Debug($"Registering item {item.Id} [{item.Name}]");
                     }
                 }
                 catch (Exception ex)
@@ -627,14 +627,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                     string fileContent = File.ReadAllText(FileName);
                     
-                    try 
+                    try
                     {
                         YAMLCustomItem Item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
-                        LogManager.Debug($"Proposed to the registerer the external item {Item.Id} [{Item.Name}] from file:\n{FileName}");
+                        LogManager.Debug($"Proposed to the registerer the item {Item.Id} [{Item.Name}] from file:\n{FileName}");
                         action(Item);
                     }
                     catch (YamlException yamlEx)
                     {
+                        CustomItem.ErrorCustomItems.Add(new ErrorCustomItem(FileName, File.ReadAllLines(FileName), yamlEx));
                         string errorMessage = $"Failed to parse {FileName}. YAML syntax error: {yamlEx.Message}";
 
                         if (yamlEx.Start.Line > 0)
@@ -651,11 +652,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         
                         if (Plugin.Instance.Config.Debug)
                         {
-                            LogManager.Error($"{errorMessage}\nStack trace: {yamlEx.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                            LogManager.Error($"{errorMessage}\nStack trace: {yamlEx.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
                         }
                         else
                         {
-                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
                         }
                     }
                     catch (Exception ex)
@@ -673,11 +674,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         
                         if (Plugin.Instance.Config.Debug)
                         {
-                            LogManager.Error($"{errorMessage}\nStack trace: {ex.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                            LogManager.Error($"{errorMessage}\nStack trace: {ex.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
                         }
                         else
                         {
-                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.thaumielscpsl.site/uciupdater");
+                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
                         }
                     }
                 }
@@ -706,7 +707,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                     string fileContent = File.ReadAllText(FileName);
                     YAMLCustomAction Action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
-                    LogManager.Debug($"Proposed to the registerer the external action {Action.Id} [{Action.Name}] from file:\n{FileName}");
+                    LogManager.Debug($"Proposed to the registerer the action {Action.Id} [{Action.Name}] from file:\n{FileName}");
                     action(Action);
                 }
                 catch (Exception ex)

@@ -1,6 +1,6 @@
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomSCP268 : APICustomItem
+    public abstract class CustomSCP268 : SCPCustomItem
     {
         public abstract bool ApplyScp268Effect { get; set; }
         public abstract float Duration { get; set; }
