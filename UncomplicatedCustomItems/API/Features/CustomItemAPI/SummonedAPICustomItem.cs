@@ -552,7 +552,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public void HandleSelectedDisplayHint()
         {
-            if (string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage))
+            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage))
                 Owner.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
 
         }
