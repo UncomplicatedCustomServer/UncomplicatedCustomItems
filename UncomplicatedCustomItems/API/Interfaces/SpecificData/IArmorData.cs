@@ -10,9 +10,6 @@ namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
         public abstract int HeadProtection { get; set; }
 
         public abstract int BodyProtection { get; set; }
-        
-        [Obsolete("No longer does anything obsoleted by EXILED")]
-        public abstract bool RemoveExcessOnDrop { get; set; }
 
         public abstract float StaminaUseMultiplier { get; set; }
         

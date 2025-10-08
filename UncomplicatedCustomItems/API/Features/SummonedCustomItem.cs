@@ -223,8 +223,6 @@ namespace UncomplicatedCustomItems.API.Features
                         armor.Base.HelmetEfficacy = armorData.HeadProtection;
                         armor.Base.VestEfficacy = armorData.BodyProtection;
                         armor.Base._staminaUseMultiplier = armorData.StaminaUseMultiplier;
-                        if (armorData.RemoveExcessOnDrop)
-                            LogManager.Warn($"Name: {CustomItem.Name} - ID: {CustomItem.Id}\n'RemoveExcessOnDrop' in ArmorData is deprecated and has no effect.");
                         break;
 
                     case CustomItemType.Weapon:
@@ -400,6 +398,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                                 if (!PropertiesSet)
                                     Scp127MagazineModule.AmmoStored = scp127Data.MaxAmmo;
+
                                 Scp127Hitscan.BaseDamage = scp127Data.Damage;
                                 Scp127Hitscan.BasePenetration = scp127Data.Penetration;
                                 Scp127Hitscan.BaseBulletInaccuracy = scp127Data.Inaccuracy;
@@ -1024,14 +1023,16 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void HandleSelectedDisplayHint()
         {
-            if (Plugin.Instance.Config.SelectedMessage.Length > 1)
+            if (string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage))
                 Owner.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
 
         }
 
         public void HandlePickedUpDisplayHint()
         {
-            if (Plugin.Instance.Config.PickedUpMessage.Length > 1)
+            if (Item.Type.IsArmor())
+                HandleSelectedDisplayHint();
+            else if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.PickedUpMessage))
                 Owner.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
         }
 

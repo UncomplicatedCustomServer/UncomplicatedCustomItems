@@ -20,13 +20,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual int BodyProtection { get; set; } = 3;
 
         /// <summary>
-        /// No longer does anything obsoleted
-        /// </summary>
-        [Obsolete("No longer does anything obsoleted by EXILED")]
-        [Description("No longer does anything obsoleted by EXILED")]
-        public virtual bool RemoveExcessOnDrop { get; set; } = true;
-
-        /// <summary>
         /// Gets or sets the stamina that this armor drains
         /// </summary>
         public virtual float StaminaUseMultiplier { get; set; } = 2f;

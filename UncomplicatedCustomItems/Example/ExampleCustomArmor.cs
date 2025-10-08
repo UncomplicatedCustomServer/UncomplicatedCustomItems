@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using CustomPlayerEffects;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Features.Wrappers;
+using MEC;
+using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
-using UnityEngine;
-using InventorySystem.Items.Firearms.Attachments;
-using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using UncomplicatedCustomItems.API.ToolGun;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.Examples
 {
@@ -22,7 +26,7 @@ namespace UncomplicatedCustomItems.Examples
         public override string Name { get; set; } = "Fast Armor";
 
         /// <inheritdoc/>
-        public override string Description { get; set; } = ":D";
+        public override string Description { get; set; } = "This will explode when you die...";
 
         /// <inheritdoc/>
         public override float Weight { get; set; } = 1.5f;
@@ -47,5 +51,42 @@ namespace UncomplicatedCustomItems.Examples
 
         /// <inheritdoc/>
         public override float StaminaRegenMultiplier { get; set; } = 30f;
+
+        protected override void OnPickup(PlayerPickedUpItemEventArgs ev)
+        {
+            foreach (Item item in ev.Player.Items.ToList())
+            {
+                if (Check(item))
+                    ev.Player.EnableEffect<MovementBoost>(20, float.MaxValue, false);
+            }
+
+            base.OnPickup(ev);
+        }
+
+        protected override void OnDropped(PlayerDroppedItemEventArgs ev)
+        {
+            foreach (Item item in ev.Player.Items.ToList())
+            {
+                if (Check(item))
+                    ev.Player.DisableEffect<MovementBoost>();
+            }
+
+            base.OnDropped(ev);
+        }
+
+        protected override void OnDying(PlayerDyingEventArgs ev)
+        {
+            foreach (Item item in ev.Player.Items.ToList())
+            {
+                if (Check(item))
+                {
+                    ev.Player.RemoveItem(item);
+                    ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)TimedGrenadeProjectile.SpawnActive(ev.Player.Position, ItemType.GrenadeHE, ev.Player, 0.1);
+                    grenade.MaxRadius = 20f;
+                }
+            }
+
+            base.OnDying(ev);
+        }
     }
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 using InventorySystem.Items.Firearms.Attachments;
 using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using LabApi.Events.Arguments.ServerEvents;
 
 namespace UncomplicatedCustomItems.Examples
 {
@@ -68,5 +69,14 @@ namespace UncomplicatedCustomItems.Examples
 
         /// <inheritdoc/>
         public override float DoorDamageMultiplier { get; set; } = 10f;
+
+        protected override void OnDetonated(ProjectileExplodedEventArgs ev)
+        {
+            if (!Check(ev.TimedGrenade))
+                return;
+
+
+            base.OnDetonated(ev);
+        }
     }
 }

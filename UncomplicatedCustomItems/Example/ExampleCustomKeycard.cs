@@ -67,5 +67,7 @@ namespace UncomplicatedCustomItems.Examples
 
         /// <inheritdoc/>
         public override int Rank { get; set; } = 2;
+
+
     }
 }

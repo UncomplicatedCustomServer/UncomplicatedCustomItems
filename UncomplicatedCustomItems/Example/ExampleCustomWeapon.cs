@@ -5,6 +5,8 @@ using UnityEngine;
 using InventorySystem.Items.Firearms.Attachments;
 using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using LabApi.Events.Arguments.PlayerEvents;
+using CustomPlayerEffects;
 
 namespace UncomplicatedCustomItems.Examples
 {
@@ -65,5 +67,15 @@ namespace UncomplicatedCustomItems.Examples
 
         /// <inheritdoc/>
         public override bool EnableFriendlyFire { get; set; } = false;
+
+        protected override void OnHurt(PlayerHurtEventArgs ev)
+        {
+            if (!Check(ev.Attacker.CurrentItem))
+                return;
+
+            ev.Player.EnableEffect<Burned>(3, 6, false);
+            ev.Player.EnableEffect<Concussed>(3, 8, false);
+            base.OnHurt(ev);
+        }
     }
 }

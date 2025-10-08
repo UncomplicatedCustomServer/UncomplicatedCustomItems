@@ -98,6 +98,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.InspectingKeycard += OnInspectingKeycard;
             PlayerEvent.InteractingElevator += OnUsingElevator;
             PlayerEvent.ChangingItem += OnChangingItem;
+            PlayerEvent.PickedUpArmor += OnArmorPickup;
         }
 
         public static void Unregister()
@@ -133,6 +134,16 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.InspectingKeycard -= OnInspectingKeycard;
             PlayerEvent.InteractingElevator -= OnUsingElevator;
             PlayerEvent.ChangingItem -= OnChangingItem;
+            PlayerEvent.PickedUpArmor -= OnArmorPickup;
+        }
+        
+        public static void OnArmorPickup(PlayerPickedUpArmorEventArgs ev)
+        {
+            if (SummonedAPICustomItem.TryGet(ev.BodyArmorItem.Serial, out var apiItem))
+                apiItem.HandleSelectedDisplayHint();
+
+            if (Utilities.TryGetSummonedCustomItem(ev.BodyArmorItem.Serial, out SummonedCustomItem customItem))
+                customItem.HandleSelectedDisplayHint();
         }
 
         public static void OnChangingItem(PlayerChangingItemEventArgs ev)
@@ -1412,6 +1423,13 @@ namespace UncomplicatedCustomItems.Events
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out var customItem))
                 return;
+
+            if (customItem.CustomItem.CustomItemType == CustomItemType.Weapon)
+            {
+                WeaponData weaponData = customItem.CustomItem.CustomData as WeaponData;
+                FirearmDamageHandler damageHandler = ev.DamageHandler as FirearmDamageHandler;
+                damageHandler.Damage = weaponData.Damage;
+            }
 
             if (customItem.CustomItem.CustomItemType == CustomItemType.MicroHID)
             {
