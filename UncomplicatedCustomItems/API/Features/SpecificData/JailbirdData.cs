@@ -1,4 +1,6 @@
-﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+﻿using InventorySystem.Items.Jailbird;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -28,8 +30,14 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual float Radius { get; set; } = 3f;
 
         /// <summary>
-        /// Gets or sets the number of times the item has been charged and used.
+        /// Gets or sets the current <see cref="JailbirdWearState"/> of the <see cref="JailbirdItem"/>
         /// </summary>
-        public virtual int TotalCharges { get; set; } = 4;
+        public JailbirdWearState WearState { get; set; }
+
+        internal float TotalHits { get; set; }
+        internal float TotalCharges { get; set; }
+        internal float TotalDamage { get; set; }
+        internal float TotalHitDamage { get; set; }
+        internal float TotalChargeDamage { get; set; }
     }
 }

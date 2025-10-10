@@ -24,7 +24,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal static readonly ConcurrentDictionary<Type, HashSet<string>> _eventArgPropertyCache = new();
 
+        private static readonly ConcurrentDictionary<string, Type> _typeResolutionCache = new(StringComparer.OrdinalIgnoreCase);
+
+        private static readonly char[] _identifierDelimiters = ['.', '(', ')', '[', ']', ',', ' ', '\t'];
+
         private static readonly Random _random = new();
+
+        internal static Dictionary<(Type, string), PropertyInfo> CachedProperties { get; } = [];
+        
+        internal static Dictionary<(Type, string), FieldInfo> CachedFields { get; } = [];
+
+        internal static Dictionary<(Type, string), MethodInfo> CachedMethods { get; } = [];
 
         private static readonly Dictionary<string, Func<IEnumerable, object?>> _collectionOperations = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -114,37 +124,55 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal static string ReplacePlaceholders(string action, EventArgs args)
         {
+            if (action.IndexOf('{') == -1) 
+                return action;
+            
+            StringBuilder sb = new(action.Length + 32);
+            int lastIndex = 0;
             int start;
-            while ((start = action.IndexOf('{')) != -1)
+            
+            while ((start = action.IndexOf('{', lastIndex)) != -1)
             {
                 int end = action.IndexOf('}', start);
-                if (end == -1)
+                if (end == -1) 
                     break;
 
+                sb.Append(action, lastIndex, start - lastIndex);
                 string placeholder = action.Substring(start + 1, end - start - 1);
                 string value = ResolvePlaceholder(placeholder, args);
-
-                action = action.Substring(0, start) + value + action.Substring(end + 1);
+                sb.Append(value);
+                lastIndex = end + 1;
             }
-            return action;
+            
+            if (lastIndex < action.Length)
+                sb.Append(action, lastIndex, action.Length - lastIndex);
+            
+            return sb.ToString();
         }
 
         private static bool TryResolveType(string fullName, out Type? found)
         {
             found = null;
             if (string.IsNullOrWhiteSpace(fullName))
+            {
+                found = null;
                 return false;
+            }
+
+            if (_typeResolutionCache.TryGetValue(fullName, out found))
+                return found != null;
+
+            if (TryGetCommonType(fullName, out found) && found != null)
+            {
+                _typeResolutionCache[fullName] = found;
+                return true;
+            }
 
             Type? t = Type.GetType(fullName, false, true);
             if (t != null)
             {
+                _typeResolutionCache[fullName] = t;
                 found = t;
-                return true;
-            }
-
-            if (TryGetCommonType(fullName, out Type? common) && common != null)
-            {
-                found = common;
                 return true;
             }
 
@@ -189,36 +217,64 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
 
+            _typeResolutionCache[fullName] = null;
             return false;
         }
-
-        private static readonly char[] _identifierDelimiters = ['.', '(', ')', '[', ']', ',', ' ', '\t'];
-
+        
         private static string ExpandCommonTypeNamesInPath(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
                 return path;
 
-            bool anyKeyPresent = _commonTypeMap.Keys.Any(k => path.IndexOf(k, StringComparison.OrdinalIgnoreCase) >= 0);
+            bool anyKeyPresent = false;
+            foreach (string key in _commonTypeMap.Keys)
+            {
+                if (path.IndexOf(key, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    anyKeyPresent = true;
+                    break;
+                }
+            }
+
             if (!anyKeyPresent)
                 return path;
 
-            StringBuilder sb = new(path);
-            foreach (var kvp in _commonTypeMap)
+            StringBuilder sb = new(path.Length + 64);
+            sb.Append(path);
+
+            foreach (KeyValuePair<string, Type> kvp in _commonTypeMap)
             {
                 string shortName = kvp.Key;
                 string fullName = kvp.Value.FullName ?? kvp.Value.Name;
 
                 int startIndex = 0;
-                while (true)
+                while (startIndex < sb.Length)
                 {
-                    int idx = sb.ToString().IndexOf(shortName, startIndex, StringComparison.OrdinalIgnoreCase);
+                    int idx = -1;
+                    for (int i = startIndex; i <= sb.Length - shortName.Length; i++)
+                    {
+                        bool match = true;
+                        for (int j = 0; j < shortName.Length; j++)
+                        {
+                            if (char.ToLowerInvariant(sb[i + j]) != char.ToLowerInvariant(shortName[j]))
+                            {
+                                match = false;
+                                break;
+                            }
+                        }
+                        if (match)
+                        {
+                            idx = i;
+                            break;
+                        }
+                    }
+
                     if (idx == -1)
                         break;
 
-                    bool okBefore = (idx == 0) || _identifierDelimiters.Contains(sb[idx - 1]);
+                    bool okBefore = (idx == 0) || Array.IndexOf(_identifierDelimiters, sb[idx - 1]) >= 0;
                     int afterIdx = idx + shortName.Length;
-                    bool okAfter = (afterIdx >= sb.Length) || _identifierDelimiters.Contains(sb[afterIdx]);
+                    bool okAfter = (afterIdx >= sb.Length) || Array.IndexOf(_identifierDelimiters, sb[afterIdx]) >= 0;
 
                     if (okBefore && okAfter)
                     {
@@ -227,15 +283,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         startIndex = idx + fullName.Length;
                     }
                     else
-                    {
                         startIndex = idx + shortName.Length;
-                    }
                 }
             }
 
             return sb.ToString();
         }
-
 
         internal static object? ResolvePlaceholderToObject(string path, object root)
         {
@@ -256,8 +309,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         string candidate = parts[0];
                         int lastCandidateIndex = 0;
-                        Type? foundType = null;
-                        if (TryResolveType(candidate, out foundType))
+                        if (TryResolveType(candidate, out Type? foundType))
                         {
                             current = foundType;
                             i = 0;
@@ -286,6 +338,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         continue;
                     }
 
+                    // Handle indexers and predicates
                     int openBracket = part.IndexOf('[');
                     if (openBracket >= 0)
                     {
@@ -296,17 +349,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         string baseName = part.Substring(0, openBracket).Trim();
                         string inner = part.Substring(openBracket + 1, closeBracket - openBracket - 1).Trim();
 
-                        object? memberContainer = string.IsNullOrEmpty(baseName) ? current : GetMemberValue(current!, baseName);
+                        object? memberContainer = string.IsNullOrEmpty(baseName) ? current : GetMemberValueCached(current!, baseName);
                         if (memberContainer == null)
                             return null;
 
-                        if (memberContainer is IEnumerable enumContainer && !(memberContainer is string))
+                        if (memberContainer is IEnumerable enumContainer && memberContainer is not string)
                         {
                             List<object?> list = enumContainer.Cast<object?>().ToList();
 
-                            if (_collectionOperations.ContainsKey(inner))
+                            if (_collectionOperations.TryGetValue(inner, out var innerOp))
                             {
-                                current = _collectionOperations[inner](list);
+                                current = innerOp(list);
                                 continue;
                             }
 
@@ -322,8 +375,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                                 {
                                     if (el == null)
                                         return false;
+
                                     if (EvaluateConditions.TryGetMemberStringValue(el, predProp, out string? memberVal))
                                         return string.Equals(memberVal, predVal, StringComparison.OrdinalIgnoreCase);
+
                                     return false;
                                 });
                                 continue;
@@ -334,12 +389,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             continue;
                         }
                         else
+                        {
                             current = memberContainer;
+                        }
                     }
-
-                    current = GetMemberValue(current!, part);
-                    if (current == null)
-                        return null;
+                    else
+                    {
+                        current = GetMemberValueCached(current!, part);
+                        if (current == null)
+                            return null;
+                    }
                 }
 
                 return current;
@@ -350,61 +409,42 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static object? GetMemberValue(object targetOrType, string name)
+        private static object? GetMemberValueCached(object target, string memberName)
         {
-            if (string.IsNullOrEmpty(name))
-                return targetOrType;
+            Type type = target.GetType();
+            (Type, string) key = (type, memberName.ToLowerInvariant());
 
-            BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
-            BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase;
+            if (CachedProperties.TryGetValue(key, out PropertyInfo? prop))
+                return prop.GetValue(target);
 
-            if (targetOrType is Type asType)
+            if (CachedFields.TryGetValue(key, out FieldInfo? field))
+                return field.GetValue(target);
+
+            if (CachedMethods.TryGetValue(key, out MethodInfo? method))
+                return method.Invoke(target, null);
+
+            prop = type.GetProperty(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (prop != null)
             {
-                PropertyInfo? prop = asType.GetProperty(name, staticFlags);
-                if (prop != null)
-                    return prop.GetValue(null);
-
-                FieldInfo? field = asType.GetField(name, staticFlags);
-                if (field != null)
-                    return field.GetValue(null);
-
-                MethodInfo? method = asType.GetMethod(name, staticFlags, null, Type.EmptyTypes, null);
-                if (method != null)
-                    return method.Invoke(null, null);
-
-                var methods = asType.GetMethods(staticFlags).Where(m => string.Equals(m.Name, name, StringComparison.OrdinalIgnoreCase));
-                MethodInfo? zero = methods.FirstOrDefault(m => m.GetParameters().Length == 0);
-                if (zero != null)
-                    return zero.Invoke(null, null);
-
-                return null;
+                CachedProperties[key] = prop;
+                return prop.GetValue(target);
             }
-            else
+
+            field = type.GetField(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (field != null)
             {
-                Type? t = targetOrType.GetType();
-
-                PropertyInfo? prop = t.GetProperty(name, instanceFlags);
-                if (prop != null)
-                    return prop.GetValue(targetOrType);
-
-                FieldInfo? field = t.GetField(name, instanceFlags);
-                if (field != null)
-                    return field.GetValue(targetOrType);
-
-                MethodInfo? method = t.GetMethod(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, Type.EmptyTypes, null);
-                if (method != null)
-                    return method.Invoke(targetOrType, null);
-
-                prop = t.GetProperty(name, staticFlags);
-                if (prop != null)
-                    return prop.GetValue(null);
-
-                field = t.GetField(name, staticFlags);
-                if (field != null)
-                    return field.GetValue(null);
-
-                return null;
+                CachedFields[key] = field;
+                return field.GetValue(target);
             }
+
+            method = type.GetMethod(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, Type.EmptyTypes, null);
+            if (method != null)
+            {
+                CachedMethods[key] = method;
+                return method.Invoke(target, null);
+            }
+
+            return null;
         }
 
         private static object? GetRandomFromCollection(IEnumerable collection)
@@ -490,7 +530,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return parameters.ToArray();
         }
 
-
         private static List<string> ParseParameterTokens(string parametersPart)
         {
             List<string> tokens = [];
@@ -503,42 +542,42 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 char c = parametersPart[i];
 
-                if (!inQuotes && (c == '"' || c == '\''))
+                switch (c)
                 {
-                    inQuotes = true;
-                    quoteChar = c;
-                    currentToken.Append(c);
-                }
-                else if (inQuotes && c == quoteChar)
-                {
-                    inQuotes = false;
-                    currentToken.Append(c);
-                }
-                else if (!inQuotes && c == '(')
-                {
-                    parenthesesDepth++;
-                    currentToken.Append(c);
-                }
-                else if (!inQuotes && c == ')')
-                {
-                    parenthesesDepth--;
-                    currentToken.Append(c);
-                }
-                else if (!inQuotes && c == ',' && parenthesesDepth == 0)
-                {
-                    tokens.Add(currentToken.ToString().Trim());
-                    currentToken.Clear();
-                }
-                else
-                {
-                    currentToken.Append(c);
+                    case '"' or '\'' when !inQuotes:
+                        inQuotes = true;
+                        quoteChar = c;
+                        currentToken.Append(c);
+                        break;
+
+                    case var _ when inQuotes && c == quoteChar:
+                        inQuotes = false;
+                        currentToken.Append(c);
+                        break;
+
+                    case '(' when !inQuotes:
+                        parenthesesDepth++;
+                        currentToken.Append(c);
+                        break;
+
+                    case ')' when !inQuotes:
+                        parenthesesDepth--;
+                        currentToken.Append(c);
+                        break;
+
+                    case ',' when !inQuotes && parenthesesDepth == 0:
+                        tokens.Add(currentToken.ToString().Trim());
+                        currentToken.Clear();
+                        break;
+
+                    default:
+                        currentToken.Append(c);
+                        break;
                 }
             }
 
             if (currentToken.Length > 0)
-            {
                 tokens.Add(currentToken.ToString().Trim());
-            }
 
             return tokens;
         }
@@ -560,30 +599,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     if (current == null)
                         return "null";
 
-                    Type type = current.GetType();
+                    current = GetMemberValueCached(current, part);
 
-                    PropertyInfo? prop = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                    if (prop != null)
-                    {
-                        current = prop.GetValue(current);
-                        continue;
-                    }
-
-                    FieldInfo? field = type.GetField(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                    if (field != null)
-                    {
-                        current = field.GetValue(current);
-                        continue;
-                    }
-
-                    MethodInfo? method = type.GetMethod(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, Type.EmptyTypes, null);
-                    if (method != null)
-                    {
-                        current = method.Invoke(current, null);
-                        continue;
-                    }
-
-                    return $"<invalid:{part}>";
+                    if (current == null)
+                        return $"<invalid:{part}>";
                 }
 
                 return current?.ToString() ?? "null";
@@ -660,7 +679,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             int thenIndex = action.IndexOf(" then ", keywordIndex, StringComparison.OrdinalIgnoreCase);
             if (thenIndex == -1)
-                throw new ArgumentException("Conditional statement must contain 'then' keyword");
+                throw new ArgumentException(LogAndReturnWarn("Conditional statement must contain 'then' keyword"));
 
             result.Condition = action.Substring(keywordIndex + keyword.Length, thenIndex - keywordIndex - keyword.Length).Trim();
 
@@ -674,12 +693,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 result.ElseActions = elsePart.Split('&').Select(a => a.Trim()).ToArray();
             }
             else
-            {
                 thenPart = action.Substring(thenIndex + 6);
-            }
 
             result.ThenActions = thenPart.Split('&').Select(a => a.Trim()).ToArray();
-
             return result;
         }
 
@@ -688,30 +704,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             try
             {
                 // Note: condition should already have placeholders resolved when this is called
-                if (condition.Contains(" contains "))
+                return (condition, eventArgs) switch
                 {
-                    return EvaluateConditions.EvaluateContainsCondition(condition, eventArgs);
-                }
-                else if (condition.Contains(" is "))
-                {
-                    return EvaluateConditions.EvaluateIsCondition(condition, eventArgs);
-                }
-                else if (condition.Contains(" equals "))
-                {
-                    return EvaluateConditions.EvaluateEqualsCondition(condition, eventArgs);
-                }
-                else if (condition.Contains(" > ") || condition.Contains(" < ") || condition.Contains(" >= ") || condition.Contains(" <= "))
-                {
-                    return EvaluateConditions.EvaluateNumericCondition(condition, eventArgs);
-                }
-                else if (condition.Contains(" != ") || condition.Contains(" == "))
-                {
-                    return EvaluateConditions.EvaluateEqualityCondition(condition, eventArgs);
-                }
-                else
-                {
-                    return IsTruthy(condition);
-                }
+                    (string, EventArgs) c when condition.Contains(" contains ") => EvaluateConditions.EvaluateContainsCondition(condition, eventArgs),
+                    (string, EventArgs) c when condition.Contains(" is ") => EvaluateConditions.EvaluateIsCondition(condition, eventArgs),
+                    (string, EventArgs) c when condition.Contains(" equals ") => EvaluateConditions.EvaluateEqualsCondition(condition, eventArgs),
+                    (string, EventArgs) c when condition.Contains(" > ") || condition.Contains(" < ") || condition.Contains(" >= ") || condition.Contains(" <= ") => EvaluateConditions.EvaluateNumericCondition(condition, eventArgs),
+                    (string, EventArgs) c when condition.Contains(" != ") || condition.Contains(" == ") => EvaluateConditions.EvaluateEqualityCondition(condition, eventArgs),
+                    _ => IsTruthy(condition),
+                };
             }
             catch (Exception ex)
             {
@@ -722,13 +723,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static bool IsTruthy(string value)
         {
-            if (string.IsNullOrWhiteSpace(value) || value == "null" || value == "0" || value == "false")
-                return false;
-
-            if (value.StartsWith("<error:") || value.StartsWith("<invalid:"))
-                return false;
-
-            return true;
+            return value switch
+            {
+                null or "" => false,
+                "null" or "0" or "false" => false,
+                string v when v.StartsWith("<error:") || v.StartsWith("<invalid:") => false,
+                _ => true
+            };
         }
 
         private static void HandleComplexAssignment(ICustomItem item, string propertyPath, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
@@ -738,14 +739,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 object? resolvedValue = null;
 
                 if (valueExpression.Contains('.') && !valueExpression.StartsWith("\"") && !valueExpression.StartsWith("'"))
-                {
                     resolvedValue = ResolveTargetObject(valueExpression, item, eventArgs);
-                }
 
                 if (resolvedValue == null && valueExpression.Contains('(') && !valueExpression.StartsWith("\"") && !valueExpression.StartsWith("'"))
-                {
                     resolvedValue = ResolveTargetObject(valueExpression, item, eventArgs);
-                }
 
                 if (resolvedValue == null)
                 {
@@ -754,15 +751,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     if (!string.Equals(resolvedValueExpression, valueExpression, StringComparison.Ordinal))
                     {
                         if (resolvedValueExpression.Contains('.') || resolvedValueExpression.Contains('('))
-                        {
                             resolvedValue = ResolveTargetObject(resolvedValueExpression, item, eventArgs);
-                        }
                     }
 
                     if (resolvedValue == null)
-                    {
                         resolvedValue = resolvedValueExpression;
-                    }
                 }
 
                 object? currentValue = null;
@@ -772,9 +765,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         string currentValueStr = ResolvePlaceholder(propertyPath, eventArgs);
                         if (currentValueStr != "null" && !currentValueStr.StartsWith("<error:") && !currentValueStr.StartsWith("<invalid:"))
-                        {
                             currentValue = currentValueStr;
-                        }
                     }
                     else
                     {
@@ -785,9 +776,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 object? newValue;
                 if (operatorType == AssignmentOperator.Assign)
-                {
                     newValue = resolvedValue;
-                }
                 else
                 {
                     string valueExprStr = resolvedValue?.ToString() ?? "null";
@@ -795,9 +784,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
 
                 if (ShouldResolveFromEventArgs(propertyPath, eventArgs))
-                {
                     SetProperty(eventArgs, propertyPath, newValue, eventArgs);
-                }
                 else
                 {
                     object root = item != null ? item : eventArgs;
@@ -815,16 +802,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (string.IsNullOrWhiteSpace(action))
                 return;
 
-            if (action.Contains("::"))
+            switch (action)
             {
-                ExecuteMethodCall(item, action, eventArgs);
-                return;
-            }
+                case string a when a.Contains("::"):
+                    ExecuteMethodCall(item, action, eventArgs);
+                    return;
 
-            if (action.StartsWith("action ", StringComparison.OrdinalIgnoreCase) || action.StartsWith("execute ", StringComparison.OrdinalIgnoreCase) || action.StartsWith("run ", StringComparison.OrdinalIgnoreCase))
-            {
-                HandleCustomActionExecution(action, eventArgs);
-                return;
+                case string a when a.StartsWith("action ", StringComparison.OrdinalIgnoreCase) || a.StartsWith("execute ", StringComparison.OrdinalIgnoreCase) || a.StartsWith("run ", StringComparison.OrdinalIgnoreCase):
+                    HandleCustomActionExecution(action, eventArgs);
+                    return;
             }
 
             var operatorInfo = FindAssignmentOperator(action);
@@ -836,13 +822,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 string valueExpression = action.Substring(operatorIndex + operatorLength).Trim();
 
                 if (propertyPath.Contains('{') && propertyPath.Contains('}'))
-                {
                     HandlePlaceholderPropertyAssignment(item, propertyPath, valueExpression, operatorType, eventArgs);
-                }
                 else
-                {
                     HandleComplexAssignment(item, propertyPath, valueExpression, operatorType, eventArgs);
-                }
+
                 return;
             }
 
@@ -884,13 +867,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 ICustomAction foundAction = CustomAction.List.FirstOrDefault(a => string.Equals(a.Name, identifier, StringComparison.OrdinalIgnoreCase));
 
                 if (foundAction != null)
-                {
                     ExecuteCustomAction(foundAction, eventArgs);
-                }
                 else
-                {
                     LogManager.Error($"{nameof(ArgumentManager)}: CustomAction not found: {identifier}");
-                }
             }
             catch (Exception ex)
             {
@@ -904,9 +883,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 int index = action.IndexOf(kvp.Key);
                 if (index > 0)
-                {
                     return (kvp.Value, index, kvp.Key.Length);
-                }
             }
 
             return null;
@@ -972,7 +949,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                                 .ToArray();
 
                 MethodInfo? method = null;
-
                 if (genericTypeArgs != null)
                 {
                     MethodInfo[]? genericDefs = methods.Where(m => m.IsGenericMethodDefinition && m.GetGenericArguments().Length == genericTypeArgs.Length).ToArray();
@@ -1026,6 +1002,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                                 if (!expected.IsAssignableFrom(actual) && parameters[i] is not string)
                                     return false;
                             }
+
                             return true;
                         });
                     }
@@ -1061,26 +1038,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             continue;
                         }
 
-                        if (value is string stringValue && stringValue.Length > 0 && 
-                            ((stringValue.StartsWith("\"") && stringValue.EndsWith("\"")) || 
-                            (stringValue.StartsWith("'") && stringValue.EndsWith("'"))))
-                        {
+                        if (value is string stringValue && stringValue.Length > 0 && ((stringValue.StartsWith("\"") && stringValue.EndsWith("\"")) || (stringValue.StartsWith("'") && stringValue.EndsWith("'"))))
                             stringValue = stringValue.Substring(1, stringValue.Length - 2);
-                        }
 
                         if (value is string sVal && expectedType == typeof(string))
-                        {
                             convertedParams[i] = sVal;
-                        }
 
                         else if (value is string sVal2)
-                        {
                             convertedParams[i] = Convert.ChangeType(sVal2, expectedType);
-                        }
                         else
-                        {
                             convertedParams[i] = Convert.ChangeType(value, expectedType);
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -1154,7 +1121,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static object ResolveTargetObject(string objectPath, ICustomItem item, EventArgs eventArgs)
+        private static object? ResolveTargetObject(string objectPath, ICustomItem item, EventArgs eventArgs)
         {
             string originalPath = objectPath;
             LogManager.Debug($"Attempting to resolve: {originalPath}");
@@ -1181,9 +1148,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         return directValue;
                     }
                     else if (directValue is Type typeResult)
-                    {
                         LogManager.Error($"Direct property '{firstToken}' returned a Type instead of an instance: {typeResult.Name}");
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -1200,7 +1165,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         {
                             try
                             {
-                                Object? propValue = kvp.Value.GetValue(eventArgs);
+                                object? propValue = kvp.Value.GetValue(eventArgs);
                                 if (propValue != null && typeResult.IsAssignableFrom(propValue.GetType()))
                                 {
                                     LogManager.Debug($"Found instance of {typeResult.Name} in property '{kvp.Key}': {propValue.GetType().Name}");
@@ -1294,9 +1259,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                                 suffix += remainder.StartsWith(".") ? remainder : "." + remainder;
                         }
                         else if (!string.IsNullOrWhiteSpace(remainder))
-                        {
                             suffix = remainder;
-                        }
 
                         if (!string.IsNullOrWhiteSpace(suffix))
                         {
@@ -1350,9 +1313,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             foreach (PropertyInfo prop in propertyInfos)
             {
                 if (prop.GetIndexParameters().Length == 0)
-                {
                     properties[prop.Name] = prop;
-                }
             }
             
             return properties;
@@ -1392,8 +1353,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             try
             {
+                if (string.IsNullOrEmpty(path) || root == null)
+                    return null;
+
                 object? current = root;
                 string[] parts = path.Split('.');
+                if (parts.Length == 0)
+                    return null;
 
                 for (int i = 0; i < parts.Length - 1; i++)
                 {
@@ -1401,41 +1367,36 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     if (current == null)
                         return null;
 
-                    Type type = current.GetType();
-
-                    PropertyInfo? prop = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                    if (prop != null)
+                    current = GetMemberValueCached(current, part);
+                    if (current == null)
                     {
-                        current = prop.GetValue(current);
-                        continue;
+                        LogManager.Error($"Property, field, or method not found (or returned null) while resolving: {part} in path {path}");
+                        return null;
                     }
-
-                    FieldInfo? field = type.GetField(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                    if (field != null)
-                    {
-                        current = field.GetValue(current);
-                        continue;
-                    }
-
-                    MethodInfo? method = type.GetMethod(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, Type.EmptyTypes, null);
-                    if (method != null)
-                    {
-                        current = method.Invoke(current, null);
-                        continue;
-                    }
-
-                    LogManager.Error($"Property, field, or method not found: {part} in path {path}");
-                    return null;
                 }
 
-                if (current == null || parts.Length == 0)
+                if (current == null)
                     return null;
 
                 string finalPart = parts[parts.Length - 1];
                 Type finalType = current.GetType();
+                (Type, string) key = (finalType, finalPart.ToLowerInvariant());
 
-                PropertyInfo? finalProp = finalType.GetProperty(finalPart, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                FieldInfo? finalField = finalType.GetField(finalPart, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                CachedProperties.TryGetValue(key, out PropertyInfo? finalProp);
+                CachedFields.TryGetValue(key, out FieldInfo? finalField);
+
+                if (finalProp == null && finalField == null)
+                {
+                    finalProp = finalType.GetProperty(finalPart, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    if (finalProp != null)
+                        CachedProperties[key] = finalProp;
+                    else
+                    {
+                        finalField = finalType.GetField(finalPart, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                        if (finalField != null)
+                            CachedFields[key] = finalField;
+                    }
+                }
 
                 if (finalProp != null || finalField != null)
                 {
@@ -1481,7 +1442,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="eventArgs"></param>
         public static void ExecuteCustomAction(ICustomAction customAction, EventArgs eventArgs)
         {
-            if (customAction?.Actions == null || customAction.Actions.Length == 0)
+            if (customAction?.Actions == null || customAction.Actions.IsEmpty())
                 return;
 
             LogManager.Debug($"{nameof(ArgumentManager)}: Executing CustomAction '{customAction.Name}' (ID: {customAction.Id})");
@@ -1489,37 +1450,30 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             foreach (string action in customAction.Actions)
             {
                 if (!string.IsNullOrWhiteSpace(action))
-                {
                     ExecuteAction(null, action.Trim(), eventArgs);
-                }
             }
         }
 
         private static object? GetPropertyValue(object root, string propertyPath)
         {
+            if (root == null)
+                return null;
+
+            if (string.IsNullOrEmpty(propertyPath))
+                return root;
+
             object? current = root;
-            foreach (string part in propertyPath.Split('.'))
+            string[] parts = propertyPath.Split('.');
+
+            for (int i = 0; i < parts.Length; i++)
             {
                 if (current == null)
                     return null;
 
-                Type type = current.GetType();
-
-                PropertyInfo? prop = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                if (prop != null)
-                {
-                    current = prop.GetValue(current);
-                    continue;
-                }
-
-                FieldInfo? field = type.GetField(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                if (field != null)
-                {
-                    current = field.GetValue(current);
-                    continue;
-                }
-
-                throw new ArgumentException($"Property or field not found: {part}");
+                string part = parts[i];
+                current = GetMemberValueCached(current, part);
+                if (current == null)
+                    throw new ArgumentException(LogAndReturnWarn($"Property or field not found: {part}"));
             }
 
             return current;
@@ -1527,64 +1481,60 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static object? CalculateNewValue(object? currentValue, string valueExpression, AssignmentOperator operatorType, string propertyPath)
         {
-            if (operatorType == AssignmentOperator.Assign)
+            return operatorType switch
             {
-                return valueExpression;
-            }
-
-            if (operatorType == AssignmentOperator.Add && currentValue is string currentStr)
-            {
-                return currentStr + valueExpression;
-            }
-
-            if (IsNumericOperation(operatorType))
-            {
-                return CalculateNumericValue(currentValue, valueExpression, operatorType);
-            }
-
-            if (IsBitwiseOperation(operatorType))
-            {
-                return CalculateBitwiseValue(currentValue, valueExpression, operatorType);
-            }
-
-            throw new NotSupportedException($"Operator {operatorType} not supported for property {propertyPath}");
+                AssignmentOperator.Assign => valueExpression,
+                AssignmentOperator.Add when currentValue is string currentStr => currentStr + valueExpression,
+                AssignmentOperator.Add or 
+                AssignmentOperator.Subtract or 
+                AssignmentOperator.Multiply or 
+                AssignmentOperator.Divide or 
+                AssignmentOperator.Modulo => CalculateNumericValue(currentValue, valueExpression, operatorType),
+                AssignmentOperator.BitwiseAnd or 
+                AssignmentOperator.BitwiseOr or 
+                AssignmentOperator.BitwiseXor => CalculateBitwiseValue(currentValue, valueExpression, operatorType),
+                _ => throw new InvalidOperationException(LogAndReturnWarn($"Unsupported operator '{operatorType}' for property '{propertyPath}'."))
+            };
         }
 
-        private static bool IsNumericOperation(AssignmentOperator operatorType)
+        private static string LogAndReturnWarn(string msg)
         {
-            return operatorType == AssignmentOperator.Add ||
-                   operatorType == AssignmentOperator.Subtract ||
-                   operatorType == AssignmentOperator.Multiply ||
-                   operatorType == AssignmentOperator.Divide ||
-                   operatorType == AssignmentOperator.Modulo;
+            LogManager.Warn(msg);
+            return msg;
         }
 
-        private static bool IsBitwiseOperation(AssignmentOperator operatorType)
+        private static string LogAndReturnError(string msg)
         {
-            return operatorType == AssignmentOperator.BitwiseAnd ||
-                   operatorType == AssignmentOperator.BitwiseOr ||
-                   operatorType == AssignmentOperator.BitwiseXor;
+            LogManager.Error(msg);
+            return msg;
         }
+
+        private static bool IsNumericOperation(AssignmentOperator operatorType) =>
+            operatorType is AssignmentOperator.Add or AssignmentOperator.Subtract or AssignmentOperator.Multiply or AssignmentOperator.Divide or AssignmentOperator.Modulo;
+
+
+        private static bool IsBitwiseOperation(AssignmentOperator operatorType) =>
+            operatorType is AssignmentOperator.BitwiseAnd or AssignmentOperator.BitwiseOr or AssignmentOperator.BitwiseXor;
 
         private static object? CalculateNumericValue(object? currentValue, string valueExpression, AssignmentOperator operatorType)
         {
             if (currentValue == null)
-                throw new ArgumentException("Cannot perform numeric operation on null value");
+                throw new ArgumentException(LogAndReturnError($"Cannot perform numeric operation on null value"));
 
             if (!TryConvertToDouble(currentValue, out double current))
-                throw new ArgumentException($"Cannot convert current value to number: {currentValue}");
+                throw new ArgumentException(LogAndReturnError($"Cannot convert current value to number: {currentValue}"));
 
             if (!double.TryParse(valueExpression, out double operand))
-                throw new ArgumentException($"Cannot convert operand to number: {valueExpression}");
+                throw new ArgumentException(LogAndReturnError($"Cannot convert operand to number: {valueExpression}"));
 
             double result = operatorType switch
             {
                 AssignmentOperator.Add => current + operand,
                 AssignmentOperator.Subtract => current - operand,
                 AssignmentOperator.Multiply => current * operand,
-                AssignmentOperator.Divide => operand != 0 ? current / operand : throw new DivideByZeroException(),
-                AssignmentOperator.Modulo => operand != 0 ? current % operand : throw new DivideByZeroException(),
-                _ => throw new NotSupportedException($"Numeric operator {operatorType} not supported")
+                AssignmentOperator.Divide => operand != 0 ? current / operand : throw new DivideByZeroException(LogAndReturnWarn("Cannot divide by zero!")),
+                AssignmentOperator.Modulo => operand != 0 ? current % operand : throw new DivideByZeroException(LogAndReturnWarn("Cannot divide by zero!")),
+                _ => throw new NotSupportedException(LogAndReturnWarn($"Numeric operator {operatorType} not supported"))
             };
 
             return ConvertToOriginalType(result, currentValue.GetType());
@@ -1593,20 +1543,20 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private static object? CalculateBitwiseValue(object? currentValue, string valueExpression, AssignmentOperator operatorType)
         {
             if (currentValue == null)
-                throw new ArgumentException("Cannot perform bitwise operation on null value");
+                throw new ArgumentException(LogAndReturnWarn("Cannot perform bitwise operation on null value"));
 
             if (!TryConvertToLong(currentValue, out long current))
-                throw new ArgumentException($"Cannot convert current value to integer: {currentValue}");
+                throw new ArgumentException(LogAndReturnError($"Cannot convert current value to integer: {currentValue}"));
 
             if (!long.TryParse(valueExpression, out long operand))
-                throw new ArgumentException($"Cannot convert operand to integer: {valueExpression}");
+                throw new ArgumentException(LogAndReturnError($"Cannot convert operand to integer: {valueExpression}"));
 
             long result = operatorType switch
             {
                 AssignmentOperator.BitwiseAnd => current & operand,
                 AssignmentOperator.BitwiseOr => current | operand,
                 AssignmentOperator.BitwiseXor => current ^ operand,
-                _ => throw new NotSupportedException($"Bitwise operator {operatorType} not supported")
+                _ => throw new NotSupportedException(LogAndReturnWarn($"Bitwise operator {operatorType} not supported"))
             };
 
             return ConvertToOriginalType(result, currentValue.GetType());
@@ -1644,22 +1594,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             try
             {
-                if (targetType == typeof(int) || targetType == typeof(int?))
-                    return Convert.ToInt32(value);
-                if (targetType == typeof(long) || targetType == typeof(long?))
-                    return Convert.ToInt64(value);
-                if (targetType == typeof(float) || targetType == typeof(float?))
-                    return Convert.ToSingle(value);
-                if (targetType == typeof(double) || targetType == typeof(double?))
-                    return Convert.ToDouble(value);
-                if (targetType == typeof(decimal) || targetType == typeof(decimal?))
-                    return Convert.ToDecimal(value);
-                if (targetType == typeof(byte) || targetType == typeof(byte?))
-                    return Convert.ToByte(value);
-                if (targetType == typeof(short) || targetType == typeof(short?))
-                    return Convert.ToInt16(value);
-
-                return value;
+                return targetType switch
+                {
+                    Type t when t == typeof(int) || t == typeof(int?) => Convert.ToInt32(value),
+                    Type t when t == typeof(long) || t == typeof(long?) => Convert.ToInt64(value),
+                    Type t when t == typeof(float) || t == typeof(float?) => Convert.ToSingle(value),
+                    Type t when t == typeof(double) || t == typeof(double?) => Convert.ToDouble(value),
+                    Type t when t == typeof(decimal) || t == typeof(decimal?) => Convert.ToDecimal(value),
+                    Type t when t == typeof(byte) || t == typeof(byte?) => Convert.ToByte(value),
+                    Type t when t == typeof(short) || t == typeof(short?) => Convert.ToInt16(value),
+                    _ => value
+                };
             }
             catch
             {
@@ -1681,14 +1626,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     PropertyInfo? prop = target.GetType().GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                     if (prop != null)
                     {
-                        target = prop.GetValue(target) ?? throw new NullReferenceException($"Property {part} is null");
+                        target = prop.GetValue(target) ?? throw new NullReferenceException(LogAndReturnError($"Property {part} is null"));
                         continue;
                     }
 
                     FieldInfo? field = target.GetType().GetField(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                     if (field != null)
                     {
-                        target = field.GetValue(target) ?? throw new NullReferenceException($"Field {part} is null");
+                        target = field.GetValue(target) ?? throw new NullReferenceException(LogAndReturnError($"Field {part} is null"));
                         continue;
                     }
 
@@ -1751,7 +1696,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     }
 
                     Type fieldType = finalField.FieldType;
-
                     if (newValue != null && fieldType.IsAssignableFrom(newValue.GetType()))
                     {
                         finalField.SetValue(target, newValue);
@@ -1809,14 +1753,75 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return -1;
         }
 
+        private static object? TryConvertOrDefault(object? value, Type targetType, Type expected, ParameterInfo param)
+        {
+            try
+            {
+                return Convert.ChangeType(value, targetType);
+            }
+            catch
+            {
+                if (value != null && expected.IsAssignableFrom(value.GetType()))
+                    return value;
+                
+                LogManager.Error($"Failed to convert constructor parameter from '{value?.GetType().Name}' to '{expected.Name}'");
+                return param.HasDefaultValue ? param.DefaultValue : (expected.IsValueType ? Activator.CreateInstance(expected) : null);
+            }
+        }
+
+        private static object? ConvertStringParameter(string stringValue, Type expected, ParameterInfo param)
+        {
+            try
+            {
+                return Convert.ChangeType(stringValue, expected);
+            }
+            catch
+            {
+                LogManager.Error($"Failed to convert string parameter to '{expected.Name}'");
+                return param.HasDefaultValue ? param.DefaultValue : (expected.IsValueType ? Activator.CreateInstance(expected) : null);
+            }
+        }
+
+        private static object?[] ConvertConstructorParameters(ParameterInfo[] ctorParams, object[] parameters)
+        {
+            object[] converted = new object[ctorParams.Length];
+
+            for (int i = 0; i < ctorParams.Length; i++)
+            {
+                Type expected = ctorParams[i].ParameterType;
+                object? value = parameters[i];
+
+#pragma warning disable CS8601 // Possible null reference assignment.
+                converted[i] = (value, expected) switch
+                {
+                    (null, _) => ctorParams[i].HasDefaultValue
+                        ? ctorParams[i].DefaultValue
+                        : (expected.IsValueType ? Activator.CreateInstance(expected) : null),
+
+                    var (v, e) when e.IsAssignableFrom(v.GetType()) => v,
+
+                    (string sVal, _) when (sVal.StartsWith("\"") && sVal.EndsWith("\"")) ||
+                                        (sVal.StartsWith("'") && sVal.EndsWith("'"))
+                        => ConvertStringParameter(sVal.Substring(1, sVal.Length - 2), expected, ctorParams[i]),
+
+                    (_, Type t) when t == typeof(float) || t == typeof(float?) => TryConvertOrDefault(value, typeof(float), expected, ctorParams[i]),
+                    (_, Type t) when t == typeof(double) || t == typeof(double?) => TryConvertOrDefault(value, typeof(double), expected, ctorParams[i]),
+                    (_, Type t) when t == typeof(int) || t == typeof(int?) => TryConvertOrDefault(value, typeof(int), expected, ctorParams[i]),
+
+                    _ => TryConvertOrDefault(value, expected, expected, ctorParams[i])
+                };
+#pragma warning restore CS8601 // Possible null reference assignment.
+            }
+
+            return converted;
+        }
+
         private static object? CreateInstanceFromType(Type type, string parametersPart, EventArgs eventArgs, ICustomItem? item)
         {
             try
             {
                 object[] parameters = ParseAndResolveParameters(parametersPart, eventArgs, item);
-
                 ConstructorInfo[] ctors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-
                 ConstructorInfo? ctor = ctors.FirstOrDefault(c => c.GetParameters().Length == parameters.Length &&
                     c.GetParameters().Select((p, i) =>
                     {
@@ -1829,9 +1834,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     }).All(b => b));
 
                 if (ctor == null)
-                {
                     ctor = ctors.FirstOrDefault(c => c.GetParameters().Length == parameters.Length);
-                }
 
                 if (ctor == null)
                 {
@@ -1840,50 +1843,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
 
                 ParameterInfo[] ctorParams = ctor.GetParameters();
-                object[] converted = new object[ctorParams.Length];
-
-                for (int i = 0; i < ctorParams.Length; i++)
-                {
-                    Type expected = ctorParams[i].ParameterType;
-                    object? value = parameters[i];
-
-                    if (value == null)
-                    {
-                        converted[i] = ctorParams[i].HasDefaultValue ? ctorParams[i].DefaultValue : (expected.IsValueType ? Activator.CreateInstance(expected) : null);
-                        continue;
-                    }
-
-                    if (expected.IsAssignableFrom(value.GetType()))
-                    {
-                        converted[i] = value;
-                        continue;
-                    }
-
-                    if (value is string sVal && ((sVal.StartsWith("\"") && sVal.EndsWith("\"")) || (sVal.StartsWith("'") && sVal.EndsWith("'"))))
-                        sVal = sVal.Substring(1, sVal.Length - 2);
-
-                    try
-                    {
-                        if (expected == typeof(float) || expected == typeof(float?))
-                            converted[i] = Convert.ChangeType(value, typeof(float));
-                        else if (expected == typeof(double) || expected == typeof(double?))
-                            converted[i] = Convert.ChangeType(value, typeof(double));
-                        else if (expected == typeof(int) || expected == typeof(int?))
-                            converted[i] = Convert.ChangeType(value, typeof(int));
-                        else
-                            converted[i] = Convert.ChangeType(value, expected);
-                    }
-                    catch
-                    {
-                        if (expected.IsAssignableFrom(value.GetType()))
-                            converted[i] = value;
-                        else
-                        {
-                            LogManager.Error($"Failed to convert constructor parameter {i} from '{value?.GetType().Name}' to '{expected.Name}' for type '{type.Name}'");
-                            converted[i] = ctorParams[i].HasDefaultValue ? ctorParams[i].DefaultValue : (expected.IsValueType ? Activator.CreateInstance(expected) : null);
-                        }
-                    }
-                }
+                object[] converted = ConvertConstructorParameters(ctorParams, parameters);
 
                 return ctor.Invoke(converted);
             }

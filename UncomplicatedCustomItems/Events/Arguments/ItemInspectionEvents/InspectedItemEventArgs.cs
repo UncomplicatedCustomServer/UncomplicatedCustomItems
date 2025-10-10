@@ -3,7 +3,6 @@ using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomItems.Events.Arguments.ItemInspectionEvents
 {
-
     public class InspectedItemEventArgs(Item item, Player player) : EventArgs
     {
         /// <summary>

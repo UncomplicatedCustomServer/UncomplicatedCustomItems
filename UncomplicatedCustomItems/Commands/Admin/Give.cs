@@ -6,9 +6,9 @@ using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UncomplicatedCustomItems.HarmonyElements.Patches.CandyPatches;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using UncomplicatedCustomItems.HarmonyElements.Patches;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -72,13 +72,27 @@ namespace UncomplicatedCustomItems.Commands.Admin
             switch (customItemobj)
             {
                 case ICustomItem customItem:
-                    if (customItem.Item == ItemType.SCP330 && customItem.CustomData is ICandyData candyData)
+                    if (customItem.Item == ItemType.SCP330 && customItem.CustomData is CandyData candyData)
                     {
+                        if (arguments.Count == 2)
+                        {
+                            Scp330CandyInstancePatch.Item = customItem;
+                            Scp330CandyInstancePatch.GiveRandom = false;
+                            Player.Get(int.Parse(arguments[1])).GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                        }
+                        else
+                        {
+                            Scp330CandyInstancePatch.Item = customItem;
+                            Scp330CandyInstancePatch.GiveRandom = false;
+                            Player.Get(sender).GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                        }
+
+                        /*
                         TryAddSpecificPatches.LastCustomItemId = customItem.Id;
                         TryAddSpecificPatches.CustomItemobj = customItem;
                         TryAddSpecificPatches.LastDesiredCandy = candyData.CandyType;
+                        */
                     }
-
 
                     if (arguments.Count == 2)
                     {
@@ -139,11 +153,25 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case APICustomItem baseCustomItem:
                     if (baseCustomItem.Item == ItemType.SCP330 && baseCustomItem is CustomCandy customCandy)
                     {
+                        if (arguments.Count == 2)
+                        {
+                            Scp330CandyInstancePatch.Item = customCandy;
+                            Scp330CandyInstancePatch.GiveRandom = false;
+                            Player.Get(int.Parse(arguments[1])).GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                        }
+                        else
+                        {
+                            Scp330CandyInstancePatch.Item = customCandy;
+                            Scp330CandyInstancePatch.GiveRandom = false;
+                            Player.Get(sender).GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                        }
+
+                        /*
                         TryAddSpecificPatches.LastCustomItemId = baseCustomItem.Id;
                         TryAddSpecificPatches.CustomItemobj = baseCustomItem;
                         TryAddSpecificPatches.LastDesiredCandy = customCandy.CandyType;
+                        */
                     }
-
 
                     if (arguments.Count == 2)
                     {

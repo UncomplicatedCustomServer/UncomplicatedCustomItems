@@ -47,6 +47,11 @@ namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
         public abstract float FriendlyFireTime { get; set; }
 
         public abstract float FuseTime { get; set; }
+
+        public float ThrowTime { get; set; }
+
+        public bool Repickable { get; set; }
+
     }
     
     public interface ISCP1344Data

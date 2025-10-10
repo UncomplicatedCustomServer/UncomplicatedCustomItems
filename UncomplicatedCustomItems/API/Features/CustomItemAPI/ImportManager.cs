@@ -29,6 +29,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             Task.Run(Actor);
         }
 
+        internal static Type[] BannedTypes =
+        [
+            typeof(CustomItem),
+            typeof(ICustomItem)
+        ];
+
         internal static Type[] CustomItemTypes =
         [
             typeof(CustomArmor),
@@ -41,7 +47,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             typeof(CustomSCP244),
             typeof(CustomSCP268),
             typeof(CustomSCP1853),
-            typeof(ToolGun)
+            typeof(ToolGun),
+            typeof(CustomJailbird),
+            typeof(CustomSCP018),
+            typeof(CustomCandy)
         ];
 
 #if EXILED
@@ -72,7 +81,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                             APICustomItem.Register(Item);
                         }
 
-                        if (attribs != null && attribs.Length > 0 && type.IsSubclassOf(typeof(CustomItem)) || type.IsSubclassOf(typeof(ICustomItem)))
+                        if (attribs != null && attribs.Length > 0 && BannedTypes.Any(baseType => baseType.IsAssignableFrom(type)))
                             LogManager.Warn($"{type.FullName} is using a old version of the CustomItem API. For the CustomItem to be loaded and registered it MUST be updated to the new version");
                     }
                     catch (Exception e)
@@ -110,7 +119,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                             APICustomItem.Register(Item);
                         }
 
-                        if (attribs != null && attribs.Length > 0 && type.IsSubclassOf(typeof(CustomItem)) || type.IsSubclassOf(typeof(ICustomItem)))
+                        if (attribs != null && attribs.Length > 0 && BannedTypes.Any(baseType => baseType.IsAssignableFrom(type)))
                             LogManager.Warn($"{type.FullName} is using a old version of the CustomItem API. For the CustomItem to be loaded and registered it MUST be updated to the new version");
                     }
                     catch (Exception e)

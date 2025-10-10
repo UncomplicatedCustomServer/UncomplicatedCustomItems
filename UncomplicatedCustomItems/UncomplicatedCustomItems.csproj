@@ -520,6 +520,7 @@
   <ItemGroup>
     <Compile Include="API\Features\CustomItemAPI\ToolGun.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\SCPCustomitem.cs" />
+    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP018.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP244.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP207.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP1853.cs" />
@@ -527,6 +528,7 @@
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP127.cs" />
     <Compile Include="API\Features\CustomItemAPI\ImportManager.cs" />
     <Compile Include="API\Features\CustomItemAPI\SummonedAPICustomItem.cs" />
+    <Compile Include="API\Features\CustomItemAPI\CustomJailbird.cs" />
     <Compile Include="API\Features\CustomItemAPI\CustomItemUtils.cs" />
     <Compile Include="API\Features\CustomItemAPI\CustomFlashGrenade.cs" />
     <Compile Include="API\Features\CustomItemAPI\CustomExplosiveGrenade.cs" />
@@ -543,8 +545,7 @@
     <Compile Include="API\Enums\CommonTypes.cs" />
     <Compile Include="API\Enums\LockerType.cs" />
     <Compile Include="API\Enums\AssignmentOperator.cs" />
-    <Compile Include="API\Features\CandySerialization\CandySerializationManager.cs" />
-    <Compile Include="API\Features\CandySerialization\SerializedCandy.cs" />
+    <Compile Include="API\Features\CandySerialization\CandyInstance.cs" />
     <Compile Include="API\Features\FlagSettings\AmmoRegenSettings.cs" />
     <Compile Include="API\Features\Manager\AudioApi.cs" />
     <Compile Include="API\Features\CustomAction.cs" />
@@ -637,8 +638,11 @@
     <Compile Include="API\Enums\FirearmType.cs" />
     <Compile Include="API\Enums\ItemEvents.cs" />
     <Compile Include="API\Enums\CustomFlags.cs" />
+    <Compile Include="Events\Handlers\JailbirdEvents.cs" />
     <Compile Include="Events\Handlers\ItemInspectionEvents.cs" />
     <Compile Include="Events\Handlers\CustomItemEvents.cs" />
+    <Compile Include="Events\Arguments\JailbirdEvents\ChangedWearStateEventArgs.cs" />
+    <Compile Include="Events\Arguments\JailbirdEvents\ChangingWearStateEventArgs.cs" />
     <Compile Include="Events\Arguments\ItemInspectionEvents\InspectingItemEventArgs.cs" />
     <Compile Include="Events\Arguments\ItemInspectionEvents\InspectedItemEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\RunningCustomItemCommandEventArgs.cs" />
@@ -650,8 +654,6 @@
     <Compile Include="Events\CustomItemEventHandler.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Events\Methods\SwitchRoleOnUseMethod.cs" />
-    <Compile Include="Events\Internal\Player.cs" />
-    <Compile Include="Events\Internal\Server.cs" />
     <Compile Include="Events\PlayerHandler.cs" />
     <Compile Include="Events\ScpHandler.cs" />
     <Compile Include="Events\ServerHandler.cs" />
@@ -674,20 +676,14 @@
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\MagazineModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\ActionModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\HumeShieldPatches.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\JailbirdPatches.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\GrenadePatches.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\LockerSpawningItemPrefix.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\LinearADSModulePostfix.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP268CooldownTimeTranspiler.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\MicroHidInspectionPostfix.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\Scp1344InspectionPostfix.cs" />
-    <Compile Include="HarmonyElements\Patches\InspectionPatches\JailbirdInspectionPrefix.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\WeaponInspectionPostfix.cs" />
-    <Compile Include="HarmonyElements\Patches\CandyPatches\GrantCandyPre.cs" />
-    <Compile Include="HarmonyElements\Patches\CandyPatches\ServerProcessPickupPre.cs" />
-    <Compile Include="HarmonyElements\Patches\CandyPatches\OnRemovedPost.cs" />
-    <Compile Include="HarmonyElements\Patches\CandyPatches\ServerOnUsingCompletedPost.cs" />
-    <Compile Include="HarmonyElements\Patches\CandyPatches\TryRemovePost.cs" />
-    <Compile Include="HarmonyElements\Patches\CandyPatches\TryAddSpecificPatches.cs" />
     <Compile Include="HarmonyElements\Patches\MicroHIDPatches\ChargeFireModeModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\BarrelAmmoPatches\AutomaticActionModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\MaxAmmoPatches\MaxAmmoPatch.cs" />
@@ -695,10 +691,10 @@
     <Compile Include="HarmonyElements\Patches\BarrelAmmoPatches\PumpActionModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\MaxAmmoPatches\RevolverCylinderPatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomFlagPatches\AttachmentPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomFlagPatches\JailbirdPatch.cs" />
     <Compile Include="HarmonyElements\Patches\SCP1344Patches\SCP1344EffectPatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\DisruptorAdsModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\SCP1344Patches\SCP1344UnEquipPatch.cs" />
+    <Compile Include="HarmonyElements\Patches\Scp330CandyInstancePatch.cs" />
     <Compile Include="HarmonyElements\Patches\RemoteAdminPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="HarmonyElements\Patches\MicroHIDPatches\ServerSetEnergyPatch.cs" />

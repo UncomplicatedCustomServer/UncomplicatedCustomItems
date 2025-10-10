@@ -2,7 +2,7 @@
 
 namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
 {
-    internal interface IFlashlightData : IData
+    public interface IFlashlightData : IData
     {
         public abstract string HexColor { get; set; }
         public abstract LightType LightType { get; set; }

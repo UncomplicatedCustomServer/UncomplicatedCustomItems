@@ -61,8 +61,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         {
             PlayerEvent.ShotWeapon += new LabApi.Events.LabEventHandler<PlayerShotWeaponEventArgs>(InternalOnShot);
             PlayerEvent.ShootingWeapon += new LabApi.Events.LabEventHandler<PlayerShootingWeaponEventArgs>(InternalOnShooting);
-            PlayerEvent.Hurt += new LabApi.Events.LabEventHandler<PlayerHurtEventArgs>(InternalOnHurt);
-            PlayerEvent.Hurting += new LabApi.Events.LabEventHandler<PlayerHurtingEventArgs>(InternalOnHurting);
             PlayerEvent.ReloadedWeapon += new LabApi.Events.LabEventHandler<PlayerReloadedWeaponEventArgs>(InternalOnReloaded);
             PlayerEvent.ReloadingWeapon += new LabApi.Events.LabEventHandler<PlayerReloadingWeaponEventArgs>(InternalOnReloading);
             PlayerEvent.ChangingAttachments += new LabApi.Events.LabEventHandler<PlayerChangingAttachmentsEventArgs>(InternalOnChangingAttachments);
@@ -75,8 +73,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         {
             PlayerEvent.ShotWeapon -= new LabApi.Events.LabEventHandler<PlayerShotWeaponEventArgs>(InternalOnShot);
             PlayerEvent.ShootingWeapon -= new LabApi.Events.LabEventHandler<PlayerShootingWeaponEventArgs>(InternalOnShooting);
-            PlayerEvent.Hurt -= new LabApi.Events.LabEventHandler<PlayerHurtEventArgs>(InternalOnHurt);
-            PlayerEvent.Hurting -= new LabApi.Events.LabEventHandler<PlayerHurtingEventArgs>(InternalOnHurting);
             PlayerEvent.ReloadedWeapon -= new LabApi.Events.LabEventHandler<PlayerReloadedWeaponEventArgs>(InternalOnReloaded);
             PlayerEvent.ReloadingWeapon -= new LabApi.Events.LabEventHandler<PlayerReloadingWeaponEventArgs>(InternalOnReloading);
             PlayerEvent.ChangingAttachments -= new LabApi.Events.LabEventHandler<PlayerChangingAttachmentsEventArgs>(InternalOnChangingAttachments);
@@ -95,20 +91,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         {
             if (Check(ev.FirearmItem))
                 OnShot(ev);
-        }
-
-        private void InternalOnHurt(PlayerHurtEventArgs ev)
-        {
-            if (Check(ev.Attacker))
-                OnHurt(ev);
-
-        }
-
-        private void InternalOnHurting(PlayerHurtingEventArgs ev)
-        {
-            if (Check(ev.Attacker))
-                OnHurting(ev);
-
         }
 
         private void InternalOnReloaded(PlayerReloadedWeaponEventArgs ev)
@@ -139,8 +121,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         protected virtual void OnShooting(PlayerShootingWeaponEventArgs ev) { }
         protected virtual void OnShot(PlayerShotWeaponEventArgs ev) { }
-        protected virtual void OnHurt(PlayerHurtEventArgs ev) { }
-        protected virtual void OnHurting(PlayerHurtingEventArgs ev) { }
         protected virtual void OnReloaded(PlayerReloadedWeaponEventArgs ev) { }
         protected virtual void OnReloading(PlayerReloadingWeaponEventArgs ev) { }
         protected virtual void OnChangingAttachments(PlayerChangingAttachmentsEventArgs ev) { }

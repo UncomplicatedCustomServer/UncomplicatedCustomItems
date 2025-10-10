@@ -1,13 +1,10 @@
 using System;
-using System.IO;
 using System.Linq;
-using YamlDotNet.Core;
 
 namespace UncomplicatedCustomItems.API.Features
 {
-    public class ErrorCustomItem
+    internal class ErrorCustomItem
     {
-
         public static string HandleErrorString(Exception ex, bool showErrorName = false)
         {
             string text = (showErrorName ? (ex.GetType().Name + " ") : string.Empty) + ex.Message;
@@ -20,18 +17,20 @@ namespace UncomplicatedCustomItems.API.Features
                 
             return text;
         }
-        public static string GetRoleFileElement(string content, string rowPart, bool removeSpaces = true)
-        {
-            return GetRoleFileElement(content.Split([Environment.NewLine], StringSplitOptions.None), rowPart, removeSpaces);
-        }
-
+        
         public static string GetRoleFileElement(string[] pieces, string rowPart, bool removeSpaces = true)
         {
-            string text = pieces.FirstOrDefault(l => l.Contains(rowPart)) ?? "N/D";
-            if (removeSpaces)
-                text.Replace(" ", string.Empty);
+            string line = pieces?.FirstOrDefault(l => l?.IndexOf(rowPart, StringComparison.OrdinalIgnoreCase) >= 0) ?? "N/D";
+            if (line == "N/D")
+                return line;
 
-            return text.Replace(rowPart + " ", string.Empty).Replace(rowPart, string.Empty);
+            int pos = line.IndexOf(rowPart, StringComparison.OrdinalIgnoreCase);
+            if (pos < 0)
+                return "N/D";
+
+            string value = line.Substring(pos + rowPart.Length).Trim();
+
+            return removeSpaces ? value.Replace(" ", string.Empty) : value;
         }
 
         public string Path { get; }
@@ -43,6 +42,8 @@ namespace UncomplicatedCustomItems.API.Features
         public string Message { get; }
 
         public string Id => GetRoleFileElement(Content, "id:");
+
+        public string Name => GetRoleFileElement(Content, "name:");
 
         internal ErrorCustomItem(string path, string[] content, Exception exception, string message = null)
         {

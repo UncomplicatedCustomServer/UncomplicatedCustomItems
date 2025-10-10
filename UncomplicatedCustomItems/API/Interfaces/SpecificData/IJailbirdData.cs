@@ -12,7 +12,5 @@
         public abstract float FlashDuration { get; set; }
 
         public abstract float Radius { get; set; }
-        
-        public abstract int TotalCharges { get; set; }
     }
 }

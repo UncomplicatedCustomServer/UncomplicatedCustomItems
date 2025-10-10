@@ -3,7 +3,6 @@ using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UnityEngine;
 using InventorySystem.Items.Firearms.Attachments;
-using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using LabApi.Events.Arguments.PlayerEvents;
 using CustomPlayerEffects;
@@ -12,7 +11,7 @@ namespace UncomplicatedCustomItems.Examples
 {
     /// <summary>
     /// Example of how to make a <see cref="CustomItem"/> in C#
-    /// You could also use the <see cref="ToolGun.ToolGun"/> as a example.
+    /// You could also use the <see cref="API.ToolGun.ToolGun"/> as a example.
     /// </summary>
     [PluginCustomItem]
     public class ExampleCustomWeapon : CustomWeapon

@@ -1,4 +1,5 @@
 using CustomPlayerEffects;
+using InventorySystem.Items.ThrowableProjectiles;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
@@ -112,11 +113,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 if (ev.Projectile is TimedGrenadeProjectile timedprojectile)
                     timedprojectile.RemainingTime = FuseTime;
                 if (ExplodeOnImpact)
-                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? LabApi.Features.Wrappers.Player.Host).GameObject, ev.Projectile.Base);         
+                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host).GameObject, ev.Projectile.Base);         
             }
 
         }
-
 
         protected virtual void OnDetonating(ProjectileExplodingEventArgs ev) { }
         protected virtual void OnDetonated(ProjectileExplodedEventArgs ev) { }

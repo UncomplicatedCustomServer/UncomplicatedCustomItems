@@ -2,7 +2,6 @@
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
-using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
@@ -14,7 +13,7 @@ namespace UncomplicatedCustomItems.Examples
 {
     /// <summary>
     /// Example of how to make a <see cref="CustomItem"/> in C#
-    /// You could also use the <see cref="ToolGun.ToolGun"/> as a example.
+    /// You could also use the <see cref="API.ToolGun.ToolGun"/> as a example.
     /// </summary>
     [PluginCustomItem]
     public class ExampleCustomArmor : CustomArmor

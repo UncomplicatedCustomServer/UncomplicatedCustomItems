@@ -5,13 +5,16 @@ using MEC;
 using Mirror;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Components;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UncomplicatedCustomItems.Commands;
 using UnityEngine;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
@@ -27,6 +30,7 @@ namespace UncomplicatedCustomItems.Events
             ServerEvent.ProjectileExploding += OnGrenadeExploding;
             ServerEvent.RoundEnding += OnRoundEnd;
             ServerEvent.PickupCreated += OnPickupCreation;
+            ServerEvent.RoundStarted += SpawnItemsOnRoundStarted;
         }
 
         public static void Unregister()
@@ -35,6 +39,53 @@ namespace UncomplicatedCustomItems.Events
             ServerEvent.ProjectileExploding -= OnGrenadeExploding;
             ServerEvent.RoundEnding -= OnRoundEnd;
             ServerEvent.PickupCreated -= OnPickupCreation;
+            ServerEvent.RoundStarted -= SpawnItemsOnRoundStarted;
+        }
+
+
+        /// <summary>
+        /// Spawn items on round started
+        /// </summary>
+        public static void SpawnItemsOnRoundStarted()
+        {
+            foreach (ICustomItem customItem in CustomItem.List)
+            {
+                if (customItem.Item is ItemType.SCP330 && customItem.CustomData is ICandyData data && !data.AllowSpawningAsItem)
+                    continue;
+
+                LogManager.Debug($"{customItem.Name} DoSpawn is set to {customItem.Spawn.DoSpawn}");
+                if (customItem.Spawn is not null && customItem.Spawn.DoSpawn)
+                {
+                    for (uint count = 0; count < customItem.Spawn.Count; count++)
+                    {
+                        LogManager.Debug($"Spawning {customItem.Name} ({count + 1}/{customItem.Spawn.Count})");
+                        Utilities.SummonCustomItem(customItem);
+                    }
+                }
+            }
+
+            if (APICustomItem.List.Count() > 0)
+            {
+                foreach (APICustomItem item in APICustomItem.List)
+                {
+                    if (item is CustomCandy data && !data.AllowSpawningAsItem)
+                        continue;
+
+                    LogManager.Debug($"{item.Name} DoSpawn is set to {item.Spawn}");
+                    if (item.Spawn)
+                    {
+                        for (uint count = 0; count < item.AmountToSpawn; count++)
+                        {
+                            float chance = UnityEngine.Random.Range(0f, 101f);
+                            if (chance >= item.ChanceToSpawn)
+                            {
+                                LogManager.Debug($"Spawning {item.Name} ({count + 1}/{item.AmountToSpawn})");
+                                APICustomItem.SummonItem(item);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public static void OnRoundEnd(RoundEndingEventArgs ev)
@@ -68,9 +119,12 @@ namespace UncomplicatedCustomItems.Events
 
             PlayerHandler.DetonationPosition = ev.Position;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem customItem) || !customItem.CustomItem.CustomFlags.HasValue)
+            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem customItem))
                 return;
                 
+            if (customItem.CustomItem.CustomItemType is CustomItemType.Item)
+                customItem?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
+
             LogManager.Debug($"{ev.TimedGrenade.Type} is a CustomItem");
             if (customItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
             {
@@ -293,7 +347,7 @@ namespace UncomplicatedCustomItems.Events
             }
         }
 
-        private static Vector3 ClusterOffset(Vector3 position)
+        internal static Vector3 ClusterOffset(Vector3 position)
         {
             System.Random random = new();
             float x = position.x - 1 + ((float)random.NextDouble() * random.Next(0, 3));

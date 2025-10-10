@@ -1,17 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using InventorySystem;
+using InventorySystem.Items.Firearms;
+using InventorySystem.Items.ThrowableProjectiles;
+using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
-using UnityEngine;
-using InventorySystem.Items.Firearms.Attachments;
-using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using LabApi.Events.Arguments.ServerEvents;
+using UncomplicatedCustomItems.API.Interfaces.FlagSettings;
+using UncomplicatedCustomItems.Events;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace UncomplicatedCustomItems.Examples
 {
     /// <summary>
     /// Example of how to make a <see cref="CustomItem"/> in C#
-    /// You could also use the <see cref="ToolGun.ToolGun"/> as a example.
+    /// You could also use the <see cref="API.ToolGun.ToolGun"/> as a example.
     /// </summary>
     [PluginCustomItem]
     public class ExampleCustomGrenade : CustomExplosiveGrenade
@@ -56,7 +60,7 @@ namespace UncomplicatedCustomItems.Examples
         public override float FuseTime { get; set; } = 10f;
 
         /// <inheritdoc/>
-        public override bool ExplodeOnImpact { get; set; } = true;
+        public override bool ExplodeOnImpact { get; set; } = false;
 
         /// <inheritdoc/>
         public override float PinPullTime { get; set; } = 1.5f;
@@ -70,13 +74,21 @@ namespace UncomplicatedCustomItems.Examples
         /// <inheritdoc/>
         public override float DoorDamageMultiplier { get; set; } = 10f;
 
-        protected override void OnDetonated(ProjectileExplodedEventArgs ev)
+        protected override void OnDetonating(ProjectileExplodingEventArgs ev)
         {
             if (!Check(ev.TimedGrenade))
                 return;
 
+            for (int i = 0; i <= 5; i++)
+            {
+                Vector3 position = ServerHandler.ClusterOffset(ev.Position);
+                ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)ExplosiveGrenadeProjectile.Create(ItemType.GrenadeHE, position, default, Scale/2);
+                grenade.RemainingTime = 1.3f;
+                grenade.MaxRadius = 4f;
+                grenade.Spawn();
+            }
 
-            base.OnDetonated(ev);
+            base.OnDetonating(ev);
         }
     }
 }

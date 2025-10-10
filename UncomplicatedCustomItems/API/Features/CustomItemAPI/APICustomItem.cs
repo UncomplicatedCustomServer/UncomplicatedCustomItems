@@ -333,6 +333,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             LabApi.Events.Handlers.PlayerEvents.DroppedItem += new LabApi.Events.LabEventHandler<PlayerDroppedItemEventArgs>(InternalOnDropped);
             LabApi.Events.Handlers.PlayerEvents.ChangedItem += new LabApi.Events.LabEventHandler<PlayerChangedItemEventArgs>(InternalOnChangedItem);
             LabApi.Events.Handlers.PlayerEvents.Death += new LabApi.Events.LabEventHandler<PlayerDeathEventArgs>(InternalOnDied);
+            LabApi.Events.Handlers.PlayerEvents.Hurt += new LabApi.Events.LabEventHandler<PlayerHurtEventArgs>(InternalOnHurt);
+            LabApi.Events.Handlers.PlayerEvents.Hurting += new LabApi.Events.LabEventHandler<PlayerHurtingEventArgs>(InternalOnHurting);
         }
 
         public virtual void UnregisterEvents()
@@ -355,6 +357,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             LabApi.Events.Handlers.PlayerEvents.DroppedItem -= new LabApi.Events.LabEventHandler<PlayerDroppedItemEventArgs>(InternalOnDropped);
             LabApi.Events.Handlers.PlayerEvents.ChangedItem -= new LabApi.Events.LabEventHandler<PlayerChangedItemEventArgs>(InternalOnChangedItem);
             LabApi.Events.Handlers.PlayerEvents.Death -= new LabApi.Events.LabEventHandler<PlayerDeathEventArgs>(InternalOnDied);
+            LabApi.Events.Handlers.PlayerEvents.Hurt -= new LabApi.Events.LabEventHandler<PlayerHurtEventArgs>(InternalOnHurt);
+            LabApi.Events.Handlers.PlayerEvents.Hurting -= new LabApi.Events.LabEventHandler<PlayerHurtingEventArgs>(InternalOnHurting);
         }
 
         private void InternalOnOwnerHandCuffed(PlayerCuffedEventArgs ev)
@@ -471,7 +475,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             foreach (Item item in ev.Player.Items.ToList())
             {
                 if (Check(item))
+                {
+                    _processedThrowables.Remove(item.Serial);
                     OnDying(ev);
+                }
             }
         }
         private void InternalOnDied(PlayerDeathEventArgs ev) 
@@ -483,6 +490,20 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
         }
 
+        private void InternalOnHurt(PlayerHurtEventArgs ev)
+        {
+            if (Check(ev.Attacker))
+                OnHurt(ev);
+        }
+
+        private void InternalOnHurting(PlayerHurtingEventArgs ev)
+        {
+            if (Check(ev.Attacker))
+                OnHurting(ev);
+        }
+
+        protected virtual void OnHurt(PlayerHurtEventArgs ev) { }
+        protected virtual void OnHurting(PlayerHurtingEventArgs ev) { }
         protected virtual void OnEscaping(PlayerEscapingEventArgs ev) { }
         protected virtual void OnChangingRole(PlayerChangingRoleEventArgs ev) { }
         protected virtual void OnCuffed(PlayerCuffedEventArgs ev) { }
@@ -501,5 +522,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         protected virtual void OnChangingItem(PlayerChangingItemEventArgs ev) { }
         protected virtual void OnDying(PlayerDyingEventArgs ev) { }
         protected virtual void OnDied(PlayerDeathEventArgs ev) { }
+
+        internal static readonly HashSet<ushort> _processedThrowables = [];
     }
 }

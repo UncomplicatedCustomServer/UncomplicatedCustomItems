@@ -4,6 +4,7 @@ using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
+using InventorySystem.Items.Jailbird;
 using InventorySystem.Items.Keycards;
 using InventorySystem.Items.ThrowableProjectiles;
 using LabApi.Events.Arguments.PlayerEvents;
@@ -17,6 +18,7 @@ using System.Linq;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UncomplicatedCustomItems.API.Struct;
@@ -89,9 +91,9 @@ namespace UncomplicatedCustomItems.API.Features
         public static List<string?> CommandsList(List<ItemDataList> commands)
         {
             List<string?> result = [];
-            
-                foreach (ItemDataList data in commands)
-                    result.Add(data.Command);
+
+            foreach (ItemDataList data in commands)
+                result.Add(data.Command);
 
             return result;
         }
@@ -134,7 +136,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item = item;
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
-            
+
             if (IsPickup)
                 Pickup.Rotation = rotation;
 
@@ -173,241 +175,60 @@ namespace UncomplicatedCustomItems.API.Features
                 );
             }
         }
-        
+
         public void SetProperties()
         {
             if (Item is not null)
             {
                 switch (CustomItem.CustomItemType)
                 {
-                    case CustomItemType.Keycard:
-                        KeycardItem keycard = Item as KeycardItem;
-                        IKeycardData keycardData = CustomItem.CustomData as IKeycardData;
-                        
-                        ColorUtility.TryParseHtmlString(keycardData.PermissionsColor, out Color permissionsColor);
-                        ColorUtility.TryParseHtmlString(keycardData.TintColor, out Color tintColor);
-                        ColorUtility.TryParseHtmlString(keycardData.LabelColor, out Color labelColor);
-                        Color32 permissionsColor32 = permissionsColor;
-                        Color32 tintColor32 = tintColor;
-                        Color32 labelColor32 = labelColor;
-                        KeycardLevels permissions = new(keycardData.Containment, keycardData.Armory, keycardData.Admin);
-                        if (!keycard.Base.Customizable)
-                        {
-                            LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
-                            return;
-                        }
-
-                        CustomKeycard customKeycard = new(keycard.Base);
-                        if (!NameApplied)
-                            customKeycard.NameTag = keycardData.Name;
-
-                        customKeycard.SerialNumber = keycardData.SerialNumber;
-                        customKeycard.WearIndex = keycardData.WearDetail;
-                        customKeycard.RankIndex = keycardData.Rank;
-                        customKeycard.LabelColor = labelColor32;
-                        customKeycard.LabelText = keycardData.Label;
-                        customKeycard.ItemName = CustomItem.Name;
-                        customKeycard.CardColor = tintColor32;
-                        customKeycard.PermissionsColor = permissionsColor32;
-                        customKeycard.Permissions = permissions;
-                        LogManager.Debug($"{labelColor32} {labelColor} {keycardData.LabelColor}");
-                        KeycardDetailSynchronizer.Database.Remove(keycard.Serial);
-                        KeycardDetailSynchronizer.ServerProcessItem(keycard.Base);
-                        NameApplied = true;
+                    case CustomItemType.Keycard when Item is KeycardItem keycard && CustomItem.CustomData is KeycardData keycardData:
+                        HandleKeycardItem(keycard, keycardData);
                         break;
 
-                    case CustomItemType.Armor:
-                        Armor armor = Item as Armor;
-                        IArmorData armorData = CustomItem.CustomData as IArmorData;
-
+                    case CustomItemType.Armor when Item is Armor armor && CustomItem.CustomData is ArmorData armorData:
                         armor.Base.HelmetEfficacy = armorData.HeadProtection;
                         armor.Base.VestEfficacy = armorData.BodyProtection;
                         armor.Base._staminaUseMultiplier = armorData.StaminaUseMultiplier;
                         break;
 
-                    case CustomItemType.Weapon:
-                        List<string> attachmentList = GetAttachmentsList();
-                        FirearmItem firearm = Item as FirearmItem;
-                        IWeaponData weaponData = CustomItem.CustomData as IWeaponData;
-                        firearm.Base.TryGetModule<MagazineModule>(out var magazine);
-                        MagazineModule = magazine;
-                        firearm.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
-                        HitscanHitregModule = hitscan;
+                    case CustomItemType.Weapon when Item is FirearmItem firearm && CustomItem.CustomData is WeaponData weaponData:
+                        HandleWeaponItem(firearm, weaponData);
+                        break;
 
-                        foreach (string attachmentString in attachmentList)
-                        {
-                            if (Enum.TryParse(attachmentString, out AttachmentName attachment))
-                            {
-                                if (firearm.Base.TryApplyAttachment(attachment))
-                                    LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                                else
-                                    LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
-                            }
-                            else
-                                LogManager.Warn($"{nameof(SetProperties)}: [{attachment}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
-                        }
-
-                        if (!PropertiesSet)
-                            MagazineModule.AmmoStored = weaponData.MaxAmmo;
-
-                        HitscanHitregModule.BaseDamage = weaponData.Damage;
-                        HitscanHitregModule.BasePenetration = weaponData.Penetration;
-                        HitscanHitregModule.BaseBulletInaccuracy = weaponData.Inaccuracy;
-                        HitscanHitregModule.DamageFalloffDistance = weaponData.DamageFalloffDistance;
-                        MagazineModule.ServerResyncData();
+                    case CustomItemType.Jailbird when Item is Jailbird jailbird && CustomItem.CustomData is JailbirdData jbData:
+                        jailbird.Base._hitreg._flashedDuration = jbData.FlashDuration;
+                        jailbird.Base._hitreg._hitregRadius = jbData.Radius;
+                        jailbird.Base._hitreg._damageCharge = jbData.ChargeDamage;
+                        jailbird.Base._hitreg._damageMelee = jbData.MeleeDamage;
+                        JailbirdDeteriorationTracker.ReceivedStates[jailbird.Serial] = jbData.WearState;
                         PropertiesSet = true;
                         break;
 
-                    case CustomItemType.Jailbird:
-                        Jailbird jailbird = Item as Jailbird;
-                        IJailbirdData jailbirdData = CustomItem.CustomData as IJailbirdData;
-
-                        jailbird.Base._hitreg._flashedDuration = jailbirdData.FlashDuration;
-                        jailbird.Base._hitreg._hitregRadius = jailbirdData.Radius;
-                        jailbird.Base._hitreg._damageCharge = jailbirdData.ChargeDamage;
-                        jailbird.Base._hitreg._damageMelee = jailbirdData.MeleeDamage;
-                        PropertiesSet = true;
-                        break;
-
-                    case CustomItemType.ExplosiveGrenade:
-                        IExplosiveGrenadeData explosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
-                        Item.Base.ItemId.TryGetTemplate<InventorySystem.Items.ThrowableProjectiles.ThrowableItem>(out var grenadeThrowable);
-                        ExplosionGrenade grenade = grenadeThrowable.Projectile as ExplosionGrenade;
-                        grenadeThrowable.ItemSerial = Item.Serial;
-                        grenade.Info.Serial = Item.Serial;
-
-                        grenade.MaxRadius = explosiveGrenadeData.MaxRadius;
-                        grenadeThrowable._pinPullTime = explosiveGrenadeData.PinPullTime;
-                        grenade.ScpDamageMultiplier = explosiveGrenadeData.ScpDamageMultiplier;
-                        grenade._concussedDuration = explosiveGrenadeData.ConcussDuration;
-                        grenade._burnedDuration = explosiveGrenadeData.BurnDuration;
-                        grenade._deafenedDuration = explosiveGrenadeData.DeafenDuration;
-                        grenadeThrowable._repickupable = explosiveGrenadeData.Repickable;
-                        grenade._fuseTime = explosiveGrenadeData.FuseTime;
-                        break;
-
-                    case CustomItemType.FlashGrenade:
-                        Item.Base.ItemId.TryGetTemplate<InventorySystem.Items.ThrowableProjectiles.ThrowableItem>(out var flashGrenadeThrowable);
-                        FlashbangGrenade flashGrenade = flashGrenadeThrowable.Projectile as FlashbangGrenade;
-                        flashGrenadeThrowable.ItemSerial = Item.Serial;
-                        flashGrenade.Info.Serial = Item.Serial;
-                        IFlashGrenadeData flashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
-
-                        flashGrenadeThrowable._pinPullTime = flashGrenadeData.PinPullTime;
-                        flashGrenadeThrowable._repickupable = flashGrenadeData.Repickable;
-                        flashGrenade.BlindTime = flashGrenadeData.MinimalDurationEffect;
-                        flashGrenade._additionalBlurDuration = flashGrenadeData.AdditionalBlindedEffect;
-                        flashGrenade._surfaceZoneDistanceIntensifier = flashGrenadeData.SurfaceDistanceIntensifier;
-                        flashGrenade._fuseTime = flashGrenadeData.FuseTime;
-                        break;
-
-                    case CustomItemType.MicroHID:
-                        MicroHIDItem microHID = Item as MicroHIDItem;
-                        IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
+                    case CustomItemType.MicroHID when Item is MicroHIDItem microHID && CustomItem.CustomData is MicroHIDData microData:
                         microHID.Energy = microData.Energy;
                         if (microData.Broken)
                             microHID.Base.BrokenSync.ServerSetBroken();
                         break;
 
-                    case CustomItemType.ParticleDisruptor:
-                        ParticleDisruptorItem particleDisruptor = Item as ParticleDisruptorItem;
-                        IParticleDisruptorData disruptorData = CustomItem.CustomData as IParticleDisruptorData;
-                        particleDisruptor.Base.TryGetModule<DisruptorHitregModule>(out var hitregModule);
-
-                        hitregModule.BasePenetration = disruptorData.Penetration;
+                    case CustomItemType.ParticleDisruptor when Item is ParticleDisruptorItem pd && CustomItem.CustomData is ParticleDisruptorData pdData:
+                        pd.Base.TryGetModule<DisruptorHitregModule>(out var hitregModule);
+                        hitregModule.BasePenetration = pdData.Penetration;
                         break;
 
-                    case CustomItemType.Light:
-                        if (Item.Type is ItemType.Flashlight && !PropertiesSet)
-                        {
-                            FlashlightItem flashLight = Item as FlashlightItem;
-                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
-                            Light newLight = Light.Create(flashLight.CurrentOwner.GameObject.transform);
-                            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+                    case CustomItemType.Light when Item is FlashlightItem flashLight && !PropertiesSet && CustomItem.CustomData is FlashlightData flData:
+                        CreateAndAttachLightToItem(flashLight.CurrentOwner.GameObject.transform, flData, new Vector3(0.05f, 0.35f, 0.5f));
+                        LogManager.Info($"{Light.Position}, {Light.Parent}, {flashLight.IsEmitting}, {Light.Base.enabled}");
+                        break;
 
-                            newLight.Color = color;
-                            newLight.Type = data.LightType;
-                            newLight.Range = data.Range;
-                            newLight.ShadowType = data.ShadowType;
-                            newLight.ShadowStrength = data.ShadowStrength;
-                            newLight.Intensity = data.Intensity;
-                            newLight.Shape = data.Shape;
-                            newLight.SpotAngle = data.SpotLightAngle;
-                            newLight.Transform.localPosition = new Vector3(0.05f, 0.35f, 0.5f);
-                            newLight.SyncInterval = 0;
-                            Light = newLight;
-                            Timing.RunCoroutine(LightFacingForward());
-                            LogManager.Info($"{newLight.Position}, {newLight.Parent}, {flashLight.IsEmitting}, {newLight.Base.enabled}");
-                        }
-                        if (Item.Type is ItemType.Lantern && !PropertiesSet)
-                        {
-                            LanternItem lantern = Item as LanternItem;
-                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
-                            Light newLight = Light.Create(lantern.CurrentOwner.GameObject.transform);
-                            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
-
-                            newLight.Color = color;
-                            newLight.Type = data.LightType;
-                            newLight.Range = data.Range;
-                            newLight.ShadowType = data.ShadowType;
-                            newLight.ShadowStrength = data.ShadowStrength;
-                            newLight.Intensity = data.Intensity;
-                            newLight.Shape = data.Shape;
-                            newLight.SpotAngle = data.SpotLightAngle;
-                            newLight.Transform.localPosition = new Vector3(0.05f, 0f, 0.5f);
-                            newLight.Base.enabled = true;
-                            newLight.SyncInterval = 0;
-                            Light = newLight;
-                            Timing.RunCoroutine(LightFacingForward());
-                        }
+                    case CustomItemType.Light when Item is LanternItem lantern && !PropertiesSet && CustomItem.CustomData is FlashlightData lanData:
+                        CreateAndAttachLightToItem(lantern.CurrentOwner.GameObject.transform, lanData, new Vector3(0.05f, 0f, 0.5f));
                         break;
 
                     case CustomItemType.SCPItem:
-                        {
-                            if (Item.Type == ItemType.SCP018)
-                            {
-                                LabApi.Features.Wrappers.ThrowableItem scp018throwableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
-                                InventorySystem.Items.ThrowableProjectiles.Scp018Projectile scp018 = scp018throwableItem.Base.Projectile as InventorySystem.Items.ThrowableProjectiles.Scp018Projectile;
-                                ISCP018Data scp018Data = CustomItem.CustomData as ISCP018Data;
-                                scp018._fuseTime = scp018Data.FuseTime;
-                                scp018._friendlyFireTime = scp018Data.FriendlyFireTime;
-                            }
-                            else if (Item.Type == ItemType.SCP244a)
-                            {
-                                LogManager.Debug($"SCPItem is SCP-244");
-                                Scp244 scp244 = Item as Scp244;
-                                ISCP244Data scp244Data = CustomItem.CustomData as ISCP244Data;
-                                scp244.Base._primed = scp244Data.Primed;
-                            }
-                            else if (Item.Type == ItemType.SCP244b)
-                            {
-                                LogManager.Debug($"SCPItem is SCP-244");
-                                Scp244 scp244 = Item as Scp244;
-                                ISCP244Data scp244Data = CustomItem.CustomData as ISCP244Data;
-                                scp244.Base._primed = scp244Data.Primed;
-                            }
-                            else if (Item.Type == ItemType.GunSCP127)
-                            {
-                                LogManager.Debug($"SCPItem is SCP-127");
-                                FirearmItem scpFirearm = Item as FirearmItem;
-                                ISCP127Data scp127Data = CustomItem.CustomData as ISCP127Data;
-                                scpFirearm.Base.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
-                                Scp127MagazineModule = scp127magazine;
-                                scpFirearm.Base.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
-                                Scp127Hitscan = scp127hitscan;
+                        HandleSCPItemForItem();
+                        break;
 
-                                if (!PropertiesSet)
-                                    Scp127MagazineModule.AmmoStored = scp127Data.MaxAmmo;
-
-                                Scp127Hitscan.BaseDamage = scp127Data.Damage;
-                                Scp127Hitscan.BasePenetration = scp127Data.Penetration;
-                                Scp127Hitscan.BaseBulletInaccuracy = scp127Data.Inaccuracy;
-                                Scp127Hitscan.DamageFalloffDistance = scp127Data.DamageFalloffDistance;
-                                Scp127MagazineModule.ServerResyncData();
-                                PropertiesSet = true;
-                            }
-                            break;
-                        }
                     default:
                         break;
                 }
@@ -416,342 +237,449 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 switch (CustomItem.CustomItemType)
                 {
-                    case CustomItemType.Keycard:
-                        LabApi.Features.Wrappers.KeycardPickup keycard = (LabApi.Features.Wrappers.KeycardPickup)LabApi.Features.Wrappers.KeycardPickup.Create(CustomItem.Item, Pickup.Position);
-                        IKeycardData keycardData = CustomItem.CustomData as IKeycardData;
-                        ColorUtility.TryParseHtmlString(keycardData.PermissionsColor, out Color permissionsColor);
-                        ColorUtility.TryParseHtmlString(keycardData.TintColor, out Color tintColor);
-                        ColorUtility.TryParseHtmlString(keycardData.LabelColor, out Color labelColor);
-                        Color32 permissionsColor32 = permissionsColor;
-                        Color32 tintColor32 = tintColor;
-                        Color32 labelColor32 = labelColor;
-                        KeycardLevels permissions = new(keycardData.Containment, keycardData.Armory, keycardData.Admin);
-                        keycard.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var item);
-                        item.ItemSerial = keycard.Serial;
-                        CustomKeycard customKeycard = new CustomKeycard(item);
-                        customKeycard.SerialNumber = keycardData.SerialNumber;
-                        customKeycard.WearIndex = keycardData.WearDetail;
-                        customKeycard.RankIndex = keycardData.Rank;
-                        customKeycard.LabelColor = labelColor32;
-                        customKeycard.LabelText = keycardData.Label;
-                        customKeycard.ItemName = CustomItem.Name;
-                        customKeycard.CardColor = tintColor32;
-                        customKeycard.PermissionsColor = permissionsColor32;
-                        customKeycard.Permissions = permissions;
-                        LogManager.Debug($"{labelColor32} {labelColor} {keycardData.LabelColor}");
-                        KeycardDetailSynchronizer.Database.Remove(keycard.Serial);
-                        KeycardDetailSynchronizer.ServerProcessPickup(keycard.Base);
-                        Pickup.Destroy();
-                        keycard.Spawn();
-                        Pickup = keycard;
-                        Serial = Pickup.Serial;
+                    case CustomItemType.Keycard when CustomItem.CustomData is KeycardData keycardData:
+                        HandleKeycardPickup(keycardData);
                         break;
 
-                    case CustomItemType.Weapon:
-                        List<string> attachmentList = GetAttachmentsList();
-                        LabApi.Features.Wrappers.FirearmPickup firearmPickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
-                        firearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out Firearm firearm);
-                        IWeaponData weaponData = CustomItem.CustomData as IWeaponData;
-                        firearm.ItemSerial = firearmPickup.Serial;
-                        firearm.TryGetModule<MagazineModule>(out var magazine);
-                        MagazineModule = magazine;
-                        firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
-                        HitscanHitregModule = hitscan;
+                    case CustomItemType.Weapon when CustomItem.CustomData is WeaponData weaponData:
+                        HandleWeaponPickup(weaponData);
+                        break;
 
-                        if (weaponData.Attachments.Count() > 1)
+                    case CustomItemType.MicroHID when CustomItem.CustomData is MicroHIDData microData:
                         {
-                            foreach (string attachmentString in attachmentList)
-                            {
-                                if (Enum.TryParse(attachmentString, out AttachmentName attachment))
-                                {
-                                    if (firearmPickup.Base.TryApplyAttachment(attachment))
-                                        LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                                    else
-                                        LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
-                                }
-                                else
-                                    LogManager.Warn($"{nameof(SetProperties)}: [{attachment}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Pickup.Type}");
-                            }
+                            MicroHIDPickup microHID = (MicroHIDPickup)Pickup;
+                            Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
+                            microHIDItem.ItemSerial = microHID.Serial;
+                            microHIDItem.EnergyManager.ServerSetEnergy(microHIDItem.ItemSerial, microData.Energy);
                         }
-                        else
-                        {
-                            LogManager.Debug($"No attachments found for {CustomItem.Name} - {CustomItem.Id} applying random attachments...");
-                            AttachmentCodeSync.ServerSetCode(firearmPickup.Base.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearmPickup.Base.Info.ItemId));
-                        }
-                        MagazineModule.MagazineInserted = true;
-                        HitscanHitregModule.BaseDamage = weaponData.Damage;
-                        if (!PropertiesSet)
-                            MagazineModule.AmmoStored = weaponData.MaxAmmo;
-                        HitscanHitregModule.BasePenetration = weaponData.Penetration;
-                        HitscanHitregModule.BaseBulletInaccuracy = weaponData.Inaccuracy;
-                        HitscanHitregModule.DamageFalloffDistance = weaponData.DamageFalloffDistance;
-                        MagazineModule.ServerResyncData();
-                        Pickup.Destroy();
-                        firearmPickup.Spawn();
-                        Pickup = firearmPickup;
-                        Serial = Pickup.Serial;
-                        PropertiesSet = true;
                         break;
 
-                    case CustomItemType.ExplosiveGrenade:
-                        Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ThrowableProjectiles.ThrowableItem>(out var explosiveGrenadeThrowable);
-                        IExplosiveGrenadeData explosiveGrenadeData = CustomItem.CustomData as IExplosiveGrenadeData;
-                        explosiveGrenadeThrowable.ItemSerial = Pickup.Serial;
-                        ExplosionGrenade explosiveGrenade = explosiveGrenadeThrowable.Projectile as ExplosionGrenade;
-                        explosiveGrenade.Info.Serial = Pickup.Serial;
-
-                        explosiveGrenadeThrowable._pinPullTime = explosiveGrenadeData.PinPullTime;
-                        explosiveGrenadeThrowable._repickupable = explosiveGrenadeData.Repickable;
-                        explosiveGrenade.MaxRadius = explosiveGrenadeData.MaxRadius;
-                        explosiveGrenade.ScpDamageMultiplier = explosiveGrenadeData.ScpDamageMultiplier;
-                        explosiveGrenade._concussedDuration = explosiveGrenadeData.ConcussDuration;
-                        explosiveGrenade._burnedDuration = explosiveGrenadeData.BurnDuration;
-                        explosiveGrenade._deafenedDuration = explosiveGrenadeData.DeafenDuration;
-                        explosiveGrenade._fuseTime = explosiveGrenadeData.FuseTime;
-                        break;
-
-                    case CustomItemType.FlashGrenade:
-                        Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ThrowableProjectiles.ThrowableItem>(out var flashGrenadeThrowable);
-                        IFlashGrenadeData flashGrenadeData = CustomItem.CustomData as IFlashGrenadeData;
-                        flashGrenadeThrowable.ItemSerial = Pickup.Serial;
-                        FlashbangGrenade flashGrenade = flashGrenadeThrowable.Projectile as FlashbangGrenade;
-                        flashGrenade.Info.Serial = Pickup.Serial;
-
-                        flashGrenadeThrowable._repickupable = flashGrenadeData.Repickable;
-                        flashGrenadeThrowable._pinPullTime = flashGrenadeData.PinPullTime;
-                        flashGrenade._additionalBlurDuration = flashGrenadeData.AdditionalBlindedEffect;
-                        flashGrenade._surfaceZoneDistanceIntensifier = flashGrenadeData.SurfaceDistanceIntensifier;
-                        flashGrenade._fuseTime = flashGrenadeData.FuseTime;
-                        break;
-
-                    case CustomItemType.MicroHID:
-                        MicroHIDPickup microHID = Pickup as MicroHIDPickup;
-                        IMicroHIDData microData = CustomItem.CustomData as IMicroHIDData;
-                        microHID.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
-                        microHIDItem.ItemSerial = microHID.Serial;
-
-                        microHIDItem.EnergyManager.ServerSetEnergy(microHIDItem.ItemSerial, microData.Energy);
-                        break;
-
-                    case CustomItemType.ParticleDisruptor:
+                    case CustomItemType.ParticleDisruptor when CustomItem.CustomData is ParticleDisruptorData pdData:
                         Pickup.Base.Info.ItemId.TryGetTemplate<ParticleDisruptor>(out var particleDisruptor);
-                        IParticleDisruptorData disruptorData = CustomItem.CustomData as IParticleDisruptorData;
-                        particleDisruptor.TryGetModule<DisruptorHitregModule>(out var hitregModule);
-
-                        hitregModule.BasePenetration = disruptorData.Penetration;
+                        particleDisruptor.TryGetModule<DisruptorHitregModule>(out var hitregModule2);
+                        hitregModule2.BasePenetration = pdData.Penetration;
                         break;
 
                     case CustomItemType.Light:
-                        if (Pickup.Type is ItemType.Flashlight && !PropertiesSet)
-                        {
-                            Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Flashlight.FlashlightItem>(out var flashLight);
-                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
-                            Light newLight = Light.Create(flashLight.gameObject.transform.position);
-                            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
-                            newLight.Color = color;
-                            newLight.Type = data.LightType;
-                            newLight.Range = data.Range;
-                            newLight.ShadowType = data.ShadowType;
-                            newLight.ShadowStrength = data.ShadowStrength;
-                            newLight.Intensity = data.Intensity;
-                            newLight.Shape = data.Shape;
-                            newLight.SpotAngle = data.SpotLightAngle;
-                            newLight.Parent = Pickup.Base.transform;
-                            newLight.Position = Pickup.Position;
-                            newLight.SyncInterval = 0;
-                            Light = newLight;
-                            newLight.Base.enabled = true;
-                        }
-                        if (Pickup.Type is ItemType.Lantern && !PropertiesSet)
-                        {
-                            Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Lantern.LanternItem>(out var lantern);
-                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
-                            Light newLight = Light.Create(lantern.gameObject.transform.position);
-                            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
-                            newLight.Color = color;
-                            newLight.Type = data.LightType;
-                            newLight.Range = data.Range;
-                            newLight.ShadowType = data.ShadowType;
-                            newLight.ShadowStrength = data.ShadowStrength;
-                            newLight.Intensity = data.Intensity;
-                            newLight.Shape = data.Shape;
-                            newLight.SpotAngle = data.SpotLightAngle;
-                            newLight.Parent = Pickup.Base.transform;
-                            newLight.Position = Pickup.Position;
-                            newLight.SyncInterval = 0;
-                            Light = newLight;
-                            newLight.Base.enabled = true;
-                        }
+                        HandlePickupLight();
                         break;
 
                     case CustomItemType.SCPItem:
-                        {
-                            if (Pickup.Type == ItemType.SCP244a)
-                            {
-                                LogManager.Debug($"SCPItem is SCP-244");
-                                Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
-                                ISCP244Data scp244Data = CustomItem.CustomData as ISCP244Data;
-                                scp244Pickup.Base.MaxDiameter = scp244Data.MaxDiameter;
-                                scp244Pickup.Base._activationDot = scp244Data.ActivationDot;
-                                scp244Pickup.Base._health = scp244Data.Health;
-                                scp244Pickup.Base.enabled = scp244Data.Primed;
-                                Pickup.Destroy();
-                                scp244Pickup.Spawn();
-                                Pickup = scp244Pickup;
-                                Serial = Pickup.Serial;
-                            }
-                            else if (Pickup.Type == ItemType.SCP244b)
-                            {
-                                LogManager.Debug($"SCPItem is SCP-244");
-                                Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
-                                ISCP244Data scp244Data = CustomItem.CustomData as ISCP244Data;
-                                scp244Pickup.Base.MaxDiameter = scp244Data.MaxDiameter;
-                                scp244Pickup.Base._activationDot = scp244Data.ActivationDot;
-                                scp244Pickup.Base._health = scp244Data.Health;
-                                scp244Pickup.Base.enabled = scp244Data.Primed;
-                                Pickup.Destroy();
-                                scp244Pickup.Spawn();
-                                Pickup = scp244Pickup;
-                                Serial = Pickup.Serial;
-                            }
-                            else if (Pickup.Type == ItemType.SCP018)
-                            {
-                                Scp018 scp018 = Pickup as Scp018;
-                                ISCP018Data scp018Data = CustomItem.CustomData as ISCP018Data;
-                                scp018.Base._fuseTime = scp018Data.FuseTime;
-                                scp018.Base._friendlyFireTime = scp018Data.FriendlyFireTime;
-                            }
-                            else if (Pickup.Type == ItemType.GunSCP127)
-                            {
-                                LogManager.Debug($"SCPItem is SCP-127");
-                                LabApi.Features.Wrappers.FirearmPickup scpFirearmPickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
-                                scpFirearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out Firearm scpFirearm);
-                                ISCP127Data scp127Data = CustomItem.CustomData as ISCP127Data;
-                                scpFirearm.ItemSerial = scpFirearmPickup.Serial;
-                                scpFirearm.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
-                                Scp127MagazineModule = scp127magazine;
-                                scpFirearm.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
-                                Scp127Hitscan = scp127hitscan;
-
-                                Scp127MagazineModule.MagazineInserted = true;
-                                if (!PropertiesSet)
-                                    Scp127MagazineModule.AmmoStored = scp127Data.MaxAmmo;
-                                Scp127Hitscan.BaseDamage = scp127Data.Damage;
-                                Scp127Hitscan.BasePenetration = scp127Data.Penetration;
-                                Scp127Hitscan.BaseBulletInaccuracy = scp127Data.Inaccuracy;
-                                Scp127Hitscan.DamageFalloffDistance = scp127Data.DamageFalloffDistance;
-                                Scp127MagazineModule.ServerResyncData();
-                                Pickup.Destroy();
-                                scpFirearmPickup.Spawn();
-                                Pickup = scpFirearmPickup;
-                                Serial = Pickup.Serial;
-                                PropertiesSet = true;
-                            }
-                        }
+                        HandleSCPItemForPickup();
                         break;
+
                     default:
                         break;
                 }
             }
         }
 
+        public void HandleKeycardItem(KeycardItem keycardItem, IKeycardData kd)
+        {
+            ColorUtility.TryParseHtmlString(kd.PermissionsColor, out Color permissionsColor);
+            ColorUtility.TryParseHtmlString(kd.TintColor, out Color tintColor);
+            ColorUtility.TryParseHtmlString(kd.LabelColor, out Color labelColor);
+
+            Color32 permissionsColor32 = (Color32)permissionsColor;
+            Color32 tintColor32 = (Color32)tintColor;
+            Color32 labelColor32 = (Color32)labelColor;
+
+            KeycardLevels permissions = new(kd.Containment, kd.Armory, kd.Admin);
+
+            if (!keycardItem.Base.Customizable)
+            {
+                LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
+                return;
+            }
+
+            CustomKeycard customKeycard = new(keycardItem.Base);
+            if (!NameApplied)
+                customKeycard.NameTag = kd.Name;
+
+            customKeycard.SerialNumber = kd.SerialNumber;
+            customKeycard.WearIndex = kd.WearDetail;
+            customKeycard.RankIndex = kd.Rank;
+            customKeycard.LabelColor = labelColor32;
+            customKeycard.LabelText = kd.Label;
+            customKeycard.ItemName = CustomItem.Name;
+            customKeycard.CardColor = tintColor32;
+            customKeycard.PermissionsColor = permissionsColor32;
+            customKeycard.Permissions = permissions;
+
+            LogManager.Debug($"{labelColor32} {labelColor} {kd.LabelColor}");
+
+            KeycardDetailSynchronizer.Database.Remove(keycardItem.Serial);
+            KeycardDetailSynchronizer.ServerProcessItem(keycardItem.Base);
+            NameApplied = true;
+        }
+
+        public void HandleKeycardPickup(IKeycardData kd)
+        {
+            LabApi.Features.Wrappers.KeycardPickup keycardPickup = (LabApi.Features.Wrappers.KeycardPickup)LabApi.Features.Wrappers.KeycardPickup.Create(CustomItem.Item, Pickup.Position);
+
+            ColorUtility.TryParseHtmlString(kd.PermissionsColor, out Color permissionsColor);
+            ColorUtility.TryParseHtmlString(kd.TintColor, out Color tintColor);
+            ColorUtility.TryParseHtmlString(kd.LabelColor, out Color labelColor);
+
+            Color32 permissionsColor32 = (Color32)permissionsColor;
+            Color32 tintColor32 = (Color32)tintColor;
+            Color32 labelColor32 = (Color32)labelColor;
+            KeycardLevels permissions = new(kd.Containment, kd.Armory, kd.Admin);
+
+            keycardPickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var item);
+            item.ItemSerial = keycardPickup.Serial;
+
+            CustomKeycard customKeycard = new(item);
+            customKeycard.SerialNumber = kd.SerialNumber;
+            customKeycard.WearIndex = kd.WearDetail;
+            customKeycard.RankIndex = kd.Rank;
+            customKeycard.LabelColor = labelColor32;
+            customKeycard.LabelText = kd.Label;
+            customKeycard.ItemName = CustomItem.Name;
+            customKeycard.CardColor = tintColor32;
+            customKeycard.PermissionsColor = permissionsColor32;
+            customKeycard.Permissions = permissions;
+
+            LogManager.Debug($"{labelColor32} {labelColor} {kd.LabelColor}");
+            KeycardDetailSynchronizer.Database.Remove(keycardPickup.Serial);
+            KeycardDetailSynchronizer.ServerProcessPickup(keycardPickup.Base);
+
+            Pickup.Destroy();
+            keycardPickup.Spawn();
+            Pickup = keycardPickup;
+            Serial = Pickup.Serial;
+        }
+
+        public void HandleWeaponItem(FirearmItem firearmItem, IWeaponData wd)
+        {
+            List<string> attachmentList = GetAttachmentsList();
+
+            firearmItem.Base.TryGetModule<MagazineModule>(out var mag);
+            MagazineModule = mag;
+
+            firearmItem.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
+            HitscanHitregModule = hitscan;
+
+            foreach (string attachmentString in attachmentList)
+            {
+                if (Enum.TryParse(attachmentString, out AttachmentName attachment))
+                {
+                    if (firearmItem.Base.TryApplyAttachment(attachment))
+                        LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                    else
+                        LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                }
+                else
+                {
+                    LogManager.Warn($"{nameof(SetProperties)}: [{attachmentString}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
+                }
+            }
+
+            if (!PropertiesSet && MagazineModule != null)
+                MagazineModule.AmmoStored = wd.MaxAmmo;
+
+            if (HitscanHitregModule != null)
+            {
+                HitscanHitregModule.BaseDamage = wd.Damage;
+                HitscanHitregModule.BasePenetration = wd.Penetration;
+                HitscanHitregModule.BaseBulletInaccuracy = wd.Inaccuracy;
+                HitscanHitregModule.DamageFalloffDistance = wd.DamageFalloffDistance;
+            }
+
+            MagazineModule?.ServerResyncData();
+            PropertiesSet = true;
+        }
+
+        public void HandleWeaponPickup(IWeaponData wd)
+        {
+            List<string> attachmentList = GetAttachmentsList();
+
+            var firearmPickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
+            firearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var firearm);
+            firearm.ItemSerial = firearmPickup.Serial;
+
+            firearm.TryGetModule<MagazineModule>(out var mag);
+            MagazineModule = mag;
+
+            firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
+            HitscanHitregModule = hitscan;
+
+            if (wd.Attachments.Count() > 1)
+            {
+                foreach (string attachmentString in attachmentList)
+                {
+                    if (Enum.TryParse(attachmentString, out AttachmentName attachment))
+                    {
+                        if (firearmPickup.Base.TryApplyAttachment(attachment))
+                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                        else
+                            LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                    }
+                    else
+                    {
+                        LogManager.Warn($"{nameof(SetProperties)}: [{attachmentString}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Pickup.Type}");
+                    }
+                }
+            }
+            else
+            {
+                LogManager.Debug($"No attachments found for {CustomItem.Name} - {CustomItem.Id} applying random attachments...");
+                AttachmentCodeSync.ServerSetCode(firearmPickup.Base.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearmPickup.Base.Info.ItemId));
+            }
+
+            MagazineModule.MagazineInserted = true;
+            if (!PropertiesSet)
+                MagazineModule.AmmoStored = wd.MaxAmmo;
+
+            HitscanHitregModule.BaseDamage = wd.Damage;
+            HitscanHitregModule.BasePenetration = wd.Penetration;
+            HitscanHitregModule.BaseBulletInaccuracy = wd.Inaccuracy;
+            HitscanHitregModule.DamageFalloffDistance = wd.DamageFalloffDistance;
+            MagazineModule.ServerResyncData();
+
+            Pickup.Destroy();
+            firearmPickup.Spawn();
+            Pickup = firearmPickup;
+            Serial = Pickup.Serial;
+            PropertiesSet = true;
+        }
+
+        public void CreateAndAttachLightToItem(Transform parentTransform, IFlashlightData data, Vector3 localPos)
+        {
+            Light newLight = Light.Create(parentTransform);
+            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+
+            newLight.Color = color;
+            newLight.Type = data.LightType;
+            newLight.Range = data.Range;
+            newLight.ShadowType = data.ShadowType;
+            newLight.ShadowStrength = data.ShadowStrength;
+            newLight.Intensity = data.Intensity;
+            newLight.Shape = data.Shape;
+            newLight.SpotAngle = data.SpotLightAngle;
+            newLight.Transform.localPosition = localPos;
+            newLight.SyncInterval = 0;
+            Light = newLight;
+            Timing.RunCoroutine(LightFacingForward());
+        }
+
+        public void HandlePickupLight()
+        {
+            if (Pickup.Type is ItemType.Flashlight && !PropertiesSet)
+            {
+                Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Flashlight.FlashlightItem>(out var flashItem);
+                IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                LightSourceToy newLight = Light.Create(flashItem.gameObject.transform.position);
+                ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+                newLight.Color = color;
+                newLight.Type = data.LightType;
+                newLight.Range = data.Range;
+                newLight.ShadowType = data.ShadowType;
+                newLight.ShadowStrength = data.ShadowStrength;
+                newLight.Intensity = data.Intensity;
+                newLight.Shape = data.Shape;
+                newLight.SpotAngle = data.SpotLightAngle;
+                newLight.Parent = Pickup.Base.transform;
+                newLight.Position = Pickup.Position;
+                newLight.SyncInterval = 0;
+                Light = newLight;
+                newLight.Base.enabled = true;
+            }
+
+            if (Pickup.Type is ItemType.Lantern && !PropertiesSet)
+            {
+                Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Lantern.LanternItem>(out var lantern);
+                IFlashlightData data = CustomItem.CustomData as IFlashlightData;
+                LightSourceToy newLight = Light.Create(lantern.gameObject.transform.position);
+                ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+                newLight.Color = color;
+                newLight.Type = data.LightType;
+                newLight.Range = data.Range;
+                newLight.ShadowType = data.ShadowType;
+                newLight.ShadowStrength = data.ShadowStrength;
+                newLight.Intensity = data.Intensity;
+                newLight.Shape = data.Shape;
+                newLight.SpotAngle = data.SpotLightAngle;
+                newLight.Parent = Pickup.Base.transform;
+                newLight.Position = Pickup.Position;
+                newLight.SyncInterval = 0;
+                Light = newLight;
+                newLight.Base.enabled = true;
+            }
+        }
+
+        public void HandleSCPItemForItem()
+        {
+            if (Item.Type == ItemType.SCP018 && CustomItem.CustomData is ISCP018Data scp018Data)
+            {
+                var scp018throwableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
+                var scp018 = scp018throwableItem.Base.Projectile as InventorySystem.Items.ThrowableProjectiles.Scp018Projectile;
+                scp018._fuseTime = scp018Data.FuseTime;
+                scp018._friendlyFireTime = scp018Data.FriendlyFireTime;
+                return;
+            }
+
+            if ((Item.Type == ItemType.SCP244a || Item.Type == ItemType.SCP244b) && CustomItem.CustomData is ISCP244Data scp244Data)
+            {
+                LogManager.Debug($"SCPItem is SCP-244");
+                Scp244 scp244 = Item as Scp244;
+                scp244.Base._primed = scp244Data.Primed;
+                return;
+            }
+
+            if (Item.Type == ItemType.GunSCP127 && CustomItem.CustomData is ISCP127Data scp127Data)
+            {
+                LogManager.Debug($"SCPItem is SCP-127");
+                FirearmItem scpFirearm = Item as FirearmItem;
+                scpFirearm.Base.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
+                Scp127MagazineModule = scp127magazine;
+                scpFirearm.Base.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
+                Scp127Hitscan = scp127hitscan;
+
+                if (!PropertiesSet)
+                    Scp127MagazineModule.AmmoStored = scp127Data.MaxAmmo;
+
+                Scp127Hitscan.BaseDamage = scp127Data.Damage;
+                Scp127Hitscan.BasePenetration = scp127Data.Penetration;
+                Scp127Hitscan.BaseBulletInaccuracy = scp127Data.Inaccuracy;
+                Scp127Hitscan.DamageFalloffDistance = scp127Data.DamageFalloffDistance;
+                Scp127MagazineModule.ServerResyncData();
+                PropertiesSet = true;
+            }
+        }
+
+        public void HandleSCPItemForPickup()
+        {
+            if ((Pickup.Type == ItemType.SCP244a || Pickup.Type == ItemType.SCP244b) && CustomItem.CustomData is ISCP244Data s244a)
+            {
+                LogManager.Debug($"SCPItem is SCP-244");
+                Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
+                scp244Pickup.Base.MaxDiameter = s244a.MaxDiameter;
+                scp244Pickup.Base._activationDot = s244a.ActivationDot;
+                scp244Pickup.Base._health = s244a.Health;
+                scp244Pickup.Base.enabled = s244a.Primed;
+                Pickup.Destroy();
+                scp244Pickup.Spawn();
+                Pickup = scp244Pickup;
+                Serial = Pickup.Serial;
+                return;
+            }
+
+            if (Pickup.Type == ItemType.SCP018 && CustomItem.CustomData is ISCP018Data s018)
+            {
+                Scp018 scp018 = Pickup as Scp018;
+                scp018.Base._fuseTime = s018.FuseTime;
+                scp018.Base._friendlyFireTime = s018.FriendlyFireTime;
+                return;
+            }
+
+            if (Pickup.Type == ItemType.GunSCP127 && CustomItem.CustomData is ISCP127Data s127)
+            {
+                LogManager.Debug($"SCPItem is SCP-127");
+                var scpFirearmPickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
+                scpFirearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var scpFirearm);
+                scpFirearm.ItemSerial = scpFirearmPickup.Serial;
+                scpFirearm.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
+                Scp127MagazineModule = scp127magazine;
+                scpFirearm.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
+                Scp127Hitscan = scp127hitscan;
+
+                Scp127MagazineModule.MagazineInserted = true;
+                if (!PropertiesSet)
+                    Scp127MagazineModule.AmmoStored = s127.MaxAmmo;
+
+                Scp127Hitscan.BaseDamage = s127.Damage;
+                Scp127Hitscan.BasePenetration = s127.Penetration;
+                Scp127Hitscan.BaseBulletInaccuracy = s127.Inaccuracy;
+                Scp127Hitscan.DamageFalloffDistance = s127.DamageFalloffDistance;
+                Scp127MagazineModule.ServerResyncData();
+
+                Pickup.Destroy();
+                scpFirearmPickup.Spawn();
+                Pickup = scpFirearmPickup;
+                Serial = Pickup.Serial;
+                PropertiesSet = true;
+            }
+        }
+
         public void SaveProperties()
         {
-            if (Item is not null)
+            if (Item is null)
+                return;
+
+            switch (CustomItem.CustomItemType)
             {
-                switch (CustomItem.CustomItemType)
-                {
-                    case CustomItemType.Armor:
+                case CustomItemType.Armor when Item is Armor armor && CustomItem.CustomData is ArmorData armorData:
+                    armorData.HeadProtection = armor.Base.HelmetEfficacy;
+                    armorData.BodyProtection = armor.Base.VestEfficacy;
+                    armorData.StaminaUseMultiplier = armor.Base._staminaUseMultiplier;
+                    armorData.StaminaRegenMultiplier = armor.Base.StaminaRegenMultiplier;
+                    break;
+
+                case CustomItemType.Weapon when Item is FirearmItem firearm && CustomItem.CustomData is WeaponData weaponData:
+                    foreach (ModuleBase module in firearm.Base.Modules)
+                    {
+                        switch (module)
                         {
-                            Armor armor = Item as Armor;
-                            if (armor != null && CustomItem.CustomData is IArmorData armorData)
-                            {
-                                armorData.HeadProtection = armor.Base.HelmetEfficacy;
-                                armorData.BodyProtection = armor.Base.VestEfficacy;
-                                armorData.StaminaUseMultiplier = armor.Base._staminaUseMultiplier;
-                                armorData.StaminaRegenMultiplier = armor.Base.StaminaRegenMultiplier;
-                            }
-                            break;
+                            case MagazineModule mag when MagazineModule == null:
+                                MagazineModule = mag;
+                                break;
+                            case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
+                                HitscanHitregModule = hitscan;
+                                break;
                         }
-                    case CustomItemType.Weapon:
+                    }
+
+                    if (MagazineModule != null && HitscanHitregModule != null)
+                    {
+                        weaponData.MaxAmmo = MagazineModule.AmmoStored;
+                        weaponData.Damage = HitscanHitregModule.BaseDamage;
+                        weaponData.Penetration = HitscanHitregModule.BasePenetration;
+                        weaponData.Inaccuracy = HitscanHitregModule.BaseBulletInaccuracy;
+                        weaponData.DamageFalloffDistance = HitscanHitregModule.DamageFalloffDistance;
+                        MagazineModule.ServerResyncData();
+                    }
+                    break;
+
+                case CustomItemType.MicroHID when Item is MicroHIDItem microHID && CustomItem.CustomData is MicroHIDData microHIDData:
+                    microHIDData.Energy = microHID.Energy;
+                    break;
+
+                case CustomItemType.Light when Item.Type is ItemType.Flashlight && CustomItem.CustomData is FlashlightData:
+                    Light.Intensity = 0;
+                    break;
+
+                case CustomItemType.Light when Item.Type is ItemType.Lantern && CustomItem.CustomData is FlashlightData:
+                    Light.Intensity = 0;
+                    break;
+
+                case CustomItemType.SCPItem when Item is FirearmItem scpFirearm && CustomItem.CustomData is SCP127Data scp127Data:
+                    foreach (ModuleBase module in scpFirearm.Base.Modules)
+                    {
+                        switch (module)
                         {
-                            FirearmItem firearm = Item as FirearmItem;
-                            IWeaponData weaponData = CustomItem.CustomData as IWeaponData;
-                            foreach (ModuleBase module in firearm.Base.Modules)
-                            {
-                                switch (module)
-                                {
-                                    case MagazineModule magazine when MagazineModule == null:
-                                        MagazineModule = magazine;
-                                        break;
-
-                                    case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
-                                        HitscanHitregModule = hitscan;
-                                        break;
-                                }
-                            }
-
-                            weaponData.MaxAmmo = MagazineModule.AmmoStored;
-                            weaponData.Damage = HitscanHitregModule.BaseDamage;
-                            weaponData.Penetration = HitscanHitregModule.BasePenetration;
-                            weaponData.Inaccuracy = HitscanHitregModule.BaseBulletInaccuracy;
-                            weaponData.DamageFalloffDistance = HitscanHitregModule.DamageFalloffDistance;
-                            MagazineModule.ServerResyncData();
-                            break;
+                            case Scp127MagazineModule mag when Scp127MagazineModule == null:
+                                Scp127MagazineModule = mag;
+                                break;
+                            case Scp127Hitscan hitscan when Scp127Hitscan == null:
+                                Scp127Hitscan = hitscan;
+                                break;
                         }
+                    }
 
-                    case CustomItemType.MicroHID:
-                        MicroHIDItem microHID = Item as MicroHIDItem;
-                        IMicroHIDData microHIDData = CustomItem.CustomData as IMicroHIDData;
-                        microHIDData.Energy = microHID.Energy;
-                        break;
+                    if (Scp127MagazineModule != null && Scp127Hitscan != null)
+                    {
+                        scp127Data.MaxAmmo = Scp127MagazineModule.AmmoStored;
+                        scp127Data.Damage = Scp127Hitscan.BaseDamage;
+                        scp127Data.Penetration = Scp127Hitscan.BasePenetration;
+                        scp127Data.Inaccuracy = Scp127Hitscan.BaseBulletInaccuracy;
+                        scp127Data.DamageFalloffDistance = Scp127Hitscan.DamageFalloffDistance;
+                        Scp127MagazineModule.ServerResyncData();
+                    }
+                    break;
 
-                    case CustomItemType.Light:
-                        if (Item.Type is ItemType.Flashlight)
-                        {
-                            FlashlightItem flashLight = Item as FlashlightItem;
-                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
-                            Light.Intensity = 0;
-                        }
-                        if (Item.Type is ItemType.Lantern)
-                        {
-                            LanternItem lantern = Item as LanternItem;
-                            IFlashlightData data = CustomItem.CustomData as IFlashlightData;
-                            Light.Intensity = 0;
-                        }
-                        break;
-
-                    case CustomItemType.SCPItem:
-                        if (Item.Type == ItemType.GunSCP127)
-                        {
-                            FirearmItem scpFirearm = Item as FirearmItem;
-                            ISCP127Data scp127Data = CustomItem.CustomData as ISCP127Data;
-
-                            foreach (ModuleBase module in scpFirearm.Base.Modules)
-                            {
-                                switch (module)
-                                {
-                                    case Scp127MagazineModule mag when Scp127MagazineModule == null:
-                                        Scp127MagazineModule = mag;
-                                        break;
-
-                                    case Scp127Hitscan hitscan when Scp127Hitscan == null:
-                                        Scp127Hitscan = hitscan;
-                                        break;
-                                }
-                            }
-
-                            scp127Data.MaxAmmo = Scp127MagazineModule.AmmoStored;
-                            scp127Data.Damage = Scp127Hitscan.BaseDamage;
-                            scp127Data.Penetration = Scp127Hitscan.BasePenetration;
-                            scp127Data.Inaccuracy = Scp127Hitscan.BaseBulletInaccuracy;
-                            scp127Data.DamageFalloffDistance = Scp127Hitscan.DamageFalloffDistance;
-                            Scp127MagazineModule.ServerResyncData();
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                default:
+                    break;
             }
         }
 
@@ -837,23 +765,28 @@ namespace UncomplicatedCustomItems.API.Features
                 yield return Timing.WaitForOneFrame;
             }
         }
-        
+
         public void LoadBadge(Player player)
         {
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
 
-            Triplet<string, string, bool>? badge = null;
+            ServerRoles serverRoles = player.ReferenceHub?.serverRoles;
+            if (serverRoles == null)
+            {
+                LogManager.Debug("LoadBadge aborted: ServerRole not available yet.");
+                return;
+            }
+
             if (CustomItem.BadgeName is not null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor is not null && CustomItem.BadgeColor.Length > 2)
             {
-                badge = new(player.GroupName ?? "", player.GroupColor ?? "", player.ReferenceHub.serverRoles.HasBadgeHidden);
                 LogManager.Debug($"Badge detected, putting {CustomItem.BadgeName}@{CustomItem.BadgeColor} to player {player.PlayerId}");
 
-                player.GroupName = CustomItem.BadgeName.Replace("@hidden", "");
+                player.GroupName = CustomItem.BadgeName;
                 player.GroupColor = CustomItem.BadgeColor;
 
                 if (CustomItem.BadgeName.Contains("@hidden"))
-                    if (player.ReferenceHub.serverRoles.TryHideTag())
+                    if (serverRoles.TryHideTag())
                         LogManager.Debug("Tag successfully hidden!");
             }
         }
@@ -868,11 +801,9 @@ namespace UncomplicatedCustomItems.API.Features
             else
                 player.ReferenceHub.serverRoles.RefreshLocalTag();
 
-            if (Plugin.Instance.Config.EnableCreditTags && player.UserId == "76561199150506472@steam")
-            {
-                player.GroupName = "UCI Lead Developer";
-                player.GroupColor = "emerald";
-            }
+            if (Plugin.Instance.Config.EnableCreditTags)
+                Plugin.HttpManager.ApplyCreditTag(player);
+
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }
 
@@ -1030,9 +961,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void HandlePickedUpDisplayHint()
         {
-            if (Item.Type.IsArmor())
-                HandleSelectedDisplayHint();
-            else if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.PickedUpMessage))
+            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.PickedUpMessage))
                 Owner.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
         }
 
@@ -1107,7 +1036,7 @@ namespace UncomplicatedCustomItems.API.Features
 
             return bySerial.TryGetValue(serial, out item);
         }
-        
+
         public static SummonedCustomItem Get(ushort serial) => _activeSerials.ContainsKey(serial) && bySerial.TryGetValue(serial, out var item) ? item : null;
 
         public static SummonedCustomItem Get(Player owner, ushort serial)
@@ -1120,7 +1049,7 @@ namespace UncomplicatedCustomItems.API.Features
 
             return bag.FirstOrDefault(sci => sci.Serial == serial);
         }
-        
+
         public static List<SummonedCustomItem> Get(ItemType item)
         {
             List<SummonedCustomItem> result = [];

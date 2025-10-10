@@ -54,6 +54,8 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     {
         public virtual float FriendlyFireTime { get; set; } = 2f;
         public virtual float FuseTime { get; set; } = 2f;
+        public float ThrowTime { get; set; } = 2f;
+        public bool Repickable { get; set; } = false;
     }
 
     public class SCP1344Data : Data, ISCP1344Data

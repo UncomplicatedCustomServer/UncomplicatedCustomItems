@@ -88,8 +88,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private Version _latestVersion { get; set; } = null;
 
-        private bool _alreadyManaged { get; set; } = false;
-
         /// <summary>
         /// Create a new instance of the HttpManager
         /// </summary>
@@ -221,15 +219,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (!Plugin.Instance.Config.EnableCreditTags)
                 return;
 
-            if (_alreadyManaged)
-                return;
+            // Name => Tag.First
+            // Color => Tag.Second
+            // Override => Tag.Third
 
             Triplet<string, string, bool> Tag = GetCreditTag(player);
 
-            if (player.GroupName is not null && player.GroupName != string.Empty)
+            if (player.UserGroup != null || player.UserGroup.Permissions != 0 || !string.IsNullOrWhiteSpace(player.UserGroup.BadgeText))
             {
                 if (Credits.Any(k => k.Value.First == player.GroupName && k.Value.Second == player.GroupColor))
-                    _alreadyManaged = true;
+                    return;
 
                 if (!Tag.Third)
                     return; // Do not override

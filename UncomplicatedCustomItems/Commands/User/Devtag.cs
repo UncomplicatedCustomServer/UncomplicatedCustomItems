@@ -34,16 +34,9 @@ namespace UncomplicatedCustomItems.Commands.User
                 return false;
             }
 
-            if (!BadgeManager.devBadges.ContainsKey(player.UserId))
-            {
-                response = "Only UCI developers can run this command!";
-                return false;
-            }
+            Plugin.HttpManager.ApplyCreditTag(player);
 
-            var (badgeText, badgeColor) = BadgeManager.devBadges[player.UserId];
-            player.GroupName = badgeText;
-            player.GroupColor = badgeColor;
-            response = $"Devtag set as <color={badgeColor}>{badgeText}</color>";
+            response = string.Empty;
             return true;
         }
     }

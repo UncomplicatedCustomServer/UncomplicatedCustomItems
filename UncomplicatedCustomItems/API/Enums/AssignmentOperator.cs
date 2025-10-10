@@ -1,6 +1,6 @@
 ﻿namespace UncomplicatedCustomItems.API.Enums
 {
-    public enum AssignmentOperator
+    internal enum AssignmentOperator
     {
         Assign,
         Add,

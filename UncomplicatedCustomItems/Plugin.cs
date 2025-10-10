@@ -25,7 +25,6 @@ using HarmonyLib;
 using MEC;
 using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
@@ -37,237 +36,252 @@ using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 namespace UncomplicatedCustomItems
 {
-    public class Plugin : Plugin<Config>
-    {
-        public bool IsPrerelease = true;
-        public override string Name => "UncomplicatedCustomItems";
+	public class Plugin : Plugin<Config>
+	{
+		public bool IsPrerelease = true;
+		public override string Name => "UncomplicatedCustomItems";
 #if EXILED
         public override string Prefix => "UncomplicatedCustomItems";
 #else
-        public override string Description => "Enables server owners to design and manage CustomItems with ease, no coding required.";
+		public override string Description => "Enables server owners to design and manage CustomItems with ease, no coding required.";
 #endif
-        public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
+		public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
         public override Version RequiredExiledVersion { get; } = new(9, 9, 1);
 #else
-        public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
+		public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
-        public override Version Version { get; } = new(4, 0, 0);
+		public override Version Version { get; } = new(4, 0, 0);
 
-        internal Handler Handler;
+		internal Handler Handler;
 
-        public Assembly Assembly => Assembly.GetExecutingAssembly();
+		public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
         public override PluginPriority Priority => PluginPriority.First;
 #else
-        public override LoadPriority Priority => LoadPriority.Highest;
+		public override LoadPriority Priority => LoadPriority.Highest;
 #endif
-        public static Plugin Instance { get; private set; }
+		/// <summary>
+		/// The <see cref="Plugin"/> instance.
+		/// </summary>
+		public static Plugin Instance { get; private set; }
 
-        internal Harmony _harmony;
+		internal Harmony _harmony;
 
-        internal static HttpManager HttpManager;
+		internal static HttpManager HttpManager;
 
-        internal FileConfig FileConfig;
+		internal FileConfig FileConfig;
 
-        internal List<ServerSpecificSettingBase> _settings;
+		internal List<ServerSpecificSettingBase> _settings;
+		
 
-        internal Dictionary<string, List<string>> ItemErrors;
-        
 #if EXILED
         public override void OnEnabled()
 #else
-                public override void Enable()
+		public override void Enable()
 #endif
-                {
-                        Instance = this;
+		{
+			Instance = this;
 
-                        FileConfig = new();
-                        HttpManager = new("uci");
-                        Handler = new();
+			FileConfig = new();
+			HttpManager = new("uci");
+			Handler = new();
 #if EXILED
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
 #else
-                        if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(this, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
+			if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(this, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
 #endif
 
-                        PlayerHandler.Register();
-                        ServerHandler.Register();
-                        ScpHandler.Register();
+			PlayerHandler.Register();
+			ServerHandler.Register();
+			ScpHandler.Register();
 
-                        ServerEvent.WaitingForPlayers += OnFinishedLoading;
-                        ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
+			ServerEvent.WaitingForPlayers += OnFinishedLoading;
+			ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
 
-                        // Debugging Events
-                        PlayerEvent.DroppingItem += Handler.OnDrop;
-                        PlayerEvent.PickedUpItem += Handler.OnDebuggingPickup;
-                        PlayerEvent.UsingItem += Handler.OnUse;
-                        PlayerEvent.ReloadingWeapon += Handler.OnReloading;
-                        PlayerEvent.ShootingWeapon += Handler.OnShooting;
-                        PlayerEvent.ThrewProjectile += Handler.OnThrown;
+#if DEBUG
+			JailbirdEvents.ChangingWearState += OnChangingWearState;
+			JailbirdEvents.ChangedWearState += OnChangedWearState;
+#endif
 
-                        Arguments.Initialize();
-                        Arguments.Register();
+            // Debugging Events
+            PlayerEvent.DroppingItem += Handler.OnDrop;
+			PlayerEvent.PickedUpItem += Handler.OnDebuggingPickup;
+			PlayerEvent.UsingItem += Handler.OnUse;
+			PlayerEvent.ReloadingWeapon += Handler.OnReloading;
+			PlayerEvent.ShootingWeapon += Handler.OnShooting;
+			PlayerEvent.ThrewProjectile += Handler.OnThrown;
 
-                        if (Config.EnablesssSettings)
-                        {
-                                try
-                                {
-                                        _settings =
-                                        [
-                                            new SSGroupHeader(Config.KeybingSettingHeaderName),
-                        new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
-                                        ];
-                                }
-                                catch (Exception e)
-                                {
-                                        LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
-                                }
+			Arguments.Initialize();
+			Arguments.Register();
 
-                                try
-                                {
-                                        ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
-                                        ServerSpecificSettingsSync.SendToAll();
-                                }
-                                catch (Exception e)
-                                {
-                                        LogManager.Error($"Failed to send settings: {e.Message}\n{e.StackTrace}");
-                                }
-                        }
+			if (Config.EnablesssSettings)
+			{
+				try
+				{
+					_settings =
+					[
+						new SSGroupHeader(Config.KeybingSettingHeaderName),
+						new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
+					];
+				}
+				catch (Exception e)
+				{
+					LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
+				}
 
-                        LogManager.History.Clear();
+				try
+				{
+					ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
+					ServerSpecificSettingsSync.SendToAll();
+				}
+				catch (Exception e)
+				{
+					LogManager.Error($"Failed to send settings: {e.Message}\n{e.StackTrace}");
+				}
+			}
 
-                        LogManager.Info("===========================================");
-                        LogManager.Info("Thanks for using UncomplicatedCustomItems");
-                        LogManager.Info($"    by {Author}");
-                        LogManager.Info("===========================================");
+			LogManager.History.Clear();
+
+			LogManager.Info("===========================================");
+			LogManager.Info("Thanks for using UncomplicatedCustomItems");
+			LogManager.Info($"    by {Author}");
+			LogManager.Info("===========================================");
 #if EXILED
             LogManager.Info($"Loaded from Exiled! [{Exiled.Loader.Loader.Version} - {RequiredExiledVersion}]");
 #else
-                        LogManager.Info($"Loaded from LabAPI [{LabApi.Features.LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
+			LogManager.Info($"Loaded from LabApi! [{LabApi.Features.LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
 #endif
-                        LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
+			LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
-                        /*
-                        if (IsPrerelease)
-                        {
-                            if (!Instance.Config.Debug)
-                            {
-                                LogManager.Info("Debug logs have been activated!");
-                                Instance.Config.Debug = true;
-                                DebugMode = true;
-                            }
-                        }
-                        */
+			/*
+			if (IsPrerelease)
+			{
+				if (!Instance.Config.Debug)
+				{
+					LogManager.Info("Debug logs have been activated!");
+					Instance.Config.Debug = true;
+					DebugMode = true;
+				}
+			}
+			*/
 
-                        Events.Internal.Player.Register();
-                        Events.Internal.Server.Register();
-
-                        FileConfig.Welcome(loadExamples: true);
-                        FileConfig.Welcome(Server.Port.ToString());
-                        FileConfig.Welcome("Actions");
-                        FileConfig.LoadAll();
-                        FileConfig.LoadAll(Server.Port.ToString());
-                        FileConfig.LoadAll("Actions");
+			FileConfig.Welcome(loadExamples: true);
+			FileConfig.Welcome(Server.Port.ToString());
+			FileConfig.Welcome("Actions");
+			FileConfig.LoadAll();
+			FileConfig.LoadAll(Server.Port.ToString());
+			FileConfig.LoadAll("Actions");
 
 #if EXILED
             _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #else
-                        _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+			_harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #endif
-                        _harmony.PatchAll();
+			_harmony.PatchAll();
 #if EXILED
             if (Round.IsStarted)
 #else
-                        if (Round.IsRoundStarted)
+			if (Round.IsRoundStarted)
 #endif
-                                Events.Internal.Server.SpawnItemsOnRoundStarted();
+				ServerHandler.SpawnItemsOnRoundStarted();
 
-                        if (Instance.Config.AllowDevPermissions)
-                                LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
+			if (Instance.Config.AllowDevPermissions)
+				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 
 #if EXILED
             base.OnEnabled();
 #endif
-                }
+		}
 #if EXILED
         public override void OnDisabled()
 #else
-        public override void Disable()
+		public override void Disable()
 #endif
-        {
-            HttpManager.StopPresence();
-            ECRIntegration.Cleanup();
-            Events.Internal.Player.Unregister();
-            Events.Internal.Server.Unregister();
-            
-            // Cleanup
-            CustomItem.List.Clear();
-            CustomItem.UnregisteredCustomItems.Clear();
-            CustomItem.CustomItems.Clear();
-            CustomItem.UnregisteredCustomItems.Clear();
-            CustomAction.CustomActions.Clear();
-            CustomAction.List.Clear();
-            CustomAction.UnregisteredCustomActions.Clear();
-            CustomAction.UnregisteredList.Clear();
-            SummonedCustomItem.List.ForEach(sci => sci.Destroy());
-            ArgumentManager._actionHandlers.Clear();
-            ArgumentManager._eventArgPropertyCache.Clear();
-            BaseCommand.Subcommands.Clear();
-            PlayerHandler._capybaras.Clear();
-            PlayerHandler._damageTimes.Clear();
-            PlayerHandler._toolGunPrimitives.Clear();
-            PlayerExtensions.PlayerKills.Clear();
-            PlayerHandler.CustomScp268Effects.Clear();
+		{
+			HttpManager.StopPresence();
+			ECRIntegration.Cleanup();
 
-            _settings = null;
+			// Cleanup
+			CustomItem.List.Clear();
+			CustomItem.UnregisteredCustomItems.Clear();
+			CustomItem.CustomItems.Clear();
+			CustomItem.UnregisteredCustomItems.Clear();
+			CustomAction.CustomActions.Clear();
+			CustomAction.List.Clear();
+			CustomAction.UnregisteredCustomActions.Clear();
+			CustomAction.UnregisteredList.Clear();
+			SummonedCustomItem.List.ForEach(sci => sci.Destroy());
+			ArgumentManager._actionHandlers.Clear();
+			ArgumentManager._eventArgPropertyCache.Clear();
+			BaseCommand.Subcommands.Clear();
+			PlayerHandler._capybaras.Clear();
+			PlayerHandler._damageTimes.Clear();
+			PlayerHandler._toolGunPrimitives.Clear();
+			PlayerExtensions.PlayerKills.Clear();
+			PlayerHandler.CustomScp268Effects.Clear();
 
-            HttpManager.UnregisterEvents();
-            _harmony.UnpatchAll();
-            _harmony = null;
+			_settings = null;
 
-            PlayerHandler.Unregister();
-            ServerHandler.Unregister();
-            ScpHandler.Unregister();
-            MERIntergration.Unregister();
+			HttpManager.UnregisterEvents();
+			_harmony.UnpatchAll();
+			_harmony = null;
 
-            ServerEvent.WaitingForPlayers -= OnFinishedLoading;
-            ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
+			PlayerHandler.Unregister();
+			ServerHandler.Unregister();
+			ScpHandler.Unregister();
+			MERIntergration.Unregister();
 
-            // Debugging Events
-            PlayerEvent.DroppingItem -= Handler.OnDrop;
-            PlayerEvent.PickedUpItem -= Handler.OnDebuggingPickup;
-            PlayerEvent.UsingItem -= Handler.OnUse;
-            PlayerEvent.ReloadingWeapon -= Handler.OnReloading;
-            PlayerEvent.ShootingWeapon -= Handler.OnShooting;
-            PlayerEvent.ThrewProjectile -= Handler.OnThrown;
+#if DEBUG
+            JailbirdEvents.ChangingWearState -= OnChangingWearState;
+			JailbirdEvents.ChangedWearState -= OnChangedWearState;
+#endif
 
-            Arguments.Cleanup();
+			ServerEvent.WaitingForPlayers -= OnFinishedLoading;
+			ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
 
-            Instance = null;
-            Handler = null;
+			// Debugging Events
+			PlayerEvent.DroppingItem -= Handler.OnDrop;
+			PlayerEvent.PickedUpItem -= Handler.OnDebuggingPickup;
+			PlayerEvent.UsingItem -= Handler.OnUse;
+			PlayerEvent.ReloadingWeapon -= Handler.OnReloading;
+			PlayerEvent.ShootingWeapon -= Handler.OnShooting;
+			PlayerEvent.ThrewProjectile -= Handler.OnThrown;
+
+			Arguments.Cleanup();
+
+			Instance = null;
+			Handler = null;
 #if EXILED
             base.OnDisabled();
 #endif
-        }
-        
-        public void OnFinishedLoading()
-        {
-            HttpManager.StartPresence();
+		}
 
-            if (Instance.Config.AllowDevPermissions)
-                LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
+#if DEBUG
+		public void OnChangingWearState(ChangingWearStateEventArgs ev) =>
+			LogManager.Debug($"Attempted to set Wearstate to {ev.NewWearState} from {ev.OldWearState}");
 
-            ImportManager.Init();
-            _ = Task.Run(() => Updater.CheckForUpdatesAsync());
+        public void OnChangedWearState(ChangedWearStateEventArgs ev) =>
+			LogManager.Debug($"Set Wearstate to {ev.NewWearState} from {ev.OldWearState}");
+#endif
 
-            LabAPIExtensions.Init();
-            MERIntergration.Init();
-            ECRIntegration.Init();
-            Timing.RunCoroutine(Settings.ResetSettings());
+		public void OnFinishedLoading()
+		{
+			HttpManager.StartPresence();
+
+			if (Instance.Config.AllowDevPermissions)
+				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
+
+			ImportManager.Init();
+			_ = Task.Run(() => Updater.CheckForUpdatesAsync());
+
+			LabAPIExtensions.Init();
+			MERIntergration.Init();
+			ECRIntegration.Init();
+			Timing.RunCoroutine(Settings.ResetSettings());
 #if EXILED
             CommonUtilitiesPatch.Initialize();
 #endif
-                }
-    }
+		}
+	}
 }

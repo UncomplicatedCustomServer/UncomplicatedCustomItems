@@ -1,50 +1,38 @@
-using MapGeneration;
-using CustomPlayerEffects;
-using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Features.Wrappers;
+using UncomplicatedCustomItems.API.Components;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
-using UncomplicatedCustomItems.API.Components;
-using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
-    public abstract class CustomFlashGrenade : APICustomItem
+    public abstract class CustomSCP018 : APICustomItem
     {
         /// <summary>
-        /// Gets or sets the minimum duration of player can take the effect.
+        /// Gets or sets the time that the <see cref="CustomSCP018"/> instance will take to detonate.
         /// </summary>
-        public abstract float MinimalDurationEffect { get; set; }
+        public float FuseTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the additional duration of the <see cref="Blindness"/> effect.
+        /// Gets or sets the time that the <see cref="CustomSCP018"/> instance will take untill it enables friendly fire.
         /// </summary>
-        public abstract float AdditionalBlindedEffect { get; set; }
+        public float FriendlyFireTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the how mush the flash grenade going to be intensified when explode at <see cref="RoomName.Surface"/>.
+        /// Gets or sets the time needed to throw the <see cref="CustomSCP018"/> instance.
         /// </summary>
-        public abstract float SurfaceDistanceIntensifier { get; set; }
+        public float PinPullTime { get; set; }
 
         /// <summary>
-        /// Gets or sets how long the fuse will last.
+        /// Gets or sets whether or not the <see cref="CustomSCP018"/> instance is pickupable after throwing.
         /// </summary>
-        public abstract float FuseTime { get; set; }
+        public bool Repickable { get; set; }
 
         /// <summary>
-        /// Gets or sets wether or not the grenade will explode on impact
+        /// Gets or sets whether or not the <see cref="CustomSCP018"/> instance will explode when impacting something.
         /// </summary>
-        public abstract bool ExplodeOnImpact { get; set; }
-
-        /// <summary>
-        /// Gets or sets the time to pull out the pin
-        /// </summary>
-        public abstract float PinPullTime { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether players can pickup grenade after throw.
-        /// </summary>
-        public abstract bool Repickable { get; set; }
+        public bool ExplodeOnImpact { get; set; }
 
         public override void RegisterEvents()
         {
@@ -89,9 +77,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             if (Check(ev.ThrowableItem))
             {
                 OnThrown(ev);
+                if (ev.Projectile is TimedGrenadeProjectile timedprojectile)
+                    timedprojectile.RemainingTime = FuseTime;
                 if (ExplodeOnImpact)
                     ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host).GameObject, ev.Projectile.Base);         
             }
+
         }
 
 

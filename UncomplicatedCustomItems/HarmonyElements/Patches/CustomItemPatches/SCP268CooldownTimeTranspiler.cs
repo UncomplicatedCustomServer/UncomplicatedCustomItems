@@ -45,6 +45,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
                 LogManager.Debug($"{nameof(SCP268CooldownTimeTranspiler)}: Total cooldown: {data.Cooldown}");
                 return data.Cooldown;
             }
+            
             if (SummonedAPICustomItem.TryGet(instance.ItemSerial, out var baseitem) && baseitem.CustomItem is CustomSCP268 customSCP268)
             {
                 LogManager.Debug($"{nameof(SCP268CooldownTimeTranspiler)}: Total cooldown: {customSCP268.Cooldown}");

@@ -9,7 +9,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// <summary>
         /// Set when the user gets the candy
         /// </summary>
-        internal SerializedCandy SerializedCandy { get; set; }
+        internal CandyInstance CandyInstance { get; set; }
 
         public virtual CandyKindID CandyType { get; set; }
         public virtual string EatingMessage { get; set; }
