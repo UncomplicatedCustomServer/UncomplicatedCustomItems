@@ -88,9 +88,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         LogManager.Warn($"Audio path is null please fill out the config properly.");
                 }
                 else
-                {
                     LogManager.Warn("You don't have AudioPlayerApi or its dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
-                }
             }
         }
 
@@ -125,9 +123,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     LogManager.Warn($"Audio path is null please fill out the config properly.");
             }
             else
-            {
                 LogManager.Warn("You don't have AudioPlayerApi or its dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
-            }
         }
     }
 }

@@ -51,21 +51,27 @@
 - **Unlimited Custom Items**: Create as many custom items as your server needs
 - **YAML Configuration**: Easy-to-use configuration files separate from LabApi's default config
 - **Comprehensive Customization**: Configure item properties, damage values, descriptions, and behaviors
-- **In-Game Commands**: Manage your custom items directly from the server console
+- **In-Game Commands**: Manage your custom items directly from the server console or RA menu
 - **Active Community**: Join our Discord server for support and exclusive previews
 - **Special Perks**: Verified server owners get access to special privileges and early features
 
 ## Requirements
 
-- **LabApi** >= `v1.1.0`
-- **SCP: Secret Laboratory** server
+- **LabApi** >= `v1.2.0` **or** **Exiled** >= `v9.9.2`
 
-## Installation
-
-1. Download the latest `UncomplicatedCustomItems.dll` from our [releases page](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest)
+## Installation 
+#### LabApi:
+1. Download the `UncomplicatedCustomItems-LabApi.dll` from our [releases page](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest)
 2. Place the file in your server's `LabApi/Port/Plugins` directory
 3. Restart your server
 4. Configure your custom items in the generated configuration files
+
+#### Exiled:
+1. Download the `UncomplicatedCustomItems-Exiled.dll` from our [releases page](https://github.com/UncomplicatedCustomServer/UncomplicatedCustomItems/releases/latest)
+2. Place the file in your server's `Exiled/Plugins` directory
+3. Restart your server
+4. Configure your custom items in the generated configuration files
+
 
 ## Quick Start
 
@@ -140,14 +146,14 @@ For detailed configuration options and examples, check our [documentation](#docu
 
 ## Documentation
 
-Visit the **[UCS Wiki](https://docs.uci.ucsserver.it)** for comprehensive guides, examples, and API documentation.
+Visit the **[UCI Wiki](https://docs.uci.ucsserver.it)** for comprehensive guides, examples, and API documentation.
 
 ## Support
 
 ### Encountering Issues?
 
 1. **Generate Logs**: Run `ucilogs` in your server console
-2. **Report the Issue**: Post the logs in our [Bug Report Forum](https://discord.com/channels/1170301876990914631/1230615155193151602)
+2. **Report the Issue**: Post the log ID in our [Bug Report Forum](https://discord.com/channels/1170301876990914631/1230615155193151602)
 3. **Include Details**: Please provide steps to reproduce the issue
 
 ### Community Help
@@ -194,7 +200,6 @@ Your donations help us maintain and improve our plugins for the entire SCP:SL co
 ### Community
 
 - **Discord Server**: [https://discord.gg/5StRGu8EJV](https://discord.gg/5StRGu8EJV)
-- **GitHub**: [UncomplicatedCustomServer](https://github.com/UncomplicatedCustomServer)
 
 ---
 

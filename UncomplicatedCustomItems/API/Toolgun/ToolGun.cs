@@ -14,6 +14,7 @@ using System.Linq;
 using LabApi.Events.Handlers;
 using UncomplicatedCustomItems.Events;
 using InventorySystem.Items.Firearms.Modules;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 namespace UncomplicatedCustomItems.API.ToolGun
 {
@@ -73,12 +74,35 @@ namespace UncomplicatedCustomItems.API.ToolGun
 
         internal static readonly CachedLayerMask ToolGunMask = new("Default", "Door", "Glass");
 
-        protected override void OnChangedItem(PlayerChangedItemEventArgs ev)
+        protected override void OnDropped(PlayerDroppedItemEventArgs ev)
         {
-            if (!Check(ev.NewItem))
+            if (!Check(ev.Pickup))
                 return;
 
-            ev.Player.GameObject.AddComponent<ToolGunUI>().Init(this);
+            if (SummonedAPICustomItem.TryGet(this, out var item))
+                item.Destroy();
+
+            base.OnDropped(ev);
+        }
+
+        protected override void OnChangedItem(PlayerChangedItemEventArgs ev)
+        {
+
+            if (Check(ev.OldItem))
+            {
+                SSTwoButtonsSetting clearList = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(ev.Player.ReferenceHub, 23);
+                foreach (PrimitiveObjectToy primitive in AdminToy.List.OfType<PrimitiveObjectToy>().ToList())
+                {
+                    if (PlayerHandler._toolGunPrimitives.TryGetValue(primitive, out int iD) && clearList.SyncIsA && ev.Player.PlayerId == iD)
+                        primitive.Destroy();
+                }
+            }
+            
+            if (Check(ev.NewItem))
+            {
+                Settings.GiveToPlayers();   
+                ev.Player.GameObject.AddComponent<ToolGunUI>().Init(this);
+            }
 
             base.OnChangedItem(ev);
         }

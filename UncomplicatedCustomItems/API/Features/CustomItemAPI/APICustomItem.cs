@@ -247,7 +247,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public virtual Vector3 Scale { get; set; }
 
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets wether the <see cref="APICustomItem"/> will naturally spawn
         /// </summary>
         public virtual bool Spawn { get; set; }
 
@@ -339,7 +339,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public virtual void UnregisterEvents()
         {
-            ItemInspectionEvents.InspectingItem += new LabApi.Events.LabEventHandler<InspectingItemEventArgs>(InternalOnInspecting);
+            ItemInspectionEvents.InspectingItem -= new LabApi.Events.LabEventHandler<InspectingItemEventArgs>(InternalOnInspecting);
             LabApi.Events.Handlers.PlayerEvents.Dying -= new LabApi.Events.LabEventHandler<PlayerDyingEventArgs>(InternalOnDying);
             LabApi.Events.Handlers.PlayerEvents.DroppingItem -= new LabApi.Events.LabEventHandler<PlayerDroppingItemEventArgs>(InternalOnDropping);
             LabApi.Events.Handlers.PlayerEvents.ChangingItem -= new LabApi.Events.LabEventHandler<PlayerChangingItemEventArgs>(InternalOnChangingItem);
@@ -461,9 +461,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
         private void InternalOnChangedItem(PlayerChangedItemEventArgs ev)
         {
-            if (Check(ev.NewItem))
-                OnChangedItem(ev);
-
+            OnChangedItem(ev);
         }
         private void InternalOnChangingItem(PlayerChangingItemEventArgs ev)
         {
@@ -475,10 +473,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             foreach (Item item in ev.Player.Items.ToList())
             {
                 if (Check(item))
-                {
-                    _processedThrowables.Remove(item.Serial);
                     OnDying(ev);
-                }
             }
         }
         private void InternalOnDied(PlayerDeathEventArgs ev) 
@@ -492,14 +487,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private void InternalOnHurt(PlayerHurtEventArgs ev)
         {
-            if (Check(ev.Attacker))
-                OnHurt(ev);
+            OnHurt(ev);
         }
 
         private void InternalOnHurting(PlayerHurtingEventArgs ev)
         {
-            if (Check(ev.Attacker))
-                OnHurting(ev);
+            OnHurting(ev);
         }
 
         protected virtual void OnHurt(PlayerHurtEventArgs ev) { }
@@ -522,7 +515,5 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         protected virtual void OnChangingItem(PlayerChangingItemEventArgs ev) { }
         protected virtual void OnDying(PlayerDyingEventArgs ev) { }
         protected virtual void OnDied(PlayerDeathEventArgs ev) { }
-
-        internal static readonly HashSet<ushort> _processedThrowables = [];
     }
 }

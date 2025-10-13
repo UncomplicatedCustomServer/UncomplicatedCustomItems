@@ -191,7 +191,7 @@ namespace UncomplicatedCustomItems.Integrations
         /// </summary>
         /// <param name="exiledPlayer">The Exiled player object.</param>
         /// <returns>The corresponding LabAPI Player, or null if conversion fails.</returns>
-        private static Player GetLabPlayerFromExiledPlayer(object exiledPlayer)
+        internal static Player GetLabPlayerFromExiledPlayer(object exiledPlayer)
         {
             try
             {

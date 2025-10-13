@@ -9,6 +9,8 @@ using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.HarmonyElements.Patches;
 using UncomplicatedCustomItems.API.Features.SpecificData;
+using InventorySystem.Items.Usables.Scp330;
+using static UncomplicatedCustomItems.API.Extensions.PlayerExtensions;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -74,24 +76,15 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case ICustomItem customItem:
                     if (customItem.Item == ItemType.SCP330 && customItem.CustomData is CandyData candyData)
                     {
-                        if (arguments.Count == 2)
+                        Player targetPlayer = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
+
+                        if (targetPlayer.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6))
                         {
-                            Scp330CandyInstancePatch.Item = customItem;
-                            Scp330CandyInstancePatch.GiveRandom = false;
-                            Player.Get(int.Parse(arguments[1])).GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
-                        }
-                        else
-                        {
-                            Scp330CandyInstancePatch.Item = customItem;
-                            Scp330CandyInstancePatch.GiveRandom = false;
-                            Player.Get(sender).GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                            response = $"{targetPlayer.DisplayName}'s Candy Bag is full!";
+                            return false;
                         }
 
-                        /*
-                        TryAddSpecificPatches.LastCustomItemId = customItem.Id;
-                        TryAddSpecificPatches.CustomItemobj = customItem;
-                        TryAddSpecificPatches.LastDesiredCandy = candyData.CandyType;
-                        */
+                        targetPlayer.GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
                     }
 
                     if (arguments.Count == 2)
@@ -153,24 +146,15 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case APICustomItem baseCustomItem:
                     if (baseCustomItem.Item == ItemType.SCP330 && baseCustomItem is CustomCandy customCandy)
                     {
-                        if (arguments.Count == 2)
+                        Player targetPlayer = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
+
+                        if (targetPlayer.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6))
                         {
-                            Scp330CandyInstancePatch.Item = customCandy;
-                            Scp330CandyInstancePatch.GiveRandom = false;
-                            Player.Get(int.Parse(arguments[1])).GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
-                        }
-                        else
-                        {
-                            Scp330CandyInstancePatch.Item = customCandy;
-                            Scp330CandyInstancePatch.GiveRandom = false;
-                            Player.Get(sender).GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                            response = $"{targetPlayer.DisplayName}'s Candy Bag is full!";
+                            return false;
                         }
 
-                        /*
-                        TryAddSpecificPatches.LastCustomItemId = baseCustomItem.Id;
-                        TryAddSpecificPatches.CustomItemobj = baseCustomItem;
-                        TryAddSpecificPatches.LastDesiredCandy = customCandy.CandyType;
-                        */
+                        targetPlayer.GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
                     }
 
                     if (arguments.Count == 2)

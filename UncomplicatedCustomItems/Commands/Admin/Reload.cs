@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         private int ReloadedItems;
         private int ReloadedActions;
-        private int ReloadedBaseItems;
+        private int ReloadedAPIItems;
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
@@ -52,10 +52,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 CustomItems.Clear();
                 int BeforeItems = CustomItem.List.Count();
                 int BeforeActions = CustomAction.List.Count();
-                int BeforeBaseItems = APICustomItem.List.Count();
+                int BeforeAPIItems = APICustomItem.List.Count();
                 ReloadedItems = 0;
                 ReloadedActions = 0;
-                ReloadedBaseItems = 0;
+                ReloadedAPIItems = 0;
 
                 foreach (SummonedCustomItem item in SummonedCustomItem.List.ToList())
                 {
@@ -101,10 +101,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     LogManager.Debug($"Unregistered action {action.Name}.");
                 }
 
-                foreach (APICustomItem baseitem in APICustomItem.List.ToList())
+                foreach (APICustomItem apiitem in APICustomItem.List.ToList())
                 {
-                    APICustomItem.Unregister(baseitem.Id);
-                    LogManager.Debug($"Unregistered API CustomItem: {baseitem.Name}.");
+                    APICustomItem.Unregister(apiitem.Id);
+                    LogManager.Debug($"Unregistered API CustomItem: {apiitem.Name}.");
                 }
 
                 APICustomItem.CustomItems.Clear();
@@ -134,11 +134,11 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 foreach (ICustomAction action in CustomAction.List)
                     ReloadedActions++;
                 foreach (APICustomItem item in APICustomItem.List)
-                    ReloadedBaseItems++;
+                    ReloadedAPIItems++;
 
                 int NewItems = BeforeItems - ReloadedItems;
                 int NewActions = BeforeActions - ReloadedActions;
-                int NewBaseItems = BeforeBaseItems - ReloadedBaseItems;
+                int NewApiItems = BeforeAPIItems - ReloadedAPIItems;
 
                 foreach (var entry in CustomItemsPickups)
                 {
@@ -168,11 +168,11 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 [
                     $"Reloaded {CustomItem.List.Count} CustomItems{(NewItems > 0 ? $" ({NewItems} new)" : "")}.",
                     $"Reloaded {CustomAction.List.Count} CustomActions{(NewActions > 0 ? $" ({NewActions} new)" : "")}.",
-                    $"Reloaded {APICustomItem.List.Count} BaseItems{(NewBaseItems > 0 ? $" ({NewBaseItems} new)" : "")}."
+                    $"Reloaded {APICustomItem.List.Count} APIItems{(NewApiItems > 0 ? $" ({NewApiItems} new)" : "")}."
                 ];
 
                 response = "\n" + string.Join("\n", reloadedLines)
-                    + $"\nUnregistered - Items: {BeforeItems}, Actions: {BeforeActions}, BaseItems: {BeforeBaseItems}";
+                    + $"\nUnregistered - Items: {BeforeItems}, Actions: {BeforeActions}, APIItems: {BeforeAPIItems}";
                 return true;
             }
             else

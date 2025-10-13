@@ -427,7 +427,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             PlayerEvent.RequestingRaPlayersInfo += OnRequestingRaPlayersInfo;
             PlayerEvent.RequestedRaPlayersInfo += OnRequestedRaPlayersInfo;
             PlayerEvent.RequestingRaPlayerInfo += OnRequestingRaPlayerInfo;
-            PlayerEvent.RequestedRaPlayerInfo += OnRequestedRaPlayerInfo;
             PlayerEvent.ChangingBadgeVisibility += OnChangingBadgeVisibility;
             PlayerEvent.ChangedBadgeVisibility += OnChangedBadgeVisibility;
             PlayerEvent.ChangingNickname += OnChangingNickname;
@@ -605,7 +604,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             PlayerEvent.RequestingRaPlayersInfo -= OnRequestingRaPlayersInfo;
             PlayerEvent.RequestedRaPlayersInfo -= OnRequestedRaPlayersInfo;
             PlayerEvent.RequestingRaPlayerInfo -= OnRequestingRaPlayerInfo;
-            PlayerEvent.RequestedRaPlayerInfo -= OnRequestedRaPlayerInfo;
             PlayerEvent.ChangingBadgeVisibility -= OnChangingBadgeVisibility;
             PlayerEvent.ChangedBadgeVisibility -= OnChangedBadgeVisibility;
             PlayerEvent.ChangingNickname -= OnChangingNickname;
@@ -805,7 +803,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private static void OnRequestingRaPlayersInfo(PlayerRequestingRaPlayersInfoEventArgs ev) => HandleEvent(ev);
         private static void OnRequestedRaPlayersInfo(PlayerRequestedRaPlayersInfoEventArgs ev) => HandleEvent(ev);
         private static void OnRequestingRaPlayerInfo(PlayerRequestingRaPlayerInfoEventArgs ev) => HandleEvent(ev);
-        private static void OnRequestedRaPlayerInfo(PlayerRequestedRaPlayerInfoEventArgs ev) => HandleEvent(ev);
         private static void OnChangingBadgeVisibility(PlayerChangingBadgeVisibilityEventArgs ev) => HandleEvent(ev);
         private static void OnChangedBadgeVisibility(PlayerChangedBadgeVisibilityEventArgs ev) => HandleEvent(ev);
         private static void OnChangingNickname(PlayerChangingNicknameEventArgs ev) => HandleEvent(ev);
@@ -857,9 +854,29 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private static void OnSpinningRevolver(PlayerSpinningRevolverEventArgs ev) => HandleEvent(ev);
         private static void OnSpinnedRevolver(PlayerSpinnedRevolverEventArgs ev) => HandleEvent(ev);
         private static void OnToggledDisruptorFiringMode(PlayerToggledDisruptorFiringModeEventArgs ev) => HandleEvent(ev);
-        private static void OnUsingItem(PlayerUsingItemEventArgs ev) => HandleEvent(ev);
-        private static void OnUsedItem(PlayerUsedItemEventArgs ev) => HandleEvent(ev);
-        private static void OnItemUsageEffectsApplying(PlayerItemUsageEffectsApplyingEventArgs ev) => HandleEvent(ev);
+        private static void OnUsingItem(PlayerUsingItemEventArgs ev)
+        {
+            if (ev == null)
+                return;
+
+            HandleEvent(ev);
+        }
+
+        private static void OnUsedItem(PlayerUsedItemEventArgs ev)
+        {
+            if (ev == null)
+                return;
+
+            HandleEvent(ev);
+        }
+
+        private static void OnItemUsageEffectsApplying(PlayerItemUsageEffectsApplyingEventArgs ev)
+        {
+            if (ev == null)
+                return;
+
+            HandleEvent(ev);
+        }
         private static void OnUsingRadio(PlayerUsingRadioEventArgs ev) => HandleEvent(ev);
         private static void OnUsedRadio(PlayerUsedRadioEventArgs ev) => HandleEvent(ev);
         private static void OnAimedWeapon(PlayerAimedWeaponEventArgs ev) => HandleEvent(ev);

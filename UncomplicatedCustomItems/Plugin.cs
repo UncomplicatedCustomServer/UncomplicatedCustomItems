@@ -7,6 +7,11 @@ using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
 #endif
+#if DEBUG
+using UncomplicatedCustomItems.Events.Handlers;
+using UncomplicatedCustomItems.Events.Arguments.JailbirdEvents;
+#endif
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -278,6 +283,7 @@ namespace UncomplicatedCustomItems
 			LabAPIExtensions.Init();
 			MERIntergration.Init();
 			ECRIntegration.Init();
+			ECIIntegration.Init();
 			Timing.RunCoroutine(Settings.ResetSettings());
 #if EXILED
             CommonUtilitiesPatch.Initialize();

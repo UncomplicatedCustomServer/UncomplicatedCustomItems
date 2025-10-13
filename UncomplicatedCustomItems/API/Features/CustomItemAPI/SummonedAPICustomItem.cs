@@ -85,6 +85,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             
             switch (CustomItem)
             {
+                case UsableItem usable:
+                    usable.RegisterEvents();
+                    break;
+                case CustomCandy candy:
+                    candy.RegisterEvents();
+                    break;
                 case CustomSCP018 scp018:
                     scp018.RegisterEvents();
                     break;
@@ -156,9 +162,14 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         {
             List.Remove(this);
             SummonedCustomItems.Remove(Serial);
-            APICustomItem._processedThrowables.Remove(Serial);
             switch (CustomItem)
             {
+                case UsableItem usable:
+                    usable.UnregisterEvents();
+                    break;
+                case CustomCandy candy:
+                    candy.UnregisterEvents();
+                    break;
                 case CustomSCP018 scp018:
                     scp018.UnregisterEvents();
                     break;
@@ -472,7 +483,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             Owner = null;
             Serial = Pickup.Serial;
             SaveProperties();
-            APICustomItem._processedThrowables.Remove(Serial);
         }
 
         public void LoadBadge(Player player)

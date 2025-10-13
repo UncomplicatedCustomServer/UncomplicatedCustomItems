@@ -1,15 +1,19 @@
 ﻿using CustomPlayerEffects;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
+using InventorySystem.Items;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.ShotEvents;
+using InventorySystem.Items.Usables.Scp330;
 using LabApi.Features.Wrappers;
 using PlayerStatsSystem;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.HarmonyElements.Patches;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Extensions

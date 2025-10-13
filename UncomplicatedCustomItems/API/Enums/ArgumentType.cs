@@ -261,9 +261,6 @@ namespace UncomplicatedCustomItems.API.Enums
         [EventType(typeof(PlayerUsedItemEventArgs))]
         OnUsedItem,
 
-        [EventType(typeof(PlayerItemUsageEffectsApplyingEventArgs))]
-        OnItemUsageEffectsApplying,
-
         [EventType(typeof(PlayerUsingRadioEventArgs))]
         OnUsingRadio,
 

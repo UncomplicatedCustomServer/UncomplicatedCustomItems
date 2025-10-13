@@ -1,5 +1,4 @@
 using InventorySystem.Items.Usables.Scp330;
-using UncomplicatedCustomItems.API.Features.CandySerialization;
 
 namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
 {

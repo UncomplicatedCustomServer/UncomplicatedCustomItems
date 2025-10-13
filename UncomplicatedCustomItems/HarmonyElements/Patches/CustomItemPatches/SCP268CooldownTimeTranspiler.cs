@@ -11,7 +11,7 @@ using UncomplicatedCustomItems.API.Features.SpecificData;
 namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
 {
     [HarmonyPatch(typeof(Scp268), nameof(Scp268.ServerOnUsingCompleted))]
-    public static class SCP268CooldownTimeTranspiler
+    internal static class SCP268CooldownTimeTranspiler
     {
         private static string text = string.Empty;
 

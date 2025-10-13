@@ -29,16 +29,15 @@ namespace UncomplicatedCustomItems.API.ToolGun
             ServerSpecificSettingsSync.DefinedSettings = _settings.ToArray();
 
             if (Player.ReadyList.Count() > 0)
-                Timing.CallDelayed(1, () => ServerSpecificSettingsSync.SendToPlayersConditionally(player =>
+                Timing.CallDelayed(0.5f, () => ServerSpecificSettingsSync.SendToPlayersConditionally(player =>
                 {
                     ItemBase itemBase = player.inventory?.CurInstance;
                     if (itemBase == null)
                         return false;
 
-                    bool hasSummoned = Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var summoned) && summoned is not null && summoned.HasModule(CustomFlags.ToolGun);
-                    bool hasBase = SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
+                    bool hasToolgun = SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
 
-                    return hasSummoned || hasBase;
+                    return  hasToolgun;
                 }));
         }
 
@@ -63,10 +62,9 @@ namespace UncomplicatedCustomItems.API.ToolGun
                     if (itemBase == null)
                         return true;
 
-                    bool hasSummoned = Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var summoned) && summoned is not null && summoned.HasModule(CustomFlags.ToolGun);
-                    bool hasBase = SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
+                    bool hasToolgun = SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var baseSummoned) && baseSummoned is not null && baseSummoned.CustomItem is Features.CustomItemAPI.ToolGun;
 
-                    return !(hasSummoned || hasBase);
+                    return !hasToolgun;
                 });
         }
     }

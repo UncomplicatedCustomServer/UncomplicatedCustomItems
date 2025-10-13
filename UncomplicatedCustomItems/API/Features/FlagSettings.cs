@@ -1,4 +1,3 @@
-using CustomPlayerEffects;
 using PlayerRoles;
 using System.Collections.Generic;
 using System.ComponentModel;

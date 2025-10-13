@@ -1,16 +1,10 @@
 using InventorySystem.Items.Usables.Scp330;
-using UncomplicatedCustomItems.API.Features.CandySerialization;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     public class CandyData : Data, ICandyData
     {
-        /// <summary>
-        /// Set when the user gets the candy
-        /// </summary>
-        internal CandyInstance CandyInstance { get; set; }
-
         public virtual CandyKindID CandyType { get; set; }
         public virtual string EatingMessage { get; set; }
         public virtual float EatingMessageDuration { get; set; }

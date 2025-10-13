@@ -518,6 +518,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Features\CustomItemAPI\UsableCustomItems\CustomAdrenaline.cs" />
+    <Compile Include="API\Features\CustomItemAPI\UsableCustomItems\CustomMedkit.cs" />
+    <Compile Include="API\Features\CustomItemAPI\UsableCustomItems\CustomPainkillers.cs" />
+    <Compile Include="API\Features\CustomItemAPI\UsableCustomItems\UsableItem.cs" />
     <Compile Include="API\Features\CustomItemAPI\ToolGun.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\SCPCustomitem.cs" />
     <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP018.cs" />
@@ -545,7 +549,6 @@
     <Compile Include="API\Enums\CommonTypes.cs" />
     <Compile Include="API\Enums\LockerType.cs" />
     <Compile Include="API\Enums\AssignmentOperator.cs" />
-    <Compile Include="API\Features\CandySerialization\CandyInstance.cs" />
     <Compile Include="API\Features\FlagSettings\AmmoRegenSettings.cs" />
     <Compile Include="API\Features\Manager\AudioApi.cs" />
     <Compile Include="API\Features\CustomAction.cs" />
@@ -651,12 +654,12 @@
     <Compile Include="Events\Arguments\CustomItemEvents\CheckedCustomFlagEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\SummonedCustomItemEventArgs.cs" />
     <Compile Include="Events\Arguments\CustomItemEvents\SummoningCustomItemEventArgs.cs" />
-    <Compile Include="Events\CustomItemEventHandler.cs" />
     <Compile Include="Events\EventHandler.cs" />
     <Compile Include="Events\Methods\SwitchRoleOnUseMethod.cs" />
     <Compile Include="Events\PlayerHandler.cs" />
     <Compile Include="Events\ScpHandler.cs" />
     <Compile Include="Events\ServerHandler.cs" />
+    <Compile Include="Example\ExampleCustomCandy.cs" />
     <Compile Include="Example\ExampleCustomArmor.cs" />
     <Compile Include="Example\ExampleCustomGrenade.cs" />
     <Compile Include="Example\ExampleCustomKeycard.cs" />
@@ -681,6 +684,7 @@
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\LockerSpawningItemPrefix.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\LinearADSModulePostfix.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP268CooldownTimeTranspiler.cs" />
+    <Compile Include="HarmonyElements\Patches\CustomItemPatches\UsableItemPatch.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\MicroHidInspectionPostfix.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\Scp1344InspectionPostfix.cs" />
     <Compile Include="HarmonyElements\Patches\InspectionPatches\WeaponInspectionPostfix.cs" />
@@ -694,7 +698,6 @@
     <Compile Include="HarmonyElements\Patches\SCP1344Patches\SCP1344EffectPatch.cs" />
     <Compile Include="HarmonyElements\Patches\CustomItemPatches\DisruptorAdsModulePatch.cs" />
     <Compile Include="HarmonyElements\Patches\SCP1344Patches\SCP1344UnEquipPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\Scp330CandyInstancePatch.cs" />
     <Compile Include="HarmonyElements\Patches\RemoteAdminPatch.cs" />
     <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
     <Compile Include="HarmonyElements\Patches\MicroHIDPatches\ServerSetEnergyPatch.cs" />
@@ -708,6 +711,7 @@
     <Compile Include="Intergrations\MER.cs" />
     <Compile Include="Intergrations\CommonUtils.cs" />
     <Compile Include="Intergrations\LabAPIExtensions.cs" />
+    <Compile Include="Intergrations\ECIIntegration.cs" />
     <Compile Include="Intergrations\ECR.cs" />
     <Compile Include="Intergrations\UCR.cs" />
     <Compile Include="API\Extensions\ListExtension.cs" />

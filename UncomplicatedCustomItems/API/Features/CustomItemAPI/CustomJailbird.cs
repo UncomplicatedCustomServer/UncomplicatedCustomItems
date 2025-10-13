@@ -1,5 +1,4 @@
 using InventorySystem.Items.Jailbird;
-using UnityEngine;
 using LabApi.Events.Arguments.PlayerEvents;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using UncomplicatedCustomItems.Events.Handlers;

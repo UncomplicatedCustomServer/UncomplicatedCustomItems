@@ -6,7 +6,6 @@ using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
 using InventorySystem.Items.Keycards;
-using InventorySystem.Items.ThrowableProjectiles;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
@@ -21,7 +20,6 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UncomplicatedCustomItems.API.Struct;
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
@@ -935,7 +933,7 @@ namespace UncomplicatedCustomItems.API.Features
         public void StartCooldown(Player player, ushort serial, float cooldown)
         {
             if (!_cooldownStates.ContainsKey(player))
-                _cooldownStates[player] = new Dictionary<ushort, bool>();
+                _cooldownStates[player] = [];
 
             _cooldownStates[player][serial] = true;
             Timing.RunCoroutine(CooldownCoroutine(player, serial, cooldown));

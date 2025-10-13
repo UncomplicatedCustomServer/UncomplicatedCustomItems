@@ -59,9 +59,7 @@ namespace UncomplicatedCustomItems.Integrations
                             {
                                 LogManager.Debug($"{item.Name} - Yup has MerSpawn - {data.ObjectName} - {data.ReplacePrimitive} - {name}");
                                 if (data.ReplacePrimitive && name == data.SchematicName)
-                                {
                                     DestroyPrimitiveInSchematic(schematicObject, data.ObjectName, item);
-                                }
 
                                 if (data.LockerSpawning && name == data.SchematicName)
                                 {

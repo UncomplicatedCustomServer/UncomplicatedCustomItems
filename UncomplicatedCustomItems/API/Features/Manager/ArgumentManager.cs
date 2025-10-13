@@ -26,6 +26,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static readonly ConcurrentDictionary<string, Type> _typeResolutionCache = new(StringComparer.OrdinalIgnoreCase);
 
+        internal static Dictionary<(Type, string), Delegate> CachedDelegates { get; } = [];
+
+        internal static readonly ConcurrentDictionary<ICustomItem, Dictionary<string, object?>> _variables = new();
+
         private static readonly char[] _identifierDelimiters = ['.', '(', ')', '[', ']', ',', ' ', '\t'];
 
         private static readonly Random _random = new();
@@ -389,9 +393,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             continue;
                         }
                         else
-                        {
                             current = memberContainer;
-                        }
                     }
                     else
                     {
@@ -420,8 +422,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (CachedFields.TryGetValue(key, out FieldInfo? field))
                 return field.GetValue(target);
 
-            if (CachedMethods.TryGetValue(key, out MethodInfo? method))
-                return method.Invoke(target, null);
+            if (CachedDelegates.TryGetValue(key, out Delegate? del))
+                return del.DynamicInvoke(target);
 
             prop = type.GetProperty(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
             if (prop != null)
@@ -437,11 +439,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return field.GetValue(target);
             }
 
-            method = type.GetMethod(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, Type.EmptyTypes, null);
+            MethodInfo? method = type.GetMethod(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, Type.EmptyTypes, null);
             if (method != null)
             {
-                CachedMethods[key] = method;
-                return method.Invoke(target, null);
+                Type? funcType = typeof(Func<,>).MakeGenericType(type, method.ReturnType);
+                Delegate? compiled = method.CreateDelegate(funcType);
+                CachedDelegates[key] = compiled;
+
+                return compiled.DynamicInvoke(target);
             }
 
             return null;
@@ -468,7 +473,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             foreach (string token in paramTokens)
             {
                 string replaced = ReplacePlaceholders(token, eventArgs);
-                replaced = ExpandCommonTypeNamesInPath(replaced); 
+                replaced = ExpandCommonTypeNamesInPath(replaced);
+
+                if (item != null && _variables.TryGetValue(item, out var dict) && dict.TryGetValue(token, out var varValue))
+                {
+                    parameters.Add(varValue!);
+                    continue;
+                }
 
                 if ((replaced.Length >= 2) && ((replaced.StartsWith("\"") && replaced.EndsWith("\"")) || (replaced.StartsWith("'") && replaced.EndsWith("'"))))
                 {
@@ -616,6 +627,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private static void ExecuteAction(ICustomItem item, string action, EventArgs eventArgs)
         {
             if (string.IsNullOrWhiteSpace(action))
+                return;
+
+            if (TryHandleVariable(item, action, eventArgs))
+                return;
+
+            if (TryHandleDelayed(item, action, eventArgs))
                 return;
 
             if (IsConditionalStatement(action))
@@ -1852,6 +1869,57 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Error($"Failed to create instance of type '{type.FullName}': {ex.Message}");
                 return null;
             }
+        }
+
+        private static bool TryHandleVariable(ICustomItem item, string action, EventArgs eventArgs)
+        {
+            if (!action.StartsWith("let ", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            string[]? parts = action.Substring(4).Split('=', (char)2);
+            if (parts.Length != 2) return true;
+
+            string varName = parts[0].Trim();
+            string expr = parts[1].Trim();
+
+            object? value = ResolveTargetObject(expr, item, eventArgs) ?? ReplacePlaceholders(expr, eventArgs);
+
+            if (!_variables.TryGetValue(item, out var dict))
+                dict = _variables[item] = [];
+
+            dict[varName] = value;
+            return true;
+        }
+
+        private static bool TryHandleDelayed(ICustomItem item, string action, EventArgs eventArgs)
+        {
+            if (!action.StartsWith("after ", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            string[] parts = action.Split([" then "], StringSplitOptions.None);
+            if (parts.Length != 2) 
+                return true;
+
+            string delayPart = parts[0].Substring(6).Trim();
+            string delayedAction = parts[1].Trim();
+
+            float seconds = ParseTime(delayPart);
+            MEC.Timing.CallDelayed(seconds, () => ExecuteAction(item, delayedAction, eventArgs));
+            return true;
+        }
+
+        private static float ParseTime(string input)
+        {
+            if (input.EndsWith("ms", StringComparison.OrdinalIgnoreCase))
+                return float.Parse(input.Substring(0, input.Length - 2)) / 1000f;
+                
+            if (input.EndsWith("s", StringComparison.OrdinalIgnoreCase))
+                return float.Parse(input.Substring(0, input.Length - 1));
+
+            if (input.EndsWith("m", StringComparison.OrdinalIgnoreCase))
+                return float.Parse(input.Substring(0, input.Length - 1)) * 60f;
+
+            return float.Parse(input);
         }
     }
 }

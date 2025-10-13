@@ -2,7 +2,6 @@
 using Exiled.API.Interfaces;
 #endif
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 namespace UncomplicatedCustomItems
 {
@@ -18,16 +17,19 @@ namespace UncomplicatedCustomItems
         [Description("Specifies whether developer (debug) mode is enabled.")]
         public bool Debug { get; set; } = false;
 
+        [Description("If true the example custom items written by the plugin will be loaded")]
+        public bool LoadExampleapiItems { get; set; } = true;
+
         [Description("If true UCI developers can run commands on your server.")]
         public bool AllowDevPermissions { get; set; } = false;
 
-        [Description("If true your server will be listed at 'https://list.thaumielscpsl.site'.")]
+        [Description("If true your server will be listed at 'https://list.uci.ucserver.it'.")]
         public bool ShowOnuciList { get; set; } = true;
 
-        [Description("If true your servers plugins will be shown at 'https://list.thaumielscpsl.site' (This does not hide UCS plugins).")]
+        [Description("If true your servers plugins will be shown at 'https://list.uci.ucserver.it' (This does not hide UCS plugins).")]
         public bool ShowPluginsOnList { get; set; } = true;
 
-        [Description("If true your servers IP will be hidden at 'https://list.thaumielscpsl.site'.")]
+        [Description("If true your servers IP will be hidden at 'https://list.uci.ucserver.it'.")]
         public bool HideipOnList { get; set; }
 
         [Description("The hint message displayed whenever you pick up a custom item. %name% is replaced with the item's name, and %desc% with its description.")]

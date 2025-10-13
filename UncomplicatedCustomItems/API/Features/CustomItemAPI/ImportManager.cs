@@ -50,7 +50,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             typeof(ToolGun),
             typeof(CustomJailbird),
             typeof(CustomSCP018),
-            typeof(CustomCandy)
+            typeof(CustomCandy),
+            typeof(CustomPainkillers),
+            typeof(CustomMedkit),
+            typeof(CustomAdrenaline)
         ];
 
 #if EXILED
@@ -70,13 +73,31 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);
                         if (attribs != null && attribs.Length > 0 && CustomItemTypes.Any(baseType => baseType.IsAssignableFrom(type)))
                         {
+                            if (!Plugin.Instance.Config.LoadExampleAPIItems)
+                            {
+                                switch (type.FullName)
+                                {
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomWeapon":
+                                        continue;
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomKeycard":
+                                        continue;
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomGrenade":
+                                        continue;
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomArmor":
+                                        continue;
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomCandy":
+                                        continue;
+                                };
+                            }
+
+                            if (type.FullName == "UncomplicatedCustomItems.API.ToolGun.ToolGun" && !Plugin.Instance.Config.EnableToolGun)
+                                continue;
+
                             LogManager.Silent($"{nameof(ImportManager.Actor)}: Importing It!");
                             ActivePlugins.TryAdd(plugin);
 
                             APICustomItem Item = Activator.CreateInstance(type) as APICustomItem;
                             LogManager.Info($"{nameof(ImportManager.Actor)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
-                            if (Item.Name is "ToolGun" && !Plugin.Instance.Config.EnableToolGun)
-                                continue;
 
                             APICustomItem.Register(Item);
                         }
@@ -108,13 +129,31 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);
                         if (attribs != null && attribs.Length > 0 && CustomItemTypes.Any(baseType => baseType.IsAssignableFrom(type)))
                         {
+                            if (!Plugin.Instance.Config.LoadExampleapiItems)
+                            {
+                                switch (type.FullName)
+                                {
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomWeapon":
+                                        continue;
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomKeycard":
+                                        continue;
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomGrenade":
+                                        continue;
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomArmor":
+                                        continue;
+                                    case "UncomplicatedCustomItems.Examples.ExampleCustomCandy":
+                                        continue;
+                                };
+                            }
+
+                            if (type.FullName == "UncomplicatedCustomItems.API.ToolGun.ToolGun" && !Plugin.Instance.Config.EnableToolGun)
+                                continue;
+
                             LogManager.Silent($"{nameof(ImportManager)}: Importing It!");
                             ActivePlugins.TryAdd(dic.Key);
 
                             APICustomItem Item = Activator.CreateInstance(type) as APICustomItem;
-                            LogManager.Info($"{nameof(ImportManager)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name}");
-                            if (Item.Name is "ToolGun" && !Plugin.Instance.Config.EnableToolGun)
-                                continue;
+                            LogManager.Info($"{nameof(ImportManager)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name} - {type.FullName}");
 
                             APICustomItem.Register(Item);
                         }

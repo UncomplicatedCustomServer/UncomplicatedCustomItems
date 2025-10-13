@@ -1,5 +1,4 @@
 using System;
-using InventorySystem;
 using InventorySystem.Items.Firearms.Attachments;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
