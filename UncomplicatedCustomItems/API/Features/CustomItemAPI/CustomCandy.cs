@@ -9,6 +9,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
     public abstract class CustomCandy : APICustomItem
     {
+        public static List<(CustomCandy, ushort, int)> Candyidx = [];
+
         /// <summary>
         /// Gets or sets the Candy Type to spawn as
         /// </summary>
@@ -89,27 +91,55 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 if (index >= 0 && index <= bag.Candies.Count)
                 {
                     List<APICustomItem> candies = List.Where(c => c is CustomCandy candyData && c.Spawn).ToList();
-                    APICustomItem item = candies.RandomItem();
-
-                    if (candies.Count > 0 && item is CustomCandy data && UnityEngine.Random.Range(0f, 101f) >= data.Chance && bag.Candies[index] == data.CandyType)
-                    {
-                        if (!ApplyEffects)
+                    if (candies.Count() >= 1)
                         {
-                            InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
-                            InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable = InventorySystem.Items.Usables.CurrentlyUsedItem.None;
-                            ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
-                            ev.IsAllowed = false;
-                            ev.ContinueProcess = false;
-                            return;
+                        APICustomItem item = candies.RandomItem();
+
+                        if (Candyidx.Any(i => i.Item2 == bag.ItemSerial && bag.Candies[index] == CandyType))
+                        {
+                            if (!ApplyEffects)
+                            {
+                                InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
+                                ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
+                                ev.IsAllowed = false;
+                                ev.ContinueProcess = false;
+                                return;
+                            }
+
+
+                            OnEffectsApplying(ev);
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () => OnEffectsApplied(ev));
+
+                            if (DestroyOnUse)
+                            {
+                                (ev.UsableItem.Base as Scp330Bag)?.TryRemove(index);
+                                Candyidx.Remove((this, bag.ItemSerial, index));
+                            }
+
+                            ev.Player.SendHint(EatingMessage, EatingMessageDuration);
                         }
+                        else if (candies.Count > 0 && item is CustomCandy data && UnityEngine.Random.Range(0f, 101f) >= data.Chance && bag.Candies[index] == data.CandyType)
+                        {
+                            if (!ApplyEffects)
+                            {
+                                InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
+                                ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
+                                ev.IsAllowed = false;
+                                ev.ContinueProcess = false;
+                                return;
+                            }
 
-                        OnEffectsApplying(ev);
-                        Timing.CallDelayed(Timing.WaitForOneFrame, () => OnEffectsApplied(ev));
+                            OnEffectsApplying(ev);
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () => OnEffectsApplied(ev));
 
-                        if (data.DestroyOnUse)
-                            (ev.UsableItem.Base as Scp330Bag)?.TryRemove(index);
+                            if (!DestroyOnUse)
+                                Candyidx.Add((this, bag.ItemSerial, index));
 
-                        ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
+                            if (data.DestroyOnUse)
+                                (ev.UsableItem.Base as Scp330Bag)?.TryRemove(index);
+
+                            ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
+                        }   
                     }
                 }
             }

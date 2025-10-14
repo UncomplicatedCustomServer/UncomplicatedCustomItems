@@ -1022,6 +1022,7 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = 0;
             Owner = null;
             CustomItem = null;
+            StopAmmoRegen();
         }
 
         public static bool TryGet(ushort serial, out SummonedCustomItem item)

@@ -11,6 +11,8 @@ using UncomplicatedCustomItems.HarmonyElements.Patches;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using InventorySystem.Items.Usables.Scp330;
 using static UncomplicatedCustomItems.API.Extensions.PlayerExtensions;
+using UncomplicatedCustomItems.Events;
+using MEC;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -76,15 +78,21 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case ICustomItem customItem:
                     if (customItem.Item == ItemType.SCP330 && customItem.CustomData is CandyData candyData)
                     {
-                        Player targetPlayer = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
+                        Player player = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
 
-                        if (targetPlayer.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6))
+                        if (player.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6))
                         {
-                            response = $"{targetPlayer.DisplayName}'s Candy Bag is full!";
+                            response = $"{player.DisplayName}'s Candy Bag is full!";
                             return false;
                         }
-
-                        targetPlayer.GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                        Scp330Bag bag = player.Items.FirstOrDefault(i => i.Base is Scp330Bag)?.Base as Scp330Bag;
+                        if (bag != null)
+                            PlayerHandler.CandyIdx.Add(((CustomItem)customItem, bag.ItemSerial, bag.Candies.Count() + 1));
+                        else
+                        {
+                            player.GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () => PlayerHandler.CandyIdx.Add(((CustomItem)customItem, bag.ItemSerial, bag.Candies.Count())));
+                        }
                     }
 
                     if (arguments.Count == 2)
@@ -146,15 +154,22 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case APICustomItem baseCustomItem:
                     if (baseCustomItem.Item == ItemType.SCP330 && baseCustomItem is CustomCandy customCandy)
                     {
-                        Player targetPlayer = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
+                        Player player = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
 
-                        if (targetPlayer.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6))
+                        if (player.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6))
                         {
-                            response = $"{targetPlayer.DisplayName}'s Candy Bag is full!";
+                            response = $"{player.DisplayName}'s Candy Bag is full!";
                             return false;
                         }
 
-                        targetPlayer.GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                        Scp330Bag bag = player.Items.FirstOrDefault(i => i.Base is Scp330Bag)?.Base as Scp330Bag;
+                        if (bag != null)
+                            CustomCandy.Candyidx.Add((customCandy, bag.ItemSerial, bag.Candies.Count() + 1));
+                        else
+                        {
+                            player.GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () => CustomCandy.Candyidx.Add((customCandy, bag.ItemSerial, bag.Candies.Count())));
+                        }
                     }
 
                     if (arguments.Count == 2)

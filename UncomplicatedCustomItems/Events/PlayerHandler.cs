@@ -3,9 +3,9 @@ using Exiled.CustomRoles.API.Features;
 using Exiled.API.Enums;
 #endif
 using CustomPlayerEffects;
-using Hazards;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
+using InventorySystem.Items.Autosync;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules;
@@ -37,6 +37,7 @@ using UncomplicatedCustomItems.Events.Methods;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
 using UserSettings.ServerSpecific;
+using static InventorySystem.Items.Firearms.Modules.AnimatorReloaderModuleBase;
 using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
@@ -53,7 +54,9 @@ namespace UncomplicatedCustomItems.Events
         public static Dictionary<int, RoleTypeId> Appearance = [];
         internal static readonly CachedLayerMask ToolGunMask = new("Default", "Door", "Glass");
         internal static List<Player> CustomScp268Effects = [];
-        internal static Dictionary<CustomItem, int> CandyIdx = [];
+        internal static List<(CustomItem, ushort, int)> CandyIdx = [];
+        private static int AmmoStored = 0;
+
 
         /// <summary>
         /// The <see cref="Dictionary{TKey,TValue}"/> that handles lights spawned from the <see cref="OnDrop"/> method.
@@ -172,8 +175,7 @@ namespace UncomplicatedCustomItems.Events
                         item.HandleEvent(ev.Player, ItemEvents.Inspect, ev.JailbirdItem.Serial);
                         break;
 
-                    case JailbirdMessageType.ChargeLoadTriggered:
-                    case JailbirdMessageType.ChargeStarted:
+                    case JailbirdMessageType.ChargeStarted or JailbirdMessageType.ChargeLoadTriggered:
                         if (item.HasModule(CustomFlags.NoCharge))
                             ev.JailbirdItem.Base.SendRpc(JailbirdMessageType.ChargeFailed);
 
@@ -425,40 +427,47 @@ namespace UncomplicatedCustomItems.Events
                 List<ICustomItem> candies = CustomItem.List.Where(c => c.CustomData is CandyData candyData && c.Spawn.DoSpawn).ToList();
                 CustomItem item = candies.RandomItem() as CustomItem;
 
-                if (CandyIdx.ContainsKey(item))
+                if (candies.Count() >= 1)
                 {
-                    if (item.CustomData is CandyData data && bag.Candies[idx] == data.CandyType)
+                    if (CandyIdx.Any(i => i.Item2 == bag.ItemSerial))
+                    {
+                        if (item.CustomData is CandyData data && bag.Candies[idx] == data.CandyType)
+                        {
+                            if (data.DestroyOnUse)
+                            {
+                                bag.TryRemove(idx);
+                                CandyIdx.Remove((item, bag.ItemSerial, idx));
+                            }
+
+                            if (!data.ApplyEffects)
+                            {
+                                ev.IsAllowed = false;
+                                ev.ContinueProcess = false;
+                                InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
+                                ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
+                            }
+
+                            ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
+                        }
+                    }
+                    else if (candies.Count > 0 && item.CustomData is CandyData data && UnityEngine.Random.Range(0f, 100f) >= data.Chance && bag.Candies[idx] == data.CandyType)
                     {
                         if (!data.ApplyEffects)
                         {
-                            InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
-                            InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable = InventorySystem.Items.Usables.CurrentlyUsedItem.None;
-                            ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
                             ev.IsAllowed = false;
                             ev.ContinueProcess = false;
+                            InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
+                            ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
                         }
+
+                        if (!data.DestroyOnUse)
+                            CandyIdx.Add((item, bag.ItemSerial, idx));
+
+                        if (data.DestroyOnUse)
+                            bag.TryRemove(idx);
 
                         ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
                     }
-                }
-                else if (candies.Count > 0 && item.CustomData is CandyData data && UnityEngine.Random.Range(0f, 101f) >= data.Chance && bag.Candies[idx] == data.CandyType)
-                {
-                    if (!data.ApplyEffects)
-                    {
-                        InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
-                        InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable = InventorySystem.Items.Usables.CurrentlyUsedItem.None;
-                        ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
-                        ev.IsAllowed = false;
-                        ev.ContinueProcess = false;
-                    }
-
-                    if (!data.DestroyOnUse)
-                        CandyIdx[item] = idx;
-
-                    if (data.DestroyOnUse)
-                        bag.TryRemove(idx);
-
-                    ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
                 }
 
                 if (item.HasModule(CustomFlags.DieOnUse))
@@ -510,9 +519,7 @@ namespace UncomplicatedCustomItems.Events
                             }
                         }
                         else
-                        {
                             LogManager.Error($"{nameof(OnUsingItemCompleted)}: No FlagSettings found on {item.Name}");
-                        }
                     }
                 }
 
@@ -784,9 +791,7 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                     else
-                    {
                         LogManager.Error($"No FlagSettings found on {summonedCustomItem.CustomItem.Name}");
-                    }
                 }
             }
         }
@@ -809,8 +814,19 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.HasModule(CustomFlags.SingleFire))
             {
+                AmmoStored = ev.FirearmItem.StoredAmmo;
                 if (customItem.MagazineModule.AmmoStored >= 1)
+                {
+                    if (ev.FirearmItem.ReloaderModule is AnimatorReloaderModuleBase animator)
+                    {
+                        animator.SendRpc(delegate (NetworkWriter x)
+                        {
+                            x.WriteSubheader(ReloaderMessageHeader.RequestRejected);
+                        });
+                    }
+
                     ev.IsAllowed = false;
+                }
             }
         }
 
@@ -820,7 +836,11 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             if (customItem.HasModule(CustomFlags.SingleFire))
+            {
+                int amount = AmmoStored - 1;
+                ev.Player.AddAmmo(ev.FirearmItem.AmmoType, (ushort)amount);
                 customItem.MagazineModule.AmmoStored = 1;
+            }
         }
 
         public static void OnShooting(PlayerShootingWeaponEventArgs ev)
@@ -886,7 +906,8 @@ namespace UncomplicatedCustomItems.Events
 
                 if (ev.FirearmItem.ActionModule is AutomaticActionModule autoModule)
                 {
-                    for (int i = 0; i <= autoModule._clientChambered.Value; i++)
+                    int amount = Mathf.Min(autoModule.AmmoStored, autoModule.ChamberSize);
+                    for (int i = 0; i <= amount; i++)
                     {
                         Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
 
@@ -906,7 +927,7 @@ namespace UncomplicatedCustomItems.Events
                 }
                 else if (ev.FirearmItem.ActionModule is PumpActionModule pumpModule)
                 {
-                    for (int i = 0; i <= pumpModule._clientChambered.Value; i++)
+                    for (int i = 0; i <= pumpModule._baseShotsPerTriggerPull; i++)
                     {
                         Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
 
@@ -933,6 +954,8 @@ namespace UncomplicatedCustomItems.Events
                 return;
             if (ev.UsableItem == null)
                 return;
+            if (ev == null)
+                return;
 
             if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var summonedItem))
                 summonedItem?.ResetBadge(ev.Player);
@@ -945,6 +968,7 @@ namespace UncomplicatedCustomItems.Events
 
             customItem.HandleEvent(ev.Player, ItemEvents.Use, ev.UsableItem.Serial);
             customItem?.ResetBadge(ev.Player);
+            
             if (customItem.CustomItem.Reusable)
                 new SummonedCustomItem(customItem.CustomItem, ev.Player);
 
@@ -1235,6 +1259,9 @@ namespace UncomplicatedCustomItems.Events
 
                 if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem customItem))
                     return;
+
+                if (customItem.HasModule(CustomFlags.SingleFire) && customItem.MagazineModule.AmmoStored > 1)
+                    customItem.MagazineModule.AmmoStored = 1;
 
                 customItem.HandleSelectedDisplayHint();
                 customItem?.LoadBadge(ev.Player);
@@ -2250,9 +2277,6 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                 }
-
-                if (CandyIdx.ContainsKey(item) && bag.SelectedCandyId > CandyIdx[item] && !item.HasModule(CustomFlags.CantDrop))
-                    CandyIdx[item]--;
             }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem))
@@ -2484,6 +2508,9 @@ namespace UncomplicatedCustomItems.Events
 
             if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem))
                 return;
+
+            if (customItem.HasModule(CustomFlags.SingleFire))
+                customItem.MagazineModule.AmmoStored = 0;
 
             if (customItem.HasModule(CustomFlags.AmmoRegen))
             {
