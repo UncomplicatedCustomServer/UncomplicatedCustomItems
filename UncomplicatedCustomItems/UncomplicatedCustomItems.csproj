@@ -1,19 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <TargetFramework>net48</TargetFramework>
     <ProjectGuid>{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UncomplicatedCustomItems</RootNamespace>
     <AssemblyName>UncomplicatedCustomItems</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <LangVersion>12</LangVersion>
-    <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <FileAlignment>512</FileAlignment>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -22,7 +21,11 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <DocumentationFile>..\..\..\..\AppData\Roaming\EXILED\Plugins\UncomplicatedCustomItems.xml</DocumentationFile>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
@@ -30,51 +33,40 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>embedded</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>12</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <DocumentationFile>..\..\..\..\AppData\Roaming\EXILED\Plugins\UncomplicatedCustomItems.xml</DocumentationFile>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>embedded</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>12</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
     <DocumentationFile>bin\x64\Release\UncomplicatedCustomItems.xml</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64' and '$(OutputPath)' == '' ">
+    <OutputPath>bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)' == 'LabApi' ">
     <DefineConstants>LABAPI</DefineConstants>
     <AssemblyName>UncomplicatedCustomItems-LabApi</AssemblyName>
     <OutputPath>bin\LabAPI\</OutputPath>
-    <RuntimeIdentifier>win</RuntimeIdentifier>
     <DebugType>embedded</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Exiled' ">
     <DefineConstants>EXILED</DefineConstants>
     <AssemblyName>UncomplicatedCustomItems-Exiled</AssemblyName>
     <OutputPath>bin\Exiled\</OutputPath>
-    <RuntimeIdentifier>win</RuntimeIdentifier>
     <DebugType>embedded</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'LabApi|AnyCPU'">
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="Exiled.API" Condition=" '$(Configuration)' == 'Exiled' ">
       <HintPath>$(EXILED_REFERENCES)\Exiled.API.dll</HintPath>
@@ -104,8 +96,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="LabApi-Publicized">
-      <HintPath>$(EXILED_REFERENCES)\LabApi-Publicized.dll</HintPath>
+    <Reference Include="LabApi" Publicize="true">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\LabApi.dll</HintPath>
     </Reference>
     <Reference Include="Mirror-Publicized">
       <HintPath>$(EXILED_REFERENCES)\Mirror-Publicized.dll</HintPath>
@@ -114,14 +106,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp-Publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-Publicized.dll</HintPath>
+    <Reference Include="Assembly-CSharp" Publicize="true">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
+    <Reference Include="Assembly-CSharp-firstpass" Publicize="true">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="AudioPlayerApi">
       <HintPath>$(EXILED_REFERENCES)\AudioPlayerApi.dll</HintPath>
@@ -237,277 +227,21 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\UnityEngine.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.AccessibilityModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.AccessibilityModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.AIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AndroidJNIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.AndroidJNIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.AnimationModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ARModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.ARModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.ClothModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.ClothModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ClusterInputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.ClusterInputModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ClusterRendererModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.ClusterRendererModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CrashReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.CrashReportingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.DirectorModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.DirectorModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.DSPGraphModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.DSPGraphModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.GameCenterModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.GameCenterModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.GIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.GIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.GridModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.GridModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.HotReloadModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.HotReloadModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.ImageConversionModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.IMGUIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.InputModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.JSONSerializeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.JSONSerializeModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.LocalizationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.LocalizationModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.NVIDIAModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.NVIDIAModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.ParticleSystemModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PerformanceReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.PerformanceReportingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.Physics2DModule.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.ProfilerModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="UnityEngine.AccessibilityModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.ProfilerModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ScreenCaptureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.ScreenCaptureModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.SharedInternalsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.SharedInternalsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.SpriteMaskModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.SpriteMaskModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.SpriteShapeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.SpriteShapeModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.StreamingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.StreamingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.SubstanceModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.SubstanceModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.SubsystemsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.SubsystemsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TerrainModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.TerrainModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TerrainPhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.TerrainPhysicsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextCoreFontEngineModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextCoreTextEngineModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.TextCoreTextEngineModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.TextRenderingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TilemapModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.TilemapModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TLSModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.TLSModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UIElementsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIElementsNativeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UIElementsNativeModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UmbraModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UmbraModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UNETModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UNETModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityAnalyticsCommonModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityAnalyticsCommonModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityAnalyticsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityAnalyticsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityConnectModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityConnectModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityCurlModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityCurlModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityTestProtocolModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityTestProtocolModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestAudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityWebRequestModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestTextureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestWWWModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.VehiclesModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.VehiclesModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.VFXModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.VFXModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.VideoModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.VideoModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.VirtualTexturingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.VirtualTexturingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.VRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.VRModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.WindModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.WindModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.XRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(EXILED_REFERENCES)\UnityEngine.XRModule.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\UnityEngine.AccessibilityModule.dll</HintPath>
     </Reference>
     <Reference Include="YamlDotNet">
       <HintPath>$(EXILED_REFERENCES)\YamlDotNet.dll</HintPath>
@@ -517,248 +251,19 @@
       <HintPath>$(EXILED_REFERENCES)\zxing.dll</HintPath>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="API\Features\CustomItemAPI\UsableCustomItems\CustomAdrenaline.cs" />
-    <Compile Include="API\Features\CustomItemAPI\UsableCustomItems\CustomMedkit.cs" />
-    <Compile Include="API\Features\CustomItemAPI\UsableCustomItems\CustomPainkillers.cs" />
-    <Compile Include="API\Features\CustomItemAPI\UsableCustomItems\UsableItem.cs" />
-    <Compile Include="API\Features\CustomItemAPI\ToolGun.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\SCPCustomitem.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP018.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP244.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP207.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP1853.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP268.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SCPCustomItems\CustomSCP127.cs" />
-    <Compile Include="API\Features\CustomItemAPI\ImportManager.cs" />
-    <Compile Include="API\Features\CustomItemAPI\SummonedAPICustomItem.cs" />
-    <Compile Include="API\Features\CustomItemAPI\CustomJailbird.cs" />
-    <Compile Include="API\Features\CustomItemAPI\CustomItemUtils.cs" />
-    <Compile Include="API\Features\CustomItemAPI\CustomFlashGrenade.cs" />
-    <Compile Include="API\Features\CustomItemAPI\CustomExplosiveGrenade.cs" />
-    <Compile Include="API\Features\CustomItemAPI\CustomCandy.cs" />
-    <Compile Include="API\Features\CustomItemAPI\CustomKeycard.cs" />
-    <Compile Include="API\Features\CustomItemAPI\CustomArmor.cs" />
-    <Compile Include="API\Features\CustomItemAPI\CustomWeapon.cs" />
-    <Compile Include="API\Features\CustomItemAPI\APICustomItem.cs" />
-    <Compile Include="API\Attributes\CommonTypesAttribute.cs" />
-    <Compile Include="API\Attributes\EventTypeAttribute.cs" />
-    <Compile Include="API\Attributes\PluginCustomItem.cs" />
-    <Compile Include="API\Components\CollisionHandler.cs" />
-    <Compile Include="API\Components\ToolGunUI.cs" />
-    <Compile Include="API\Enums\CommonTypes.cs" />
-    <Compile Include="API\Enums\LockerType.cs" />
-    <Compile Include="API\Enums\AssignmentOperator.cs" />
-    <Compile Include="API\Features\FlagSettings\AmmoRegenSettings.cs" />
-    <Compile Include="API\Features\Manager\AudioApi.cs" />
-    <Compile Include="API\Features\CustomAction.cs" />
-    <Compile Include="API\Features\Manager\BadgeManager.cs" />
-    <Compile Include="API\Features\Spawning\DynamicSpawn.cs" />
-    <Compile Include="API\Features\FlagSettings\HumeShieldSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\ClusterSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\CraftableSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\CantDropSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\DieOnDropSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\DieOnUseSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\DisguiseSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\SpawnItemWhenDetonatedSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\EffectSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\AudioSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\LifeStealSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\MERSpawnSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\ExplosiveBulletsSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\HealOnKillSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\ItemGlowSettings.cs" />
-    <Compile Include="API\Features\FlagSettings\SwitchRoleOnUseSettings.cs" />
-    <Compile Include="API\Features\FlagSettings.cs" />
-    <Compile Include="API\Features\ArgumentHelpers\EvaluateConditions.cs" />
-    <Compile Include="API\Features\ArgumentHelpers\ConditionalParts.cs" />
-    <Compile Include="API\Features\ArgumentHelpers\PropertyTarget.cs" />
-    <Compile Include="API\Features\Manager\FileConfig.cs" />
-    <Compile Include="API\Features\Manager\Arguments.cs" />
-    <Compile Include="API\Features\Manager\ArgumentManager.cs" />
-    <Compile Include="API\Features\Manager\HttpManager.cs" />
-    <Compile Include="API\Features\Manager\LogEntry.cs" />
-    <Compile Include="API\Features\Manager\LogManager.cs" />
-    <Compile Include="API\Features\Manager\VersionInfo.cs" />
-    <Compile Include="API\Features\Manager\Updater.cs" />
-    <Compile Include="API\Features\Manager\VersionManager.cs" />
-    <Compile Include="API\Features\Spawning\SpawnData.cs" />
-    <Compile Include="API\Features\Spawning\LockerSpawn.cs" />
-    <Compile Include="API\Features\Spawning\Spawn.cs" />
-    <Compile Include="API\Features\SpecificData\FlashlightData.cs" />
-    <Compile Include="API\Features\ItemDataList.cs" />
-    <Compile Include="API\Features\SummonedCustomItem.cs" />
-    <Compile Include="API\Toolgun\Settings.cs" />
-    <Compile Include="API\Toolgun\ToolGun.cs" />
-    <Compile Include="API\Struct\Triplet.cs" />
-    <Compile Include="API\Utilities.cs" />
-    <Compile Include="API\Wrappers\CustomKeycard.cs" />
-    <Compile Include="API\YAMLCaster.cs" />
-    <Compile Include="Commands\SilentCommandSender.cs" />
-    <Compile Include="Commands\Admin\Errors.cs" />
-    <Compile Include="Commands\Admin\Generate.cs" />
-    <Compile Include="Commands\Admin\Get.cs" />
-    <Compile Include="Commands\Admin\Info.cs" />
-    <Compile Include="Commands\Admin\Give.cs" />
-    <Compile Include="Commands\Admin\List.cs" />
-    <Compile Include="Commands\Admin\LogShare.cs" />
-    <Compile Include="Commands\Admin\Reload.cs" />
-    <Compile Include="Commands\Admin\Summon.cs" />
-    <Compile Include="Commands\Admin\Summoned.cs" />
-    <Compile Include="Commands\Admin\ToolGun.cs" />
-    <Compile Include="Commands\Admin\Update.cs" />
-    <Compile Include="Commands\Admin\Random.cs" />
-    <Compile Include="Commands\Admin\UpdateCheck.cs" />
-    <Compile Include="Commands\EquipCustomItemDebug.cs" />
-    <Compile Include="Commands\PresenceDebug.cs" />
-    <Compile Include="Commands\BaseCommand.cs" />
-    <Compile Include="Commands\User\Devtag.cs" />
-    <Compile Include="Commands\User\Info.cs" />
-    <Compile Include="Commands\User\Use.cs" />
-    <Compile Include="Config.cs" />
-    <Compile Include="API\Features\ErrorCustomItem.cs" />
-    <Compile Include="API\Features\CustomItem.cs" />
-    <Compile Include="API\Features\SpecificData\AdrenalineData.cs" />
-    <Compile Include="API\Features\SpecificData\CandyData.cs" />
-    <Compile Include="API\Features\SpecificData\ArmorData.cs" />
-    <Compile Include="API\Features\SpecificData\Data.cs" />
-    <Compile Include="API\Features\SpecificData\ExplosiveGrenadeData.cs" />
-    <Compile Include="API\Features\SpecificData\FlashGrenadeData.cs" />
-    <Compile Include="API\Features\SpecificData\ParticleDisruptorData.cs" />
-    <Compile Include="API\Features\SpecificData\SCPItemData.cs" />
-    <Compile Include="API\Features\SpecificData\ItemData.cs" />
-    <Compile Include="API\Features\SpecificData\JailbirdData.cs" />
-    <Compile Include="API\Features\SpecificData\MedikitData.cs" />
-    <Compile Include="API\Features\SpecificData\MicroHIDData.cs" />
-    <Compile Include="API\Features\SpecificData\PainkillersData.cs" />
-    <Compile Include="API\Features\SpecificData\WeaponData.cs" />
-    <Compile Include="API\Features\SpecificData\KeycardData.cs" />
-    <Compile Include="API\Features\YAMLCustomAction.cs" />
-    <Compile Include="API\Features\YAMLCustomItem.cs" />
-    <Compile Include="API\Enums\ArgumentType.cs" />
-    <Compile Include="API\Enums\CustomItemType.cs" />
-    <Compile Include="API\Enums\FirearmType.cs" />
-    <Compile Include="API\Enums\ItemEvents.cs" />
-    <Compile Include="API\Enums\CustomFlags.cs" />
-    <Compile Include="Events\Handlers\JailbirdEvents.cs" />
-    <Compile Include="Events\Handlers\ItemInspectionEvents.cs" />
-    <Compile Include="Events\Handlers\CustomItemEvents.cs" />
-    <Compile Include="Events\Arguments\JailbirdEvents\ChangedWearStateEventArgs.cs" />
-    <Compile Include="Events\Arguments\JailbirdEvents\ChangingWearStateEventArgs.cs" />
-    <Compile Include="Events\Arguments\ItemInspectionEvents\InspectingItemEventArgs.cs" />
-    <Compile Include="Events\Arguments\ItemInspectionEvents\InspectedItemEventArgs.cs" />
-    <Compile Include="Events\Arguments\CustomItemEvents\RunningCustomItemCommandEventArgs.cs" />
-    <Compile Include="Events\Arguments\CustomItemEvents\RanCustomItemCommandEventArgs.cs" />
-    <Compile Include="Events\Arguments\CustomItemEvents\CheckingCustomFlagEventArgs.cs" />
-    <Compile Include="Events\Arguments\CustomItemEvents\CheckedCustomFlagEventArgs.cs" />
-    <Compile Include="Events\Arguments\CustomItemEvents\SummonedCustomItemEventArgs.cs" />
-    <Compile Include="Events\Arguments\CustomItemEvents\SummoningCustomItemEventArgs.cs" />
-    <Compile Include="Events\EventHandler.cs" />
-    <Compile Include="Events\Methods\SwitchRoleOnUseMethod.cs" />
-    <Compile Include="Events\PlayerHandler.cs" />
-    <Compile Include="Events\ScpHandler.cs" />
-    <Compile Include="Events\ServerHandler.cs" />
-    <Compile Include="Example\ExampleCustomCandy.cs" />
-    <Compile Include="Example\ExampleCustomArmor.cs" />
-    <Compile Include="Example\ExampleCustomGrenade.cs" />
-    <Compile Include="Example\ExampleCustomKeycard.cs" />
-    <Compile Include="Example\ExampleCustomWeapon.cs" />
-    <Compile Include="API\Extensions\AnimationCurveExtensions.cs" />
-    <Compile Include="API\Extensions\CustomItemExtensions.cs" />
-    <Compile Include="API\Extensions\DictionaryExtension.cs" />
-    <Compile Include="API\Extensions\HarmonyExtensions.cs" />
-    <Compile Include="API\Extensions\FirearmItemExtensions.cs" />
-    <Compile Include="API\Extensions\ItemExtensions.cs" />
-    <Compile Include="API\Extensions\PickupExtensions.cs" />
-    <Compile Include="API\Extensions\RoomExtensions.cs" />
-    <Compile Include="API\Extensions\PlayerExtensions.cs" />
-    <Compile Include="API\Extensions\StringExtensions.cs" />
-    <Compile Include="API\Extensions\Vector3Extensions.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\VoiceTriggerPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\MagazineModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\ActionModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP127\HumeShieldPatches.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\JailbirdPatches.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\GrenadePatches.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\LockerSpawningItemPrefix.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\LinearADSModulePostfix.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\SCP268CooldownTimeTranspiler.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\UsableItemPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\InspectionPatches\MicroHidInspectionPostfix.cs" />
-    <Compile Include="HarmonyElements\Patches\InspectionPatches\Scp1344InspectionPostfix.cs" />
-    <Compile Include="HarmonyElements\Patches\InspectionPatches\WeaponInspectionPostfix.cs" />
-    <Compile Include="HarmonyElements\Patches\MicroHIDPatches\ChargeFireModeModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\BarrelAmmoPatches\AutomaticActionModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\MaxAmmoPatches\MaxAmmoPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\ArmorPatches.cs" />
-    <Compile Include="HarmonyElements\Patches\BarrelAmmoPatches\PumpActionModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\MaxAmmoPatches\RevolverCylinderPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomFlagPatches\AttachmentPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\SCP1344Patches\SCP1344EffectPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\DisruptorAdsModulePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\SCP1344Patches\SCP1344UnEquipPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\RemoteAdminPatch.cs" />
-    <Compile Include="HarmonyElements\Patches\ServerNamePatch.cs" />
-    <Compile Include="HarmonyElements\Patches\MicroHIDPatches\ServerSetEnergyPatch.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IClusterSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IDieOnDropSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IDieOnUseSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IDisguiseSettings.cs" />
-    <Compile Include="API\Interfaces\IDynamicSpawn.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IFlashlightData.cs" />
-    <Compile Include="Intergrations\ReflectionEventRegistrar.cs" />
-    <Compile Include="Intergrations\MER.cs" />
-    <Compile Include="Intergrations\CommonUtils.cs" />
-    <Compile Include="Intergrations\LabAPIExtensions.cs" />
-    <Compile Include="Intergrations\ECIIntegration.cs" />
-    <Compile Include="Intergrations\ECR.cs" />
-    <Compile Include="Intergrations\UCR.cs" />
-    <Compile Include="API\Extensions\ListExtension.cs" />
-    <Compile Include="HarmonyElements\Patches\CustomItemPatches\ConsumablePatch.cs" />
-    <Compile Include="API\Interfaces\ICustomItem.cs" />
-    <Compile Include="API\Interfaces\ICustomModule.cs" />
-    <Compile Include="API\Interfaces\IFlagSettings.cs" />
-    <Compile Include="API\Interfaces\ISpawn.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\ISpawnItemWhenDetonatedSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\ICraftableSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IHealOnKillSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\ICantDropSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IEffectSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IAudioSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\ILifeStealSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IItemGlowSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\IExplosiveBulletsSettings.cs" />
-    <Compile Include="API\Interfaces\FlagSettings\ISwitchRoleOnUseSettings.cs" />
-    <Compile Include="API\Interfaces\ICustomAction.cs" />
-    <Compile Include="API\Interfaces\ISubcommand.cs" />
-    <Compile Include="API\Interfaces\SpecificData\ICandyData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IAdrenalineData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IArmorData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IExplosiveGrenadeData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IFlashGrenadeData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IItemData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\ISCPItemData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IJailbirdData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IKeycardData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IParticleDisruptorData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IMedikitData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IMicroHIDData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IPainkillersData.cs" />
-    <Compile Include="API\Interfaces\SpecificData\IWeaponData.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
-  <ItemGroup />
+
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.3</Version>
-    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
+
   <Target Name="PostBuildCopyExiledDll" AfterTargets="Build" Condition=" '$(Configuration)' == 'Exiled' ">
     <Message Text="Copying UncomplicatedCustomItems-Exiled.dll to EXILED plugin folder..." Importance="high" />
     <Copy SourceFiles="$(OutputPath)UncomplicatedCustomItems-Exiled.dll" DestinationFolder="$(APPDATA)\EXILED\Plugins" SkipUnchangedFiles="true" />
@@ -767,5 +272,5 @@
     <Message Text="Copying UncomplicatedCustomItems-LabApi.dll to LabAPI plugin folder..." Importance="high" />
     <Copy SourceFiles="$(OutputPath)UncomplicatedCustomItems-LabApi.dll" DestinationFolder="$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global" SkipUnchangedFiles="true" />
   </Target>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

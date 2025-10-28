@@ -284,7 +284,6 @@ namespace UncomplicatedCustomItems
 			MERIntergration.Init();
 			ECRIntegration.Init();
 			ECIIntegration.Init();
-			Timing.RunCoroutine(Settings.ResetSettings());
 #if EXILED
             CommonUtilitiesPatch.Initialize();
 #endif

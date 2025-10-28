@@ -23,5 +23,6 @@ namespace UncomplicatedCustomItems.API.Interfaces
         public List<HumeShieldSettings?> HumeShieldSettings { get; set; }
         public List<MERSpawnSettings> MerSpawnSettings { get; set; }
         public List<AmmoRegenSettings?> AmmoRegenSettings { get; set; }
+        public List<ItemShotSettings?> ItemShotSettings { get; set; }
     }
 }

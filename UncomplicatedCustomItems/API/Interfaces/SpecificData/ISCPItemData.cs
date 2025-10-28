@@ -9,6 +9,23 @@ namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
     {
 
     }
+
+    /// <summary>
+    /// The interface associated with <see cref="ItemType.SCP1509"/> <see cref="CustomItemType.SCPItem"/>
+    /// </summary>
+    public interface ISCP1509Data
+    {
+        public abstract bool CanResurrect { get; set; }
+        public abstract double ReviveCooldown { get; set; }
+        public abstract float RevivedPlayerMaxahp { get; set; }
+        public abstract float RevivedPlayeraoeBonusahp { get; set; }
+        public abstract float HumeshieldMax { get; set; }
+        public abstract float HumeshieldRegeneration { get; set; }
+        public abstract float HumeshieldRegenRate { get; set; }
+        public abstract float HumeshieldDecayRate { get; set; }
+        public abstract float HumeshieldOnDamagePauseTime { get; set; }
+        public abstract float UnequipHumeshieldDecayDelay { get; set; }
+    }
     
     /// <summary>
     /// The interface associated with <see cref="ItemType.SCP500"/> <see cref="CustomItemType.SCPItem"/>

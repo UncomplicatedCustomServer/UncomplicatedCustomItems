@@ -35,7 +35,6 @@ namespace UncomplicatedCustomItems.API.Components
                 BaseCustomItem = summonedItem;
 
             Builder = new();
-            Settings.GiveToPlayers();
             LogManager.Debug($"Starting ToolGun UI");
         }
 

@@ -169,5 +169,18 @@ namespace UncomplicatedCustomItems.API.Features
                 AmmoPerInterval = 1
             }
         ];
+
+        public virtual List<ItemShotSettings?> ItemShotSettings { get; set; } =
+        [
+            new()
+            {
+                IsCustomItem = false,
+                CustomItemId = 0,
+                Velocity = 15f,
+                ItemType = ItemType.GrenadeHE,
+                IsGrenade = true,
+                GrenadeExplodeOnImpact = true
+            }
+        ];
     }
 }

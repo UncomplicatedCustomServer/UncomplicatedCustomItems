@@ -40,5 +40,7 @@ namespace UncomplicatedCustomItems.API.Enums
         Tantrum = 1L << 27,
         MERSpawn = 1L << 28,
         AmmoRegen = 1L << 29,
+        ItemShot = 1L << 30,
+        ShootItems = 1L << 30,
     }
 }

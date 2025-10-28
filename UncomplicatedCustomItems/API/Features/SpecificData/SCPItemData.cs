@@ -10,7 +10,21 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     {
 
     }
-    
+
+    public class SCP1509Data : Data, ISCP1509Data
+    {
+        public bool CanResurrect { get; set; }
+        public double ReviveCooldown { get; set; }
+        public float RevivedPlayerMaxahp { get; set; }
+        public float RevivedPlayeraoeBonusahp { get; set; }
+        public float HumeshieldMax { get; set; }
+        public float HumeshieldRegeneration { get; set; }
+        public float HumeshieldRegenRate { get; set; }
+        public float HumeshieldDecayRate { get; set; }
+        public float HumeshieldOnDamagePauseTime { get; set; }
+        public float UnequipHumeshieldDecayDelay { get; set; }
+    }
+
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP500"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>

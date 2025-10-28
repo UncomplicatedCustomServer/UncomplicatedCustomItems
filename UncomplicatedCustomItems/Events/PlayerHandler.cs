@@ -3,6 +3,7 @@ using Exiled.CustomRoles.API.Features;
 using Exiled.API.Enums;
 #endif
 using CustomPlayerEffects;
+using Footprinting;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
 using InventorySystem.Items.Autosync;
@@ -11,6 +12,7 @@ using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
+using InventorySystem.Items.Pickups;
 using InventorySystem.Items.ThrowableProjectiles;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
@@ -23,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Components;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
@@ -638,7 +641,7 @@ namespace UncomplicatedCustomItems.Events
 #endif
                         {
 #if EXILED
-                                    LogManager.Warn($"The role_type field in {customItem1.Name} is currently {switchRoleOnUseSettings.RoleType} and should be 'Normal', 'UCR', or 'ECR'");
+                                    LogManager.Warn($"The role_type field in {item.Name} is currently {switchRoleOnUseSettings.RoleType} and should be 'Normal', 'UCR', or 'ECR'");
 #else
                             LogManager.Warn($"The role_type field in {item.Name} is currently {switchRoleOnUseSettings.RoleType} and should be 'Normal' or 'UCR'");
 #endif
@@ -658,9 +661,9 @@ namespace UncomplicatedCustomItems.Events
                         _capybaras.TryAdd(ev.Player.PlayerId, capybara);
                     }
 #if EXILED
-                        if (customItem1.HasModule(CustomFlags.Disguise))
+                        if (item.HasModule(CustomFlags.Disguise))
                         {
-                            foreach (DisguiseSettings disguiseSettings in customItem1.FlagSettings.DisguiseSettings)
+                            foreach (DisguiseSettings disguiseSettings in item.FlagSettings.DisguiseSettings)
                             {
                                 if (disguiseSettings.RoleId == null)
                                     continue;
@@ -860,6 +863,64 @@ namespace UncomplicatedCustomItems.Events
             if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem))
                 return;
 
+            if (customItem.HasModule(CustomFlags.ItemShot))
+            {
+                Vector3 position = ev.Player.Camera.position;
+                if (BarrelTipExtension.TryFindWorldmodelBarrelTip(ev.FirearmItem.Serial, out var tip))
+                    position = tip.WorldspacePosition;
+
+                position.y -= 0.6f;
+
+                foreach (ItemShotSettings itemShotSettings in customItem.CustomItem.FlagSettings.ItemShotSettings)
+                {
+                    float num = 1f - Mathf.Abs(Vector3.Dot(ev.Player.Camera.forward, Vector3.up));
+                    Vector3 forward = ev.Player.Camera.forward;
+                    Vector3 vector = ev.Player.Camera.up * itemShotSettings.UpwardsFactor;
+                    Vector3 vector3 = forward + vector * num;
+                    Vector3 velocityVector = vector3 * itemShotSettings.Velocity;
+
+                    if (itemShotSettings.IsCustomItem)
+                    {
+                        var item = new SummonedCustomItem(Utilities.GetCustomItem(itemShotSettings.CustomItemId), position);
+                        item.Pickup.PickupStandardPhysics.Rb.centerOfMass = Vector3.zero;
+                        item.Pickup.PickupStandardPhysics.Rb.angularVelocity = itemShotSettings.Torque;
+                        item.Pickup.PickupStandardPhysics.Rb.linearVelocity = velocityVector;
+                    }
+
+                    Pickup pickup = Pickup.Create(itemShotSettings.ItemType, position);
+                    if (itemShotSettings.ItemType == ItemType.GrenadeFlash || itemShotSettings.ItemType == ItemType.GrenadeHE || itemShotSettings.ItemType == ItemType.SCP018 && itemShotSettings.IsGrenade)
+                    {
+                        if (pickup.Base.Info.ItemId.GetItemBase() is InventorySystem.Items.ThrowableProjectiles.ThrowableItem throwableItem)
+                        {
+                            ThrownProjectile thrownProjectile = UnityEngine.Object.Instantiate(throwableItem.Projectile);
+                            if (thrownProjectile.PhysicsModule is PickupStandardPhysics pickupStandardPhysics)
+                            {
+                                Rigidbody rb = pickupStandardPhysics.Rb;
+                                rb.centerOfMass = Vector3.zero;
+                                rb.angularVelocity = itemShotSettings.Torque;
+                                rb.linearVelocity = velocityVector;
+                            }
+
+                            pickup.Base.Info.Locked = true;
+                            thrownProjectile.NetworkInfo = pickup.Base.Info;
+                            thrownProjectile.PreviousOwner = new Footprint(ev.Player.ReferenceHub);
+                            NetworkServer.Spawn(thrownProjectile.gameObject);
+                            thrownProjectile.ServerActivate();
+
+                            if (itemShotSettings.GrenadeExplodeOnImpact)
+                                pickup.GameObject.AddComponent<CollisionHandler>().Init(pickup.GameObject, throwableItem.Projectile);
+                        }
+                    }
+                    else
+                    {
+                        pickup.PickupStandardPhysics.Rb.centerOfMass = Vector3.zero;
+                        pickup.PickupStandardPhysics.Rb.angularVelocity = itemShotSettings.Torque;
+                        pickup.PickupStandardPhysics.Rb.linearVelocity = velocityVector;
+                        pickup.Spawn();
+                    }
+                }
+            }
+
             if (customItem.HasModule(CustomFlags.InfiniteAmmo))
             {
                 IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
@@ -877,14 +938,22 @@ namespace UncomplicatedCustomItems.Events
                 foreach (DieOnUseSettings dieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
                 {
                     if (dieOnUseSettings.Vaporize ?? false)
+                    {
+                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} vaporized by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
                         ev.Player.Vaporize();
+                    }
 
                     if (dieOnUseSettings.DeathMessage != null)
+                    {
+                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
                         ev.Player.Kill($"{dieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
+                    }
                     else
+                    {
+                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
                         ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
+                    }
                 }
-                LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed.");
             }
             if (customItem.HasModule(CustomFlags.DistruptorTracer))
             {
@@ -968,7 +1037,7 @@ namespace UncomplicatedCustomItems.Events
 
             customItem.HandleEvent(ev.Player, ItemEvents.Use, ev.UsableItem.Serial);
             customItem?.ResetBadge(ev.Player);
-            
+
             if (customItem.CustomItem.Reusable)
                 new SummonedCustomItem(customItem.CustomItem, ev.Player);
 
@@ -1162,38 +1231,64 @@ namespace UncomplicatedCustomItems.Events
                 ISCP207Data scp207Data = item.CustomItem.CustomData as ISCP207Data;
                 ISCP1853Data scp1853Data = item.CustomItem.CustomData as ISCP1853Data;
                 ISCP1576Data scp1576Data = item.CustomItem.CustomData as ISCP1576Data;
-                dynamic data = ev.UsableItem.Type switch
-                {
-                    ItemType.SCP500 => scp500Data,
-                    ItemType.SCP207 or ItemType.AntiSCP207 => scp207Data,
-                    ItemType.SCP1853 => scp1853Data,
-                    ItemType.SCP1576 => scp1576Data,
-                    _ => null
-                };
 
-                if (data is null)
+                string effect = null;
+                byte intensity = 0;
+                float duration = 0;
+
+                switch (ev.UsableItem.Type)
+                {
+                    case ItemType.SCP500 when scp500Data is not null:
+                        effect = scp500Data.Effect;
+                        intensity = scp500Data.Intensity;
+                        duration = scp500Data.Duration;
+                        break;
+
+                    case ItemType.SCP207 or ItemType.AntiSCP207 when scp207Data is not null:
+                        effect = scp207Data.Effect;
+                        intensity = scp207Data.Intensity;
+                        duration = scp207Data.Duration;
+                        break;
+
+                    case ItemType.SCP1853 when scp1853Data is not null:
+                        effect = scp1853Data.Effect;
+                        intensity = scp1853Data.Intensity;
+                        duration = scp1853Data.Duration;
+                        break;
+
+                    case ItemType.SCP1576 when scp1576Data is not null:
+                        effect = scp1576Data.Effect;
+                        intensity = scp1576Data.Intensity;
+                        duration = scp1576Data.Duration;
+                        break;
+
+                    default:
+                        return;
+                }
+
+                if (effect is null)
                     return;
 
-                if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == data.Effect))
+                if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effect))
                 {
-                    LogManager.Warn($"Invalid Effect: {data.Effect} for ID: {item.CustomItem.Id} Name: {item.CustomItem.Name}");
+                    LogManager.Warn($"Invalid Effect: {effect} for ID: {item.CustomItem.Id} Name: {item.CustomItem.Name}");
                     return;
                 }
 
-                if (data.Duration <= -2)
+                if (duration <= -2)
                 {
-                    LogManager.Warn($"Invalid Duration: {data.Duration} for ID: {item.CustomItem.Id} Name: {item.CustomItem.Name}");
+                    LogManager.Warn($"Invalid Duration: {duration} for ID: {item.CustomItem.Id} Name: {item.CustomItem.Name}");
                     return;
                 }
 
-                if (data.Intensity <= 0)
+                if (intensity <= 0)
                 {
-                    LogManager.Warn($"Invalid intensity: {data.Intensity} for ID: {item.CustomItem.Id} Name: {item.CustomItem.Name}");
+                    LogManager.Warn($"Invalid intensity: {intensity} for ID: {item.CustomItem.Id} Name: {item.CustomItem.Name}");
                     return;
                 }
 
-                LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {data.Effect} at intensity {data.Intensity}, duration is {data.Duration} to {ev.Player.Nickname}");
-                ev.Player?.ReferenceHub.playerEffectsController.ChangeState(data.Effect, (byte)data.Intensity, (float)data.Duration, true);
+                LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {effect} at intensity {intensity}, duration is {duration} to {ev.Player.Nickname}");
+                ev.Player?.ReferenceHub.playerEffectsController.ChangeState(effect, intensity, duration, true);
 
                 if (ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207)
                 {

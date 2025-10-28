@@ -99,10 +99,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
             }
             
             if (Check(ev.NewItem))
-            {
-                Settings.GiveToPlayers();   
                 ev.Player.GameObject.AddComponent<ToolGunUI>().Init(this);
-            }
 
             base.OnChangedItem(ev);
         }

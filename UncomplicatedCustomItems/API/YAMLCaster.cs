@@ -235,6 +235,7 @@ namespace UncomplicatedCustomItems.API
                 (CustomItemType.Candy, ItemType.SCP330) => (Data)Decode(new CandyData(), data),
                 (CustomItemType.SCPItem, ItemType.SCP018) => (Data)Decode(new SCP018Data(), data),
                 (CustomItemType.SCPItem, ItemType.SCP207) => (Data)Decode(new SCP207Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP1509) => (Data)Decode(new SCP1509Data(), data),
                 (CustomItemType.SCPItem, ItemType.SCP500) => (Data)Decode(new SCP500Data(), data),
                 (CustomItemType.SCPItem, ItemType.SCP2176) => (Data)Decode(new SCP2176Data(), data),
                 (CustomItemType.SCPItem, ItemType.SCP244a) => (Data)Decode(new SCP244Data(), data),

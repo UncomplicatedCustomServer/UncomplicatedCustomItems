@@ -73,7 +73,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                         object[] attribs = type.GetCustomAttributes(typeof(PluginCustomItem), false);
                         if (attribs != null && attribs.Length > 0 && CustomItemTypes.Any(baseType => baseType.IsAssignableFrom(type)))
                         {
-                            if (!Plugin.Instance.Config.LoadExampleAPIItems)
+                            if (!Plugin.Instance.Config.LoadExampleapiItems)
                             {
                                 switch (type.FullName)
                                 {
