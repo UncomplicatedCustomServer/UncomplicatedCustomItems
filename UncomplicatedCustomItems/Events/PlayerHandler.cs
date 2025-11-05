@@ -91,13 +91,13 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.InteractingLocker += OnLockerInteracting;
             PlayerEvent.Joined += OnVerified;
             PlayerEvent.PickedUpItem += OnPickup;
+            PlayerEvent.PickedUpArmor += OnArmorPickup;
             PlayerEvent.Spawned += OnSpawned;
             PlayerEvent.Left += OnLeft;
             PlayerEvent.FlippedCoin += OnFlippedCoin;
             PlayerEvent.ToggledFlashlight += OnToggledFlashlight;
             PlayerEvent.ToggledWeaponFlashlight += OnWeaponFlashlightToggled;
             PlayerEvent.ReloadingWeapon += OnReloading;
-            PlayerEvent.ReloadedWeapon += OnReloaded;
             PlayerEvent.TogglingFlashlight += OnTogglingFlashlight;
             PlayerEvent.ThrowingProjectile += OnThrowingProjectile;
             PlayerEvent.ItemUsageEffectsApplying += OnUsingItemCompleted;
@@ -131,13 +131,13 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.InteractingLocker -= OnLockerInteracting;
             PlayerEvent.Joined -= OnVerified;
             PlayerEvent.PickedUpItem -= OnPickup;
+            PlayerEvent.PickedUpArmor -= OnArmorPickup;
             PlayerEvent.Spawned -= OnSpawned;
             PlayerEvent.Left -= OnLeft;
             PlayerEvent.FlippedCoin -= OnFlippedCoin;
             PlayerEvent.ToggledFlashlight -= OnToggledFlashlight;
             PlayerEvent.ToggledWeaponFlashlight -= OnWeaponFlashlightToggled;
             PlayerEvent.ReloadingWeapon -= OnReloading;
-            PlayerEvent.ReloadedWeapon -= OnReloaded;
             PlayerEvent.TogglingFlashlight -= OnTogglingFlashlight;
             PlayerEvent.ThrowingProjectile -= OnThrowingProjectile;
             PlayerEvent.ItemUsageEffectsApplying -= OnUsingItemCompleted;
@@ -149,6 +149,22 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.TogglingNoclip -= OnNoclip;
             PlayerEvent.ProcessingJailbirdMessage -= OnJailbirdMessaging;
             PlayerEvent.ProcessedJailbirdMessage -= OnJailbirdMessage;
+        }
+
+        private static void OnArmorPickup(PlayerPickedUpArmorEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.BodyArmorItem.Serial, out var item))
+                return;
+
+            if (item.HasModule(CustomFlags.HumeShield))
+            {
+                foreach (HumeShieldSettings humeShieldSettings in item.CustomItem.FlagSettings.HumeShieldSettings)
+                {
+                    ev.Player.MaxHumeShield = humeShieldSettings.MaxHumeShield;
+                    ev.Player.HumeShieldRegenCooldown = humeShieldSettings.RegenCoolDown;
+                    ev.Player.HumeShieldRegenRate = humeShieldSettings.RegenRate;
+                }
+            }
         }
 
         public static void OnJailbirdMessage(PlayerProcessedJailbirdMessageEventArgs ev)
@@ -817,33 +833,91 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.HasModule(CustomFlags.SingleFire))
             {
-                AmmoStored = ev.FirearmItem.StoredAmmo;
-                if (customItem.MagazineModule.AmmoStored >= 1)
+                ev.IsAllowed = false;
+                if (!ev.FirearmItem.Base.TryGetModule<AnimatorReloaderModuleBase>(out var reloadModule))
                 {
-                    if (ev.FirearmItem.ReloaderModule is AnimatorReloaderModuleBase animator)
-                    {
-                        animator.SendRpc(delegate (NetworkWriter x)
-                        {
-                            x.WriteSubheader(ReloaderMessageHeader.RequestRejected);
-                        });
-                    }
+                    LogManager.Debug($"{customItem.CustomItem.Name} - No AnimatorReloaderModuleBase found");
+                    return;
+                }
 
-                    ev.IsAllowed = false;
+                if (!ev.FirearmItem.Base.TryGetModule<AutomaticActionModule>(out var actionModule))
+                {
+                    LogManager.Debug($"{customItem.CustomItem.Name} - No AutomaticActionModule found");
+                    return;
+                }
+
+                if (!ev.FirearmItem.Base.TryGetModule<MagazineModule>(out var magazineModule))
+                {
+                    LogManager.Debug($"{customItem.CustomItem.Name} - No MagazineModule found");
+                    return;
+                }
+
+                if (actionModule.AmmoStored > 0)
+                {
+                    LogManager.Debug($"{customItem.CustomItem.Name} - Reload denied (already chambered)");
+                    return;
+                }
+
+                if (reloadModule.IsReloading)
+                {
+                    LogManager.Debug($"{customItem.CustomItem.Name} - Reload denied (Already Reloading)");
+                    return;
+                }
+
+                if (ev.Player.Ammo[ev.FirearmItem.AmmoType] <= 0)
+                {
+                    LogManager.Debug($"{customItem.CustomItem.Name} - Reload denied (No ammo)");
+                    return;
+                }
+
+                if (ev.FirearmItem.TryTriggerFakeReload())
+                {
+                    reloadModule.IsReloading = true;
+                    Timing.CallDelayed(3f, () =>
+                    {
+                        if (!reloadModule.IsReloading)
+                        {
+                            LogManager.Debug($"{customItem.CustomItem.Name} - Reload cancelled (not reloading)");
+                            return;
+                        }
+
+                        if (ev.Player.CurrentItem is null || ev.Player.CurrentItem.Serial != ev.FirearmItem.Serial)
+                        {
+                            LogManager.Debug($"{customItem.CustomItem.Name} - Reload cancelled (weapon not equipped)");
+                            return;
+                        }
+
+                        reloadModule.IsReloading = false;
+
+                        magazineModule.AmmoStored = 0;
+                        magazineModule.ServerResyncData();
+                        actionModule.AmmoStored = 1;
+                        actionModule.Cocked = true;
+                        actionModule.BoltLocked = false;
+                        actionModule._serverQueuedRequests.Clear();
+                        actionModule.ServerResync();
+
+                        ev.Player.SetAmmo(ev.FirearmItem.AmmoType, ev.Player.Ammo[ev.FirearmItem.AmmoType] -= 1);
+                        LogManager.Debug($"{customItem.CustomItem.Name} - Reload complete: AmmoStored={actionModule.AmmoStored}, Cocked={actionModule.Cocked}, MagAmmo={magazineModule.AmmoStored}");
+                    });
                 }
             }
         }
 
-        public static void OnReloaded(PlayerReloadedWeaponEventArgs ev)
+        private static void ApplyPhysics(Player player, Pickup pickup, ItemShotSettings settings)
         {
-            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem))
-                return;
+            float num = 1f - Mathf.Abs(Vector3.Dot(player.Camera.forward, Vector3.up));
+            Vector3 forward = player.Camera.forward;
+            Vector3 vector = player.Camera.up * settings.UpwardsFactor;
+            Vector3 vector3 = forward + vector * num;
+            Vector3 velocityVector = vector3 * settings.Velocity;
 
-            if (customItem.HasModule(CustomFlags.SingleFire))
-            {
-                int amount = AmmoStored - 1;
-                ev.Player.AddAmmo(ev.FirearmItem.AmmoType, (ushort)amount);
-                customItem.MagazineModule.AmmoStored = 1;
-            }
+            Rigidbody rb = pickup.PickupStandardPhysics.Rb;
+            rb.centerOfMass = Vector3.zero;
+            rb.angularVelocity = settings.Torque;
+            rb.linearVelocity = velocityVector;
+
+            LogManager.Debug($"Applying physics to {pickup.Type} - {pickup.Serial}: VelocityVector: {velocityVector}, StartTorque: {settings.Torque}, ");
         }
 
         public static void OnShooting(PlayerShootingWeaponEventArgs ev)
@@ -881,25 +955,43 @@ namespace UncomplicatedCustomItems.Events
 
                     if (itemShotSettings.IsCustomItem)
                     {
-                        var item = new SummonedCustomItem(Utilities.GetCustomItem(itemShotSettings.CustomItemId), position);
-                        item.Pickup.PickupStandardPhysics.Rb.centerOfMass = Vector3.zero;
-                        item.Pickup.PickupStandardPhysics.Rb.angularVelocity = itemShotSettings.Torque;
-                        item.Pickup.PickupStandardPhysics.Rb.linearVelocity = velocityVector;
+                        SummonedCustomItem summoned = new(Utilities.GetCustomItem(itemShotSettings.CustomItemId), position);
+                        ApplyPhysics(ev.Player, summoned.Pickup, itemShotSettings);
+                        break;
+                    }
+
+                    if ((itemShotSettings.ItemType == ItemType.GrenadeHE || itemShotSettings.ItemType == ItemType.GrenadeFlash || itemShotSettings.ItemType == ItemType.SCP018 || itemShotSettings.ItemType == ItemType.SCP2176) && itemShotSettings.IsGrenade)
+                    {
+                        int fuse = itemShotSettings.ItemType == ItemType.SCP2176 ? 30 : 10;
+                        Pickup spawned = (Pickup)TimedGrenadeProjectile.SpawnActive(position, itemShotSettings.ItemType, ev.Player, fuse);
+                        if (spawned != null)
+                        {
+                            ApplyPhysics(ev.Player, spawned, itemShotSettings);
+                            if (itemShotSettings.GrenadeExplodeOnImpact)
+                            {
+                                if (spawned.Base.Info.ItemId.GetItemBase() is InventorySystem.Items.ThrowableProjectiles.ThrowableItem throwableBase)
+                                    spawned.GameObject.AddComponent<CollisionHandler>().Init(spawned.GameObject, throwableBase.Projectile);
+                            }
+
+                            LogManager.Debug($"{customItem.CustomItem.Name} - {itemShotSettings.ItemType} spawned (ItemShot) - {spawned.Serial}");
+                        }
+
+                        break;
                     }
 
                     Pickup pickup = Pickup.Create(itemShotSettings.ItemType, position);
-                    if (itemShotSettings.ItemType == ItemType.GrenadeFlash || itemShotSettings.ItemType == ItemType.GrenadeHE || itemShotSettings.ItemType == ItemType.SCP018 && itemShotSettings.IsGrenade)
+                    if (pickup == null)
                     {
-                        if (pickup.Base.Info.ItemId.GetItemBase() is InventorySystem.Items.ThrowableProjectiles.ThrowableItem throwableItem)
+                        LogManager.Warn($"{customItem.CustomItem.Name} - Failed to create pickup for ItemType {itemShotSettings.ItemType}");
+                        continue;
+                    }
+
+                    if (pickup.Base.Info.ItemId.GetItemBase() is InventorySystem.Items.ThrowableProjectiles.ThrowableItem throwableItem)
+                    {
+                        ThrownProjectile thrownProjectile = UnityEngine.Object.Instantiate(throwableItem.Projectile);
+                        if (Pickup.TryGet(thrownProjectile.ItemId.SerialNumber, out var pickup1))
                         {
-                            ThrownProjectile thrownProjectile = UnityEngine.Object.Instantiate(throwableItem.Projectile);
-                            if (thrownProjectile.PhysicsModule is PickupStandardPhysics pickupStandardPhysics)
-                            {
-                                Rigidbody rb = pickupStandardPhysics.Rb;
-                                rb.centerOfMass = Vector3.zero;
-                                rb.angularVelocity = itemShotSettings.Torque;
-                                rb.linearVelocity = velocityVector;
-                            }
+                            ApplyPhysics(ev.Player, Pickup.Get(thrownProjectile), itemShotSettings);
 
                             pickup.Base.Info.Locked = true;
                             thrownProjectile.NetworkInfo = pickup.Base.Info;
@@ -909,108 +1001,110 @@ namespace UncomplicatedCustomItems.Events
 
                             if (itemShotSettings.GrenadeExplodeOnImpact)
                                 pickup.GameObject.AddComponent<CollisionHandler>().Init(pickup.GameObject, throwableItem.Projectile);
+
+                            LogManager.Debug($"{customItem.CustomItem.Name} - ThrownProjectile spawned (ItemShot) - {pickup.Serial}");
                         }
                     }
                     else
                     {
-                        pickup.PickupStandardPhysics.Rb.centerOfMass = Vector3.zero;
-                        pickup.PickupStandardPhysics.Rb.angularVelocity = itemShotSettings.Torque;
-                        pickup.PickupStandardPhysics.Rb.linearVelocity = velocityVector;
+                        ApplyPhysics(ev.Player, pickup, itemShotSettings);
                         pickup.Spawn();
-                    }
-                }
-            }
 
-            if (customItem.HasModule(CustomFlags.InfiniteAmmo))
-            {
-                IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
-                customItem.MagazineModule.AmmoStored = data.MaxMagazineAmmo;
-                customItem.MagazineModule.ServerResyncData();
-                LogManager.Silent($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}");
-            }
-            if (customItem.HasModule(CustomFlags.CustomSound))
-            {
-                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
-                AudioApi.PlayAudio(customItem, ev.Player.Position);
-            }
-            if (customItem.HasModule(CustomFlags.DieOnUse))
-            {
-                foreach (DieOnUseSettings dieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
-                {
-                    if (dieOnUseSettings.Vaporize ?? false)
-                    {
-                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} vaporized by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
-                        ev.Player.Vaporize();
+                        LogManager.Debug($"{customItem.CustomItem.Name} - Pickup spawned (ItemShot) - {pickup.Serial}");
                     }
 
-                    if (dieOnUseSettings.DeathMessage != null)
+                    if (customItem.HasModule(CustomFlags.InfiniteAmmo))
                     {
-                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
-                        ev.Player.Kill($"{dieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
+                        IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
+                        customItem.MagazineModule.AmmoStored = data.MaxMagazineAmmo;
+                        customItem.MagazineModule.ServerResyncData();
+                        LogManager.Silent($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}");
                     }
-                    else
+                    if (customItem.HasModule(CustomFlags.CustomSound))
                     {
-                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
-                        ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
+                        LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
+                        AudioApi.PlayAudio(customItem, ev.Player.Position);
                     }
-                }
-            }
-            if (customItem.HasModule(CustomFlags.DistruptorTracer))
-            {
-                if (!InventoryItemLoader.TryGetItem(ItemType.ParticleDisruptor, out ParticleDisruptor disruptor))
-                    return;
-                if (!disruptor.TryGetModule(out ImpactEffectsModule impactmodule))
-                    return;
-                if (!disruptor.TryGetModule(out DisruptorHitregModule hitregmodule))
-                    return;
-
-                Vector3 position = ev.Player.Camera.position;
-                if (BarrelTipExtension.TryFindWorldmodelBarrelTip(ev.FirearmItem.Serial, out var tip))
-                    position = tip.WorldspacePosition;
-
-                position.y -= 0.6f;
-                float maxDistance = customItem.HitscanHitregModule.DamageFalloffDistance + customItem.HitscanHitregModule.FullDamageDistance;
-
-                Ray baseRay = new(ev.Player.Camera.position + ev.Player.Camera.forward, ev.Player.Camera.forward);
-
-                if (ev.FirearmItem.ActionModule is AutomaticActionModule autoModule)
-                {
-                    int amount = Mathf.Min(autoModule.AmmoStored, autoModule.ChamberSize);
-                    for (int i = 0; i <= amount; i++)
+                    if (customItem.HasModule(CustomFlags.DieOnUse))
                     {
-                        Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
-
-                        if (Physics.Raycast(ray, out RaycastHit hitInfo, maxDistance, HitscanHitregModuleBase.HitregMask))
+                        foreach (DieOnUseSettings dieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
                         {
-                            hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
-                            impactmodule.ServerSendTracer(hitInfo, position, null, impactmodule.BaseSettings.TracerPrefab);
-                        }
-                        else
-                        {
-                            Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
-                            hitInfo.point = endPoint;
-                            hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
-                            impactmodule.ServerSendTracer(hitInfo, position, null, impactmodule.BaseSettings.TracerPrefab);
+                            if (dieOnUseSettings.Vaporize ?? false)
+                            {
+                                LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} vaporized by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
+                                ev.Player.Vaporize();
+                            }
+
+                            if (dieOnUseSettings.DeathMessage != null)
+                            {
+                                LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
+                                ev.Player.Kill($"{dieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
+                            }
+                            else
+                            {
+                                LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
+                                ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
+                            }
                         }
                     }
-                }
-                else if (ev.FirearmItem.ActionModule is PumpActionModule pumpModule)
-                {
-                    for (int i = 0; i <= pumpModule._baseShotsPerTriggerPull; i++)
+                    if (customItem.HasModule(CustomFlags.DistruptorTracer))
                     {
-                        Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
+                        if (!InventoryItemLoader.TryGetItem(ItemType.ParticleDisruptor, out ParticleDisruptor disruptor))
+                            return;
+                        if (!disruptor.TryGetModule(out ImpactEffectsModule impactmodule))
+                            return;
+                        if (!disruptor.TryGetModule(out DisruptorHitregModule hitregmodule))
+                            return;
 
-                        if (Physics.Raycast(ray, out RaycastHit hitInfo, maxDistance, HitscanHitregModuleBase.HitregMask))
+                        Vector3 position1 = ev.Player.Camera.position;
+                        if (BarrelTipExtension.TryFindWorldmodelBarrelTip(ev.FirearmItem.Serial, out var tip1))
+                            position = tip1.WorldspacePosition;
+
+                        position.y -= 0.6f;
+                        float maxDistance = customItem.HitscanHitregModule.DamageFalloffDistance + customItem.HitscanHitregModule.FullDamageDistance;
+
+                        Ray baseRay = new(ev.Player.Camera.position + ev.Player.Camera.forward, ev.Player.Camera.forward);
+
+                        if (ev.FirearmItem.ActionModule is AutomaticActionModule autoModule)
                         {
-                            hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
-                            impactmodule.ServerSendTracer(hitInfo, position, null, impactmodule.BaseSettings.TracerPrefab);
+                            int amount = Mathf.Min(autoModule.AmmoStored, autoModule.ChamberSize);
+                            for (int i = 0; i <= amount; i++)
+                            {
+                                Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
+
+                                if (Physics.Raycast(ray, out RaycastHit hitInfo, maxDistance, HitscanHitregModuleBase.HitregMask))
+                                {
+                                    hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
+                                    impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
+                                }
+                                else
+                                {
+                                    Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
+                                    hitInfo.point = endPoint;
+                                    hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
+                                    impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
+                                }
+                            }
                         }
-                        else
+                        else if (ev.FirearmItem.ActionModule is PumpActionModule pumpModule)
                         {
-                            Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
-                            hitInfo.point = endPoint;
-                            hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
-                            impactmodule.ServerSendTracer(hitInfo, position, null, impactmodule.BaseSettings.TracerPrefab);
+                            for (int i = 0; i <= pumpModule._baseShotsPerTriggerPull; i++)
+                            {
+                                Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
+
+                                if (Physics.Raycast(ray, out RaycastHit hitInfo, maxDistance, HitscanHitregModuleBase.HitregMask))
+                                {
+                                    hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
+                                    impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
+                                }
+                                else
+                                {
+                                    Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
+                                    hitInfo.point = endPoint;
+                                    hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
+                                    impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
+                                }
+                            }
                         }
                     }
                 }
@@ -2131,9 +2225,7 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                     else
-                    {
                         LogManager.Error($"No FlagSettings found on {customItem.CustomItem.Name}");
-                    }
                 }
             }
         }
@@ -2202,11 +2294,9 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                     else
-                    {
                         LogManager.Error("No FlagSettings found on custom item");
-                    }
 
-                    var light = Light.Create(ev.Pickup.Position);
+                    Light light = Light.Create(ev.Pickup.Position);
                     light.Color = lightColor;
                     light.Intensity = itemGlowSettings.Intensity;
                     light.Range = itemGlowSettings.Range;
@@ -2218,6 +2308,14 @@ namespace UncomplicatedCustomItems.Events
                     ActiveLights[ev.Pickup] = light;
                 }
             }
+
+            if (summonedCustomItem.HasModule(CustomFlags.HumeShield) && ev.Pickup.Type is ItemType.ArmorLight || ev.Pickup.Type is ItemType.ArmorCombat || ev.Pickup.Type is ItemType.ArmorHeavy)
+            {
+                ev.Player.MaxHumeShield = 0;
+                ev.Player.HumeShieldRegenCooldown = 0;
+                ev.Player.HumeShieldRegenRate = 0;
+            }
+
 #if EXILED
             if (summonedCustomItem.HasModule(CustomFlags.Disguise))
             {

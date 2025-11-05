@@ -54,14 +54,12 @@ namespace UncomplicatedCustomItems.API.Extensions
             {
                 foreach (Item item in player.Items)
                 {
-                    if (item.IsCustomItem())
+                    if (item.IsSummonedCustomItem())
                         return true;
                 }
             }
-            else if (player.CurrentItem.IsCustomItem())
-            {
+            else if (player.CurrentItem.IsSummonedCustomItem())
                 return true;
-            }
 
             return false;
         }

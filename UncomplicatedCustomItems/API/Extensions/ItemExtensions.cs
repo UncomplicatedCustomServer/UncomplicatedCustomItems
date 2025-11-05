@@ -80,18 +80,19 @@ namespace UncomplicatedCustomItems.API.Extensions
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="Item"/> is a custom item.
-        /// </summary>
-        /// <param name="item">The item to check.</param>
-        /// <returns><c>true</c> if the item is a custom item; otherwise, <c>false</c>.</returns>
-        public static bool IsCustomItem(this Item item) => Utilities.IsCustomItem(item.Serial);
-
-        /// <summary>
         /// Determines whether the specified <see cref="Item"/> is a summoned custom item.
         /// </summary>
         /// <param name="item">The item to check.</param>
         /// <returns><c>true</c> if the item is a summoned custom item; otherwise, <c>false</c>.</returns>
         public static bool IsSummonedCustomItem(this Item item) => Utilities.IsSummonedCustomItem(item.Serial);
+
+
+        /// <summary>
+        /// Determines whether the specified <see cref="ItemBase"/> is a summoned custom item.
+        /// </summary>
+        /// <param name="item">The item to check.</param>
+        /// <returns><c>true</c> if the item is a summoned custom item; otherwise, <c>false</c>.</returns>
+        public static bool IsSummonedCustomItem(this ItemBase item) => Utilities.IsSummonedCustomItem(item.ItemSerial);
 
         /// <summary>
         /// Attempts to retrieve the <see cref="SummonedCustomItem"/> associated with the specified <see cref="Item"/>.

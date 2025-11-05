@@ -82,7 +82,7 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnItemUpgrade(Scp914ProcessingInventoryItemEventArgs ev)
         {
-            if (ev.Item.IsCustomItem() || APICustomItem.CustomItems.ContainsKey(SummonedAPICustomItem.Get(ev.Item.Serial).CustomItem.Id))
+            if (ev.Item.IsSummonedCustomItem() || APICustomItem.CustomItems.ContainsKey(SummonedAPICustomItem.Get(ev.Item.Serial).CustomItem.Id))
                 ev.IsAllowed = false;
 
             foreach (CustomItem customItem in CustomItem.List)

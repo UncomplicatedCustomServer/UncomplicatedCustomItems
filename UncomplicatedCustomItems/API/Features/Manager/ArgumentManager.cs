@@ -9,6 +9,8 @@ using UncomplicatedCustomItems.API.Features.ArgumentHelpers;
 using System.Text;
 using System.Collections;
 using UncomplicatedCustomItems.API.Attributes;
+using LabApi.Features.Wrappers;
+using MEC;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -1322,7 +1324,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static Dictionary<string, PropertyInfo> GetEventArgsProperties(EventArgs eventArgs)
         {
-            var properties = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, PropertyInfo> properties = new(StringComparer.OrdinalIgnoreCase);
             
             Type eventArgsType = eventArgs.GetType();
             PropertyInfo[] propertyInfos = eventArgsType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -1877,7 +1879,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return false;
 
             string[]? parts = action.Substring(4).Split('=', (char)2);
-            if (parts.Length != 2) return true;
+            if (parts.Length != 2)
+                return true;
 
             string varName = parts[0].Trim();
             string expr = parts[1].Trim();
@@ -1912,7 +1915,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             if (input.EndsWith("ms", StringComparison.OrdinalIgnoreCase))
                 return float.Parse(input.Substring(0, input.Length - 2)) / 1000f;
-                
+            
             if (input.EndsWith("s", StringComparison.OrdinalIgnoreCase))
                 return float.Parse(input.Substring(0, input.Length - 1));
 

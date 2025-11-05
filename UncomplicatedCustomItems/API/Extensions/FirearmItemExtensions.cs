@@ -1,10 +1,14 @@
 ﻿using InventorySystem;
+using InventorySystem.Items.Autosync;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Attachments.Components;
 using InventorySystem.Items.Firearms.Modules;
 using LabApi.Features.Wrappers;
 using FirearmPickup = InventorySystem.Items.Firearms.FirearmPickup;
+using static InventorySystem.Items.Firearms.Modules.AnimatorReloaderModuleBase;
+using static InventorySystem.Items.Firearms.Modules.AutomaticActionModule;
+using static InventorySystem.Items.Firearms.Modules.PumpActionModule;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
@@ -72,6 +76,230 @@ namespace UncomplicatedCustomItems.API.Extensions
             }
             else
                 return false;
+        }
+
+                public static bool TrySendFakeMessage(this FirearmItem item, ReloaderMessageHeader reloaderMessageHeader)
+        {
+            if (!item.Base.TryGetModule<AnimatorReloaderModuleBase>(out var actionModule))
+                return false;
+
+            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(reloaderMessageHeader);
+            });
+
+            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(reloaderMessageHeader);
+            });
+
+            return true;
+        }
+
+        public static bool TrySendFakeMessage(this FirearmItem item, DisruptorActionModule.MessageType messageType)
+        {
+            if (!item.Base.TryGetModule<DisruptorActionModule>(out var actionModule))
+                return false;
+
+            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(messageType);
+            });
+
+            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(messageType);
+            });
+
+            return true;
+        }
+
+        public static bool TrySendFakeMessage(this FirearmItem item, RpcType rpcType)
+        {
+            if (!item.Base.TryGetModule<PumpActionModule>(out var actionModule))
+                return false;
+
+            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(rpcType);
+            });
+
+            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(rpcType);
+            });
+
+            return true;
+        }
+
+        public static bool TrySendFakeMessage(this FirearmItem item, DoubleActionModule.MessageType messageHeader)
+        {
+            if (!item.Base.TryGetModule<DoubleActionModule>(out var actionModule))
+                return false;
+
+            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(messageHeader);
+            });
+
+            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(messageHeader);
+            });
+
+            return true;
+        }
+
+        public static bool TrySendFakeMessage(this FirearmItem item, MessageHeader messageHeader)
+        {
+            if (!item.Base.TryGetModule<AutomaticActionModule>(out var actionModule))
+                return false;
+
+            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(messageHeader);
+            });
+
+            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(messageHeader);
+            });
+
+            return true;
+        }
+
+        public static bool TryTriggerFakeReload(this FirearmItem item)
+        {
+            if (!item.Base.TryGetModule<AnimatorReloaderModuleBase>(out var reloadModule))
+                return false;
+
+            reloadModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            {
+                reloadModule.IsReloading = true;
+                writer.WriteSubheader(ReloaderMessageHeader.Reload);
+                if (reloadModule._randomize)
+                    writer.WriteByte((byte)UnityEngine.Random.Range(0, 256));
+            });
+
+            reloadModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            {
+                reloadModule.IsReloading = true;
+                writer.WriteSubheader(ReloaderMessageHeader.Reload);
+                if (reloadModule._randomize)
+                    writer.WriteByte((byte)UnityEngine.Random.Range(0, 256));
+            });
+
+            return true;
+        }
+
+        public static bool TryTriggerAutomaticFakeShot(this FirearmItem item, int chambersFired = 1, bool dryFire = false)
+        {
+            if (!item.Base.TryGetModule<AutomaticActionModule>(out var actionModule))
+                return false;
+
+            if (dryFire)
+            {
+                actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+                {
+                    writer.WriteSubheader(MessageHeader.RpcDryFire);
+                });
+
+                actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+                {
+                    writer.WriteSubheader(MessageHeader.RpcDryFire);
+                });
+            }
+            else
+            {
+                actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+                {
+                    writer.WriteSubheader(MessageHeader.RpcFire);
+                    writer.WriteByte((byte)chambersFired);
+                });
+
+                actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+                {
+                    writer.WriteSubheader(MessageHeader.RpcFire);
+                    writer.WriteByte((byte)chambersFired);
+                });
+            }
+
+            return true;
+        }
+
+        public static bool TryTriggerRevolverFakeShot(this FirearmItem item, int chambersFired = 1, bool dryFire = false)
+        {
+            if (!item.Base.TryGetModule<DoubleActionModule>(out var actionModule))
+                return false;
+
+            if (dryFire)
+            {
+                actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+                {
+                    writer.WriteSubheader(DoubleActionModule.MessageType.RpcDryFire);
+                });
+
+                actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+                {
+                    writer.WriteSubheader(DoubleActionModule.MessageType.RpcDryFire);
+                });
+            }
+            else
+            {
+                actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+                {
+                    writer.WriteSubheader(DoubleActionModule.MessageType.RpcFire);
+                    writer.WriteByte((byte)chambersFired);
+                });
+
+                actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+                {
+                    writer.WriteSubheader(DoubleActionModule.MessageType.RpcFire);
+                    writer.WriteByte((byte)chambersFired);
+                });
+            }
+
+            return true;
+        }
+
+        public static bool TryTriggerPumpFakeShot(this FirearmItem item, int chambersFired = 1)
+        {
+            if (!item.Base.TryGetModule<PumpActionModule>(out var actionModule))
+                return false;
+
+            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(RpcType.Shoot);
+                writer.WriteByte((byte)chambersFired);
+            });
+
+            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(RpcType.Shoot);
+                writer.WriteByte((byte)chambersFired);
+            });
+
+            return true;
+        }
+
+        public static bool TryTriggerDisruptorFakeShot(this FirearmItem item, int chambersFired = 1)
+        {
+            if (!item.Base.TryGetModule<DisruptorActionModule>(out var actionModule))
+                return false;
+
+            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(DisruptorActionModule.MessageType.RpcStartFiring);
+                writer.WriteByte((byte)chambersFired);
+            });
+
+            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            {
+                writer.WriteSubheader(DisruptorActionModule.MessageType.RpcStartFiring);
+                writer.WriteByte((byte)chambersFired);
+            });
+
+            return true;
         }
     }
 }
