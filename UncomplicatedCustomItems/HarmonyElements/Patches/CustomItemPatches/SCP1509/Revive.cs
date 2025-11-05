@@ -1,5 +1,8 @@
 using HarmonyLib;
 using InventorySystem.Items.Scp1509;
+using Mirror;
+using PlayerRoles;
+using PlayerStatsSystem;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 
@@ -8,15 +11,19 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
     [HarmonyPatch(typeof(Scp1509Item))]
     public static class Revive
     {
-        [HarmonyPatch(nameof(Scp1509Item._reviveCooldown), MethodType.Getter)]
+        [HarmonyPatch(nameof(Scp1509Item.ServerProcessKill))]
         [HarmonyPostfix]
-        public static void ReviveCooldownPostfix(Scp1509Item __instance, ref double __result)
+        public static void ServerProcessKill_Postfix(Scp1509Item __instance, ReferenceHub ply)
         {
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
-                __result = data.ReviveCooldown;
+                if (__instance._nextResurrectTime > NetworkTime.time)
+                {
+                    __instance._nextResurrectTime = NetworkTime.time + data.ReviveCooldown;
+                }
             }
         }
+
 
         [HarmonyPatch(nameof(Scp1509Item.CanResurrect), MethodType.Getter)]
         [HarmonyPostfix]
@@ -28,23 +35,25 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             }
         }
 
-        [HarmonyPatch(nameof(Scp1509Item._revivedPlayerAOEBonusAHP), MethodType.Getter)]
-        [HarmonyPostfix]
-        public static void DecayRatePostfix(Scp1509Item __instance, ref float __result)
+        [HarmonyPatch(nameof(Scp1509Item.ServerApplyResurrectEffects))]
+        [HarmonyPrefix]
+        public static void ServerApplyResurrectEffects_Prefix(Scp1509Item __instance, ReferenceHub victim, ReferenceHub resurrectedPlayer, RoleTypeId respawnRole)
         {
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
-                __result = data.RevivedPlayeraoeBonusahp;
+                __instance._revivedPlayerAOEBonusAHP = data.RevivedPlayeraoeBonusahp;
             }
         }
 
-        [HarmonyPatch(nameof(Scp1509Item.RevivedPlayerMaxAHP), MethodType.Getter)]
+        [HarmonyPatch(nameof(Scp1509Item.ServerApplyResurrectEffects))]
         [HarmonyPostfix]
-        public static void RevivedPlayerMaxAHPPostfix(Scp1509Item __instance, ref float __result)
+        public static void ServerApplyResurrectEffects_Postfix(Scp1509Item __instance, ReferenceHub victim, ReferenceHub resurrectedPlayer, RoleTypeId respawnRole)
         {
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
-                __result = data.RevivedPlayerMaxahp;
+                AhpStat ahp = resurrectedPlayer.playerStats.GetModule<AhpStat>();
+                if (ahp != null)
+                    ahp.ServerAddProcess(data.RevivedPlayerMaxahp, data.RevivedPlayerMaxahp, 0f, 0.7f, 0f, false);
             }
         }
     }
