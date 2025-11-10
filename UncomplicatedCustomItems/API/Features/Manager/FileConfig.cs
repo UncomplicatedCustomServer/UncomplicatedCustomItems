@@ -394,6 +394,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     EatingMessage = ""
                 })
             },
+            new()
+            {
+                Id = 29,
+                Name = "SCP1509",
+                Description = "SCP1509",
+                Item = ItemType.SCP1509,
+                CustomItemType = CustomItemType.SCPItem,
+                Scale = Vector3.one,
+                CustomData = YAMLCaster.Encode(new SCP1509Data())
+            },
         ];
 
         public uint NewId = new();
@@ -403,6 +413,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Dictionary<string, object> customData = [];
             switch (customType, itemType)
             {
+                case (CustomItemType.SCPItem, ItemType.SCP1509):
+                    SCP1509Data SCP1509Data = new();
+                    customData = YAMLCaster.Encode(SCP1509Data);
+                    break;
+                    
                 case (CustomItemType.SCPItem, ItemType.SCP244a):
                 case (CustomItemType.SCPItem, ItemType.SCP244b):
                     SCP244Data SCP244aData = new();
