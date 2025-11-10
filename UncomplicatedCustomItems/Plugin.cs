@@ -27,8 +27,6 @@ using UnityEngine;
 using UserSettings.ServerSpecific;
 using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using HarmonyLib;
-using MEC;
-using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 // Events
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
@@ -52,7 +50,7 @@ namespace UncomplicatedCustomItems
 #endif
 		public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 9, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 10, 1);
 #else
 		public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
