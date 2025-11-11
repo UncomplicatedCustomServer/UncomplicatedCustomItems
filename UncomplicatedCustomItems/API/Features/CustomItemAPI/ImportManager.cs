@@ -53,7 +53,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             typeof(CustomCandy),
             typeof(CustomPainkillers),
             typeof(CustomMedkit),
-            typeof(CustomAdrenaline)
+            typeof(CustomAdrenaline),
+            typeof(CustomSCP1509)
         ];
 
 #if EXILED

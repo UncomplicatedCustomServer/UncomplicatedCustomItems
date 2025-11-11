@@ -368,9 +368,7 @@ namespace UncomplicatedCustomItems.API.Features
                         LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
                 }
                 else
-                {
                     LogManager.Warn($"{nameof(SetProperties)}: [{attachmentString}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
-                }
             }
 
             if (!PropertiesSet && MagazineModule != null)
@@ -947,19 +945,19 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 itemStates[serial] = false;
             }
+
             LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
         }
 
         public void HandleSelectedDisplayHint()
         {
-            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage))
+            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage) && Owner is not null)
                 Owner.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
-
         }
 
         public void HandlePickedUpDisplayHint()
         {
-            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.PickedUpMessage))
+            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.PickedUpMessage) && Owner is not null)
                 Owner.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
         }
 

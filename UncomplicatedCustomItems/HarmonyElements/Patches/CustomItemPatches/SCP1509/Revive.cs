@@ -4,6 +4,7 @@ using Mirror;
 using PlayerRoles;
 using PlayerStatsSystem;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP1509
@@ -22,6 +23,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
                     __instance._nextResurrectTime = NetworkTime.time + data.ReviveCooldown;
                 }
             }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                if (__instance._nextResurrectTime > NetworkTime.time)
+                {
+                    __instance._nextResurrectTime = NetworkTime.time + customSCP1509.ReviveCooldown;
+                }
+            }
         }
 
 
@@ -33,6 +42,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             {
                 __result = data.CanResurrect;
             }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                __result = customSCP1509.CanResurrect;
+            }
         }
 
         [HarmonyPatch(nameof(Scp1509Item.ServerApplyResurrectEffects))]
@@ -43,17 +57,27 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             {
                 __instance._revivedPlayerAOEBonusAHP = data.RevivedPlayeraoeBonusahp;
             }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                __instance._revivedPlayerAOEBonusAHP = customSCP1509.RevivedPlayeraoeBonusahp;
+            }
         }
 
         [HarmonyPatch(nameof(Scp1509Item.ServerApplyResurrectEffects))]
         [HarmonyPostfix]
-        public static void ServerApplyResurrectEffects_Postfix(Scp1509Item __instance, ReferenceHub victim, ReferenceHub resurrectedPlayer, RoleTypeId respawnRole)
+        public static void ServerApplyResurrectEffectsPostfix(Scp1509Item __instance, ReferenceHub victim, ReferenceHub resurrectedPlayer, RoleTypeId respawnRole)
         {
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
                 AhpStat ahp = resurrectedPlayer.playerStats.GetModule<AhpStat>();
-                if (ahp != null)
-                    ahp.ServerAddProcess(data.RevivedPlayerMaxahp, data.RevivedPlayerMaxahp, 0f, 0.7f, 0f, false);
+                ahp?.ServerAddProcess(data.RevivedPlayerMaxahp, data.RevivedPlayerMaxahp, 0f, 0.7f, 0f, false);
+            }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                AhpStat ahp = resurrectedPlayer.playerStats.GetModule<AhpStat>();
+                ahp?.ServerAddProcess(customSCP1509.RevivedPlayerMaxahp, customSCP1509.RevivedPlayerMaxahp, 0f, 0.7f, 0f, false);
             }
         }
     }

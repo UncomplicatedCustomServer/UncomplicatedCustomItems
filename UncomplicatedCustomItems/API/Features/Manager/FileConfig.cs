@@ -545,9 +545,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     break;
                 }
                 else
-                {
                     NewId = id;
-                }
             }
 
             YAMLCustomItem NewItem = new()

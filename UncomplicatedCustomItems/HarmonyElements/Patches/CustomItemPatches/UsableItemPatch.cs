@@ -9,7 +9,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     [HarmonyPatch]
     internal static class UsableItemPatch
     {
-        [HarmonyPatch(typeof(InventorySystem.Items.Usables.Consumable), "ActivateEffects")]
+        [HarmonyPatch(typeof(InventorySystem.Items.Usables.Consumable), nameof(InventorySystem.Items.Usables.Consumable.ActivateEffects))]
         public static bool Prefix(InventorySystem.Items.Usables.Consumable __instance)
         {
             if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var item))

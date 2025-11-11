@@ -1,6 +1,7 @@
 using HarmonyLib;
 using InventorySystem.Items.Scp1509;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP1509
@@ -16,6 +17,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             {
                 __result = data.HumeshieldMax;
             }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                __result = customSCP1509.HumeshieldMax;
+            }
         }
 
         [HarmonyPatch(nameof(Scp1509Item.HsRegeneration), MethodType.Getter)]
@@ -25,6 +31,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.HumeshieldRegeneration;
+            }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                __result = customSCP1509.HumeshieldRegeneration;
             }
         }
 
@@ -36,6 +47,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             {
                 __result = data.HumeshieldRegenRate;
             }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                __result = customSCP1509.HumeshieldRegenRate;
+            }
         }
 
         [HarmonyPatch(nameof(Scp1509Item.ShieldDecayRate), MethodType.Getter)]
@@ -45,6 +61,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.HumeshieldDecayRate;
+            }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                __result = customSCP1509.HumeshieldDecayRate;
             }
         }
 
@@ -56,6 +77,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             {
                 __result = data.HumeshieldOnDamagePauseTime;
             }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                __result = customSCP1509.HumeshieldOnDamagePauseTime;
+            }
         }
 
         [HarmonyPatch(nameof(Scp1509Item.UnequipDecayDelay), MethodType.Getter)]
@@ -65,6 +91,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.UnequipHumeshieldDecayDelay;
+            }
+
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            {
+                __result = customSCP1509.UnequipHumeshieldDecayDelay;
             }
         }
     }

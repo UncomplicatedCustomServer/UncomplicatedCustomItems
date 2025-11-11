@@ -485,7 +485,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     ["scpslVersion"] = GameCore.Version.VersionString,
                     ["showOnList"] = Plugin.Instance.Config.ShowOnuciList.ToString(),
                     ["exiled"] = hasExiled.ToString().ToLower(),
-                    ["extra"] = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}",
+                    ["extra"] = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}, EnabledCreditTags: {Plugin.Instance.Config.EnableCreditTags}",
                     ["plugins"] = pluginNames.Where(p => ucsPlugins.Contains(p)).ToList()
                 };
 
