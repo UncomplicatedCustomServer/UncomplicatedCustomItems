@@ -281,6 +281,7 @@ namespace UncomplicatedCustomItems
 			MERIntergration.Init();
 			ECRIntegration.Init();
 			ECIIntegration.Init();
+			AudioApi.Init();
 #if EXILED
             CommonUtilitiesPatch.Initialize();
 #endif

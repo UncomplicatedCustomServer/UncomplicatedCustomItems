@@ -17,31 +17,35 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// If true it enables access to the custom sound custom flag.
         /// </summary>
         public static bool EnableAudioApi { get; set; } = false;
+        
         /// <summary>
         /// Checks for dependencies that <see cref="AudioApi"/> requires.
         /// </summary>
-        public AudioApi()
+        public static void Init()
         {
             if (!CheckForNVorbisDependency())
             {
                 LogManager.Error("You don't have the AudioPlayerApi dependency NVorbis installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x400");
                 EnableAudioApi = false;
+                return;
             }
+
             if (!CheckForAudioPlayerApiDependency())
             {
                 LogManager.Error("You don't have the dependency AudioPlayerApi installed!\nInstall it to use the custom sound custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x405");
                 EnableAudioApi = false;
+                return;
             }
-            else
-                EnableAudioApi = true;
+
+            EnableAudioApi = true;
         }
         
 #if EXILED
-        private bool CheckForAudioPlayerApiDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "AudioPlayerApi");
-        private bool CheckForNVorbisDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "NVorbis");
+        private static bool CheckForAudioPlayerApiDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "AudioPlayerApi");
+        private static bool CheckForNVorbisDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "NVorbis");
 #else
-        private bool CheckForAudioPlayerApiDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("AudioPlayerApi", StringComparison.OrdinalIgnoreCase));
-        private bool CheckForNVorbisDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("NVorbis", StringComparison.OrdinalIgnoreCase));
+        private static bool CheckForAudioPlayerApiDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("AudioPlayerApi", StringComparison.OrdinalIgnoreCase));
+        private static bool CheckForNVorbisDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("NVorbis", StringComparison.OrdinalIgnoreCase));
 #endif
 
         /// <summary>

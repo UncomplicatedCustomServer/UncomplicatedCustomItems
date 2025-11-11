@@ -12,7 +12,6 @@ using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
-using InventorySystem.Items.Pickups;
 using InventorySystem.Items.ThrowableProjectiles;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;

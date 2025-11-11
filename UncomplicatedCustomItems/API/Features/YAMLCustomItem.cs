@@ -46,7 +46,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         [Description("Settings for the CustomFlags. You can remove any unused settings.")]
         public FlagSettings? FlagSettings { get; set; } = new();
-
         public Dictionary<ArgumentType, string> Arguments { get; set; } = [];
 
         [Description("Sets the custom data type the item will use.")]

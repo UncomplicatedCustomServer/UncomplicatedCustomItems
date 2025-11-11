@@ -10,6 +10,7 @@ using System.IO;
 using LabApi.Features.Wrappers;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -215,6 +216,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             sb.AppendLine($"Generated: {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}");
             sb.AppendLine($"Server Port: {Server.Port}");
             sb.AppendLine($"Total Entries: {History.Count}");
+            sb.AppendLine($"Total CustomItems: {CustomItem.List.Count + CustomItem.UnregisteredList.Count}");
 
             var logSummary = History.GroupBy(h => h.Level).ToDictionary(g => g.Key, g => g.Count());
 
@@ -297,6 +299,26 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     }
                 }
             }
+
+
+            sb.AppendLine();
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine("                         REGISTERED CUSTOMITEMS");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            foreach (ICustomItem item in CustomItem.List)
+                sb.AppendLine(item.ToString());
+
+
+            if (!CustomItem.UnregisteredList.IsEmpty())
+            {
+                sb.AppendLine();
+                sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+                sb.AppendLine("                      UNREGISTERED CUSTOMITEMS");
+                sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+                foreach (ICustomItem item in CustomItem.UnregisteredList)
+                    sb.AppendLine(item.ToString());
+            }
+
 
             sb.AppendLine();
             sb.AppendLine("═══════════════════════════════════════════════════════════════════");

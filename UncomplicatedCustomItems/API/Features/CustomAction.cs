@@ -29,6 +29,7 @@ namespace UncomplicatedCustomItems.API.Features
                 UnregisteredCustomActions.TryAdd(action.Id, action);
                 return;
             }
+            
             CustomActions.TryAdd(action.Id, action);
             LogManager.Info($"Successfully registered CustomAction '{action.Name}' (Id: {action.Id}) into the plugin!");
         }

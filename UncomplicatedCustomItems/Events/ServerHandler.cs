@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Components;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;

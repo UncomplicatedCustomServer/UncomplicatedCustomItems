@@ -8,6 +8,7 @@ using UnityEngine;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Extensions;
+using System.Text;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -173,5 +174,38 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="IData">Custom Data</see>, based on the CustomItemType
         /// </summary>
         public virtual IData CustomData { get; set; } = new ItemData();
+
+        public override string ToString()
+        {
+            StringBuilder sb = new();
+            
+            sb.AppendLine($"CustomItem [{Name}]");
+            sb.AppendLine($"  Id: {Id}");
+            sb.AppendLine($"  Description: {Description}");
+            
+            if (!string.IsNullOrEmpty(ExtendedDescription))
+                sb.AppendLine($"  Extended Description: {ExtendedDescription}");
+            
+            sb.AppendLine($"  Item Type: {Item}");
+            sb.AppendLine($"  Custom Item Type: {CustomItemType}");
+            sb.AppendLine($"  Weight: {Weight}");
+            sb.AppendLine($"  Scale: {Scale}");
+            sb.AppendLine($"  Reusable: {Reusable}");
+            sb.AppendLine($"  Badge: {BadgeName} ({BadgeColor})");
+            
+            if (CustomFlags.HasValue)
+                sb.AppendLine($"  Custom Flags: {CustomFlags.Value}");
+            
+            if (Spawn != null)
+                sb.AppendLine($"  Spawn: {Spawn}");
+            
+            if (CustomData != null)
+                sb.AppendLine($"  Custom Data: {CustomData.GetType().Name}");
+            
+            if (Arguments != null && Arguments.Count > 0)
+                sb.AppendLine($"  Arguments: {Arguments.Count} defined");
+            
+            return sb.ToString().TrimEnd();
+        }
     }
 }
