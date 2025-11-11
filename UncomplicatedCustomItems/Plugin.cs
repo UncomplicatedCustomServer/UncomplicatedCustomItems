@@ -25,7 +25,6 @@ using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
 using UserSettings.ServerSpecific;
-using Handler = UncomplicatedCustomItems.Events.EventHandler;
 using HarmonyLib;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 // Events
@@ -55,8 +54,6 @@ namespace UncomplicatedCustomItems
 		public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
 		public override Version Version { get; } = new(4, 0, 0);
-
-		internal Handler Handler;
 
 		public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
@@ -88,7 +85,6 @@ namespace UncomplicatedCustomItems
 
 			FileConfig = new();
 			HttpManager = new("uci");
-			Handler = new();
 #if EXILED
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
 #else
@@ -98,22 +94,14 @@ namespace UncomplicatedCustomItems
 			PlayerHandler.Register();
 			ServerHandler.Register();
 			ScpHandler.Register();
+			SSSHandler.Register();
 
 			ServerEvent.WaitingForPlayers += OnFinishedLoading;
-			ServerSpecificSettingsSync.ServerOnSettingValueReceived += Handler.OnValueReceived;
 
 #if DEBUG
 			JailbirdEvents.ChangingWearState += OnChangingWearState;
 			JailbirdEvents.ChangedWearState += OnChangedWearState;
 #endif
-
-            // Debugging Events
-            PlayerEvent.DroppingItem += Handler.OnDrop;
-			PlayerEvent.PickedUpItem += Handler.OnDebuggingPickup;
-			PlayerEvent.UsingItem += Handler.OnUse;
-			PlayerEvent.ReloadingWeapon += Handler.OnReloading;
-			PlayerEvent.ShootingWeapon += Handler.OnShooting;
-			PlayerEvent.ThrewProjectile += Handler.OnThrown;
 
 			Arguments.Initialize();
 			Arguments.Register();
@@ -233,6 +221,7 @@ namespace UncomplicatedCustomItems
 			PlayerHandler.Unregister();
 			ServerHandler.Unregister();
 			ScpHandler.Unregister();
+			SSSHandler.Unregister();
 			MERIntergration.Unregister();
 
 #if DEBUG
@@ -241,20 +230,10 @@ namespace UncomplicatedCustomItems
 #endif
 
 			ServerEvent.WaitingForPlayers -= OnFinishedLoading;
-			ServerSpecificSettingsSync.ServerOnSettingValueReceived -= Handler.OnValueReceived;
-
-			// Debugging Events
-			PlayerEvent.DroppingItem -= Handler.OnDrop;
-			PlayerEvent.PickedUpItem -= Handler.OnDebuggingPickup;
-			PlayerEvent.UsingItem -= Handler.OnUse;
-			PlayerEvent.ReloadingWeapon -= Handler.OnReloading;
-			PlayerEvent.ShootingWeapon -= Handler.OnShooting;
-			PlayerEvent.ThrewProjectile -= Handler.OnThrown;
 
 			Arguments.Cleanup();
 
 			Instance = null;
-			Handler = null;
 #if EXILED
             base.OnDisabled();
 #endif

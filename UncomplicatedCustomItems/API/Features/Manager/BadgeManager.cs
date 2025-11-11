@@ -32,7 +32,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal static IReadOnlyDictionary<string, (string, string)> devBadges = new Dictionary<string, (string, string)>()
         {
-            ["76561199150506472@steam"] = ("💻 UCI Lead Developer", "emerald"),
+            ["76561199150506472@steam"] = ("UCI Lead Developer", "emerald"),
         };
     }
 }

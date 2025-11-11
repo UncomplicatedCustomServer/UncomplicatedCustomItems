@@ -42,9 +42,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
             else
-            {
                 LogManager.Info($"You are using UncomplicatedCustomItems v{VersionInfo.Name}{(VersionInfo.CustomName is not null ? $" '{VersionInfo.CustomName}'" : string.Empty)}!");
-            }
 
             // Check integrity
             string hash = HashFile(Plugin.Instance.Assembly.GetHashCode().ToString());
@@ -91,8 +89,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 Position = 0
             };
-            byte[] bytes = SHA256.Create().ComputeHash(file);
 
+            byte[] bytes = SHA256.Create().ComputeHash(file);
             file.Close();
             return BitConverter.ToString(bytes).Replace("-", string.Empty);
         }

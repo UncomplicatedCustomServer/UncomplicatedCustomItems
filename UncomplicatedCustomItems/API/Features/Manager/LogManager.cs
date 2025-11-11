@@ -17,9 +17,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
     internal class LogManager
     {
         // We should store the data here
-        public static readonly List<LogEntry> History = new();
+        public static readonly List<LogEntry> History = [];
 
-        public static bool MessageSent { get; internal set; } = false;
+        public static bool MessageSent { get; internal set; }
         
         public static void Debug(string message)
         {
@@ -281,9 +281,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 FileInfo fileInfo = new(latestFile);
                 if (fileInfo.Length > 1 * 1024 * 1024)
-                {
-                    sb.AppendLine($"LocalAdmin log skipped (too large: {(fileInfo.Length / 1024.0 / 1024.0):F2} MB)");
-                }
+                    sb.AppendLine($"LocalAdmin log skipped (too large: {fileInfo.Length / 1024.0 / 1024.0:F2} MB)");
                 else
                 {
                     try
@@ -300,25 +298,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
 
-
-            sb.AppendLine();
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine("                         REGISTERED CUSTOMITEMS");
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            foreach (ICustomItem item in CustomItem.List)
-                sb.AppendLine(item.ToString());
-
-
-            if (!CustomItem.UnregisteredList.IsEmpty())
-            {
-                sb.AppendLine();
-                sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-                sb.AppendLine("                      UNREGISTERED CUSTOMITEMS");
-                sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-                foreach (ICustomItem item in CustomItem.UnregisteredList)
-                    sb.AppendLine(item.ToString());
-            }
-
+            AppendCustomItemFiles(sb);
 
             sb.AppendLine();
             sb.AppendLine("═══════════════════════════════════════════════════════════════════");
@@ -326,6 +306,63 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             sb.AppendLine("═══════════════════════════════════════════════════════════════════");
 
             return sb.ToString();
+        }
+
+        private static void AppendCustomItemFiles(StringBuilder sb)
+        {
+            sb.AppendLine();
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine("                       CUSTOMITEM RAW CONFIG FILES");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine();
+
+            try
+            {
+                string cfgDir = Plugin.Instance.FileConfig.Dir;
+                if (string.IsNullOrEmpty(cfgDir) || !Directory.Exists(cfgDir))
+                {
+                    sb.AppendLine($"CustomItems directory not found at: {cfgDir}");
+                    return;
+                }
+
+                string[] files = Directory.GetFiles(cfgDir, "*.yml", SearchOption.TopDirectoryOnly).Concat(Directory.Exists(Path.Combine(cfgDir, "Actions")) ? Directory.GetFiles(Path.Combine(cfgDir, "Actions"), "*.yml", SearchOption.TopDirectoryOnly) : Array.Empty<string>()).OrderBy(x => x).ToArray();
+                if (files.Length == 0)
+                {
+                    sb.AppendLine("No customitem .yml files found.");
+                    return;
+                }
+
+                foreach (string file in files)
+                {
+                    sb.AppendLine($"--- File: {Path.GetFileName(file)} ---");
+                    try
+                    {
+                        FileInfo fi = new(file);
+                        if (fi.Length > 1 * 1024 * 1024)
+                        {
+                            sb.AppendLine($"Skipped (too large: {fi.Length / 1024.0 / 1024.0:F2} MB)");
+                            sb.AppendLine();
+                            continue;
+                        }
+
+                        using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                        using StreamReader reader = new(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+                        sb.AppendLine(reader.ReadToEnd());
+                    }
+                    catch (Exception ex)
+                    {
+                        sb.AppendLine($"Error reading file: {ex.Message}");
+                    }
+
+                    sb.AppendLine();
+                }
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"Error enumerating customitem files: {ex.Message}");
+            }
+
+            sb.AppendLine();
         }
 
         private static string FormatLogEntry(LogEntry entry)

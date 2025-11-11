@@ -414,126 +414,102 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             switch (customType, itemType)
             {
                 case (CustomItemType.SCPItem, ItemType.SCP1509):
-                    SCP1509Data SCP1509Data = new();
-                    customData = YAMLCaster.Encode(SCP1509Data);
+                    customData = YAMLCaster.Encode(new SCP1509Data());
                     break;
                     
                 case (CustomItemType.SCPItem, ItemType.SCP244a):
                 case (CustomItemType.SCPItem, ItemType.SCP244b):
-                    SCP244Data SCP244aData = new();
-                    customData = YAMLCaster.Encode(SCP244aData);
+                    customData = YAMLCaster.Encode(new SCP244Data());
                     break;
 
                 case (CustomItemType.SCPItem, ItemType.SCP2176):
-                    SCP2176Data SCP244bData = new();
-                    customData = YAMLCaster.Encode(SCP244bData);
+                    customData = YAMLCaster.Encode(new SCP2176Data());
                     break;
 
                 case (CustomItemType.SCPItem, ItemType.SCP018):
-                    SCP018Data SCP018Data = new();
-                    customData = YAMLCaster.Encode(SCP018Data);
+                    customData = YAMLCaster.Encode(new SCP018Data());
                     break;
 
                 case (CustomItemType.SCPItem, ItemType.SCP500):
-                    SCP500Data SCP500Data = new();
-                    customData = YAMLCaster.Encode(SCP500Data);
+                    customData = YAMLCaster.Encode(new SCP500Data());
                     break;
 
                 case (CustomItemType.SCPItem, ItemType.SCP207):
                 case (CustomItemType.SCPItem, ItemType.AntiSCP207):
-                    SCP207Data SCP207Data = new();
-                    customData = YAMLCaster.Encode(SCP207Data);
+                    customData = YAMLCaster.Encode(new SCP207Data());
                     break;
 
                 case (CustomItemType.SCPItem, ItemType.SCP1853):
-                    SCP1853Data SCP1853Data = new();
-                    customData = YAMLCaster.Encode(SCP1853Data);
+                    customData = YAMLCaster.Encode(new SCP1853Data());
                     break;
 
                 case (CustomItemType.SCPItem, ItemType.SCP1576):
-                    SCP1576Data SCP1576Data = new();
-                    customData = YAMLCaster.Encode(SCP1576Data);
+                    customData = YAMLCaster.Encode(new SCP1576Data());
                     break;
 
                 case (CustomItemType.SCPItem, ItemType.GunSCP127):
-                    SCP127Data GunSCP127Data = new();
-                    customData = YAMLCaster.Encode(GunSCP127Data);
+                    customData = YAMLCaster.Encode(new SCP127Data());
                     break;
 
                 case (CustomItemType.SCPItem, ItemType.SCP268):
-                    SCP268Data SCP268Data = new();
-                    customData = YAMLCaster.Encode(SCP268Data);
+                    customData = YAMLCaster.Encode(new SCP268Data());
                     break;
 
                 case (CustomItemType.Candy, ItemType.SCP330):
-                    CandyData CandyData = new();
-                    customData = YAMLCaster.Encode(CandyData);
+                    customData = YAMLCaster.Encode(new CandyData());
                     break;
 
                 case (CustomItemType.Weapon, _):
-                    WeaponData WeaponData = new();
-                    customData = YAMLCaster.Encode(WeaponData);
+                    customData = YAMLCaster.Encode(new WeaponData());
                     break;
 
                 case (CustomItemType.Keycard, _):
-                    KeycardData KeycardData = new();
-                    customData = YAMLCaster.Encode(KeycardData);
+                    customData = YAMLCaster.Encode(new KeycardData());
                     break;
 
                 case (CustomItemType.Armor, _):
-                    ArmorData ArmorData = new();
-                    customData = YAMLCaster.Encode(ArmorData);
+                    customData = YAMLCaster.Encode(new ArmorData());
                     break;
 
                 case (CustomItemType.ExplosiveGrenade, ItemType.GrenadeHE):
-                    ExplosiveGrenadeData ExplosiveGrenadeData = new();
-                    customData = YAMLCaster.Encode(ExplosiveGrenadeData);
+                    customData = YAMLCaster.Encode(new ExplosiveGrenadeData());
                     break;
 
                 case (CustomItemType.FlashGrenade, ItemType.GrenadeFlash):
-                    FlashGrenadeData FlashGrenadeData = new();
-                    customData = YAMLCaster.Encode(FlashGrenadeData);
+                    customData = YAMLCaster.Encode(new FlashGrenadeData());
                     break;
 
                 case (CustomItemType.Jailbird, ItemType.Jailbird):
-                    JailbirdData JailbirdData = new();
-                    customData = YAMLCaster.Encode(JailbirdData);                
+                    customData = YAMLCaster.Encode(new JailbirdData());                
                     break;
 
                 case (CustomItemType.Medikit, ItemType.Medkit):
-                    MedikitData MedikitData = new();
-                    customData = YAMLCaster.Encode(MedikitData);
+                    customData = YAMLCaster.Encode(new MedikitData());
                     break;
 
                 case (CustomItemType.Painkillers, ItemType.Painkillers):
-                    PainkillersData PainkillersData = new();
-                    customData = YAMLCaster.Encode(PainkillersData);
+                    customData = YAMLCaster.Encode(new PainkillersData());
                     break;
 
                 case (CustomItemType.Adrenaline, ItemType.Adrenaline):
-                    AdrenalineData AdrenalineData = new();
-                    customData = YAMLCaster.Encode(AdrenalineData);
+                    customData = YAMLCaster.Encode(new AdrenalineData());
                     break;
 
                 case (CustomItemType.MicroHID, ItemType.MicroHID):
-                    MicroHIDData MicroHIDData = new();
-                    customData = YAMLCaster.Encode(MicroHIDData);
+                    customData = YAMLCaster.Encode(new MicroHIDData());
                     break;
 
                 case (CustomItemType.ParticleDisruptor, ItemType.ParticleDisruptor):
-                    ParticleDisruptorData ParticleDisruptorData = new();
-                    customData = YAMLCaster.Encode(ParticleDisruptorData);
+                    customData = YAMLCaster.Encode(new ParticleDisruptorData());
                     break;
 
                 case (CustomItemType.Light, ItemType.Lantern):
                 case (CustomItemType.Light, ItemType.Flashlight):
-                    FlashlightData FlashlightData = new();
-                    customData = YAMLCaster.Encode(FlashlightData);
+                    customData = YAMLCaster.Encode(new FlashlightData());
                     break;
 
                 case (CustomItemType.Item, _):
-                    ItemData ItemData = new();
-                    customData = YAMLCaster.Encode(ItemData);
+                    customData = YAMLCaster.Encode(new ItemData());
                     break;
             }
 

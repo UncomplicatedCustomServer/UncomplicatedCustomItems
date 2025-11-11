@@ -230,7 +230,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (Credits.Any(k => k.Value.First == player.GroupName && k.Value.Second == player.GroupColor))
                     return;
 
-                if (!Tag.Third)
+                if (!Tag.Third) // Job
                     return; // Do not override
             }
 
@@ -275,7 +275,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 #endif
 
                 using StringContent content = new(data, Encoding.UTF8, "text/plain");
-
                 using HttpResponseMessage response = await HttpClient.PutAsync(url, content).ConfigureAwait(false);
 
                 HttpContent responseContent = null;
@@ -486,7 +485,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     ["showOnList"] = Plugin.Instance.Config.ShowOnuciList.ToString(),
                     ["exiled"] = hasExiled.ToString().ToLower(),
                     ["extra"] = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}, EnabledCreditTags: {Plugin.Instance.Config.EnableCreditTags}",
-                    ["plugins"] = pluginNames.Where(p => ucsPlugins.Contains(p)).ToList()
+                    ["plugins"] = pluginNames.Where(ucsPlugins.Contains).ToList()
                 };
 
                 if (Plugin.Instance.Config.ShowPluginsOnList)
