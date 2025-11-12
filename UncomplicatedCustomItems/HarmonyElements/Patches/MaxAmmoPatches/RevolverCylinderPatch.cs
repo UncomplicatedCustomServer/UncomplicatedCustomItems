@@ -7,7 +7,6 @@ using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
-    // TODO: Test this.
     [HarmonyPatch(typeof(CylinderAmmoModule), nameof(CylinderAmmoModule.AmmoMax), MethodType.Getter)]
     internal static class RevolverCylinderPatch
     {

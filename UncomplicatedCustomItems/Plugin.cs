@@ -28,7 +28,6 @@ using UserSettings.ServerSpecific;
 using HarmonyLib;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 // Events
-using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
 

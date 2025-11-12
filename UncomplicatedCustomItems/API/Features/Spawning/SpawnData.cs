@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// The rotation of the CustomItem when spawned
         /// </summary>
         [Description("The rotation of the CustomItem when spawned")]
-        public virtual Vector4 Rotation { get; set; } = Vector4.zero;
+        public virtual Vector3 Rotation { get; set; } = Vector3.zero;
 
         public virtual LockerSpawn LockerSettings { get; set; } = new();
 

@@ -402,10 +402,10 @@ namespace UncomplicatedCustomItems.API
 
         private static void SpawnAtCoordinate(ICustomItem customItem, SpawnData spawn)
         {
-            if (spawn.Rotation != Vector4.zero)
+            if (spawn.Rotation != Vector3.zero)
             {
                 spawn.Rotation.Normalize();
-                Quaternion rotation = new(spawn.Rotation.x, spawn.Rotation.y, spawn.Rotation.z, spawn.Rotation.w);
+                Quaternion rotation = Quaternion.Euler(spawn.Rotation);
                 new SummonedCustomItem(customItem, spawn.Coords, rotation);
             }
             else
@@ -421,10 +421,10 @@ namespace UncomplicatedCustomItems.API
                     continue;
 
                 spawn.Rotation.Normalize();
-                Quaternion rotation = new(spawn.Rotation.x, spawn.Rotation.y, spawn.Rotation.z, spawn.Rotation.w);
+                Quaternion rotation = Quaternion.Euler(spawn.Rotation);
 
                 Vector3 spawnPosition = GetDynamicSpawnPosition(room, dynamicSpawn, spawn, customItem);
-                if (spawnPosition != Vector3.zero && spawn.Rotation != Vector4.zero)
+                if (spawnPosition != Vector3.zero && spawn.Rotation != Vector3.zero)
                     new SummonedCustomItem(customItem, spawnPosition, rotation);
                 else if (spawnPosition != Vector3.zero)
                     new SummonedCustomItem(customItem, spawnPosition);
