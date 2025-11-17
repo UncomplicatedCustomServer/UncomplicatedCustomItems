@@ -384,19 +384,16 @@ namespace UncomplicatedCustomItems.API
                     continue;
                 }
 
-                if (spawn.DynamicSpawn.Count() > 0)
+                if (spawn.DynamicSpawn.Count > 0)
                 {
                     HandleDynamicSpawn(customItem, spawn);
                     continue;
                 }
 
-                if (spawn.Zones.Count() > 0)
-                {
+                if (spawn.Zones.Count > 0)
                     HandleZoneSpawn(customItem, spawn);
-                }
                 
-                SummonedCustomItemEventArgs args1 = new(customItem);
-                Events.Handlers.CustomItemEvents.OnSummonedCustomItem(args1);
+                Events.Handlers.CustomItemEvents.OnSummonedCustomItem(new(customItem));
             }
         }
 
@@ -416,7 +413,7 @@ namespace UncomplicatedCustomItems.API
         {
             foreach (DynamicSpawn dynamicSpawn in spawn.DynamicSpawn)
             {
-                Room room = GetRoomFromDynamicSpawn(dynamicSpawn.Room);
+                Room room = GetRoomFromName(dynamicSpawn.Room);
                 if (room == null)
                     continue;
 
@@ -431,7 +428,7 @@ namespace UncomplicatedCustomItems.API
             }
         }
 
-        internal static Room GetRoomFromDynamicSpawn(string room)
+        internal static Room GetRoomFromName(string room)
         {
             if (Enum.TryParse(room, out RoomName roomName))
             {

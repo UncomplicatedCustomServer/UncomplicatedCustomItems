@@ -549,7 +549,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 #endif
 
             CustomItem.Register(YAMLCaster.Converter(NewItem));
-
             LogManager.Info($"Generated and registered custom item: {NewItem.Name} with ID {NewItem.Id}");
         }
         
@@ -581,7 +580,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         continue;
 
                     string fileContent = File.ReadAllText(fileName);
-
                     if (IsActionFile(fileContent))
                     {
                         YAMLCustomAction action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
@@ -615,7 +613,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         return;
 
                     string fileContent = File.ReadAllText(FileName);
-                    
                     try
                     {
                         YAMLCustomItem Item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);

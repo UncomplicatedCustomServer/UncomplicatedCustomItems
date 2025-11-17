@@ -1,6 +1,7 @@
 using CustomPlayerEffects;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UnityEngine;
@@ -51,7 +52,8 @@ namespace UncomplicatedCustomItems.Examples
 
         protected override void OnEffectsApplying(PlayerItemUsageEffectsApplyingEventArgs ev)
         {
-            ev.Player.EnableEffect<Scp207>(1, 20);
+            ExplosiveGrenadeProjectile pickup = Pickup.Create(ItemType.GrenadeHE, ev.Player.Position) as ExplosiveGrenadeProjectile;
+            pickup.Base.ServerFuseEnd();
             base.OnEffectsApplying(ev);
         }
     }

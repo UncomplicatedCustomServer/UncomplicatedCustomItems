@@ -28,7 +28,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                     if (!Room.TryGetRoomAtPosition(__instance.gameObject.transform.position, out Room lockerRoom))
                         continue;
 
-                    Room customItemRoom = Utilities.GetRoomFromDynamicSpawn(data.LockerSettings.Room);
+                    Room customItemRoom = Utilities.GetRoomFromName(data.LockerSettings.Room);
 
                     float chance = UnityEngine.Random.Range(0f, 101f);
                     if (chance >= data.Chance)

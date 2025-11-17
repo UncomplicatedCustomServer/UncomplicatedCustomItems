@@ -63,7 +63,7 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
 
-            if (APICustomItem.List.Count() > 0)
+            if (APICustomItem.List.Count > 0)
             {
                 foreach (APICustomItem item in APICustomItem.List)
                 {
@@ -108,7 +108,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerHandler._damageTimes.Clear();
             PlayerHandler._toolGunPrimitives.Clear();
             PlayerHandler.CustomScp268Effects.Clear();
-
         }
 
         public static void OnGrenadeExploding(ProjectileExplodingEventArgs ev)
@@ -122,7 +121,7 @@ namespace UncomplicatedCustomItems.Events
                 return;
                 
             if (customItem.CustomItem.CustomItemType is CustomItemType.Item)
-                customItem?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
+                customItem.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
 
             LogManager.Debug($"{ev.TimedGrenade.Type} is a CustomItem");
             if (customItem.HasModule(CustomFlags.SpawnItemWhenDetonated))
@@ -248,9 +247,7 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
             else
-            {
                 LogManager.Debug($"{ev.TimedGrenade.Type} is not a CustomItem with the Cluster flag. Serial: {ev.TimedGrenade.Serial}");
-            }
         }
 
         public static void OnPickupCreation(PickupCreatedEventArgs ev)
@@ -259,7 +256,6 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             customItem?.OnDrop(ev);
-
             Timing.CallDelayed(Timing.WaitForOneFrame, () =>
             {
                 try

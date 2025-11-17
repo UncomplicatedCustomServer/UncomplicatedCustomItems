@@ -82,7 +82,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 foreach (var dic in item.SpawnLocations)
                 {
                     Vector3 pos;
-                    Room room = Utilities.GetRoomFromDynamicSpawn(dic.Key);
+                    Room room = Utilities.GetRoomFromName(dic.Key);
 
                     if (dic.Value != Vector3.zero)
                         pos = room.WorldPosition(dic.Value);

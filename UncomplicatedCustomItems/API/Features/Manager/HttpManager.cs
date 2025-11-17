@@ -66,12 +66,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
         /// </summary>
-        public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = new();
+        public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = [];
 
         /// <summary>
         /// Gets the role of the given player (as steamid@64) inside UCI
         /// </summary>
-        public Dictionary<string, string> OrgPlayerRole { get; } = new();
+        public Dictionary<string, string> OrgPlayerRole { get; } = [];
 
         /// <summary>
         /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
@@ -362,7 +362,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 try
                 {
-                    var presenceTask = SendPresenceOnceAsync();
+                    Task<bool> presenceTask = SendPresenceOnceAsync();
 
                     _ = TrackPresenceResult(presenceTask);
                 }
@@ -480,6 +480,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     ["serverName"] = Server.ServerListName,
                     ["pluginVersion"] = Plugin.Instance.Version.ToString(3) ?? "unknown",
                     ["serverPort"] = Server.Port,
+                    ["serverIp"] = Server.IpAddress,
                     ["hideIP"] = Plugin.Instance.Config.HideipOnList.ToString(),
                     ["scpslVersion"] = GameCore.Version.VersionString,
                     ["showOnList"] = Plugin.Instance.Config.ShowOnuciList.ToString(),

@@ -97,6 +97,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ToggledFlashlight += OnToggledFlashlight;
             PlayerEvent.ToggledWeaponFlashlight += OnWeaponFlashlightToggled;
             PlayerEvent.ReloadingWeapon += OnReloading;
+            PlayerEvent.ReloadedWeapon += OnReloaded;
             PlayerEvent.TogglingFlashlight += OnTogglingFlashlight;
             PlayerEvent.ThrowingProjectile += OnThrowingProjectile;
             PlayerEvent.ItemUsageEffectsApplying += OnUsingItemCompleted;
@@ -137,6 +138,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ToggledFlashlight -= OnToggledFlashlight;
             PlayerEvent.ToggledWeaponFlashlight -= OnWeaponFlashlightToggled;
             PlayerEvent.ReloadingWeapon -= OnReloading;
+            PlayerEvent.ReloadedWeapon -= OnReloaded;
             PlayerEvent.TogglingFlashlight -= OnTogglingFlashlight;
             PlayerEvent.ThrowingProjectile -= OnThrowingProjectile;
             PlayerEvent.ItemUsageEffectsApplying -= OnUsingItemCompleted;
@@ -732,6 +734,7 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnHurt(PlayerHurtEventArgs ev)
         {
+            LogManager.Debug($"{ev.Player.Health}/{ev.Player.MaxHealth}");
             foreach (Item pitem in ev.Player.Items)
             {
                 if (Utilities.TryGetSummonedCustomItem(pitem.Serial, out var item))
@@ -777,6 +780,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
+            
             if (summonedCustomItem.HasModule(CustomFlags.EffectShot))
             {
                 foreach (EffectSettings effectSettings in summonedCustomItem.CustomItem.FlagSettings.EffectSettings)
@@ -832,74 +836,29 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.HasModule(CustomFlags.SingleFire))
             {
-                ev.IsAllowed = false;
-                if (!ev.FirearmItem.Base.TryGetModule<AnimatorReloaderModuleBase>(out var reloadModule))
+                if (ev.FirearmItem.StoredAmmo >= 0 || ev.FirearmItem.ChamberedAmmo >= 1)
+                    ev.IsAllowed = false;
+            }
+        }
+
+        private static void OnReloaded(PlayerReloadedWeaponEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem))
+                return;
+
+            if (customItem.HasModule(CustomFlags.SingleFire))
+            {
+                ev.FirearmItem.StoredAmmo = 0;
+                ev.FirearmItem.ChamberedAmmo = 1;
+                ev.FirearmItem.Cocked = true;
+                ev.FirearmItem.BoltLocked = false;
+                if (ev.FirearmItem.ActionModule is AutomaticActionModule actionModule)
                 {
-                    LogManager.Debug($"{customItem.CustomItem.Name} - No AnimatorReloaderModuleBase found");
-                    return;
+                    actionModule._serverQueuedRequests.Clear();
+                    actionModule.ServerResync();
                 }
 
-                if (!ev.FirearmItem.Base.TryGetModule<AutomaticActionModule>(out var actionModule))
-                {
-                    LogManager.Debug($"{customItem.CustomItem.Name} - No AutomaticActionModule found");
-                    return;
-                }
-
-                if (!ev.FirearmItem.Base.TryGetModule<MagazineModule>(out var magazineModule))
-                {
-                    LogManager.Debug($"{customItem.CustomItem.Name} - No MagazineModule found");
-                    return;
-                }
-
-                if (actionModule.AmmoStored > 0)
-                {
-                    LogManager.Debug($"{customItem.CustomItem.Name} - Reload denied (already chambered)");
-                    return;
-                }
-
-                if (reloadModule.IsReloading)
-                {
-                    LogManager.Debug($"{customItem.CustomItem.Name} - Reload denied (Already Reloading)");
-                    return;
-                }
-
-                if (ev.Player.Ammo[ev.FirearmItem.AmmoType] <= 0)
-                {
-                    LogManager.Debug($"{customItem.CustomItem.Name} - Reload denied (No ammo)");
-                    return;
-                }
-
-                if (ev.FirearmItem.TryTriggerFakeReload())
-                {
-                    reloadModule.IsReloading = true;
-                    Timing.CallDelayed(3f, () =>
-                    {
-                        if (!reloadModule.IsReloading)
-                        {
-                            LogManager.Debug($"{customItem.CustomItem.Name} - Reload cancelled (not reloading)");
-                            return;
-                        }
-
-                        if (ev.Player.CurrentItem is null || ev.Player.CurrentItem.Serial != ev.FirearmItem.Serial)
-                        {
-                            LogManager.Debug($"{customItem.CustomItem.Name} - Reload cancelled (weapon not equipped)");
-                            return;
-                        }
-
-                        reloadModule.IsReloading = false;
-
-                        magazineModule.AmmoStored = 0;
-                        magazineModule.ServerResyncData();
-                        actionModule.AmmoStored = 1;
-                        actionModule.Cocked = true;
-                        actionModule.BoltLocked = false;
-                        actionModule._serverQueuedRequests.Clear();
-                        actionModule.ServerResync();
-
-                        ev.Player.SetAmmo(ev.FirearmItem.AmmoType, ev.Player.Ammo[ev.FirearmItem.AmmoType] -= 1);
-                        LogManager.Debug($"{customItem.CustomItem.Name} - Reload complete: AmmoStored={actionModule.AmmoStored}, Cocked={actionModule.Cocked}, MagAmmo={magazineModule.AmmoStored}");
-                    });
-                }
+                ev.Player.SetAmmo(ev.FirearmItem.AmmoType, ev.Player.Ammo[ev.FirearmItem.AmmoType] -= 1);
             }
         }
 
@@ -1797,28 +1756,39 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
 
-            if (customItem.CustomItem.CustomItemType == CustomItemType.Weapon)
+            switch (customItem.CustomItem.CustomItemType)
             {
-                WeaponData weaponData = customItem.CustomItem.CustomData as WeaponData;
-                FirearmDamageHandler damageHandler = ev.DamageHandler as FirearmDamageHandler;
-                damageHandler.Damage = weaponData.Damage;
-            }
+                case CustomItemType.Weapon:
+                {
+                    IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
+                    FirearmDamageHandler damageHandler = ev.DamageHandler as FirearmDamageHandler;
+                    LogManager.Debug($"{damageHandler.Damage}");
+                    LogManager.Debug($"{ev.Player.Health}/{ev.Player.MaxHealth}");
+                    damageHandler.Damage = weaponData.Damage;
+                    LogManager.Debug($"{damageHandler.Damage}");
+                    break;
+                }
 
-            if (customItem.CustomItem.CustomItemType == CustomItemType.MicroHID)
-            {
-                IMicroHIDData microData = customItem.CustomItem.CustomData as IMicroHIDData;
-                MicroHidDamageHandler damageHandler = ev.DamageHandler as MicroHidDamageHandler;
-                damageHandler.Damage = microData.Damage;
-            }
+                case CustomItemType.MicroHID:
+                {
+                    IMicroHIDData microData = customItem.CustomItem.CustomData as IMicroHIDData;
+                    MicroHidDamageHandler damageHandler = ev.DamageHandler as MicroHidDamageHandler;
+                    damageHandler.Damage = microData.Damage;
+                    break;
+                }
 
-            if (customItem.CustomItem.CustomItemType == CustomItemType.ParticleDisruptor)
-            {
-                IParticleDisruptorData disruptorData = customItem.CustomItem.CustomData as IParticleDisruptorData;
-                DisruptorDamageHandler damageHandler = ev.DamageHandler as DisruptorDamageHandler;
-                if (damageHandler.FiringState == FiringState.FiringSingle)
-                    damageHandler.Damage = disruptorData.ChargeDamage;
-                if (damageHandler.FiringState == FiringState.FiringRapid)
-                    damageHandler.Damage = disruptorData.BurstDamage;
+                case CustomItemType.ParticleDisruptor:
+                {
+                    IParticleDisruptorData disruptorData = customItem.CustomItem.CustomData as IParticleDisruptorData;
+                    DisruptorDamageHandler damageHandler = ev.DamageHandler as DisruptorDamageHandler;
+                    if (damageHandler.FiringState == FiringState.FiringSingle)
+                        damageHandler.Damage = disruptorData.ChargeDamage;
+                        
+                    if (damageHandler.FiringState == FiringState.FiringRapid)
+                        damageHandler.Damage = disruptorData.BurstDamage;
+
+                    break;
+                }
             }
         }
 

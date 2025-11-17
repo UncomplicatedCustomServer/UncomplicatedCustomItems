@@ -14,6 +14,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using InventorySystem.Items.Pickups;
+using InventorySystem.Items.ThrowableProjectiles;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -31,6 +33,7 @@ using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using Scp018 = LabApi.Features.Wrappers.Scp018Projectile;
 using Scp244 = LabApi.Features.Wrappers.Scp244Item;
+using ThrowableItem = LabApi.Features.Wrappers.ThrowableItem;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -180,6 +183,10 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 switch (CustomItem.CustomItemType)
                 {
+                    case CustomItemType.ExplosiveGrenade when Item is ThrowableItem { Base.Projectile: ExplosionGrenade grenade } && CustomItem.CustomData is ExplosiveGrenadeData grenadeData:
+                        HandleGrenadeItem(grenade, grenadeData);
+                        break;
+
                     case CustomItemType.Keycard when Item is KeycardItem keycard && CustomItem.CustomData is KeycardData keycardData:
                         HandleKeycardItem(keycard, keycardData);
                         break;
@@ -265,11 +272,20 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.SCPItem:
                         HandleSCPItemForPickup();
                         break;
-
-                    default:
-                        break;
                 }
             }
+        }
+
+        private static void HandleGrenadeItem(ExplosionGrenade grenade, ExplosiveGrenadeData data)
+        {
+            grenade.MaxRadius = data.MaxRadius;
+            grenade.ScpDamageMultiplier = data.ScpDamageMultiplier;
+            grenade._burnedDuration = data.BurnDuration;
+            grenade._concussedDuration = data.ConcussDuration;
+            grenade._deafenedDuration = data.DeafenDuration;
+            grenade._fuseTime = data.FuseTime;
+            grenade._doorDamageOverDistance.Multiply(data.DoorDamageMultiplier);
+            grenade._playerDamageOverDistance.Multiply(data.PlayerDamageMultiplier);
         }
 
         public void HandleKeycardItem(KeycardItem keycardItem, IKeycardData kd)
@@ -372,7 +388,13 @@ namespace UncomplicatedCustomItems.API.Features
             }
 
             if (!PropertiesSet && MagazineModule != null)
-                MagazineModule.AmmoStored = wd.MaxAmmo;
+            {
+                firearmItem.StoredAmmo = wd.MaxAmmo;
+                firearmItem.ChamberedAmmo = wd.MaxBarrelAmmo;
+                MagazineModule._defaultCapacity = wd.MaxMagazineAmmo;
+            }
+
+            firearmItem.ChamberMax = wd.MaxBarrelAmmo;
 
             if (HitscanHitregModule != null)
             {
@@ -423,15 +445,17 @@ namespace UncomplicatedCustomItems.API.Features
                 AttachmentCodeSync.ServerSetCode(firearmPickup.Base.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearmPickup.Base.Info.ItemId));
             }
 
-            MagazineModule.MagazineInserted = true;
+            MagazineModule.ServerInsertMagazine();
             if (!PropertiesSet)
-                MagazineModule.AmmoStored = wd.MaxAmmo;
+                MagazineModule.ServerModifyAmmo(wd.MaxAmmo);
 
-            HitscanHitregModule.BaseDamage = wd.Damage;
-            HitscanHitregModule.BasePenetration = wd.Penetration;
-            HitscanHitregModule.BaseBulletInaccuracy = wd.Inaccuracy;
-            HitscanHitregModule.DamageFalloffDistance = wd.DamageFalloffDistance;
-            MagazineModule.ServerResyncData();
+            if (HitscanHitregModule is not null)
+            {
+                HitscanHitregModule.BaseDamage = wd.Damage;
+                HitscanHitregModule.BasePenetration = wd.Penetration;
+                HitscanHitregModule.BaseBulletInaccuracy = wd.Inaccuracy;
+                HitscanHitregModule.DamageFalloffDistance = wd.DamageFalloffDistance;
+            }
 
             Pickup.Destroy();
             firearmPickup.Spawn();
