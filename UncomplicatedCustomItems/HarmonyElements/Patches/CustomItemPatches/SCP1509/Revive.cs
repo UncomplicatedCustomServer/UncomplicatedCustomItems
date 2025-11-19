@@ -51,7 +51,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
 
         [HarmonyPatch(nameof(Scp1509Item.ServerApplyResurrectEffects))]
         [HarmonyPrefix]
-        public static void ServerApplyResurrectEffects_Prefix(Scp1509Item __instance, ReferenceHub victim, ReferenceHub resurrectedPlayer, RoleTypeId respawnRole)
+        public static void ServerApplyResurrectEffectsPrefix(Scp1509Item __instance, ReferenceHub victim, ReferenceHub resurrectedPlayer, RoleTypeId respawnRole)
         {
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {

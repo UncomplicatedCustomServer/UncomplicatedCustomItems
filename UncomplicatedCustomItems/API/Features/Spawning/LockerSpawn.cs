@@ -10,7 +10,7 @@ namespace UncomplicatedCustomItems.API.Features
         public LockerType LockerType { get; set; }
         public string Room { get; set; } = "HczWarhead";
         public FacilityZone Zone { get; set; } = FacilityZone.HeavyContainment;
-        public int Chamber { get; set; }
+        public string Chamber { get; set; } = "";
         public Vector3 Offset { get; set; } = Vector3.zero;
     }
 }

@@ -10,7 +10,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     {
         public static bool Prefix(Firearm firearm, AttachmentParam param, ref float __result)
         {
-            if (firearm.IsSummonedCustomItem())
+            if (firearm.IsSummonedCustomItem() || firearm.IsSummonedAPICustomItem())
             {
                 __result = 0f;
                 return false;

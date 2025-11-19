@@ -30,6 +30,7 @@ namespace UncomplicatedCustomItems.Events
             ServerEvent.RoundEnding += OnRoundEnd;
             ServerEvent.PickupCreated += OnPickupCreation;
             ServerEvent.RoundStarted += SpawnItemsOnRoundStarted;
+            ServerEvent.ProjectileExploded += OnDetonated;
         }
 
         public static void Unregister()
@@ -39,8 +40,16 @@ namespace UncomplicatedCustomItems.Events
             ServerEvent.RoundEnding -= OnRoundEnd;
             ServerEvent.PickupCreated -= OnPickupCreation;
             ServerEvent.RoundStarted -= SpawnItemsOnRoundStarted;
+            ServerEvent.ProjectileExploded -= OnDetonated;
         }
 
+        private static void OnDetonated(ProjectileExplodedEventArgs ev)
+        {
+            if (Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out var item))
+            {
+                item.OnDetonated(ev);
+            }
+        }
 
         /// <summary>
         /// Spawn items on round started
@@ -246,8 +255,6 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            else
-                LogManager.Debug($"{ev.TimedGrenade.Type} is not a CustomItem with the Cluster flag. Serial: {ev.TimedGrenade.Serial}");
         }
 
         public static void OnPickupCreation(PickupCreatedEventArgs ev)

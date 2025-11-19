@@ -259,8 +259,14 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                     ApplyAttachments(firearm.Base, weaponData.Attachments);
                     
-                    if (!PropertiesSet)
-                        magazine.AmmoStored = weaponData.MaxAmmo;
+                    if (!PropertiesSet && magazine != null)
+                    {
+                        firearm.StoredAmmo = weaponData.MaxAmmo;
+                        firearm.ChamberedAmmo = weaponData.MaxBarrelAmmo;
+                        magazine._defaultCapacity = weaponData.MaxMagazineAmmo;
+                    }
+
+                    firearm.ChamberMax = weaponData.MaxBarrelAmmo;
                     
                     ApplyFirearmStats(hitscan, weaponData);
                     magazine.ServerResyncData();
@@ -322,7 +328,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     firearm.TryGetModule<MagazineModule>(out var magazine);
                     firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
 
-                    if (weaponData.Attachments.Count() > 1)
+                    if (weaponData.Attachments.Count > 1)
                         ApplyAttachments(firearm, weaponData.Attachments);
                     else
                     {
@@ -332,7 +338,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                     magazine.MagazineInserted = true;
                     if (!PropertiesSet)
-                        magazine.AmmoStored = weaponData.MaxAmmo;
+                        magazine.ServerModifyAmmo(weaponData.MaxAmmo);
                     
                     ApplyFirearmStats(hitscan, weaponData);
                     magazine.ServerResyncData();
@@ -520,16 +526,16 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }
 
-        public void HandleSelectedDisplayHint()
+        public void HandleSelectedDisplayHint(Player player)
         {
             if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage))
-                Owner.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
+                player.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
         }
 
-        public void HandlePickedUpDisplayHint()
+        public void HandlePickedUpDisplayHint(Player player)
         {
             if (!string.IsNullOrEmpty(Plugin.Instance.Config.PickedUpMessage))
-                Owner.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
+                player.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
         }
 
         /// <summary>

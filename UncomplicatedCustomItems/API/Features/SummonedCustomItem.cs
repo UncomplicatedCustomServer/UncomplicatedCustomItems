@@ -14,8 +14,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using InventorySystem.Items.Firearms.Modules.Misc;
 using InventorySystem.Items.Pickups;
 using InventorySystem.Items.ThrowableProjectiles;
+using Mirror;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -233,9 +235,6 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.SCPItem:
                         HandleSCPItemForItem();
                         break;
-
-                    default:
-                        break;
                 }
             }
             else if (IsPickup)
@@ -278,6 +277,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         private static void HandleGrenadeItem(ExplosionGrenade grenade, ExplosiveGrenadeData data)
         {
+            LogManager.Debug($"Throwable");
             grenade.MaxRadius = data.MaxRadius;
             grenade.ScpDamageMultiplier = data.ScpDamageMultiplier;
             grenade._burnedDuration = data.BurnDuration;
@@ -294,9 +294,9 @@ namespace UncomplicatedCustomItems.API.Features
             ColorUtility.TryParseHtmlString(kd.TintColor, out Color tintColor);
             ColorUtility.TryParseHtmlString(kd.LabelColor, out Color labelColor);
 
-            Color32 permissionsColor32 = (Color32)permissionsColor;
-            Color32 tintColor32 = (Color32)tintColor;
-            Color32 labelColor32 = (Color32)labelColor;
+            Color32 permissionsColor32 = permissionsColor;
+            Color32 tintColor32 = tintColor;
+            Color32 labelColor32 = labelColor;
 
             KeycardLevels permissions = new(kd.Containment, kd.Armory, kd.Admin);
 
@@ -335,9 +335,9 @@ namespace UncomplicatedCustomItems.API.Features
             ColorUtility.TryParseHtmlString(kd.TintColor, out Color tintColor);
             ColorUtility.TryParseHtmlString(kd.LabelColor, out Color labelColor);
 
-            Color32 permissionsColor32 = (Color32)permissionsColor;
-            Color32 tintColor32 = (Color32)tintColor;
-            Color32 labelColor32 = (Color32)labelColor;
+            Color32 permissionsColor32 = permissionsColor;
+            Color32 tintColor32 = tintColor;
+            Color32 labelColor32 = labelColor;
             KeycardLevels permissions = new(kd.Containment, kd.Armory, kd.Admin);
 
             keycardPickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var item);
@@ -366,15 +366,13 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void HandleWeaponItem(FirearmItem firearmItem, IWeaponData wd)
         {
-            List<string> attachmentList = GetAttachmentsList();
-
             firearmItem.Base.TryGetModule<MagazineModule>(out var mag);
             MagazineModule = mag;
 
             firearmItem.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
             HitscanHitregModule = hitscan;
 
-            foreach (string attachmentString in attachmentList)
+            foreach (string attachmentString in GetAttachmentsList())
             {
                 if (Enum.TryParse(attachmentString, out AttachmentName attachment))
                 {
@@ -387,14 +385,21 @@ namespace UncomplicatedCustomItems.API.Features
                     LogManager.Warn($"{nameof(SetProperties)}: [{attachmentString}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
             }
 
+            MagazineModule._defaultCapacity = wd.MaxMagazineAmmo;
             if (!PropertiesSet && MagazineModule != null)
             {
-                firearmItem.StoredAmmo = wd.MaxAmmo;
-                firearmItem.ChamberedAmmo = wd.MaxBarrelAmmo;
-                MagazineModule._defaultCapacity = wd.MaxMagazineAmmo;
-            }
+                if (!MagazineModule.MagazineInserted)
+                    MagazineModule.ServerInsertEmptyMagazine();
+                MagazineModule.ServerSetInstanceAmmo(Serial, wd.MaxAmmo);
 
-            firearmItem.ChamberMax = wd.MaxBarrelAmmo;
+                if (firearmItem.ActionModule is AutomaticActionModule actionModule)
+                {
+                    actionModule.AmmoStored = wd.MaxBarrelAmmo;
+                    actionModule.Cocked = true;
+                    actionModule.BoltLocked = false;
+                    actionModule.ServerResync();
+                }
+            }
 
             if (HitscanHitregModule != null)
             {
@@ -410,8 +415,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void HandleWeaponPickup(IWeaponData wd)
         {
-            List<string> attachmentList = GetAttachmentsList();
-
             var firearmPickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
             firearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var firearm);
             firearm.ItemSerial = firearmPickup.Serial;
@@ -424,7 +427,7 @@ namespace UncomplicatedCustomItems.API.Features
 
             if (wd.Attachments.Count() > 1)
             {
-                foreach (string attachmentString in attachmentList)
+                foreach (string attachmentString in GetAttachmentsList())
                 {
                     if (Enum.TryParse(attachmentString, out AttachmentName attachment))
                     {
@@ -856,6 +859,20 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Pickup.Serial;
         }
 
+        public void OnThrew(PlayerThrewProjectileEventArgs ev)
+        {
+            Pickup = ev.Projectile;
+            Item = null;
+            Owner = ev.Projectile.LastOwner;
+            Serial = ev.Projectile.Serial;
+        }
+
+        public void OnDetonated(ProjectileExplodedEventArgs ev)
+        {
+            Destroy();
+        }
+
+
         public bool HasModule(CustomFlags flag)
         {
             if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(flag))
@@ -904,13 +921,16 @@ namespace UncomplicatedCustomItems.API.Features
                                 .Replace("{p_zone}", player.Zone.ToString())
                                 .Replace("{p_room}", player.Room.ToString())
                                 .Replace("{p_rotation}", player.Rotation.ToString())
-                                .Replace("{pj_pos}", PlayerHandler.DetonationPosition.ToString());
+                                .Replace("{pj_pos}", PlayerHandler.DetonationPosition.ToString())
+                                .Replace("{pj_pos_mer}", PlayerHandler.DetonationPosition.ToString().Replace(",", " "))
+                                .Replace("{p_pos_mer}", player.Position.ToString().Replace(",", " "));
 
                             if (data.Command.Contains("{p_id}") || data.Command.Contains("{rp_id}") ||
                                 data.Command.Contains("{p_pos}") || data.Command.Contains("{p_role}") ||
                                 data.Command.Contains("{p_health}") || data.Command.Contains("{p_zone}") ||
                                 data.Command.Contains("{p_room}") || data.Command.Contains("{p_rotation}") ||
-                                data.Command.Contains("{pj_pos}"))
+                                data.Command.Contains("{pj_pos}") || data.Command.Contains("{pj_pos_mer}") ||
+                                data.Command.Contains("{p_pos_mer}"))
                             {
                                 RunningCustomItemCommandEventArgs args = new(processedCommand, data.Command, this);
                                 Events.Handlers.CustomItemEvents.OnRunningCustomItemCommand(args);
@@ -973,16 +993,16 @@ namespace UncomplicatedCustomItems.API.Features
             LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
         }
 
-        public void HandleSelectedDisplayHint()
+        public void HandleSelectedDisplayHint(Player player)
         {
-            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage) && Owner is not null)
-                Owner.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
+            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage))
+                player.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
         }
 
-        public void HandlePickedUpDisplayHint()
+        public void HandlePickedUpDisplayHint(Player player)
         {
-            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.PickedUpMessage) && Owner is not null)
-                Owner.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
+            if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.PickedUpMessage))
+                player.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
         }
 
         internal bool HandleCustomAction(Item item)

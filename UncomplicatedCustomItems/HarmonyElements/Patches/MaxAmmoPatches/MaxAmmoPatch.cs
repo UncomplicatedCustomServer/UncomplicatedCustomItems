@@ -10,6 +10,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     [HarmonyPatch(typeof(MagazineModule), nameof(MagazineModule.AmmoMax), MethodType.Getter)]
     internal static class MaxAmmoPatch
     {
+        /*
         [HarmonyPrefix]
         public static bool Prefix(MagazineModule __instance, ref int __result)
         {
@@ -34,5 +35,6 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
 
             return true;
         }
+        */
     }
 }

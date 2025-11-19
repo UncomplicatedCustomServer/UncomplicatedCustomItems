@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using HarmonyLib;
+using InventorySystem.Items;
+using InventorySystem.Items.Firearms.Modules;
+using LabApi.Features.Wrappers;
+using Mirror;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using InventorySystem.Items;
-using UncomplicatedCustomItems.API.Features.Helper;
-using HarmonyLib;
-using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-
+using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
@@ -16,25 +18,59 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     [HarmonyPatch(typeof(AutomaticActionModule))]
     internal static class AutomaticActionModulePatch
     {
+        [HarmonyPatch(nameof(AutomaticActionModule.ServerProcessCmd))]
+        [HarmonyPrefix]
+        public static void ServerProcessCmdPrefix(AutomaticActionModule __instance, NetworkReader reader)
+        {
+            int startPos = reader.Position;
+            byte messageHeader = reader.ReadByte();
+            reader.Position = startPos;
+
+            LogManager.Debug($"[ServerProcessCmd] Firearm: {__instance.Firearm?.ItemTypeId}, MessageHeader: {(AutomaticActionModule.MessageHeader)messageHeader}, Owner: {Player.Get(__instance.Firearm.Owner)?.DisplayName}");
+        }
+
+        [HarmonyPatch(nameof(AutomaticActionModule.ServerShoot))]
+        [HarmonyPrefix]
+        public static void ServerShootPrefix(AutomaticActionModule __instance, ReferenceHub primaryTarget)
+        {
+            LogManager.Debug($"[ServerShoot] Target: {Player.Get(primaryTarget)?.DisplayName}, AmmoStored: {__instance.AmmoStored}, OpenBolt: {__instance.OpenBolt}");
+        }
+
+        [HarmonyPatch(nameof(AutomaticActionModule.ServerSendRejection))]
+        [HarmonyPrefix]
+        public static void ServerSendRejectionPrefix(AutomaticActionModule __instance, AutomaticActionModule.RejectionReason reason, byte errorCode)
+        {
+            LogManager.Debug($"[REJECTION] Reason: {reason}, ErrorCode: {errorCode}, Firearm: {__instance.Firearm?.ItemTypeId}");
+        }
+
+        [HarmonyPatch(nameof(AutomaticActionModule.OnTriggerHeld))]
+        [HarmonyPrefix]
+        public static void OnTriggerHeldPrefix(AutomaticActionModule __instance)
+        {
+            LogManager.Debug($"[OnTriggerHeld] Cocked: {__instance._clientCocked.Value}, RateLimiter Ready: {__instance._clientRateLimiter.Ready}");
+        }
+
+        [HarmonyPatch(nameof(AutomaticActionModule.ProcessClientShots))]
+        [HarmonyPrefix]
+        public static void ProcessClientShotsPrefix(AutomaticActionModule __instance)
+        {
+            LogManager.Debug($"[ProcessClientShots] QueuedShots: {__instance._clientQueuedShots.Count}, Cocked: {__instance._clientCocked.Value}, BoltLocked: {__instance._clientBoltLock.Value}, AmmoChambered: {__instance._clientChambered.Value}");
+        }
+
         [HarmonyPatch("get_ChamberSize")]
         [HarmonyPrefix]
         public static bool Prefix(AutomaticActionModule __instance, ref int __result)
         {
-            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) || !SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem))
-                return true;
-            if (customItem.CustomItem.CustomItemType is not CustomItemType.Weapon || summonItem.CustomItem is not CustomWeapon customWeapon)
-                return true;
-
-            if (customItem != null)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem) && summonItem.CustomItem is CustomWeapon customWeapon)
             {
-                IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
-                __result = weaponData.MaxBarrelAmmo;
+                __result = customWeapon.MaxBarrelAmmo;
                 __instance.ServerResync();
                 return false;
             }
-            else if (summonItem != null)
+
+            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) && customItem.CustomItem.CustomData is WeaponData data)
             {
-                __result = customWeapon.MaxBarrelAmmo;
+                __result = data.MaxBarrelAmmo;
                 __instance.ServerResync();
                 return false;
             }
@@ -42,7 +78,6 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             return true;
         }
 
-        /*
         [HarmonyPatch(nameof(AutomaticActionModule.UpdateServer))]
         [HarmonyTranspiler]
         public static IEnumerable<CodeInstruction> UpdateServerTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
@@ -50,11 +85,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             List<CodeInstruction> codes = new(instructions);
             for (int i = 0; i < codes.Count - 10; i++)
             {
-                if (codes[i].opcode == OpCodes.Callvirt && codes[i].operand is MethodInfo method && method.Name == "get_Modules")
+                if (codes[i].opcode == OpCodes.Callvirt && codes[i].operand is MethodInfo { Name: "get_Modules" })
                 {
                     Label skipLabel = generator.DefineLabel();
 
-                    // Insert the custom check before the loop
+                    // Insert the check before the loop
                     List<CodeInstruction> newInstructions = [
                         new CodeInstruction(OpCodes.Ldarg_0), // Load this (AutomaticActionModule instance)
                         new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(ModuleBase), nameof(ModuleBase.Firearm))), // Get Firearm
@@ -67,7 +102,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                     // Find the end of the busy module check - look for the AmmoStored/OpenBolt check
                     for (int j = i + 20; j < codes.Count; j++)
                     {
-                        if (codes[j].opcode == OpCodes.Callvirt && codes[j].operand is MethodInfo m2 && (m2.Name == "get_AmmoStored" || m2.Name == "get_OpenBolt"))
+                        if (codes[j].opcode == OpCodes.Callvirt && codes[j].operand is MethodInfo { Name: "get_AmmoStored" or "get_OpenBolt" })
                         {
                             codes[j].labels.Add(skipLabel);
                             break;
@@ -85,6 +120,5 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             LogManager.Debug($"Successfully patched UpdateServer with ILCode: {text}");
             return codes;
         }
-        */
     }
 }

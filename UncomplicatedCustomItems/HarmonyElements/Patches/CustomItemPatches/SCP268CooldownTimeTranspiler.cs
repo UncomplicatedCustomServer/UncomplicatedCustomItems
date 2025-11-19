@@ -22,7 +22,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
 
             for (int i = 0; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Ldc_R4 && codes[i].operand is float floatValue && floatValue == 120f)
+                if (codes[i].opcode == OpCodes.Ldc_R4 && codes[i].operand is 120f)
                 {
                     // Replace the constant with a call to GetCooldownTime()
                     codes[i] = new CodeInstruction(OpCodes.Ldarg_0); // This
@@ -31,8 +31,8 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
                 }
             }
 
-           foreach (CodeInstruction code in codes)
-                text += "\n" + code.ToString();
+            foreach (CodeInstruction code in codes)
+                text += $"\n{code}";
             LogManager.Silent($"{nameof(SCP268CooldownTimeTranspiler)}: Codes: {text}");
              
             return codes;

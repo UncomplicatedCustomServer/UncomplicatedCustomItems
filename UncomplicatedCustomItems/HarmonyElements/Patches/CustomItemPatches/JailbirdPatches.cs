@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
         [HarmonyPrefix]
         public static void SetupPrefix(JailbirdDeteriorationTracker __instance)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance._jailbird.ItemSerial, out var item) && item.CustomItem.CustomItemType == CustomItemType.Jailbird && item.CustomItem.CustomData is JailbirdData data)
+            if (Utilities.TryGetSummonedCustomItem(__instance._jailbird.ItemSerial, out var item) && item.CustomItem.CustomItemType is CustomItemType.Jailbird && item.CustomItem.CustomData is JailbirdData data)
             {
                 __instance._chargesToWearState = data.ChargesToWearState;
                 __instance._damageToWearState = data.DamageToWearState;

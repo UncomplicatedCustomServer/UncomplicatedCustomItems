@@ -3,6 +3,7 @@ using InventorySystem.Items;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
@@ -93,6 +94,21 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <param name="item">The item to check.</param>
         /// <returns><c>true</c> if the item is a summoned custom item; otherwise, <c>false</c>.</returns>
         public static bool IsSummonedCustomItem(this ItemBase item) => Utilities.IsSummonedCustomItem(item.ItemSerial);
+
+        /// <summary>
+        /// Determines whether the specified <see cref="Item"/> is a summoned custom item.
+        /// </summary>
+        /// <param name="item">The item to check.</param>
+        /// <returns><c>true</c> if the item is a summoned custom item; otherwise, <c>false</c>.</returns>
+        public static bool IsSummonedAPICustomItem(this Item item) => SummonedAPICustomItem.TryGet(item.Serial, out _);
+
+
+        /// <summary>
+        /// Determines whether the specified <see cref="ItemBase"/> is a summoned custom item.
+        /// </summary>
+        /// <param name="item">The item to check.</param>
+        /// <returns><c>true</c> if the item is a summoned custom item; otherwise, <c>false</c>.</returns>
+        public static bool IsSummonedAPICustomItem(this ItemBase item) => SummonedAPICustomItem.TryGet(item.ItemSerial, out _);
 
         /// <summary>
         /// Attempts to retrieve the <see cref="SummonedCustomItem"/> associated with the specified <see cref="Item"/>.

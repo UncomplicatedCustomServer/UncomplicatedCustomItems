@@ -92,7 +92,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 {
                     List<APICustomItem> candies = List.Where(c => c is CustomCandy candyData && c.Spawn).ToList();
                     if (candies.Count() >= 1)
-                        {
+                    {
                         APICustomItem item = candies.RandomItem();
 
                         if (Candyidx.Any(i => i.Item2 == bag.ItemSerial && bag.Candies[index] == CandyType))

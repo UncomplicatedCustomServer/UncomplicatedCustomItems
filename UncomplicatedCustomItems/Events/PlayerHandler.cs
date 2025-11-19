@@ -43,6 +43,7 @@ using static InventorySystem.Items.Firearms.Modules.AnimatorReloaderModuleBase;
 using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using Scp018Projectile = InventorySystem.Items.ThrowableProjectiles.Scp018Projectile;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -109,6 +110,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.TogglingNoclip += OnNoclip;
             PlayerEvent.ProcessingJailbirdMessage += OnJailbirdMessaging;
             PlayerEvent.ProcessedJailbirdMessage += OnJailbirdMessage;
+            PlayerEvent.ThrewProjectile += OnProjectileThrew;
         }
 
         public static void Unregister()
@@ -150,6 +152,71 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.TogglingNoclip -= OnNoclip;
             PlayerEvent.ProcessingJailbirdMessage -= OnJailbirdMessaging;
             PlayerEvent.ProcessedJailbirdMessage -= OnJailbirdMessage;
+            PlayerEvent.ThrewProjectile -= OnProjectileThrew;
+        }
+
+        private static void OnProjectileThrew(PlayerThrewProjectileEventArgs ev)
+        {
+            if (Utilities.TryGetSummonedCustomItem(ev.ThrowableItem.Serial, out var summoned))
+            {
+                summoned.OnThrew(ev);
+                switch (summoned.CustomItem.CustomItemType)
+                {
+                    case CustomItemType.ExplosiveGrenade when summoned.CustomItem.CustomData is ExplosiveGrenadeData exdata && ev.Projectile.Base is ExplosionGrenade exGrenade:
+                        exGrenade.MaxRadius = exdata.MaxRadius;
+                        exGrenade.ScpDamageMultiplier = exdata.ScpDamageMultiplier;
+                        exGrenade._burnedDuration = exdata.BurnDuration;
+                        exGrenade._concussedDuration = exdata.ConcussDuration;
+                        exGrenade._deafenedDuration = exdata.DeafenDuration;
+                        exGrenade._fuseTime = exdata.FuseTime;
+                        exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
+                        exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
+                        break;
+                    
+                    case CustomItemType.FlashGrenade when summoned.CustomItem.CustomData is FlashGrenadeData flashdata && ev.Projectile.Base is FlashbangGrenade flash:
+                        flash.BlindTime = flashdata.AdditionalBlindedEffect;
+                        flash._minimalEffectDuration = flashdata.MinimalDurationEffect;
+                        flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
+                        flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
+                        flash._fuseTime = flashdata.FuseTime;
+                        break;
+
+                    case CustomItemType.SCPItem when summoned.CustomItem.CustomData is SCP018Data scp018data && ev.Projectile.Base is Scp018Projectile scp018:
+                        scp018._friendlyFireTime = scp018data.FriendlyFireTime;
+                        scp018._fuseTime = scp018data.FuseTime;
+                        break;
+                }
+            }
+
+            if (SummonedAPICustomItem.TryGet(ev.ThrowableItem.Serial, out var api))
+            {
+                switch (api.CustomItem)
+                {
+                    case CustomExplosiveGrenade exdata when ev.Projectile.Base is ExplosionGrenade exGrenade:
+                        exGrenade.MaxRadius = exdata.MaxRadius;
+                        exGrenade.ScpDamageMultiplier = exdata.ScpDamageMultiplier;
+                        exGrenade._burnedDuration = exdata.BurnDuration;
+                        exGrenade._concussedDuration = exdata.ConcussDuration;
+                        exGrenade._deafenedDuration = exdata.DeafenDuration;
+                        exGrenade._fuseTime = exdata.FuseTime;
+                        exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
+                        exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
+                        break;
+                    
+                    case CustomFlashGrenade flashdata when ev.Projectile.Base is FlashbangGrenade flash:
+                        flash.BlindTime = flashdata.AdditionalBlindedEffect;
+                        flash._minimalEffectDuration = flashdata.MinimalDurationEffect;
+                        flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
+                        flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
+                        flash._fuseTime = flashdata.FuseTime;
+                        break;
+
+                    case CustomSCP018 scp018data when ev.Projectile.Base is Scp018Projectile scp018:
+                        scp018._friendlyFireTime = scp018data.FriendlyFireTime;
+                        scp018._fuseTime = scp018data.FuseTime;
+                        break;
+                }
+            }
         }
 
         private static void OnArmorPickup(PlayerPickedUpArmorEventArgs ev)
@@ -974,8 +1041,7 @@ namespace UncomplicatedCustomItems.Events
                     if (customItem.HasModule(CustomFlags.InfiniteAmmo))
                     {
                         IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
-                        customItem.MagazineModule.AmmoStored = data.MaxMagazineAmmo;
-                        customItem.MagazineModule.ServerResyncData();
+                        customItem.MagazineModule.ServerModifyAmmo(data.MaxMagazineAmmo);
                         LogManager.Silent($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}");
                     }
                     if (customItem.HasModule(CustomFlags.CustomSound))
@@ -1395,7 +1461,7 @@ namespace UncomplicatedCustomItems.Events
                 if (SummonedAPICustomItem.TryGet(ev.NewItem.Serial, out var summonedItem))
                 {
                     summonedItem?.LoadBadge(ev.Player);
-                    summonedItem.HandleSelectedDisplayHint();
+                    summonedItem.HandleSelectedDisplayHint(ev.Player);
 
                     if (summonedItem.CustomItem is CustomSCP127 data)
                     {
@@ -1407,10 +1473,29 @@ namespace UncomplicatedCustomItems.Events
                 if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem customItem))
                     return;
 
+                if (customItem.CustomItem.CustomData is WeaponData wd)
+                {
+                    customItem.MagazineModule._defaultCapacity = wd.MaxMagazineAmmo;
+                    if (!customItem.PropertiesSet && customItem.MagazineModule != null && ev.NewItem is FirearmItem firearmItem)
+                    {
+                        if (!customItem.MagazineModule.MagazineInserted)
+                            customItem.MagazineModule.ServerInsertEmptyMagazine();
+                        customItem.MagazineModule.ServerSetInstanceAmmo(customItem.Serial, wd.MaxAmmo);
+
+                        if (firearmItem.ActionModule is AutomaticActionModule actionModule)
+                        {
+                            actionModule.AmmoStored = wd.MaxBarrelAmmo;
+                            actionModule.Cocked = true;
+                            actionModule.BoltLocked = false;
+                            actionModule.ServerResync();
+                        }
+                    }
+                }
+
                 if (customItem.HasModule(CustomFlags.SingleFire) && customItem.MagazineModule.AmmoStored > 1)
                     customItem.MagazineModule.AmmoStored = 1;
 
-                customItem.HandleSelectedDisplayHint();
+                customItem.HandleSelectedDisplayHint(ev.Player);
                 customItem?.LoadBadge(ev.Player);
 
                 Timing.CallDelayed(Timing.WaitForOneFrame, () =>
@@ -1604,14 +1689,14 @@ namespace UncomplicatedCustomItems.Events
             if (SummonedAPICustomItem.TryGet(ev.Item.Serial, out var summonedItem))
             {
                 summonedItem.OnPickup(ev);
-                summonedItem.HandlePickedUpDisplayHint();
+                summonedItem.HandlePickedUpDisplayHint(ev.Player);
             }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem))
                 return;
 
             customItem.OnPickup(ev);
-            customItem.HandlePickedUpDisplayHint();
+            customItem.HandlePickedUpDisplayHint(ev.Player);
 
             if (customItem.HasModule(CustomFlags.EffectWhenEquiped))
             {
@@ -2322,7 +2407,7 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-            if (summonedCustomItem.CustomItem.CustomFlags.HasValue && summonedCustomItem.HasModule(CustomFlags.DieOnDrop))
+            if (summonedCustomItem.HasModule(CustomFlags.DieOnDrop))
             {
                 foreach (DieOnDropSettings dieOnDropSettings in summonedCustomItem.CustomItem.FlagSettings.DieOnDropSettings)
                 {
@@ -2678,6 +2763,12 @@ namespace UncomplicatedCustomItems.Events
             {
                 AmmoRegenSettings regen = customItem.CustomItem.FlagSettings.AmmoRegenSettings.FirstOrDefault();
                 customItem.PauseAmmoRegen(ev.FirearmItem, regen.RegenDelay);
+            }
+
+            if (ev.FirearmItem.ActionModule is AutomaticActionModule actionModule)
+            {
+                actionModule._serverQueuedRequests.Clear();
+                actionModule._clientQueuedShots.Clear();
             }
 
             if (customItem.HasModule(CustomFlags.EffectWhenUsed))
