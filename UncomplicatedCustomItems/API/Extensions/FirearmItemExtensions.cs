@@ -16,6 +16,23 @@ namespace UncomplicatedCustomItems.API.Extensions
     {
         public static bool IsAiming(this FirearmItem firearm) => firearm.Base.TryGetModule(out IAdsModule module) && module.AdsTarget;
         
+        /// <summary>
+        /// Extension version of <see cref="FirearmItem.GetCodeFromAttachmentNamesRaw"/>
+        /// </summary>
+        public static uint GetCodeFromAttachmentNamesRaw(this Firearm firearm, AttachmentName[] attachments)
+        {
+            uint attachmentNamesRaw = 0;
+            uint num = 1;
+            foreach (Attachment attachment in firearm.Attachments)
+            {
+                if (attachments.Contains(attachment.Name))
+                    attachmentNamesRaw += num;
+                num *= 2U;
+            }
+
+            return attachmentNamesRaw;
+        }
+
         public static Attachment GetAttachmentByName(this Firearm firearm, AttachmentName name)
         {
             foreach (Attachment attachment in firearm.Attachments)

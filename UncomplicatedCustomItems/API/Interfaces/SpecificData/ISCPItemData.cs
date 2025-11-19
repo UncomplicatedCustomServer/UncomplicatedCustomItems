@@ -5,10 +5,7 @@ namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
     /// <summary>
     /// The interface associated with <see cref="CustomItemType.SCPItem"/>
     /// </summary>
-    public interface ISCPItemData : IData
-    {
-
-    }
+    public interface ISCPItemData : IData;
 
     /// <summary>
     /// The interface associated with <see cref="ItemType.SCP1509"/> <see cref="CustomItemType.SCPItem"/>
@@ -64,11 +61,6 @@ namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
         public abstract float FriendlyFireTime { get; set; }
 
         public abstract float FuseTime { get; set; }
-
-        public float ThrowTime { get; set; }
-
-        public bool Repickable { get; set; }
-
     }
     
     public interface ISCP1344Data

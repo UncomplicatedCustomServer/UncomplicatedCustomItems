@@ -11,6 +11,7 @@ using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
 using InventorySystem.Items.Keycards;
 using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using Mirror;
 using UncomplicatedCustomItems.API.Extensions;
@@ -257,7 +258,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     firearm.Base.TryGetModule<MagazineModule>(out var magazine);
                     firearm.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
 
-                    ApplyAttachments(firearm.Base, weaponData.Attachments);
+                    firearm.Base.ApplyAttachmentsCode(firearm.GetCodeFromAttachmentNamesRaw(weaponData.Attachments.ToArray()), true);
                     
                     if (!PropertiesSet && magazine != null)
                     {
@@ -329,7 +330,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
 
                     if (weaponData.Attachments.Count > 1)
-                        ApplyAttachments(firearm, weaponData.Attachments);
+                        firearm.ApplyAttachmentsCode(firearm.GetCodeFromAttachmentNamesRaw(weaponData.Attachments.ToArray()), true);
                     else
                     {
                         LogManager.Debug($"No attachments found for {CustomItem.Name} - {CustomItem.Id} applying random attachments...");
@@ -488,6 +489,19 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             Owner = null;
             Serial = Pickup.Serial;
             SaveProperties();
+        }
+
+        public void OnThrew(PlayerThrewProjectileEventArgs ev)
+        {
+            Pickup = ev.Projectile;
+            Item = null;
+            Owner = ev.Projectile.LastOwner;
+            Serial = ev.Projectile.Serial;
+        }
+
+        public void OnDetonated(ProjectileExplodedEventArgs ev)
+        {
+            Destroy();
         }
 
         public void LoadBadge(Player player)

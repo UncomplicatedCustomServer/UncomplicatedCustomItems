@@ -20,16 +20,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public float FriendlyFireTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the time needed to throw the <see cref="CustomSCP018"/> instance.
-        /// </summary>
-        public float PinPullTime { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether or not the <see cref="CustomSCP018"/> instance is pickupable after throwing.
-        /// </summary>
-        public bool Repickable { get; set; }
-
-        /// <summary>
         /// Gets or sets whether or not the <see cref="CustomSCP018"/> instance will explode when impacting something.
         /// </summary>
         public bool ExplodeOnImpact { get; set; }

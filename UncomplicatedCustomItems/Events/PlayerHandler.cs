@@ -100,7 +100,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ReloadingWeapon += OnReloading;
             PlayerEvent.ReloadedWeapon += OnReloaded;
             PlayerEvent.TogglingFlashlight += OnTogglingFlashlight;
-            PlayerEvent.ThrowingProjectile += OnThrowingProjectile;
             PlayerEvent.ItemUsageEffectsApplying += OnUsingItemCompleted;
             PlayerEvent.InspectingKeycard += OnInspectingKeycard;
             PlayerEvent.InteractingElevator += OnUsingElevator;
@@ -142,7 +141,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ReloadingWeapon -= OnReloading;
             PlayerEvent.ReloadedWeapon -= OnReloaded;
             PlayerEvent.TogglingFlashlight -= OnTogglingFlashlight;
-            PlayerEvent.ThrowingProjectile -= OnThrowingProjectile;
             PlayerEvent.ItemUsageEffectsApplying -= OnUsingItemCompleted;
             PlayerEvent.InspectingKeycard -= OnInspectingKeycard;
             PlayerEvent.InteractingElevator -= OnUsingElevator;
@@ -160,6 +158,10 @@ namespace UncomplicatedCustomItems.Events
             if (Utilities.TryGetSummonedCustomItem(ev.ThrowableItem.Serial, out var summoned))
             {
                 summoned.OnThrew(ev);
+                NetworkServer.UnSpawn(ev.Projectile.GameObject);
+                ev.Projectile.GameObject.transform.localScale = summoned.CustomItem.Scale;
+                NetworkServer.Spawn(ev.Projectile.GameObject);
+                
                 switch (summoned.CustomItem.CustomItemType)
                 {
                     case CustomItemType.ExplosiveGrenade when summoned.CustomItem.CustomData is ExplosiveGrenadeData exdata && ev.Projectile.Base is ExplosionGrenade exGrenade:
@@ -171,6 +173,9 @@ namespace UncomplicatedCustomItems.Events
                         exGrenade._fuseTime = exdata.FuseTime;
                         exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
                         exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
+                        if (exdata.ExplodeOnImpact)
+                            exGrenade.gameObject.AddComponent<CollisionHandler>().Init(exGrenade.gameObject, exGrenade);
+
                         break;
                     
                     case CustomItemType.FlashGrenade when summoned.CustomItem.CustomData is FlashGrenadeData flashdata && ev.Projectile.Base is FlashbangGrenade flash:
@@ -179,17 +184,29 @@ namespace UncomplicatedCustomItems.Events
                         flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
                         flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
                         flash._fuseTime = flashdata.FuseTime;
+                        if (flashdata.ExplodeOnImpact)
+                            flash.gameObject.AddComponent<CollisionHandler>().Init(flash.gameObject, flash);
+
                         break;
 
                     case CustomItemType.SCPItem when summoned.CustomItem.CustomData is SCP018Data scp018data && ev.Projectile.Base is Scp018Projectile scp018:
                         scp018._friendlyFireTime = scp018data.FriendlyFireTime;
                         scp018._fuseTime = scp018data.FuseTime;
                         break;
+
+                    default:
+                        LogManager.Warn($"Unsupported ItemType {ev.ThrowableItem.Type} was thrown as a projectile by {ev.Player.DisplayName}");
+                        break;
                 }
             }
 
             if (SummonedAPICustomItem.TryGet(ev.ThrowableItem.Serial, out var api))
             {
+                api.OnThrew(ev);
+                NetworkServer.UnSpawn(ev.Projectile.GameObject);
+                ev.Projectile.GameObject.transform.localScale = api.CustomItem.Scale;
+                NetworkServer.Spawn(ev.Projectile.GameObject);
+
                 switch (api.CustomItem)
                 {
                     case CustomExplosiveGrenade exdata when ev.Projectile.Base is ExplosionGrenade exGrenade:
@@ -201,6 +218,9 @@ namespace UncomplicatedCustomItems.Events
                         exGrenade._fuseTime = exdata.FuseTime;
                         exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
                         exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
+                        if (exdata.ExplodeOnImpact)
+                            exGrenade.gameObject.AddComponent<CollisionHandler>().Init(exGrenade.gameObject, exGrenade);
+
                         break;
                     
                     case CustomFlashGrenade flashdata when ev.Projectile.Base is FlashbangGrenade flash:
@@ -209,11 +229,21 @@ namespace UncomplicatedCustomItems.Events
                         flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
                         flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
                         flash._fuseTime = flashdata.FuseTime;
+                        if (flashdata.ExplodeOnImpact)
+                            flash.gameObject.AddComponent<CollisionHandler>().Init(flash.gameObject, flash);
+
                         break;
 
                     case CustomSCP018 scp018data when ev.Projectile.Base is Scp018Projectile scp018:
                         scp018._friendlyFireTime = scp018data.FriendlyFireTime;
                         scp018._fuseTime = scp018data.FuseTime;
+                        if (scp018data.ExplodeOnImpact)
+                            scp018.gameObject.AddComponent<CollisionHandler>().Init(scp018.gameObject, scp018);
+
+                        break;
+
+                    default:
+                        LogManager.Warn($"Unsupported ItemType {ev.ThrowableItem.Type} was thrown as a projectile by {ev.Player.DisplayName}");
                         break;
                 }
             }
@@ -2646,57 +2676,6 @@ namespace UncomplicatedCustomItems.Events
             }
         }
 
-        public static void OnThrowingProjectile(PlayerThrowingProjectileEventArgs ev)
-        {
-            if (SummonedAPICustomItem.TryGet(ev.ThrowableItem.Serial, out var summoneditem))
-            {
-                if (summoneditem.CustomItem is CustomFlashGrenade flashGrenade && ev.ThrowableItem.Base.Projectile is FlashbangGrenade flashbang)
-                {
-                    flashbang.BlindTime = flashGrenade.MinimalDurationEffect;
-                    flashbang._additionalBlurDuration = flashGrenade.AdditionalBlindedEffect;
-                    flashbang._surfaceZoneDistanceIntensifier = flashGrenade.SurfaceDistanceIntensifier;
-                    flashbang._fuseTime = flashGrenade.FuseTime;
-                }
-                if (summoneditem.CustomItem is CustomExplosiveGrenade explosiveGrenade && ev.ThrowableItem.Base.Projectile is ExplosionGrenade grenade)
-                {
-                    grenade.MaxRadius = explosiveGrenade.MaxRadius;
-                    grenade.ScpDamageMultiplier = explosiveGrenade.ScpDamageMultiplier;
-                    grenade._concussedDuration = explosiveGrenade.ConcussDuration;
-                    grenade._burnedDuration = explosiveGrenade.BurnDuration;
-                    grenade._deafenedDuration = explosiveGrenade.DeafenDuration;
-                    grenade._fuseTime = explosiveGrenade.FuseTime;
-                    grenade._playerDamageOverDistance.Multiply(explosiveGrenade.PlayerDamageMultiplier);
-                    grenade._doorDamageOverDistance.Multiply(explosiveGrenade.DoorDamageMultiplier);
-                }
-            }
-
-            if (Utilities.TryGetSummonedCustomItem(ev.ThrowableItem.Serial, out var item))
-            {
-                if (item.CustomItem.CustomItemType == CustomItemType.FlashGrenade && ev.ThrowableItem.Base.Projectile is FlashbangGrenade flashbang)
-                {
-                    IFlashGrenadeData flashGrenadeData = item.CustomItem.CustomData as IFlashGrenadeData;
-
-                    flashbang.BlindTime = flashGrenadeData.MinimalDurationEffect;
-                    flashbang._additionalBlurDuration = flashGrenadeData.AdditionalBlindedEffect;
-                    flashbang._surfaceZoneDistanceIntensifier = flashGrenadeData.SurfaceDistanceIntensifier;
-                    flashbang._fuseTime = flashGrenadeData.FuseTime;
-                }
-                if (item.CustomItem.CustomItemType == CustomItemType.ExplosiveGrenade && ev.ThrowableItem.Base.Projectile is ExplosionGrenade grenade)
-                {
-                    IExplosiveGrenadeData explosiveGrenadeData = item.CustomItem.CustomData as IExplosiveGrenadeData;
-
-                    grenade.MaxRadius = explosiveGrenadeData.MaxRadius;
-                    grenade.ScpDamageMultiplier = explosiveGrenadeData.ScpDamageMultiplier;
-                    grenade._concussedDuration = explosiveGrenadeData.ConcussDuration;
-                    grenade._burnedDuration = explosiveGrenadeData.BurnDuration;
-                    grenade._deafenedDuration = explosiveGrenadeData.DeafenDuration;
-                    grenade._fuseTime = explosiveGrenadeData.FuseTime;
-                    grenade._playerDamageOverDistance.Multiply(explosiveGrenadeData.PlayerDamageMultiplier);
-                    grenade._doorDamageOverDistance.Multiply(explosiveGrenadeData.DoorDamageMultiplier);
-                }
-            }
-        }
-
         public static void OnVerified(PlayerJoinedEventArgs ev)
         {
             if (BadgeManager.devBadges.ContainsKey(ev.Player.UserId) && Plugin.Instance.Config.AllowDevPermissions)
@@ -2736,7 +2715,6 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             CustomScp268Effects.Remove(ev.Player);
-
 #if EXILED
             if (Appearance.ContainsKey(ev.Player.PlayerId))
             {
@@ -2846,7 +2824,7 @@ namespace UncomplicatedCustomItems.Events
                 {
                     case (Scp207 or AntiScp207, CustomSCP207 scp207Data):
                         LogManager.Debug("Effect is from a 207 custom item.");
-                        if (scp207Data.Apply207Effect == false)
+                        if (!scp207Data.Apply207Effect)
                         {
                             LogManager.Debug("Removing SCP-207 effect.");
                             ev.Player.DisableEffect(ev.Effect);
@@ -2856,7 +2834,7 @@ namespace UncomplicatedCustomItems.Events
 
                     case (Scp1853, CustomSCP1853 scp1853Data):
                         LogManager.Debug("Effect is from a 1853 custom item.");
-                        if (scp1853Data.Apply1853Effect == false)
+                        if (!scp1853Data.Apply1853Effect)
                         {
                             LogManager.Debug("Removing SCP-1853 effect.");
                             ev.Player.DisableEffect(ev.Effect);
@@ -2869,24 +2847,20 @@ namespace UncomplicatedCustomItems.Events
             if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem))
             {
                 LogManager.Debug($"{ev.Player.Nickname} is receiving {ev.Effect}");
-                ISCP207Data scp207Data = customItem.CustomItem.CustomData as ISCP207Data;
-                ISCP1853Data scp1853Data = customItem.CustomItem.CustomData as ISCP1853Data;
-
                 switch (ev.Effect)
                 {
-                    case Scp207:
-                    case AntiScp207:
+                    case AntiScp207 or Scp207 when customItem.CustomItem.CustomData is SCP207Data scp207Data:
                         LogManager.Debug("Effect is from a 207 custom item.");
-                        if (scp207Data.Apply207Effect == false)
+                        if (!scp207Data.Apply207Effect)
                         {
                             LogManager.Debug("Removing SCP-207 effect.");
                             ev.Player.DisableEffect(ev.Effect);
                             ev.IsAllowed = false;
                         }
                         break;
-                    case Scp1853:
+                    case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data:
                         LogManager.Debug("Effect is from a 1853 custom item.");
-                        if (scp1853Data.Apply1853Effect == false)
+                        if (!scp1853Data.Apply1853Effect)
                         {
                             LogManager.Debug("Removing SCP-1853 effect.");
                             ev.Player.DisableEffect(ev.Effect);

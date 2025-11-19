@@ -50,5 +50,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual float PlayerDamageMultiplier { get; set; } = 3.5f;
 
         public virtual float DoorDamageMultiplier { get; set; } = 2.5f;
+
+        public virtual bool ExplodeOnImpact { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+﻿using MapGeneration;
+using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -13,13 +15,12 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual float MinimalDurationEffect { get; set; } = 5f;
 
         /// <summary>
-        /// Gets or sets the additional duration of the <see cref="EffectType.Blinded"/> effect.
+        /// Gets or sets the additional duration of the <see cref="CustomPlayerEffects.Blindness"/> effect.
         /// </summary>
         public virtual float AdditionalBlindedEffect { get; set; } = 10f;
 
-
         /// <summary>
-        /// Gets or sets the how mush the flash grenade going to be intensified when explode at <see cref="RoomType.Surface"/>.
+        /// Gets or sets the how mush the flash grenade going to be intensified when detonated on <see cref="RoomName.Outside"/>.
         /// </summary>
         public virtual float SurfaceDistanceIntensifier { get; set; } = 15f;
 
@@ -37,5 +38,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets a value indicating whether players can pickup grenade after throw.
         /// </summary>
         public virtual bool Repickable { get; set; } = false;
+
+        public virtual bool ExplodeOnImpact { get; set; }
     }
 }

@@ -49,6 +49,11 @@ namespace UncomplicatedCustomItems.Events
             {
                 item.OnDetonated(ev);
             }
+
+            if (SummonedAPICustomItem.TryGet(ev.TimedGrenade.Serial, out var api))
+            {
+                api.OnDetonated(ev);
+            }
         }
 
         /// <summary>

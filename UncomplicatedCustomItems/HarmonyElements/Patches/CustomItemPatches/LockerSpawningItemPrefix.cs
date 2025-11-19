@@ -7,12 +7,16 @@ using UncomplicatedCustomItems.API.Enums.LockerChambers;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
+using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
     [HarmonyPatch(typeof(MapGeneration.Distributors.Locker))]
     internal static class LockerSpawningItemPrefix
     {
+        private static List<Locker> usedLockers = [];
+        private static Dictionary<uint, uint> spawnedAmounts = [];
+
         [HarmonyPatch(nameof(MapGeneration.Distributors.Locker.FillChamber))]
         public static bool Prefix(MapGeneration.Distributors.Locker __instance)
         {
@@ -20,6 +24,9 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             {
                 if (!item.Spawn.DoSpawn)
                     continue;
+
+                if (!spawnedAmounts.ContainsKey(item.Id))
+                    spawnedAmounts.Add(item.Id, 0);
 
                 foreach (SpawnData data in item.Spawn.SpawnSettings)
                 {
@@ -45,10 +52,10 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         continue;
 
                     Locker locker = Locker.Get(__instance);
+                    if (usedLockers.Contains(locker))
+                        continue;
 
-                    bool spawned = HandleLockerSpawn(data, locker, item);
-
-                    return spawned;
+                    return HandleLockerSpawn(data, locker, item);
                 }
             }
 
@@ -57,49 +64,63 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
 
         internal static bool HandleLockerSpawn(SpawnData data, Locker locker, ICustomItem item)
         {
+            if (usedLockers.Contains(locker))
+                return true;
+
+            if (spawnedAmounts[item.Id] >= item.Spawn.Count)
+                return true;
 
             switch (data.LockerSettings.LockerType)
             {
                 case LockerType.SCPPedestal:
                     if (locker is PedestalLocker pedestalLocker)
                     {
-                        LogManager.Silent($"{nameof(LockerSpawningItemPrefix)}: Spawning in SCP Pedestal");
-                        new SummonedCustomItem(item, pedestalLocker.AddItem(item.Item));
+                        LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in SCP Pedestal");
+                        SummonedCustomItem summoned = new(item, pedestalLocker.AddItem(item.Item));
+                        
+                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        usedLockers.Add(locker);
+                        spawnedAmounts[item.Id]++;
+                        return false;
                     }
-
                     break;
+                    
                 case LockerType.RifleRack:
                     if (locker is RifleRackLocker riflerack)
                     {
-                        LogManager.Silent($"{nameof(LockerSpawningItemPrefix)}: Spawning in Rifle Rack");
+                        SummonedCustomItem summoned;
+                        LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in Rifle Rack");
                         switch (Enum.Parse(typeof(RifleRackLockerChambers), data.LockerSettings.Chamber))
                         {
                             case RifleRackLockerChambers.MainChamber:
-                                new SummonedCustomItem(item, riflerack.MainChamber.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, riflerack.MainChamber.AddItem(item.Item));
                                 break;
                             case RifleRackLockerChambers.Bullet1:
-                                new SummonedCustomItem(item, riflerack.Bullet1.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, riflerack.Bullet1.AddItem(item.Item));
                                 break;
                             case RifleRackLockerChambers.Bullet2:
-                                new SummonedCustomItem(item, riflerack.Bullet2.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, riflerack.Bullet2.AddItem(item.Item));
                                 break;
                             case RifleRackLockerChambers.Bullet3:
-                                new SummonedCustomItem(item, riflerack.Bullet3.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, riflerack.Bullet3.AddItem(item.Item));
                                 break;
                             case RifleRackLockerChambers.Bullet4:
-                                new SummonedCustomItem(item, riflerack.Bullet4.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, riflerack.Bullet4.AddItem(item.Item));
                                 break;
                             case RifleRackLockerChambers.HeGrenade1:
-                                new SummonedCustomItem(item, riflerack.HeGrenade1.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, riflerack.HeGrenade1.AddItem(item.Item));
                                 break;
                             case RifleRackLockerChambers.HeGrenade2:
-                                new SummonedCustomItem(item, riflerack.HeGrenade2.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, riflerack.HeGrenade2.AddItem(item.Item));
                                 break;
                             default:
-                                new SummonedCustomItem(item, riflerack.MainChamber.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, riflerack.MainChamber.AddItem(item.Item));
                                 break;
                         }
 
+                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        usedLockers.Add(locker);
+                        spawnedAmounts[item.Id]++;
                         return false;
                     }
                     break;
@@ -107,23 +128,27 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 case LockerType.WallCabinet:
                     if (locker is WallCabinet wallCabinet)
                     {
-                        LogManager.Silent($"{nameof(LockerSpawningItemPrefix)}: Spawning in WallCabinet");
+                        SummonedCustomItem summoned;
+                        LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in WallCabinet");
                         switch (Enum.Parse(typeof(WallCabinetChambers), data.LockerSettings.Chamber))
                         {
                             case WallCabinetChambers.MainChamber:
-                                new SummonedCustomItem(item, wallCabinet.MainChamber.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, wallCabinet.MainChamber.AddItem(item.Item));
                                 break;
                             case WallCabinetChambers.LowerShelf:
-                                new SummonedCustomItem(item, wallCabinet.LowerShelf.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, wallCabinet.LowerShelf.AddItem(item.Item));
                                 break;
                             case WallCabinetChambers.UpperShelf:
-                                new SummonedCustomItem(item, wallCabinet.UpperShelf.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, wallCabinet.UpperShelf.AddItem(item.Item));
                                 break;
                             default:
-                                new SummonedCustomItem(item, wallCabinet.MainChamber.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, wallCabinet.MainChamber.AddItem(item.Item));
                                 break;
                         }
 
+                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        usedLockers.Add(locker);
+                        spawnedAmounts[item.Id]++;
                         return false;
                     }
                     break;
@@ -131,32 +156,36 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 case LockerType.StandardLocker:
                     if (locker is StandardLocker standardLocker)
                     {
-                        LogManager.Silent($"{nameof(LockerSpawningItemPrefix)}: Spawning in Standard Locker");
+                        SummonedCustomItem summoned;
+                        LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in Standard Locker");
                         switch (Enum.Parse(typeof(StandardLockerChambers), data.LockerSettings.Chamber))
                         {
                             case StandardLockerChambers.BottomLeft:
-                                new SummonedCustomItem(item, standardLocker.BottomLeft.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, standardLocker.BottomLeft.AddItem(item.Item));
                                 break;
                             case StandardLockerChambers.BottomMiddle:
-                                new SummonedCustomItem(item, standardLocker.BottomMiddle.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, standardLocker.BottomMiddle.AddItem(item.Item));
                                 break;
                             case StandardLockerChambers.BottomRight:
-                                new SummonedCustomItem(item, standardLocker.BottomRight.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, standardLocker.BottomRight.AddItem(item.Item));
                                 break;
                             case StandardLockerChambers.MainLeft:
-                                new SummonedCustomItem(item, standardLocker.MainLeft.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, standardLocker.MainLeft.AddItem(item.Item));
                                 break;
                             case StandardLockerChambers.MainMiddle:
-                                new SummonedCustomItem(item, standardLocker.MainMiddle.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, standardLocker.MainMiddle.AddItem(item.Item));
                                 break;
                             case StandardLockerChambers.MainRight:
-                                new SummonedCustomItem(item, standardLocker.MainRight.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, standardLocker.MainRight.AddItem(item.Item));
                                 break;
                             default:
-                                new SummonedCustomItem(item, standardLocker.MainMiddle.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, standardLocker.MainMiddle.AddItem(item.Item));
                                 break;
                         }
 
+                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        usedLockers.Add(locker);
+                        spawnedAmounts[item.Id]++;
                         return false;
                     }
                     break;
@@ -164,38 +193,42 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 case LockerType.LargeLocker:
                     if (locker is LargeLocker largeLocker)
                     {
-                        LogManager.Silent($"{nameof(LockerSpawningItemPrefix)}: Spawning in Large Locker");
+                        SummonedCustomItem summoned;
+                        LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in Large Locker");
                         switch (Enum.Parse(typeof(LargeLockerChambers), data.LockerSettings.Chamber))
                         {
                             case LargeLockerChambers.BottomLeft:
-                                new SummonedCustomItem(item, largeLocker.BottomLeft.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.BottomLeft.AddItem(item.Item));
                                 break;
                             case LargeLockerChambers.BottomMiddle:
-                                new SummonedCustomItem(item, largeLocker.BottomMiddle.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.BottomMiddle.AddItem(item.Item));
                                 break;
                             case LargeLockerChambers.BottomRight:
-                                new SummonedCustomItem(item, largeLocker.BottomRight.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.BottomRight.AddItem(item.Item));
                                 break;
                             case LargeLockerChambers.MiddleLeft:
-                                new SummonedCustomItem(item, largeLocker.MiddleLeft.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.MiddleLeft.AddItem(item.Item));
                                 break;
                             case LargeLockerChambers.MiddleRight:
-                                new SummonedCustomItem(item, largeLocker.MiddleRight.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.MiddleRight.AddItem(item.Item));
                                 break;
                             case LargeLockerChambers.TopLeft:
-                                new SummonedCustomItem(item, largeLocker.TopLeft.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.TopLeft.AddItem(item.Item));
                                 break;
                             case LargeLockerChambers.TopMiddle:
-                                new SummonedCustomItem(item, largeLocker.TopMiddle.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.TopMiddle.AddItem(item.Item));
                                 break;
                             case LargeLockerChambers.TopRight:
-                                new SummonedCustomItem(item, largeLocker.TopRight.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.TopRight.AddItem(item.Item));
                                 break;
                             default:
-                                new SummonedCustomItem(item, largeLocker.TopMiddle.AddItem(item.Item));
+                                summoned = new SummonedCustomItem(item, largeLocker.TopMiddle.AddItem(item.Item));
                                 break;
                         }
 
+                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        usedLockers.Add(locker);
+                        spawnedAmounts[item.Id]++;
                         return false;
                     }
                     break;

@@ -185,8 +185,12 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 switch (CustomItem.CustomItemType)
                 {
-                    case CustomItemType.ExplosiveGrenade when Item is ThrowableItem { Base.Projectile: ExplosionGrenade grenade } && CustomItem.CustomData is ExplosiveGrenadeData grenadeData:
-                        HandleGrenadeItem(grenade, grenadeData);
+                    case CustomItemType.FlashGrenade when Item is ThrowableItem throwable && CustomItem.CustomData is FlashGrenadeData flashData:
+                        HandleFlashbangItem(throwable, flashData);
+                        break;
+
+                    case CustomItemType.ExplosiveGrenade when Item is ThrowableItem throwable && CustomItem.CustomData is ExplosiveGrenadeData grenadeData:
+                        HandleGrenadeItem(throwable, grenadeData);
                         break;
 
                     case CustomItemType.Keycard when Item is KeycardItem keycard && CustomItem.CustomData is KeycardData keycardData:
@@ -235,6 +239,9 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.SCPItem:
                         HandleSCPItemForItem();
                         break;
+
+                    default:
+                        break;
                 }
             }
             else if (IsPickup)
@@ -271,21 +278,25 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.SCPItem:
                         HandleSCPItemForPickup();
                         break;
+
+                    default:
+                        break;
                 }
             }
         }
 
-        private static void HandleGrenadeItem(ExplosionGrenade grenade, ExplosiveGrenadeData data)
+        private void HandleFlashbangItem(ThrowableItem throwable, FlashGrenadeData data)
         {
-            LogManager.Debug($"Throwable");
-            grenade.MaxRadius = data.MaxRadius;
-            grenade.ScpDamageMultiplier = data.ScpDamageMultiplier;
-            grenade._burnedDuration = data.BurnDuration;
-            grenade._concussedDuration = data.ConcussDuration;
-            grenade._deafenedDuration = data.DeafenDuration;
-            grenade._fuseTime = data.FuseTime;
-            grenade._doorDamageOverDistance.Multiply(data.DoorDamageMultiplier);
-            grenade._playerDamageOverDistance.Multiply(data.PlayerDamageMultiplier);
+            LogManager.Debug($"Throwable Flashbang");
+            throwable.Base._pinPullTime = data.PinPullTime;
+            throwable.Base._repickupable = data.Repickable;
+        }
+
+        private void HandleGrenadeItem(ThrowableItem throwable, ExplosiveGrenadeData data)
+        {
+            LogManager.Debug($"Throwable Grenade");
+            throwable.Base._pinPullTime = data.PinPullTime;
+            throwable.Base._repickupable = data.Repickable;
         }
 
         public void HandleKeycardItem(KeycardItem keycardItem, IKeycardData kd)
@@ -372,19 +383,7 @@ namespace UncomplicatedCustomItems.API.Features
             firearmItem.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
             HitscanHitregModule = hitscan;
 
-            foreach (string attachmentString in GetAttachmentsList())
-            {
-                if (Enum.TryParse(attachmentString, out AttachmentName attachment))
-                {
-                    if (firearmItem.Base.TryApplyAttachment(attachment))
-                        LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                    else
-                        LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
-                }
-                else
-                    LogManager.Warn($"{nameof(SetProperties)}: [{attachmentString}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Item.Type}");
-            }
-
+            firearmItem.Base.ApplyAttachmentsCode(firearmItem.GetCodeFromAttachmentNamesRaw(GetAttachments()), true);
             MagazineModule._defaultCapacity = wd.MaxMagazineAmmo;
             if (!PropertiesSet && MagazineModule != null)
             {
@@ -425,32 +424,20 @@ namespace UncomplicatedCustomItems.API.Features
             firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
             HitscanHitregModule = hitscan;
 
-            if (wd.Attachments.Count() > 1)
-            {
-                foreach (string attachmentString in GetAttachmentsList())
-                {
-                    if (Enum.TryParse(attachmentString, out AttachmentName attachment))
-                    {
-                        if (firearmPickup.Base.TryApplyAttachment(attachment))
-                            LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                        else
-                            LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
-                    }
-                    else
-                    {
-                        LogManager.Warn($"{nameof(SetProperties)}: [{attachmentString}] is not a valid attachment for {CustomItem.Name} - {CustomItem.Id} - {Pickup.Type}");
-                    }
-                }
-            }
+            if (wd.Attachments.Length > 1)
+                firearm.ApplyAttachmentsCode(firearm.GetCodeFromAttachmentNamesRaw(GetAttachments()), true);
             else
             {
                 LogManager.Debug($"No attachments found for {CustomItem.Name} - {CustomItem.Id} applying random attachments...");
                 AttachmentCodeSync.ServerSetCode(firearmPickup.Base.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearmPickup.Base.Info.ItemId));
             }
 
-            MagazineModule.ServerInsertMagazine();
             if (!PropertiesSet)
-                MagazineModule.ServerModifyAmmo(wd.MaxAmmo);
+            {
+                if (!MagazineModule.MagazineInserted)
+                    MagazineModule.ServerInsertEmptyMagazine();
+                MagazineModule.ServerSetInstanceAmmo(Serial, wd.MaxAmmo);
+            }
 
             if (HitscanHitregModule is not null)
             {
@@ -706,10 +693,11 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
-        private List<string> GetAttachmentsList()
+        private AttachmentName[] GetAttachments()
         {
             if (CustomItem.CustomData is IWeaponData weaponData)
             {
+                List<AttachmentName> names = [];
                 string attachmentsString = weaponData.Attachments;
 
                 if (string.IsNullOrWhiteSpace(attachmentsString))
@@ -721,7 +709,13 @@ namespace UncomplicatedCustomItems.API.Features
                     .Where(att => !string.IsNullOrEmpty(att))
                     .ToList();
 
-                return attachmentsList;
+                foreach (string attachment in attachmentsList)
+                {
+                    if (Enum.TryParse(attachment, out AttachmentName name))
+                        names.Add(name);
+                }
+
+                return names.ToArray();
             }
             else
             {
