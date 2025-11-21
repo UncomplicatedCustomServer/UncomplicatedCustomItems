@@ -11,9 +11,10 @@ namespace UncomplicatedCustomItems
     public class Config
 #endif
     {
+#if EXILED
         [Description("Specifies whether the plugin is enabled.")]
         public bool IsEnabled { get; set; } = true;
-
+#endif
         [Description("Specifies whether developer (debug) mode is enabled.")]
         public bool Debug { get; set; } = false;
 

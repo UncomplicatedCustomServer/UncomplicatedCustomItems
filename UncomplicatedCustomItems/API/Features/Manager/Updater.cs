@@ -25,7 +25,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public GitHubAssetInfo[] Assets { get; set; }
     }
 
-
     public class GitHubAssetInfo
     {
         [JsonProperty("name")]
@@ -95,7 +94,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (latestRelease == null)
                     return;
 
-                var asset = latestRelease.Assets?.FirstOrDefault(a => a.Name.Equals(PluginDllName, StringComparison.OrdinalIgnoreCase));
+                GitHubAssetInfo asset = latestRelease.Assets?.FirstOrDefault(a => a.Name.Equals(PluginDllName, StringComparison.OrdinalIgnoreCase));
                 if (asset == null || string.IsNullOrEmpty(asset.BrowserDownloadUrl))
                 {
                     LogManager.Error($"Could not find the plugin DLL ('{PluginDllName}') in the latest GitHub release.");
@@ -147,15 +146,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 if (releases == null || releases.Count == 0) return null;
 
-                var filtered = Plugin.Instance.Config.AllowPreReleases
-                    ? releases
-                    : releases.Where(r => !r.PreRelease);
+                IEnumerable<GitHubReleaseInfo> filtered = Plugin.Instance.Config.AllowPreReleases ? releases : releases.Where(r => !r.PreRelease);
 
                 return filtered
                     .OrderByDescending(r =>
                     {
                         string tag = r.TagName.TrimStart('v');
-                        return Version.TryParse(tag, out var v) ? v : new Version(0, 0);
+                        return Version.TryParse(tag, out Version v) ? v : new Version(0, 0);
                     })
                     .FirstOrDefault();
             }

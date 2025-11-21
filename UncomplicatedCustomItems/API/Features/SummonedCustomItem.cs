@@ -14,6 +14,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using InventorySystem.Items.Autosync;
+using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules.Misc;
 using InventorySystem.Items.Pickups;
 using InventorySystem.Items.ThrowableProjectiles;
@@ -384,7 +386,6 @@ namespace UncomplicatedCustomItems.API.Features
             HitscanHitregModule = hitscan;
 
             firearmItem.Base.ApplyAttachmentsCode(firearmItem.GetCodeFromAttachmentNamesRaw(GetAttachments()), true);
-            MagazineModule._defaultCapacity = wd.MaxMagazineAmmo;
             if (!PropertiesSet && MagazineModule != null)
             {
                 if (!MagazineModule.MagazineInserted)
@@ -415,17 +416,25 @@ namespace UncomplicatedCustomItems.API.Features
         public void HandleWeaponPickup(IWeaponData wd)
         {
             var firearmPickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
-            firearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var firearm);
+            Firearm firearm = AttachmentPreview.Get(firearmPickup.Base.CurId);
             firearm.ItemSerial = firearmPickup.Serial;
 
             firearm.TryGetModule<MagazineModule>(out var mag);
             MagazineModule = mag;
-
             firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
             HitscanHitregModule = hitscan;
-
-            if (wd.Attachments.Length > 1)
-                firearm.ApplyAttachmentsCode(firearm.GetCodeFromAttachmentNamesRaw(GetAttachments()), true);
+            firearm.TryGetModule<AutomaticActionModule>(out var actionModule);
+            
+            if (wd.Attachments.Count() > 1)
+            {
+                foreach (AttachmentName attachment in GetAttachments())
+                {
+                    if (firearmPickup.Base.TryApplyAttachment(attachment))
+                        LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                    else
+                        LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                }
+            }
             else
             {
                 LogManager.Debug($"No attachments found for {CustomItem.Name} - {CustomItem.Id} applying random attachments...");
@@ -436,7 +445,10 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 if (!MagazineModule.MagazineInserted)
                     MagazineModule.ServerInsertEmptyMagazine();
-                MagazineModule.ServerSetInstanceAmmo(Serial, wd.MaxAmmo);
+
+                MagazineModule.ServerSetInstanceAmmo(firearmPickup.Serial, wd.MaxAmmo);
+                firearmPickup.Base.Worldmodel.TryGetExtension<WorldmodelMagazineExtension>(out var extension);
+                extension.UpdateAllMags();
             }
 
             if (HitscanHitregModule is not null)

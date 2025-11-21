@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <summary>
         /// If true it enables access to the custom sound custom flag.
         /// </summary>
-        public static bool EnableAudioApi { get; set; } = false;
+        public static bool EnableAudioApi { get; set; }
         
         /// <summary>
         /// Checks for dependencies that <see cref="AudioApi"/> requires.

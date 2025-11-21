@@ -3,6 +3,7 @@ using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
@@ -10,31 +11,20 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     [HarmonyPatch(typeof(MagazineModule), nameof(MagazineModule.AmmoMax), MethodType.Getter)]
     internal static class MaxAmmoPatch
     {
-        /*
-        [HarmonyPrefix]
-        public static bool Prefix(MagazineModule __instance, ref int __result)
+        [HarmonyPostfix]
+        public static void Postfix(MagazineModule __instance, ref int __result)
         {
-            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var summonedCustomItem) || !SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem))
-                return true;
-            if (summonedCustomItem.CustomItem.CustomItemType is not CustomItemType.Weapon || summonItem.CustomItem is not CustomWeapon customWeapon)
-                return true;
-
-            if (summonedCustomItem != null)
+            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var summonedCustomItem) && summonedCustomItem.CustomItem.CustomData is WeaponData wd)
             {
-                IWeaponData weaponData = summonedCustomItem.CustomItem.CustomData as IWeaponData;
-                __result = weaponData.MaxMagazineAmmo;
+                __result = wd.MaxMagazineAmmo;
                 __instance.ServerResyncData();
-                return false;
-            }
-            else if (summonItem != null)
-            {
-                __result = customWeapon.MaxMagazineAmmo;
-                __instance.ServerResyncData();
-                return false;   
             }
 
-            return true;
+            if (SummonedAPICustomItem.TryGet(__instance.Firearm.ItemSerial, out var apiItem) && apiItem.CustomItem is CustomWeapon cw)
+            {
+                __result = cw.MaxMagazineAmmo;
+                __instance.ServerResyncData();
+            }
         }
-        */
     }
 }

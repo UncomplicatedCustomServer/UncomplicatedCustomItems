@@ -164,6 +164,9 @@
     <Reference Include="NorthwoodLib">
       <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+    </Reference>
     <Reference Include="NVorbis">
       <HintPath>$(EXILED_REFERENCES)\NVorbis.dll</HintPath>
     </Reference>

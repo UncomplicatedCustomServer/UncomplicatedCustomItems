@@ -110,6 +110,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ProcessingJailbirdMessage += OnJailbirdMessaging;
             PlayerEvent.ProcessedJailbirdMessage += OnJailbirdMessage;
             PlayerEvent.ThrewProjectile += OnProjectileThrew;
+            PlayerEvent.ChangingAttachments += OnPlayerChangingAttachments;
         }
 
         public static void Unregister()
@@ -151,6 +152,19 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ProcessingJailbirdMessage -= OnJailbirdMessaging;
             PlayerEvent.ProcessedJailbirdMessage -= OnJailbirdMessage;
             PlayerEvent.ThrewProjectile -= OnProjectileThrew;
+            PlayerEvent.ChangingAttachments -= OnPlayerChangingAttachments;
+        }
+
+        private static void OnPlayerChangingAttachments(PlayerChangingAttachmentsEventArgs ev)
+        {
+            if (Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out var customItem))
+            {
+                if (customItem.HasModule(CustomFlags.WorkstationBan))
+                {
+                    ev.Player.SendHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", customItem.CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
+                    ev.IsAllowed = false;
+                }
+            }
         }
 
         private static void OnProjectileThrew(PlayerThrewProjectileEventArgs ev)
@@ -158,10 +172,6 @@ namespace UncomplicatedCustomItems.Events
             if (Utilities.TryGetSummonedCustomItem(ev.ThrowableItem.Serial, out var summoned))
             {
                 summoned.OnThrew(ev);
-                NetworkServer.UnSpawn(ev.Projectile.GameObject);
-                ev.Projectile.GameObject.transform.localScale = summoned.CustomItem.Scale;
-                NetworkServer.Spawn(ev.Projectile.GameObject);
-                
                 switch (summoned.CustomItem.CustomItemType)
                 {
                     case CustomItemType.ExplosiveGrenade when summoned.CustomItem.CustomData is ExplosiveGrenadeData exdata && ev.Projectile.Base is ExplosionGrenade exGrenade:
@@ -203,10 +213,6 @@ namespace UncomplicatedCustomItems.Events
             if (SummonedAPICustomItem.TryGet(ev.ThrowableItem.Serial, out var api))
             {
                 api.OnThrew(ev);
-                NetworkServer.UnSpawn(ev.Projectile.GameObject);
-                ev.Projectile.GameObject.transform.localScale = api.CustomItem.Scale;
-                NetworkServer.Spawn(ev.Projectile.GameObject);
-
                 switch (api.CustomItem)
                 {
                     case CustomExplosiveGrenade exdata when ev.Projectile.Base is ExplosionGrenade exGrenade:
@@ -1502,25 +1508,6 @@ namespace UncomplicatedCustomItems.Events
 
                 if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem customItem))
                     return;
-
-                if (customItem.CustomItem.CustomData is WeaponData wd)
-                {
-                    customItem.MagazineModule._defaultCapacity = wd.MaxMagazineAmmo;
-                    if (!customItem.PropertiesSet && customItem.MagazineModule != null && ev.NewItem is FirearmItem firearmItem)
-                    {
-                        if (!customItem.MagazineModule.MagazineInserted)
-                            customItem.MagazineModule.ServerInsertEmptyMagazine();
-                        customItem.MagazineModule.ServerSetInstanceAmmo(customItem.Serial, wd.MaxAmmo);
-
-                        if (firearmItem.ActionModule is AutomaticActionModule actionModule)
-                        {
-                            actionModule.AmmoStored = wd.MaxBarrelAmmo;
-                            actionModule.Cocked = true;
-                            actionModule.BoltLocked = false;
-                            actionModule.ServerResync();
-                        }
-                    }
-                }
 
                 if (customItem.HasModule(CustomFlags.SingleFire) && customItem.MagazineModule.AmmoStored > 1)
                     customItem.MagazineModule.AmmoStored = 1;

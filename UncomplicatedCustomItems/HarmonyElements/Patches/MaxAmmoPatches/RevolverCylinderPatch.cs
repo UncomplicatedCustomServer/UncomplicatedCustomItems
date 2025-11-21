@@ -3,6 +3,7 @@ using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
@@ -13,22 +14,18 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPrefix]
         public static bool Prefix(CylinderAmmoModule __instance, ref int __result)
         {
-            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) || !SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem))
-                return true;
-            if (customItem.CustomItem.CustomItemType is not CustomItemType.Weapon || summonItem.CustomItem is not CustomWeapon customWeapon)
-                return true;
-
-            if (customItem != null)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem) && summonItem.CustomItem is CustomWeapon cw)
             {
-                IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
-                __result = weaponData.MaxMagazineAmmo;
+                __result = cw.MaxMagazineAmmo;
                 __instance.ServerResync();
                 return false;
             }
-            else if (summonItem != null)
+
+            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) && customItem.CustomItem.CustomData is WeaponData wd)
             {
-                __result = customWeapon.MaxMagazineAmmo;
+                __result = wd.MaxMagazineAmmo;
                 __instance.ServerResync();
+                return false;
             }
 
             return true;

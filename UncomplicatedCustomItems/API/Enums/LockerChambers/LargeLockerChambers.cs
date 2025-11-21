@@ -6,6 +6,7 @@ namespace UncomplicatedCustomItems.API.Enums.LockerChambers
         BottomMiddle,
         BottomRight,
         MiddleLeft,
+        Center,
         MiddleRight,
         TopLeft,
         TopMiddle,

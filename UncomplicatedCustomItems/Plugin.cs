@@ -254,6 +254,7 @@ namespace UncomplicatedCustomItems
 
 			ImportManager.Init();
 			_ = Task.Run(Updater.CheckForUpdatesAsync);
+			_ = Task.Run(VersionManager.Init);
 
 			LabAPIExtensions.Init();
 			MERIntergration.Init();
