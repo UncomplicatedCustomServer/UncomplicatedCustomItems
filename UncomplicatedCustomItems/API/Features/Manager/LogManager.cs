@@ -111,14 +111,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public static async Task<(HttpStatusCode statusCode, HttpContent content, string readableSize)> SendReportAsync()
         {
             if (!Plugin.Instance.IsPrerelease && MessageSent)
-            {
                 return (HttpStatusCode.Forbidden, null, null);
-            }
 
             if (History.Count < 1)
-            {
                 return (HttpStatusCode.Forbidden, null, null);
-            }
 
             string formattedContent = await Task.Run(() => FormatLogsForReport()).ConfigureAwait(false);
 
@@ -135,9 +131,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 var (statusCode, content) = await Plugin.HttpManager.ShareLogsAsync(formattedContent).ConfigureAwait(false);
 
                 if (statusCode == HttpStatusCode.OK)
-                {
                     MessageSent = true;
-                }
 
                 return (statusCode, content, readableSize);
             }

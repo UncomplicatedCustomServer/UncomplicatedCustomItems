@@ -39,6 +39,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             EnableAudioApi = true;
         }
+        
         private static bool CheckForAudioPlayerApiDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("AudioPlayerApi", StringComparison.OrdinalIgnoreCase));
         private static bool CheckForNVorbisDependency() => LabApi.Loader.Features.Misc.AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("NVorbis", StringComparison.OrdinalIgnoreCase));
 

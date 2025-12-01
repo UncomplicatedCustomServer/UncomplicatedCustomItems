@@ -27,6 +27,7 @@ using UnityEngine;
 using UserSettings.ServerSpecific;
 using HarmonyLib;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+
 // Events
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
@@ -72,8 +73,7 @@ namespace UncomplicatedCustomItems
 		internal FileConfig FileConfig;
 
 		internal List<ServerSpecificSettingBase> _settings;
-		
-
+    
 #if EXILED
         public override void OnEnabled()
 #else
@@ -144,18 +144,6 @@ namespace UncomplicatedCustomItems
 #endif
 			LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
-			/*
-			if (IsPrerelease)
-			{
-				if (!Instance.Config.Debug)
-				{
-					LogManager.Info("Debug logs have been activated!");
-					Instance.Config.Debug = true;
-					DebugMode = true;
-				}
-			}
-			*/
-
 			FileConfig.Welcome(loadExamples: true);
 			FileConfig.Welcome(Server.Port.ToString());
 			FileConfig.Welcome("Actions");
@@ -183,6 +171,7 @@ namespace UncomplicatedCustomItems
             base.OnEnabled();
 #endif
 		}
+    
 #if EXILED
         public override void OnDisabled()
 #else

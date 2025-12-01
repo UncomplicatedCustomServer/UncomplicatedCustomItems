@@ -9,7 +9,6 @@ using UncomplicatedCustomItems.API.Features.ArgumentHelpers;
 using System.Text;
 using System.Collections;
 using UncomplicatedCustomItems.API.Attributes;
-using LabApi.Features.Wrappers;
 using MEC;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
@@ -359,7 +358,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         if (memberContainer == null)
                             return null;
 
-                        if (memberContainer is IEnumerable enumContainer && memberContainer is not string)
+                        if (memberContainer is IEnumerable enumContainer and not string)
                         {
                             List<object?> list = enumContainer.Cast<object?>().ToList();
 
@@ -1907,7 +1906,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             string delayedAction = parts[1].Trim();
 
             float seconds = ParseTime(delayPart);
-            MEC.Timing.CallDelayed(seconds, () => ExecuteAction(item, delayedAction, eventArgs));
+            Timing.CallDelayed(seconds, () => ExecuteAction(item, delayedAction, eventArgs));
             return true;
         }
 
