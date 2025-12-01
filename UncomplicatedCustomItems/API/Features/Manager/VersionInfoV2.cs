@@ -1,14 +1,22 @@
+using Newtonsoft.Json;
+
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
     public class VersionInfoV2
     {
-        public string CodeName { get; }
-        public string Version { get; }
-        public bool Recalled { get; }
-        public string RecallReason { get; }
-        public bool PreRelease { get; }
-        public bool ForceDebug { get; }
-
+        [JsonProperty("codeName")]
+        public string CodeName { get; set; }
+        [JsonProperty("version")]
+        public string Version { get; set; }
+        [JsonProperty("recalled")]
+        public bool Recalled { get; set; }
+        [JsonProperty("recallReason")]
+        public string RecallReason { get; set; }
+        [JsonProperty("preRelease")]
+        public bool PreRelease { get; set; }
+        [JsonProperty("forceDebug")]
+        public bool ForceDebug { get; set; }
+        
         public VersionInfoV2(string name, string version, bool recalled, string recallReason, bool preRelease, bool forceDebug)
         {
             CodeName = name;

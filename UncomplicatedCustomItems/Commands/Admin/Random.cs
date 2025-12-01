@@ -8,7 +8,7 @@ using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
 
-namespace UncomplicatedCustomItems.Commands
+namespace UncomplicatedCustomItems.Commands.Admin
 {
     public class Random : ISubcommand
     {

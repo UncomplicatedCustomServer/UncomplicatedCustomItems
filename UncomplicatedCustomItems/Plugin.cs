@@ -253,7 +253,11 @@ namespace UncomplicatedCustomItems
 				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 
 			ImportManager.Init();
-			_ = Task.Run(Updater.CheckForUpdatesAsync);
+#if EXILED
+			Server.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
+#else
+			Player.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
+#endif
 			_ = Task.Run(VersionManager.Init);
 
 			LabAPIExtensions.Init();

@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -25,9 +26,13 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            Version version = Plugin.Instance.Version;
-            response = $"Attempting to update UncomplicatedCustomBots from version {version}. Check console for details.";
-            _ = Task.Run(() => Updater.UpdatePluginAsync(version, arguments.FirstOrDefault()));
+            string arg = arguments.Count > 0 ? arguments.At(0) : "false";
+            response = $"Attempting to update UncomplicatedCustomBots from version {Plugin.Instance.Version}. Check console for details.";
+#if EXILED
+			Server.Host?.ReferenceHub.StartCoroutine(Updater.UpdatePluginCoroutine(Plugin.Instance.Version, arg));
+#else
+            Player.Host?.ReferenceHub.StartCoroutine(Updater.UpdatePluginCoroutine(Plugin.Instance.Version, arg));
+#endif
             return true;
         }
     }

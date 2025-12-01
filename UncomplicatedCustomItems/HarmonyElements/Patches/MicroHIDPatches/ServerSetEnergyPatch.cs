@@ -11,15 +11,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     {
         private static bool Prefix(EnergyManagerModule __instance)
         {
-            if (!Utilities.TryGetSummonedCustomItem(__instance.MicroHid.ItemSerial, out SummonedCustomItem customItem))
-                return true;
-
-            if (customItem.CustomItem.CustomData is not IMicroHIDData data)
-                return true;
-
-            if (data.InfiniteEnergy)
-                return false;
-
+            if (Utilities.TryGetSummonedCustomItem(__instance.MicroHid.ItemSerial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomData is IMicroHIDData md)
+            {
+                if (md.InfiniteEnergy)
+                    return false;
+            }
+            
             return true;
         }
     }

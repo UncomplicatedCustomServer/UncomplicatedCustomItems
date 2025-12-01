@@ -8,6 +8,8 @@ using System.Linq;
 using UncomplicatedCustomItems.Commands.Admin;
 using UncomplicatedCustomItems.API.Interfaces;
 using LabApi.Features.Permissions;
+using UncomplicatedCustomItems.API.Features.Helper;
+using Random = UncomplicatedCustomItems.Commands.Admin.Random;
 
 namespace UncomplicatedCustomItems.Commands
 {
@@ -35,7 +37,9 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Get());
             Subcommands.Add(new ToolGun());
             Subcommands.Add(new Errors());
-
+            Subcommands.Add(new Owner());
+            Subcommands.Add(new VersionInfo());
+            
             Subcommands.Add(new PresenceDebug());
             Subcommands.Add(new EquipCustomItemDebug());
         }
@@ -64,17 +68,14 @@ namespace UncomplicatedCustomItems.Commands
             }
 #if EXILED
             if (!sender.CheckPermission(cmd.RequiredPermission))
+#else
+            if (!sender.HasPermissions(cmd.RequiredPermission))
+#endif
+
             {
                 response = "You don't have permission to access that command! \n Required permission: {cmd.RequiredPermission}";
                 return false;
             }
-#else
-            if (!sender.HasPermissions(cmd.RequiredPermission))
-            {
-                response = $"You don't have permission to access that command! \n Required permission: {cmd.RequiredPermission}";
-                return false;
-            }
-#endif
 
             if (arguments.Count < cmd.RequiredArgsCount)
             {

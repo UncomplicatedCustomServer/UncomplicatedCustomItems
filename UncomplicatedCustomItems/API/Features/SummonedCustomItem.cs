@@ -14,12 +14,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using InventorySystem.Items.Autosync;
 using InventorySystem.Items.Firearms.Extensions;
-using InventorySystem.Items.Firearms.Modules.Misc;
-using InventorySystem.Items.Pickups;
-using InventorySystem.Items.ThrowableProjectiles;
-using Mirror;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -147,7 +142,7 @@ namespace UncomplicatedCustomItems.API.Features
 
             SetProperties();
             AddToCollections(this);
-            if (Item is not null && Item is FirearmItem firearm)
+            if (Item is FirearmItem firearm)
                 StartAmmoRegen(firearm);
         }
 
@@ -878,23 +873,24 @@ namespace UncomplicatedCustomItems.API.Features
             Destroy();
         }
 
+        public static bool HasFlagFast(CustomFlags flags, CustomFlags flag) => (flags & flag) == flag;
 
         public bool HasModule(CustomFlags flag)
         {
-            if (CustomItem.CustomFlags.HasValue && CustomItem.CustomFlags.Value.HasFlag(flag))
+            if (CustomItem.CustomFlags.HasValue && HasFlagFast(CustomItem.CustomFlags.Value, flag))
             {
                 CheckingCustomFlagEventArgs args = new(CustomItem, flag);
                 Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
+
                 if (!args.IsAllowed)
                     return false;
 
                 LogManager.Silent($"{CustomItem.Name} has {flag}");
-
                 Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new(CustomItem, flag));
                 return true;
             }
-            else
-                return false;
+
+            return false;
         }
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = [];
@@ -1038,7 +1034,7 @@ namespace UncomplicatedCustomItems.API.Features
                 HandleEvent(Owner, ItemEvents.Use, Serial);
                 if (!CustomItem.Reusable)
                     Owner.RemoveItem(item.Base);
-
+ 
                 return true;
             }
 

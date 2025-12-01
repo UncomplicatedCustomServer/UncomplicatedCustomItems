@@ -26,6 +26,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
                 HintDuration = 2.3f,
                 DestroyAfterUse = false
             }
-        };
+        };  
     }
 }

@@ -23,7 +23,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// </summary>
         public virtual int MaxMagazineAmmo { get; set; } = 150;
 
-        public virtual int MaxBarrelAmmo { get; set; } = 100;
+        public virtual int MaxBarrelAmmo { get; set; } = 16;
 
         /// <summary>
         /// Gets or sets the penetration of the firearm

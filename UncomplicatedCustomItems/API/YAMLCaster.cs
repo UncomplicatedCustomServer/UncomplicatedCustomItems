@@ -57,7 +57,6 @@ namespace UncomplicatedCustomItems.API
             foreach (PropertyInfo property in baseElement.GetType().GetProperties())
             {
                 string yamlKey = snakeCaseStrategy.GetPropertyName(property.Name, false);
-
                 if (data.TryGetValue(yamlKey, out object value))
                 {
                     try

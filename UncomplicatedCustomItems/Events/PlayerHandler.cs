@@ -2631,6 +2631,22 @@ namespace UncomplicatedCustomItems.Events
             PlayerExtensions.PlayerKills.TryGetValue(ev.Attacker, out int kills);
             PlayerExtensions.PlayerKills.TryAdd(ev.Attacker, kills + 1);
 
+            if (customItem.HasModule(CustomFlags.ChangeDisguiseOnKill))
+            {
+#if EXILED
+                Exiled.API.Features.Player player = Exiled.API.Features.Player.Get(ev.Attacker);
+                LogManager.Debug($"{nameof(OnDying)}: Changing {player.DisplayNickname} appearance to {ev.Player.Role}");
+                Exiled.API.Extensions.MirrorExtensions.ChangeAppearance(player, ev.Player.Role);
+                LogManager.Debug($"{nameof(OnDying)}: Adding or updating {player.Id} to appearance dictionary");
+                Appearance.TryAdd(player.Id, ev.Player.Role);
+#else
+                LogManager.Debug($"{nameof(OnDying)}: Changing {ev.Player.Nickname} appearance to {ev.Player.Role}");
+                ev.Attacker.DisguisePlayer(ev.Player.Role);
+                LogManager.Debug($"{nameof(OnDying)}: Adding or updating {ev.Player.PlayerId} to appearance dictionary");
+                Appearance.TryAdd(ev.Player.PlayerId, ev.Player.Role);
+#endif
+            }
+
             if (customItem.HasModule(CustomFlags.VaporizeKills))
             {
                 try

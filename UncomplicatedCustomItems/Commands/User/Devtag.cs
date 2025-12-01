@@ -2,6 +2,7 @@
 using System;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Struct;
 
 namespace UncomplicatedCustomItems.Commands.User
 {
@@ -20,9 +21,7 @@ namespace UncomplicatedCustomItems.Commands.User
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player player = Player.Get(sender);
-
-            if (sender.LogName is "SERVER CONSOLE" || player is null)
+            if (!Player.TryGet(sender, out var player))
             {
                 response = "Can't use this command while not in the game!";
                 return false;
@@ -34,9 +33,15 @@ namespace UncomplicatedCustomItems.Commands.User
                 return false;
             }
 
-            Plugin.HttpManager.ApplyCreditTag(player);
+            if (!Plugin.HttpManager.Credits.ContainsKey(player.UserId))
+            {
+                response = "You do not have a credit tag!";
+                return true;
+            }
 
-            response = string.Empty;
+            Plugin.HttpManager.ApplyCreditTag(player);
+            Triplet<string, string, bool> credits = Plugin.HttpManager.Credits[player.UserId];
+            response = $"Applied Credit Tag with name: {credits.First} color: {credits.Second}";
             return true;
         }
     }

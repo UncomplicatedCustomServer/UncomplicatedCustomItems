@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public string RequiredPermission { get; } = "uci.reload";
 
-        public string[] Aliases { get; } = ["reload"];
+        public string[] Aliases { get; } = [""];
 
         public Dictionary<APICustomItem, List<Vector3>> APICustomItemsPickups = [];
         public Dictionary<ICustomItem, List<Vector3>> CustomItemsPickups = [];
@@ -127,7 +127,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 Plugin.Instance.FileConfig.LoadAll();
                 Plugin.Instance.FileConfig.LoadAll(Server.Port.ToString());
                 Plugin.Instance.FileConfig.LoadAll("Actions");
-                Task.Run(ImportManager.Actor);
+                ImportManager.Actor();
 
                 foreach (ICustomItem item in CustomItem.List)
                     ReloadedItems++;

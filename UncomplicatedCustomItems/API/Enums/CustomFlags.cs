@@ -42,5 +42,6 @@ namespace UncomplicatedCustomItems.API.Enums
         AmmoRegen = 1L << 29,
         ItemShot = 1L << 30,
         ShootItems = 1L << 30,
+        ChangeDisguiseOnKill = 1L << 31,
     }
 }

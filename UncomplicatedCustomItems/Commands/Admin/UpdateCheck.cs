@@ -2,22 +2,22 @@ using CommandSystem;
 using System;
 using Newtonsoft.Json;
 using UncomplicatedCustomItems.API.Features.Helper;
-using System.Threading.Tasks;
+using LabApi.Features.Wrappers;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    public class GitHubReleaseInfo
-    {
-        [JsonProperty("tag_name")]
-        public string TagName { get; set; }
-
-        [JsonProperty("assets")]
-        public GitHubAssetInfo[] Assets { get; set; }
-    }
-
     [CommandHandler(typeof(GameConsoleCommandHandler))]
     public class UpdateCheck : ParentCommand
     {
+        public class GitHubReleaseInfo
+        {
+            [JsonProperty("tag_name")]
+            public string TagName { get; set; }
+
+            [JsonProperty("assets")]
+            public Updater.GitHubAssetInfo[] Assets { get; set; }
+        }
+        
         public UpdateCheck() => LoadGeneratedCommands();
 
         public override string Command { get; } = "uciupdatecheck";
@@ -34,10 +34,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            Version version = Plugin.Instance.Version;
-            response = $"Currently running version {version}. Checking for updates...";
-
-            _ = Task.Run(() => Updater.CheckForUpdatesAsync());
+            response = $"Currently running version {Plugin.Instance.Version}. Checking for updates...";
+#if EXILED
+			Server.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
+#else
+            Player.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
+#endif
             return true;
         }
     }

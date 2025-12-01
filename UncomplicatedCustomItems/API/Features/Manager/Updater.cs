@@ -3,166 +3,177 @@ using Exiled.API.Features;
 #endif
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using UncomplicatedCustomItems.Commands;
+using UnityEngine;
+using UnityEngine.Networking;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
-    public class GitHubReleaseInfo
+    public class Updater
     {
-        [JsonProperty("tag_name")]
-        public string TagName { get; set; }
+        public class GitHubReleaseInfo
+        {
+            [JsonProperty("tag_name")]
+            public string TagName { get; set; }
 
-        [JsonProperty("prerelease")]
-        public bool PreRelease { get; set; }
+            [JsonProperty("prerelease")]
+            public bool PreRelease { get; set; }
 
-        [JsonProperty("assets")]
-        public GitHubAssetInfo[] Assets { get; set; }
-    }
+            [JsonProperty("assets")]
+            public GitHubAssetInfo[] Assets { get; set; }
+        }
 
-    public class GitHubAssetInfo
-    {
-        [JsonProperty("name")]
-        public string Name { get; set; }
+        public class GitHubAssetInfo
+        {
+            [JsonProperty("name")]
+            public string Name { get; set; }
 
-        [JsonProperty("browser_download_url")]
-        public string BrowserDownloadUrl { get; set; }
-    }
-
-    /// <summary>
-    /// A static helper class to handle checking for and applying updates from GitHub.
-    /// </summary>
-    public static class Updater
-    {
+            [JsonProperty("browser_download_url")]
+            public string BrowserDownloadUrl { get; set; }
+        }
+        
 #if EXILED
         private const string PluginDllName = "UncomplicatedCustomItems-Exiled.dll";
 #else
         private const string PluginDllName = "UncomplicatedCustomItems-LabApi.dll";
 #endif
-        private static readonly HttpClient HttpClient = new();
+        private const string UserAgent = "UncomplicatedCustomItems-Updater/1.2";
+        private const string ReleasesApiUrl = "https://api.github.com/repos/UncomplicatedCustomServer/UncomplicatedCustomItems/releases";
 
-        /// <summary>
-        /// Checks GitHub for a newer version of the plugin.
-        /// </summary>
-        public static async Task CheckForUpdatesAsync()
+        public static IEnumerator CheckForUpdatesCoroutine()
         {
-            try
+            Version currentVersion = Plugin.Instance.Version;
+            LogManager.Updater($"Current version: {currentVersion}. Checking for updates...");
+
+            GitHubReleaseInfo latestRelease = null;
+            yield return GetLatestReleaseCoroutine(result => latestRelease = result);
+
+            if (latestRelease == null)
+                yield break;
+
+            string latestVersionTag = latestRelease.TagName?.TrimStart('v') ?? string.Empty;
+            if (Version.TryParse(latestVersionTag, out Version githubVersion))
             {
-                Version currentVersion = Plugin.Instance.Version;
-                LogManager.Updater($"Current version: {currentVersion}. Checking for updates...");
-
-                GitHubReleaseInfo latestRelease = await GetLatestReleaseAsync();
-                if (latestRelease == null) return;
-
-                string latestVersionTag = latestRelease.TagName.TrimStart('v');
-                if (Version.TryParse(latestVersionTag, out Version githubVersion))
+                LogManager.Updater($"Latest version: {githubVersion}.");
+                if (githubVersion > currentVersion)
                 {
-                    LogManager.Updater($"Latest version: {githubVersion}.");
-                    if (githubVersion > currentVersion)
-                    {
-                        LogManager.Updater($"An update is available! Use the 'uciupdate' command to install it.");
-                    }
-                    else if (githubVersion < currentVersion)
-                    {
-                        LogManager.Updater("You are on a Pre Release or Developer version! :D");
-                    }
-                    else
-                    {
-                        LogManager.Updater("You are on the latest version.");
-                    }
+                    LogManager.Updater("An update is available! Use the 'uciupdate' command to install it.");
                 }
-            }
-            catch (Exception ex)
-            {
-                LogManager.Error($"An unexpected error occurred during update check: {ex.Message}");
+                else if (githubVersion < currentVersion)
+                {
+                    LogManager.Updater("You are on a Pre Release or Developer version! :D");
+                }
+                else
+                {
+                    LogManager.Updater("You are on the latest version.");
+                }
             }
         }
 
-        /// <summary>
-        /// Downloads and installs the latest version of the plugin.
-        /// </summary>
-        public static async Task UpdatePluginAsync(Version currentVersion, string forceArgument)
+        public static IEnumerator UpdatePluginCoroutine(Version currentVersion, string forceArgument)
         {
+            GitHubReleaseInfo latestRelease = null;
+            yield return GetLatestReleaseCoroutine(result => latestRelease = result);
+
+            if (latestRelease == null)
+                yield break;
+
+            GitHubAssetInfo asset = latestRelease.Assets?.FirstOrDefault(a => a.Name.Equals(PluginDllName, StringComparison.OrdinalIgnoreCase));
+
+            if (asset == null || string.IsNullOrEmpty(asset.BrowserDownloadUrl))
+            {
+                LogManager.Error($"Could not find the plugin DLL ('{PluginDllName}') in the latest GitHub release.");
+                yield break;
+            }
+
+            string latestVersionTag = latestRelease.TagName?.TrimStart('v') ?? string.Empty;
+            if (Version.TryParse(latestVersionTag, out Version latestGitHubVersion) && latestGitHubVersion <= currentVersion && string.Equals(forceArgument, "force", StringComparison.OrdinalIgnoreCase) == false)
+            {
+                LogManager.Updater("You are already on the latest version. Use 'uciupdate force' to proceed anyway.");
+                yield break;
+            }
+
+            LogManager.Updater($"Downloading new version from {asset.BrowserDownloadUrl}...");
+
+            UnityWebRequest req = UnityWebRequest.Get(asset.BrowserDownloadUrl);
+            req.SetRequestHeader("User-Agent", UserAgent);
+            if (!string.IsNullOrEmpty(Plugin.Instance.Config.GithubToken))
+                req.SetRequestHeader("Authorization", $"token {Plugin.Instance.Config.GithubToken}");
+
+            req.downloadHandler = new DownloadHandlerBuffer();
+            yield return req.SendWebRequest();
+
+            if (req.result != UnityWebRequest.Result.Success)
+            {
+                LogManager.Error($"Failed to download plugin: {req.error} ({req.responseCode})");
+                yield break;
+            }
+
             try
             {
-                GitHubReleaseInfo latestRelease = await GetLatestReleaseAsync();
-                if (latestRelease == null)
-                    return;
+                byte[] fileBytes = req.downloadHandler.data ?? Array.Empty<byte>();
+                LogManager.Updater($"{PluginDllName} downloaded successfully ({fileBytes.Length} bytes). Applying update...");
 
-                GitHubAssetInfo asset = latestRelease.Assets?.FirstOrDefault(a => a.Name.Equals(PluginDllName, StringComparison.OrdinalIgnoreCase));
-                if (asset == null || string.IsNullOrEmpty(asset.BrowserDownloadUrl))
-                {
-                    LogManager.Error($"Could not find the plugin DLL ('{PluginDllName}') in the latest GitHub release.");
-                    return;
-                }
-
-                string latestVersionTag = latestRelease.TagName.TrimStart('v');
-                if (Version.TryParse(latestVersionTag, out Version latestGitHubVersion) && latestGitHubVersion <= currentVersion && forceArgument?.ToLower() != "force")
-                {
-                    LogManager.Updater("You are already on the latest version. Use 'uciupdate force' to proceed anyway.");
-                    return;
-                }
-
-                LogManager.Updater($"Downloading new version from {asset.BrowserDownloadUrl}...");
-                byte[] fileBytes = await HttpClient.GetByteArrayAsync(asset.BrowserDownloadUrl);
-                LogManager.Updater($"{PluginDllName} updated successfully ({fileBytes.Length} bytes). Restarting round to apply changes.");
-
-                await Task.Run(() => File.WriteAllBytes(GetPluginPath(), fileBytes));
+                File.WriteAllBytes(GetPluginPath(), fileBytes);
                 LabApi.Features.Wrappers.Server.RunCommand("rnr", new SilentCommandSender());
             }
             catch (Exception ex)
             {
-                LogManager.Error($"An unexpected error occurred during the update process: {ex}");
+                LogManager.Error($"Failed to write plugin file: {ex}");
             }
         }
 
-        private static async Task<GitHubReleaseInfo> GetLatestReleaseAsync()
+        private static IEnumerator GetLatestReleaseCoroutine(Action<GitHubReleaseInfo> onComplete)
         {
+            UnityWebRequest req = UnityWebRequest.Get(ReleasesApiUrl);
+            req.SetRequestHeader("User-Agent", UserAgent);
+            req.SetRequestHeader("Accept", "application/vnd.github.v3+json");
+            if (!string.IsNullOrEmpty(Plugin.Instance.Config.GithubToken))
+                req.SetRequestHeader("Authorization", $"token {Plugin.Instance.Config.GithubToken}");
+
+            req.downloadHandler = new DownloadHandlerBuffer();
+            yield return req.SendWebRequest();
+
+            if (req.result != UnityWebRequest.Result.Success)
+            {
+                LogManager.Error($"Failed to fetch release info from GitHub. Error: {req.error} ({req.responseCode})");
+                onComplete?.Invoke(null);
+                yield break;
+            }
+
             try
             {
-                HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("UncomplicatedCustomItems-Updater/1.2");
-                if (!string.IsNullOrEmpty(Plugin.Instance.Config.GithubToken))
-                {
-                    HttpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("token", Plugin.Instance.Config.GithubToken);
-                }
-
-                string apiUrl = "https://api.github.com/repos/UncomplicatedCustomServer/UncomplicatedCustomItems/releases";
-                HttpResponseMessage httpResponse = await HttpClient.GetAsync(apiUrl);
-
-                if (!httpResponse.IsSuccessStatusCode)
-                {
-                    LogManager.Error($"Failed to fetch release info from GitHub. Status: {httpResponse.StatusCode}");
-                    return null;
-                }
-
-                string jsonResponse = await httpResponse.Content.ReadAsStringAsync();
+                string jsonResponse = req.downloadHandler.text;
                 List<GitHubReleaseInfo> releases = JsonConvert.DeserializeObject<List<GitHubReleaseInfo>>(jsonResponse);
 
-                if (releases == null || releases.Count == 0) return null;
+                if (releases == null || releases.Count == 0)
+                {
+                    onComplete?.Invoke(null);
+                    yield break;
+                }
 
                 IEnumerable<GitHubReleaseInfo> filtered = Plugin.Instance.Config.AllowPreReleases ? releases : releases.Where(r => !r.PreRelease);
 
-                return filtered
+                GitHubReleaseInfo chosen = filtered
                     .OrderByDescending(r =>
                     {
-                        string tag = r.TagName.TrimStart('v');
+                        string tag = r.TagName?.TrimStart('v') ?? string.Empty;
                         return Version.TryParse(tag, out Version v) ? v : new Version(0, 0);
                     })
                     .FirstOrDefault();
+
+                onComplete?.Invoke(chosen);
             }
             catch (Exception ex)
             {
-                LogManager.Error($"Network error while fetching release info: {ex.Message}");
-                return null;
+                LogManager.Error($"Error parsing GitHub response: {ex.Message}");
+                onComplete?.Invoke(null);
             }
         }
-
 
         private static string GetPluginPath()
         {

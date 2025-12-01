@@ -149,6 +149,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
+        public HttpStatusCode AddServerOwner(string discordId)
+        {
+            return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
+        }
 
         public string RetriveString(HttpResponseMessage response)
         {
@@ -212,6 +216,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return Credits[player.UserId];
 
             return new(null, null, false);
+        }
+
+        public bool TryGetCreditTag(Player player, out Triplet<string, string, bool> output)
+        {
+            if (Credits.TryGetValue(player.UserId, out output))
+                return true;
+                
+            output = new(null, null, false);
+            return false;
         }
 
         public void ApplyCreditTag(Player player)
@@ -316,7 +329,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 #nullable enable
         internal async Task<Tuple<HttpStatusCode, string?>> VersionInfo()
         {
-            HttpResponseMessage message = await HttpClient.GetAsync($"https://uciversionmanager.thaumiel-servers.workers.dev/item/{Plugin.Instance.Version.ToString(3)}");
+            HttpResponseMessage message = await HttpClient.GetAsync($"https://versioninfo.thaumielscpsl.site/item/{Plugin.Instance.Version.ToString(3)}");
 
             if (message.StatusCode != HttpStatusCode.OK)
                 return new(message.StatusCode, null);
