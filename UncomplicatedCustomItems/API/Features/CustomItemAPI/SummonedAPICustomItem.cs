@@ -391,22 +391,22 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
         }
 
-        private void ApplyFirearmStats(HitscanHitregModuleBase hitscan, dynamic weaponData)
+        private void ApplyFirearmStats(HitscanHitregModuleBase hitscan, object weaponData)
         {
-            hitscan.BaseDamage = weaponData.Damage;
-            hitscan.BasePenetration = weaponData.Penetration;
-            hitscan.BaseBulletInaccuracy = weaponData.Inaccuracy;
-            hitscan.DamageFalloffDistance = weaponData.DamageFalloffDistance;
-        }
-
-        private void ApplyAttachments(Firearm firearm, IEnumerable<AttachmentName> attachments)
-        {
-            foreach (AttachmentName attachment in attachments)
+            if (weaponData is CustomSCP127 scp127)
             {
-                if (firearm.TryApplyAttachment(attachment))
-                    LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
-                else
-                    LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
+                hitscan.BaseDamage = scp127.Damage;
+                hitscan.BasePenetration = scp127.Penetration;
+                hitscan.BaseBulletInaccuracy = scp127.Inaccuracy;
+                hitscan.DamageFalloffDistance = scp127.DamageFalloffDistance;
+            }
+
+            if (weaponData is CustomWeapon weapon)
+            {
+                hitscan.BaseDamage = weapon.Damage;
+                hitscan.BasePenetration = weapon.Penetration;
+                hitscan.BaseBulletInaccuracy = weapon.Inaccuracy;
+                hitscan.DamageFalloffDistance = weapon.DamageFalloffDistance;
             }
         }
 
@@ -421,14 +421,14 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             customKeycard.SerialNumber = keycardData.SerialNumber;
             customKeycard.WearIndex = keycardData.WearDetail;
             customKeycard.RankIndex = keycardData.Rank;
-            customKeycard.LabelColor = (Color32)labelColor;
+            customKeycard.LabelColor = labelColor;
             customKeycard.LabelText = keycardData.Label;
             customKeycard.ItemName = CustomItem.Name;
-            customKeycard.CardColor = (Color32)tintColor;
-            customKeycard.PermissionsColor = (Color32)permissionsColor;
+            customKeycard.CardColor = tintColor;
+            customKeycard.PermissionsColor = permissionsColor;
             customKeycard.Permissions = permissions;
             
-            LogManager.Debug($"{(Color32)labelColor} {labelColor} {keycardData.LabelColor}");
+            LogManager.Debug($"{labelColor} {labelColor} {keycardData.LabelColor}");
         }
 
         private void ReplacePickup(Pickup newPickup)
@@ -463,13 +463,26 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
         }
 
-        private void SaveFirearmStats(dynamic weaponData, MagazineModule magazine, HitscanHitregModuleBase hitscan)
+        private void SaveFirearmStats(object weaponData, MagazineModule magazine, HitscanHitregModuleBase hitscan)
         {
-            weaponData.MaxAmmo = magazine.AmmoStored;
-            weaponData.Damage = hitscan.BaseDamage;
-            weaponData.Penetration = hitscan.BasePenetration;
-            weaponData.Inaccuracy = hitscan.BaseBulletInaccuracy;
-            weaponData.DamageFalloffDistance = hitscan.DamageFalloffDistance;
+            if (weaponData is CustomSCP127 scp127)
+            {
+                scp127.MaxAmmo = magazine.AmmoStored;
+                scp127.Damage = hitscan.BaseDamage;
+                scp127.Penetration = hitscan.BasePenetration;
+                scp127.Inaccuracy = hitscan.BaseBulletInaccuracy;
+                scp127.DamageFalloffDistance = hitscan.DamageFalloffDistance;
+            }
+
+            if (weaponData is CustomWeapon weapon)
+            {
+                weapon.MaxAmmo = magazine.AmmoStored;
+                weapon.Damage = hitscan.BaseDamage;
+                weapon.Penetration = hitscan.BasePenetration;
+                weapon.Inaccuracy = hitscan.BaseBulletInaccuracy;
+                weapon.DamageFalloffDistance = hitscan.DamageFalloffDistance;
+            }
+
             magazine.ServerResyncData();
         }
 

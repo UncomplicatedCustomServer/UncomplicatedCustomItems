@@ -24,6 +24,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         /// <summary>
         /// Gets or sets the amount of ammo able to be chambered in the barrel.
+        /// Max value is 16.
         /// </summary>
         public abstract int MaxBarrelAmmo { get; set; }
 
