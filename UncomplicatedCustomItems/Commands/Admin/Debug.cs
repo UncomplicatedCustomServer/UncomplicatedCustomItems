@@ -17,12 +17,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> args, ICommandSender sender, out string response)
         {
-            Player player = Player.Get(sender);
-            if (player == null)
+            if (!Player.TryGet(sender, out Player player))
             {
                 response = "You must be a Player to use this command!";
                 return false;
             }
+
             DebugUI uI;
             switch (args[0].ToLower())
             {
@@ -108,9 +108,6 @@ namespace UncomplicatedCustomItems.Commands.Admin
                                 response = "Added 'Base' segment";
                                 return true;
                             }
-
-                            
-
                     }
 
                 default:

@@ -1,7 +1,5 @@
 ﻿using HarmonyLib;
 using InventorySystem.Items.Firearms.Modules;
-using LabApi.Features.Wrappers;
-using Mirror;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;

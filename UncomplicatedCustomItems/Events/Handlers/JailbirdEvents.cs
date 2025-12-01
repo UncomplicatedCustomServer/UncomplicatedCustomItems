@@ -6,12 +6,12 @@ namespace UncomplicatedCustomItems.Events.Handlers
     public class JailbirdEvents
     {
         /// <summary>
-        /// Event for Inpecting Items
+        /// Event for when a Jailbird's WearState has changed.
         /// </summary>
         public static event LabEventHandler<ChangedWearStateEventArgs>? ChangedWearState;
 
         /// <summary>
-        /// Event for Inspected Items
+        /// Event for when a Jailbird's WearState is changing.
         /// </summary>
         public static event LabEventHandler<ChangingWearStateEventArgs>? ChangingWearState;
 

@@ -236,9 +236,6 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.SCPItem:
                         HandleSCPItemForItem();
                         break;
-
-                    default:
-                        break;
                 }
             }
             else if (IsPickup)
@@ -274,9 +271,6 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.SCPItem:
                         HandleSCPItemForPickup();
-                        break;
-
-                    default:
                         break;
                 }
             }
@@ -694,9 +688,6 @@ namespace UncomplicatedCustomItems.API.Features
                         Scp127MagazineModule.ServerResyncData();
                     }
                     break;
-
-                default:
-                    break;
             }
         }
 
@@ -1020,13 +1011,16 @@ namespace UncomplicatedCustomItems.API.Features
                         IMedikitData medikitData = CustomItem.CustomData as IMedikitData;
                         Owner.Heal(medikitData.Health);
                         break;
+                    
                     case CustomItemType.Painkillers:
                         Timing.RunCoroutine(Utilities.PainkillersCoroutine(Owner, CustomItem.CustomData as IPainkillersData));
                         break;
+                    
                     case CustomItemType.Adrenaline:
                         IAdrenalineData adrenalineData = CustomItem.CustomData as IAdrenalineData;
                         Owner.CreateAhpProcess(adrenalineData.Amount, limit: 1000f, decay: adrenalineData.Decay, efficacy: adrenalineData.Efficacy, sustain: adrenalineData.Sustain, adrenalineData.Persistant);
                         break;
+                    
                     default:
                         return false;
                 }

@@ -6,7 +6,6 @@ using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
-
     [HarmonyPatch(typeof(LinearAdsModule))]
     internal static class LinearADSModulePostfix
     {

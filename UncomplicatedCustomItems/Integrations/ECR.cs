@@ -25,6 +25,12 @@ namespace UncomplicatedCustomItems.Integrations
         /// </summary>
         public static void Init()
         {
+            if (!Plugin.Instance.Config.EnableECRIntegration)
+            {
+                LogManager.Debug("The ECR integration is disabled!");
+                return;
+            }
+
             if (TryPatchECRIntegration())
             {
                 _isEcrFound = true;

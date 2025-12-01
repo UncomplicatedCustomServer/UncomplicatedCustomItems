@@ -33,6 +33,12 @@ namespace UncomplicatedCustomItems
         [Description("If true your servers IP will be hidden at 'https://list.uci.ucserver.it'.")]
         public bool HideipOnList { get; set; }
 
+        [Description("Tries to find Exiled CustomItems if enabled and will try to replace a ECI item with a UCI item if the id or name matches the spawning item.")]
+        public bool EnableECIIntegration { get; set; } = true;
+
+        [Description("Tries to find Exiled CustomRoles if enabled and will try to replace a ECI item with a UCI item if the id or name matches the item being given to a player.")]
+        public bool EnableECRIntegration { get; set; } = true;
+
         [Description("The hint message displayed whenever you pick up a custom item. %name% is replaced with the item's name, and %desc% with its description.")]
         public string PickedUpMessage { get; set; } = "You have picked up a %name% who's a %desc%";
 

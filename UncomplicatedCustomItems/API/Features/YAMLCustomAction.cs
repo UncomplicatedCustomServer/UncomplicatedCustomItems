@@ -8,7 +8,8 @@ namespace UncomplicatedCustomItems.API.Features
         public string[] Actions { get; set; } =
         [
             "if {Player.Health} < 100 then Heal {Player.UserId} 10",
-            "{Player.DisplayName} = :3"
+            "{Player.DisplayName} = :3",
+            "if Player.Ammo[ItemType.Ammo9x19] < 10 then Player.Ammo[ItemType.Ammo9x19] += 100"
         ];
     }
 }

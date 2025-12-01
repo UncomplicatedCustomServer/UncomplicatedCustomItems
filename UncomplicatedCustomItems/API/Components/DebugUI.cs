@@ -34,7 +34,7 @@ namespace UncomplicatedCustomItems.API.Components
 
         private void Update()
         {
-            if (ActiveSegments.Count() <= 0)
+            if (ActiveSegments.Count <= 0)
                 return;
 
             Builder.Clear();

@@ -1,6 +1,4 @@
-using System.Linq;
 using System.Text;
-using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Modules;
 using LabApi.Features.Extensions;
 using LabApi.Features.Wrappers;
@@ -9,9 +7,7 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UnityEngine;
 using UserSettings.ServerSpecific;
-using UncomplicatedCustomItems.API.ToolGun;
 using UncomplicatedCustomItems.API.Features.Helper;
-using PlayerRoles;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 namespace UncomplicatedCustomItems.API.Components

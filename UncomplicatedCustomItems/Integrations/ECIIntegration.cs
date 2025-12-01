@@ -20,6 +20,12 @@ namespace UncomplicatedCustomItems.Integrations
         /// </summary>
         public static void Init()
         {
+            if (!Plugin.Instance.Config.EnableECIIntegration)
+            {
+                LogManager.Debug("The ECI integration is disabled!");
+                return;
+            }
+
             if (TryPatchECIIntegration())
             {
                 _isECIFound = true;

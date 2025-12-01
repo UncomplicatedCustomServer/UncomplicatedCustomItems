@@ -18,6 +18,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// Gets or sets when the delay after <see cref="ItemEvents"/> is fired. 
         /// </summary>
         public virtual float CoolDown { get; set; } = 1f;
+        
         /// <summary>
         /// Gets or sets the message that will be sent inside the console when the <see cref="ItemEvents"/> will be fired
         /// </summary>

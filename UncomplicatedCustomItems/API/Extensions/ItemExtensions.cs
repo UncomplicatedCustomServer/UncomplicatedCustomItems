@@ -74,7 +74,7 @@ namespace UncomplicatedCustomItems.API.Extensions
 
         public static bool IsLightItem(this ItemType item)
         {
-            if (item is ItemType.Lantern || item is ItemType.Flashlight)
+            if (item is ItemType.Lantern or ItemType.Flashlight)
                 return true;
 
             return false;
