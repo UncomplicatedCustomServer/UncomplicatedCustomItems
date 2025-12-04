@@ -31,7 +31,6 @@ using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 // Events
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 
-
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=Exiled
@@ -81,9 +80,9 @@ namespace UncomplicatedCustomItems
 #endif
 		{
 			Instance = this;
-
 			FileConfig = new();
 			HttpManager = new("uci");
+
 #if EXILED
             if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
 #else

@@ -114,19 +114,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         }
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
-#if EXILED
-        private bool CheckForDependency() => Loader.Dependencies.Any(assembly => assembly.GetName().Name == "Newtonsoft.Json");
-#else
+        
         private bool CheckForDependency() => AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("Newtonsoft.Json", StringComparison.OrdinalIgnoreCase));
-#endif
+
         public HttpResponseMessage HttpGetRequest(string url)
         {
             try
             {
                 Task<HttpResponseMessage> Response = Task.Run(() => HttpClient.GetAsync(url));
-
                 Response.Wait();
-
                 return Response.Result;
             }
             catch (Exception)
@@ -149,10 +145,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        public HttpStatusCode AddServerOwner(string discordId)
-        {
-            return HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
-        }
+        public HttpStatusCode AddServerOwner(string discordId) => HttpGetRequest($"{Endpoint}/owners/add?discordid={discordId}")?.StatusCode ?? HttpStatusCode.InternalServerError;
 
         public string RetriveString(HttpResponseMessage response)
         {
@@ -304,10 +297,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 throw;
             }
             catch (TaskCanceledException)
-            {
-                throw;
-            }
-            catch (Exception)
             {
                 throw;
             }
