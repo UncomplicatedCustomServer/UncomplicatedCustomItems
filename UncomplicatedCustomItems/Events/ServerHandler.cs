@@ -128,6 +128,7 @@ namespace UncomplicatedCustomItems.Events
             CustomAction.UnregisteredCustomActions.Clear();
             CustomAction.UnregisteredList.Clear();
             SummonedCustomItem.List.ForEach(sci => sci.Destroy());
+            SummonedAPICustomItem.List.ForEach(sci => sci.Destroy());
             ArgumentManager._actionHandlers.Clear();
             ArgumentManager._eventArgPropertyCache.Clear();
             BaseCommand.Subcommands.Clear();
