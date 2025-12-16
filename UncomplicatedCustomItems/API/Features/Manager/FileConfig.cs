@@ -584,13 +584,62 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         YAMLCustomAction action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
                         CustomAction.Register(YAMLCaster.Converter(action));
-                        LogManager.Debug($"Registering action {action.Id} [{action.Name}]");
+                        LogManager.Debug($"Registering action {action.Id} [{action.Name}] from {Path.Combine(Dir, localDir)}");
                     }
                     else
                     {
-                        YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
-                        CustomItem.Register(YAMLCaster.Converter(item));
-                        LogManager.Debug($"Registering item {item.Id} [{item.Name}]");
+                        try
+                        {
+                            YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
+                            CustomItem.Register(YAMLCaster.Converter(item));
+                            LogManager.Debug($"Registering item {item.Id} [{item.Name}] from {Path.Combine(Dir, localDir)}");
+                        }
+                        catch (YamlException yamlEx)
+                        {
+                            CustomItem.ErrorCustomItems.Add(new ErrorCustomItem(fileName, File.ReadAllLines(fileName), yamlEx));
+                            string errorMessage = $"Failed to parse {fileName}. YAML syntax error: {yamlEx.Message}";
+
+                            if (yamlEx.Start.Line > 0)
+                            {
+                                errorMessage += $" at line {yamlEx.Start.Line}, column {yamlEx.Start.Column}";
+
+                                string[] lines = fileContent.Split('\n');
+                                if (yamlEx.Start.Line <= lines.Length)
+                                {
+                                    string problematicLine = lines[yamlEx.Start.Line - 1];
+                                    errorMessage += $"\nProblematic line: \"{problematicLine.Trim()}\"";
+                                }
+                            }
+
+                            if (Plugin.Instance.Config.Debug)
+                            {
+                                LogManager.Error($"{errorMessage}\nStack trace: {yamlEx.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
+                            }
+                            else
+                            {
+                                LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            string errorMessage = $"Failed to process {fileName}. Error: {ex.Message}";
+
+                            if (ex.Message.Contains("type") || ex.Message.Contains("convert"))
+                            {
+                                errorMessage += "\nThis appears to be a type mismatch error. Check that your values match the expected types for each field.";
+                            }
+                            else if (ex.Message.Contains("property") || ex.Message.Contains("member"))
+                            {
+                                errorMessage += "\nThis appears to be related to an unknown property. Check for typos in your YAML field names.";
+                            }
+
+                            if (Plugin.Instance.Config.Debug)
+                            {
+                                LogManager.Error($"{errorMessage}\nStack trace: {ex.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
+                            }
+                            else
+                                LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -599,112 +648,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
         }
-
-        public void LoadAction(Action<YAMLCustomItem> action, string localDir = "")
-        {
-            foreach (string FileName in List(localDir))
-            {
-                try
-                {
-                    if (Directory.Exists(FileName))
-                        continue;
-
-                    if (FileName.Split().First() == ".")
-                        return;
-
-                    string fileContent = File.ReadAllText(FileName);
-                    try
-                    {
-                        YAMLCustomItem Item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
-                        LogManager.Debug($"Proposed to the registerer the item {Item.Id} [{Item.Name}] from file:\n{FileName}");
-                        action(Item);
-                    }
-                    catch (YamlException yamlEx)
-                    {
-                        CustomItem.ErrorCustomItems.Add(new ErrorCustomItem(FileName, File.ReadAllLines(FileName), yamlEx));
-                        string errorMessage = $"Failed to parse {FileName}. YAML syntax error: {yamlEx.Message}";
-
-                        if (yamlEx.Start.Line > 0)
-                        {
-                            errorMessage += $" at line {yamlEx.Start.Line}, column {yamlEx.Start.Column}";
-                            
-                            string[] lines = fileContent.Split('\n');
-                            if (yamlEx.Start.Line <= lines.Length)
-                            {
-                                string problematicLine = lines[yamlEx.Start.Line - 1];
-                                errorMessage += $"\nProblematic line: \"{problematicLine.Trim()}\"";
-                            }
-                        }
-                        
-                        if (Plugin.Instance.Config.Debug)
-                        {
-                            LogManager.Error($"{errorMessage}\nStack trace: {yamlEx.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
-                        }
-                        else
-                        {
-                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        string errorMessage = $"Failed to process {FileName}. Error: {ex.Message}";
-                        
-                        if (ex.Message.Contains("type") || ex.Message.Contains("convert"))
-                        {
-                            errorMessage += "\nThis appears to be a type mismatch error. Check that your values match the expected types for each field.";
-                        }
-                        else if (ex.Message.Contains("property") || ex.Message.Contains("member"))
-                        {
-                            errorMessage += "\nThis appears to be related to an unknown property. Check for typos in your YAML field names.";
-                        }
-                        
-                        if (Plugin.Instance.Config.Debug)
-                        {
-                            LogManager.Error($"{errorMessage}\nStack trace: {ex.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
-                        }
-                        else
-                        {
-                            LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}\n{ex.HResult}");
-                    if (Plugin.Instance.Config.Debug)
-                    {
-                        LogManager.Error($"Stack trace: {ex.StackTrace}");
-                    }
-                }
-            }
-        }
-
-        public void LoadAction(Action<YAMLCustomAction> action, string localDir = "")
-        {
-            foreach (string FileName in List(localDir))
-            {
-                try
-                {
-                    if (Directory.Exists(FileName))
-                        continue;
-
-                    if (FileName.Split().First() == ".")
-                        return;
-
-                    string fileContent = File.ReadAllText(FileName);
-                    YAMLCustomAction Action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
-                    LogManager.Debug($"Proposed to the registerer the action {Action.Id} [{Action.Name}] from file:\n{FileName}");
-                    action(Action);
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Error($"Failed to access file {FileName}. Error: {ex.Message}\n{ex.HResult}");
-                    if (Plugin.Instance.Config.Debug)
-                        LogManager.Error($"Stack trace: {ex.StackTrace}");
-                }
-            }
-        }
-
 
         public void Welcome(string localDir = "", bool loadExamples = false)
         {
@@ -718,6 +661,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         {
                             Id = CustomItem.GetFirstFreeId(1)
                         }));
+                        LogManager.Debug($"Creating CustomItem at {Path.Combine(Dir, localDir)}");
                     }
                     else
                     {
@@ -725,6 +669,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         {
                             Id = CustomAction.GetFirstFreeId(1)
                         }));
+                        LogManager.Debug($"Creating CustomAction at {Path.Combine(Dir, localDir)}");
                     }
                 else
                     foreach (YAMLCustomItem customItem in _examples)

@@ -61,7 +61,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <summary>
         /// Gets the UCI API endpoint
         /// </summary>
-        public string UCIAPIEndpoint { get; } = "https://ucipluginapi.thaumielscpsl.site";
+        public string UCIAPIEndpoint { get; } = "https://ucipluginapi.thaumiel-servers.workers.dev";
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
@@ -318,7 +318,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 #nullable enable
         internal async Task<Tuple<HttpStatusCode, string?>> VersionInfo()
         {
-            HttpResponseMessage message = await HttpClient.GetAsync($"https://versioninfo.thaumielscpsl.site/item/{Plugin.Instance.Version.ToString(3)}");
+            HttpResponseMessage message = await HttpClient.GetAsync($"https://uciversionmanager.thaumiel-servers.workers.dev/item/{Plugin.Instance.Version.ToString(3)}");
 
             if (message.StatusCode != HttpStatusCode.OK)
                 return new(message.StatusCode, null);

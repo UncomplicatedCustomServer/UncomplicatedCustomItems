@@ -67,7 +67,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (!item.IsPickup)
                         CustomItems[item.Owner].Add(item.CustomItem);
-                    else
+                    else if (item.Pickup.Position != null)
                         CustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
 
                     item.Destroy();
@@ -83,7 +83,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (!item.IsPickup)
                         APICustomItems[item.Owner].Add(item.CustomItem);
-                    else
+                    else if (item.Pickup.Position != null)
                         APICustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
 
                     item.Destroy();
@@ -171,8 +171,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     $"Reloaded {APICustomItem.List.Count} APIItems{(NewApiItems > 0 ? $" ({NewApiItems} new)" : "")}."
                 ];
 
-                response = "\n" + string.Join("\n", reloadedLines)
-                    + $"\nUnregistered - Items: {BeforeItems}, Actions: {BeforeActions}, APIItems: {BeforeAPIItems}";
+                response = $"\n {string.Join("\n", reloadedLines)}\nUnregistered - Items: {BeforeItems}, Actions: {BeforeActions}, APIItems: {BeforeAPIItems}";
                 return true;
             }
             else

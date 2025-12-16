@@ -47,7 +47,7 @@ namespace UncomplicatedCustomItems.API.Enums
         [CommonTypes(typeof(CustomAction))]
         CustomAction,
 
-        [CommonTypes(typeof(Cassie))]
+        [CommonTypes(typeof(LabApi.Features.Wrappers.Cassie))]
         Cassie,
 
         [CommonTypes(typeof(Elevator))]

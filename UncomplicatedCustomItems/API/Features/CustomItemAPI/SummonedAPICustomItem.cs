@@ -364,10 +364,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             if (jailbird is LabApi.Features.Wrappers.JailbirdItem jailbirditem)
             {
                 LogManager.Debug($"Jailbird - {jailbirditem.Serial} is a Item");
-                jailbirditem.Base._hitreg._flashedDuration = data.FlashDuration;
-                jailbirditem.Base._hitreg._hitregRadius = data.Radius;
-                jailbirditem.Base._hitreg._damageCharge = data.ChargeDamage;
-                jailbirditem.Base._hitreg._damageMelee = data.MeleeDamage;
+                jailbirditem.Base._flashedDuration = data.FlashDuration;
+                jailbirditem.Base._hitregRadius = data.Radius;
+                jailbirditem.Base._chargeDamage = data.ChargeDamage;
+                jailbirditem.Base.MeleeDamage = data.MeleeDamage;
                 JailbirdDeteriorationTracker.ReceivedStates[jailbirditem.Serial] = data.WearState;
                 JailbirdDeteriorationTracker._anyReceived = true;
                 using (new AutosyncRpc(jailbirditem.Base.ItemId, out NetworkWriter writer))
@@ -381,10 +381,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 LogManager.Debug($"Jailbird - {jailbirdpickup.Serial} is a Pickup");
                 if (jailbirdpickup.Base.TryGetTemplate<InventorySystem.Items.Jailbird.JailbirdItem>(out var jailbirdpickupitem))
                 {
-                    jailbirdpickupitem._hitreg._flashedDuration = data.FlashDuration;
-                    jailbirdpickupitem._hitreg._hitregRadius = data.Radius;
-                    jailbirdpickupitem._hitreg._damageCharge = data.ChargeDamage;
-                    jailbirdpickupitem._hitreg._damageMelee = data.MeleeDamage;
+                    jailbirdpickupitem._flashedDuration = data.FlashDuration;
+                    jailbirdpickupitem._hitregRadius = data.Radius;
+                    jailbirdpickupitem._chargeDamage = data.ChargeDamage;
+                    jailbirdpickupitem.MeleeDamage = data.MeleeDamage;
                 }
 
                 jailbirdpickup.WearState = data.WearState;

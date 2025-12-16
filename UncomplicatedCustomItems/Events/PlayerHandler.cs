@@ -6,12 +6,14 @@ using CustomPlayerEffects;
 using Footprinting;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
+using InventorySystem.Items;
 using InventorySystem.Items.Autosync;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
+using InventorySystem.Items.Pickups;
 using InventorySystem.Items.ThrowableProjectiles;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
@@ -59,7 +61,6 @@ namespace UncomplicatedCustomItems.Events
         internal static List<Player> CustomScp268Effects = [];
         internal static List<(CustomItem, ushort, int)> CandyIdx = [];
         private static int AmmoStored = 0;
-
 
         /// <summary>
         /// The <see cref="Dictionary{TKey,TValue}"/> that handles lights spawned from the <see cref="OnDrop"/> method.
@@ -111,6 +112,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ProcessedJailbirdMessage += OnJailbirdMessage;
             PlayerEvent.ThrewProjectile += OnProjectileThrew;
             PlayerEvent.ChangingAttachments += OnPlayerChangingAttachments;
+            InventorySystem.InventoryExtensions.OnItemAdded += OnItemAdded;
         }
 
         public static void Unregister()
@@ -153,6 +155,17 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ProcessedJailbirdMessage -= OnJailbirdMessage;
             PlayerEvent.ThrewProjectile -= OnProjectileThrew;
             PlayerEvent.ChangingAttachments -= OnPlayerChangingAttachments;
+            InventorySystem.InventoryExtensions.OnItemAdded -= OnItemAdded;
+        }
+
+        private static void OnItemAdded(ReferenceHub hub, ItemBase itemBase, ItemPickupBase pickupBase)
+        {
+            Player player = Player.Get(hub);
+            if (Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var item))
+                item.HandlePickedUpDisplayHint(player);
+
+            if (SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var api))
+                api.HandlePickedUpDisplayHint(player);
         }
 
         private static void OnPlayerChangingAttachments(PlayerChangingAttachmentsEventArgs ev)

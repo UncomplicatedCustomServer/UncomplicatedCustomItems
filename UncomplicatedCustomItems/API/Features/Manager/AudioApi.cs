@@ -77,7 +77,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             Speaker speaker = p.AddSpeaker("Main", Coords, isSpatial: true, maxDistance: AudioSettings.AudibleDistance ?? 1f);
                         });
 
-                        float volume = Clamp(AudioSettings.SoundVolume, 1f, 100f);
+                        float volume = Clamp(AudioSettings.SoundVolume, 1f, 100f)/100;
                         audioPlayer.AddClip($"{clipId}", volume);
                         AudioClipStorage.LoadClip(AudioSettings.AudioPath, $"{clipId}");
                         LogManager.Debug($"Playing {Path.GetFileName(AudioSettings.AudioPath)}");

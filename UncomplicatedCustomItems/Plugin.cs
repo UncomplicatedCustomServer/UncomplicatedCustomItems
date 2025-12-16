@@ -83,12 +83,6 @@ namespace UncomplicatedCustomItems
 			FileConfig = new();
 			HttpManager = new("uci");
 
-#if EXILED
-            if (!File.Exists(Path.Combine(ConfigPath, "UncomplicatedCustomItems", ".nohttp")))
-#else
-			if (!File.Exists(Path.Combine(ConfigurationLoader.GetConfigPath(this, "UncomplicatedCustomItems"), "UncomplicatedCustomItems", ".nohttp")))
-#endif
-
 			PlayerHandler.Register();
 			ServerHandler.Register();
 			ScpHandler.Register();

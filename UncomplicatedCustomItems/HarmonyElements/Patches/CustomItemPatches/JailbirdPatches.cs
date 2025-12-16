@@ -11,20 +11,6 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
     [HarmonyPatch(typeof(JailbirdDeteriorationTracker))]
     internal static class JailbirdPatches
     {
-        // Broke all Jailbirds :|
-        /*
-        [HarmonyPatch(nameof(JailbirdDeteriorationTracker.Setup))]
-        [HarmonyPrefix]
-        public static void SetupPrefix(JailbirdDeteriorationTracker __instance)
-        {
-            if (Utilities.TryGetSummonedCustomItem(__instance._jailbird.ItemSerial, out var item) && item.CustomItem.CustomItemType is CustomItemType.Jailbird && item.CustomItem.CustomData is JailbirdData data)
-            {
-                __instance._chargesToWearState = data.ChargesToWearState;
-                __instance._damageToWearState = data.DamageToWearState;
-            }
-        }
-        */
-
         private static JailbirdWearState previousState;
 
         [HarmonyPatch(nameof(JailbirdDeteriorationTracker.RecheckUsage))]
@@ -33,7 +19,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
         {
             previousState = __instance.WearState;
 
-            JailbirdWearState damageState = __instance.StateForTotalDamage(__instance._hitreg.TotalMeleeDamageDealt);
+            JailbirdWearState damageState = __instance.StateForTotalDamage(__instance._jailbird.TotalMeleeDamageDealt);
             JailbirdWearState chargesState = __instance.StateForCharges(__instance._jailbird.TotalChargesPerformed);
             JailbirdWearState newState = (damageState > chargesState) ? damageState : chargesState;
 

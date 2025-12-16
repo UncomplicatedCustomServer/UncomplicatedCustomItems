@@ -205,10 +205,10 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.Jailbird when Item is Jailbird jailbird && CustomItem.CustomData is JailbirdData jbData:
-                        jailbird.Base._hitreg._flashedDuration = jbData.FlashDuration;
-                        jailbird.Base._hitreg._hitregRadius = jbData.Radius;
-                        jailbird.Base._hitreg._damageCharge = jbData.ChargeDamage;
-                        jailbird.Base._hitreg._damageMelee = jbData.MeleeDamage;
+                        jailbird.Base._flashedDuration = jbData.FlashDuration;
+                        jailbird.Base._hitregRadius = jbData.Radius;
+                        jailbird.Base._chargeDamage = jbData.ChargeDamage;
+                        jailbird.Base.MeleeDamage = jbData.MeleeDamage;
                         JailbirdDeteriorationTracker.ReceivedStates[jailbird.Serial] = jbData.WearState;
                         PropertiesSet = true;
                         break;
