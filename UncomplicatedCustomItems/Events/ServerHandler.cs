@@ -32,7 +32,6 @@ namespace UncomplicatedCustomItems.Events
             ServerEvent.PickupCreated += OnPickupCreation;
             ServerEvent.RoundStarted += SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded += OnDetonated;
-            ItemPickupBase.OnBeforePickupDestroyed += OnPickupDestroying;
         }
 
         public static void Unregister()
@@ -43,17 +42,6 @@ namespace UncomplicatedCustomItems.Events
             ServerEvent.PickupCreated -= OnPickupCreation;
             ServerEvent.RoundStarted -= SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded -= OnDetonated;
-            ItemPickupBase.OnBeforePickupDestroyed -= OnPickupDestroying;
-        }
-        
-        private static void OnPickupDestroying(ItemPickupBase pickupBase)
-        {
-            Pickup pickup = Pickup.Get(pickupBase);
-            if (Utilities.TryGetSummonedCustomItem(pickup.Serial, out var item))
-                item.Destroy();
-
-            if (SummonedAPICustomItem.TryGet(pickup.Serial, out var api))
-                api.Destroy();
         }
 
         private static void OnDetonated(ProjectileExplodedEventArgs ev)
