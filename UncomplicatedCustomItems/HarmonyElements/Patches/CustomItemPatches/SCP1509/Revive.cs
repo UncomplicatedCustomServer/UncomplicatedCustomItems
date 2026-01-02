@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
     {
         [HarmonyPatch(nameof(Scp1509Item.ServerProcessKill))]
         [HarmonyPostfix]
-        public static void ServerProcessKill_Postfix(Scp1509Item __instance, ReferenceHub ply)
+        public static void ServerProcessKillPostfix(Scp1509Item __instance, ReferenceHub victim)
         {
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {

@@ -30,6 +30,7 @@ using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 // Events
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using System.Linq;
 
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
@@ -52,7 +53,7 @@ namespace UncomplicatedCustomItems
 #else
 		public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
-		public override Version Version { get; } = new(4, 0, 2);
+		public override Version Version { get; } = new(4, 0, 3);
 
 		public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
@@ -60,9 +61,7 @@ namespace UncomplicatedCustomItems
 #else
 		public override LoadPriority Priority => LoadPriority.Highest;
 #endif
-		/// <summary>
-		/// The <see cref="Plugin"/> instance.
-		/// </summary>
+
 		public static Plugin Instance { get; private set; }
 
 		internal Harmony _harmony;
@@ -82,6 +81,21 @@ namespace UncomplicatedCustomItems
 			Instance = this;
 			FileConfig = new();
 			HttpManager = new("uci");
+
+			try
+			{
+#if EXILED
+            	_harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+#else
+				_harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+#endif
+				_harmony.PatchAll();
+				LogManager.Debug($"Successfully enabled {_harmony.GetPatchedMethods().Count()} patches");
+			}
+			catch (HarmonyException ex)
+			{
+				LogManager.Error($"Failed to enable patches! \n\n {ex.Message} \n\n {ex.StackTrace}");
+			}
 
 			PlayerHandler.Register();
 			ServerHandler.Register();
@@ -144,12 +158,6 @@ namespace UncomplicatedCustomItems
 			FileConfig.LoadAll(Server.Port.ToString());
 			FileConfig.LoadAll("Actions");
 
-#if EXILED
-            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-#else
-			_harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-#endif
-			_harmony.PatchAll();
 #if EXILED
             if (Round.IsStarted)
 #else
