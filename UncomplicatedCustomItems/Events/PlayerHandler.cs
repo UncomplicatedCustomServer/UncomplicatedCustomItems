@@ -1086,98 +1086,98 @@ namespace UncomplicatedCustomItems.Events
 
                         LogManager.Debug($"{customItem.CustomItem.Name} - Pickup spawned (ItemShot) - {pickup.Serial}");
                     }
+                }
+            }
 
-                    if (customItem.HasModule(CustomFlags.InfiniteAmmo))
+            if (customItem.HasModule(CustomFlags.InfiniteAmmo))
+            {
+                IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
+                customItem.MagazineModule.ServerModifyAmmo(data.MaxMagazineAmmo);
+                LogManager.Silent($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}");
+            }
+            if (customItem.HasModule(CustomFlags.CustomSound))
+            {
+                LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
+                AudioApi.PlayAudio(customItem, ev.Player.Position);
+            }
+            if (customItem.HasModule(CustomFlags.DieOnUse))
+            {
+                foreach (DieOnUseSettings dieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
+                {
+                    if (dieOnUseSettings.Vaporize ?? false)
                     {
-                        IWeaponData data = customItem.CustomItem.CustomData as IWeaponData;
-                        customItem.MagazineModule.ServerModifyAmmo(data.MaxMagazineAmmo);
-                        LogManager.Silent($"InfiniteAmmo flag was triggered: magazine refilled to {data.MaxMagazineAmmo}");
+                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} vaporized by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
+                        ev.Player.Vaporize();
                     }
-                    if (customItem.HasModule(CustomFlags.CustomSound))
+
+                    if (dieOnUseSettings.DeathMessage != null)
                     {
-                        LogManager.Debug($"Attempting to play audio at {ev.Player.Position} triggered by {ev.Player.Nickname} using {customItem.CustomItem.Name}.");
-                        AudioApi.PlayAudio(customItem, ev.Player.Position);
+                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
+                        ev.Player.Kill($"{dieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
                     }
-                    if (customItem.HasModule(CustomFlags.DieOnUse))
+                    else
                     {
-                        foreach (DieOnUseSettings dieOnUseSettings in customItem.CustomItem.FlagSettings.DieOnUseSettings)
+                        LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
+                        ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
+                    }
+                }
+            }
+            if (customItem.HasModule(CustomFlags.DistruptorTracer))
+            {
+                if (!InventoryItemLoader.TryGetItem(ItemType.ParticleDisruptor, out ParticleDisruptor disruptor))
+                    return;
+                if (!disruptor.TryGetModule(out ImpactEffectsModule impactmodule))
+                    return;
+                if (!disruptor.TryGetModule(out DisruptorHitregModule hitregmodule))
+                    return;
+
+                Vector3 position1 = ev.Player.Camera.position;
+                if (BarrelTipExtension.TryFindWorldmodelBarrelTip(ev.FirearmItem.Serial, out var tip1))
+                    position1 = tip1.WorldspacePosition;
+
+                position1.y -= 0.6f;
+                float maxDistance = customItem.HitscanHitregModule.DamageFalloffDistance + customItem.HitscanHitregModule.FullDamageDistance;
+
+                Ray baseRay = new(ev.Player.Camera.position + ev.Player.Camera.forward, ev.Player.Camera.forward);
+
+                if (ev.FirearmItem.ActionModule is AutomaticActionModule autoModule)
+                {
+                    int amount = Mathf.Min(autoModule.AmmoStored, autoModule.ChamberSize);
+                    for (int i = 0; i <= amount; i++)
+                    {
+                        Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
+
+                        if (Physics.Raycast(ray, out RaycastHit hitInfo, maxDistance, HitscanHitregModuleBase.HitregMask))
                         {
-                            if (dieOnUseSettings.Vaporize ?? false)
-                            {
-                                LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} vaporized by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
-                                ev.Player.Vaporize();
-                            }
-
-                            if (dieOnUseSettings.DeathMessage != null)
-                            {
-                                LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
-                                ev.Player.Kill($"{dieOnUseSettings.DeathMessage.Replace("%name%", customItem.CustomItem.Name)}");
-                            }
-                            else
-                            {
-                                LogManager.Debug($"DieOnUse triggered: {ev.Player.Nickname} killed by {customItem.CustomItem.Name} with DieOnUse CustomFlag");
-                                ev.Player.Kill($"Killed by {customItem.CustomItem.Name}");
-                            }
+                            hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
+                            impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
+                        }
+                        else
+                        {
+                            Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
+                            hitInfo.point = endPoint;
+                            hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
+                            impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
                         }
                     }
-                    if (customItem.HasModule(CustomFlags.DistruptorTracer))
+                }
+                else if (ev.FirearmItem.ActionModule is PumpActionModule pumpModule)
+                {
+                    for (int i = 0; i <= pumpModule._baseShotsPerTriggerPull; i++)
                     {
-                        if (!InventoryItemLoader.TryGetItem(ItemType.ParticleDisruptor, out ParticleDisruptor disruptor))
-                            return;
-                        if (!disruptor.TryGetModule(out ImpactEffectsModule impactmodule))
-                            return;
-                        if (!disruptor.TryGetModule(out DisruptorHitregModule hitregmodule))
-                            return;
+                        Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
 
-                        Vector3 position1 = ev.Player.Camera.position;
-                        if (BarrelTipExtension.TryFindWorldmodelBarrelTip(ev.FirearmItem.Serial, out var tip1))
-                            position = tip1.WorldspacePosition;
-
-                        position.y -= 0.6f;
-                        float maxDistance = customItem.HitscanHitregModule.DamageFalloffDistance + customItem.HitscanHitregModule.FullDamageDistance;
-
-                        Ray baseRay = new(ev.Player.Camera.position + ev.Player.Camera.forward, ev.Player.Camera.forward);
-
-                        if (ev.FirearmItem.ActionModule is AutomaticActionModule autoModule)
+                        if (Physics.Raycast(ray, out RaycastHit hitInfo, maxDistance, HitscanHitregModuleBase.HitregMask))
                         {
-                            int amount = Mathf.Min(autoModule.AmmoStored, autoModule.ChamberSize);
-                            for (int i = 0; i <= amount; i++)
-                            {
-                                Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
-
-                                if (Physics.Raycast(ray, out RaycastHit hitInfo, maxDistance, HitscanHitregModuleBase.HitregMask))
-                                {
-                                    hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
-                                    impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
-                                }
-                                else
-                                {
-                                    Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
-                                    hitInfo.point = endPoint;
-                                    hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
-                                    impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
-                                }
-                            }
+                            hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
+                            impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
                         }
-                        else if (ev.FirearmItem.ActionModule is PumpActionModule pumpModule)
+                        else
                         {
-                            for (int i = 0; i <= pumpModule._baseShotsPerTriggerPull; i++)
-                            {
-                                Ray ray = customItem.HitscanHitregModule.RandomizeRay(baseRay, customItem.HitscanHitregModule.CurrentInaccuracy);
-
-                                if (Physics.Raycast(ray, out RaycastHit hitInfo, maxDistance, HitscanHitregModuleBase.HitregMask))
-                                {
-                                    hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
-                                    impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
-                                }
-                                else
-                                {
-                                    Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
-                                    hitInfo.point = endPoint;
-                                    hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
-                                    impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
-                                }
-                            }
+                            Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
+                            hitInfo.point = endPoint;
+                            hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
+                            impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
                         }
                     }
                 }

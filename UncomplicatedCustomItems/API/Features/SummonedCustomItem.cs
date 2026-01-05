@@ -46,20 +46,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public static List<SummonedCustomItem> List { get; } = [];
 
-        /// <summary>
-        /// Cache of all <see cref="SummonedCustomItem"/> instances mapped by their <see cref="Serial"/>.
-        /// </summary>
-        public static readonly ConcurrentDictionary<ushort, SummonedCustomItem> bySerial = new();
-
-        /// <summary>
-        /// Cache of all <see cref="SummonedCustomItem"/> instances grouped by their owner's <see cref="Player.PlayerId"/>.
-        /// </summary>
-        public static readonly ConcurrentDictionary<int, ConcurrentBag<SummonedCustomItem>> byPlayerId = new();
-
-        /// <summary>
-        /// HashSet for faster existence checks and removal operations
-        /// </summary>
-        private static readonly ConcurrentDictionary<ushort, byte> _activeSerials = new();
+        private static readonly HashSet<ushort> _activeSerials = [];
 
         /// <summary>
         /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
@@ -141,7 +128,9 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Rotation = rotation;
 
             SetProperties();
-            AddToCollections(this);
+            List.Add(this);
+            _activeSerials.Add(this.Serial);
+
             if (Item is FirearmItem firearm)
                 StartAmmoRegen(firearm);
         }
@@ -159,23 +148,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, Player.Get(player.Id), item, null) { }
 #endif
-
-        private static void AddToCollections(SummonedCustomItem sci)
-        {
-            List.Add(sci);
-            bySerial[sci.Serial] = sci;
-            _activeSerials[sci.Serial] = 0;
-
-            if (sci.Owner != null)
-            {
-                byPlayerId.AddOrUpdate(
-                    sci.Owner.PlayerId,
-                    [sci],
-                    (key, existingBag) => { existingBag.Add(sci); return existingBag; }
-                );
-            }
-        }
-
         public void SetProperties()
         {
             if (Item is not null)
@@ -251,12 +223,10 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
 
                     case CustomItemType.MicroHID when CustomItem.CustomData is MicroHIDData microData:
-                        {
-                            MicroHIDPickup microHID = (MicroHIDPickup)Pickup;
-                            Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
-                            microHIDItem.ItemSerial = microHID.Serial;
-                            microHIDItem.EnergyManager.ServerSetEnergy(microHIDItem.ItemSerial, microData.Energy);
-                        }
+                        MicroHIDPickup microHID = (MicroHIDPickup)Pickup;
+                        Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
+                        microHIDItem.ItemSerial = microHID.Serial;
+                        microHIDItem.EnergyManager.ServerSetEnergy(microHIDItem.ItemSerial, microData.Energy);
                         break;
 
                     case CustomItemType.ParticleDisruptor when CustomItem.CustomData is ParticleDisruptorData pdData:
@@ -1038,17 +1008,7 @@ namespace UncomplicatedCustomItems.API.Features
         public void Destroy()
         {
             List.Remove(this);
-            bySerial.TryRemove(Serial, out _);
-            _activeSerials.TryRemove(Serial, out _);
-
-            if (Owner?.PlayerId != null && byPlayerId.TryGetValue(Owner.PlayerId, out var bag))
-            {
-                ConcurrentBag<SummonedCustomItem> newBag = new(bag.Where(sci => sci.Serial != Serial));
-                if (newBag.IsEmpty)
-                    byPlayerId.TryRemove(Owner.PlayerId, out _);
-                else
-                    byPlayerId[Owner.PlayerId] = newBag;
-            }
+            _activeSerials.Remove(Serial);
 
             if (IsPickup)
                 Pickup?.Destroy();
@@ -1065,26 +1025,41 @@ namespace UncomplicatedCustomItems.API.Features
 
         public static bool TryGet(ushort serial, out SummonedCustomItem item)
         {
-            if (!_activeSerials.ContainsKey(serial))
+            if (!_activeSerials.Contains(serial))
             {
                 item = null;
                 return false;
             }
 
-            return bySerial.TryGetValue(serial, out item);
+            item = List.FirstOrDefault(sci => sci.Serial == serial);
+            return item != null;
         }
 
-        public static SummonedCustomItem Get(ushort serial) => _activeSerials.ContainsKey(serial) && bySerial.TryGetValue(serial, out var item) ? item : null;
+        public static SummonedCustomItem Get(ushort serial)
+        {
+            if (!_activeSerials.Contains(serial))
+                return null;
+
+            return List.FirstOrDefault(sci => sci.Serial == serial);
+        }
 
         public static SummonedCustomItem Get(Player owner, ushort serial)
         {
-            if (owner?.PlayerId == null || !_activeSerials.ContainsKey(serial))
+            if (owner?.PlayerId == null)
                 return null;
 
-            if (!byPlayerId.TryGetValue(owner.PlayerId, out var bag))
+            if (!_activeSerials.Contains(serial))
                 return null;
 
-            return bag.FirstOrDefault(sci => sci.Serial == serial);
+            return List.FirstOrDefault(sci => sci.Serial == serial && sci.Owner?.PlayerId == owner.PlayerId);
+        }
+
+        public static List<SummonedCustomItem> Get(Player owner)
+        {
+            if (owner?.PlayerId == null)
+                return [];
+
+            return List.Where(sci => sci.Owner?.PlayerId == owner.PlayerId).ToList();
         }
 
         public static List<SummonedCustomItem> Get(ItemType item)
@@ -1093,17 +1068,6 @@ namespace UncomplicatedCustomItems.API.Features
             List<SummonedCustomItem> items = List.Count > 100 ? List.AsParallel().Where(sci => sci.CustomItem.Item == item).ToList() : List.Where(sci => sci.CustomItem.Item == item).ToList();
 
             return items;
-        }
-
-        public static List<SummonedCustomItem> Get(Player owner)
-        {
-            if (owner?.PlayerId == null)
-                return [];
-
-            if (byPlayerId.TryGetValue(owner.PlayerId, out var bag))
-                return bag.ToList();
-
-            return [];
         }
     }
 }

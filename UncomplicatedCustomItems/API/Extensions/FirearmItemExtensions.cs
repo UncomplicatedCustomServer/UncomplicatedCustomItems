@@ -84,6 +84,7 @@ namespace UncomplicatedCustomItems.API.Extensions
             if (firearm == null)
                 return false;
 
+            firearm.ItemSerial = firearmPickup.Info.Serial;
             AttachmentCodeSync.ServerSetCode(firearmPickup.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearmPickup.Info.ItemId));
             bool success = TryApplyAttachment(firearm, name);
             if (success && firearm.WorldModel != null)
