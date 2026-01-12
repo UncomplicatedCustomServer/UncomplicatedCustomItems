@@ -1,10 +1,146 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
     public static class DictionaryExtension
     {
+        public static bool TryGetRaw(this Dictionary<object, object> dict, string name, out object value)
+        {
+            value = null;
+            if (dict == null || name == null)
+                return false;
+
+            foreach (var kv in dict)
+            {
+                if (kv.Key == null)
+                    continue;
+
+                if (string.Equals(kv.Key.ToString().Trim(), name, StringComparison.OrdinalIgnoreCase))
+                {
+                    value = kv.Value;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool TryGetValue<T>(this Dictionary<object, object> dict, string name, out T result)
+        {
+            result = default!;
+            if (!dict.TryGetRaw(name, out object raw) || raw == null)
+                return false;
+
+            if (raw is T direct)
+            {
+                result = direct;
+                return true;
+            }
+
+            Type targetType = typeof(T);
+            TypeCode typeCode = Type.GetTypeCode(targetType);
+
+            string rawStr = raw.ToString().Trim();
+
+            try
+            {
+                if (raw is string)
+                {
+                    switch (typeCode)
+                    {
+                        case TypeCode.UInt16:
+                            if (ushort.TryParse(rawStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var us)) { result = (T)(object)us; return true; }
+                            return false;
+                        case TypeCode.UInt32:
+                            if (uint.TryParse(rawStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var ui)) { result = (T)(object)ui; return true; }
+                            return false;
+                        case TypeCode.Int32:
+                            if (int.TryParse(rawStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var i)) { result = (T)(object)i; return true; }
+                            return false;
+                        case TypeCode.Int64:
+                            if (long.TryParse(rawStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var l)) { result = (T)(object)l; return true; }
+                            return false;
+                        case TypeCode.Double:
+                            if (double.TryParse(rawStr, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var d)) { result = (T)(object)d; return true; }
+                            return false;
+                        case TypeCode.Boolean:
+                            if (bool.TryParse(rawStr, out var b)) { result = (T)(object)b; return true; }
+                            return false;
+                        case TypeCode.String:
+                            result = (T)(object)rawStr;
+                            return true;
+                    }
+                }
+
+                if (raw is IConvertible)
+                {
+                    switch (typeCode)
+                    {
+                        case TypeCode.UInt16:
+                            result = (T)(object)Convert.ToUInt16(raw, CultureInfo.InvariantCulture);
+                            return true;
+                        case TypeCode.UInt32:
+                            result = (T)(object)Convert.ToUInt32(raw, CultureInfo.InvariantCulture);
+                            return true;
+                        case TypeCode.Int32:
+                            result = (T)(object)Convert.ToInt32(raw, CultureInfo.InvariantCulture);
+                            return true;
+                        case TypeCode.Int64:
+                            result = (T)(object)Convert.ToInt64(raw, CultureInfo.InvariantCulture);
+                            return true;
+                        case TypeCode.Double:
+                            result = (T)(object)Convert.ToDouble(raw, CultureInfo.InvariantCulture);
+                            return true;
+                        case TypeCode.Boolean:
+                            result = (T)(object)Convert.ToBoolean(raw, CultureInfo.InvariantCulture);
+                            return true;
+                        case TypeCode.String:
+                            result = (T)(object)raw.ToString();
+                            return true;
+                        default:
+                            result = (T)Convert.ChangeType(raw, targetType, CultureInfo.InvariantCulture);
+                            return true;
+                    }
+                }
+
+                if (targetType == typeof(List<object>))
+                {
+                    if (raw is IEnumerable<object> genericList)
+                    {
+                        result = (T)(object)genericList.ToList();
+                        return true;
+                    }
+                    if (raw is IEnumerable enumList)
+                    {
+                        result = (T)(object)enumList.Cast<object>().ToList();
+                        return true;
+                    }
+                }
+            }
+            catch (OverflowException)
+            {
+                LogManager.Warn($"Value for '{name}' out of range for target type {targetType.Name}: '{rawStr}'");
+                return false;
+            }
+            catch (FormatException)
+            {
+                LogManager.Warn($"Value for '{name}' has wrong format for target type {targetType.Name}: '{rawStr}'");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogManager.Warn($"Failed to convert '{name}' to {targetType.Name}: {ex.Message}");
+                return false;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Attempts to add a key-value pair to the dictionary. If the key already exists, updates its value.
         /// </summary>
@@ -106,7 +242,7 @@ namespace UncomplicatedCustomItems.API.Extensions
                 dictionary[kvp.Key] = kvp.Value;
             }
         }
-        
+
         /// <summary>
         /// Tries to get the first key that matches the specified value.
         /// </summary>

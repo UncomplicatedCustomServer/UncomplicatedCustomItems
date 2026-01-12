@@ -21,6 +21,18 @@ namespace UncomplicatedCustomItems.API.Extensions
                 list.Add(item);
         }
 
+        public static void TryAddRange<T>(this List<T> list, IEnumerable<T> values)
+        {
+            if (list == null)
+                throw new ArgumentNullException("list");
+
+            foreach (T value in values)
+            {
+                if (!list.Contains(value))
+                    list.Add(value);
+            }
+        }
+
         /// <summary>
         /// Converts the list to a formatted string representation.
         /// </summary>

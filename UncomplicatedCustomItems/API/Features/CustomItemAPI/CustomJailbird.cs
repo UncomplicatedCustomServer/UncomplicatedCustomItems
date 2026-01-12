@@ -33,8 +33,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// </summary>
         public JailbirdWearState WearState { get; set; }
 
-        
-
         public override void RegisterEvents()
         {
             PlayerEvent.ProcessedJailbirdMessage += new LabApi.Events.LabEventHandler<PlayerProcessedJailbirdMessageEventArgs>(InternalOnMessageProcessed);

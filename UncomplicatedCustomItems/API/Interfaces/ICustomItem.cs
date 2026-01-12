@@ -2,6 +2,7 @@
 using UnityEngine;
 using UncomplicatedCustomItems.API.Enums;
 using System.Collections.Generic;
+using UncomplicatedCustomItems.API.CustomModuleAPI;
 
 namespace UncomplicatedCustomItems.API.Interfaces
 {
@@ -30,9 +31,7 @@ namespace UncomplicatedCustomItems.API.Interfaces
         
         public abstract ISpawn Spawn { get; set; }
 
-        public abstract CustomFlags? CustomFlags { get; set; }
-        
-        public abstract IFlagSettings? FlagSettings { get; set; }
+        public abstract Dictionary<CustomModuleBase, List<object>> CustomModules { get; set; }
 
         public Dictionary<ArgumentType, string> Arguments { get; set; }
 

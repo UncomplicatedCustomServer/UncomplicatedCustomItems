@@ -83,6 +83,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="10.0.1" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
   </ItemGroup>
   <ItemGroup>
@@ -280,11 +281,7 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
-
+  
   <Target Name="PostBuildCopyExiledDll" AfterTargets="Build" Condition=" '$(Configuration)' == 'Exiled' ">
     <Message Text="Copying UncomplicatedCustomItems-Exiled.dll to EXILED plugin folder..." Importance="high" />
     <Copy SourceFiles="$(OutputPath)UncomplicatedCustomItems-Exiled.dll" DestinationFolder="$(APPDATA)\EXILED\Plugins" SkipUnchangedFiles="true" />

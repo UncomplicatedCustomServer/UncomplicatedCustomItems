@@ -1,15 +1,10 @@
-﻿using InventorySystem;
-using InventorySystem.Items.Firearms;
-using InventorySystem.Items.ThrowableProjectiles;
-using LabApi.Events.Arguments.ServerEvents;
+﻿using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Interfaces.FlagSettings;
 using UncomplicatedCustomItems.Events;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace UncomplicatedCustomItems.Examples
 {

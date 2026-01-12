@@ -365,13 +365,16 @@ namespace UncomplicatedCustomItems.API
         /// Summon a <see cref="CustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
-        internal static void SummonCustomItem(ICustomItem customItem)
+        internal static void SummonCustomItem(ICustomItem customItem, bool ignoreChance = false)
         {
             foreach (SpawnData spawn in customItem.Spawn.SpawnSettings)
             {
-                float chance = UnityEngine.Random.Range(0f, 101f);
-                if (chance >= spawn.Chance)
-                    continue;
+                if (!ignoreChance)
+                {
+                    float roll = UnityEngine.Random.Range(0f, 101f);
+                    if (roll >= spawn.Chance)
+                        continue;
+                }
 
                 SummoningCustomItemEventArgs args = new(customItem);
                 Events.Handlers.CustomItemEvents.OnSummoningCustomItem(args);

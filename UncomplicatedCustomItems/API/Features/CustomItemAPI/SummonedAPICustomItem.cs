@@ -381,6 +381,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 LogManager.Debug($"Jailbird - {jailbirdpickup.Serial} is a Pickup");
                 if (jailbirdpickup.Base.TryGetTemplate<InventorySystem.Items.Jailbird.JailbirdItem>(out var jailbirdpickupitem))
                 {
+                    jailbirdpickupitem.ItemSerial = jailbirdpickup.Serial;
                     jailbirdpickupitem._flashedDuration = data.FlashDuration;
                     jailbirdpickupitem._hitregRadius = data.Radius;
                     jailbirdpickupitem._chargeDamage = data.ChargeDamage;
@@ -605,14 +606,14 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// Gets a list of every summoned <see cref="APICustomItem"/> where the <see cref="Owner"/> equals the parameter
         /// </summary>
         /// <param name="owner"></param>
-        /// <returns>SummonedCustomItem List</returns>
+        /// <returns>CustomItem List</returns>
         public static List<SummonedAPICustomItem> Get(Player owner) => List.Where(i => i.Owner == owner).ToList();
 
         /// <summary>
         /// Gets a list of every summoned <see cref="APICustomItem"/> where the <see cref="CustomItem.Item"/> equals the parameter
         /// </summary>
         /// <param name="item"></param>
-        /// <returns>SummonedCustomItem List</returns>
+        /// <returns>CustomItem List</returns>
         public static List<SummonedAPICustomItem> Get(ItemType item) => List.Where(i => i.CustomItem.Item == item).ToList();
     }
 }

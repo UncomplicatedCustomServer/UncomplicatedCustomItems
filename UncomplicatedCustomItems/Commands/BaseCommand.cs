@@ -39,6 +39,7 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Errors());
             Subcommands.Add(new Owner());
             Subcommands.Add(new VersionInfo());
+            Subcommands.Add(new CustomModuleInfo());
             
             Subcommands.Add(new PresenceDebug());
             Subcommands.Add(new EquipCustomItemDebug());
@@ -48,45 +49,59 @@ namespace UncomplicatedCustomItems.Commands
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (arguments.Count == 0)
+            try
             {
-                response = $"UncomplicatedCustomItems v{Plugin.Instance.Version} by FoxWorn3365, SpGerg & Mr. Baguetter\n\n<size=35>Available commands:</size>";
-                foreach (ISubcommand command in Subcommands)
-                    response += $"\n- uci {command.Name}{(command.VisibleArgs != string.Empty ? $" {command.VisibleArgs}" : "")} - {command.Description}";
+                if (Subcommands.IsEmpty())
+                    LoadGeneratedCommands();
 
-                return true;
-            }
+                if (arguments.Count == 0)
+                {
+                    response = $"UncomplicatedCustomItems v{Plugin.Instance.Version} by FoxWorn3365, SpGerg & Mr. Baguetter\n\n<size=35>Available commands:</size>";
+                    foreach (ISubcommand command in Subcommands)
+                        response += $"\n- uci {command.Name}{(command.VisibleArgs != string.Empty ? $" {command.VisibleArgs}" : "")} - {command.Description}";
 
-            ISubcommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
+                    return true;
+                }
 
-            cmd ??= Subcommands.FirstOrDefault(cmd => cmd.Aliases.Contains(arguments.At(0)));
+                ISubcommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
+                cmd ??= Subcommands.FirstOrDefault(cmd => cmd.Aliases.Contains(arguments.At(0)));
 
-            if (cmd is null)
-            {
-                response = "Command not found!";
-                return false;
-            }
+                if (cmd is null)
+                {
+                    response = "Command not found!";
+                    return false;
+                }
+
 #if EXILED
-            if (!sender.CheckPermission(cmd.RequiredPermission))
+                if (!sender.CheckPermission(cmd.RequiredPermission))
 #else
-            if (!sender.HasPermissions(cmd.RequiredPermission))
+                if (!sender.HasPermissions(cmd.RequiredPermission))
 #endif
+                {
+                    response = "You don't have permission to access that command! \n Required permission: {cmd.RequiredPermission}";
+                    return false;
+                }
 
+                if (arguments.Count < cmd.RequiredArgsCount)
+                {
+                    response = $"Wrong usage!\nCorrect usage: uci {cmd.Name} {cmd.VisibleArgs}";
+                    return false;
+                }
+
+                List<string> args = [.. arguments];
+                args.RemoveAt(0);
+
+                return cmd.Execute(args, sender, out response);
+            }
+            catch (Exception ex)
             {
-                response = "You don't have permission to access that command! \n Required permission: {cmd.RequiredPermission}";
+                ISubcommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
+                cmd ??= Subcommands.FirstOrDefault(cmd => cmd.Aliases.Contains(arguments.At(0)));
+
+                LogManager.Error($"Error when running command {cmd.Name} \n\n {ex.Message} \n\n {ex.StackTrace}");
+                response = $"Error when running command {cmd.Name} \n\n {ex.Message} \n\n {ex.StackTrace}";
                 return false;
             }
-
-            if (arguments.Count < cmd.RequiredArgsCount)
-            {
-                response = $"Wrong usage!\nCorrect usage: uci {cmd.Name} {cmd.VisibleArgs}";
-                return false;
-            }
-
-            List<string> args = [.. arguments];
-            args.RemoveAt(0);
-
-            return cmd.Execute(args, sender, out response);
         }
     }
 }

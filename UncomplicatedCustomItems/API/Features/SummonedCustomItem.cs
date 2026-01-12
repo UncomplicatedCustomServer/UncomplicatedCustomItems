@@ -2,6 +2,7 @@
 using InventorySystem;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
+using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
@@ -14,7 +15,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using InventorySystem.Items.Firearms.Extensions;
+using UncomplicatedCustomItems.API.CustomModuleAPI;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -26,6 +27,7 @@ using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Events.Arguments.CustomItemEvents;
 using UnityEngine;
+using ZXing.Common;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
@@ -42,24 +44,11 @@ namespace UncomplicatedCustomItems.API.Features
     public class SummonedCustomItem
     {
         /// <summary>
-        /// Gets the list of every active SummonedCustomItem
+        /// Gets the list of every active CustomItem
         /// </summary>
         public static List<SummonedCustomItem> List { get; } = [];
 
-        /// <summary>
-        /// Cache of all <see cref="SummonedCustomItem"/> instances mapped by their <see cref="Serial"/>.
-        /// </summary>
-        public static readonly ConcurrentDictionary<ushort, SummonedCustomItem> bySerial = new();
-
-        /// <summary>
-        /// Cache of all <see cref="SummonedCustomItem"/> instances grouped by their owner's <see cref="Player.PlayerId"/>.
-        /// </summary>
-        public static readonly ConcurrentDictionary<int, ConcurrentBag<SummonedCustomItem>> byPlayerId = new();
-
-        /// <summary>
-        /// HashSet for faster existence checks and removal operations
-        /// </summary>
-        private static readonly ConcurrentDictionary<ushort, byte> _activeSerials = new();
+        private static readonly HashSet<ushort> _activeSerials = [];
 
         /// <summary>
         /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
@@ -118,6 +107,8 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal bool PropertiesSet { get; set; }
 
+        internal List<CustomModuleBase> CustomModules { get; set; } = [];
+
         /// <summary>
         /// Gets or sets the light on a <see cref="Features.CustomItem"/> if its type is <see cref="CustomItemType.Light"/>.
         /// </summary>
@@ -141,7 +132,10 @@ namespace UncomplicatedCustomItems.API.Features
                 Pickup.Rotation = rotation;
 
             SetProperties();
-            AddToCollections(this);
+            List.Add(this);
+            _activeSerials.Add(this.Serial);
+            CustomModuleManager.Load(this);
+
             if (Item is FirearmItem firearm)
                 StartAmmoRegen(firearm);
         }
@@ -159,22 +153,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, Player.Get(player.Id), item, null) { }
 #endif
-
-        private static void AddToCollections(SummonedCustomItem sci)
-        {
-            List.Add(sci);
-            bySerial[sci.Serial] = sci;
-            _activeSerials[sci.Serial] = 0;
-
-            if (sci.Owner != null)
-            {
-                byPlayerId.AddOrUpdate(
-                    sci.Owner.PlayerId,
-                    [sci],
-                    (key, existingBag) => { existingBag.Add(sci); return existingBag; }
-                );
-            }
-        }
 
         public void SetProperties()
         {
@@ -249,14 +227,11 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Weapon when CustomItem.CustomData is WeaponData weaponData:
                         HandleWeaponPickup(weaponData);
                         break;
-
                     case CustomItemType.MicroHID when CustomItem.CustomData is MicroHIDData microData:
-                        {
-                            MicroHIDPickup microHID = (MicroHIDPickup)Pickup;
-                            Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
-                            microHIDItem.ItemSerial = microHID.Serial;
-                            microHIDItem.EnergyManager.ServerSetEnergy(microHIDItem.ItemSerial, microData.Energy);
-                        }
+                        MicroHIDPickup microHID = (MicroHIDPickup)Pickup;
+                        Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
+                        microHIDItem.ItemSerial = microHID.Serial;
+                        microHIDItem.EnergyManager.ServerSetEnergy(microHIDItem.ItemSerial, microData.Energy);
                         break;
 
                     case CustomItemType.ParticleDisruptor when CustomItem.CustomData is ParticleDisruptorData pdData:
@@ -650,6 +625,7 @@ namespace UncomplicatedCustomItems.API.Features
                         weaponData.DamageFalloffDistance = HitscanHitregModule.DamageFalloffDistance;
                         MagazineModule.ServerResyncData();
                     }
+
                     break;
 
                 case CustomItemType.MicroHID when Item is MicroHIDItem microHID && CustomItem.CustomData is MicroHIDData microHIDData:
@@ -687,6 +663,7 @@ namespace UncomplicatedCustomItems.API.Features
                         scp127Data.DamageFalloffDistance = Scp127Hitscan.DamageFalloffDistance;
                         Scp127MagazineModule.ServerResyncData();
                     }
+
                     break;
             }
         }
@@ -735,12 +712,11 @@ namespace UncomplicatedCustomItems.API.Features
                 Timing.KillCoroutines(RegenHandle);
                 Timing.CallDelayed(pauseTime, () => StartAmmoRegen(firearm));
             }
-
         }
 
         internal void StartAmmoRegen(FirearmItem firearm)
         {
-            if (HasModule(CustomFlags.AmmoRegen))
+            if (HasModule<CustomModuleAPI.CustomModules.AmmoRegen>())
                 RegenHandle = Timing.RunCoroutine(AmmoRegen(firearm));
         }
 
@@ -748,10 +724,9 @@ namespace UncomplicatedCustomItems.API.Features
         {
             for (; ; )
             {
-                if (!HasModule(CustomFlags.AmmoRegen))
+                if (!TryGetModule<CustomModuleAPI.CustomModules.AmmoRegen>(out var regen))
                     yield break;
 
-                AmmoRegenSettings regen = CustomItem.FlagSettings.AmmoRegenSettings?.FirstOrDefault();
                 if (firearm.StoredAmmo != firearm.MaxAmmo)
                     firearm.StoredAmmo = Math.Min(firearm.StoredAmmo + regen.AmmoPerInterval, firearm.MaxAmmo);
 
@@ -828,7 +803,6 @@ namespace UncomplicatedCustomItems.API.Features
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
             SetProperties();
-            Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup, pickedUp.Item.Serial);
         }
 
@@ -838,17 +812,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item = null;
             Owner = null;
             SaveProperties();
-            Serial = Pickup.Serial;
             HandleEvent(dropped.Player, ItemEvents.Drop, dropped.Pickup.Serial);
-        }
-
-        public void OnDrop(PickupCreatedEventArgs created)
-        {
-            Pickup = created.Pickup;
-            Item = null;
-            Owner = null;
-            SaveProperties();
-            Serial = Pickup.Serial;
         }
 
         public void OnThrew(PlayerThrewProjectileEventArgs ev)
@@ -856,7 +820,6 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = ev.Projectile;
             Item = null;
             Owner = ev.Projectile.LastOwner;
-            Serial = ev.Projectile.Serial;
         }
 
         public void OnDetonated(ProjectileExplodedEventArgs ev)
@@ -864,25 +827,44 @@ namespace UncomplicatedCustomItems.API.Features
             Destroy();
         }
 
-        public static bool HasFlagFast(CustomFlags flags, CustomFlags flag) => (flags & flag) == flag;
-
-        public bool HasModule(CustomFlags flag)
+        public bool HasModule<T>() where T : CustomModuleBase
         {
-            if (CustomItem.CustomFlags.HasValue && HasFlagFast(CustomItem.CustomFlags.Value, flag))
+            Type moduleType = typeof(T);
+
+            CheckingCustomFlagEventArgs args = new(CustomItem, moduleType);
+            Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
+
+            if (!args.IsAllowed)
+                return false;
+
+            bool has = CustomModules.OfType<T>().Any();
+
+            LogManager.Silent($"{CustomItem.Name} has {(has ? moduleType.Name : $"no {moduleType.Name}")}");
+            Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new (CustomItem, moduleType, has));
+
+            return has;
+        }
+
+        public bool TryGetModule<T>(out T module) where T : CustomModuleBase
+        {
+            Type moduleType = typeof(T);
+
+            CheckingCustomFlagEventArgs args = new(CustomItem, moduleType);
+            Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
+
+            if (!args.IsAllowed)
             {
-                CheckingCustomFlagEventArgs args = new(CustomItem, flag);
-                Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
-
-                if (!args.IsAllowed)
-                    return false;
-
-                LogManager.Silent($"{CustomItem.Name} has {flag}");
-                Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new(CustomItem, flag));
-                return true;
+                module = null;
+                return false;
             }
 
-            return false;
+            module = CustomModules.OfType<T>().FirstOrDefault();
+
+            LogManager.Silent($"{CustomItem.Name} has {(module != null ? moduleType.Name : $"no {moduleType.Name}")}");
+            Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new (CustomItem, moduleType, module != null));
+            return module != null;
         }
+
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = [];
 
@@ -962,6 +944,7 @@ namespace UncomplicatedCustomItems.API.Features
                 if (itemStates.TryGetValue(serial, out bool isOnCooldown))
                     return isOnCooldown;
             }
+            
             return false;
         }
 
@@ -979,9 +962,7 @@ namespace UncomplicatedCustomItems.API.Features
             yield return Timing.WaitForSeconds(cooldown);
 
             if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
-            {
                 itemStates[serial] = false;
-            }
 
             LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
         }
@@ -1037,18 +1018,9 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void Destroy()
         {
+            CustomModuleManager.Destroy(this);
             List.Remove(this);
-            bySerial.TryRemove(Serial, out _);
-            _activeSerials.TryRemove(Serial, out _);
-
-            if (Owner?.PlayerId != null && byPlayerId.TryGetValue(Owner.PlayerId, out var bag))
-            {
-                ConcurrentBag<SummonedCustomItem> newBag = new(bag.Where(sci => sci.Serial != Serial));
-                if (newBag.IsEmpty)
-                    byPlayerId.TryRemove(Owner.PlayerId, out _);
-                else
-                    byPlayerId[Owner.PlayerId] = newBag;
-            }
+            _activeSerials.Remove(Serial);
 
             if (IsPickup)
                 Pickup?.Destroy();
@@ -1065,26 +1037,41 @@ namespace UncomplicatedCustomItems.API.Features
 
         public static bool TryGet(ushort serial, out SummonedCustomItem item)
         {
-            if (!_activeSerials.ContainsKey(serial))
+            if (!_activeSerials.Contains(serial))
             {
                 item = null;
                 return false;
             }
 
-            return bySerial.TryGetValue(serial, out item);
+            item = List.FirstOrDefault(sci => sci.Serial == serial);
+            return item != null;
         }
 
-        public static SummonedCustomItem Get(ushort serial) => _activeSerials.ContainsKey(serial) && bySerial.TryGetValue(serial, out var item) ? item : null;
+        public static SummonedCustomItem Get(ushort serial)
+        {
+            if (!_activeSerials.Contains(serial))
+                return null;
+
+            return List.FirstOrDefault(sci => sci.Serial == serial);
+        }
 
         public static SummonedCustomItem Get(Player owner, ushort serial)
         {
-            if (owner?.PlayerId == null || !_activeSerials.ContainsKey(serial))
+            if (owner?.PlayerId == null)
                 return null;
 
-            if (!byPlayerId.TryGetValue(owner.PlayerId, out var bag))
+            if (!_activeSerials.Contains(serial))
                 return null;
 
-            return bag.FirstOrDefault(sci => sci.Serial == serial);
+            return List.FirstOrDefault(sci => sci.Serial == serial && sci.Owner?.PlayerId == owner.PlayerId);
+        }
+
+        public static List<SummonedCustomItem> Get(Player owner)
+        {
+            if (owner?.PlayerId == null)
+                return [];
+
+            return List.Where(sci => sci.Owner?.PlayerId == owner.PlayerId).ToList();
         }
 
         public static List<SummonedCustomItem> Get(ItemType item)
@@ -1093,17 +1080,6 @@ namespace UncomplicatedCustomItems.API.Features
             List<SummonedCustomItem> items = List.Count > 100 ? List.AsParallel().Where(sci => sci.CustomItem.Item == item).ToList() : List.Where(sci => sci.CustomItem.Item == item).ToList();
 
             return items;
-        }
-
-        public static List<SummonedCustomItem> Get(Player owner)
-        {
-            if (owner?.PlayerId == null)
-                return [];
-
-            if (byPlayerId.TryGetValue(owner.PlayerId, out var bag))
-                return bag.ToList();
-
-            return [];
         }
     }
 }

@@ -4,9 +4,9 @@ using System.Net;
 using UncomplicatedCustomItems.API.Features.Helper;
 using System.Net.Http;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using LabApi.Features.Console;
+using System.Text.Json;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -42,11 +42,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     Logger.Info("[ShareTheLog] Starting log upload process...");
                     
                     var result = await LogManager.SendReportAsync().ConfigureAwait(false);
-                    
                     if (result.statusCode == HttpStatusCode.OK)
                     {
                         string responseContent = Plugin.HttpManager.RetriveString(result.content);
-                        Dictionary<string, string> data = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseContent);
+                        Dictionary<string, string> data = JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
                         
                         long elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - start;
                         
@@ -56,9 +55,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         Logger.Info($"[ShareTheLog] Operation completed in {elapsed}ms");
                     }
                     else
-                    {
                         Logger.Error($"[ShareTheLog] Failed to share the UCI logs with the developers. Server response: {result.statusCode}");
-                    }
                 }
                 catch (JsonException jsonEx)
                 {

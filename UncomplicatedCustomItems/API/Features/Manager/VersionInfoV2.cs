@@ -1,25 +1,26 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
     public class VersionInfoV2
     {
-        [JsonProperty("codeName")]
+        [JsonPropertyName("codeName")]
         public string CodeName { get; set; }
-        [JsonProperty("version")]
+        [JsonPropertyName("version")]
         public string Version { get; set; }
-        [JsonProperty("recalled")]
+        [JsonPropertyName("recalled")]
         public bool Recalled { get; set; }
-        [JsonProperty("recallReason")]
+        [JsonPropertyName("recallReason")]
         public string RecallReason { get; set; }
-        [JsonProperty("preRelease")]
+        [JsonPropertyName("preRelease")]
         public bool PreRelease { get; set; }
-        [JsonProperty("forceDebug")]
+        [JsonPropertyName("forceDebug")]
         public bool ForceDebug { get; set; }
         
-        public VersionInfoV2(string name, string version, bool recalled, string recallReason, bool preRelease, bool forceDebug)
+        [JsonConstructor]
+        public VersionInfoV2(string codeName, string version, bool recalled, string recallReason, bool preRelease, bool forceDebug)
         {
-            CodeName = name;
+            CodeName = codeName;
             Version = version;
             Recalled = recalled;
             RecallReason = recallReason;

@@ -75,8 +75,15 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             return 0;
         }
 
-        public static void SummonItem(APICustomItem item)
+        public static void SummonItem(APICustomItem item, bool ignoreChance = false)
         {
+            if (!ignoreChance)
+            {
+                float roll = UnityEngine.Random.Range(0f, 101f);
+                if (roll >= item.ChanceToSpawn)
+                    return;
+            }
+
             if (item.SpawnLocations.Count() >= 1)
             {
                 foreach (var dic in item.SpawnLocations)

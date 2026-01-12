@@ -10,7 +10,8 @@ using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Enums;
-using Newtonsoft.Json.Serialization;
+using UncomplicatedCustomItems.API.CustomModuleAPI;
+using System.Text.Json;
 
 namespace UncomplicatedCustomItems.API
 {
@@ -26,18 +27,19 @@ namespace UncomplicatedCustomItems.API
         /// <returns>The <see cref="Dictionary{string, object}"/> of the class</returns>
         public static Dictionary<string, object> Encode(Data element)
         {
-            Dictionary<string, object> serialized = [];
-            SnakeCaseNamingStrategy snakeCaseStrategy = new();
+            Dictionary<string, object> serialized = new();
+
+            var namingPolicy = JsonNamingPolicy.SnakeCaseLower;
 
             foreach (PropertyInfo property in element.GetType().GetProperties())
             {
                 if (property.GetCustomAttribute<YamlIgnoreAttribute>() != null)
                     continue;
 
-                string yamlKey = snakeCaseStrategy.GetPropertyName(property.Name, false);
-                object value = property.GetValue(element, null);
+                string key = namingPolicy.ConvertName(property.Name);
+                object? value = property.GetValue(element);
 
-                serialized.Add(yamlKey, value ?? "");
+                serialized[key] = value ?? "";
             }
 
             return serialized;
@@ -52,12 +54,11 @@ namespace UncomplicatedCustomItems.API
         /// <returns>The class</returns>
         public static IData Decode(Data baseElement, Dictionary<string, object> data)
         {
-            SnakeCaseNamingStrategy snakeCaseStrategy = new();
-
+            JsonNamingPolicy namingPolicy = JsonNamingPolicy.SnakeCaseLower;
             foreach (PropertyInfo property in baseElement.GetType().GetProperties())
             {
-                string yamlKey = snakeCaseStrategy.GetPropertyName(property.Name, false);
-                if (data.TryGetValue(yamlKey, out object value))
+                string key = namingPolicy.ConvertName(property.Name);
+                if (data.TryGetValue(key, out object? value))
                 {
                     try
                     {
@@ -67,47 +68,41 @@ namespace UncomplicatedCustomItems.API
                             continue;
                         }
 
-                        if (property.PropertyType.IsEnum)
+                        Type propType = property.PropertyType;
+                        if (propType.IsEnum)
                         {
                             try
                             {
-                                object enumValue = Enum.Parse(property.PropertyType, value.ToString(), true);
-                                property.SetValue(baseElement, enumValue, null);
+                                object enumValue = Enum.Parse(propType, value.ToString()!, ignoreCase: true);
+                                property.SetValue(baseElement, enumValue);
                             }
                             catch
                             {
                                 SetDefaultValue(baseElement, property);
-                                LogManager.Warn($"{nameof(YAMLCaster)}: Invalid enum value '{value}' for property '{property.Name}'. Using default value.");
+                                LogManager.Warn($"{nameof(Decode)}: Invalid enum value '{value}' for property '{property.Name}'. Using default value.");
                             }
                         }
-                        else if (property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
+                        else if (propType.IsPrimitive || propType == typeof(string) || propType == typeof(decimal))
                         {
-                            object convertedValue = Convert.ChangeType(value, property.PropertyType);
-                            property.SetValue(baseElement, convertedValue, null);
+                            object convertedValue = Convert.ChangeType(value, propType);
+                            property.SetValue(baseElement, convertedValue);
                         }
                         else
                         {
-                            if (property.PropertyType.IsAssignableFrom(value.GetType()))
-                            {
-                                property.SetValue(baseElement, value, null);
-                            }
-                            else
-                            {
-                                object convertedValue = ConvertComplexValue(value, property.PropertyType);
-                                property.SetValue(baseElement, convertedValue, null);
-                            }
+                            object? convertedValue = ConvertComplexValue(value, propType);
+                            property.SetValue(baseElement, convertedValue);
                         }
                     }
                     catch (Exception ex)
                     {
                         SetDefaultValue(baseElement, property);
-                        LogManager.Warn($"{nameof(YAMLCaster)}: Failed to convert value '{value}' for property '{property.Name}': {ex.Message}. Using default value.");
+                        LogManager.Warn($"{nameof(Decode)}: Failed to convert value '{value}' for property '{property.Name}': {ex.Message}. Using default value.");
                     }
                 }
                 else
                 {
                     SetDefaultValue(baseElement, property);
-                    LogManager.Debug($"{nameof(YAMLCaster)}: Property '{property.Name}' missing from YAML data. Using default value.");
+                    LogManager.Debug($"{nameof(Decode)}: Property '{property.Name}' missing from data. Using default value.");
                 }
             }
 
@@ -270,8 +265,7 @@ namespace UncomplicatedCustomItems.API
                 Scale = item.Scale,
                 Spawn = item.Spawn,
                 Arguments = item.Arguments,
-                CustomFlags = item.CustomFlags,
-                FlagSettings = item.FlagSettings,
+                CustomModules = CustomModuleManager.Decode(item.CustomModules),
                 CustomItemType = item.CustomItemType,
                 CustomData = Decode(item.CustomItemType, item.CustomData, item.Item)
             };

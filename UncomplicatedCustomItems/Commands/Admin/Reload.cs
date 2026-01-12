@@ -42,11 +42,13 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 response = "This command doesnt have any arguments";
                 return false;
             }
+
             if (CustomItem.List.Count == 0)
             {
                 response = $"No loaded custom items!";
                 return false;
             }
+
             if (CustomItem.List.Count > 0)
             {
                 CustomItems.Clear();
@@ -59,6 +61,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (SummonedCustomItem item in SummonedCustomItem.List.ToList())
                 {
+                    if (item is null)
+                        continue;
+
                     if (item.Owner != null && !CustomItems.ContainsKey(item.Owner))
                         CustomItems[item.Owner] = [];
 
@@ -67,7 +72,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (!item.IsPickup)
                         CustomItems[item.Owner].Add(item.CustomItem);
-                    else if (item.Pickup.Position != null)
+                    else if (item.IsPickup && item.Pickup.Position != null && item.Pickup.Position != Vector3.zero)
                         CustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
 
                     item.Destroy();
@@ -75,6 +80,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List.ToList())
                 {
+                    if (item is null)
+                        continue;
+
                     if (item.Owner != null && !APICustomItems.ContainsKey(item.Owner))
                         APICustomItems[item.Owner] = [];
 
@@ -83,7 +91,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (!item.IsPickup)
                         APICustomItems[item.Owner].Add(item.CustomItem);
-                    else if (item.Pickup.Position != null)
+                    else if (item.IsPickup && item.Pickup.Position != null && item.Pickup.Position != Vector3.zero)
                         APICustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
 
                     item.Destroy();

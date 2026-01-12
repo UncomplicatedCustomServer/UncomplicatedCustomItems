@@ -40,15 +40,6 @@ namespace UncomplicatedCustomItems.API.Components
             if (Paused)
                 return;
 
-            if (CustomItem != null)
-            {
-                if (!Utilities.TryGetSummonedCustomItem(Owner.CurrentItem.Serial, out var item) || item != CustomItem)
-                    Destroy(this);
-
-                if (!CustomItem.HasModule(CustomFlags.ToolGun))
-                    Destroy(this);
-            }
-
             if (BaseCustomItem != null)
             {
                 if (!SummonedAPICustomItem.TryGet(BaseCustomItem, out var item) || item.CustomItem != BaseCustomItem)

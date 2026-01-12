@@ -39,16 +39,17 @@ namespace UncomplicatedCustomItems.Commands.Admin
             {
                 customItemobj = baseCustomItem;
             }
+            
             if (customItemobj is ICustomItem customItem)
             {
                 response = $"Successfully summoned 1 '{customItem.Name}' to it's spawn point";
-                Utilities.SummonCustomItem(customItem);
+                Utilities.SummonCustomItem(customItem, true);
                 return true;
             }
             if (customItemobj is APICustomItem baseCustom)
             {
                 response = $"Successfully summoned 1 '{baseCustom.Name}' to it's spawn point";
-                APICustomItem.SummonItem(baseCustom);
+                APICustomItem.SummonItem(baseCustom, true);
                 return true;
             }
 

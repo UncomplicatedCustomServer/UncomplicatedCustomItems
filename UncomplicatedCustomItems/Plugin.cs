@@ -3,18 +3,13 @@ using Exiled.API.Features;
 using Exiled.API.Enums;
 #else
 using LabApi.Features.Wrappers;
-using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
-#endif
-#if DEBUG
-using UncomplicatedCustomItems.Events.Handlers;
-using UncomplicatedCustomItems.Events.Arguments.JailbirdEvents;
+using LabApi.Features;
 #endif
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Extensions;
@@ -27,9 +22,13 @@ using UnityEngine;
 using UserSettings.ServerSpecific;
 using HarmonyLib;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using UncomplicatedCustomItems.API.CustomModuleAPI;
+using System.Linq;
 
 // Events
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using UncomplicatedCustomItems.API.Components;
+
 
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
@@ -50,9 +49,9 @@ namespace UncomplicatedCustomItems
 #if EXILED
         public override Version RequiredExiledVersion { get; } = new(9, 10, 1);
 #else
-		public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
+		public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
 #endif
-		public override Version Version { get; } = new(4, 0, 0);
+		public override Version Version { get; } = new(4, 1, 0);
 
 		public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
@@ -60,9 +59,6 @@ namespace UncomplicatedCustomItems
 #else
 		public override LoadPriority Priority => LoadPriority.Highest;
 #endif
-		/// <summary>
-		/// The <see cref="Plugin"/> instance.
-		/// </summary>
 		public static Plugin Instance { get; private set; }
 
 		internal Harmony _harmony;
@@ -83,17 +79,32 @@ namespace UncomplicatedCustomItems
 			FileConfig = new();
 			HttpManager = new("uci");
 
+			try
+			{
+#if EXILED
+            	_harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+#else
+				_harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+#endif
+				_harmony.PatchAll();
+				LogManager.Debug($"Successfully enabled {_harmony.GetPatchedMethods().Count()} patches");
+			}
+			catch (HarmonyException ex)
+			{
+				LogManager.Error($"Failed to enable all patches! \n\n {ex.Message} \n\n {ex.StackTrace}");
+			}
+			catch (Exception ex)
+            {
+				LogManager.Error($"Failed to enable all patches! \n\n {ex.Message} \n\n {ex.StackTrace}");
+            }
+
 			PlayerHandler.Register();
 			ServerHandler.Register();
 			ScpHandler.Register();
 			SSSHandler.Register();
+			CustomModuleManager.Init();
 
 			ServerEvent.WaitingForPlayers += OnFinishedLoading;
-
-#if DEBUG
-			JailbirdEvents.ChangingWearState += OnChangingWearState;
-			JailbirdEvents.ChangedWearState += OnChangedWearState;
-#endif
 
 			Arguments.Initialize();
 			Arguments.Register();
@@ -110,7 +121,7 @@ namespace UncomplicatedCustomItems
 				}
 				catch (Exception e)
 				{
-					LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
+					LogManager.Error($"Failed to initialize SSS settings: {e.Message}\n{e.StackTrace}");
 				}
 
 				try
@@ -133,7 +144,7 @@ namespace UncomplicatedCustomItems
 #if EXILED
             LogManager.Info($"Loaded from Exiled! [{Exiled.Loader.Loader.Version} - {RequiredExiledVersion}]");
 #else
-			LogManager.Info($"Loaded from LabApi! [{LabApi.Features.LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
+			LogManager.Info($"Loaded from LabApi! [{LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
 #endif
 			LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
@@ -144,12 +155,6 @@ namespace UncomplicatedCustomItems
 			FileConfig.LoadAll(Server.Port.ToString());
 			FileConfig.LoadAll("Actions");
 
-#if EXILED
-            _harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-#else
-			_harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-#endif
-			_harmony.PatchAll();
 #if EXILED
             if (Round.IsStarted)
 #else
@@ -171,7 +176,9 @@ namespace UncomplicatedCustomItems
 		public override void Disable()
 #endif
 		{
-			HttpManager.StopPresence();
+			if (Player.Host != null && Player.Host.GameObject.TryGetComponent<Presence>(out var presence))
+                UnityEngine.Object.Destroy(presence);
+
 			ECRIntegration.Cleanup();
 
 			// Cleanup
@@ -205,11 +212,6 @@ namespace UncomplicatedCustomItems
 			SSSHandler.Unregister();
 			MERIntergration.Unregister();
 
-#if DEBUG
-            JailbirdEvents.ChangingWearState -= OnChangingWearState;
-			JailbirdEvents.ChangedWearState -= OnChangedWearState;
-#endif
-
 			ServerEvent.WaitingForPlayers -= OnFinishedLoading;
 
 			Arguments.Cleanup();
@@ -219,18 +221,11 @@ namespace UncomplicatedCustomItems
             base.OnDisabled();
 #endif
 		}
-
-#if DEBUG
-		public void OnChangingWearState(ChangingWearStateEventArgs ev) =>
-			LogManager.Debug($"Attempted to set Wearstate to {ev.NewWearState} from {ev.OldWearState}");
-
-        public void OnChangedWearState(ChangedWearStateEventArgs ev) =>
-			LogManager.Debug($"Set Wearstate to {ev.NewWearState} from {ev.OldWearState}");
-#endif
-
+		
 		public void OnFinishedLoading()
 		{
-			HttpManager.StartPresence();
+			Player.Host.GameObject.AddComponent<Presence>().Init(30, 5);
+			//HttpManager.StartPresence();
 			if (Instance.Config.AllowDevPermissions)
 				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 

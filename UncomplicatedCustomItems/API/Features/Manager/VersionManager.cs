@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -22,8 +21,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return;
             }
 
-            VersionInfo = JsonConvert.DeserializeObject<VersionInfoV2>(data.Item2);
+            JsonSerializerOptions options = new()
+            {
+                PropertyNameCaseInsensitive = true
+            };
 
+            VersionInfo = JsonSerializer.Deserialize<VersionInfoV2>(data.Item2, options);
             if (VersionInfo is null)
             {
                 LogManager.Silent($"Failed to convert API endpoint answer to VersionInfo.\nContent: {data.Item2}");

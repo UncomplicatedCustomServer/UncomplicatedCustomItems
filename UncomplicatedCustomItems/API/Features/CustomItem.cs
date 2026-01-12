@@ -9,6 +9,7 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Extensions;
 using System.Text;
+using UncomplicatedCustomItems.API.CustomModuleAPI;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -46,15 +47,13 @@ namespace UncomplicatedCustomItems.API.Features
             LogManager.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
-        internal bool HasModule(CustomFlags Flag)
+        public bool HasModule<T>() where T : CustomModuleBase =>
+            CustomModules.OfType<T>().FirstOrDefault() != null;
+
+        public bool TryGetModule<T>(out T? module) where T : CustomModuleBase
         {
-            if (CustomFlags.HasValue && CustomFlags.Value.HasFlag(Flag))
-            {
-                LogManager.Silent($"{Name} has {Flag}");
-                return true;
-            }
-            else
-                return false;
+            module = CustomModules.OfType<T>().FirstOrDefault();
+            return module != null;
         }
 
         /// <summary>
@@ -157,11 +156,7 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Custom flags for the item")]
         public virtual CustomFlags? CustomFlags { get; set; } = new();
 
-        /// <summary>
-        /// Custom flag settings of the item
-        /// </summary>
-        [Description("Settings for the CustomFlags. You can remove any unused settings.")]
-        public virtual IFlagSettings? FlagSettings { get; set; } = new FlagSettings();
+        public virtual Dictionary<CustomModuleBase, List<object>> CustomModules { get; set; } = [];
 
         public virtual Dictionary<ArgumentType, string> Arguments { get; set; }
 
