@@ -1342,7 +1342,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             try
             {
                 string placeholderContent = propertyPathPlaceholder.Trim('{', '}');
-
                 PropertyTarget? propertyTarget = ResolvePropertyTarget(placeholderContent, eventArgs);
 
                 if (propertyTarget == null)

@@ -3,6 +3,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
@@ -36,6 +37,13 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <param name="pickup">The pickup to check.</param>
         /// <returns><c>true</c> if the pickup is a <see cref="SummonedCustomItem"/>; otherwise, <c>false</c>.</returns>
         public static bool IsSummonedCustomItem(this Pickup pickup) => Utilities.IsSummonedCustomItem(pickup.Serial);
+
+        /// <summary>
+        /// Determines whether the specified <see cref="Item"/> is a summoned custom item.
+        /// </summary>
+        /// <param name="item">The item to check.</param>
+        /// <returns><c>true</c> if the item is a summoned custom item; otherwise, <c>false</c>.</returns>
+        public static bool IsSummonedAPICustomItem(this Pickup pickup) => SummonedAPICustomItem.TryGet(pickup.Serial, out _);
 
         /// <summary>
         /// Attempts to retrieve the <see cref="SummonedCustomItem"/> associated with the specified <see cref="Pickup"/>.
