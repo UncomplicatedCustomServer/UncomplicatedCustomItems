@@ -101,9 +101,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             LogManager.Warn($"{ItemId} is not a UCI CustomItem ID!");
                     }
 #if EXILED
-                        else if (ItemType == "ECI" || ItemType == "eci")
+                        else if (ApiType == "ECI" || ApiType == "eci")
                         {
-                            if (Exiled.CustomItems.API.Features.TryGet((uint)ItemId, out Exiled.CustomItems.API.Features.CustomItem ExCustomItem))
+                            if (Exiled.CustomItems.API.Features.CustomItem.TryGet((uint)ItemId, out Exiled.CustomItems.API.Features.CustomItem ExCustomItem))
                             {
                                 Exiled.API.Features.Pickups.Pickup exCustomItem = ExCustomItem.Spawn(ev.Position);
                                 if (!Pickupable)

@@ -2,8 +2,8 @@
 using Exiled.API.Features;
 using Exiled.API.Enums;
 #else
-using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Plugins;
+using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Plugins.Enums;
 using LabApi.Features;
 #endif
@@ -27,9 +27,8 @@ using System.Linq;
 
 // Events
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
-using System.Linq;
-using System.Collections;
 using UncomplicatedCustomItems.API.Components;
+using System.Collections;
 
 
 // Building for remote development. You can ignore this :)
@@ -214,7 +213,7 @@ namespace UncomplicatedCustomItems
 		public override void Disable()
 #endif
 		{
-			if (Player.Host != null && Player.Host.GameObject.TryGetComponent<Presence>(out var presence))
+			if (LabApi.Features.Wrappers.Player.Host != null && LabApi.Features.Wrappers.Player.Host.GameObject.TryGetComponent<Presence>(out var presence))
                 UnityEngine.Object.Destroy(presence);
 
 			ECRIntegration.Cleanup();
@@ -262,7 +261,7 @@ namespace UncomplicatedCustomItems
 		
 		public void OnFinishedLoading()
 		{
-			Player.Host.GameObject.AddComponent<Presence>().Init(30, 5);
+            LabApi.Features.Wrappers.Player.Host.GameObject.AddComponent<Presence>().Init(30, 5);
 			//HttpManager.StartPresence();
 			if (Instance.Config.AllowDevPermissions)
 				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");

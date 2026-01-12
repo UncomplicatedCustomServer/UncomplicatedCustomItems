@@ -1,4 +1,8 @@
-﻿using LabApi.Events.Arguments.PlayerEvents;
+﻿#if EXILED
+using Exiled.CustomRoles.API.Features;
+#endif
+
+using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
@@ -171,13 +175,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                                     player.Position = OldPos;
                                 });
                             }
-                            
-                            break;
                         }
                         else
-                        {
                             LogManager.Warn($"{RoleId} Is not a ECR role");
-                        }
                     }
 #endif
             else if (RoleType.ToLower() == "normal")
@@ -202,7 +202,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 #endif
             {
 #if EXILED
-                LogManager.Warn($"The role_type field in {SummonedCustomItem.Name} is currently {RoleType} and should be 'Normal', 'UCR', or 'ECR'");
+                LogManager.Warn($"The role_type field in {CustomItem.Name} is currently {RoleType} and should be 'Normal', 'UCR', or 'ECR'");
 #else
                 LogManager.Warn($"The role_type field in {CustomItem.Name} is currently {RoleType} and should be 'Normal' or 'UCR'");
 #endif

@@ -42,6 +42,7 @@ using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using Scp018Projectile = InventorySystem.Items.ThrowableProjectiles.Scp018Projectile;
+using InventorySystem.Items.Autosync;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -271,7 +272,7 @@ namespace UncomplicatedCustomItems.Events
                         break;
 
                     case JailbirdMessageType.ChargeStarted or JailbirdMessageType.ChargeLoadTriggered:
-                        if (item.HasModule(CustomFlags.NoCharge))
+                        if (item.HasModule<NoCharge>())
                             ev.JailbirdItem.Base.SendRpc(JailbirdMessageType.ChargeFailed);
 
                         break;

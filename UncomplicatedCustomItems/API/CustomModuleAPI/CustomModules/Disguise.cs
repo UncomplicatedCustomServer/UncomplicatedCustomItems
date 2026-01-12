@@ -139,11 +139,11 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                 case PlayerDyingEventArgs ev when HasFlagFast(Trigger, TriggerOn.OnDeath):
 #if EXILED
-                    Exiled.API.Features.Player player = Exiled.API.Features.Player.Get(ev.Attacker);
-                    LogManager.Debug($"Changing {player.DisplayNickname} appearance to {ev.Player.Role}");
-                    Exiled.API.Extensions.MirrorExtensions.ChangeAppearance(player, ev.Player.Role);
-                    LogManager.Debug($"Adding or updating {player.Id} to appearance dictionary");
-                    Appearance.TryAdd(player.Id, ev.Player.Role);
+                    Exiled.API.Features.Player explayer = Exiled.API.Features.Player.Get(ev.Attacker);
+                    LogManager.Debug($"Changing {explayer.DisplayNickname} appearance to {ev.Player.Role}");
+                    Exiled.API.Extensions.MirrorExtensions.ChangeAppearance(explayer, ev.Player.Role);
+                    LogManager.Debug($"Adding or updating {explayer.Id} to appearance dictionary");
+                    Appearance.TryAdd(explayer.Id, ev.Player.Role);
 #else
                     LogManager.Debug($"Changing {ev.Player.Nickname} appearance to {ev.Player.Role}");
                     ev.Attacker.DisguisePlayer(ev.Player.Role);
