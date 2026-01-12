@@ -153,7 +153,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, Player.Get(player.Id), item, null) { }
 #endif
-
         public void SetProperties()
         {
             if (Item is not null)
@@ -1020,6 +1019,8 @@ namespace UncomplicatedCustomItems.API.Features
         {
             CustomModuleManager.Destroy(this);
             List.Remove(this);
+            _activeSerials.Remove(Serial);
+
             _activeSerials.Remove(Serial);
 
             if (IsPickup)

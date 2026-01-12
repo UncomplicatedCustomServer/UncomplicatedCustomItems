@@ -59,7 +59,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 ReloadedActions = 0;
                 ReloadedAPIItems = 0;
 
-                foreach (SummonedCustomItem item in SummonedCustomItem.List.ToList())
+                foreach (SummonedCustomItem item in SummonedCustomItem.List.ToArray())
                 {
                     if (item is null)
                         continue;

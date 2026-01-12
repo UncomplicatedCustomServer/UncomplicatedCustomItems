@@ -142,8 +142,6 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.Pickup != null)
                 PlayerHandler.DestroyLightOnPickup(ev.Pickup);
-            else
-                LogManager.Error($"Couldnt destroy light on {ev.Pickup.Type}.");
         }
 
         internal static Vector3 ClusterOffset(Vector3 position)

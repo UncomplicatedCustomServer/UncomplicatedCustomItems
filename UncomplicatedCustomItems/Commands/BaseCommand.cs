@@ -51,9 +51,6 @@ namespace UncomplicatedCustomItems.Commands
         {
             try
             {
-                if (Subcommands.IsEmpty())
-                    LoadGeneratedCommands();
-
                 if (arguments.Count == 0)
                 {
                     response = $"UncomplicatedCustomItems v{Plugin.Instance.Version} by FoxWorn3365, SpGerg & Mr. Baguetter\n\n<size=35>Available commands:</size>";
@@ -64,6 +61,7 @@ namespace UncomplicatedCustomItems.Commands
                 }
 
                 ISubcommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
+
                 cmd ??= Subcommands.FirstOrDefault(cmd => cmd.Aliases.Contains(arguments.At(0)));
 
                 if (cmd is null)
@@ -71,7 +69,6 @@ namespace UncomplicatedCustomItems.Commands
                     response = "Command not found!";
                     return false;
                 }
-
 #if EXILED
                 if (!sender.CheckPermission(cmd.RequiredPermission))
 #else

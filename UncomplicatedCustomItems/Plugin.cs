@@ -27,6 +27,8 @@ using System.Linq;
 
 // Events
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using System.Linq;
+using System.Collections;
 using UncomplicatedCustomItems.API.Components;
 
 
@@ -59,6 +61,7 @@ namespace UncomplicatedCustomItems
 #else
 		public override LoadPriority Priority => LoadPriority.Highest;
 #endif
+
 		public static Plugin Instance { get; private set; }
 
 		internal Harmony _harmony;
@@ -75,7 +78,46 @@ namespace UncomplicatedCustomItems
 		public override void Enable()
 #endif
 		{
-			Instance = this;
+
+#if EXILED
+			if (LabApi.Loader.PluginLoader.EnabledPlugins.Any(p => p.Name == "UncomplicatedCustomItems"))
+			{
+				LogManager.Warn($"You have both Exiled and LabApi versions of UCI installed this is not supported! Remove on of these for UCI to be enabled.");
+				OnDisabled();
+				return;
+			}
+#else
+            Type loaderType = Type.GetType("Exiled.Loader.Loader, Exiled.Loader");
+            if (loaderType != null)
+            {
+                PropertyInfo pluginsProperty = loaderType.GetProperty("Plugins", BindingFlags.Public | BindingFlags.Static);
+                if (pluginsProperty != null)
+                {
+                    if (pluginsProperty.GetValue(null) is IEnumerable plugins)
+                    {
+                        foreach (object plugin in plugins)
+                        {
+                            PropertyInfo nameProperty = plugin.GetType().GetProperty("Name");
+                            if (nameProperty != null)
+                            {
+                                string name = nameProperty.GetValue(plugin) as string;
+                                if (!string.IsNullOrEmpty(name))
+                                {
+                                    if (name == "UncomplicatedCustomItems")
+                                    {
+                                        LogManager.Warn($"You have both Exiled and LabApi versions of UCI installed this is not supported! Remove on of these for UCI to be enabled.");
+                                        Disable();
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+#endif
+
+            Instance = this;
 			FileConfig = new();
 			HttpManager = new("uci");
 
@@ -91,12 +133,8 @@ namespace UncomplicatedCustomItems
 			}
 			catch (HarmonyException ex)
 			{
-				LogManager.Error($"Failed to enable all patches! \n\n {ex.Message} \n\n {ex.StackTrace}");
+				LogManager.Error($"Failed to enable patches! \n\n {ex.Message} \n\n {ex.StackTrace}");
 			}
-			catch (Exception ex)
-            {
-				LogManager.Error($"Failed to enable all patches! \n\n {ex.Message} \n\n {ex.StackTrace}");
-            }
 
 			PlayerHandler.Register();
 			ServerHandler.Register();
