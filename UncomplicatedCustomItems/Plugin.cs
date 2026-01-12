@@ -14,7 +14,6 @@ using UncomplicatedCustomItems.Events.Arguments.JailbirdEvents;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Extensions;
@@ -31,6 +30,7 @@ using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 // Events
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using System.Linq;
+using System.Collections;
 
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
@@ -53,7 +53,7 @@ namespace UncomplicatedCustomItems
 #else
 		public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
-		public override Version Version { get; } = new(4, 0, 3);
+		public override Version Version { get; } = new(4, 0, 4);
 
 		public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
@@ -78,7 +78,46 @@ namespace UncomplicatedCustomItems
 		public override void Enable()
 #endif
 		{
-			Instance = this;
+
+#if EXILED
+			if (LabApi.Loader.PluginLoader.EnabledPlugins.Any(p => p.Name == "UncomplicatedCustomItems"))
+			{
+				LogManager.Warn($"You have both Exiled and LabApi versions of UCI installed this is not supported! Remove on of these for UCI to be enabled.");
+				OnDisabled();
+				return;
+			}
+#else
+            Type loaderType = Type.GetType("Exiled.Loader.Loader, Exiled.Loader");
+            if (loaderType != null)
+            {
+                PropertyInfo pluginsProperty = loaderType.GetProperty("Plugins", BindingFlags.Public | BindingFlags.Static);
+                if (pluginsProperty != null)
+                {
+                    if (pluginsProperty.GetValue(null) is IEnumerable plugins)
+                    {
+                        foreach (object plugin in plugins)
+                        {
+                            PropertyInfo nameProperty = plugin.GetType().GetProperty("Name");
+                            if (nameProperty != null)
+                            {
+                                string name = nameProperty.GetValue(plugin) as string;
+                                if (!string.IsNullOrEmpty(name))
+                                {
+                                    if (name == "UncomplicatedCustomItems")
+                                    {
+                                        LogManager.Warn($"You have both Exiled and LabApi versions of UCI installed this is not supported! Remove on of these for UCI to be enabled.");
+                                        Disable();
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+#endif
+
+            Instance = this;
 			FileConfig = new();
 			HttpManager = new("uci");
 

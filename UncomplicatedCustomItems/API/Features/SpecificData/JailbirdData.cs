@@ -29,6 +29,8 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// </summary>
         public virtual float Radius { get; set; } = 3f;
 
+        public bool AllowWearStateChanges { get; set; }
+
         /// <summary>
         /// Gets or sets the current <see cref="JailbirdWearState"/> of the <see cref="JailbirdItem"/>
         /// </summary>

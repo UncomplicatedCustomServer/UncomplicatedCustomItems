@@ -316,6 +316,20 @@ namespace UncomplicatedCustomItems.Events
                             ev.JailbirdItem.Base.SendRpc(JailbirdMessageType.ChargeFailed);
 
                         break;
+
+                    case JailbirdMessageType.UpdateState:
+                        if (item.CustomItem.CustomData is JailbirdData jailbird && !jailbird.AllowWearStateChanges && item.CustomItem.CustomItemType is CustomItemType.Jailbird)
+                        {
+                            JailbirdDeteriorationTracker.ReceivedStates[ev.JailbirdItem.Serial] = jailbird.WearState;
+                            ev.IsAllowed = false;
+                            
+                            using (new AutosyncRpc(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer))
+                            {
+                                writer.WriteByte(0);
+                                writer.WriteByte((byte)jailbird.WearState);
+                            }
+                        }
+                        break;
                 }
             }
         }
