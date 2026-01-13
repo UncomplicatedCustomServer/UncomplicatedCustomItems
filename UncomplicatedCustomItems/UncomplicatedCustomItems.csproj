@@ -53,43 +53,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ExMod.Exiled" Version="9.12.2" Condition=" '$(Configuration)' == 'Exiled'"/>
     <PackageReference Include="System.Text.Json" Version="10.0.1" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp" Publicize="true">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Exiled.API" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(APPDATA)\SCP Secret Laboratory\LabAPI\dependencies\global\Exiled.API.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Exiled.Loader" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global\Exiled.Loader.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Exiled.Events" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(APPDATA)\EXILED\Plugins\Exiled.Events.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Exiled.CustomItems" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(APPDATA)\EXILED\Plugins\Exiled.CustomItems.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Exiled.CustomRoles" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(APPDATA)\EXILED\Plugins\Exiled.CustomRoles.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Exiled.Permissions" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(APPDATA)\EXILED\Plugins\Exiled.Permissions.dll</HintPath>
-      <Private>false</Private>
+      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="LabApi" Publicize="true">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\LabApi.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\LabApi.dll</HintPath>
     </Reference>
     <Reference Include="Mirror-Publicized">
       <HintPath>$(EXILED_REFERENCES)\Mirror-Publicized.dll</HintPath>
@@ -100,7 +77,7 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Assembly-CSharp-firstpass" Publicize="true">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="AudioPlayerApi">
       <HintPath>$(EXILED_REFERENCES)\AudioPlayerApi.dll</HintPath>
@@ -136,7 +113,7 @@
       <HintPath>$(EXILED_REFERENCES)\NorthwoodLib.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES)\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
     <Reference Include="NVorbis">
       <HintPath>$(EXILED_REFERENCES)\NVorbis.dll</HintPath>
