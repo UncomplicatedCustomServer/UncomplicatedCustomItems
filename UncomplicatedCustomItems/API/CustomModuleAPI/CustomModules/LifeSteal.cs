@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -54,7 +53,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            base.Run(eventArgs);
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is PlayerHurtEventArgs ev)
             {
                 foreach (Dictionary<object, object> args in Arguments)

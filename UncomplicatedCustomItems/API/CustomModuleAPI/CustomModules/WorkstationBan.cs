@@ -10,11 +10,22 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            base.Run(eventArgs);
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is PlayerChangingAttachmentsEventArgs ev)
             {
-                ev.Player.SendHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
-                ev.IsAllowed = false;
+                if (Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out var item))
+                {
+                    if (item.TryGetModule<WorkstationBanHintOverride>(out var hintOverride))
+                    {
+                        ev.Player.SendHint(hintOverride.HintOverride.Replace("%name%", CustomItem.Name), hintOverride.DurationOverride);                        
+                    }
+                    else
+                        ev.Player.SendHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
+
+                    ev.IsAllowed = false;
+                }
             }
         }
 

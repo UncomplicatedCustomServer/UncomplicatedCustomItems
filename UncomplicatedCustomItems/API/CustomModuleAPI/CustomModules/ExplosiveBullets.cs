@@ -36,7 +36,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            base.Run(eventArgs);
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is PlayerPlacedBulletHoleEventArgs playerPlacedBullet)
             {
                 ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)TimedGrenadeProjectile.SpawnActive(playerPlacedBullet.HitPosition, ItemType.GrenadeHE, playerPlacedBullet.Player, 0.2);

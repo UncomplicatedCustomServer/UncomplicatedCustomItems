@@ -24,13 +24,12 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             "Trigger",
         ];
 
-        public string EffectName { get; set; }
         public byte Intensity { get; set; }
         public float Duration { get; set; }
         public bool AddDurationIfActive { get; set; }
         public bool ClearOnUnequip { get; set; }
         public TriggerOn Trigger { get; set; }
-        private StatusEffectBase effect { get; set; }
+        private StatusEffectBase StatusEffect { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
@@ -80,7 +79,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     return;
                 }
 
-                effect = _effect;
+                StatusEffect = _effect;
                 Intensity = intensity;
                 Duration = duration;
                 AddDurationIfActive = addDurationIfActive;
@@ -91,41 +90,55 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            base.Run(eventArgs);
+            if (!Check(eventArgs))
+                return;
+                
             switch (eventArgs)
             {
                 case PlayerShotWeaponEventArgs playerShotWeapon when HasFlagFast(Trigger, TriggerOn.OnShot):
                     if (Duration >= 0)
-                        playerShotWeapon.Player.EnableEffect(effect, Intensity, Duration, AddDurationIfActive);
+                    {
+                        playerShotWeapon.Player.EnableEffect(StatusEffect, Intensity, Duration, AddDurationIfActive);                        
+                    }
                     else
-                        playerShotWeapon.Player.EnableEffect(effect, Intensity, float.MaxValue, AddDurationIfActive);
+                        playerShotWeapon.Player.EnableEffect(StatusEffect, Intensity, float.MaxValue, AddDurationIfActive);
+
                     break;
 
                 case PlayerUsedItemEventArgs playerUsedItem when HasFlagFast(Trigger, TriggerOn.OnUse):
                     if (Duration >= 0)
-                        playerUsedItem.Player.EnableEffect(effect, Intensity, Duration, AddDurationIfActive);
+                    {
+                        playerUsedItem.Player.EnableEffect(StatusEffect, Intensity, Duration, AddDurationIfActive);                        
+                    }
                     else
-                        playerUsedItem.Player.EnableEffect(effect, Intensity, float.MaxValue, AddDurationIfActive);
+                        playerUsedItem.Player.EnableEffect(StatusEffect, Intensity, float.MaxValue, AddDurationIfActive);
+
                     break;
 
                 case PlayerChangedItemEventArgs playerChangedItem:
                     if (ClearOnUnequip)
-                        playerChangedItem.Player.DisableEffect(effect);
+                        playerChangedItem.Player.DisableEffect(StatusEffect);
 
                     if (HasFlagFast(Trigger, TriggerOn.OnChangedItem))
                     {
                         if (Duration >= 0)
-                            playerChangedItem.Player.EnableEffect(effect, Intensity, Duration, AddDurationIfActive);
+                        {
+                            playerChangedItem.Player.EnableEffect(StatusEffect, Intensity, Duration, AddDurationIfActive);                            
+                        }
                         else
-                            playerChangedItem.Player.EnableEffect(effect, Intensity, float.MaxValue, AddDurationIfActive);
+                            playerChangedItem.Player.EnableEffect(StatusEffect, Intensity, float.MaxValue, AddDurationIfActive);
                     }
+
                     break;
 
                 case PlayerPickedUpItemEventArgs playerPickedUpItem when HasFlagFast(Trigger, TriggerOn.OnAdded):
                     if (Duration >= 0)
-                        playerPickedUpItem.Player.EnableEffect(effect, Intensity, Duration, AddDurationIfActive);
+                    {
+                        playerPickedUpItem.Player.EnableEffect(StatusEffect, Intensity, Duration, AddDurationIfActive);                        
+                    }
                     else
-                        playerPickedUpItem.Player.EnableEffect(effect, Intensity, float.MaxValue, AddDurationIfActive);
+                        playerPickedUpItem.Player.EnableEffect(StatusEffect, Intensity, float.MaxValue, AddDurationIfActive);
+                        
                     break;
             }
         }

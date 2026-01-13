@@ -75,7 +75,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            base.Run(eventArgs);
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is ProjectileExplodedEventArgs ev)
             {
                 float chance = UnityEngine.Random.Range(0f, 101f);

@@ -12,6 +12,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public void Execute(EventArgs eventArgs)
         {
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is PlayerDyingEventArgs ev && Utilities.TryGetSummonedCustomItem(ev.Attacker?.CurrentItem.Serial ?? 0, out var item))
             {
                 LogManager.Silent("Name | Id | CustomFlag(s)");

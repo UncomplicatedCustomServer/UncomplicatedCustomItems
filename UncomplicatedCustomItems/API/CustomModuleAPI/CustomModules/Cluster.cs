@@ -67,7 +67,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            base.Run(eventArgs);
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is ProjectileExplodingEventArgs ev)
             {
                 Vector3 scale = CustomItem.Scale * 0.75f;

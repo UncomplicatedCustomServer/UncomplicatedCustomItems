@@ -48,7 +48,7 @@ namespace UncomplicatedCustomItems
 #endif
 		public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 10, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 12, 3);
 #else
 		public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
 #endif

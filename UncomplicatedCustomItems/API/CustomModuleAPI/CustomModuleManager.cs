@@ -19,6 +19,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 
         public static void Init()
         {
+#if EXILED
+
+#else
             foreach (var pluginEntry in LabApi.Loader.PluginLoader.Plugins.ToArray())
             {
                 try
@@ -90,6 +93,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                     LogManager.Error($"{nameof(CustomModuleManager)}: Unexpected error with plugin {pluginEntry.Key.Name}: {e}");
                 }
             }
+#endif
         }
 
         private static CustomModuleBase CreateInstanceFast(Type type)

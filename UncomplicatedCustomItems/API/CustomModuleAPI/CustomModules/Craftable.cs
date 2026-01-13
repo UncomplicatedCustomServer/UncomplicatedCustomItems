@@ -55,6 +55,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is Scp914ProcessingPickupEventArgs processingPickup)
             {
                 LogManager.Debug($"Triggered");

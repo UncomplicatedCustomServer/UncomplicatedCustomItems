@@ -12,30 +12,36 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
     {
         public ICustomItem CustomItem { get; set; }
         public abstract string Name { get; }
-        public virtual List<string> RequiredArguments => new();
+        public virtual List<string> RequiredArguments => [];
         public virtual List<Dictionary<object, object>> Arguments { get; set; }
-        public virtual void Run(EventArgs eventArgs)
+        public virtual void Run(EventArgs eventArgs) { }
+
+        public bool Check(EventArgs eventArgs)
         {
-            LogManager.Debug($"Running {Name}");
             if (eventArgs is IPlayerEvent playerEvent && playerEvent.Player.CurrentItem is not null)
             {
                 if (!Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var playeritem))
-                    return;
+                    return false;
 
                 if (playeritem.CustomItem != CustomItem)
-                    return;
+                    return false;
+
+                return true;
             }
 
             if (eventArgs is IItemEvent itemEvent)
             {
                 if (!Utilities.TryGetSummonedCustomItem(itemEvent.Item.Serial, out var item))
-                    return;
+                    return false;
 
                 if (item.CustomItem != CustomItem)
-                    return;
-            }
-        }
+                    return false;
 
+                return true;
+            }
+
+            return true;
+        }
 
         public virtual void Run() { }
 

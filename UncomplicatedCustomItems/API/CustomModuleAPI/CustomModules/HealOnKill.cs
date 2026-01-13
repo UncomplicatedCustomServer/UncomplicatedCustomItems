@@ -44,6 +44,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is PlayerDeathEventArgs ev)
             {
                 if (!Utilities.TryGetSummonedCustomItem(ev.Attacker?.CurrentItem.Serial ?? 0, out var item))

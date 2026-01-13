@@ -12,7 +12,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            base.Run(eventArgs);
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is PlayerReloadingWeaponEventArgs playerReloading)
             {
                 if (playerReloading.FirearmItem.StoredAmmo >= 0 || playerReloading.FirearmItem.ChamberedAmmo >= 1)

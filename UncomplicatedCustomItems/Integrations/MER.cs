@@ -59,22 +59,6 @@ namespace UncomplicatedCustomItems.Integrations
                             LogManager.Debug($"{item.Name} - Yup has MerSpawn - {data.ObjectName} - {data.ReplacePrimitive} - {name}");
                             if (data.ReplacePrimitive && name == data.SchematicName)
                                 DestroyPrimitiveInSchematic(schematicObject, data.ObjectName, item);
-
-                            if (data.LockerSpawning && name == data.SchematicName)
-                            {
-                                List<Locker> lockers = GetLockers(schematicObject);
-                                if (lockers == null || lockers.Count() <= 0)
-                                    continue;
-
-                                foreach (Locker locker in lockers)
-                                {
-                                    LabApi.Features.Wrappers.Locker lablocker = LabApi.Features.Wrappers.Locker.Get(locker);
-                                    foreach (SpawnData spawn in item.Spawn.SpawnSettings)
-                                    {
-                                        LockerSpawningItemTranspiler.HandleLockerSpawn(spawn, lablocker, item);
-                                    }
-                                }
-                            }
                         }
                     }
                 }

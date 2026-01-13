@@ -10,7 +10,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public override string Name => "NoCharge";
         public override void Run(EventArgs eventArgs)
         {
-            base.Run(eventArgs);
+            if (!Check(eventArgs))
+                return;
+                
             if (eventArgs is PlayerProcessingJailbirdMessageEventArgs ev)
             {
                 if (ev.Message is JailbirdMessageType.ChargeStarted or JailbirdMessageType.ChargeLoadTriggered)
