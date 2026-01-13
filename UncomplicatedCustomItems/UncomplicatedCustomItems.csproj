@@ -61,27 +61,27 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Exiled.API" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(EXILED_REFERENCES)\Exiled.API.dll</HintPath>
+      <HintPath>$(APPDATA)\SCP Secret Laboratory\LabAPI\dependencies\global\Exiled.API.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Exiled.Loader" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(EXILED_REFERENCES)\Exiled.Loader.dll</HintPath>
+      <HintPath>$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global\Exiled.Loader.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Exiled.Events" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(EXILED_REFERENCES)\Exiled.Events.dll</HintPath>
+      <HintPath>$(APPDATA)\EXILED\Plugins\Exiled.Events.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Exiled.CustomItems" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(EXILED_REFERENCES)\Exiled.CustomItems.dll</HintPath>
+      <HintPath>$(APPDATA)\EXILED\Plugins\Exiled.CustomItems.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Exiled.CustomRoles" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(EXILED_REFERENCES)\Exiled.CustomRoles.dll</HintPath>
+      <HintPath>$(APPDATA)\EXILED\Plugins\Exiled.CustomRoles.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Exiled.Permissions" Condition=" '$(Configuration)' == 'Exiled' ">
-      <HintPath>$(EXILED_REFERENCES)\Exiled.Permissions.dll</HintPath>
+      <HintPath>$(APPDATA)\EXILED\Plugins\Exiled.Permissions.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">

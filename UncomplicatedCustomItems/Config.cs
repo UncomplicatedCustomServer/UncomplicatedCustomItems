@@ -95,6 +95,6 @@ namespace UncomplicatedCustomItems
         public string KeybindSettingName { get; set; } = "Trigger CustomItem";
 
         [Description("The name of the Keybind setting header")]
-        public string KeybingSettingHeaderName { get; set; } = "CustomItem Settings";
+        public string KeybindSettingHeaderName { get; set; } = "CustomItem Settings";
     }
 }

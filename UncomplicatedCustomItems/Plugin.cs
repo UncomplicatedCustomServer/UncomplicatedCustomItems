@@ -152,7 +152,7 @@ namespace UncomplicatedCustomItems
 				{
 					_settings =
 					[
-						new SSGroupHeader(Config.KeybingSettingHeaderName),
+						new SSGroupHeader(Config.KeybindSettingHeaderName),
 						new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
 					];
 				}
