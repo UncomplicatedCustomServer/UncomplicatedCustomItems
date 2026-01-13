@@ -48,7 +48,7 @@ namespace UncomplicatedCustomItems
 #endif
 		public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 12, 3);
+        public override Version RequiredExiledVersion { get; } = new(9, 12, 2);
 #else
 		public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
 #endif
@@ -262,6 +262,7 @@ namespace UncomplicatedCustomItems
 		public void OnFinishedLoading()
 		{
             LabApi.Features.Wrappers.Player.Host.GameObject.AddComponent<Presence>().Init(30, 5);
+            LabApi.Features.Wrappers.Player.Host.GameObject.AddComponent<AdminMessageWatcher>();
 			//HttpManager.StartPresence();
 			if (Instance.Config.AllowDevPermissions)
 				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
