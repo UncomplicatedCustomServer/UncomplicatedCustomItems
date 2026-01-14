@@ -729,7 +729,7 @@ namespace UncomplicatedCustomItems.API.Features
                 if (firearm.StoredAmmo != firearm.MaxAmmo)
                     firearm.StoredAmmo = Math.Min(firearm.StoredAmmo + regen.AmmoPerInterval, firearm.MaxAmmo);
 
-                yield return regen.RegenInterval;
+                yield return Timing.WaitForSeconds(regen.RegenInterval);
             }
         }
 

@@ -27,8 +27,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
     {
         public class CreditTag
         {
+            public CreditTag(string role, string color, bool overrideStr)
+            {
+                Role = role;
+                Color = color;
+                Override = overrideStr;
+            }
+
             [JsonPropertyName("role")]
-            public string Text { get; set; } = string.Empty;
+            public string Role { get; set; } = string.Empty;
 
             [JsonPropertyName("color")]
             public string Color { get; set; } = string.Empty;
@@ -39,7 +46,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             [JsonPropertyName("job")]
             public bool Job { get; set; }
 
-            public override string ToString() => $"Text: {Text} Color: {Color} Override: {Override}";
+            public override string ToString() => $"Text: {Role} Color: {Color} Override: {Override}";
         }
 
         /// <summary>
@@ -174,7 +181,20 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             try
             {
-                Credits = JsonSerializer.Deserialize<Dictionary<string, CreditTag>>(RetriveString(HttpGetRequest("https://api.ucserver.it/credits.json")));
+                Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(HttpQuery.Get($"https://api.ucserver.it/credits.json"));
+                foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
+                {
+                    string role = kvp.Value["role"].GetString();
+                    string color = kvp.Value["color"].GetString();
+                    bool overrideStr = kvp.Value["override"].ValueKind switch
+                    {
+                        JsonValueKind.String => bool.Parse(kvp.Value["override"].GetString() ?? string.Empty),
+                        JsonValueKind.True => true,
+                        _ => false
+                    };
+
+                    Credits.Add(kvp.Key, new(role, color, overrideStr));
+                }
             }
             catch (JsonException je)
             {
@@ -209,16 +229,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             CreditTag tag = GetCreditTag(player);
             if (player.UserGroup != null || player.UserGroup.Permissions != 0 || !string.IsNullOrWhiteSpace(player.UserGroup.BadgeText))
             {
-                if (tag.Text == player.GroupName && tag.Color == player.GroupColor)
+                if (tag.Role == player.GroupName && tag.Color == player.GroupColor)
                     return;
 
                 if (!tag.Override)
                     return;
             }
 
-            if (!string.IsNullOrWhiteSpace(tag.Text) && !string.IsNullOrWhiteSpace(tag.Color))
+            if (!string.IsNullOrWhiteSpace(tag.Role) && !string.IsNullOrWhiteSpace(tag.Color))
             {
-                player.GroupName = tag.Text;
+                player.GroupName = tag.Role;
                 player.GroupColor = tag.Color;
             }
         }

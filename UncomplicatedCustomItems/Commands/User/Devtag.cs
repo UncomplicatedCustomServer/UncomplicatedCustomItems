@@ -42,7 +42,7 @@ namespace UncomplicatedCustomItems.Commands.User
             }
 
             Plugin.HttpManager.ApplyCreditTag(player);
-            response = $"Applied Credit Tag with name: {credits.Text} color: {credits.Color}";
+            response = $"Applied Credit Tag with name: {credits.Role} color: {credits.Color}";
             return true;
         }
     }

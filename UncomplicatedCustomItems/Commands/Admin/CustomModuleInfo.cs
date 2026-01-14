@@ -1,6 +1,7 @@
+using CommandSystem;
+using Exiled.API.Interfaces;
 using System.Collections.Generic;
 using System.Text;
-using CommandSystem;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 using UncomplicatedCustomItems.API.Interfaces;
 using LabPlugin = LabApi.Loader.Features.Plugins.Plugin;
@@ -26,10 +27,13 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
 
             sb.AppendLine($"<size=23>CustomModule Info</size>");
-
+#if EXILED
+            foreach (KeyValuePair<CustomModuleBase, IPlugin<IConfig>> kvp in CustomModuleManager.ModuleOwners)
+                sb.AppendLine($"[{kvp.Key.GetType().Name}] - {kvp.Value.Name} - v{kvp.Value.Version}");
+#else
             foreach (KeyValuePair<CustomModuleBase, LabPlugin> kvp in CustomModuleManager.ModuleOwners)
                 sb.AppendLine($"[{kvp.Key.GetType().Name}] - {kvp.Value.Name} - v{kvp.Value.Version}");
-
+#endif
             sb.AppendLine($"");
             sb.AppendLine($"Total: {CustomModuleManager.CustomModules.Count}");
             response = sb.ToString();

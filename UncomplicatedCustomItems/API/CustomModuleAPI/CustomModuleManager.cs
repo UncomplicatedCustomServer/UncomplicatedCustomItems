@@ -1,10 +1,16 @@
+using Exiled.API.Interfaces;
+using Exiled.Loader;
+using Mirror;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using UncomplicatedCustomItems.API.Attributes;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI
@@ -12,15 +18,62 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
     public class CustomModuleManager
     {
         public static List<CustomModuleBase> CustomModules { get; set; } = [];
+#if EXILED
+        public static List<IPlugin<IConfig>> ActivePlugins { get; set; } = [];
+        public static Dictionary<CustomModuleBase, IPlugin<IConfig>> ModuleOwners { get; set; } = [];
+#else
         public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins { get; set; } = [];
         public static Dictionary<CustomModuleBase, LabApi.Loader.Features.Plugins.Plugin> ModuleOwners { get; set; } = [];
+#endif
         private static readonly Dictionary<Type, Func<CustomModuleBase>> _factoryCache = [];
         private static readonly object _cacheLock = new();
 
         public static void Init()
         {
 #if EXILED
+            foreach (IPlugin<IConfig> plugin in Loader.Plugins)
+            {
+                LogManager.Silent($"{nameof(ImportManager.Actor)}: Passing plugin {plugin.Name}");
+                foreach (Type type in plugin.Assembly.GetTypes())
+                {
+                    if (!type.IsClass || type.IsAbstract)
+                        continue;
+                    if (!typeof(CustomModuleBase).IsAssignableFrom(type))
+                        continue;
 
+                    LogManager.Silent($"{nameof(CustomModuleManager)}: Importing {type.FullName}!");
+                    ActivePlugins.TryAdd(plugin);
+                    object instance = null;
+                    try
+                    {
+                        instance = Activator.CreateInstance(type);
+                    }
+                    catch (MissingMethodException)
+                    {
+                        LogManager.Error($"{nameof(CustomModuleManager)}: No parameterless constructor for {type.FullName} (plugin {plugin.Name}).");
+                        continue;
+                    }
+
+                    if (instance is not CustomModuleBase module)
+                    {
+                        LogManager.Error($"{nameof(CustomModuleManager)}: Instance of {type.FullName} could not be cast to CustomModuleBase.");
+                        continue;
+                    }
+
+                    LogManager.Info($"{nameof(CustomModuleManager)}: Imported CustomModule {module.Name} from plugin {plugin.Name} - {type.FullName}");
+                    CustomModules.TryAdd(module);
+                    ModuleOwners[module] = plugin;
+
+                    try
+                    {
+                        module.OnRegistered();
+                    }
+                    catch (Exception regEx)
+                    {
+                        LogManager.Error($"{nameof(CustomModuleManager)}: Error in OnRegistered for {module.Name}: {regEx}");
+                    }
+                }
+            }
 #else
             foreach (var pluginEntry in LabApi.Loader.PluginLoader.Plugins.ToArray())
             {
