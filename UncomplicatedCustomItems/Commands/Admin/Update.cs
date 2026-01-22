@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
 
             string arg = arguments.Count > 0 ? arguments.At(0) : "false";
-            response = $"Attempting to update UncomplicatedCustomBots from version {Plugin.Instance.Version}. Check console for details.";
+            response = $"Attempting to update UncomplicatedCustomItems from version {Plugin.Instance.Version}. Check console for details.";
 #if EXILED
 			Server.Host?.ReferenceHub.StartCoroutine(Updater.UpdatePluginCoroutine(Plugin.Instance.Version, arg));
 #else

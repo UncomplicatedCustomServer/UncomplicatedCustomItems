@@ -105,7 +105,7 @@ namespace UncomplicatedCustomItems
                                 {
                                     if (name == "UncomplicatedCustomItems")
                                     {
-                                        LogManager.Warn($"You have both Exiled and LabApi versions of UCI installed this is not supported! Remove on of these for UCI to be enabled.");
+                                        LogManager.Warn($"You have both Exiled and LabApi versions of UCI installed this is not supported! Remove one of these for UCI to be enabled.");
                                         Disable();
                                         return;
                                     }
