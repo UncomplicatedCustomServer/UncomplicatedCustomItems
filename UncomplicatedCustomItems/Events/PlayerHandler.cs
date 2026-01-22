@@ -329,6 +329,7 @@ namespace UncomplicatedCustomItems.Events
                                 writer.WriteByte((byte)jailbird.WearState);
                             }
                         }
+                        
                         break;
                 }
             }

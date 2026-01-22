@@ -1,12 +1,10 @@
-﻿using InventorySystem.Items.Pickups;
-using InventorySystem.Items.Usables.Scp244;
+﻿using InventorySystem.Items.Usables.Scp244;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
 using Mirror;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
@@ -15,7 +13,6 @@ using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UncomplicatedCustomItems.Commands;
 using UnityEngine;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
@@ -28,7 +25,6 @@ namespace UncomplicatedCustomItems.Events
         {
             ServerEvent.PickupDestroyed += OnPickup;
             ServerEvent.ProjectileExploding += OnGrenadeExploding;
-            ServerEvent.RoundEnding += OnRoundEnd;
             ServerEvent.PickupCreated += OnPickupCreation;
             ServerEvent.RoundStarted += SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded += OnDetonated;
@@ -38,7 +34,6 @@ namespace UncomplicatedCustomItems.Events
         {
             ServerEvent.PickupDestroyed -= OnPickup;
             ServerEvent.ProjectileExploding -= OnGrenadeExploding;
-            ServerEvent.RoundEnding -= OnRoundEnd;
             ServerEvent.PickupCreated -= OnPickupCreation;
             ServerEvent.RoundStarted -= SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded -= OnDetonated;
@@ -100,30 +95,6 @@ namespace UncomplicatedCustomItems.Events
                     }
                 }
             }
-        }
-
-        public static void OnRoundEnd(RoundEndingEventArgs ev)
-        {
-            if (!ev.IsAllowed)
-                return;
-
-            CustomItem.List.Clear();
-            CustomItem.UnregisteredCustomItems.Clear();
-            CustomItem.CustomItems.Clear();
-            CustomItem.UnregisteredCustomItems.Clear();
-            CustomAction.CustomActions.Clear();
-            CustomAction.List.Clear();
-            CustomAction.UnregisteredCustomActions.Clear();
-            CustomAction.UnregisteredList.Clear();
-            SummonedCustomItem.List.ForEach(sci => sci.Destroy());
-            SummonedAPICustomItem.List.ForEach(sci => sci.Destroy());
-            ArgumentManager._actionHandlers.Clear();
-            ArgumentManager._eventArgPropertyCache.Clear();
-            BaseCommand.Subcommands.Clear();
-            PlayerHandler._capybaras.Clear();
-            PlayerHandler._damageTimes.Clear();
-            PlayerHandler._toolGunPrimitives.Clear();
-            PlayerHandler.CustomScp268Effects.Clear();
         }
 
         public static void OnGrenadeExploding(ProjectileExplodingEventArgs ev)
