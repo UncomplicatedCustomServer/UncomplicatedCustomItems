@@ -53,7 +53,7 @@ namespace UncomplicatedCustomItems
 #else
 		public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
 #endif
-		public override Version Version { get; } = new(4, 0, 4);
+		public override Version Version { get; } = new(4, 0, 5);
 
 		public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
