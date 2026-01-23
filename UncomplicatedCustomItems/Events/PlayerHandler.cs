@@ -112,7 +112,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ProcessedJailbirdMessage += OnJailbirdMessage;
             PlayerEvent.ThrewProjectile += OnProjectileThrew;
             PlayerEvent.ChangingAttachments += OnPlayerChangingAttachments;
-            InventorySystem.InventoryExtensions.OnItemAdded += OnItemAdded;
+            InventoryExtensions.OnItemAdded += OnItemAdded;
         }
 
         public static void Unregister()
@@ -155,7 +155,7 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ProcessedJailbirdMessage -= OnJailbirdMessage;
             PlayerEvent.ThrewProjectile -= OnProjectileThrew;
             PlayerEvent.ChangingAttachments -= OnPlayerChangingAttachments;
-            InventorySystem.InventoryExtensions.OnItemAdded -= OnItemAdded;
+            InventoryExtensions.OnItemAdded -= OnItemAdded;
         }
 
         private static void OnItemAdded(ReferenceHub hub, ItemBase itemBase, ItemPickupBase pickupBase)
@@ -215,6 +215,9 @@ namespace UncomplicatedCustomItems.Events
                     case CustomItemType.SCPItem when summoned.CustomItem.CustomData is SCP018Data scp018data && ev.Projectile.Base is Scp018Projectile scp018:
                         scp018._friendlyFireTime = scp018data.FriendlyFireTime;
                         scp018._fuseTime = scp018data.FuseTime;
+                        if (scp018data.ExplodeOnImpact)
+                            scp018.gameObject.AddComponent<CollisionHandler>().Init(scp018.gameObject, scp018);
+
                         break;
 
                     default:
@@ -2209,7 +2212,7 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.CoinItem == null || ev.Player == null)
                 return;
-
+                
             if (!Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem customItem))
                 return;
 
