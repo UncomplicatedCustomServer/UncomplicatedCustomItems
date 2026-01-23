@@ -2,41 +2,53 @@
 using Exiled.API.Interfaces;
 using Exiled.Loader;
 #endif
-using CentralAuth;
+using HarmonyLib;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features;
 using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Misc;
 using MEC;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Struct;
-
+using UnityEngine.Networking;
 using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
 #pragma warning disable IDE1006
-
     internal class HttpManager
     {
-        private int _presenceIntervalSeconds = 60;
-        private bool _presenceRunning = false;
-        private int _presenceFailureCount = 0;
+        public class CreditTag
+        {
+            public CreditTag(string role, string color, bool overrideStr)
+            {
+                Role = role;
+                Color = color;
+                Override = overrideStr;
+            }
 
-        /// <summary>
-        /// Gets the <see cref="CoroutineHandle"/> of the presence coroutine.
-        /// </summary>
-        public CoroutineHandle PresenceCoroutine { get; internal set; }
+            [JsonPropertyName("role")]
+            public string Role { get; set; } = string.Empty;
+
+            [JsonPropertyName("color")]
+            public string Color { get; set; } = string.Empty;
+
+            [JsonPropertyName("override")]
+            public bool Override { get; set; }
+
+            [JsonPropertyName("job")]
+            public bool Job { get; set; }
+
+            public override string ToString() => $"Text: {Role} Color: {Color} Override: {Override}";
+        }
 
         /// <summary>
         /// Gets if the feature can be activated - missing library
@@ -59,19 +71,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public string Endpoint { get; } = "https://api.ucserver.it/v2";
 
         /// <summary>
-        /// Gets the UCI API endpoint
-        /// </summary>
-        public string UCIAPIEndpoint { get; } = "https://ucipluginapi.thaumiel-servers.workers.dev";
-
-        /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server
         /// </summary>
-        public Dictionary<string, Triplet<string, string, bool>> Credits { get; internal set; } = [];
-
-        /// <summary>
-        /// Gets the role of the given player (as steamid@64) inside UCI
-        /// </summary>
-        public Dictionary<string, string> OrgPlayerRole { get; } = [];
+        public Dictionary<string, CreditTag> Credits { get; internal set; } = [];
 
         /// <summary>
         /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
@@ -94,9 +96,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="prefix"></param>
         public HttpManager(string prefix)
         {
-            if (!CheckForDependency())
-                Timing.CallContinuously(20f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x406"));
-
             Prefix = prefix;
             RegisterEvents();
             HttpClient = new();
@@ -114,8 +113,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         }
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
-        
-        private bool CheckForDependency() => AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("Newtonsoft.Json", StringComparison.OrdinalIgnoreCase));
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -161,7 +158,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return string.Empty;
 
             Task<string> String = Task.Run(response.ReadAsStringAsync);
-
             String.Wait();
 
             return String.Result;
@@ -179,23 +175,42 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void LoadCreditTags()
         {
-            Credits = [];
+            Player.Host.ReferenceHub.StartCoroutine(LoadCreditTagsCoroutine());
+        }
+
+        private IEnumerator LoadCreditTagsCoroutine()
+        {
+            using UnityWebRequest request = UnityWebRequest.Get("https://api.ucserver.it/credits.json");
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                LogManager.Error($"Failed to fetch credits data in HttpManager::LoadCreditTags() - {request.error}");
+                yield break;
+            }
+
             try
             {
-                Dictionary<string, Dictionary<string, string>> Data = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(RetriveString(HttpGetRequest("https://api.ucserver.it/credits.json")));
+                string jsonResponse = request.downloadHandler.text;
+                Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(jsonResponse);
 
-                if (Data is null)
+                foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
                 {
-                    LogManager.Warn("Failed to connect to the UCS Central Server to get the credit tags informations!");
-                    return;
-                }
+                    string role = kvp.Value["role"].GetString();
+                    string color = kvp.Value["color"].GetString();
+                    bool overrideStr = kvp.Value["override"].ValueKind switch
+                    {
+                        JsonValueKind.String => bool.Parse(kvp.Value["override"].GetString() ?? string.Empty),
+                        JsonValueKind.True => true,
+                        _ => false
+                    };
 
-                foreach (KeyValuePair<string, Dictionary<string, string>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override")))
-                {
-                    Credits.Add(kvp.Key, new(kvp.Value["role"], kvp.Value["color"], bool.Parse(kvp.Value["override"])));
-                    if (kvp.Value.TryGetValue("job", out string isJob) && isJob is "true")
-                        OrgPlayerRole.Add(kvp.Key, isJob);
+                    Credits.Add(kvp.Key, new(role, color, overrideStr));
                 }
+            }
+            catch (JsonException je)
+            {
+                LogManager.Error($"Failed to parse JSON in HttpManager::LoadCreditTags() - {je.GetType().FullName}: {je.Message}\n{je.StackTrace}");
             }
             catch (Exception e)
             {
@@ -203,20 +218,18 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        public Triplet<string, string, bool> GetCreditTag(Player player)
+        public CreditTag GetCreditTag(Player player)
         {
-            if (Credits.ContainsKey(player.UserId))
-                return Credits[player.UserId];
-
-            return new(null, null, false);
+            return Credits.GetValueSafe(player.UserId);
         }
 
-        public bool TryGetCreditTag(Player player, out Triplet<string, string, bool> output)
+        public bool TryGetCreditTag(Player player, out CreditTag output)
         {
-            if (Credits.TryGetValue(player.UserId, out output))
+            output = Credits.GetValueSafe(player.UserId);
+            if (output != null)
                 return true;
                 
-            output = new(null, null, false);
+            output = null;
             return false;
         }
 
@@ -225,25 +238,20 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (!Plugin.Instance.Config.EnableCreditTags)
                 return;
 
-            // Name => Tag.First
-            // Color => Tag.Second
-            // Override => Tag.Third
-
-            Triplet<string, string, bool> Tag = GetCreditTag(player);
-
+            CreditTag tag = GetCreditTag(player);
             if (player.UserGroup != null || player.UserGroup.Permissions != 0 || !string.IsNullOrWhiteSpace(player.UserGroup.BadgeText))
             {
-                if (Credits.Any(k => k.Value.First == player.GroupName && k.Value.Second == player.GroupColor))
+                if (tag.Role == player.GroupName && tag.Color == player.GroupColor)
                     return;
 
-                if (!Tag.Third) // Job
-                    return; // Do not override
+                if (!tag.Override)
+                    return;
             }
 
-            if (Tag.First is not null && Tag.Second is not null)
+            if (!string.IsNullOrWhiteSpace(tag.Role) && !string.IsNullOrWhiteSpace(tag.Color))
             {
-                player.GroupName = Tag.First;
-                player.GroupColor = Tag.Second;
+                player.GroupName = tag.Role;
+                player.GroupColor = tag.Color;
             }
         }
 
@@ -320,215 +328,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             HttpResponseMessage message = await HttpClient.GetAsync($"https://uciversionmanager.thaumiel-servers.workers.dev/item/{Plugin.Instance.Version.ToString(3)}");
 
-            if (message.StatusCode != HttpStatusCode.OK)
+            if (!message.IsSuccessStatusCode)
                 return new(message.StatusCode, null);
 
             return new(message.StatusCode, await message.Content.ReadAsStringAsync());
-        }
-
-        /// <summary>
-        /// Start sending presence updates.
-        /// </summary>
-        public void StartPresence(int intervalSeconds = 60)
-        {
-            if (!PlayerAuthenticationManager.OnlineMode)
-                return;
-
-            LogManager.Debug("Starting UCI API Presence");
-            if (string.IsNullOrWhiteSpace(UCIAPIEndpoint))
-                throw new ArgumentException("Presence Worker Url required", nameof(UCIAPIEndpoint));
-
-            if (_presenceRunning)
-                StopPresence();
-
-            _presenceIntervalSeconds = Math.Max(5, intervalSeconds);
-            _presenceRunning = true;
-            _presenceFailureCount = 0;
-
-            PresenceCoroutine = Timing.RunCoroutine(PresenceLoop(), Segment.RealtimeUpdate);
-        }
-
-        /// <summary>
-        /// Stop presence coroutine.
-        /// </summary>
-        public void StopPresence()
-        {
-            LogManager.Debug("Stopping UCI API Presence");
-            _presenceRunning = false;
-            Timing.KillCoroutines(PresenceCoroutine);
-        }
-
-        private IEnumerator<float> PresenceLoop()
-        {
-            while (_presenceRunning)
-            {
-                try
-                {
-                    Task<bool> presenceTask = SendPresenceOnceAsync();
-
-                    _ = TrackPresenceResult(presenceTask);
-                }
-                catch (Exception ex)
-                {
-                    LogManager.Error($"HttpManager: error while scheduling presence send: {ex}");
-                    _presenceFailureCount++;
-
-                    if (_presenceFailureCount >= 5)
-                    {
-                        LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
-                        _presenceRunning = false;
-                        break;
-                    }
-                }
-
-                yield return Timing.WaitForSeconds(_presenceIntervalSeconds);
-            }
-        }
-
-        private async Task TrackPresenceResult(Task<bool> presenceTask)
-        {
-            try
-            {
-                bool success = await presenceTask;
-                
-                if (success)
-                {
-                    _presenceFailureCount = 0;
-                }
-                else
-                {
-                    _presenceFailureCount++;
-                    LogManager.Warn($"Presence failed ({_presenceFailureCount}/5)");
-
-                    if (_presenceFailureCount >= 5)
-                    {
-                        LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
-                        _presenceRunning = false;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogManager.Error($"Error tracking presence result: {ex}");
-                _presenceFailureCount++;
-
-                if (_presenceFailureCount >= 5)
-                {
-                    LogManager.Error($"Presence failed {_presenceFailureCount} consecutive times. Stopping presence updates.");
-                    _presenceRunning = false;
-                }
-            }
-        }
-
-        internal async Task<bool> SendPresenceOnceAsync()
-        {
-            if (string.IsNullOrWhiteSpace(UCIAPIEndpoint))
-                return false;
-
-            List<string> pluginNames = [];
-            bool hasExiled = false;
-
-            try
-            {
-                Type loaderType = Type.GetType("Exiled.Loader.Loader, Exiled.Loader");
-                if (loaderType != null)
-                {
-                    PropertyInfo pluginsProperty = loaderType.GetProperty("Plugins", BindingFlags.Public | BindingFlags.Static);
-                    if (pluginsProperty != null)
-                    {
-                        if (pluginsProperty.GetValue(null) is IEnumerable plugins)
-                        {
-                            foreach (object plugin in plugins)
-                            {
-                                PropertyInfo nameProperty = plugin.GetType().GetProperty("Name");
-                                if (nameProperty != null)
-                                {
-                                    string name = nameProperty.GetValue(plugin) as string;
-                                    if (!string.IsNullOrEmpty(name))
-                                    {
-                                        if (name.StartsWith("Exiled", StringComparison.OrdinalIgnoreCase))
-                                            hasExiled = true;
-                                        else
-                                            pluginNames.Add(name);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                LabApi.Loader.PluginLoader.EnabledPlugins.ToList().ForEach(p =>
-                {
-                    if (!p.Name.StartsWith("Exiled", StringComparison.OrdinalIgnoreCase))
-                        pluginNames.Add(p.Name);
-                    else
-                        hasExiled = true;
-                });
-
-                if (hasExiled)
-                    pluginNames.Add("Exiled");
-
-                HashSet<string> ucsPlugins = new(StringComparer.OrdinalIgnoreCase)
-                {
-                    "uncomplicatedcustomitems",
-                    "uncomplicatedcustomroles",
-                    "uncomplicatedcustomescapezones",
-                    "uncomplicatedcustomteams",
-                    "uncomplicatedcustombots"
-                };
-
-                Dictionary<string, object> payload = new()
-                {
-                    ["serverName"] = Server.ServerListName,
-                    ["pluginVersion"] = Plugin.Instance.Version.ToString(3) ?? "unknown",
-                    ["serverPort"] = Server.Port,
-                    ["serverIp"] = Server.IpAddress,
-                    ["hideIP"] = Plugin.Instance.Config.HideipOnList.ToString(),
-                    ["scpslVersion"] = GameCore.Version.VersionString,
-                    ["showOnList"] = Plugin.Instance.Config.ShowOnuciList.ToString(),
-                    ["exiled"] = hasExiled.ToString().ToLower(),
-                    ["extra"] = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}, EnabledCreditTags: {Plugin.Instance.Config.EnableCreditTags}",
-                    ["plugins"] = pluginNames.Where(ucsPlugins.Contains).ToList()
-                };
-
-                if (Plugin.Instance.Config.ShowPluginsOnList)
-                    payload["plugins"] = pluginNames;
-
-                string json = JsonConvert.SerializeObject(payload);
-
-                using StringContent content = new(json, Encoding.UTF8, "application/json");
-                using HttpResponseMessage response = await HttpClient.PostAsync($"{UCIAPIEndpoint}/connect", content).ConfigureAwait(false);
-
-                string responseText = string.Empty;
-                if (response.Content != null)
-                    responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    LogManager.Silent($"Presence posted to {UCIAPIEndpoint} - status {(int)response.StatusCode}. Response: {responseText}");
-                    return true;
-                }
-                else
-                {
-                    LogManager.Warn($"Presence POST failed for {UCIAPIEndpoint} - status {(int)response.StatusCode}. Response: {responseText}");
-                    return false;
-                }
-            }
-            catch (HttpRequestException hre)
-            {
-                LogManager.Warn($"Presence POST HttpRequestException: {hre.Message}");
-                return false;
-            }
-            catch (TaskCanceledException tce)
-            {
-                LogManager.Warn($"Presence POST canceled/timed out: {tce.Message}");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                LogManager.Error($"Unexpected error sending presence: {ex.GetType().FullName}: {ex.Message}");
-                return false;
-            }
         }
     }
 }

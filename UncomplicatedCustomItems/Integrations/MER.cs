@@ -6,6 +6,7 @@ using AdminToys;
 using LabApi.Loader.Features.Misc;
 using MapGeneration.Distributors;
 using Mirror;
+using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -53,30 +54,11 @@ namespace UncomplicatedCustomItems.Integrations
 
                     foreach (CustomItem item in CustomItem.List)
                     {
-                        if (item.HasModule(CustomFlags.MERSpawn))
+                        if (item.TryGetModule<MERSpawn>(out var data))
                         {
-                            foreach (MERSpawnSettings data in item.FlagSettings.MerSpawnSettings)
-                            {
-                                LogManager.Debug($"{item.Name} - Yup has MerSpawn - {data.ObjectName} - {data.ReplacePrimitive} - {name}");
-                                if (data.ReplacePrimitive && name == data.SchematicName)
-                                    DestroyPrimitiveInSchematic(schematicObject, data.ObjectName, item);
-
-                                if (data.LockerSpawning && name == data.SchematicName)
-                                {
-                                    List<Locker> lockers = GetLockers(schematicObject);
-                                    if (lockers == null || lockers.Count() <= 0)
-                                        continue;
-
-                                    foreach (Locker locker in lockers)
-                                    {
-                                        LabApi.Features.Wrappers.Locker lablocker = LabApi.Features.Wrappers.Locker.Get(locker);
-                                        foreach (SpawnData spawn in item.Spawn.SpawnSettings)
-                                        {
-                                            LockerSpawningItemPrefix.HandleLockerSpawn(spawn, lablocker, item);
-                                        }
-                                    }
-                                }
-                            }
+                            LogManager.Debug($"{item.Name} - Yup has MerSpawn - {data.ObjectName} - {data.ReplacePrimitive} - {name}");
+                            if (data.ReplacePrimitive && name == data.SchematicName)
+                                DestroyPrimitiveInSchematic(schematicObject, data.ObjectName, item);
                         }
                     }
                 }

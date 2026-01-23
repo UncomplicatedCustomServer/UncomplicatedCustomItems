@@ -80,6 +80,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List.ToList())
                 {
+                    if (item is null)
+                        continue;
+
                     if (item.Owner != null && !APICustomItems.ContainsKey(item.Owner))
                         APICustomItems[item.Owner] = [];
 
@@ -88,7 +91,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (!item.IsPickup)
                         APICustomItems[item.Owner].Add(item.CustomItem);
-                    else if (item.Pickup.Position != null)
+                    else if (item.IsPickup && item.Pickup.Position != null && item.Pickup.Position != Vector3.zero)
                         APICustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
 
                     item.Destroy();

@@ -1,8 +1,8 @@
 using CommandSystem;
 using System;
-using Newtonsoft.Json;
 using UncomplicatedCustomItems.API.Features.Helper;
 using LabApi.Features.Wrappers;
+using System.Text.Json.Serialization;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -11,10 +11,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
     {
         public class GitHubReleaseInfo
         {
-            [JsonProperty("tag_name")]
+            [JsonPropertyName("tag_name")]
             public string TagName { get; set; }
 
-            [JsonProperty("assets")]
+            [JsonPropertyName("assets")]
             public Updater.GitHubAssetInfo[] Assets { get; set; }
         }
         

@@ -2,14 +2,10 @@
 using Exiled.API.Features;
 using Exiled.API.Enums;
 #else
-using LabApi.Features.Wrappers;
-using LabApi.Loader;
 using LabApi.Loader.Features.Plugins;
+using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Plugins.Enums;
-#endif
-#if DEBUG
-using UncomplicatedCustomItems.Events.Handlers;
-using UncomplicatedCustomItems.Events.Arguments.JailbirdEvents;
+using LabApi.Features;
 #endif
 
 using System;
@@ -26,10 +22,10 @@ using UnityEngine;
 using UserSettings.ServerSpecific;
 using HarmonyLib;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-
-// Events
-using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using UncomplicatedCustomItems.API.CustomModuleAPI;
 using System.Linq;
+using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using UncomplicatedCustomItems.API.Components;
 using System.Collections;
 
 // Building for remote development. You can ignore this :)
@@ -49,11 +45,11 @@ namespace UncomplicatedCustomItems
 #endif
 		public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 10, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 12, 2);
 #else
-		public override Version RequiredApiVersion { get; } = LabApi.Features.LabApiProperties.CurrentVersion;
+		public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
 #endif
-		public override Version Version { get; } = new(4, 0, 5);
+		public override Version Version { get; } = new(4, 1, 0);
 
 		public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
@@ -140,13 +136,9 @@ namespace UncomplicatedCustomItems
 			ServerHandler.Register();
 			ScpHandler.Register();
 			SSSHandler.Register();
+			CustomModuleManager.Init();
 
 			ServerEvent.WaitingForPlayers += OnFinishedLoading;
-
-#if DEBUG
-			JailbirdEvents.ChangingWearState += OnChangingWearState;
-			JailbirdEvents.ChangedWearState += OnChangedWearState;
-#endif
 
 			Arguments.Initialize();
 			Arguments.Register();
@@ -157,13 +149,13 @@ namespace UncomplicatedCustomItems
 				{
 					_settings =
 					[
-						new SSGroupHeader(Config.KeybingSettingHeaderName),
+						new SSGroupHeader(Config.KeybindSettingHeaderName),
 						new SSKeybindSetting(Config.KeybindSettingId, Config.KeybindSettingName, KeyCode.K, hint: Config.KeybindSettingHint, allowSpectatorTrigger: false)
 					];
 				}
 				catch (Exception e)
 				{
-					LogManager.Error($"Failed to initialize settings: {e.Message}\n{e.StackTrace}");
+					LogManager.Error($"Failed to initialize SSS settings: {e.Message}\n{e.StackTrace}");
 				}
 
 				try
@@ -186,7 +178,7 @@ namespace UncomplicatedCustomItems
 #if EXILED
             LogManager.Info($"Loaded from Exiled! [{Exiled.Loader.Loader.Version} - {RequiredExiledVersion}]");
 #else
-			LogManager.Info($"Loaded from LabApi! [{LabApi.Features.LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
+			LogManager.Info($"Loaded from LabApi! [{LabApiProperties.CurrentVersion} - {RequiredApiVersion}]");
 #endif
 			LogManager.Info(">> Join our discord: https://discord.gg/5StRGu8EJV <<");
 
@@ -218,7 +210,9 @@ namespace UncomplicatedCustomItems
 		public override void Disable()
 #endif
 		{
-			HttpManager.StopPresence();
+			if (LabApi.Features.Wrappers.Player.Host != null && LabApi.Features.Wrappers.Player.Host.GameObject.TryGetComponent<Presence>(out var presence))
+                UnityEngine.Object.Destroy(presence);
+
 			ECRIntegration.Cleanup();
 
 			// Cleanup
@@ -252,11 +246,6 @@ namespace UncomplicatedCustomItems
 			SSSHandler.Unregister();
 			MERIntergration.Unregister();
 
-#if DEBUG
-            JailbirdEvents.ChangingWearState -= OnChangingWearState;
-			JailbirdEvents.ChangedWearState -= OnChangedWearState;
-#endif
-
 			ServerEvent.WaitingForPlayers -= OnFinishedLoading;
 
 			Arguments.Cleanup();
@@ -266,18 +255,11 @@ namespace UncomplicatedCustomItems
             base.OnDisabled();
 #endif
 		}
-
-#if DEBUG
-		public void OnChangingWearState(ChangingWearStateEventArgs ev) =>
-			LogManager.Debug($"Attempted to set Wearstate to {ev.NewWearState} from {ev.OldWearState}");
-
-        public void OnChangedWearState(ChangedWearStateEventArgs ev) =>
-			LogManager.Debug($"Set Wearstate to {ev.NewWearState} from {ev.OldWearState}");
-#endif
-
+		
 		public void OnFinishedLoading()
 		{
-			HttpManager.StartPresence();
+            LabApi.Features.Wrappers.Player.Host.GameObject.AddComponent<Presence>().Init(30, 5);
+			//HttpManager.StartPresence();
 			if (Instance.Config.AllowDevPermissions)
 				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 

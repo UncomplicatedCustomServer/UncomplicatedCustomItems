@@ -35,14 +35,11 @@ namespace UncomplicatedCustomItems.Events
                         {
                             if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
                             {
-                                if (player.GameObject == null)
-                                    return;
-
                                 customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
                                 break;
                             }
                             else
-                                LogManager.Debug($"{nameof(OnValueReceived)}: {item} - {item.Serial} Is not a CustomItem.");
+                                LogManager.Debug($"{item.Serial} Is not a CustomItem.");
                         }
                     }
                 }

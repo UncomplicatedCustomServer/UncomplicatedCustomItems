@@ -365,13 +365,16 @@ namespace UncomplicatedCustomItems.API
         /// Summon a <see cref="CustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
-        internal static void SummonCustomItem(ICustomItem customItem)
+        internal static void SummonCustomItem(ICustomItem customItem, bool ignoreChance = false)
         {
             foreach (SpawnData spawn in customItem.Spawn.SpawnSettings)
             {
-                float chance = UnityEngine.Random.Range(0f, 101f);
-                if (chance >= spawn.Chance)
-                    continue;
+                if (!ignoreChance)
+                {
+                    float roll = UnityEngine.Random.Range(0f, 101f);
+                    if (roll >= spawn.Chance)
+                        continue;
+                }
 
                 SummoningCustomItemEventArgs args = new(customItem);
                 Events.Handlers.CustomItemEvents.OnSummoningCustomItem(args);
@@ -422,7 +425,9 @@ namespace UncomplicatedCustomItems.API
 
                 Vector3 spawnPosition = GetDynamicSpawnPosition(room, dynamicSpawn, spawn, customItem);
                 if (spawnPosition != Vector3.zero && spawn.Rotation != Vector3.zero)
-                    new SummonedCustomItem(customItem, spawnPosition, rotation);
+                {
+                    new SummonedCustomItem(customItem, spawnPosition, rotation);                    
+                }
                 else if (spawnPosition != Vector3.zero)
                     new SummonedCustomItem(customItem, spawnPosition);
             }
@@ -478,33 +483,17 @@ namespace UncomplicatedCustomItems.API
 
         private static Pickup FindTargetPickupInRoom(Room room, SpawnData spawn, ICustomItem customItem)
         {
-            List<Pickup> pickupsInRoom = Pickup.List.Where(pickup => 
-                pickup.Room == room && 
-                !IsSummonedCustomItem(pickup.Serial))
-                .ToList();
-
+            List<Pickup> pickupsInRoom = Pickup.List.Where(pickup => pickup.Room == room && !IsSummonedCustomItem(pickup.Serial)).ToList();
             return FilterAndSelectPickup(pickupsInRoom, spawn, customItem);
         }
 
         private static Pickup FindTargetPickupInZone(FacilityZone zone, SpawnData spawn, ICustomItem customItem)
         {
-            List<Pickup> pickupsInZone = Pickup.List.Where(pickup => 
-                pickup.Room != null && 
-                pickup.Room.Zone == zone && 
-                !IsSummonedCustomItem(pickup.Serial))
-                .ToList();
-
+            List<Pickup> pickupsInZone = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
             if (!(spawn.ReplaceItemsInPedestals ?? false))
             {
-                List<ushort> pedestalItemSerials = PedestalLocker.List
-                .Select(locker => locker.GetAllItems().FirstOrDefault())
-                .Where(pickup => pickup != null)
-                .Select(pickup => pickup.Serial)
-                .ToList();
-
-                pickupsInZone = pickupsInZone.Where(pickup => 
-                    !pedestalItemSerials.Contains(pickup.Serial))
-                    .ToList();
+                List<ushort> pedestalItemSerials = PedestalLocker.List.Select(locker => locker.GetAllItems().FirstOrDefault()).Where(pickup => pickup != null).Select(pickup => pickup.Serial).ToList();
+                pickupsInZone = pickupsInZone.Where(pickup => !pedestalItemSerials.Contains(pickup.Serial)).ToList();
             }
 
             return FilterAndSelectPickup(pickupsInZone, spawn, customItem);

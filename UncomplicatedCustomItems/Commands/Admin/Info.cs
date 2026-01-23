@@ -11,6 +11,7 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
+using UncomplicatedCustomItems.API.CustomModuleAPI;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -50,137 +51,156 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (customItem.Spawn is not null)
             {
-                AddInfoLine(sb, "<color=#632300>󾠬</color> Does It Spawn:", string.Join(", ", customItem.Spawn.DoSpawn));
-                
-                foreach (SummonedCustomItem SummonedCustomItem in SummonedCustomItem.List)
-                {
-                    if (SummonedCustomItem.CustomItem.Id == customItem.Id)
-                    {
-                        Count += 1;
-                    }
-                }
+                ISpawn spawnRoot = customItem.Spawn;
+                AddInfoLine(sb, "<color=#632300>󾠬</color> Does It Spawn:", spawnRoot.DoSpawn ? "Yes" : "No");
+                AddInfoLine(sb, "<color=#632300>🔢</color> Spawn Count:", spawnRoot.Count.ToString());
+
+                Count = 0;
+                foreach (SummonedCustomItem summoned in SummonedCustomItem.List.Where(sci => sci.CustomItem.Id == customItem.Id))
+                    Count += 1;
+
                 AddInfoLine(sb, "<color=#632300>📏</color> Amount Spawned:", Count.ToString());
-                foreach (SpawnData spawn in customItem.Spawn.SpawnSettings)
+
+                if (spawnRoot.SpawnSettings != null && spawnRoot.SpawnSettings.Count > 0)
                 {
-                    if (spawn.Coords != Vector3.zero)
-                        AddInfoLine(sb, "<color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", spawn?.Coords));
-                    else if (spawn.DynamicSpawn.Count >= 1)
+                    int idx = 0;
+                    foreach (SpawnData spawn in spawnRoot.SpawnSettings)
                     {
-                        AddInfoLine(sb, "<color=#632300>📂</color> Dynamic Spawn:", "");
-                        foreach (DynamicSpawn DynamicSpawn in spawn.DynamicSpawn)
+                        idx++;
+                        AddInfoLine(sb, $"<color=#632300>📦</color> Spawn Setting #{idx}:", "");
+                        AddInfoLine(sb, "    Chance:", spawn.Chance.ToString());
+
+                        if (spawn.Rotation != Vector3.zero)
+                            AddInfoLine(sb, "    Rotation:", FormatVector(spawn.Rotation));
+
+                        if (spawn.Coords != Vector3.zero)
+                            AddInfoLine(sb, "    Coords:", FormatVector(spawn.Coords));
+
+                        if (spawn.LockerSettings != null && spawn.LockerSettings.Enable)
                         {
-                            AddInfoLine(sb, "    <color=#632300>🎦</color> Spawn Rooms:", string.Join(", ", DynamicSpawn.Room));
-                            AddInfoLine(sb, "    <color=#632300>󾠬</color> Spawn Coords:", string.Join(", ", DynamicSpawn.Coords));
+                            AddInfoLine(sb, "    Locker Spawn:", "");
+                            AddInfoLine(sb, "        Enable:", spawn.LockerSettings.Enable.ToString());
+                            AddInfoLine(sb, "        Locker Type:", spawn.LockerSettings.LockerType.ToString());
+                            AddInfoLine(sb, "        Room:", spawn.LockerSettings.Room ?? "<null>");
+                            AddInfoLine(sb, "        Zone:", spawn.LockerSettings.Zone.ToString());
+                            AddInfoLine(sb, "        Chamber:", string.IsNullOrEmpty(spawn.LockerSettings.Chamber) ? "<none>" : spawn.LockerSettings.Chamber);
+                            if (spawn.LockerSettings.Offset != Vector3.zero)
+                                AddInfoLine(sb, "        Offset:", FormatVector(spawn.LockerSettings.Offset));
                         }
+
+                        if (spawn.DynamicSpawn != null && spawn.DynamicSpawn.Count >= 1)
+                        {
+                            AddInfoLine(sb, "    Dynamic Spawn:", "");
+                            int dI = 0;
+                            foreach (DynamicSpawn dynamic in spawn.DynamicSpawn)
+                            {
+                                dI++;
+                                AddInfoLine(sb, $"        Spawn #{dI} Room:", dynamic.Room ?? "<null>");
+                                if (dynamic.Coords != Vector3.zero)
+                                    AddInfoLine(sb, $"        Spawn #{dI} Coords:", FormatVector(dynamic.Coords));
+                            }
+                        }
+
+                        if (spawn.Zones != null && spawn.Zones.Count >= 1)
+                            AddInfoLine(sb, "    Spawn Zones:", string.Join(", ", spawn.Zones.Select(z => z.ToString())));
+
+                        AddInfoLine(sb, "    Replace Existing Pickup:", spawn.ReplaceExistingPickup.ToString());
+                        AddInfoLine(sb, "    Force Item Replace:", spawn.ForceItem.ToString());
+                        AddInfoLine(sb, "    Replace Items In Pedestals:", spawn.ReplaceItemsInPedestals?.ToString() ?? "null");
                     }
-                    else if (spawn.Zones.Count >= 1)
-                        AddInfoLine(sb, "<color=#632300>🇿</color> Spawn Zones:", string.Join(", ", spawn?.Zones));
                 }
+                else
+                    AddInfoLine(sb, "<color=#632300>📦</color> Spawn Settings:", "<i>None</i>");
             }
 
-            ProcessCustomFlags(customItem, sb);
-
-            if (customItem.CustomFlags.HasValue)
-                AddInfoLine(sb, "<color=#bf4eb6>📄</color> Custom flags:", customItem.CustomFlags.ToString());
+            ProcessCustomModules(customItem, sb);
 
             response = sb.ToString();
             return true;
         }
 
-        private void ProcessCustomFlags(ICustomItem customItem, StringBuilder sb)
+        private void ProcessCustomModules(ICustomItem customItem, StringBuilder sb)
         {
-            if (customItem.FlagSettings == null || !customItem.CustomFlags.HasValue)
+            if (customItem.CustomModules == null || customItem.CustomModules.Count == 0)
                 return;
 
-            Type flagSettingsType = customItem.FlagSettings.GetType();
-            PropertyInfo[] settingsProperties = flagSettingsType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            AddInfoLine(sb, "<color=#ffd700>🧩</color> Custom Modules:", "");
 
-            List<CustomFlags> activeFlags = GetActiveCustomFlags(customItem.CustomFlags.Value);
-
-            foreach (PropertyInfo settingsProperty in settingsProperties)
+            foreach (KeyValuePair<CustomModuleBase, List<object>> kvp in customItem.CustomModules)
             {
-                object settingsValue = settingsProperty.GetValue(customItem.FlagSettings);
-                if (settingsValue == null) continue;
-
-                string flagName = GetFlagNameFromSettingsProperty(settingsProperty.Name);
-                if (!IsRelevantForActiveFlags(flagName, activeFlags)) continue;
-
-                if (settingsValue is IEnumerable enumerable && settingsValue is not string)
+                try
                 {
-                    ProcessSettingsCollection(settingsProperty.Name, enumerable, sb);
+                    CustomModuleBase module = kvp.Key;
+                    List<object> argsList = kvp.Value;
+
+                    if (module == null)
+                        continue;
+
+                    string moduleName = module.Name ?? module.GetType().Name;
+                    AddInfoLine(sb, $"    <color=#ffd700>🔧</color> {moduleName}:", "");
+
+                    if (argsList == null || argsList.Count == 0)
+                    {
+                        AddInfoLine(sb, "        ", "<i>No arguments</i>");
+                        continue;
+                    }
+
+                    int argIndex = 0;
+                    foreach (object arg in argsList)
+                    {
+                        ProcessModuleArgument(arg, sb, argIndex);
+                        argIndex++;
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    ProcessSingleSettings(settingsProperty.Name, settingsValue, sb);
+                    AddInfoLine(sb, "    <color=#ff0000>!</color> Error reading module:", ex.Message);
                 }
             }
         }
 
-        private List<CustomFlags> GetActiveCustomFlags(CustomFlags flags)
+        private void ProcessModuleArgument(object arg, StringBuilder sb, int argIndex)
         {
-            List<CustomFlags> activeFlags = [];
-            foreach (CustomFlags flag in Enum.GetValues(typeof(CustomFlags)))
+            string indent = "        ";
+            string color = "#ffd700";
+
+            if (arg is IDictionary dict)
             {
-                if (flag != CustomFlags.None && flags.HasFlag(flag))
+                if (dict.Count == 0)
+                    return;
+
+                AddInfoLine(sb, $"{indent}<color={color}>▪</color> Argument {argIndex}:", "");
+                foreach (DictionaryEntry entry in dict)
                 {
-                    activeFlags.Add(flag);
+                    string rawKey = entry.Key?.ToString() ?? "<null>";
+                    string propName = GetPropertyDisplayName(rawKey);
+                    string formatted = FormatPropertyValue(entry.Value);
+
+                    AddInfoLine(sb, $"{indent}    {propName}:", formatted);
                 }
             }
-            return activeFlags;
-        }
-
-        private string GetFlagNameFromSettingsProperty(string propertyName)
-        {
-            if (propertyName.EndsWith("Settings"))
-                return propertyName.Substring(0, propertyName.Length - 8);
-            return propertyName;
-        }
-
-        private bool IsRelevantForActiveFlags(string flagName, List<CustomFlags> activeFlags)
-        {
-            Dictionary<string, CustomFlags[]> specialMappings = new()
+            else if (arg is IEnumerable enumerable and not string)
             {
-                { "Effect", new[] { CustomFlags.EffectShot, CustomFlags.EffectWhenEquiped, CustomFlags.EffectWhenUsed } },
-                { "Audio", new[] { CustomFlags.CustomSound } },
-                { "ItemGlow", new[] { CustomFlags.ItemGlow } },
-                { "CantDrop", new[] { CustomFlags.CantDrop } },
-                { "Cluster", new[] { CustomFlags.Cluster } },
-                { "DieOnDrop", new[] { CustomFlags.DieOnDrop } },
-                { "ExplosiveBullets", new[] { CustomFlags.ExplosiveBullets } },
-                { "LifeSteal", new[] { CustomFlags.LifeSteal } },
-                { "SpawnItemWhenDetonated", new[] { CustomFlags.SpawnItemWhenDetonated } },
-                { "SwitchRoleOnUse", new[] { CustomFlags.SwitchRoleOnUse } },
-                { "Craftable", new[] { CustomFlags.Craftable } }
-            };
-
-            if (specialMappings.ContainsKey(flagName))
-            {
-                return specialMappings[flagName].Any(activeFlags.Contains);
+                IEnumerable<string> items = enumerable.Cast<object>().Select(x => x?.ToString() ?? "null");
+                AddInfoLine(sb, $"{indent}<color={color}>▪</color> Argument {argIndex}:", string.Join(", ", items));
             }
-
-            try
-            {
-                CustomFlags flag = (CustomFlags)Enum.Parse(typeof(CustomFlags), flagName, true);
-                return activeFlags.Contains(flag);
-            }
-            catch
-            {
-                return false;
-            }
+            else
+                AddInfoLine(sb, $"{indent}<color={color}>▪</color> Argument {argIndex}:", arg?.ToString() ?? "null");
         }
 
         private void ProcessSettingsCollection(string settingsName, IEnumerable collection, StringBuilder sb)
         {
             string displayName = GetDisplayName(settingsName);
             string color = GetColorForSettings(settingsName);
-            
+
             AddInfoLine(sb, $"<color={color}>📂</color> {displayName}:", "");
 
             foreach (object item in collection)
             {
                 if (item == null)
                     continue;
-                ProcessSettingsObject(item, sb, color, "    ");
+
+                ProcessSettingsObject(item, sb, "    ");
             }
         }
 
@@ -188,13 +208,16 @@ namespace UncomplicatedCustomItems.Commands.Admin
         {
             string displayName = GetDisplayName(settingsName);
             string color = GetColorForSettings(settingsName);
-            
+
             AddInfoLine(sb, $"<color={color}>📂</color> {displayName}:", "");
-            ProcessSettingsObject(settings, sb, color, "    ");
+            ProcessSettingsObject(settings, sb, "    ");
         }
 
-        private void ProcessSettingsObject(object settings, StringBuilder sb, string color, string indent)
+        private void ProcessSettingsObject(object settings, StringBuilder sb, string indent)
         {
+            if (settings == null)
+                return;
+
             Type settingsType = settings.GetType();
             PropertyInfo[] properties = settingsType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
@@ -207,16 +230,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         continue;
 
                     string displayName = GetPropertyDisplayName(prop.Name);
-                    string icon = GetIconForProperty(prop.Name);
                     string formattedValue = FormatPropertyValue(value);
 
                     if (prop.Name.Equals("GlowColor", StringComparison.OrdinalIgnoreCase) && value is string glowColor)
-                    {
                         Color = glowColor;
-                        color = glowColor;
-                    }
 
-                    AddInfoLine(sb, $"{indent}<color={color}>{icon}</color> {displayName}:", formattedValue);
+                    AddInfoLine(sb, $"{indent} {displayName}:", formattedValue);
                 }
                 catch (Exception)
                 {
@@ -225,22 +244,17 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
         }
 
-        private void AddInfoLine(StringBuilder sb, string label, string value)
-        {
+        private void AddInfoLine(StringBuilder sb, string label, string value) =>
             sb.AppendLine($"{label.GenerateWithBuffer(40)} {value}");
-        }
 
-        private string GetDisplayName(string settingsName)
-        {
-            return settingsName.Replace("Settings", "")
-                              .Replace("_", " ");
-        }
+        private string GetDisplayName(string settingsName) =>
+            settingsName.Replace("Settings", "").Replace("_", " ");
 
         private string GetColorForSettings(string settingsName)
         {
             if (settingsName.Contains("ItemGlow") && !string.IsNullOrEmpty(Color))
                 return Color;
-            
+
             return "#bf4eb6";
         }
 
@@ -250,59 +264,24 @@ namespace UncomplicatedCustomItems.Commands.Admin
             return result;
         }
 
-        private string GetIconForProperty(string propertyName)
-        {
-            var iconMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "AudibleDistance", "📏" },
-                { "AudioPath", "📃" },
-                { "SoundVolume", "🔉" },
-                { "Volume", "🔉" },
-                { "HintOrBroadcast", "💬" },
-                { "Message", "💬" },
-                { "Duration", "🕛" },
-                { "DeathMessage", "💬" },
-                { "Vaporize", "💦" },
-                { "AmountToSpawn", "#" },
-                { "Amount", "#" },
-                { "FuseTime", "🕛" },
-                { "ItemToSpawn", "🔫" },
-                { "ItemId", "🔫" },
-                { "ScpDamageMultiplier", "💥" },
-                { "DamageRadius", "💥" },
-                { "EffectEvent", "💻" },
-                { "Effect", "💉" },
-                { "EffectIntensity", "📶" },
-                { "EffectDuration", "🕛" },
-                { "GlowColor", "🌟" },
-                { "LifeStealAmount", "💊" },
-                { "LifeStealPercentage", "💊" },
-                { "Chance", "🎲" },
-                { "Pickupable", "🛠️" },
-                { "TimeTillDespawn", "🕛" },
-                { "Delay", "🔂" },
-                { "KeepLocation", "🔒" },
-                { "RoleId", "🆔" },
-                { "RoleType", "🚶" },
-                { "SpawnFlags", "󾓦" },
-                { "KnobSetting", "🔒" },
-                { "OriginalItem", "🆔" }
-            };
-
-            return iconMap.TryGetValue(propertyName, out string icon) ? icon : "📋";
-        }
-
         private string FormatPropertyValue(object value)
         {
-            if (value == null) return "null";
-            
-            if (value is IEnumerable enumerable && !(value is string))
+            if (value == null)
+                return "null";
+
+            if (value is Vector3 v)
+                return FormatVector(v);
+
+            if (value is IEnumerable enumerable and not string)
             {
-                var items = enumerable.Cast<object>().Select(x => x?.ToString() ?? "null");
+                IEnumerable<string> items = enumerable.Cast<object>().Select(x => x?.ToString() ?? "null");
                 return string.Join(", ", items);
             }
-            
+
             return value.ToString();
         }
+
+        private string FormatVector(Vector3 v) =>
+            $"{v.x:F2}, {v.y:F2}, {v.z:F2}";
     }
 }

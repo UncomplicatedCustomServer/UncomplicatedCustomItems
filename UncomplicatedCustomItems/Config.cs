@@ -60,9 +60,6 @@ namespace UncomplicatedCustomItems
         [Description("The duration (in seconds) for which the WorkstationBan hint is displayed. Currently does nothing since LabApi dosent have a event for this")]
         public float WorkstationBanHintDuration { get; set; } = 3f;
 
-        [Description("Enables admin messages. Occasionally, you will receive important notifications on your console from our central servers.")]
-        public bool DoEnableAdminMessages { get; set; } = true;
-
         [Description("Allow server tracking? (This does nothing to your server it only allows us to view the amount of servers using the plugin)")]
         public bool ServerTracking { get; set; } = true;
 
@@ -95,6 +92,6 @@ namespace UncomplicatedCustomItems
         public string KeybindSettingName { get; set; } = "Trigger CustomItem";
 
         [Description("The name of the Keybind setting header")]
-        public string KeybingSettingHeaderName { get; set; } = "CustomItem Settings";
+        public string KeybindSettingHeaderName { get; set; } = "CustomItem Settings";
     }
 }

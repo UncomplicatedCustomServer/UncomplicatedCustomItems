@@ -2,6 +2,7 @@
 using InventorySystem;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
+using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
@@ -14,7 +15,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using InventorySystem.Items.Firearms.Extensions;
+using UncomplicatedCustomItems.API.CustomModuleAPI;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -26,6 +27,7 @@ using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Events.Arguments.CustomItemEvents;
 using UnityEngine;
+using ZXing.Common;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
@@ -42,7 +44,7 @@ namespace UncomplicatedCustomItems.API.Features
     public class SummonedCustomItem
     {
         /// <summary>
-        /// Gets the list of every active SummonedCustomItem
+        /// Gets the list of every active CustomItem
         /// </summary>
         public static List<SummonedCustomItem> List { get; } = [];
 
@@ -105,6 +107,8 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal bool PropertiesSet { get; set; }
 
+        internal List<CustomModuleBase> CustomModules { get; set; } = [];
+
         /// <summary>
         /// Gets or sets the light on a <see cref="Features.CustomItem"/> if its type is <see cref="CustomItemType.Light"/>.
         /// </summary>
@@ -130,6 +134,7 @@ namespace UncomplicatedCustomItems.API.Features
             SetProperties();
             List.Add(this);
             _activeSerials.Add(this.Serial);
+            CustomModuleManager.Load(this);
 
             if (Item is FirearmItem firearm)
                 StartAmmoRegen(firearm);
@@ -221,7 +226,6 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Weapon when CustomItem.CustomData is WeaponData weaponData:
                         HandleWeaponPickup(weaponData);
                         break;
-
                     case CustomItemType.MicroHID when CustomItem.CustomData is MicroHIDData microData:
                         MicroHIDPickup microHID = (MicroHIDPickup)Pickup;
                         Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
@@ -620,6 +624,7 @@ namespace UncomplicatedCustomItems.API.Features
                         weaponData.DamageFalloffDistance = HitscanHitregModule.DamageFalloffDistance;
                         MagazineModule.ServerResyncData();
                     }
+
                     break;
 
                 case CustomItemType.MicroHID when Item is MicroHIDItem microHID && CustomItem.CustomData is MicroHIDData microHIDData:
@@ -657,6 +662,7 @@ namespace UncomplicatedCustomItems.API.Features
                         scp127Data.DamageFalloffDistance = Scp127Hitscan.DamageFalloffDistance;
                         Scp127MagazineModule.ServerResyncData();
                     }
+
                     break;
             }
         }
@@ -705,12 +711,11 @@ namespace UncomplicatedCustomItems.API.Features
                 Timing.KillCoroutines(RegenHandle);
                 Timing.CallDelayed(pauseTime, () => StartAmmoRegen(firearm));
             }
-
         }
 
         internal void StartAmmoRegen(FirearmItem firearm)
         {
-            if (HasModule(CustomFlags.AmmoRegen))
+            if (HasModule<CustomModuleAPI.CustomModules.AmmoRegen>())
                 RegenHandle = Timing.RunCoroutine(AmmoRegen(firearm));
         }
 
@@ -718,14 +723,13 @@ namespace UncomplicatedCustomItems.API.Features
         {
             for (; ; )
             {
-                if (!HasModule(CustomFlags.AmmoRegen))
+                if (!TryGetModule<CustomModuleAPI.CustomModules.AmmoRegen>(out var regen))
                     yield break;
 
-                AmmoRegenSettings regen = CustomItem.FlagSettings.AmmoRegenSettings?.FirstOrDefault();
                 if (firearm.StoredAmmo != firearm.MaxAmmo)
                     firearm.StoredAmmo = Math.Min(firearm.StoredAmmo + regen.AmmoPerInterval, firearm.MaxAmmo);
 
-                yield return regen.RegenInterval;
+                yield return Timing.WaitForSeconds(regen.RegenInterval);
             }
         }
 
@@ -798,7 +802,6 @@ namespace UncomplicatedCustomItems.API.Features
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
             SetProperties();
-            Serial = Item.Serial;
             HandleEvent(pickedUp.Player, ItemEvents.Pickup, pickedUp.Item.Serial);
         }
 
@@ -808,17 +811,7 @@ namespace UncomplicatedCustomItems.API.Features
             Item = null;
             Owner = null;
             SaveProperties();
-            Serial = Pickup.Serial;
             HandleEvent(dropped.Player, ItemEvents.Drop, dropped.Pickup.Serial);
-        }
-
-        public void OnDrop(PickupCreatedEventArgs created)
-        {
-            Pickup = created.Pickup;
-            Item = null;
-            Owner = null;
-            SaveProperties();
-            Serial = Pickup.Serial;
         }
 
         public void OnThrew(PlayerThrewProjectileEventArgs ev)
@@ -826,7 +819,6 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = ev.Projectile;
             Item = null;
             Owner = ev.Projectile.LastOwner;
-            Serial = ev.Projectile.Serial;
         }
 
         public void OnDetonated(ProjectileExplodedEventArgs ev)
@@ -834,25 +826,44 @@ namespace UncomplicatedCustomItems.API.Features
             Destroy();
         }
 
-        public static bool HasFlagFast(CustomFlags flags, CustomFlags flag) => (flags & flag) == flag;
-
-        public bool HasModule(CustomFlags flag)
+        public bool HasModule<T>() where T : CustomModuleBase
         {
-            if (CustomItem.CustomFlags.HasValue && HasFlagFast(CustomItem.CustomFlags.Value, flag))
+            Type moduleType = typeof(T);
+
+            CheckingCustomFlagEventArgs args = new(CustomItem, moduleType);
+            Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
+
+            if (!args.IsAllowed)
+                return false;
+
+            bool has = CustomModules.OfType<T>().Any();
+
+            LogManager.Silent($"{CustomItem.Name} has {(has ? moduleType.Name : $"no {moduleType.Name}")}");
+            Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new (CustomItem, moduleType, has));
+
+            return has;
+        }
+
+        public bool TryGetModule<T>(out T module) where T : CustomModuleBase
+        {
+            Type moduleType = typeof(T);
+
+            CheckingCustomFlagEventArgs args = new(CustomItem, moduleType);
+            Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
+
+            if (!args.IsAllowed)
             {
-                CheckingCustomFlagEventArgs args = new(CustomItem, flag);
-                Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
-
-                if (!args.IsAllowed)
-                    return false;
-
-                LogManager.Silent($"{CustomItem.Name} has {flag}");
-                Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new(CustomItem, flag));
-                return true;
+                module = null;
+                return false;
             }
 
-            return false;
+            module = CustomModules.OfType<T>().FirstOrDefault();
+
+            LogManager.Silent($"{CustomItem.Name} has {(module != null ? moduleType.Name : $"no {moduleType.Name}")}");
+            Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new (CustomItem, moduleType, module != null));
+            return module != null;
         }
+
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = [];
 
@@ -932,6 +943,7 @@ namespace UncomplicatedCustomItems.API.Features
                 if (itemStates.TryGetValue(serial, out bool isOnCooldown))
                     return isOnCooldown;
             }
+            
             return false;
         }
 
@@ -949,9 +961,7 @@ namespace UncomplicatedCustomItems.API.Features
             yield return Timing.WaitForSeconds(cooldown);
 
             if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
-            {
                 itemStates[serial] = false;
-            }
 
             LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
         }
@@ -1007,7 +1017,10 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void Destroy()
         {
+            CustomModuleManager.Destroy(this);
             List.Remove(this);
+            _activeSerials.Remove(Serial);
+
             _activeSerials.Remove(Serial);
 
             if (IsPickup)

@@ -13,6 +13,7 @@ using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 using YamlDotNet.Core;
 using InventorySystem.Items.Usables.Scp330;
+using UncomplicatedCustomItems.API.ItemUpdater;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -22,7 +23,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         [
             new()
             {
-                CustomFlags = CustomFlags.None,
                 CustomData = YAMLCaster.Encode(new ItemData()
                 {
                     Data =
@@ -52,8 +52,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     [ArgumentType.OnShotWeapon] = "action Example",
                     [ArgumentType.OnAimedWeapon] = "Player::Damage(10, \"Test\", 'AIMING')",
                 },
-                CustomFlags = CustomFlags.InfiniteAmmo,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new WeaponData())
             },
             new()
@@ -67,8 +65,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Armor,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new ArmorData()
                 {
                     HeadProtection = 150,
@@ -87,8 +83,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Keycard,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new KeycardData())
             },
             new()
@@ -102,8 +96,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.ExplosiveGrenade,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new ExplosiveGrenadeData()
                 {
                     MaxRadius = 250f
@@ -120,8 +112,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.FlashGrenade,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new FlashGrenadeData()
                 {
                     AdditionalBlindedEffect = 250f
@@ -142,8 +132,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 {
                     [ArgumentType.OnUsedItem] = "if {Player.Health} < 100 then Player::EnableEffect[CustomPlayerEffects.Flashed](2, 10, true)",
                 },
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new MedikitData()
                 {
                     Health = 250f
@@ -160,8 +148,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Painkillers,
                 Scale = new(5, 5, 5),
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new PainkillersData()
                 {
                     TickHeal = 1f,
@@ -181,8 +167,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.Jailbird,
                 Scale = new(1, 1, 1),
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new JailbirdData())
             },
             new()
@@ -193,8 +177,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Item = ItemType.Adrenaline,
                 CustomItemType = CustomItemType.Adrenaline,
                 Scale = new(1, 1, 1),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new AdrenalineData()
                 {
                     Amount = 10,
@@ -214,8 +196,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new SCP500Data())
             },
             new()
@@ -229,8 +209,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new SCP207Data())
             },
             new()
@@ -244,8 +222,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new SCP018Data())
             },
             new()
@@ -259,8 +235,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = new(2, 2, 2),
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new SCP2176Data())
             },
             new()
@@ -274,8 +248,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = new(5, 5, 5),
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new SCP244Data())
             },
             new()
@@ -289,8 +261,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = new(5, 5, 5),
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new SCP244Data())
             },
             new()
@@ -304,8 +274,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = CustomItemType.SCPItem,
                 Scale = new(1, 1, 1),
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = YAMLCaster.Encode(new SCP1853Data())
             },
             new()
@@ -535,8 +503,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomItemType = customType,
                 Scale = Vector3.one,
                 Spawn = new(),
-                CustomFlags = CustomFlags.None,
-                FlagSettings = new(),
                 CustomData = customData,
             };
 
@@ -590,6 +556,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         try
                         {
+                            if (ItemUpdateManager.TryUpdate(Path.Combine(Dir, localDir, fileName)))
+                                LogManager.Info($"Updated Item {fileName}");
+
                             YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
                             CustomItem.Register(YAMLCaster.Converter(item));
                             LogManager.Debug($"Registering item {item.Id} [{item.Name}] from {Path.Combine(Dir, localDir)}");

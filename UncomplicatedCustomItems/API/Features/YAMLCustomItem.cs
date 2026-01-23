@@ -41,11 +41,9 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Defines the spawn settings for the custom item. Information on rooms can be found in the UCI Information forum on Discord.")]
         public Spawn Spawn { get; set; } = new();
 
-        [Description("Sets the custom flags of the custom item. Information about custom flags can be found in the UCI Information forum on Discord.")]
-        public CustomFlags? CustomFlags { get; set; } = Enums.CustomFlags.None;
-
-        [Description("Settings for the CustomFlags. You can remove any unused settings.")]
-        public FlagSettings? FlagSettings { get; set; } = new();
+        [Description("New system for CustomFlags")]
+        public Dictionary<object, List<object>> CustomModules { get; set; } = [];
+        
         public Dictionary<ArgumentType, string> Arguments { get; set; } = [];
 
         [Description("Sets the custom data type the item will use.")]

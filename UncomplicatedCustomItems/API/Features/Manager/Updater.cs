@@ -1,15 +1,15 @@
 #if EXILED
 using Exiled.API.Features;
 #endif
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UncomplicatedCustomItems.Commands;
-using UnityEngine;
 using UnityEngine.Networking;
+using System.Text.Json;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -17,22 +17,25 @@ namespace UncomplicatedCustomItems.API.Features.Helper
     {
         public class GitHubReleaseInfo
         {
-            [JsonProperty("tag_name")]
+            [JsonPropertyName("tag_name")]
             public string TagName { get; set; }
 
-            [JsonProperty("prerelease")]
+            [JsonPropertyName("prerelease")]
             public bool PreRelease { get; set; }
 
-            [JsonProperty("assets")]
+            [JsonPropertyName("assets")]
             public GitHubAssetInfo[] Assets { get; set; }
+
+            [JsonPropertyName("body")]
+            public string Body { get; set; }
         }
 
         public class GitHubAssetInfo
         {
-            [JsonProperty("name")]
+            [JsonPropertyName("name")]
             public string Name { get; set; }
 
-            [JsonProperty("browser_download_url")]
+            [JsonPropertyName("browser_download_url")]
             public string BrowserDownloadUrl { get; set; }
         }
         
@@ -61,16 +64,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Updater($"Latest version: {githubVersion}.");
                 if (githubVersion > currentVersion)
                 {
-                    LogManager.Updater("An update is available! Use the 'uciupdate' command to install it.");
+                    LogManager.Updater("An update is available! Use the 'uciupdate' command to install it."); 
+                    if (!string.IsNullOrWhiteSpace(latestRelease.Body))
+                        LogManager.Updater($"Changes: \n {latestRelease.Body}");
                 }
                 else if (githubVersion < currentVersion)
                 {
                     LogManager.Updater("You are on a Pre Release or Developer version! :D");
                 }
                 else
-                {
                     LogManager.Updater("You are on the latest version.");
-                }
             }
         }
 
@@ -98,6 +101,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
 
             LogManager.Updater($"Downloading new version from {asset.BrowserDownloadUrl}...");
+
+            if (!string.IsNullOrWhiteSpace(latestRelease.Body))
+                LogManager.Updater($"Changes for this version: \n {latestRelease.Body}");
 
             UnityWebRequest req = UnityWebRequest.Get(asset.BrowserDownloadUrl);
             req.SetRequestHeader("User-Agent", UserAgent);
@@ -148,7 +154,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             try
             {
                 string jsonResponse = req.downloadHandler.text;
-                List<GitHubReleaseInfo> releases = JsonConvert.DeserializeObject<List<GitHubReleaseInfo>>(jsonResponse);
+                List<GitHubReleaseInfo> releases = JsonSerializer.Deserialize<List<GitHubReleaseInfo>>(jsonResponse);
 
                 if (releases == null || releases.Count == 0)
                 {
@@ -158,14 +164,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 IEnumerable<GitHubReleaseInfo> filtered = Plugin.Instance.Config.AllowPreReleases ? releases : releases.Where(r => !r.PreRelease);
 
-                GitHubReleaseInfo chosen = filtered
-                    .OrderByDescending(r =>
-                    {
-                        string tag = r.TagName?.TrimStart('v') ?? string.Empty;
-                        return Version.TryParse(tag, out Version v) ? v : new Version(0, 0);
-                    })
-                    .FirstOrDefault();
-
+                GitHubReleaseInfo chosen = filtered.OrderByDescending(r =>
+                {
+                    string tag = r.TagName?.TrimStart('v') ?? string.Empty;
+                    return Version.TryParse(tag, out Version v) ? v : new Version(0, 0);
+                }).FirstOrDefault();
                 onComplete?.Invoke(chosen);
             }
             catch (Exception ex)

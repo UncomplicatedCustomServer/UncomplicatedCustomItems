@@ -34,13 +34,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
 
                     Room customItemRoom = Utilities.GetRoomFromName(data.LockerSettings.Room);
 
-                    float chance = UnityEngine.Random.Range(0f, 101f);
-                    if (chance > data.Chance)
+                    if (UnityEngine.Random.Range(0f, 101f) > data.Chance)
                         continue;
 
                     if (!string.Equals(customItemRoom.Name.ToString(), lockerRoom.Name.ToString(), StringComparison.OrdinalIgnoreCase))
                     {
-                        LogManager.Debug($"{customItemRoom.Name.ToString()}, {lockerRoom.Name.ToString()}");
+                        LogManager.Silent($"{customItemRoom.Name}, {lockerRoom.Name}");
                         continue;
                     }
 
