@@ -24,12 +24,9 @@ using HarmonyLib;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 using System.Linq;
-
-// Events
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using UncomplicatedCustomItems.API.Components;
 using System.Collections;
-
 
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
@@ -262,7 +259,6 @@ namespace UncomplicatedCustomItems
 		public void OnFinishedLoading()
 		{
             LabApi.Features.Wrappers.Player.Host.GameObject.AddComponent<Presence>().Init(30, 5);
-            LabApi.Features.Wrappers.Player.Host.GameObject.AddComponent<AdminMessageWatcher>();
 			//HttpManager.StartPresence();
 			if (Instance.Config.AllowDevPermissions)
 				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");

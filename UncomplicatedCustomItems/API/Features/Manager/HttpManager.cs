@@ -9,6 +9,7 @@ using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Misc;
 using MEC;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,7 +18,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-
+using UnityEngine.Networking;
 using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
@@ -95,9 +96,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="prefix"></param>
         public HttpManager(string prefix)
         {
-            if (!CheckForDependency())
-                Timing.CallContinuously(20f, () => LogManager.Error("You don't have the dependency Newtonsoft.Json installed!\nPlease install it AS SOON POSSIBLE!\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV\nError code: 0x406"));
-
             Prefix = prefix;
             RegisterEvents();
             HttpClient = new();
@@ -115,8 +113,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         }
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
-        
-        private bool CheckForDependency() => AssemblyUtils.GetLoadedAssemblies().Any(assembly => assembly.StartsWith("Newtonsoft.Json", StringComparison.OrdinalIgnoreCase));
 
         public HttpResponseMessage HttpGetRequest(string url)
         {
@@ -179,9 +175,25 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void LoadCreditTags()
         {
+            Player.Host.ReferenceHub.StartCoroutine(LoadCreditTagsCoroutine());
+        }
+
+        private IEnumerator LoadCreditTagsCoroutine()
+        {
+            using UnityWebRequest request = UnityWebRequest.Get("https://api.ucserver.it/credits.json");
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                LogManager.Error($"Failed to fetch credits data in HttpManager::LoadCreditTags() - {request.error}");
+                yield break;
+            }
+
             try
             {
-                Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(HttpQuery.Get($"https://api.ucserver.it/credits.json"));
+                string jsonResponse = request.downloadHandler.text;
+                Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(jsonResponse);
+
                 foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
                 {
                     string role = kvp.Value["role"].GetString();

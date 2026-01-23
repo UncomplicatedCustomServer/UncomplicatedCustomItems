@@ -192,7 +192,9 @@ namespace UncomplicatedCustomItems.API
                     property.SetValue(obj, defaultValue, null);
                 }
                 else if (property.PropertyType == typeof(string))
-                    property.SetValue(obj, string.Empty, null);
+                {
+                    property.SetValue(obj, string.Empty, null);                    
+                }
                 else
                     property.SetValue(obj, null, null);
             }
