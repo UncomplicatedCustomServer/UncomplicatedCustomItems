@@ -1,3 +1,10 @@
+﻿using InventorySystem.Items.Usables.Scp244;
+using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Features.Wrappers;
+using MEC;
+using Mirror;
+using System;
+using System.Collections.Generic;
 ﻿using LabApi.Events.Arguments.ServerEvents;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
@@ -17,6 +24,7 @@ namespace UncomplicatedCustomItems.Events
         {
             ServerEvent.PickupDestroyed += OnPickup;
             ServerEvent.ProjectileExploding += OnGrenadeExploding;
+            ServerEvent.PickupCreated += OnPickupCreation;
             ServerEvent.RoundStarted += SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded += OnDetonated;
         }
@@ -25,6 +33,7 @@ namespace UncomplicatedCustomItems.Events
         {
             ServerEvent.PickupDestroyed -= OnPickup;
             ServerEvent.ProjectileExploding -= OnGrenadeExploding;
+            ServerEvent.PickupCreated -= OnPickupCreation;
             ServerEvent.RoundStarted -= SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded -= OnDetonated;
         }
