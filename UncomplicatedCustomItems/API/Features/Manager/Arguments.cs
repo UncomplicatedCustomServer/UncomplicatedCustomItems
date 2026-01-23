@@ -749,25 +749,32 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static void HandleEvent<T>(T eventArgs) where T : EventArgs
         {
-            if (EventTypeMapping.TryGetValue(typeof(T), out ArgumentType argumentType))
+            try
             {
-                if (eventArgs is IPlayerEvent playerEvent && playerEvent.Player != null)
+                if (EventTypeMapping.TryGetValue(typeof(T), out ArgumentType argumentType))
                 {
-                    if (playerEvent.Player.CurrentItem is not null && Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var item))
+                    if (eventArgs is IPlayerEvent playerEvent && playerEvent.Player != null)
                     {
-                        if (item.CustomItem.Arguments != null && item.CustomItem.Arguments.Count > 0)
-                            ArgumentManager.Trigger(item.CustomItem, argumentType, eventArgs);
-                    }
-                    else if (playerEvent.Player.Items != null && playerEvent.Player.Items.Count() >= 1)
-                    {
-                        Item armorItem = playerEvent.Player.Items.Where(i => i.Category is ItemCategory.Armor).FirstOrDefault();
-                        if (armorItem is not null && Utilities.TryGetSummonedCustomItem(armorItem.Serial, out var item1))
+                        if (playerEvent.Player.CurrentItem is not null && Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var item))
                         {
-                            if (item1.CustomItem.Arguments != null && item1.CustomItem.Arguments.Count > 0)
-                                ArgumentManager.Trigger(item1.CustomItem, argumentType, eventArgs);
+                            if (item.CustomItem.Arguments != null && item.CustomItem.Arguments.Count > 0)
+                                ArgumentManager.Trigger(item.CustomItem, argumentType, eventArgs);
+                        }
+                        else if (playerEvent.Player.Items != null && playerEvent.Player.Items.Count() >= 1)
+                        {
+                            Item armorItem = playerEvent.Player.Items.Where(i => i.Category is ItemCategory.Armor).FirstOrDefault();
+                            if (armorItem is not null && Utilities.TryGetSummonedCustomItem(armorItem.Serial, out var item1))
+                            {
+                                if (item1.CustomItem.Arguments != null && item1.CustomItem.Arguments.Count > 0)
+                                    ArgumentManager.Trigger(item1.CustomItem, argumentType, eventArgs);
+                            }
                         }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                LogManager.Silent($"An error occuried when running Arguments.HandleEvent \n {ex}");                
             }
         }
 

@@ -23,6 +23,12 @@ namespace UncomplicatedCustomItems.Commands
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
+            if (!Plugin.Instance.Config.Debug)
+            {
+                response = "Debug is disabled.";
+                return false;
+            }
+
             if (Player.Host.GameObject.TryGetComponent<Presence>(out var presence))
             {
                 presence.SendPresence();

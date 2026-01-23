@@ -23,6 +23,12 @@ namespace UncomplicatedCustomItems.Commands
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
+            if (!Plugin.Instance.Config.Debug)
+            {
+                response = "Debug is disabled.";
+                return false;
+            }
+
             Player player = Player.Get(int.Parse(arguments[0]));
             foreach (Item item in player.Items)
             {
