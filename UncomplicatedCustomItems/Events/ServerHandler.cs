@@ -1,11 +1,5 @@
-﻿using InventorySystem.Items.Usables.Scp244;
-using LabApi.Events.Arguments.ServerEvents;
-using LabApi.Features.Wrappers;
-using MEC;
-using Mirror;
-using System;
-using System.Collections.Generic;
 ﻿using LabApi.Events.Arguments.ServerEvents;
+using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
@@ -24,7 +18,6 @@ namespace UncomplicatedCustomItems.Events
         {
             ServerEvent.PickupDestroyed += OnPickup;
             ServerEvent.ProjectileExploding += OnGrenadeExploding;
-            ServerEvent.PickupCreated += OnPickupCreation;
             ServerEvent.RoundStarted += SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded += OnDetonated;
         }
@@ -33,7 +26,6 @@ namespace UncomplicatedCustomItems.Events
         {
             ServerEvent.PickupDestroyed -= OnPickup;
             ServerEvent.ProjectileExploding -= OnGrenadeExploding;
-            ServerEvent.PickupCreated -= OnPickupCreation;
             ServerEvent.RoundStarted -= SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded -= OnDetonated;
         }
@@ -84,7 +76,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         for (uint count = 0; count < item.AmountToSpawn; count++)
                         {
-                            float chance = Random.Range(0f, 101f);
+                            float chance = UnityEngine.Random.Range(0f, 101f);
                             if (chance >= item.ChanceToSpawn)
                             {
                                 LogManager.Debug($"Spawning {item.Name} ({count + 1}/{item.AmountToSpawn})");

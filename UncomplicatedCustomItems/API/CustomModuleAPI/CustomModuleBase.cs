@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using LabApi.Events.Arguments.Interfaces;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI

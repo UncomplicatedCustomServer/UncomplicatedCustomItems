@@ -60,7 +60,6 @@ namespace UncomplicatedCustomItems.Integrations
                 }
 
                 MethodInfo prefixMethod = typeof(ECRIntegration).GetMethod(nameof(Prefix), BindingFlags.Static | BindingFlags.Public);
-
                 if (prefixMethod == null)
                 {
                     LogManager.Error("Failed to find Prefix method for ECR patching.");
@@ -141,7 +140,7 @@ namespace UncomplicatedCustomItems.Integrations
             catch (Exception ex)
             {
                 LogManager.Debug($"Failed to load types from assembly '{assembly.FullName}': {ex.Message}");
-                return Array.Empty<Type>();
+                return [];
             }
         }
 

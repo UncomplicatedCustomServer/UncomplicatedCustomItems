@@ -11,7 +11,6 @@ using UserSettings.ServerSpecific;
 using MEC;
 using UncomplicatedCustomItems.API.Components;
 using System.Linq;
-using LabApi.Events.Handlers;
 using UncomplicatedCustomItems.Events;
 using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;

@@ -1,8 +1,11 @@
+using LabApi.Features.Console;
 using LabApi.Features.Wrappers;
 using MEC;
+using PlayerRoles;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UnityEngine;
+using Logger = LabApi.Features.Console.Logger;
 
 namespace UncomplicatedCustomItems.API.Enums
 {
@@ -30,10 +33,19 @@ namespace UncomplicatedCustomItems.API.Enums
         Timing,
 
         [CommonTypes(typeof(Player))]
-        Player,
+        StaticPlayer,
+
+        [CommonTypes(typeof(Logger))]
+        Log,
+
+        [CommonTypes(typeof(Logger))]
+        Logger,
 
         [CommonTypes(typeof(Room))]
         Room,
+
+        [CommonTypes(typeof(RoleTypeId))]
+        RoleTypeId,
 
         [CommonTypes(typeof(Item))]
         Item,
@@ -57,7 +69,7 @@ namespace UncomplicatedCustomItems.API.Enums
         Elevator,
 
         [CommonTypes(typeof(Pickup))]
-        Pickup,
+        StaticPickup,
 
         [CommonTypes(typeof(Map))]
         Map,

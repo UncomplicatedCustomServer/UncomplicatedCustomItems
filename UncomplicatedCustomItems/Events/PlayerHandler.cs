@@ -37,7 +37,6 @@ using UncomplicatedCustomItems.Events.Handlers;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
 using UserSettings.ServerSpecific;
-using static InventorySystem.Items.Firearms.Modules.AnimatorReloaderModuleBase;
 using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
@@ -102,7 +101,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ProcessingJailbirdMessage += OnJailbirdMessaging;
             PlayerEvent.ProcessedJailbirdMessage += OnJailbirdMessage;
             PlayerEvent.ThrewProjectile += OnProjectileThrew;
-            PlayerEvent.ChangingAttachments += OnPlayerChangingAttachments;
             InventoryExtensions.OnItemAdded += OnItemAdded;
         }
 
@@ -139,7 +137,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ProcessingJailbirdMessage -= OnJailbirdMessaging;
             PlayerEvent.ProcessedJailbirdMessage -= OnJailbirdMessage;
             PlayerEvent.ThrewProjectile -= OnProjectileThrew;
-            PlayerEvent.ChangingAttachments -= OnPlayerChangingAttachments;
             InventoryExtensions.OnItemAdded -= OnItemAdded;
         }
 
@@ -166,12 +163,14 @@ namespace UncomplicatedCustomItems.Events
                 switch (summoned.CustomItem.CustomItemType)
                 {
                     case CustomItemType.ExplosiveGrenade when summoned.CustomItem.CustomData is ExplosiveGrenadeData exdata && ev.Projectile.Base is ExplosionGrenade exGrenade:
+                        if (ev.Projectile is TimedGrenadeProjectile projectile)
+                            projectile.RemainingTime = exdata.FuseTime;
+
                         exGrenade.MaxRadius = exdata.MaxRadius;
                         exGrenade.ScpDamageMultiplier = exdata.ScpDamageMultiplier;
                         exGrenade._burnedDuration = exdata.BurnDuration;
                         exGrenade._concussedDuration = exdata.ConcussDuration;
                         exGrenade._deafenedDuration = exdata.DeafenDuration;
-                        exGrenade._fuseTime = exdata.FuseTime;
                         exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
                         exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
                         if (exdata.ExplodeOnImpact)
@@ -180,19 +179,23 @@ namespace UncomplicatedCustomItems.Events
                         break;
 
                     case CustomItemType.FlashGrenade when summoned.CustomItem.CustomData is FlashGrenadeData flashdata && ev.Projectile.Base is FlashbangGrenade flash:
+                        if (ev.Projectile is TimedGrenadeProjectile projectile1)
+                            projectile1.RemainingTime = flashdata.FuseTime;
+
                         flash.BlindTime = flashdata.AdditionalBlindedEffect;
                         flash._minimalEffectDuration = flashdata.MinimalDurationEffect;
                         flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
                         flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
-                        flash._fuseTime = flashdata.FuseTime;
                         if (flashdata.ExplodeOnImpact)
                             flash.gameObject.AddComponent<CollisionHandler>().Init(flash.gameObject, flash);
 
                         break;
 
                     case CustomItemType.SCPItem when summoned.CustomItem.CustomData is SCP018Data scp018data && ev.Projectile.Base is Scp018Projectile scp018:
+                        if (ev.Projectile is TimedGrenadeProjectile projectile2)
+                            projectile2.RemainingTime = scp018data.FuseTime;
+
                         scp018._friendlyFireTime = scp018data.FriendlyFireTime;
-                        scp018._fuseTime = scp018data.FuseTime;
                         if (scp018data.ExplodeOnImpact)
                             scp018.gameObject.AddComponent<CollisionHandler>().Init(scp018.gameObject, scp018);
 
@@ -210,12 +213,14 @@ namespace UncomplicatedCustomItems.Events
                 switch (api.CustomItem)
                 {
                     case CustomExplosiveGrenade exdata when ev.Projectile.Base is ExplosionGrenade exGrenade:
+                        if (ev.Projectile is TimedGrenadeProjectile projectile)
+                            projectile.RemainingTime = exdata.FuseTime;
+
                         exGrenade.MaxRadius = exdata.MaxRadius;
                         exGrenade.ScpDamageMultiplier = exdata.ScpDamageMultiplier;
                         exGrenade._burnedDuration = exdata.BurnDuration;
                         exGrenade._concussedDuration = exdata.ConcussDuration;
                         exGrenade._deafenedDuration = exdata.DeafenDuration;
-                        exGrenade._fuseTime = exdata.FuseTime;
                         exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
                         exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
                         if (exdata.ExplodeOnImpact)
@@ -224,17 +229,22 @@ namespace UncomplicatedCustomItems.Events
                         break;
 
                     case CustomFlashGrenade flashdata when ev.Projectile.Base is FlashbangGrenade flash:
+                        if (ev.Projectile is TimedGrenadeProjectile projectile1)
+                            projectile1.RemainingTime = flashdata.FuseTime;
+
                         flash.BlindTime = flashdata.AdditionalBlindedEffect;
                         flash._minimalEffectDuration = flashdata.MinimalDurationEffect;
                         flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
                         flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
-                        flash._fuseTime = flashdata.FuseTime;
                         if (flashdata.ExplodeOnImpact)
                             flash.gameObject.AddComponent<CollisionHandler>().Init(flash.gameObject, flash);
 
                         break;
 
                     case CustomSCP018 scp018data when ev.Projectile.Base is Scp018Projectile scp018:
+                        if (ev.Projectile is TimedGrenadeProjectile projectile2)
+                            projectile2.RemainingTime = scp018data.FuseTime;
+
                         scp018._friendlyFireTime = scp018data.FriendlyFireTime;
                         scp018._fuseTime = scp018data.FuseTime;
                         if (scp018data.ExplodeOnImpact)

@@ -241,7 +241,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             CreditTag tag = GetCreditTag(player);
             if (player.UserGroup != null || player.UserGroup.Permissions != 0 || !string.IsNullOrWhiteSpace(player.UserGroup.BadgeText))
             {
-                if (tag.Role == player.GroupName && tag.Color == player.GroupColor)
+                if (tag?.Role == player.GroupName && tag?.Color == player.GroupColor)
                     return;
 
                 if (!tag.Override)

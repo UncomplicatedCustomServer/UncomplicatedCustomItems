@@ -54,7 +54,8 @@
 
   <ItemGroup>
     <PackageReference Include="AudioPlayerApi" Version="1.1.2" />
-    <PackageReference Include="ExMod.Exiled" Version="9.12.2" Condition=" '$(Configuration)' == 'Exiled'" />
+    <PackageReference Include="Northwood.LabAPI" Version="1.1.5" Publicize="true"/>
+    <PackageReference Include="ExMod.Exiled" Version="9.12.6" Condition=" '$(Configuration)' == 'Exiled'" />
     <PackageReference Include="Lib.Harmony" Version="2.2.2" />
     <PackageReference Include="System.Text.Json" Version="10.0.1" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
@@ -62,9 +63,6 @@
     <ItemGroup>
       <Reference Include="Assembly-CSharp" Publicize="true">
         <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp.dll</HintPath>
-      </Reference>
-      <Reference Include="LabApi" Publicize="true">
-        <HintPath>$(EXILED_REFERENCES)\LabApi.dll</HintPath>
       </Reference>
       <Reference Include="Mirror-Publicized">
         <HintPath>$(EXILED_REFERENCES)\Mirror-Publicized.dll</HintPath>

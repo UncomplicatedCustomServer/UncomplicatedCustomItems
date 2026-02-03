@@ -344,6 +344,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 AudioApi.PlayAudio(path, volume, player.Position, audibledistance);
             });
+
+            ArgumentManager.Register("Log", (item, args) =>
+            {
+                LogManager.Debug("Log triggered");
+                LabApi.Features.Console.Logger.Info(string.Join(" ", args));
+            });
         }
 
         /// <summary>

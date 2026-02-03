@@ -3,7 +3,6 @@ using InventorySystem.Items.Firearms.Attachments;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.API.Enums;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {

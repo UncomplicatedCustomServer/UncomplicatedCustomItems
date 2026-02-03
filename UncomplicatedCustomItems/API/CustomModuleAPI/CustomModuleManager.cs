@@ -1,16 +1,14 @@
+#if EXILED
 using Exiled.API.Interfaces;
 using Exiled.Loader;
-using Mirror;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using UncomplicatedCustomItems.API.Attributes;
-using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI
@@ -33,7 +31,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 #if EXILED
             foreach (IPlugin<IConfig> plugin in Loader.Plugins)
             {
-                LogManager.Silent($"{nameof(ImportManager.Actor)}: Passing plugin {plugin.Name}");
+                LogManager.Silent($"{nameof(CustomModuleManager)}: Passing plugin {plugin.Name}");
                 foreach (Type type in plugin.Assembly.GetTypes())
                 {
                     if (!type.IsClass || type.IsAbstract)
