@@ -1,10 +1,6 @@
 ﻿using LabApi.Events.Arguments.Scp914Events;
 using System;
-using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
 using Scp914Event = LabApi.Events.Handlers.Scp914Events;
 
 namespace UncomplicatedCustomItems.Events

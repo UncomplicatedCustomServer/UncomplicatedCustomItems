@@ -22,6 +22,9 @@ namespace UncomplicatedCustomItems.API.Components
         public bool LastUploadSucceeded;
         public uint MaxFailCount = 1;
         public uint FailCount = 0;
+        public bool hasExiled;
+        public bool CheckedForExiledPlugins;
+        public List<string> pluginNames = [];
 
         public void Init(uint interval, uint maxFailCount)
         {
@@ -96,14 +99,12 @@ namespace UncomplicatedCustomItems.API.Components
 
         private string GetJsonPayload()
         {
-            List<string> pluginNames = [];
-            bool hasExiled = false;
-
             try
             {
                 Type loaderType = Type.GetType("Exiled.Loader.Loader, Exiled.Loader");
-                if (loaderType != null)
+                if (loaderType != null && !CheckedForExiledPlugins)
                 {
+                    CheckedForExiledPlugins = true;
                     PropertyInfo pluginsProperty = loaderType.GetProperty("Plugins", BindingFlags.Public | BindingFlags.Static);
                     if (pluginsProperty != null)
                     {

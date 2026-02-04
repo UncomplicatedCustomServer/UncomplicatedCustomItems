@@ -30,7 +30,7 @@ using System.Collections;
 
 // Building for remote development. You can ignore this :)
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
-// & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=Exiled
+// & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /restore /p:Configuration=Exiled
 
 namespace UncomplicatedCustomItems
 {
@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems
 #endif
 		public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 12, 2);
+        public override Version RequiredExiledVersion { get; } = new(9, 12, 6);
 #else
 		public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
 #endif

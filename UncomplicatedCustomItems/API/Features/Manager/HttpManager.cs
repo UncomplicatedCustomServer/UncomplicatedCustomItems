@@ -244,7 +244,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (tag?.Role == player.GroupName && tag?.Color == player.GroupColor)
                     return;
 
-                if (!tag.Override)
+                if ((bool)!tag?.Override)
                     return;
             }
 

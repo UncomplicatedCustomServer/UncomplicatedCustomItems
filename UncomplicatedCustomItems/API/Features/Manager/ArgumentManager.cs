@@ -317,7 +317,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         if (TryResolveType(candidate, out Type? foundType))
                         {
                             current = foundType;
-                            i = 0;
                         }
                         else
                         {
@@ -854,7 +853,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 return;
 
             string command = parts[0];
-            string[] args = parts.Length > 1 ? parts.Skip(1).ToArray() : Array.Empty<string>();
+            string[] args = parts.Length > 1 ? parts.Skip(1).ToArray() : [];
 
             if (_actionHandlers.TryGetValue(command, out var handler))
                 handler(item, args);
@@ -1848,11 +1847,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                             return !expected.IsValueType || (Nullable.GetUnderlyingType(expected) != null);
 
                         return expected.IsAssignableFrom(actual.GetType()) || (actual is string);
-                    }).All(b => b));
-
-                if (ctor == null)
-                    ctor = ctors.FirstOrDefault(c => c.GetParameters().Length == parameters.Length);
-
+                    }).All(b => b)) ?? ctors.FirstOrDefault(c => c.GetParameters().Length == parameters.Length);
                 if (ctor == null)
                 {
                     LogManager.Error($"No matching constructor found on type '{type.FullName}' with {parameters.Length} parameters");
