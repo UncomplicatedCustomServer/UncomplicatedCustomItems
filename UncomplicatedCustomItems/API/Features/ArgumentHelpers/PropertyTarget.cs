@@ -3,9 +3,11 @@ using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 {
+#nullable enable
+
     internal class PropertyTarget
     {
-        public object Target { get; set; }
+        public object? Target { get; set; }
         public PropertyInfo? PropertyInfo { get; set; }
         public FieldInfo? FieldInfo { get; set; }
         public string MemberName { get; set; } = string.Empty;

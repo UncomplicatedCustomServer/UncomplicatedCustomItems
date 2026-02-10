@@ -140,6 +140,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
         }
 
+#nullable enable
+
         /// <summary>
         /// Gets the <see cref="APICustomItem"/> by its unique Id
         /// </summary>
@@ -191,7 +193,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             return false;
         }
 
-#nullable enable
 
         public virtual bool Check(Pickup? pickup)
         {

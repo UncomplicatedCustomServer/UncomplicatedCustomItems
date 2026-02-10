@@ -73,7 +73,7 @@ namespace UncomplicatedCustomItems.API.Features
         public Item Item { get; internal set; }
 
         internal bool NameApplied { get; set; } = false;
-
+#nullable enable
         /// <summary>
         /// Converts the Command custom data from items into a list to allow multiple commands.
         /// </summary>
@@ -86,6 +86,7 @@ namespace UncomplicatedCustomItems.API.Features
 
             return result;
         }
+#nullable disable
 
         /// <summary>
         /// The <see cref="SummonedCustomItem"/> as a <see cref="LabApi.Features.Wrappers.Pickup"/>.

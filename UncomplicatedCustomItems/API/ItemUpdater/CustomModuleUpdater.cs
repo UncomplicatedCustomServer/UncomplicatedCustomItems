@@ -318,9 +318,9 @@ namespace UncomplicatedCustomItems.API.ItemUpdater
                 File.WriteAllText(yamlPath, updatedYaml);
 
                 if (customModules.Count > 0)
-                    LogManager.Info($"Successfully converted custom_flags and flag_settings to custom_modules in {yamlPath}");
+                    LogManager.Debug($"Successfully converted custom_flags and flag_settings to custom_modules in {yamlPath}");
                 else
-                    LogManager.Info($"Removed custom_flags and flag_settings from {yamlPath} (no custom_modules present; wrote empty mapping).");
+                    LogManager.Debug($"Removed custom_flags and flag_settings from {yamlPath} (no custom_modules present; wrote empty mapping).");
 
                 return true;
             }

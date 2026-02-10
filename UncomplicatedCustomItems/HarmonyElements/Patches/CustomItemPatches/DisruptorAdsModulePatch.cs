@@ -8,10 +8,11 @@ using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
     // Neither are synced with client but still are applied.
-    [HarmonyPatch(typeof(DisruptorAdsModule), nameof(DisruptorAdsModule.BaseAdsInaccuracy), MethodType.Getter)]
-    public static class DisruptorAdsModuleAimingInaccuracyPatch
+    [HarmonyPatch(typeof(DisruptorAdsModule))]
+    public static class DisruptorAdsModulePatch
     {
-        public static bool Prefix(DisruptorAdsModule __instance, ref float __result)
+        [HarmonyPatch(nameof(DisruptorAdsModule.BaseAdsInaccuracy), MethodType.Getter)]
+        public static bool AimingAccuracyPrefix(DisruptorAdsModule __instance, ref float __result)
         {
             if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem))
                 return true;
@@ -22,12 +23,9 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             __result = data.AimingInaccuracy;
             return false;
         }
-    }
 
-    [HarmonyPatch(typeof(DisruptorAdsModule), nameof(DisruptorAdsModule.BaseHipInaccuracy), MethodType.Getter)]
-    public static class DisruptorAdsModuleHipInaccuracyPatch
-    {
-        public static bool Prefix(DisruptorAdsModule __instance, ref float __result)
+        [HarmonyPatch(nameof(DisruptorAdsModule.BaseHipInaccuracy), MethodType.Getter)]
+        public static bool HipAccuracyPrefix(DisruptorAdsModule __instance, ref float __result)
         {
             if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem))
                 return true;

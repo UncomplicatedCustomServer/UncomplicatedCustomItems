@@ -56,8 +56,6 @@ namespace UncomplicatedCustomItems.Events
         internal static readonly CachedLayerMask ToolGunMask = new("Default", "Door", "Glass");
         internal static List<Player> CustomScp268Effects = [];
         internal static List<(CustomItem, ushort, int)> CandyIdx = [];
-        private static int AmmoStored = 0;
-
         /// <summary>
         /// The <see cref="Dictionary{TKey,TValue}"/> that handles lights spawned from the <see cref="OnDrop"/> method.
         /// </summary>
@@ -612,16 +610,19 @@ namespace UncomplicatedCustomItems.Events
                             LogManager.Warn($"Invalid Effect: {data207.Effect} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         if (data207.Duration <= -2)
                         {
                             LogManager.Warn($"Invalid Duration: {data207.Duration} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         if (data207.Intensity <= 0)
                         {
                             LogManager.Warn($"Invalid intensity: {data207.Intensity} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {data207.Effect} at intensity {data207.Intensity}, duration is {data207.Duration} to {ev.Player.Nickname}");
                         string s207effect = data207.Effect;
                         float s207duration = data207.Duration;
@@ -635,16 +636,19 @@ namespace UncomplicatedCustomItems.Events
                             LogManager.Warn($"Invalid Effect: {data1853.Effect} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         if (data1853.Duration <= -2)
                         {
                             LogManager.Warn($"Invalid Duration: {data1853.Duration} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         if (data1853.Intensity <= 0)
                         {
                             LogManager.Warn($"Invalid intensity: {data1853.Intensity} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+                        
                         LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {data1853.Effect} at intensity {data1853.Intensity}, duration is {data1853.Duration} to {ev.Player.Nickname}");
                         string s1853effect = data1853.Effect;
                         float s1853duration = data1853.Duration;

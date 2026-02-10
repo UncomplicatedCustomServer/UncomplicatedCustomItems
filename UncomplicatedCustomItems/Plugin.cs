@@ -28,7 +28,8 @@ using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using UncomplicatedCustomItems.API.Components;
 using System.Collections;
 
-// Building for remote development. You can ignore this :)
+// Commands for remote development. You can ignore this :)
+// cd "C:\Program Files (x86)\steam\steamapps\common\SCP Secret Laboratory Dedicated Server"
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /p:Configuration=LabApi
 // & "C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe" UncomplicatedCustomItems.csproj /restore /p:Configuration=Exiled
 
@@ -259,7 +260,6 @@ namespace UncomplicatedCustomItems
 		public void OnFinishedLoading()
 		{
             LabApi.Features.Wrappers.Player.Host.GameObject.AddComponent<Presence>().Init(30, 5);
-			//HttpManager.StartPresence();
 			if (Instance.Config.AllowDevPermissions)
 				LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 

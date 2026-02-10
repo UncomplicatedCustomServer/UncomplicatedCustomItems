@@ -1,5 +1,7 @@
 namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 {
+#nullable enable
+
     internal class ConditionalParts
     {
         public bool IsUnless { get; set; }

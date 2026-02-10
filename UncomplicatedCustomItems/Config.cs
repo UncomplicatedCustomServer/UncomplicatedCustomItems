@@ -48,6 +48,9 @@ namespace UncomplicatedCustomItems
         [Description("The hint message displayed whenever you select a custom item. %name% is replaced with the item's name, and %desc% with its description.")]
         public string SelectedMessage { get; set; } = "You have picked up a %name% who's a %desc%";
 
+
+        public float MaxActionsExecutionDepth { get; set; } = 50f;
+
         [Description("If false, the UCS credit tag system will not be activated. Please do not disable it, as many contributors worked on this plugin for free.")]
         public bool EnableCreditTags { get; set; } = true;
 

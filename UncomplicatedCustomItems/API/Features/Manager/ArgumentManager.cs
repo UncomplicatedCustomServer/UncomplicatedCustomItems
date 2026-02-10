@@ -10,6 +10,7 @@ using System.Text;
 using System.Collections;
 using UncomplicatedCustomItems.API.Attributes;
 using MEC;
+using System.Threading;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -41,6 +42,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal static Dictionary<(Type, string), MethodInfo> CachedMethods { get; } = [];
 
+        private static readonly AsyncLocal<int> _executeActionDepth = new();
+        
         private static readonly Dictionary<string, Func<IEnumerable, object?>> _collectionOperations = new(StringComparer.OrdinalIgnoreCase)
         {
             { "Random", GetRandomFromCollection },
@@ -222,7 +225,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
 
-            _typeResolutionCache[fullName] = null;
+            _typeResolutionCache[fullName] = null!;
             return false;
         }
         
@@ -626,22 +629,37 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static void ExecuteAction(ICustomItem item, string action, EventArgs eventArgs)
         {
-            if (string.IsNullOrWhiteSpace(action))
-                return;
-
-            if (TryHandleVariable(item, action, eventArgs))
-                return;
-
-            if (TryHandleDelayed(item, action, eventArgs))
-                return;
-
-            if (IsConditionalStatement(action))
+            _executeActionDepth.Value = _executeActionDepth.Value + 1;
+            if (_executeActionDepth.Value > Plugin.Instance.Config.MaxActionsExecutionDepth)
             {
-                ExecuteConditional(item, action, eventArgs);
+                LogManager.Error($"Potential recursion/loop detected executing action '{action}' (depth > {Plugin.Instance.Config.MaxActionsExecutionDepth}). Aborting to avoid infinite loop. You can increase this limit in the plugin config.");
+                _executeActionDepth.Value = 0;
                 return;
             }
 
-            ExecuteRegularAction(item, action, eventArgs);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(action))
+                    return;
+
+                if (TryHandleVariable(item, action, eventArgs))
+                    return;
+
+                if (TryHandleDelayed(item, action, eventArgs))
+                    return;
+
+                if (IsConditionalStatement(action))
+                {
+                    ExecuteConditional(item, action, eventArgs);
+                    return;
+                }
+
+                ExecuteRegularAction(item, action, eventArgs);
+            }
+            finally
+            {
+                _executeActionDepth.Value = Math.Max(0, _executeActionDepth.Value - 1);
+            }
         }
 
         private static bool IsConditionalStatement(string action)

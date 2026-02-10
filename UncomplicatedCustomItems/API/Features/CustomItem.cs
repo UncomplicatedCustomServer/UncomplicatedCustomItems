@@ -158,7 +158,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public virtual Dictionary<CustomModuleBase, List<object>> CustomModules { get; set; } = [];
 
-        public virtual Dictionary<ArgumentType, string> Arguments { get; set; }
+        public virtual Dictionary<ArgumentType, string> Arguments { get; set; } = [];
 
         /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item

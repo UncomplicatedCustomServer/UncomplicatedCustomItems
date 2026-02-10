@@ -27,9 +27,8 @@ namespace UncomplicatedCustomItems.API
         /// <returns>The <see cref="Dictionary{string, object}"/> of the class</returns>
         public static Dictionary<string, object> Encode(Data element)
         {
-            Dictionary<string, object> serialized = new();
-
-            var namingPolicy = JsonNamingPolicy.SnakeCaseLower;
+            Dictionary<string, object> serialized = [];
+            JsonNamingPolicy namingPolicy = JsonNamingPolicy.SnakeCaseLower;
 
             foreach (PropertyInfo property in element.GetType().GetProperties())
             {
