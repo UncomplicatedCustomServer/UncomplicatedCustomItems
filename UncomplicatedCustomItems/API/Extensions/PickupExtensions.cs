@@ -7,7 +7,7 @@ using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
-    internal static class PickupExtensions
+    public static class PickupExtensions
     {
         /// <summary>
         /// Create a spawn a <see cref="Pickup"/>

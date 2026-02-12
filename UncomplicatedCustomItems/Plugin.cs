@@ -271,7 +271,8 @@ namespace UncomplicatedCustomItems
 #endif
 			_ = Task.Run(VersionManager.Init);
 
-			LabAPIExtensions.Init();
+			CustomItemBackupSystem.Init();
+            LabAPIExtensions.Init();
 			MERIntergration.Init();
 			ECRIntegration.Init();
 			ECIIntegration.Init();

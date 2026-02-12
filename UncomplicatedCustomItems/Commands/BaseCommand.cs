@@ -40,6 +40,7 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Owner());
             Subcommands.Add(new VersionInfo());
             Subcommands.Add(new CustomModuleInfo());
+            Subcommands.Add(new Backup());
             
             Subcommands.Add(new PresenceDebug());
             Subcommands.Add(new EquipCustomItemDebug());

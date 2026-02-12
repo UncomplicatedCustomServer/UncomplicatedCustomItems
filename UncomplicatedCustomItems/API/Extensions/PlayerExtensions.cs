@@ -23,7 +23,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <param name="player"><see cref="Player" /> trying to interact.</param>
         /// <param name="door"></param>
         /// <returns>Whether the player has the required keycard.</returns>
-        internal static bool HasKeycardPermission(this Player player, IDoorPermissionRequester door) =>
+        public static bool HasKeycardPermission(this Player player, IDoorPermissionRequester door) =>
             player.CurrentItem is KeycardItem keycard && player.CurrentItem.Base is IDoorPermissionProvider keycardProvider && door is IDoorPermissionRequester permissions && permissions.PermissionsPolicy.CheckPermissions(keycardProvider.GetPermissions(permissions));
 
         public static CommandSender GetSender(this Player player) => player.ReferenceHub.queryProcessor._sender;

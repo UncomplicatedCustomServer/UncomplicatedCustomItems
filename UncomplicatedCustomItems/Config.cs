@@ -48,6 +48,8 @@ namespace UncomplicatedCustomItems
         [Description("The hint message displayed whenever you select a custom item. %name% is replaced with the item's name, and %desc% with its description.")]
         public string SelectedMessage { get; set; } = "You have picked up a %name% who's a %desc%";
 
+        [Description("DO NOT EDIT THIS. If this is edited you will loose access to any uploaded CustomItems")]
+        public string BackupCode { get; set; } = "0";
 
         public float MaxActionsExecutionDepth { get; set; } = 50f;
 

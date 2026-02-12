@@ -534,7 +534,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return Directory.GetFiles(Path.Combine(Dir, localDir));
         }
 
-        private bool IsActionFile(string fileContent) => fileContent.Contains("actions:") || fileContent.Contains("parameters:");
+        internal bool IsActionFile(string fileContent) => fileContent.Contains("actions:") || fileContent.Contains("parameters:");
 
         public void LoadAll(string localDir = "")
         {
