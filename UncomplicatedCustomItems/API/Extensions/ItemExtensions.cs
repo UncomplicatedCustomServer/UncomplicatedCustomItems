@@ -110,6 +110,8 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <returns><c>true</c> if the item is a summoned custom item; otherwise, <c>false</c>.</returns>
         public static bool IsSummonedAPICustomItem(this ItemBase item) => SummonedAPICustomItem.TryGet(item.ItemSerial, out _);
 
+#nullable enable
+
         /// <summary>
         /// Attempts to retrieve the <see cref="SummonedCustomItem"/> associated with the specified <see cref="Item"/>.
         /// </summary>
@@ -117,7 +119,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <returns>
         /// The corresponding <see cref="SummonedCustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static SummonedCustomItem TryGetSummonedCustomItem(this Item item) => Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem) ? customItem : null;
+        public static SummonedCustomItem? TryGetSummonedCustomItem(this Item item) => Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem) ? customItem : null;
 
         /// <summary>
         /// Attempts to retrieve the <see cref="ICustomItem"/> associated with the specified <see cref="Item"/>.
@@ -126,7 +128,9 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <returns>
         /// The corresponding <see cref="ICustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static ICustomItem TryGetCustomItem(this Item item) => Utilities.TryGetCustomItem(item.Serial, out ICustomItem customItem) ? customItem : null;
+        public static ICustomItem? TryGetCustomItem(this Item item) => Utilities.TryGetCustomItem(item.Serial, out ICustomItem customItem) ? customItem : null;
+
+#nullable disable
 
         /// <summary>
         /// Compares two <see cref="Item"/> instances to determine if they refer to the same custom item definition.
