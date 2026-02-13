@@ -55,7 +55,7 @@
   <ItemGroup>
     <PackageReference Include="AudioPlayerApi" Version="1.1.2" />
     <PackageReference Include="Northwood.LabAPI" Version="1.1.5" Publicize="true"/>
-    <PackageReference Include="ExMod.Exiled" Version="9.12.6" Condition=" '$(Configuration)' == 'Exiled'" />
+    <PackageReference Include="ExMod.Exiled" Version="9.13.1" Condition=" '$(Configuration)' == 'Exiled'" />
     <PackageReference Include="Lib.Harmony" Version="2.2.2" />
     <PackageReference Include="System.Text.Json" Version="10.0.1" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />

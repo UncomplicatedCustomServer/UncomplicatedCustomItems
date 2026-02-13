@@ -16,6 +16,13 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> args, ICommandSender sender, out string response)
         {
+            if (args.Count < 1)
+            {
+                response = "This command requires atleast one argument! (Upload or Download)";
+                return false;
+            }
+
+            string customCode = args.Count > 1 ? args[1] : string.Empty;
             switch (args[0].ToLower())
             {
                 case "upload":
@@ -34,7 +41,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case "download":
                     if (CustomItemBackupSystem.Online)
                     {
-                        CustomItemBackupSystem.Download();
+                        CustomItemBackupSystem.Download(customCode);
                         response = "Beginning backup download...";
                         return true;
                     }

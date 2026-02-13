@@ -44,7 +44,7 @@ namespace UncomplicatedCustomItems.API.Features
                 return;
             }
             CustomItems.TryAdd(item.Id, item);
-            LogManager.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
+            LogManager.Silent($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
         public bool HasModule<T>() where T : CustomModuleBase =>

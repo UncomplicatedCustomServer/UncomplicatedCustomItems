@@ -1,17 +1,13 @@
 using System.Collections;
-using System.Text.Json.Serialization;
 using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Yaml;
 using UnityEngine.Networking;
-using System.Text.Json;
 using System.IO;
-using System.Collections.Generic;
 using System;
 using YamlDotNet.Core;
 using System.Text;
 using static UnityEngine.Networking.UnityWebRequest;
 using UncomplicatedCustomItems.API.Interfaces;
-using System.Linq;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -37,7 +33,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Player.Host.ReferenceHub.StartCoroutine(UploadBackupData());
         }
 
-        public static void Download()
+        public static void Download(string code = "")
         {
             if (!Online || Plugin.Instance.Config.BackupCode == "0")
                 return;
@@ -45,7 +41,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (!Directory.Exists(BackupDir))
                 Directory.CreateDirectory(BackupDir);
 
-            Player.Host.ReferenceHub.StartCoroutine(GetBackupData());
+            Player.Host.ReferenceHub.StartCoroutine(GetBackupData(code));
         }
 
         private static void GenerateBackupCode()
@@ -95,12 +91,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             request.Dispose();
         }
 
-        private static IEnumerator GetBackupData()
+        private static IEnumerator GetBackupData(string code = "")
         {
+            string BackupCode = code;
+            if (string.IsNullOrEmpty(BackupCode))
+                BackupCode = Plugin.Instance.Config.BackupCode;
+
             UnityWebRequest request = new($"{Url}/download");
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/yaml");
-            request.SetRequestHeader("Token", $"{Plugin.Instance.Config.BackupCode}");         
+            request.SetRequestHeader("Token", $"{BackupCode}");         
             request.method = kHttpVerbGET;
             yield return request.SendWebRequest();
             

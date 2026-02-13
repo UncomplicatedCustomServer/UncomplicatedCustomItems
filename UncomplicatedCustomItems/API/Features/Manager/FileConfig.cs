@@ -17,7 +17,7 @@ using UncomplicatedCustomItems.API.ItemUpdater;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
-    internal class FileConfig
+    public class FileConfig
     {
         public static readonly List<YAMLCustomItem> _examples =
         [
@@ -557,7 +557,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         try
                         {
                             if (ItemUpdateManager.TryUpdate(Path.Combine(Dir, localDir, fileName)))
-                                LogManager.Info($"Updated Item {fileName}");
+                                LogManager.Silent($"Updated Item {fileName}");
 
                             YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
                             CustomItem.Register(YAMLCaster.Converter(item));
