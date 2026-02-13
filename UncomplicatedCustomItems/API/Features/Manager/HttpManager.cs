@@ -97,7 +97,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Prefix = prefix;
             RegisterEvents();
             HttpClient = new();
-            LoadCreditTags();
         }
 
         internal void RegisterEvents()
@@ -127,11 +126,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private IEnumerator LoadLatestVersionCoroutine()
         {
-            string url = $"{Endpoint}/{Prefix}/version?vts=5";
-
-            using UnityWebRequest request = Get(url);
+            using UnityWebRequest request = Get($"{Endpoint}/{Prefix}/version?vts=5");
             request.downloadHandler = new DownloadHandlerBuffer();
-
             yield return request.SendWebRequest();
 
             if (request.result != Result.Success)
@@ -198,10 +194,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        public CreditTag GetCreditTag(Player player)
-        {
-            return Credits.GetValueSafe(player.UserId);
-        }
+        public CreditTag GetCreditTag(Player player) =>
+            Credits.GetValueSafe(player.UserId);
 
         public bool TryGetCreditTag(Player player, out CreditTag output)
         {

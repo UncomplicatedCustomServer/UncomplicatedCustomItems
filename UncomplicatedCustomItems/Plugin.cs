@@ -294,6 +294,7 @@ namespace UncomplicatedCustomItems
 #endif
             _ = Task.Run(VersionManager.Init);
 
+			HttpManager.LoadCreditTags();
             CustomItemBackupSystem.Init();
             LabAPIExtensions.Init();
             MERIntergration.Init();
