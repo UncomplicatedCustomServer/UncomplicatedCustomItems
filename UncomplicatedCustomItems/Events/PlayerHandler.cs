@@ -351,18 +351,14 @@ namespace UncomplicatedCustomItems.Events
 
         internal static IEnumerator<float> DecayRate(Player player, float decayRate)
         {
-            for (; ; )
+            while (player != null && player.IsAlive && player.HumeShield > 0)
             {
-                if (player.HumeShield >= 0)
-                {
-                    player.HumeShield -= Time.deltaTime * decayRate;
-                    yield return Timing.WaitForOneFrame;
-                }
-                else
-                {
-                    yield break;
-                }
+                player.HumeShield -= decayRate * Timing.DeltaTime;
+                yield return Timing.WaitForOneFrame;
             }
+
+            if (player != null && player.HumeShield < 0)
+                player.HumeShield = 0;
         }
 
         public static void OnChangingItem(PlayerChangingItemEventArgs ev)
@@ -816,7 +812,7 @@ namespace UncomplicatedCustomItems.Events
 
         internal static void StopHumeShieldRegen(Player player)
         {
-            if (_relativePosCoroutine.TryGetValue(player, out CoroutineHandle handle))
+            if (_humeShieldRegenCoroutine.TryGetValue(player, out CoroutineHandle handle))
             {
                 Timing.KillCoroutines(handle);
                 _humeShieldRegenCoroutine.Remove(player);
@@ -852,9 +848,7 @@ namespace UncomplicatedCustomItems.Events
                     player.HumeShieldRegenRate = (elapsed >= damagePause) ? regenRate : 0f;
                 }
                 else
-                {
                     player.HumeShieldRegenRate = regenRate;
-                }
 
                 if (player.CurrentItem == null || player.CurrentItem.Serial != customItem.Serial)
                     yield break;
@@ -865,42 +859,43 @@ namespace UncomplicatedCustomItems.Events
 
         internal static IEnumerator<float> HumeShieldRegeneration(Player player, ISCP127Data data, Scp127Tier tier, SummonedCustomItem customItem)
         {
-            float regenRate = 0f;
-            float damagePause = 0f;
-
-            switch (tier)
+            float regenRate = tier switch
             {
-                case Scp127Tier.Tier1:
-                    regenRate = data.Tier1ShieldRegenRate;
-                    damagePause = data.Tier1ShieldOnDamagePause;
-                    break;
-                case Scp127Tier.Tier2:
-                    regenRate = data.Tier2ShieldRegenRate;
-                    damagePause = data.Tier2ShieldOnDamagePause;
-                    break;
-                case Scp127Tier.Tier3:
-                    regenRate = data.Tier3ShieldRegenRate;
-                    damagePause = data.Tier3ShieldOnDamagePause;
-                    break;
-            }
+                Scp127Tier.Tier1 => data.Tier1ShieldRegenRate,
+                Scp127Tier.Tier2 => data.Tier2ShieldRegenRate,
+                Scp127Tier.Tier3 => data.Tier3ShieldRegenRate,
+                _ => 0f
+            };
 
-            for (; ; )
+            float damagePause = tier switch
             {
+                Scp127Tier.Tier1 => data.Tier1ShieldOnDamagePause,
+                Scp127Tier.Tier2 => data.Tier2ShieldOnDamagePause,
+                Scp127Tier.Tier3 => data.Tier3ShieldOnDamagePause,
+                _ => 0f
+            };
+
+            while (player != null && player.IsAlive)
+            {
+                if (player.CurrentItem == null || player.CurrentItem.Serial != customItem.Serial)
+                {
+                    player.HumeShieldRegenRate = 0f;
+                    yield break;
+                }
+
                 if (_damageTimes.TryGetValue(player, out long time))
                 {
                     long elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - time;
                     player.HumeShieldRegenRate = (elapsed >= damagePause) ? regenRate : 0f;
                 }
                 else
-                {
                     player.HumeShieldRegenRate = regenRate;
-                }
-
-                if (player.CurrentItem == null || player.CurrentItem.Serial != customItem.Serial)
-                    yield break;
 
                 yield return Timing.WaitForOneFrame;
             }
+
+            if (player != null)
+                player.HumeShieldRegenRate = 0f;
         }
 
         public static void OnPickup(PlayerPickedUpItemEventArgs ev)

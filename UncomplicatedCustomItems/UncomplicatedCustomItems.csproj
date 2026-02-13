@@ -4,36 +4,15 @@
     <ProjectGuid>{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}</ProjectGuid>
     <RootNamespace>UncomplicatedCustomItems</RootNamespace>
     <AssemblyName>UncomplicatedCustomItems</AssemblyName>
-    <LangVersion>12</LangVersion>
+    <LangVersion>14</LangVersion>
     <Deterministic>true</Deterministic>
     <FileAlignment>512</FileAlignment>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-    <Configurations>Debug;Release;Exiled;LabApi</Configurations>
+    <Configurations>Exiled;LabApi;Exiled-Debug;LabApi-Debug</Configurations>
 	  <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'LabApi' ">
@@ -42,6 +21,7 @@
     <OutputPath>bin\LabAPI\</OutputPath>
     <DebugType>embedded</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Exiled' ">
@@ -50,12 +30,33 @@
     <OutputPath>bin\Exiled\</OutputPath>
     <DebugType>embedded</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'LabApi-Debug' ">
+    <DefineConstants>LABAPI;DEBUG;TRACE</DefineConstants>
+    <AssemblyName>UncomplicatedCustomItems-LabApi</AssemblyName>
+    <OutputPath>bin\LabAPI-Debug\</OutputPath>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Exiled-Debug' ">
+    <DefineConstants>EXILED;DEBUG;TRACE</DefineConstants>
+    <AssemblyName>UncomplicatedCustomItems-Exiled</AssemblyName>
+    <OutputPath>bin\Exiled-Debug\</OutputPath>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>false</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AudioPlayerApi" Version="1.1.2" />
     <PackageReference Include="Northwood.LabAPI" Version="1.1.5" Publicize="true"/>
-    <PackageReference Include="ExMod.Exiled" Version="9.13.1" Condition=" '$(Configuration)' == 'Exiled'" />
+    <PackageReference Include="ExMod.Exiled" Version="9.13.1" Condition=" '$(Configuration)' == 'Exiled' Or '$(Configuration)' == 'Exiled-Debug'" />
     <PackageReference Include="Lib.Harmony" Version="2.2.2" />
     <PackageReference Include="System.Text.Json" Version="10.0.1" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
@@ -219,13 +220,14 @@
     <None Include="app.config" />
   </ItemGroup>
   
-  <Target Name="PostBuildCopyExiledDll" AfterTargets="Build" Condition=" '$(Configuration)' == 'Exiled' And '$(OS)' == 'Windows_NT'">
-    <Message Text="Copying UncomplicatedCustomItems-Exiled.dll to EXILED plugin folder..." Importance="high" />
-    <Copy SourceFiles="$(OutputPath)UncomplicatedCustomItems-Exiled.dll" DestinationFolder="$(APPDATA)\EXILED\Plugins" SkipUnchangedFiles="true" />
-  </Target>
-  <Target Name="PostBuildCopyLabApiDll" AfterTargets="Build" Condition=" '$(Configuration)' == 'LabApi' And '$(OS)' == 'Windows_NT'">
-    <Message Text="Copying UncomplicatedCustomItems-LabApi.dll to LabAPI plugin folder..." Importance="high" />
-    <Copy SourceFiles="$(OutputPath)UncomplicatedCustomItems-LabApi.dll" DestinationFolder="$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global" SkipUnchangedFiles="true" />
-  </Target>
+<Target Name="PostBuildCopyExiledDll" AfterTargets="Build" Condition=" ('$(Configuration)' == 'Exiled' Or '$(Configuration)' == 'Exiled-Debug') And '$(OS)' == 'Windows_NT'">
+  <Message Text="Copying UncomplicatedCustomItems-Exiled.dll to EXILED plugin folder..." Importance="high" />
+  <Copy SourceFiles="$(OutputPath)UncomplicatedCustomItems-Exiled.dll" DestinationFolder="$(APPDATA)\EXILED\Plugins" SkipUnchangedFiles="true" />
+</Target>
+
+<Target Name="PostBuildCopyLabApiDll" AfterTargets="Build" Condition=" ('$(Configuration)' == 'LabApi' Or '$(Configuration)' == 'LabApi-Debug') And '$(OS)' == 'Windows_NT'">
+  <Message Text="Copying UncomplicatedCustomItems-LabApi.dll to LabAPI plugin folder..." Importance="high" />
+  <Copy SourceFiles="$(OutputPath)UncomplicatedCustomItems-LabApi.dll" DestinationFolder="$(APPDATA)\SCP Secret Laboratory\LabAPI\plugins\global" SkipUnchangedFiles="true" />
+</Target>
 
 </Project>

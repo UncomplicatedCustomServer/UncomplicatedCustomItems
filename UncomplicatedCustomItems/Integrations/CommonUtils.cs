@@ -226,7 +226,14 @@ namespace UncomplicatedCustomItems.Integrations
                         if (Utilities.TryGetCustomItemByName(item, out ICustomItem customItem))
                         {
                             LogManager.Silent($"Granting UCI item '{customItem.Name}' to {player.Nickname} via CommonUtilities integration.");
-                            Timing.RunCoroutine(ItemAddCoroutine(player, customItem));
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () => 
+                            {
+                                if (player?.IsConnected == true)
+                                {
+                                    new SummonedCustomItem(customItem, player);
+                                }
+                            });
+
                             return;
                         }
                     }
@@ -236,16 +243,7 @@ namespace UncomplicatedCustomItems.Integrations
                 }
             }
         }
-
-        public static IEnumerator<float> ItemAddCoroutine(Player player, ICustomItem customItem)
-        {
-            yield return Timing.WaitForSeconds(0.5f);
-            if (player?.IsConnected == true)
-            {
-                 new SummonedCustomItem(customItem, player);
-            }
-        }
-
+        
         public static double CalculateChance(IEnumerable<object> itemChances, bool additiveProbabilities)
         {
             Object randomInstanceProvider = _commonUtilsRandomField?.GetValue(null);

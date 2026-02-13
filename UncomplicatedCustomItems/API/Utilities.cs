@@ -36,7 +36,7 @@ namespace UncomplicatedCustomItems.API
                 LogManager.Warn($"{item.Name} - {OldId} ID is already used asigning new ID...\n{item.Name} new ID is {NewId}");
                 CustomItem.Register(item);
             }
-            
+
             switch (item.CustomItemType)
             {
                 case CustomItemType.Item:
@@ -203,7 +203,7 @@ namespace UncomplicatedCustomItems.API
                         error = $"The Item has been flagged as 'MicroHID' but the item {item.Item} is not a MicroHID!";
                         return false;
                     }
-                    
+
                     break;
 
                 case CustomItemType.ParticleDisruptor:
@@ -264,7 +264,7 @@ namespace UncomplicatedCustomItems.API
                 LogManager.Warn($"{action.Name} - {OldId} ID is already used asigning new ID...\n{action.Name} new ID is {NewId}");
                 CustomAction.Register(action);
             }
-            
+
             error = "";
             return true;
         }
@@ -293,7 +293,7 @@ namespace UncomplicatedCustomItems.API
 
                 if (data.BroadcastMessage.Length > 1 && data.BroadcastDuration > 0)
                 {
-                    player.SendBroadcast( data.BroadcastMessage, data.BroadcastDuration);
+                    player.SendBroadcast(data.BroadcastMessage, data.BroadcastDuration);
                 }
 
                 if (data.HintMessage.Length > 1 && data.HintDuration > 0)
@@ -395,7 +395,7 @@ namespace UncomplicatedCustomItems.API
 
                 if (spawn.Zones.Count > 0)
                     HandleZoneSpawn(customItem, spawn);
-                
+
                 Events.Handlers.CustomItemEvents.OnSummonedCustomItem(new(customItem));
             }
         }
@@ -426,7 +426,7 @@ namespace UncomplicatedCustomItems.API
                 Vector3 spawnPosition = GetDynamicSpawnPosition(room, dynamicSpawn, spawn, customItem);
                 if (spawnPosition != Vector3.zero && spawn.Rotation != Vector3.zero)
                 {
-                    new SummonedCustomItem(customItem, spawnPosition, rotation);                    
+                    new SummonedCustomItem(customItem, spawnPosition, rotation);
                 }
                 else if (spawnPosition != Vector3.zero)
                     new SummonedCustomItem(customItem, spawnPosition);
@@ -439,7 +439,7 @@ namespace UncomplicatedCustomItems.API
             {
                 return Room.Get(roomName).FirstOrDefault();
             }
-            
+
             return Room.List.GetByGameObjectName($"{room}");
         }
 
@@ -476,7 +476,7 @@ namespace UncomplicatedCustomItems.API
                     return;
                 }
             }
-            
+
             Room randomRoom = Room.List.Where(room => room.Zone == zone).ToList().RandomItem();
             new SummonedCustomItem(customItem, randomRoom.Position);
         }
@@ -506,21 +506,23 @@ namespace UncomplicatedCustomItems.API
 
             return pickups.Count > 0 ? pickups.RandomItem() : null;
         }
-                
+
         /// <summary>
         /// Reproduce the SCP:SL <see cref="ItemType.Painkillers"/> healing process but with custom things :)
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="Data"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
         internal static IEnumerator<float> PainkillersCoroutine(Player player, IPainkillersData Data)
         {
             float TotalHealed = 0;
             yield return Timing.WaitForSeconds(Data.TimeBeforeStartHealing);
+
             while (TotalHealed < Data.TotalHealing && player.IsAlive)
             {
-                player.Heal(Data.TickHeal);
-                TotalHealed += Data.TickHeal;
+                float healAmount = Math.Min(Data.TickHeal, Data.TotalHealing - TotalHealed);
+                player.Heal(healAmount);
+                TotalHealed += healAmount;
                 yield return Timing.WaitForSeconds(Data.TickTime);
             }
         }

@@ -14,7 +14,6 @@ using LabApi.Features.Wrappers;
 using MEC;
 using Mirror;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
@@ -29,7 +28,6 @@ using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Events.Arguments.CustomItemEvents;
 using UnityEngine;
-using ZXing.Common;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
@@ -730,10 +728,22 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal IEnumerator<float> AmmoRegen(FirearmItem firearm)
         {
-            for (; ; )
+            while (true)
             {
                 if (!TryGetModule<CustomModuleAPI.CustomModules.AmmoRegen>(out var regen))
                     yield break;
+
+                if (firearm == null || firearm.CurrentOwner == null)
+                    yield break;
+
+                if (!firearm.CurrentOwner.IsAlive)
+                    yield break;
+
+                if (firearm.CurrentOwner.CurrentItem?.Serial != firearm.Serial)
+                {
+                    yield return Timing.WaitForSeconds(regen.RegenInterval);
+                    continue;
+                }
 
                 if (firearm.StoredAmmo != firearm.MaxAmmo)
                     firearm.StoredAmmo = Math.Min(firearm.StoredAmmo + regen.AmmoPerInterval, firearm.MaxAmmo);
@@ -744,16 +754,13 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal IEnumerator<float> LightFacingForward()
         {
-            for (; ; )
+            while (Owner != null)
             {
-                if (Owner == null)
+                if (Owner.CurrentItem == null || Serial != Owner.CurrentItem.Serial || !Toggled)
+                {
                     Light.Intensity = 0;
-                if (Owner.CurrentItem == null)
-                    Light.Intensity = 0;
-                if (Serial != Owner.CurrentItem.Serial)
-                    Light.Intensity = 0;
-
-                if (Toggled)
+                }
+                else
                 {
                     IFlashlightData data = CustomItem.CustomData as IFlashlightData;
                     Light.Intensity = data.Intensity;
@@ -762,6 +769,8 @@ namespace UncomplicatedCustomItems.API.Features
 
                 yield return Timing.WaitForOneFrame;
             }
+
+            Light.Intensity = 0;
         }
 
         public void LoadBadge(Player player)
@@ -962,17 +971,13 @@ namespace UncomplicatedCustomItems.API.Features
                 _cooldownStates[player] = [];
 
             _cooldownStates[player][serial] = true;
-            Timing.RunCoroutine(CooldownCoroutine(player, serial, cooldown));
-        }
+            Timing.CallDelayed(Timing.WaitForSeconds(cooldown), () =>
+            {
+                if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
+                    itemStates[serial] = false;
 
-        public IEnumerator<float> CooldownCoroutine(Player player, ushort serial, float cooldown)
-        {
-            yield return Timing.WaitForSeconds(cooldown);
-
-            if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
-                itemStates[serial] = false;
-
-            LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
+                LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
+            });
         }
 
         public void HandleSelectedDisplayHint(Player player)

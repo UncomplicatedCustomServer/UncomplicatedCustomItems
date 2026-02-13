@@ -96,7 +96,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(summonedItem.Serial, (float)TimeTillDespawn));
+                                DespawnAfter(summonedItem.Serial, (float)TimeTillDespawn);
                             }
                         }
                         else
@@ -114,7 +114,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                                 if (TimeTillDespawn > 0f)
                                 {
                                     LogManager.Debug($"Starting Despawn Coroutine");
-                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(exCustomItem.Serial, (float)TimeTillDespawn));
+                                    DespawnAfter(exCustomItem.Serial, (float)TimeTillDespawn);
                                 }
                             }
                             else
@@ -136,7 +136,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(scp244Pickup.Serial, (float)TimeTillDespawn));
+                                DespawnAfter(scp244Pickup.Serial, (float)TimeTillDespawn);
                             }
                         }
                         else
@@ -151,7 +151,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(pickup.Serial, (float)TimeTillDespawn));
+                                DespawnAfter(pickup.Serial, (float)TimeTillDespawn);
                             }
                         }
                     }
@@ -170,15 +170,16 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             ServerEvents.ProjectileExploded -= Run;
         }
 
-        public static IEnumerator<float> TimeTillDespawnCoroutine(ushort serial, float despawnTime)
+        public static void DespawnAfter(ushort serial, float time)
         {
-            yield return Timing.WaitForSeconds(despawnTime);
-            Pickup pickup = Pickup.Get(serial);
-            if (pickup != null)
+            Timing.CallDelayed(Timing.WaitForSeconds(time), () =>
             {
-                pickup.Destroy();
-                LogManager.Debug($"Destroyed pickup. Type: {pickup.Type} Previous owner: {pickup.LastOwner} Serial: {pickup.Serial}");
-            }
+                if (Pickup.TryGet(serial, out var pickup))
+                {
+                    pickup.Destroy();
+                    LogManager.Debug($"Destroyed pickup. Type: {pickup.Type} Previous owner: {pickup.LastOwner} Serial: {pickup.Serial}");
+                }
+            });
         }
     }
 }
