@@ -398,6 +398,22 @@ namespace UncomplicatedCustomItems.Events
                             });
 
                             break;
+                        
+                        case ItemType.SCP207 or ItemType.AntiSCP207 when customItem.CustomItem.CustomData is SCP207Data cola:
+                            if (!cola.Apply207Effect)
+                            {
+                                ev.IsAllowed = false;
+                                ev.ContinueProcess = false;
+
+                            /*
+                                if (ev.Player.TryGetEffect<Scp207>(out var scp207Effect) && ev.UsableItem.Type is ItemType.SCP207)
+                                    scp207Effect.Intensity -= 1;
+
+                                if (ev.Player.TryGetEffect<AntiScp207>(out var antiScp207Effect) && ev.UsableItem.Type is ItemType.AntiSCP207)
+                                    antiScp207Effect.Intensity -= 1;
+                            */
+                            }
+                            break;
                     }
                 }
             }

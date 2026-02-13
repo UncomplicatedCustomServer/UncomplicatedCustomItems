@@ -50,10 +50,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="value"></param>
         /// <param name="min"></param>
         /// <param name="max"></param>
-        /// <returns></returns>
+        /// <returns>Value between 0% and 100%</returns>
         public static float Clamp(float? value, float min, float max)
         {
-            return (float)((value < min) ? min : (value > max) ? max : value);
+            return (float)((value < min) ? min : (value > max) ? max : value)/100;
         }
 
         /// <summary>
@@ -82,11 +82,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         Speaker speaker = p.AddSpeaker("Main", Coords, isSpatial: true, maxDistance: data.AudibleDistance);
                     });
 
-                    float volume = Clamp(data.Volume, 1f, 100f)/100;
-                    audioPlayer.AddClip($"{clipId}", volume);
-                    AudioClipStorage.LoadClip(data.AudioPath, $"{clipId}");
-                    LogManager.Debug($"Playing {Path.GetFileName(data.AudioPath)}");
-                    LogManager.Debug($"Audio should have been played.");
+                    audioPlayer.AddClip($"{clipId}", Clamp(data.Volume, 1f, 100f));
+                    if (AudioClipStorage.LoadClip(data.AudioPath, $"{clipId}"))
+                    {
+                        LogManager.Debug($"Playing {Path.GetFileName(data.AudioPath)}");
+                        LogManager.Debug($"Audio should have been played.");
+                    }
+                    else
+                        LogManager.Warn($"Failed to load audio file {Path.GetFileName(data.AudioPath)}");
                 }
                 else
                     LogManager.Warn($"Audio path is null please fill out the config properly.");
@@ -118,9 +121,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                     float volume = Clamp(volumefloat, 1f, 100f);
                     audioPlayer.AddClip($"{clipId}", volume);
-                    AudioClipStorage.LoadClip(path, $"{clipId}");
-                    LogManager.Debug($"Playing {Path.GetFileName(path)}");
-                    LogManager.Debug($"Audio should have been played.");
+                    if (AudioClipStorage.LoadClip(path, $"{clipId}"))
+                    {
+                        LogManager.Debug($"Playing {Path.GetFileName(path)}");
+                        LogManager.Debug($"Audio should have been played.");
+                    }
+                    else
+                        LogManager.Warn($"Failed to load audio file {Path.GetFileName(path)}");
                 }
                 else
                     LogManager.Warn($"Audio path is null please fill out the config properly.");

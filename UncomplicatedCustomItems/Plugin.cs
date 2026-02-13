@@ -292,8 +292,7 @@ namespace UncomplicatedCustomItems
 #else
             Player.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
 #endif
-            _ = Task.Run(VersionManager.Init);
-
+            VersionManager.Init();
 			HttpManager.LoadCreditTags();
             CustomItemBackupSystem.Init();
             LabAPIExtensions.Init();

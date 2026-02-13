@@ -8,7 +8,6 @@ using UnityEngine;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Extensions;
-using System.Text;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 
 namespace UncomplicatedCustomItems.API.Features
