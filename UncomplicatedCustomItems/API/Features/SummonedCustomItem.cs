@@ -1,5 +1,6 @@
 ﻿using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
+using InventorySystem.Items.Autosync;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Extensions;
@@ -11,6 +12,7 @@ using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
+using Mirror;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -189,6 +191,12 @@ namespace UncomplicatedCustomItems.API.Features
                         jailbird.Base.MeleeDamage = jbData.MeleeDamage;
                         JailbirdDeteriorationTracker.ReceivedStates[jailbird.Serial] = jbData.WearState;
                         PropertiesSet = true;
+
+                        using (new AutosyncRpc(jailbird.Base.ItemId, out NetworkWriter writer))
+                        {
+                            writer.WriteByte(0);
+                            writer.WriteByte((byte)jailbird.WearState);
+                        }
                         break;
 
                     case CustomItemType.MicroHID when Item is MicroHIDItem microHID && CustomItem.CustomData is MicroHIDData microData:
