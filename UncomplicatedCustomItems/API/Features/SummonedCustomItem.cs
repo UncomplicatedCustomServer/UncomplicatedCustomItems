@@ -160,14 +160,6 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 switch (CustomItem.CustomItemType)
                 {
-                    case CustomItemType.FlashGrenade when Item is ThrowableItem throwable && CustomItem.CustomData is FlashGrenadeData flashData:
-                        HandleFlashbangItem(throwable, flashData);
-                        break;
-
-                    case CustomItemType.ExplosiveGrenade when Item is ThrowableItem throwable && CustomItem.CustomData is ExplosiveGrenadeData grenadeData:
-                        HandleGrenadeItem(throwable, grenadeData);
-                        break;
-
                     case CustomItemType.Keycard when Item is KeycardItem keycard && CustomItem.CustomData is KeycardData keycardData:
                         HandleKeycardItem(keycard, keycardData);
                         break;
@@ -255,20 +247,6 @@ namespace UncomplicatedCustomItems.API.Features
                         break;
                 }
             }
-        }
-
-        private void HandleFlashbangItem(ThrowableItem throwable, FlashGrenadeData data)
-        {
-            LogManager.Debug($"Throwable Flashbang");
-            throwable.Base._pinPullTime = data.PinPullTime;
-            throwable.Base._repickupable = data.Repickable;
-        }
-
-        private void HandleGrenadeItem(ThrowableItem throwable, ExplosiveGrenadeData data)
-        {
-            LogManager.Debug($"Throwable Grenade");
-            throwable.Base._pinPullTime = data.PinPullTime;
-            throwable.Base._repickupable = data.Repickable;
         }
 
         public void HandleKeycardItem(KeycardItem keycardItem, IKeycardData kd)

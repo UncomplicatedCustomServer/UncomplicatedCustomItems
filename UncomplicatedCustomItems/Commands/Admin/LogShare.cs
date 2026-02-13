@@ -2,9 +2,7 @@ using CommandSystem;
 using System;
 using System.Net;
 using UncomplicatedCustomItems.API.Features.Helper;
-using System.Net.Http;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using LabApi.Features.Console;
 using System.Text.Json;
 
@@ -31,43 +29,43 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            response = "Loading the JSON content to share with the developers... This may take a moment.";
+            response = "Uploading logs to the developers... This may take a moment.";
 
-            _ = Task.Run(async () =>
+            long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            Logger.Info("[ShareTheLog] Starting log upload process...");
+            LogManager.SendReport((status, responseContent, readableSize) =>
             {
-                long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                
-                try
+                long elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - start;
+                if (status == HttpStatusCode.OK)
                 {
-                    Logger.Info("[ShareTheLog] Starting log upload process...");
-                    
-                    var result = await LogManager.SendReportAsync().ConfigureAwait(false);
-                    if (result.statusCode == HttpStatusCode.OK)
+                    try
                     {
-                        string responseContent = Plugin.HttpManager.RetriveString(result.content);
-                        Dictionary<string, string> data = JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
-                        
-                        long elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - start;
-                        
-                        Logger.Info($"[ShareTheLog] Data size being sent: {result.readableSize}");
-                        Logger.Info($"[ShareTheLog] Successfully shared the UCI logs with the developers!");
-                        Logger.Info($"[ShareTheLog] Send this ID to the developers: {data["id"]}");
+                        Dictionary<string, JsonElement> data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(responseContent);
+
+                        Logger.Info($"[ShareTheLog] Data size being sent: {readableSize}");
+                        Logger.Info("[ShareTheLog] Successfully shared the UCI logs with the developers!");
+
+                        if (data.TryGetValue("id", out JsonElement idElement))
+                        {
+                            string id = idElement.GetString();
+                            Logger.Info($"[ShareTheLog] Send this ID to the developers: {id}");
+                        }
+                        else
+                            Logger.Warn("[ShareTheLog] Server response did not contain an ID.");
+
                         Logger.Info($"[ShareTheLog] Operation completed in {elapsed}ms");
                     }
-                    else
-                        Logger.Error($"[ShareTheLog] Failed to share the UCI logs with the developers. Server response: {result.statusCode}");
+                    catch (JsonException jsonEx)
+                    {
+                        Logger.Error($"[ShareTheLog] Failed to parse server response: {jsonEx.Message}");
+                    }
                 }
-                catch (JsonException jsonEx)
+                else
                 {
-                    Logger.Error($"[ShareTheLog] Failed to parse server response: {jsonEx.Message}");
-                }
-                catch (HttpRequestException httpEx)
-                {
-                    Logger.Error($"[ShareTheLog] Network error during log upload: {httpEx.Message}");
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"[ShareTheLog] Unexpected error during log upload: {ex}");
+                    Logger.Error($"[ShareTheLog] Failed to share the UCI logs with the developers. Server response: {status}");
+
+                    if (!string.IsNullOrEmpty(responseContent))
+                        Logger.Debug($"[ShareTheLog] Response body: {responseContent}");
                 }
             });
 

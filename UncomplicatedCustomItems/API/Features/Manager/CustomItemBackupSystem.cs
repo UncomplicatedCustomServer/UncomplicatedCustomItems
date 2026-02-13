@@ -131,6 +131,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
             else
                 LogManager.Warn($"Download failed {request.responseCode} {request.error}");
+
+            request.Dispose();
         }
 
         private static IEnumerator UploadBackupData()

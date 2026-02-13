@@ -15,7 +15,6 @@ using ThrowableItem = InventorySystem.Items.ThrowableProjectiles.ThrowableItem;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
-    // TODO Test.
     [HarmonyPatch(typeof(ThrowableItem), nameof(ThrowableItem.ServerThrow))]
     internal static class CustomThrowablePropertiesPatch
     {

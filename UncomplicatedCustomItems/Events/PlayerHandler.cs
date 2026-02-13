@@ -156,105 +156,10 @@ namespace UncomplicatedCustomItems.Events
         private static void OnProjectileThrew(PlayerThrewProjectileEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.ThrowableItem.Serial, out var summoned))
-            {
                 summoned.OnThrew(ev);
-                switch (summoned.CustomItem.CustomItemType)
-                {
-                    case CustomItemType.ExplosiveGrenade when summoned.CustomItem.CustomData is ExplosiveGrenadeData exdata && ev.Projectile.Base is ExplosionGrenade exGrenade:
-                        if (ev.Projectile is TimedGrenadeProjectile projectile)
-                            projectile.RemainingTime = exdata.FuseTime;
-
-                        exGrenade.MaxRadius = exdata.MaxRadius;
-                        exGrenade.ScpDamageMultiplier = exdata.ScpDamageMultiplier;
-                        exGrenade._burnedDuration = exdata.BurnDuration;
-                        exGrenade._concussedDuration = exdata.ConcussDuration;
-                        exGrenade._deafenedDuration = exdata.DeafenDuration;
-                        exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
-                        exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
-                        if (exdata.ExplodeOnImpact)
-                            exGrenade.gameObject.AddComponent<CollisionHandler>().Init(exGrenade.gameObject, exGrenade);
-
-                        break;
-
-                    case CustomItemType.FlashGrenade when summoned.CustomItem.CustomData is FlashGrenadeData flashdata && ev.Projectile.Base is FlashbangGrenade flash:
-                        if (ev.Projectile is TimedGrenadeProjectile projectile1)
-                            projectile1.RemainingTime = flashdata.FuseTime;
-
-                        flash.BlindTime = flashdata.AdditionalBlindedEffect;
-                        flash._minimalEffectDuration = flashdata.MinimalDurationEffect;
-                        flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
-                        flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
-                        if (flashdata.ExplodeOnImpact)
-                            flash.gameObject.AddComponent<CollisionHandler>().Init(flash.gameObject, flash);
-
-                        break;
-
-                    case CustomItemType.SCPItem when summoned.CustomItem.CustomData is SCP018Data scp018data && ev.Projectile.Base is Scp018Projectile scp018:
-                        if (ev.Projectile is TimedGrenadeProjectile projectile2)
-                            projectile2.RemainingTime = scp018data.FuseTime;
-
-                        scp018._friendlyFireTime = scp018data.FriendlyFireTime;
-                        if (scp018data.ExplodeOnImpact)
-                            scp018.gameObject.AddComponent<CollisionHandler>().Init(scp018.gameObject, scp018);
-
-                        break;
-
-                    default:
-                        LogManager.Warn($"Unsupported ItemType {ev.ThrowableItem.Type} was thrown as a projectile by {ev.Player.DisplayName}");
-                        break;
-                }
-            }
 
             if (SummonedAPICustomItem.TryGet(ev.ThrowableItem.Serial, out var api))
-            {
                 api.OnThrew(ev);
-                switch (api.CustomItem)
-                {
-                    case CustomExplosiveGrenade exdata when ev.Projectile.Base is ExplosionGrenade exGrenade:
-                        if (ev.Projectile is TimedGrenadeProjectile projectile)
-                            projectile.RemainingTime = exdata.FuseTime;
-
-                        exGrenade.MaxRadius = exdata.MaxRadius;
-                        exGrenade.ScpDamageMultiplier = exdata.ScpDamageMultiplier;
-                        exGrenade._burnedDuration = exdata.BurnDuration;
-                        exGrenade._concussedDuration = exdata.ConcussDuration;
-                        exGrenade._deafenedDuration = exdata.DeafenDuration;
-                        exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
-                        exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
-                        if (exdata.ExplodeOnImpact)
-                            exGrenade.gameObject.AddComponent<CollisionHandler>().Init(exGrenade.gameObject, exGrenade);
-
-                        break;
-
-                    case CustomFlashGrenade flashdata when ev.Projectile.Base is FlashbangGrenade flash:
-                        if (ev.Projectile is TimedGrenadeProjectile projectile1)
-                            projectile1.RemainingTime = flashdata.FuseTime;
-
-                        flash.BlindTime = flashdata.AdditionalBlindedEffect;
-                        flash._minimalEffectDuration = flashdata.MinimalDurationEffect;
-                        flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
-                        flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
-                        if (flashdata.ExplodeOnImpact)
-                            flash.gameObject.AddComponent<CollisionHandler>().Init(flash.gameObject, flash);
-
-                        break;
-
-                    case CustomSCP018 scp018data when ev.Projectile.Base is Scp018Projectile scp018:
-                        if (ev.Projectile is TimedGrenadeProjectile projectile2)
-                            projectile2.RemainingTime = scp018data.FuseTime;
-
-                        scp018._friendlyFireTime = scp018data.FriendlyFireTime;
-                        scp018._fuseTime = scp018data.FuseTime;
-                        if (scp018data.ExplodeOnImpact)
-                            scp018.gameObject.AddComponent<CollisionHandler>().Init(scp018.gameObject, scp018);
-
-                        break;
-
-                    default:
-                        LogManager.Warn($"Unsupported ItemType {ev.ThrowableItem.Type} was thrown as a projectile by {ev.Player.DisplayName}");
-                        break;
-                }
-            }
         }
 
         public static void OnJailbirdMessage(PlayerProcessedJailbirdMessageEventArgs ev)

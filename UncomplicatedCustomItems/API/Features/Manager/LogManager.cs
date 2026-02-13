@@ -73,50 +73,21 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Logger.Raw($"[Security] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.DarkMagenta);
         }
 
-        public static HttpStatusCode SendReport(out HttpContent content, out string readableSize)
+        public static void SendReport(Action<HttpStatusCode, string, string> onCompleted)
         {
-            content = null;
-            readableSize = null;
-
             if (MessageSent || !Plugin.Instance.IsPrerelease)
             {
-                return HttpStatusCode.Forbidden;
+                onCompleted?.Invoke(HttpStatusCode.Forbidden, null, null);
+                return;
             }
 
             if (History.Count < 1)
             {
-                return HttpStatusCode.Forbidden;
+                onCompleted?.Invoke(HttpStatusCode.Forbidden, null, null);
+                return;
             }
 
             string formattedContent = FormatLogsForReport();
-
-            int byteSize = Encoding.UTF8.GetByteCount(formattedContent);
-            readableSize = byteSize switch
-            {
-                < 1024 => $"{byteSize} bytes",
-                < 1024 * 1024 => $"{(byteSize / 1024.0):F2} KB",
-                _ => $"{(byteSize / 1024.0 / 1024.0):F2} MB"
-            };
-
-            HttpStatusCode response = Plugin.HttpManager.ShareLogs(formattedContent, out content);
-
-            if (response == HttpStatusCode.OK)
-            {
-                MessageSent = true;
-            }
-
-            return response;
-        }
-
-        public static async Task<(HttpStatusCode statusCode, HttpContent content, string readableSize)> SendReportAsync()
-        {
-            if (!Plugin.Instance.IsPrerelease && MessageSent)
-                return (HttpStatusCode.Forbidden, null, null);
-
-            if (History.Count < 1)
-                return (HttpStatusCode.Forbidden, null, null);
-
-            string formattedContent = await Task.Run(() => FormatLogsForReport()).ConfigureAwait(false);
 
             int byteSize = Encoding.UTF8.GetByteCount(formattedContent);
             string readableSize = byteSize switch
@@ -126,59 +97,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 _ => $"{(byteSize / 1024.0 / 1024.0):F2} MB"
             };
 
-            try
+            Plugin.HttpManager.ShareLogs(formattedContent, (status, response) =>
             {
-                var (statusCode, content) = await Plugin.HttpManager.ShareLogsAsync(formattedContent).ConfigureAwait(false);
-
-                if (statusCode == HttpStatusCode.OK)
+                if (status == HttpStatusCode.OK)
                     MessageSent = true;
 
-                return (statusCode, content, readableSize);
-            }
-            catch (HttpRequestException ex)
-            {
-                Error($"HTTP error during log upload: {ex.Message}");
-                return (HttpStatusCode.ServiceUnavailable, null, readableSize);
-            }
-            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
-            {
-                Error("Log upload timed out");
-                return (HttpStatusCode.RequestTimeout, null, readableSize);
-            }
-            catch (Exception ex)
-            {
-                Error($"Unexpected error during log upload: {ex.Message}");
-                return (HttpStatusCode.InternalServerError, null, readableSize);
-            }
-        }
-
-        private static async Task<string> GetLocalAdminLogContentAsync()
-        {
-            try
-            {
-                string scpSlPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SCP Secret Laboratory");
-                string localAdminLogsPath = Path.Combine(scpSlPath, "LocalAdminLogs", Server.Port.ToString());
-
-                if (!Directory.Exists(localAdminLogsPath))
-                    return $"LocalAdmin logs directory not found at: {localAdminLogsPath}";
-
-                string latestLogFile = Directory.GetFiles(localAdminLogsPath, "LocalAdmin Log*.txt")
-                    .OrderByDescending(f => File.GetLastWriteTime(f))
-                    .FirstOrDefault();
-
-                if (string.IsNullOrEmpty(latestLogFile))
-                    return "No LocalAdmin log files found in directory.";
-
-                using FileStream fs = new(latestLogFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                using StreamReader reader = new(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-
-                string content = await reader.ReadToEndAsync().ConfigureAwait(false);
-                return RedactSensitiveData(content);
-            }
-            catch (Exception ex)
-            {
-                return RedactSensitiveData($"Error reading LocalAdmin log file: {ex.Message}");
-            }
+                onCompleted?.Invoke(status, response, readableSize);
+            });
         }
 
         private static readonly Regex IpRegex = new(@"\b(?:25[0-5]|2[0-4]\d|1?\d{1,2})(?:\.(?:25[0-5]|2[0-4]\d|1?\d{1,2})){3}\b", RegexOptions.Compiled);
