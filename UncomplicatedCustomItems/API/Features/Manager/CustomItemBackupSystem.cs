@@ -11,15 +11,41 @@ using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
+    public class BackupKey
+    {
+        public string BackupCode { get; set; } = "0";
+    }
+
     public class CustomItemBackupSystem
     {
+        private static BackupKey key { get; set; }
         private static string Url => "https://ucibackup.thaumiel-servers.workers.dev";
+#if EXILED
         private static string BackupDir => Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups");
+#else
+        private static string BackupDir => Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups");
+#endif
         public static bool Online = false;
 
         public static void Init()
         {
-            if (Plugin.Instance.Config.BackupCode == "0")
+            if (!Directory.Exists(BackupDir))
+                Directory.CreateDirectory(BackupDir);
+
+            if (!File.Exists(Path.Combine(BackupDir, "key.yml")))
+            {
+                string content = YamlConfigParser.Serializer.Serialize(new BackupKey());
+                File.WriteAllText(Path.Combine(BackupDir, "key.yml"), content);
+            }
+
+            if (key is null)
+            {
+                string content = File.ReadAllText(Path.Combine(BackupDir, "key.yml"));
+                BackupKey backup = YamlConfigParser.Deserializer.Deserialize<BackupKey>(content);
+                key = backup;
+            }
+
+            if (key.BackupCode == "0")
                 GenerateBackupCode();
 
             Player.Host.ReferenceHub.StartCoroutine(SendInitialRequest());
@@ -27,7 +53,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public static void Upload()
         {
-            if (!Online || Plugin.Instance.Config.BackupCode == "0")
+            if (!Online || key.BackupCode == "0")
                 return;
 
             Player.Host.ReferenceHub.StartCoroutine(UploadBackupData());
@@ -37,9 +63,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             if (!Online || Plugin.Instance.Config.BackupCode == "0")
                 return;
-
-            if (!Directory.Exists(BackupDir))
-                Directory.CreateDirectory(BackupDir);
 
             Player.Host.ReferenceHub.StartCoroutine(GetBackupData(code));
         }
@@ -52,12 +75,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             for (int i = 0; i < UnityEngine.Random.Range(16, 48); i++)
                 code += chars[random.Next(chars.Length)];
 
-            Plugin.Instance.Config.BackupCode = code;
-#if EXILED
-            // Figure out how to save config in Exiled
-#else
-            Plugin.Instance.SaveConfig();
-#endif
+            key.BackupCode = code;
+            File.WriteAllText(Path.Combine(BackupDir, "key.yml"), YamlConfigParser.Serializer.Serialize(key));
         }
 
         private static string ParseItems()
@@ -85,7 +104,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             UnityWebRequest request = new($"{Url}");
             request.method = kHttpVerbGET;
             yield return request.SendWebRequest();
-            if (request.result == UnityWebRequest.Result.Success)
+            if (request.result == Result.Success)
                 Online = true;
 
             request.Dispose();
@@ -95,7 +114,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             string BackupCode = code;
             if (string.IsNullOrEmpty(BackupCode))
-                BackupCode = Plugin.Instance.Config.BackupCode;
+                BackupCode = key.BackupCode;
 
             UnityWebRequest request = new($"{Url}/download");
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -141,7 +160,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             byte[] bodyRaw = Encoding.UTF8.GetBytes(ParseItems());   
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.SetRequestHeader("Content-Type", "application/yaml");
-            request.SetRequestHeader("Token", $"{Plugin.Instance.Config.BackupCode}");
+            request.SetRequestHeader("Token", $"{key.BackupCode}");
             request.method = kHttpVerbPOST;
             yield return request.SendWebRequest();
 
