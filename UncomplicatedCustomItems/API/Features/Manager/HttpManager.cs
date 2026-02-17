@@ -18,6 +18,7 @@ using System.Text.Json.Serialization;
 using UnityEngine.Networking;
 using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 using static UnityEngine.Networking.UnityWebRequest;
+using UncomplicatedCustomItems.API.Extensions;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -180,7 +181,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         _ => false
                     };
 
-                    Credits.Add(kvp.Key, new(role, color, overrideStr));
+                    Credits.TryAdd(kvp.Key, new(role, color, overrideStr));
                     request.Dispose();
                 }
             }

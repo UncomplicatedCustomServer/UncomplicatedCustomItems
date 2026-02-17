@@ -24,6 +24,9 @@ namespace UncomplicatedCustomItems.Integrations
 
         public static void Init()
         {
+            if (Found)
+                return;
+
             foreach (LabApi.Loader.Features.Plugins.Plugin plugin in LabApi.Loader.PluginLoader.EnabledPlugins)
             {
                 if (plugin.Name is "ProjectMER")

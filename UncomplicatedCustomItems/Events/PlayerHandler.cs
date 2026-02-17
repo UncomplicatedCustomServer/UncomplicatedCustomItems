@@ -379,21 +379,21 @@ namespace UncomplicatedCustomItems.Events
                     switch (ev.UsableItem.Type)
                     {
                         case ItemType.SCP268:
-                            if (customItem.CustomItem.CustomData is not SCP268Data data)
+                            if (customItem.CustomItem.CustomData is not SCP268Data hat)
                                 break;
 
                             Timing.CallDelayed(Timing.WaitForOneFrame, () =>
                             {
-                                if (!data.ApplyScp268Effect)
+                                if (!hat.ApplyScp268Effect)
                                     ev.Player.DisableEffect<Invisible>();
 
-                                if (data.ApplyScp268Effect)
+                                if (hat.ApplyScp268Effect)
                                 {
-                                    ev.Player.EnableEffect<Invisible>(1, data.Duration, false);
+                                    ev.Player.EnableEffect<Invisible>(1, hat.Duration, false);
                                     CustomScp268Effects.TryAdd(ev.Player);
                                 }
 
-                                if (data.OneTimeUse)
+                                if (hat.OneTimeUse)
                                     ev.UsableItem.DropItem().Destroy();
                             });
 
@@ -404,14 +404,6 @@ namespace UncomplicatedCustomItems.Events
                             {
                                 ev.IsAllowed = false;
                                 ev.ContinueProcess = false;
-
-                            /*
-                                if (ev.Player.TryGetEffect<Scp207>(out var scp207Effect) && ev.UsableItem.Type is ItemType.SCP207)
-                                    scp207Effect.Intensity -= 1;
-
-                                if (ev.Player.TryGetEffect<AntiScp207>(out var antiScp207Effect) && ev.UsableItem.Type is ItemType.AntiSCP207)
-                                    antiScp207Effect.Intensity -= 1;
-                            */
                             }
                             break;
                     }

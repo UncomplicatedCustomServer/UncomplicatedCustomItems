@@ -420,6 +420,7 @@ namespace UncomplicatedCustomItems.API
                 if (room == null)
                     continue;
 
+                LogManager.Debug($"Got room {room.Name} from DynamicSpawn");
                 spawn.Rotation.Normalize();
                 Quaternion rotation = Quaternion.Euler(spawn.Rotation);
 
@@ -440,7 +441,7 @@ namespace UncomplicatedCustomItems.API
                 return Room.Get(roomName).FirstOrDefault();
             }
 
-            return Room.List.GetByGameObjectName($"{room}");
+            return Room.List.GetByGameObjectName(room);
         }
 
         private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, SpawnData spawn, ICustomItem customItem)

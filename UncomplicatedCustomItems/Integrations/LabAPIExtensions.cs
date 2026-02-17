@@ -17,6 +17,9 @@ namespace UncomplicatedCustomItems.Integrations
 
         public static void Init()
         {
+            if (Found)
+                return;
+                
             GetDependencies();
         }
 
