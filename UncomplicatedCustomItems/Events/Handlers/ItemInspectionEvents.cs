@@ -5,6 +5,7 @@ namespace UncomplicatedCustomItems.Events.Handlers
 {
     public class ItemInspectionEvents
     {
+#nullable enable
         /// <summary>
         /// Event for Inpecting Items
         /// </summary>

@@ -5,6 +5,7 @@ namespace UncomplicatedCustomItems.Events.Handlers
 {
     public class JailbirdEvents
     {
+#nullable enable
         /// <summary>
         /// Event for when a Jailbird's WearState has changed.
         /// </summary>

@@ -23,9 +23,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
 
         public virtual float SpotLightAngle { get; set; } = 90f;
 
+#pragma warning disable CS0618 // Type or member is obsolete
         [Description("Sets or gets the shape of the light if its a spotlight")]
         public virtual LightShape Shape { get; set; } = LightShape.Cone;
-        
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }
 

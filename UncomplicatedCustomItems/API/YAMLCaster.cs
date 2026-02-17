@@ -15,6 +15,7 @@ using System.Text.Json;
 
 namespace UncomplicatedCustomItems.API
 {
+#nullable enable
     /// <summary>
     /// Casts the YAML data from <see cref="YAMLCustomItem"/> or <see cref="YAMLCustomAction"/> files into the plugin
     /// </summary>
@@ -43,7 +44,6 @@ namespace UncomplicatedCustomItems.API
 
             return serialized;
         }
-
         /// <summary>
         /// As YAML is a big shit, decode the serialized <see cref="Dictionary{string, object}"/> into a fullified class, giving the <paramref name="baseElement"/>
         /// Missing properties will be set to their default values.
@@ -114,7 +114,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="value">The value to convert</param>
         /// <param name="targetType">The target type</param>
         /// <returns>Converted value</returns>
-        private static object ConvertComplexValue(object value, Type targetType)
+        private static object? ConvertComplexValue(object value, Type targetType)
         {
             if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>))
             {
@@ -146,7 +146,7 @@ namespace UncomplicatedCustomItems.API
                                 .Build();
 
                             string yamlString = yamlSerializer.Serialize(item);
-                            object convertedItem = yamlDeserializer.Deserialize(yamlString, elementType);
+                            object? convertedItem = yamlDeserializer.Deserialize(yamlString, elementType);
                             targetList.Add(convertedItem);
                         }
                     }

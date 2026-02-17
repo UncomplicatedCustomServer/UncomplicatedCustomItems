@@ -11,7 +11,6 @@ using LabApi.Features;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -84,45 +83,6 @@ namespace UncomplicatedCustomItems
         public override void Enable()
 #endif
         {
-
-#if EXILED
-			if (LabApi.Loader.PluginLoader.EnabledPlugins.Any(p => p.Name == "UncomplicatedCustomItems"))
-			{
-				LogManager.Warn($"You have both Exiled and LabApi versions of UCI installed this is not supported! Remove one of these for UCI to be enabled.");
-				OnDisabled();
-				return;
-			}
-#else
-            Type loaderType = Type.GetType("Exiled.Loader.Loader, Exiled.Loader");
-            if (loaderType != null)
-            {
-                PropertyInfo pluginsProperty = loaderType.GetProperty("Plugins", BindingFlags.Public | BindingFlags.Static);
-                if (pluginsProperty != null)
-                {
-                    if (pluginsProperty.GetValue(null) is IEnumerable plugins)
-                    {
-                        foreach (object plugin in plugins)
-                        {
-                            PropertyInfo nameProperty = plugin.GetType().GetProperty("Name");
-                            if (nameProperty != null)
-                            {
-                                string name = nameProperty.GetValue(plugin) as string;
-                                if (!string.IsNullOrEmpty(name))
-                                {
-                                    if (name == "UncomplicatedCustomItems")
-                                    {
-                                        LogManager.Warn($"You have both Exiled and LabApi versions of UCI installed this is not supported! Remove one of these for UCI to be enabled.");
-                                        Disable();
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-#endif
-
             Instance = this;
             FileConfig = new();
             HttpManager = new("uci");
@@ -130,7 +90,7 @@ namespace UncomplicatedCustomItems
             try
             {
 #if EXILED
-			_harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+    			_harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #else
                 _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #endif

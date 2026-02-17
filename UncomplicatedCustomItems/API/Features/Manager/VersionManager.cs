@@ -48,7 +48,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         if (VersionInfo.ForceDebug)
                         {
                             LogManager.Info("Debug logs have been activated!");
-                            Plugin.Instance.Config.Debug = true;
+                            Plugin.Instance.Config?.Debug = true;
                         }
                     }
                     else

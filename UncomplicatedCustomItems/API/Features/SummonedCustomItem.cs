@@ -338,6 +338,7 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 if (!MagazineModule.MagazineInserted)
                     MagazineModule.ServerInsertEmptyMagazine();
+                    
                 MagazineModule.ServerSetInstanceAmmo(Serial, wd.MaxAmmo);
 
                 if (firearmItem.ActionModule is AutomaticActionModule actionModule)
@@ -439,7 +440,7 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Flashlight.FlashlightItem>(out var flashItem);
                 IFlashlightData data = CustomItem.CustomData as IFlashlightData;
-                LightSourceToy newLight = Light.Create(flashItem.gameObject.transform.position);
+                Light newLight = Light.Create(flashItem.gameObject.transform.position);
                 ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
                 newLight.Color = color;
                 newLight.Type = data.LightType;
@@ -460,7 +461,7 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Lantern.LanternItem>(out var lantern);
                 IFlashlightData data = CustomItem.CustomData as IFlashlightData;
-                LightSourceToy newLight = Light.Create(lantern.gameObject.transform.position);
+                Light newLight = Light.Create(lantern.gameObject.transform.position);
                 ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
                 newLight.Color = color;
                 newLight.Type = data.LightType;
@@ -480,15 +481,6 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void HandleSCPItemForItem()
         {
-            if (Item.Type == ItemType.SCP018 && CustomItem.CustomData is ISCP018Data scp018Data)
-            {
-                var scp018throwableItem = Item as LabApi.Features.Wrappers.ThrowableItem;
-                var scp018 = scp018throwableItem.Base.Projectile as InventorySystem.Items.ThrowableProjectiles.Scp018Projectile;
-                scp018._fuseTime = scp018Data.FuseTime;
-                scp018._friendlyFireTime = scp018Data.FriendlyFireTime;
-                return;
-            }
-
             if ((Item.Type == ItemType.SCP244a || Item.Type == ItemType.SCP244b) && CustomItem.CustomData is ISCP244Data scp244Data)
             {
                 LogManager.Debug($"SCPItem is SCP-244");
@@ -532,14 +524,6 @@ namespace UncomplicatedCustomItems.API.Features
                 scp244Pickup.Spawn();
                 Pickup = scp244Pickup;
                 Serial = Pickup.Serial;
-                return;
-            }
-
-            if (Pickup.Type == ItemType.SCP018 && CustomItem.CustomData is ISCP018Data s018)
-            {
-                Scp018 scp018 = Pickup as Scp018;
-                scp018.Base._fuseTime = s018.FuseTime;
-                scp018.Base._friendlyFireTime = s018.FriendlyFireTime;
                 return;
             }
 
@@ -1013,10 +997,10 @@ namespace UncomplicatedCustomItems.API.Features
             List.Remove(this);
             _activeSerials.Remove(Serial);
 
-            _activeSerials.Remove(Serial);
-
             if (IsPickup)
+            {                
                 Pickup?.Destroy();
+            }
             else if (Item != null)
                 Owner?.RemoveItem(Item.Base);
 

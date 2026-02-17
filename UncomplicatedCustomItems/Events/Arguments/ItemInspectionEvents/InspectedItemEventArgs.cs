@@ -8,11 +8,11 @@ namespace UncomplicatedCustomItems.Events.Arguments.ItemInspectionEvents
         /// <summary>
         /// The Inspected <see cref="LabApi.Features.Wrappers.Item"/>.
         /// </summary>
-        public Item Item { get; }
+        public Item Item { get; } = item;
 
         /// <summary>
         /// The <see cref="LabApi.Features.Wrappers.Player"/> that inspected the <see cref="LabApi.Features.Wrappers.Item"/>.
         /// </summary>
-        public Player Player { get; }
+        public Player Player { get; } = player;
     }
 }
