@@ -57,7 +57,7 @@
 
 ## Requirements
 
-- **LabApi** >= `v1.2.0` **or** **Exiled** >= `v9.9.2`
+- **LabApi** >= `v1.1.5` **or** **Exiled** >= `v9.9.2`
 
 ## Installation 
 #### LabApi:
