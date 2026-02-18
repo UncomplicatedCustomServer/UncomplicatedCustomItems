@@ -25,7 +25,6 @@ using UncomplicatedCustomItems.API.CustomModuleAPI;
 using System.Linq;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using UncomplicatedCustomItems.API.Components;
-using System.Collections;
 using MEC;
 
 // Commands for remote development. You can ignore this :)
@@ -52,11 +51,11 @@ namespace UncomplicatedCustomItems
 #endif
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion { get; } = new(9, 13, 1);
+        public override Version RequiredExiledVersion => new(9, 13, 1);
 #else
-        public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
+        public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
 #endif
-        public override Version Version { get; } = new(4, 1, 0);
+        public override Version Version => new(4, 1, 0);
 
         public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED

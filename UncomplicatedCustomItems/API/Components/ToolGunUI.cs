@@ -3,7 +3,6 @@ using InventorySystem.Items.Firearms.Modules;
 using LabApi.Features.Extensions;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UnityEngine;
 using UserSettings.ServerSpecific;

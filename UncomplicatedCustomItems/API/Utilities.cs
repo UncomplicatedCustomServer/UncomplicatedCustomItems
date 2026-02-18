@@ -420,7 +420,7 @@ namespace UncomplicatedCustomItems.API
                 if (room == null)
                     continue;
 
-                LogManager.Debug($"Got room {room.Name} from DynamicSpawn");
+                LogManager.Debug($"Got room {room.Name} from DynamicSpawn {customItem.Name} - {customItem.Id}");
                 spawn.Rotation.Normalize();
                 Quaternion rotation = Quaternion.Euler(spawn.Rotation);
 
@@ -514,17 +514,17 @@ namespace UncomplicatedCustomItems.API
         /// <param name="player"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        internal static IEnumerator<float> PainkillersCoroutine(Player player, IPainkillersData Data)
+        internal static IEnumerator<float> PainkillersCoroutine(Player player, IPainkillersData data)
         {
             float TotalHealed = 0;
-            yield return Timing.WaitForSeconds(Data.TimeBeforeStartHealing);
+            yield return Timing.WaitForSeconds(data.TimeBeforeStartHealing);
 
-            while (TotalHealed < Data.TotalHealing && player.IsAlive)
+            while (TotalHealed < data.TotalHealing && player.IsAlive)
             {
-                float healAmount = Math.Min(Data.TickHeal, Data.TotalHealing - TotalHealed);
+                float healAmount = Math.Min(data.TickHeal, data.TotalHealing - TotalHealed);
                 player.Heal(healAmount);
                 TotalHealed += healAmount;
-                yield return Timing.WaitForSeconds(Data.TickTime);
+                yield return Timing.WaitForSeconds(data.TickTime);
             }
         }
     }

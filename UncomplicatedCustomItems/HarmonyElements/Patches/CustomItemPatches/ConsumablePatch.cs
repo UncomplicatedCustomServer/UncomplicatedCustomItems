@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using InventorySystem.Items.Usables;
 using LabApi.Features.Wrappers;
@@ -51,17 +52,19 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         /// Reproduce the SCP:SL <see cref="ItemType.Painkillers"/> healing process but with custom things :)
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="Data"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
-        internal static IEnumerator<float> PainkillersCoroutine(Player player, CustomPainkillers Data)
+        internal static IEnumerator<float> PainkillersCoroutine(Player player, CustomPainkillers data)
         {
             float TotalHealed = 0;
-            yield return Timing.WaitForSeconds(Data.TimeBeforeStartHealing);
-            while (TotalHealed < Data.TotalHealing && player.IsAlive)
+            yield return Timing.WaitForSeconds(data.TimeBeforeStartHealing);
+
+            while (TotalHealed < data.TotalHealing && player.IsAlive)
             {
-                player.Heal(Data.TickHeal);
-                TotalHealed += Data.TickHeal;
-                yield return Timing.WaitForSeconds(Data.TickTime);
+                float healAmount = Math.Min(data.TickHeal, data.TotalHealing - TotalHealed);
+                player.Heal(healAmount);
+                TotalHealed += healAmount;
+                yield return Timing.WaitForSeconds(data.TickTime);
             }
         }
     }

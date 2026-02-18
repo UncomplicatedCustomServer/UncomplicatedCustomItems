@@ -6,7 +6,6 @@ using InventorySystem.Items.Firearms.Attachments.Components;
 using InventorySystem.Items.Firearms.Modules;
 using LabApi.Features.Wrappers;
 using FirearmPickup = InventorySystem.Items.Firearms.FirearmPickup;
-using static InventorySystem.Items.Firearms.Modules.AnimatorReloaderModuleBase;
 using static InventorySystem.Items.Firearms.Modules.AutomaticActionModule;
 using static InventorySystem.Items.Firearms.Modules.PumpActionModule;
 

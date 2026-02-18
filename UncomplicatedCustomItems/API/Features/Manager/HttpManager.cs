@@ -156,34 +156,81 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private IEnumerator LoadCreditTagsCoroutine()
         {
-            using UnityWebRequest request = Get("https://api.ucserver.it/credits.json");
-            yield return request.SendWebRequest();
+            string[] endpoints =
+            [
+                "https://api.ucserver.it/credits.json", // Main
+                "https://devtagsbackup.thaumiel-servers.workers.dev/" // Backup
+            ];
 
-            if (request.result != Result.Success)
+            UnityWebRequest request = null;
+            bool success = false;
+            string jsonResponse = null;
+
+            foreach (string endpoint in endpoints)
             {
-                LogManager.Error($"Failed to fetch credits data in HttpManager::LoadCreditTags() - {request.error}");
+                using (request = Get(endpoint))
+                {
+                    yield return request.SendWebRequest();
+
+                    if (request.result == Result.Success)
+                    {
+                        jsonResponse = request.downloadHandler.text;
+                        success = true;
+                        LogManager.Info($"Successfully fetched credits data from {endpoint}");
+                        break;
+                    }
+                    else
+                        LogManager.Warn($"Failed to fetch credits data from {endpoint} - {request.error}");
+                }
+            }
+
+            if (!success)
+            {
+                LogManager.Error("Failed to fetch credits data from all endpoints in HttpManager::LoadCreditTags()");
                 yield break;
             }
 
             try
             {
-                string jsonResponse = request.downloadHandler.text;
-                Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(jsonResponse);
-
-                foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
+                if (jsonResponse.TrimStart().StartsWith("{"))
                 {
-                    string role = kvp.Value["role"].GetString();
-                    string color = kvp.Value["color"].GetString();
-                    bool overrideStr = kvp.Value["override"].ValueKind switch
-                    {
-                        JsonValueKind.String => bool.Parse(kvp.Value["override"].GetString() ?? string.Empty),
-                        JsonValueKind.True => true,
-                        _ => false
-                    };
+                    Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(jsonResponse);
 
-                    Credits.TryAdd(kvp.Key, new(role, color, overrideStr));
-                    request.Dispose();
+                    foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
+                    {
+                        string role = kvp.Value["role"].GetString();
+                        string color = kvp.Value["color"].GetString();
+                        bool overrideStr = kvp.Value["override"].ValueKind switch
+                        {
+                            JsonValueKind.String => bool.Parse(kvp.Value["override"].GetString() ?? string.Empty),
+                            JsonValueKind.True => true,
+                            _ => false
+                        };
+
+                        Credits.TryAdd(kvp.Key, new(role, color, overrideStr));
+                    }
                 }
+                else if (jsonResponse.TrimStart().StartsWith("["))
+                {
+                    List<Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(jsonResponse);
+
+                    foreach (Dictionary<string, JsonElement> item in Data.Where(item => item is not null && item.ContainsKey("SteamID") && item.ContainsKey("role") && item.ContainsKey("color") && item.ContainsKey("override") && item.ContainsKey("job")))
+                    {
+                        string steamId = item["SteamID"].GetString();
+                        string role = item["role"].GetString();
+                        string color = item["color"].GetString();
+                        bool overrideStr = item["override"].ValueKind switch
+                        {
+                            JsonValueKind.String => bool.Parse(item["override"].GetString() ?? string.Empty),
+                            JsonValueKind.True => true,
+                            _ => false
+                        };
+
+                        Credits.TryAdd(steamId, new(role, color, overrideStr));
+                    }
+                }
+                else
+                    LogManager.Error("Unknown JSON format in HttpManager::LoadCreditTags()");
             }
             catch (JsonException je)
             {

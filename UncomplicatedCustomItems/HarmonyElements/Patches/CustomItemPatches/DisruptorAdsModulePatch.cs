@@ -3,11 +3,11 @@ using HarmonyLib;
 using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
-    // Neither are synced with client but still are applied.
+    // Neither are synced with client but still are applied serverside.
     [HarmonyPatch(typeof(DisruptorAdsModule))]
     public static class DisruptorAdsModulePatch
     {
@@ -18,8 +18,9 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 return true;
             if (customItem.CustomItem.CustomItemType is not CustomItemType.ParticleDisruptor)
                 return true;
+            if (customItem.CustomItem.CustomData is not ParticleDisruptorData data)
+                return true;
 
-            IParticleDisruptorData data = customItem.CustomItem.CustomData as IParticleDisruptorData;
             __result = data.AimingInaccuracy;
             return false;
         }
@@ -31,8 +32,9 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 return true;
             if (customItem.CustomItem.CustomItemType is not CustomItemType.ParticleDisruptor)
                 return true;
+            if (customItem.CustomItem.CustomData is not ParticleDisruptorData data)
+                return true;
 
-            IParticleDisruptorData data = customItem.CustomItem.CustomData as IParticleDisruptorData;
             __result = data.Inaccuracy;
             return false;
         }

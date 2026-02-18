@@ -10,7 +10,6 @@ using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
 using InventorySystem.Items.Pickups;
-using InventorySystem.Items.ThrowableProjectiles;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;
@@ -22,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Components;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
@@ -40,14 +38,12 @@ using UserSettings.ServerSpecific;
 using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
-using Scp018Projectile = InventorySystem.Items.ThrowableProjectiles.Scp018Projectile;
 using InventorySystem.Items.Autosync;
 
 namespace UncomplicatedCustomItems.Events
 {
     internal class PlayerHandler
     {
-        internal static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
         internal static Dictionary<Player, CoroutineHandle> _humeShieldRegenCoroutine = [];
         internal static Dictionary<int, CapybaraToy> _capybaras = [];
         internal static Dictionary<Player, long> _damageTimes = [];
@@ -807,8 +803,7 @@ namespace UncomplicatedCustomItems.Events
                 yield return Timing.WaitForOneFrame;
             }
 
-            if (player != null)
-                player.HumeShieldRegenRate = 0f;
+            player?.HumeShieldRegenRate = 0f;
         }
 
         public static void OnPickup(PlayerPickedUpItemEventArgs ev)

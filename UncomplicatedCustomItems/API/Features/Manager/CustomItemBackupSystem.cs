@@ -138,12 +138,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         string yamlItem = "id:" + item;
                         YAMLCustomItem customItem = YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(yamlItem);
-                        LogManager.Info($"Deserialized Backuped CustomItem {customItem.Name}");
+                        LogManager.Info($"Wrote CustomItem backup {customItem.Name} to {Path.Combine(FileDirectory, $"{customItem.Name}.yml")}");
                         File.WriteAllText(Path.Combine(FileDirectory, $"{customItem.Name}.yml"), yamlItem);
                     }
                     catch(YamlException yamlex)
                     {
-                        LogManager.Warn($"Failed to Deserialize a backup CustomItem {yamlex}");
+                        LogManager.Warn($"Failed to Deserialize a CustomItem backup {yamlex}");
                         continue;
                     }
                 }

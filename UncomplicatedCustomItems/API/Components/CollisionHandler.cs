@@ -1,3 +1,14 @@
+// -----------------------------------------------------------------------
+// <copyright file="CollisionHandler.cs" company="ExMod Team">
+// Copyright (c) ExMod Team. All rights reserved.
+// Licensed under the CC BY-SA 3.0 license.
+// </copyright>
+// -----------------------------------------------------------------------
+// This file contains code originally licensed under CC BY-SA 3.0.
+// Modifications and adaptations by UCSC are licensed under GNU AGPL v3.
+// See LICENSE file for full GNU AGPL v3 license text.
+// -----------------------------------------------------------------------
+
 using System;
 using InventorySystem.Items.ThrowableProjectiles;
 using UncomplicatedCustomItems.API.Features.Helper;

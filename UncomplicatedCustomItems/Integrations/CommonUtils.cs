@@ -20,6 +20,7 @@ namespace UncomplicatedCustomItems.Integrations
 {
     internal class CommonUtilitiesPatch
     {
+        private static bool _loaded;
         private static Assembly commonUtilitiesAssembly;
         private static MethodInfo _targetMethod;
         private static Type _commonUtilsPlugin;
@@ -33,6 +34,9 @@ namespace UncomplicatedCustomItems.Integrations
 
         internal static void Initialize()
         {
+            if (_loaded)
+                return;
+
             commonUtilitiesAssembly = Loader.Plugins.FirstOrDefault(p => p.Name == "Common Utilities")?.Assembly;
 
             if (commonUtilitiesAssembly == null)
@@ -97,6 +101,7 @@ namespace UncomplicatedCustomItems.Integrations
             }
 
             Plugin.Instance._harmony.Patch(_targetMethod, prefix: new HarmonyMethod(typeof(CommonUtilitiesPatch).GetMethod(nameof(Prefix), BindingFlags.Public | BindingFlags.Static)));
+            _loaded = true;
 
             LogManager.Silent("Common Utilities integration patch applied successfully.");
         }

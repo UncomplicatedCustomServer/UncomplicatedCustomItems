@@ -119,9 +119,11 @@ namespace UncomplicatedCustomItems.API.Components
                                     if (!string.IsNullOrEmpty(name))
                                     {
                                         if (name.StartsWith("Exiled", StringComparison.OrdinalIgnoreCase))
+                                        {                                            
                                             hasExiled = true;
+                                        }
                                         else
-                                            pluginNames.Add(name);
+                                            pluginNames.TryAdd(name);
                                     }
                                 }
                             }
@@ -132,7 +134,9 @@ namespace UncomplicatedCustomItems.API.Components
                 LabApi.Loader.PluginLoader.EnabledPlugins.ToArray().ForEach(p =>
                 {
                     if (!p.Name.StartsWith("Exiled", StringComparison.OrdinalIgnoreCase))
-                        pluginNames.Add(p.Name);
+                    {
+                        pluginNames.TryAdd(p.Name);                        
+                    }
                     else
                         hasExiled = true;
                 });
