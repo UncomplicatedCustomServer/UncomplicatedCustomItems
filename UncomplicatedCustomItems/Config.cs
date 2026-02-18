@@ -75,6 +75,9 @@ namespace UncomplicatedCustomItems
         [Description("If filled the update checker will use the provided token. You can get a token from 'https://github.com/settings/tokens'")]
         public string GithubToken { get; set; } = string.Empty;
 
+        [Description("If true the updater will update the plugin whenever a new version is released.")]
+        public bool AllowAutomaticUpdates { get; set; }
+
         [Description("If true, the plugin will check for prereleases when triggered")]
         public bool AllowPreReleases { get; set; }
 

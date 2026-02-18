@@ -143,7 +143,7 @@ namespace UncomplicatedCustomItems.API.Components
                 }
 
                 if (hasExiled)
-                    pluginNames.Add("Exiled");
+                    pluginNames.TryAdd("Exiled");
 
                 HashSet<string> ucsPlugins = new(StringComparer.OrdinalIgnoreCase)
                 {
@@ -165,7 +165,7 @@ namespace UncomplicatedCustomItems.API.Components
                     ["showOnList"] = Plugin.Instance.Config.ShowOnuciList.ToString(),
                     ["exiled"] = hasExiled.ToString().ToLower(),
                     ["extra"] = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}, EnabledCreditTags: {Plugin.Instance.Config.EnableCreditTags}",
-                    ["plugins"] = pluginNames.Where(ucsPlugins.Contains).ToList()
+                    ["plugins"] = pluginNames.Where(ucsPlugins.Contains).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList()
                 };
 
                 if (Plugin.Instance.Config.ShowPluginsOnList)

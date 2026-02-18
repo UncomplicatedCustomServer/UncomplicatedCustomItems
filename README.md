@@ -199,7 +199,7 @@ Your donations help us maintain and improve our plugins for the entire SCP:SL co
 
 - **Mr. Baguetter**
   - Discord: `@ender1992`
-  - Email: `baguetter@thaumielscpsl.site`
+  - Email: `Mr.Baguetter1@gmail.com`
 
 ### Community
 

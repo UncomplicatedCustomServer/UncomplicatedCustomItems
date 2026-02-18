@@ -3,7 +3,6 @@ using Exiled.API.Features;
 #endif
 using System.Text.Json.Serialization;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -78,7 +77,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        public static IEnumerator<float> UpdatePluginCoroutine(Version currentVersion, string forceArgument)
+        public static IEnumerator<float> UpdatePluginCoroutine(string forceArgument)
         {
             GitHubReleaseInfo latestRelease = null;
             yield return Timing.WaitUntilDone(GetLatestReleaseCoroutine(result => latestRelease = result));
@@ -95,7 +94,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
 
             string latestVersionTag = latestRelease.TagName?.TrimStart('v') ?? string.Empty;
-            if (Version.TryParse(latestVersionTag, out Version latestGitHubVersion) && latestGitHubVersion <= currentVersion && string.Equals(forceArgument, "force", StringComparison.OrdinalIgnoreCase) == false)
+            if (Version.TryParse(latestVersionTag, out Version latestGitHubVersion) && latestGitHubVersion <= Plugin.Instance.Version && string.Equals(forceArgument, "force", StringComparison.OrdinalIgnoreCase) == false)
             {
                 LogManager.Updater("You are already on the latest version. Use 'uciupdate force' to proceed anyway.");
                 yield break;
@@ -127,6 +126,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 File.WriteAllBytes(GetPluginPath(), fileBytes);
                 LabApi.Features.Wrappers.Server.RunCommand("rnr", new SilentCommandSender());
+                req.Dispose();
             }
             catch (Exception ex)
             {
@@ -171,6 +171,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     return Version.TryParse(tag, out Version v) ? v : new Version(0, 0);
                 }).FirstOrDefault();
                 onComplete?.Invoke(chosen);
+                req.Dispose();
             }
             catch (Exception ex)
             {

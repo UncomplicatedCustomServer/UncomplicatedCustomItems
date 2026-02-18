@@ -244,7 +244,13 @@ namespace UncomplicatedCustomItems
             if (Instance.Config.AllowDevPermissions)
                 LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 
-            Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine());
+            if (Config.AllowAutomaticUpdates)
+            {
+                Timing.RunCoroutine(Updater.UpdatePluginCoroutine(string.Empty));
+            }
+            else
+                Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine());
+
             Timing.RunCoroutine(HttpManager.LoadCreditTagsCoroutine());
 
             ImportManager.Init();
