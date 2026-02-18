@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using LabApi.Features.Wrappers;
+using MEC;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
@@ -36,15 +37,15 @@ namespace UncomplicatedCustomItems.API.Components
         {
             if (LastUpload == default)
             {
-                LastUpload = DateTime.Now;
+                LastUpload = DateTime.UtcNow;
                 SendPresence();
             }
             else
             {
-                TimeSpan timeSinceLastUpload = DateTime.Now - LastUpload;
+                TimeSpan timeSinceLastUpload = DateTime.UtcNow - LastUpload;
                 if (timeSinceLastUpload.TotalSeconds >= Interval)
                 {
-                    LastUpload = DateTime.Now;
+                    LastUpload = DateTime.UtcNow;
                     SendPresence();
                 }
             }
@@ -52,13 +53,13 @@ namespace UncomplicatedCustomItems.API.Components
 
         public void SendPresence()
         {
-            StartCoroutine(SendPresenceCoroutine(result => 
+            Timing.RunCoroutine(SendPresenceCoroutine(result => 
             {
                 LastUploadSucceeded = result;
             }));
         }
 
-        private IEnumerator SendPresenceCoroutine(Action<bool> onComplete)
+        private IEnumerator<float> SendPresenceCoroutine(Action<bool> onComplete)
         {
             UnityWebRequest request = new($"{Endpoint}/connect", "POST");
             byte[] bodyRaw = Encoding.UTF8.GetBytes(GetJsonPayload());
@@ -66,7 +67,7 @@ namespace UncomplicatedCustomItems.API.Components
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
 
-            yield return request.SendWebRequest();
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
 
             bool success = false;
             switch (request.result)
@@ -131,15 +132,15 @@ namespace UncomplicatedCustomItems.API.Components
                     }
                 }
 
-                LabApi.Loader.PluginLoader.EnabledPlugins.ToArray().ForEach(p =>
+                foreach (LabApi.Loader.Features.Plugins.Plugin plugin in LabApi.Loader.PluginLoader.EnabledPlugins)
                 {
-                    if (!p.Name.StartsWith("Exiled", StringComparison.OrdinalIgnoreCase))
+                    if (!plugin.Name.StartsWith("Exiled", StringComparison.OrdinalIgnoreCase))
                     {
-                        pluginNames.TryAdd(p.Name);                        
+                        pluginNames.TryAdd(plugin.Name);                        
                     }
                     else
                         hasExiled = true;
-                });
+                }
 
                 if (hasExiled)
                     pluginNames.Add("Exiled");

@@ -6,7 +6,6 @@ using Exiled.Loader;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Interfaces;

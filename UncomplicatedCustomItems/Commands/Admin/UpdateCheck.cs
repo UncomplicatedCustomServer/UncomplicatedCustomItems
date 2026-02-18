@@ -3,6 +3,7 @@ using System;
 using UncomplicatedCustomItems.API.Features.Helper;
 using LabApi.Features.Wrappers;
 using System.Text.Json.Serialization;
+using MEC;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -35,11 +36,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
 
             response = $"Currently running version {Plugin.Instance.Version}. Checking for updates...";
-#if EXILED
-			Server.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
-#else
-            Player.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
-#endif
+            Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine());
             return true;
         }
     }

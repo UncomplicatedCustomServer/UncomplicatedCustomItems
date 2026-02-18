@@ -147,7 +147,11 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 #endif
         }
 
-        public static void RegisterCustomModule<T>() where T : CustomModuleBase
+#if EXILED
+        public static void RegisterCustomModule<T>(IPlugin<IConfig> owner) where T : CustomModuleBase
+#else
+        public static void RegisterCustomModule<T>(LabApi.Loader.Features.Plugins.Plugin owner) where T : CustomModuleBase
+#endif
         {
             Type type = typeof(T);
 
@@ -175,6 +179,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
             }
 
             CustomModules.TryAdd(module);
+            ModuleOwners[module] = owner;
             LogManager.Info($"{nameof(CustomModuleManager)}: Manually registered CustomModule {module.Name} - {type.FullName}");
 
             try

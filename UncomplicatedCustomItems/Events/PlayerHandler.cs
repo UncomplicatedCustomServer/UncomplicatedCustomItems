@@ -140,7 +140,9 @@ namespace UncomplicatedCustomItems.Events
             if (Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var item))
             {
                 if (item.TryGetModule<PickupHintOverride>(out var hintoverride))
+                {
                     player.SendHint(hintoverride.Hint.Replace("%name%", item.CustomItem.Name).Replace("%desc%", item.CustomItem.Description).Replace("%description%", item.CustomItem.Description), hintoverride.Duration);
+                }
                 else
                     item.HandlePickedUpDisplayHint(player);
             }
@@ -672,7 +674,9 @@ namespace UncomplicatedCustomItems.Events
                     return;
 
                 if (customItem.TryGetModule<PickupHintOverride>(out var hintoverride))
+                {
                     ev.Player.SendHint(hintoverride.Hint.Replace("%name%", customItem.CustomItem.Name).Replace("%desc%", customItem.CustomItem.Description).Replace("%description%", customItem.CustomItem.Description), hintoverride.Duration);
+                }
                 else
                     customItem.HandleSelectedDisplayHint(ev.Player);
 
@@ -824,7 +828,9 @@ namespace UncomplicatedCustomItems.Events
 
             customItem.OnPickup(ev);
             if (customItem.TryGetModule<PickupHintOverride>(out var hintoverride))
+            {
                 ev.Player.SendHint(hintoverride.Hint.Replace("%name%", customItem.CustomItem.Name).Replace("%desc%", customItem.CustomItem.Description).Replace("%description%", customItem.CustomItem.Description), hintoverride.Duration);
+            }
             else
                 customItem.HandlePickedUpDisplayHint(ev.Player);
         }

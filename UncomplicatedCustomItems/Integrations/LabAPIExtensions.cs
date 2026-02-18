@@ -8,6 +8,7 @@ using UncomplicatedCustomItems.API.Features.Helper;
 namespace UncomplicatedCustomItems.Integrations
 {
 #nullable enable
+    // Todo: Update this to the latest version
     internal static class LabAPIExtensions
     {
         private static Assembly? LabAPIExtension;

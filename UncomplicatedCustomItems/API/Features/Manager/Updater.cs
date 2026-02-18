@@ -78,10 +78,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        public static IEnumerator UpdatePluginCoroutine(Version currentVersion, string forceArgument)
+        public static IEnumerator<float> UpdatePluginCoroutine(Version currentVersion, string forceArgument)
         {
             GitHubReleaseInfo latestRelease = null;
-            yield return GetLatestReleaseCoroutine(result => latestRelease = result);
+            yield return Timing.WaitUntilDone(GetLatestReleaseCoroutine(result => latestRelease = result));
 
             if (latestRelease == null)
                 yield break;
@@ -112,7 +112,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 req.SetRequestHeader("Authorization", $"token {Plugin.Instance.Config.GithubToken}");
 
             req.downloadHandler = new DownloadHandlerBuffer();
-            yield return req.SendWebRequest();
+            yield return Timing.WaitUntilDone(req.SendWebRequest());
 
             if (req.result != UnityWebRequest.Result.Success)
             {
@@ -122,7 +122,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             try
             {
-                byte[] fileBytes = req.downloadHandler.data ?? Array.Empty<byte>();
+                byte[] fileBytes = req.downloadHandler.data ?? [];
                 LogManager.Updater($"{PluginDllName} downloaded successfully ({fileBytes.Length} bytes). Applying update...");
 
                 File.WriteAllBytes(GetPluginPath(), fileBytes);

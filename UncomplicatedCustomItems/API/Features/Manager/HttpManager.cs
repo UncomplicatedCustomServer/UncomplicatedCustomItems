@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -50,19 +49,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         }
 
         /// <summary>
-        /// Gets if the feature can be activated - missing library
-        /// </summary>
-        public bool IsAllowed { get; internal set; } = true;
-
-        /// <summary>
         /// Gets the prefix of the plugin for our APIs
         /// </summary>
         public string Prefix { get; }
-
-        /// <summary>
-        /// Gets the <see cref="HttpClient"/> public instance
-        /// </summary>
-        public HttpClient HttpClient { get; }
 
         /// <summary>
         /// Gets the UCS APIs endpoint
@@ -83,6 +72,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 if (_latestVersion is null)
                     Timing.RunCoroutine(LoadLatestVersionCoroutine());
+
                 return _latestVersion;
             }
         }
@@ -97,7 +87,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             Prefix = prefix;
             RegisterEvents();
-            HttpClient = new();
         }
 
         internal void RegisterEvents()

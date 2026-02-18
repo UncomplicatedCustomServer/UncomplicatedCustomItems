@@ -2,6 +2,7 @@
 using System;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features.Helper;
+using MEC;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -26,11 +27,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             string arg = arguments.Count > 0 ? arguments.At(0) : "false";
             response = $"Attempting to update UncomplicatedCustomItems from version {Plugin.Instance.Version}. Check console for details.";
-#if EXILED
-			Server.Host?.ReferenceHub.StartCoroutine(Updater.UpdatePluginCoroutine(Plugin.Instance.Version, arg));
-#else
-            Player.Host?.ReferenceHub.StartCoroutine(Updater.UpdatePluginCoroutine(Plugin.Instance.Version, arg));
-#endif
+            Timing.RunCoroutine(Updater.UpdatePluginCoroutine(Plugin.Instance.Version, arg));
             return true;
         }
     }
