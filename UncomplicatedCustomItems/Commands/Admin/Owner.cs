@@ -1,5 +1,5 @@
 using CommandSystem;
-using LabApi.Features.Wrappers;
+using MEC;
 using System.Collections.Generic;
 using System.Net;
 using UncomplicatedCustomItems.API.Interfaces;
@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
         {
             HttpStatusCode outstatus = new();
 
-            Player.Host.ReferenceHub.StartCoroutine(Plugin.HttpManager.AddServerOwner(arguments[0], status =>
+            Timing.RunCoroutine(Plugin.HttpManager.AddServerOwner(arguments[0], status =>
             {
                 outstatus = status;
             }));

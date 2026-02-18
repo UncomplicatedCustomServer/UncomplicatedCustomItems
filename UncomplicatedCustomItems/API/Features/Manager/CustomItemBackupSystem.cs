@@ -1,5 +1,3 @@
-using System.Collections;
-using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Yaml;
 using UnityEngine.Networking;
 using System.IO;
@@ -8,6 +6,8 @@ using YamlDotNet.Core;
 using System.Text;
 using static UnityEngine.Networking.UnityWebRequest;
 using UncomplicatedCustomItems.API.Interfaces;
+using System.Collections.Generic;
+using MEC;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -48,7 +48,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (key.BackupCode == "0")
                 GenerateBackupCode();
 
-            Player.Host.ReferenceHub.StartCoroutine(SendInitialRequest());
+            Timing.RunCoroutine(SendInitialRequest());
         }
 
         public static void Upload()
@@ -56,7 +56,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (!Online || key.BackupCode == "0")
                 return;
 
-            Player.Host.ReferenceHub.StartCoroutine(UploadBackupData());
+            Timing.RunCoroutine(UploadBackupData());
         }
 
         public static void Download(string code = "")
@@ -64,7 +64,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (!Online || Plugin.Instance.Config.BackupCode == "0")
                 return;
 
-            Player.Host.ReferenceHub.StartCoroutine(GetBackupData(code));
+            Timing.RunCoroutine(GetBackupData(code));
         }
 
         private static void GenerateBackupCode()
@@ -99,18 +99,18 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return content;
         }
 
-        private static IEnumerator SendInitialRequest()
+        private static IEnumerator<float> SendInitialRequest()
         {
             UnityWebRequest request = new($"{Url}");
             request.method = kHttpVerbGET;
-            yield return request.SendWebRequest();
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
             if (request.result == Result.Success)
                 Online = true;
 
             request.Dispose();
         }
 
-        private static IEnumerator GetBackupData(string code = "")
+        private static IEnumerator<float> GetBackupData(string code = "")
         {
             string BackupCode = code;
             if (string.IsNullOrEmpty(BackupCode))
@@ -121,7 +121,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             request.SetRequestHeader("Content-Type", "application/yaml");
             request.SetRequestHeader("Token", $"{BackupCode}");         
             request.method = kHttpVerbGET;
-            yield return request.SendWebRequest();
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
             
             if (request.result == Result.Success)
             {
@@ -154,7 +154,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             request.Dispose();
         }
 
-        private static IEnumerator UploadBackupData()
+        private static IEnumerator<float> UploadBackupData()
         {
             UnityWebRequest request = new($"{Url}/upload");
             byte[] bodyRaw = Encoding.UTF8.GetBytes(ParseItems());   
@@ -162,7 +162,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             request.SetRequestHeader("Content-Type", "application/yaml");
             request.SetRequestHeader("Token", $"{key.BackupCode}");
             request.method = kHttpVerbPOST;
-            yield return request.SendWebRequest();
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
 
             if (request.result == Result.Success)
             {
