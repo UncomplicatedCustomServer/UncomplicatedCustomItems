@@ -147,6 +147,46 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 #endif
         }
 
+        public static void RegisterCustomModule<T>() where T : CustomModuleBase
+        {
+            Type type = typeof(T);
+
+            object instance;
+            try
+            {
+                instance = Activator.CreateInstance(type);
+            }
+            catch (MissingMethodException)
+            {
+                LogManager.Error($"{nameof(CustomModuleManager)}: No parameterless constructor for {type.FullName}.");
+                return;
+            }
+
+            if (instance is not CustomModuleBase module)
+            {
+                LogManager.Error($"{nameof(CustomModuleManager)}: Instance of {type.FullName} could not be cast to CustomModuleBase.");
+                return;
+            }
+
+            if (CustomModules.Any(m => m.GetType() == type))
+            {
+                LogManager.Warn($"{nameof(CustomModuleManager)}: CustomModule {module.Name} ({type.FullName}) is already registered. Skipping.");
+                return;
+            }
+
+            CustomModules.TryAdd(module);
+            LogManager.Info($"{nameof(CustomModuleManager)}: Manually registered CustomModule {module.Name} - {type.FullName}");
+
+            try
+            {
+                module.OnRegistered();
+            }
+            catch (Exception regEx)
+            {
+                LogManager.Error($"{nameof(CustomModuleManager)}: Error in OnRegistered for {module.Name}: {regEx}");
+            }
+        }
+
         private static CustomModuleBase CreateInstanceFast(Type type)
         {
             if (!_factoryCache.TryGetValue(type, out Func<CustomModuleBase> factory))
