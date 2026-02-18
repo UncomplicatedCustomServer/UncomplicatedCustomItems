@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using LabApi.Features.Wrappers;
@@ -15,9 +14,6 @@ namespace UncomplicatedCustomItems.Integrations
         private static bool _isPatched = false;
         private static bool _isECIFound = false;
 
-        /// <summary>
-        /// Initializes the ECI integration by attempting to patch the ECI plugin.
-        /// </summary>
         public static void Init()
         {
             if (_isECIFound)
@@ -39,10 +35,6 @@ namespace UncomplicatedCustomItems.Integrations
                 LogManager.Debug("ECI found and integrated! :D");
         }
 
-        /// <summary>
-        /// Attempts to patch the ECI Give method with a Harmony prefix.
-        /// </summary>
-        /// <returns>True if patching succeeded or was already applied; false otherwise.</returns>
         private static bool TryPatchECIIntegration()
         {
             if (_isPatched)
@@ -57,8 +49,7 @@ namespace UncomplicatedCustomItems.Integrations
                     return false;
                 }
 
-                MethodInfo prefixMethod = typeof(ECIIntegration).GetMethod(nameof(Prefix), BindingFlags.Static | BindingFlags.Public);
-
+                MethodInfo prefixMethod = AccessTools.Method(typeof(ECIIntegration), nameof(Prefix));
                 if (prefixMethod == null)
                 {
                     LogManager.Error("Failed to find Prefix method for ECI patching.");
@@ -67,7 +58,7 @@ namespace UncomplicatedCustomItems.Integrations
 
                 Plugin.Instance._harmony.Patch(targetMethod, new HarmonyMethod(prefixMethod));
                 _isPatched = true;
-                LogManager.Silent($"Successfully patched ECI's 'Give' method.");
+                LogManager.Silent("Successfully patched ECI's 'Give' method.");
                 return true;
             }
             catch (Exception ex)
@@ -77,40 +68,34 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
-        /// <summary>
-        /// Locates the ECI CustomItem.Give method via reflection.
-        /// </summary>
-        /// <returns>The MethodBase of the target method, or null if not found.</returns>
         private static MethodBase GetTargetMethod()
         {
             try
             {
-                Type customItemType = FindTypeInLoadedAssemblies("Exiled.CustomItems.API.Features.CustomItem");
+                Type customItemType = AccessTools.TypeByName("Exiled.CustomItems.API.Features.CustomItem");
                 if (customItemType == null)
                 {
-                    LogManager.Debug($"Type 'Exiled.CustomItems.API.Features.CustomItem' not found in loaded assemblies.");
+                    LogManager.Debug("Type 'Exiled.CustomItems.API.Features.CustomItem' not found in loaded assemblies.");
                     return null;
                 }
 
-                Type exiledPlayerType = Type.GetType("Exiled.API.Features.Player, Exiled.API");
+                Type exiledPlayerType = AccessTools.TypeByName("Exiled.API.Features.Player");
                 if (exiledPlayerType == null)
                 {
-                    LogManager.Error($"Could not load Exiled player type: Exiled.API.Features.Player, Exiled.API");
+                    LogManager.Error("Could not load Exiled player type: Exiled.API.Features.Player");
                     return null;
                 }
 
-                Type exiledItemType = Type.GetType("Exiled.API.Features.Items.Item, Exiled.API");
+                Type exiledItemType = AccessTools.TypeByName("Exiled.API.Features.Items.Item");
                 if (exiledItemType == null)
                 {
-                    LogManager.Error($"Could not load Exiled Item type: Exiled.API.Features.Items.Item, Exiled.API");
+                    LogManager.Error("Could not load Exiled Item type: Exiled.API.Features.Items.Item");
                     return null;
                 }
 
-                Type[] parameterTypes = [exiledPlayerType, exiledItemType, typeof(bool)];
-                MethodInfo method = customItemType.GetMethod("Give", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, parameterTypes, null);
-
+                MethodInfo method = AccessTools.Method(customItemType, "Give", [exiledPlayerType, exiledItemType, typeof(bool)]);
                 if (method == null)
-                    LogManager.Debug($"Method 'Give' not found on type 'Exiled.CustomItems.API.Features.CustomItem'.");
+                    LogManager.Debug("Method 'Give' not found on type 'Exiled.CustomItems.API.Features.CustomItem'.");
 
                 return method;
             }
@@ -121,48 +106,12 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
-        /// <summary>
-        /// Searches all loaded assemblies for a type with the specified full name.
-        /// </summary>
-        /// <param name="fullTypeName">The full name of the type to find.</param>
-        /// <returns>The Type if found; null otherwise.</returns>
-        private static Type FindTypeInLoadedAssemblies(string fullTypeName) => AppDomain.CurrentDomain.GetAssemblies().SelectMany(GetTypesFromAssembly).FirstOrDefault(t => t.FullName == fullTypeName);
-
-        /// <summary>
-        /// Safely retrieves all types from an assembly, handling ReflectionTypeLoadException.
-        /// </summary>
-        /// <param name="assembly">The assembly to get types from.</param>
-        /// <returns>Array of types from the assembly.</returns>
-        private static Type[] GetTypesFromAssembly(Assembly assembly)
-        {
-            try
-            {
-                return assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                return ex.Types.Where(t => t != null).ToArray();
-            }
-            catch (Exception ex)
-            {
-                LogManager.Debug($"Failed to load types from assembly '{assembly.FullName}': {ex.Message}");
-                return Array.Empty<Type>();
-            }
-        }
-
-        /// <summary>
-        /// Harmony prefix patch for ECI's Give method.
-        /// Intercepts custom item additions and handles UCI custom items.
-        /// </summary>
-        /// <param name="__instance">The CustomItem instance calling Give.</param>
-        /// <param name="player">The Exiled player object receiving the item.</param>
-        /// <param name="item">the item to add.</param>
-        /// <returns>False to skip original method; true to continue to original method.</returns>
         public static bool Prefix(object __instance, object player, object item)
         {
             try
             {
-                string itemName = __instance.GetType().GetProperty("Name")?.GetValue(__instance)?.ToString() ?? "Unknown";
+                PropertyInfo nameProperty = AccessTools.Property(__instance.GetType(), "Name");
+                string itemName = nameProperty?.GetValue(__instance)?.ToString() ?? "Unknown";
                 LogManager.Debug($"ECI Integration intercepted item '{item}' for item '{itemName}'");
 
                 Player labPlayer = ECRIntegration.GetLabPlayerFromExiledPlayer(player);
@@ -190,8 +139,7 @@ namespace UncomplicatedCustomItems.Integrations
 
         internal static Item GetLabItemFromExiledItem(object exiledItem)
         {
-            Type itemType = exiledItem.GetType();
-            PropertyInfo serialProperty = itemType.GetProperty("Serial", BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo serialProperty = AccessTools.Property(exiledItem.GetType(), "Serial");
             ushort serial = (ushort)serialProperty.GetValue(exiledItem);
             return Item.Get(serial);
         }

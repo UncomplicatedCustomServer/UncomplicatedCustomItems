@@ -10,6 +10,7 @@ using System.Linq;
 using UncomplicatedCustomItems.Commands;
 using UnityEngine.Networking;
 using System.Text.Json;
+using MEC;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -47,13 +48,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         private const string UserAgent = "UncomplicatedCustomItems-Updater/1.2";
         private const string ReleasesApiUrl = "https://api.github.com/repos/UncomplicatedCustomServer/UncomplicatedCustomItems/releases";
 
-        public static IEnumerator CheckForUpdatesCoroutine()
+        public static IEnumerator<float> CheckForUpdatesCoroutine()
         {
             Version currentVersion = Plugin.Instance.Version;
             LogManager.Updater($"Current version: {currentVersion}. Checking for updates...");
 
             GitHubReleaseInfo latestRelease = null;
-            yield return GetLatestReleaseCoroutine(result => latestRelease = result);
+            yield return Timing.WaitUntilDone(GetLatestReleaseCoroutine(result => latestRelease = result));
 
             if (latestRelease == null)
                 yield break;
@@ -133,7 +134,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static IEnumerator GetLatestReleaseCoroutine(Action<GitHubReleaseInfo> onComplete)
+        private static IEnumerator<float> GetLatestReleaseCoroutine(Action<GitHubReleaseInfo> onComplete)
         {
             UnityWebRequest req = UnityWebRequest.Get(ReleasesApiUrl);
             req.SetRequestHeader("User-Agent", UserAgent);
@@ -142,7 +143,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 req.SetRequestHeader("Authorization", $"token {Plugin.Instance.Config.GithubToken}");
 
             req.downloadHandler = new DownloadHandlerBuffer();
-            yield return req.SendWebRequest();
+            yield return Timing.WaitUntilDone(req.SendWebRequest());
 
             if (req.result != UnityWebRequest.Result.Success)
             {

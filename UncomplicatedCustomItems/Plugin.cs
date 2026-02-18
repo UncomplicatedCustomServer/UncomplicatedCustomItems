@@ -227,7 +227,6 @@ namespace UncomplicatedCustomItems
             ServerHandler.Unregister();
             ScpHandler.Unregister();
             SSSHandler.Unregister();
-            MERIntergration.Unregister();
 
             ServerEvent.WaitingForPlayers -= OnFinishedLoading;
 
@@ -245,17 +244,13 @@ namespace UncomplicatedCustomItems
             if (Instance.Config.AllowDevPermissions)
                 LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 
+            Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine());
+            Timing.RunCoroutine(HttpManager.LoadCreditTagsCoroutine());
+
             ImportManager.Init();
-#if EXILED
-			Server.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
-#else
-            Player.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
-#endif
             VersionManager.Init();
-			HttpManager.LoadCreditTags();
             CustomItemBackupSystem.Init();
             LabAPIExtensions.Init();
-            MERIntergration.Init();
             ECRIntegration.Init();
             ECIIntegration.Init();
             AudioApi.Init();

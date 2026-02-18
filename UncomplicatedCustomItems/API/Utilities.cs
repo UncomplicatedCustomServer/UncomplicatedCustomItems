@@ -425,11 +425,11 @@ namespace UncomplicatedCustomItems.API
                 Quaternion rotation = Quaternion.Euler(spawn.Rotation);
 
                 Vector3 spawnPosition = GetDynamicSpawnPosition(room, dynamicSpawn, spawn, customItem);
-                if (spawnPosition != Vector3.zero && spawn.Rotation != Vector3.zero)
+                if (spawn.Rotation != Vector3.zero)
                 {
                     new SummonedCustomItem(customItem, spawnPosition, rotation);
                 }
-                else if (spawnPosition != Vector3.zero)
+                else
                     new SummonedCustomItem(customItem, spawnPosition);
             }
         }
@@ -437,20 +437,13 @@ namespace UncomplicatedCustomItems.API
         internal static Room GetRoomFromName(string room)
         {
             if (Enum.TryParse(room, out RoomName roomName))
-            {
                 return Room.Get(roomName).FirstOrDefault();
-            }
 
             return Room.List.GetByGameObjectName(room);
         }
 
         private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, SpawnData spawn, ICustomItem customItem)
         {
-            if (dynamicSpawn.Coords != Vector3.zero)
-            {
-                return room.WorldPosition(dynamicSpawn.Coords);
-            }
-
             if (spawn.ReplaceExistingPickup)
             {
                 Pickup targetPickup = FindTargetPickupInRoom(room, spawn, customItem);
@@ -460,6 +453,8 @@ namespace UncomplicatedCustomItems.API
                     return Vector3.zero;
                 }
             }
+            else
+                return room.WorldPosition(dynamicSpawn.Coords);
 
             return room.Position;
         }

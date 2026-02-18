@@ -1,6 +1,5 @@
 using HarmonyLib;
 using System;
-using System.Linq;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -62,7 +61,7 @@ namespace UncomplicatedCustomItems.Integrations
                     return false;
                 }
 
-                MethodInfo prefixMethod = typeof(ECRIntegration).GetMethod(nameof(Prefix), BindingFlags.Static | BindingFlags.Public);
+                MethodInfo prefixMethod = AccessTools.Method(typeof(ECRIntegration), nameof(Prefix));
                 if (prefixMethod == null)
                 {
                     LogManager.Error("Failed to find Prefix method for ECR patching.");
@@ -71,7 +70,7 @@ namespace UncomplicatedCustomItems.Integrations
 
                 Plugin.Instance._harmony.Patch(targetMethod, new HarmonyMethod(prefixMethod));
                 _isPatched = true;
-                LogManager.Silent($"Successfully patched ECR's 'TryAddItem' method.");
+                LogManager.Silent("Successfully patched ECR's 'TryAddItem' method.");
                 return true;
             }
             catch (Exception ex)
@@ -89,25 +88,23 @@ namespace UncomplicatedCustomItems.Integrations
         {
             try
             {
-                Type customRoleType = FindTypeInLoadedAssemblies("Exiled.CustomRoles.API.Features.CustomRole");
+                Type customRoleType = AccessTools.TypeByName("Exiled.CustomRoles.API.Features.CustomRole");
                 if (customRoleType == null)
                 {
-                    LogManager.Debug($"Type 'Exiled.CustomRoles.API.Features.CustomRole' not found in loaded assemblies.");
+                    LogManager.Debug("Type 'Exiled.CustomRoles.API.Features.CustomRole' not found in loaded assemblies.");
                     return null;
                 }
 
-                Type exiledPlayerType = Type.GetType("Exiled.API.Features.Player, Exiled.API");
+                Type exiledPlayerType = AccessTools.TypeByName("Exiled.API.Features.Player");
                 if (exiledPlayerType == null)
                 {
-                    LogManager.Error($"Could not load Exiled player type: Exiled.API.Features.Player, Exiled.API");
+                    LogManager.Error("Could not load Exiled player type: Exiled.API.Features.Player");
                     return null;
                 }
 
-                Type[] parameterTypes = [exiledPlayerType, typeof(string)];
-                MethodInfo method = customRoleType.GetMethod("TryAddItem", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, parameterTypes, null);
-
+                MethodInfo method = AccessTools.Method(customRoleType, "TryAddItem", [exiledPlayerType, typeof(string)]);
                 if (method == null)
-                    LogManager.Debug($"Method 'TryAddItem' not found on type 'Exiled.CustomRoles.API.Features.CustomRole'.");
+                    LogManager.Debug("Method 'TryAddItem' not found on type 'Exiled.CustomRoles.API.Features.CustomRole'.");
 
                 return method;
             }
@@ -115,35 +112,6 @@ namespace UncomplicatedCustomItems.Integrations
             {
                 LogManager.Error($"Error finding target method: {ex.Message}");
                 return null;
-            }
-        }
-
-        /// <summary>
-        /// Searches all loaded assemblies for a type with the specified full name.
-        /// </summary>
-        /// <param name="fullTypeName">The full name of the type to find.</param>
-        /// <returns>The Type if found; null otherwise.</returns>
-        private static Type FindTypeInLoadedAssemblies(string fullTypeName) => AppDomain.CurrentDomain.GetAssemblies().SelectMany(GetTypesFromAssembly).FirstOrDefault(t => t.FullName == fullTypeName);
-
-        /// <summary>
-        /// Safely retrieves all types from an assembly, handling ReflectionTypeLoadException.
-        /// </summary>
-        /// <param name="assembly">The assembly to get types from.</param>
-        /// <returns>Array of types from the assembly.</returns>
-        private static Type[] GetTypesFromAssembly(Assembly assembly)
-        {
-            try
-            {
-                return assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                return ex.Types.Where(t => t != null).ToArray();
-            }
-            catch (Exception ex)
-            {
-                LogManager.Debug($"Failed to load types from assembly '{assembly.FullName}': {ex.Message}");
-                return [];
             }
         }
 
@@ -160,7 +128,7 @@ namespace UncomplicatedCustomItems.Integrations
         {
             try
             {
-                string roleName = __instance.GetType().GetProperty("Name")?.GetValue(__instance)?.ToString() ?? "Unknown";
+                string roleName = AccessTools.Property(__instance.GetType(), "Name")?.GetValue(__instance)?.ToString() ?? "Unknown";
                 LogManager.Debug($"ECR Integration intercepted item '{itemName}' for role '{roleName}'");
 
                 Player labPlayer = GetLabPlayerFromExiledPlayer(player);
@@ -203,9 +171,7 @@ namespace UncomplicatedCustomItems.Integrations
         {
             try
             {
-                Type playerType = exiledPlayer.GetType();
-                PropertyInfo gameObjectProperty = playerType.GetProperty("GameObject", BindingFlags.Public | BindingFlags.Instance);
-
+                PropertyInfo gameObjectProperty = AccessTools.Property(exiledPlayer.GetType(), "GameObject");
                 if (gameObjectProperty == null)
                 {
                     LogManager.Error("Could not find 'GameObject' property on Exiled Player object.");

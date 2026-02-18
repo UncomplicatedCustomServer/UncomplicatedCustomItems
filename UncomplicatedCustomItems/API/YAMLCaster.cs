@@ -44,6 +44,7 @@ namespace UncomplicatedCustomItems.API
 
             return serialized;
         }
+        
         /// <summary>
         /// As YAML is a big shit, decode the serialized <see cref="Dictionary{string, object}"/> into a fullified class, giving the <paramref name="baseElement"/>
         /// Missing properties will be set to their default values.

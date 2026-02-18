@@ -19,6 +19,7 @@ using UnityEngine.Networking;
 using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 using static UnityEngine.Networking.UnityWebRequest;
 using UncomplicatedCustomItems.API.Extensions;
+using MEC;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -82,7 +83,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             get
             {
                 if (_latestVersion is null)
-                    LoadLatestVersion();
+                    Timing.RunCoroutine(LoadLatestVersionCoroutine());
                 return _latestVersion;
             }
         }
@@ -112,24 +113,19 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public void OnVerified(PlayerJoinedEventArgs ev) => ApplyCreditTag(ev.Player);
 
-        public IEnumerator AddServerOwner(string discordId, Action<HttpStatusCode> onCompleted)
+        public IEnumerator<float> AddServerOwner(string discordId, Action<HttpStatusCode> onCompleted)
         {
             using UnityWebRequest request = Get($"{Endpoint}/owners/add?discordid={discordId}");
-            yield return request.SendWebRequest();
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
             onCompleted.Invoke((HttpStatusCode)request.responseCode);
             request.Dispose();
         }
 
-        public void LoadLatestVersion()
-        {
-            Player.Host?.ReferenceHub.StartCoroutine(LoadLatestVersionCoroutine());
-        }
-
-        private IEnumerator LoadLatestVersionCoroutine()
+        private IEnumerator<float> LoadLatestVersionCoroutine()
         {
             using UnityWebRequest request = Get($"{Endpoint}/{Prefix}/version?vts=5");
             request.downloadHandler = new DownloadHandlerBuffer();
-            yield return request.SendWebRequest();
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
 
             if (request.result != Result.Success)
             {
@@ -149,12 +145,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             LogManager.Debug($"Latest version loaded: {_latestVersion}");
         }
 
-        public void LoadCreditTags()
-        {
-            Player.Host.ReferenceHub.StartCoroutine(LoadCreditTagsCoroutine());
-        }
-
-        private IEnumerator LoadCreditTagsCoroutine()
+        internal IEnumerator<float> LoadCreditTagsCoroutine()
         {
             string[] endpoints =
             [
@@ -170,7 +161,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 using (request = Get(endpoint))
                 {
-                    yield return request.SendWebRequest();
+                    yield return Timing.WaitUntilDone(request.SendWebRequest());
 
                     if (request.result == Result.Success)
                     {
@@ -260,20 +251,22 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (!Plugin.Instance.Config.EnableCreditTags)
                 return;
 
-            CreditTag tag = GetCreditTag(player);
-            if (player.UserGroup != null || player.UserGroup.Permissions != 0 || !string.IsNullOrWhiteSpace(player.UserGroup.BadgeText))
+            if (TryGetCreditTag(player, out var tag))
             {
-                if (tag?.Role == player.GroupName && tag?.Color == player.GroupColor)
-                    return;
+                if (player.UserGroup != null || player.UserGroup.Permissions != 0 || !string.IsNullOrWhiteSpace(player.UserGroup.BadgeText))
+                {
+                    if (tag.Role == player.GroupName && tag.Color == player.GroupColor)
+                        return;
 
-                if ((bool)!tag?.Override)
-                    return;
-            }
+                    if (!tag.Override)
+                        return;
+                }
 
-            if (!string.IsNullOrWhiteSpace(tag.Role) && !string.IsNullOrWhiteSpace(tag.Color))
-            {
-                player.GroupName = tag.Role;
-                player.GroupColor = tag.Color;
+                if (!string.IsNullOrWhiteSpace(tag.Role) && !string.IsNullOrWhiteSpace(tag.Color))
+                {
+                    player.GroupName = tag.Role;
+                    player.GroupColor = tag.Color;
+                }
             }
         }
 
@@ -281,14 +274,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         internal void VersionInfo(Action<HttpStatusCode, string?> onCompleted)
         {
             string url = $"https://uciversionmanager.thaumiel-servers.workers.dev/item/{Plugin.Instance.Version.ToString(3)}";
-            Player.Host?.ReferenceHub.StartCoroutine(VersionInfoCoroutine(url, onCompleted));
+            Timing.RunCoroutine(VersionInfoCoroutine(url, onCompleted));
         }
 
-        private IEnumerator VersionInfoCoroutine(string url, Action<HttpStatusCode, string?> onCompleted)
+        private IEnumerator<float> VersionInfoCoroutine(string url, Action<HttpStatusCode, string?> onCompleted)
         {
             using UnityWebRequest request = Get(url);
             request.downloadHandler = new DownloadHandlerBuffer();
-            yield return request.SendWebRequest();
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
 
             HttpStatusCode status = (HttpStatusCode)request.responseCode;
             if (request.result != Result.Success)
@@ -305,9 +298,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
 
         public void ShareLogs(string data, Action<HttpStatusCode, string> onCompleted) =>
-            Player.Host?.ReferenceHub.StartCoroutine(UploadLogs(data, onCompleted));
+            Timing.RunCoroutine(UploadLogs(data, onCompleted));
 
-        private IEnumerator UploadLogs(string data, Action<HttpStatusCode, string> onCompleted)
+        private IEnumerator<float> UploadLogs(string data, Action<HttpStatusCode, string> onCompleted)
         {
 #if EXILED
             UnityWebRequest request = new($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&using_labapi=false&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}");
@@ -320,7 +313,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "text/plain");
             request.method = kHttpVerbPUT;
-            yield return request.SendWebRequest();
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
             HttpStatusCode status = (HttpStatusCode)request.responseCode;
             LogManager.Debug($"Uploaded data to endpoint. Status: {status}");
             onCompleted?.Invoke(status, request.downloadHandler.text);

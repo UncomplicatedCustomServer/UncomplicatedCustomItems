@@ -14,6 +14,7 @@ using System.Linq;
 using UncomplicatedCustomItems.Events;
 using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using MapGeneration;
 
 namespace UncomplicatedCustomItems.API.ToolGun
 {
@@ -163,8 +164,10 @@ namespace UncomplicatedCustomItems.API.ToolGun
                         color = new Vector4(x, y, z, w);
                     }
 
-                    if (ev.Player.Room.Name.ToString() != "Unnamed")
-                        room = ev.Player.Room.Name.ToString();
+                    if (ev.Player.Room.Name is not RoomName.Unnamed)
+                    {
+                        room = ev.Player.Room.Name.ToString();                        
+                    }
                     else
                         room = ev.Player.Room.GameObject.name;
 
