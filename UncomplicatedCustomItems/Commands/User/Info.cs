@@ -13,7 +13,7 @@ namespace UncomplicatedCustomItems.Commands.User
 
         public override string Command => "customiteminfo";
 
-        public override string[] Aliases { get; } = ["info", "cinfo"];
+        public override string[] Aliases { get; } = ["info"];
 
         public override string Description => "Gets the extended discription of a CustomItem";
 

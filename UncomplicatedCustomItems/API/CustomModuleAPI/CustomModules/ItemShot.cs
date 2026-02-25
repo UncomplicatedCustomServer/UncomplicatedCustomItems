@@ -123,6 +123,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 {
                     SummonedCustomItem summoned = new(Utilities.GetCustomItem(CustomItemId), position);
                     ApplyPhysics(ev.Player, summoned.Pickup);
+                    if (summoned.Pickup is TimedGrenadeProjectile grenadePickup)
+                        grenadePickup.Base.ServerActivate();
+                        
                     return;
                 }
 
