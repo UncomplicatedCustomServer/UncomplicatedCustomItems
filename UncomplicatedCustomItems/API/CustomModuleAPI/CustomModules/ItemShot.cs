@@ -113,12 +113,6 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 if (BarrelTipExtension.TryFindWorldmodelBarrelTip(ev.FirearmItem.Serial, out var tip))
                     position = tip.WorldspacePosition;
 
-                float num = 1f - Mathf.Abs(Vector3.Dot(ev.Player.Camera.forward, Vector3.up));
-                Vector3 forward = ev.Player.Camera.forward;
-                Vector3 vector = ev.Player.Camera.up * UpwardsFactor;
-                Vector3 vector3 = forward + vector * num;
-                Vector3 velocityVector = vector3 * Velocity;
-
                 if (IsCustomItem)
                 {
                     SummonedCustomItem summoned = new(Utilities.GetCustomItem(CustomItemId), position);
