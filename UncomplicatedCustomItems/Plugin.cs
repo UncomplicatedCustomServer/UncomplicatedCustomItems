@@ -42,7 +42,6 @@ namespace UncomplicatedCustomItems
 {
     public class Plugin : Plugin<Config>
     {
-        public bool IsPrerelease = true;
         public override string Name => "UncomplicatedCustomItems";
 #if EXILED
         public override string Prefix => "UncomplicatedCustomItems";

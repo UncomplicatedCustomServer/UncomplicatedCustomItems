@@ -75,7 +75,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public static void SendReport(Action<HttpStatusCode, string, string> onCompleted)
         {
-            if (MessageSent || !Plugin.Instance.IsPrerelease)
+            if (MessageSent || !VersionManager.VersionInfo.PreRelease)
             {
                 onCompleted?.Invoke(HttpStatusCode.Forbidden, null, null);
                 return;

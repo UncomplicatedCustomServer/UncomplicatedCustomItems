@@ -6,6 +6,8 @@ using System;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using MEC;
+using LabApi.Features.Wrappers;
+using InventorySystem.Items.Firearms.Modules;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -17,13 +19,16 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             "BurstAmount",
             "CoolDown",
             "ForceFire",
+            "TimingBetweenForcedShots"
         ];
 
-        public CoroutineHandle Handle { get; set; }
+        public CoroutineHandle CooldownHandle { get; set; }
+        public CoroutineHandle ForceFireHandle { get; set; }
         public uint TotalFired { get; set; }
         public uint BurstAmount { get; set; }
         public bool ForceFire { get; set; }
         public float CoolDown { get; set; }
+        public float TimingBetweenForcedShots { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
@@ -47,9 +52,16 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     return;
                 }
 
+                if (!args.TryGetValue<float>("TimingBetweenForcedShots", out var timing))
+                {
+                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} TimingBetweenForcedShots is not a valid Float!");
+                    return;
+                }
+
                 BurstAmount = burst;
                 ForceFire = force;
                 CoolDown = cool;
+                TimingBetweenForcedShots = timing;
             }
         }
 
@@ -62,14 +74,16 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             {
                 if (TotalFired >= BurstAmount)
                 {
-                    if (!Handle.IsRunning)
-                        Handle = Timing.RunCoroutine(ResetCooldownCoroutine());
+                    if (!CooldownHandle.IsRunning)
+                        CooldownHandle = Timing.RunCoroutine(ResetCooldownCoroutine());
                         
                     ev.IsAllowed = false;
                     return;
                 }
 
                 TotalFired++;
+                if (ForceFire && !ForceFireHandle.IsRunning)
+                    ForceFireHandle = Timing.RunCoroutine(ForceFireCoroutine(ev.FirearmItem));
             }
         }
 
@@ -87,6 +101,18 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         {
             yield return Timing.WaitForSeconds(CoolDown);
             TotalFired = 0;
+        }
+
+        public IEnumerator<float> ForceFireCoroutine(FirearmItem item)
+        {
+            for (int i = 0; i < BurstAmount - 1; i++)
+            {
+                yield return Timing.WaitForSeconds(TimingBetweenForcedShots);
+                if (item.ActionModule is AutomaticActionModule actionModule)
+                {
+                    actionModule.ServerShoot(item.Base.Owner);
+                }
+            }
         }
     }
 }
