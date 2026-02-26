@@ -886,41 +886,6 @@ namespace UncomplicatedCustomItems.Events
                     ev.Attacker.SendHitMarker(weaponData.Damage);
                 }
             }
-
-            switch (customItem.CustomItem.CustomItemType)
-            {
-                case CustomItemType.Weapon:
-                    {
-                        IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
-                        FirearmDamageHandler damageHandler = ev.DamageHandler as FirearmDamageHandler;
-                        LogManager.Debug($"{damageHandler.Damage}");
-                        LogManager.Debug($"{ev.Player.Health}/{ev.Player.MaxHealth}");
-                        damageHandler.Damage = weaponData.Damage;
-                        LogManager.Debug($"{damageHandler.Damage}");
-                        break;
-                    }
-
-                case CustomItemType.MicroHID:
-                    {
-                        IMicroHIDData microData = customItem.CustomItem.CustomData as IMicroHIDData;
-                        MicroHidDamageHandler damageHandler = ev.DamageHandler as MicroHidDamageHandler;
-                        damageHandler.Damage = microData.Damage;
-                        break;
-                    }
-
-                case CustomItemType.ParticleDisruptor:
-                    {
-                        IParticleDisruptorData disruptorData = customItem.CustomItem.CustomData as IParticleDisruptorData;
-                        DisruptorDamageHandler damageHandler = ev.DamageHandler as DisruptorDamageHandler;
-                        if (damageHandler.FiringState == FiringState.FiringSingle)
-                            damageHandler.Damage = disruptorData.ChargeDamage;
-
-                        if (damageHandler.FiringState == FiringState.FiringRapid)
-                            damageHandler.Damage = disruptorData.BurstDamage;
-
-                        break;
-                    }
-            }
         }
 
         public static void OnSpawned(PlayerSpawnedEventArgs ev)
