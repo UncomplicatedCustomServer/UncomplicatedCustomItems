@@ -8,6 +8,7 @@ using LabApi.Features.Wrappers;
 using FirearmPickup = InventorySystem.Items.Firearms.FirearmPickup;
 using static InventorySystem.Items.Firearms.Modules.AutomaticActionModule;
 using static InventorySystem.Items.Firearms.Modules.PumpActionModule;
+using System.Linq;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
@@ -26,6 +27,7 @@ namespace UncomplicatedCustomItems.API.Extensions
             {
                 if (attachments.Contains(attachment.Name))
                     attachmentNamesRaw += num;
+
                 num *= 2U;
             }
 
@@ -34,10 +36,9 @@ namespace UncomplicatedCustomItems.API.Extensions
 
         public static Attachment GetAttachmentByName(this Firearm firearm, AttachmentName name)
         {
-            foreach (Attachment attachment in firearm.Attachments)
+            foreach (Attachment attachment in firearm.Attachments.Where(a => a.Name == name))
             {
-                if (attachment.Name == name)
-                    return attachment;
+                return attachment;
             }
 
             return null;
@@ -50,11 +51,9 @@ namespace UncomplicatedCustomItems.API.Extensions
                 return false;
 
             uint newCode = firearm.GetCurrentAttachmentsCode();
-
             for (int i = 0; i < firearm.Attachments.Length; i++)
             {
-                Attachment attachment = firearm.Attachments[i];
-                if (attachment.Slot == targetAttachment.Slot)
+                if (firearm.Attachments[i].Slot == targetAttachment.Slot)
                 {
                     uint bitToRemove = 1u << i;
                     newCode &= ~bitToRemove;
@@ -85,8 +84,7 @@ namespace UncomplicatedCustomItems.API.Extensions
 
             firearm.ItemSerial = firearmPickup.Info.Serial;
             AttachmentCodeSync.ServerSetCode(firearmPickup.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearmPickup.Info.ItemId));
-            bool success = TryApplyAttachment(firearm, name);
-            if (success && firearm.WorldModel != null)
+            if (TryApplyAttachment(firearm, name) && firearm.WorldModel != null)
             {
                 firearm.WorldModel.Setup(firearm.ItemId, firearm.WorldModel.WorldmodelType, firearm.GetCurrentAttachmentsCode());
                 return true;
