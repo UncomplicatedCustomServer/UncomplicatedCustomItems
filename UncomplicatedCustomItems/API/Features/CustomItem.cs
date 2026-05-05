@@ -27,8 +27,8 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal static List<ErrorCustomItem> ErrorCustomItems { get; set; } = [];
 
-        internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = new();
-        internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = new();
+        internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = [];
+        internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = [];
 
         /// <summary>
         /// Register a new <see cref="ICustomItem"/> inside the plugin

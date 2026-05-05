@@ -16,6 +16,7 @@ namespace UncomplicatedCustomItems.Events
     {
         public static void Register()
         {
+            ServerEvent.WaitingForPlayers += OnWaitingForPlayers;
             ServerEvent.PickupDestroyed += OnPickup;
             ServerEvent.ProjectileExploding += OnGrenadeExploding;
             ServerEvent.RoundStarted += SpawnItemsOnRoundStarted;
@@ -24,10 +25,17 @@ namespace UncomplicatedCustomItems.Events
 
         public static void Unregister()
         {
+            ServerEvent.WaitingForPlayers -= OnWaitingForPlayers;
             ServerEvent.PickupDestroyed -= OnPickup;
             ServerEvent.ProjectileExploding -= OnGrenadeExploding;
             ServerEvent.RoundStarted -= SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded -= OnDetonated;
+        }
+
+        private static void OnWaitingForPlayers()
+        {
+            SummonedCustomItem.Cleanup();
+            SummonedAPICustomItem.Cleanup();
         }
 
         private static void OnDetonated(ProjectileExplodedEventArgs ev)

@@ -266,13 +266,22 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnChangingItem(PlayerChangingItemEventArgs ev)
         {
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value))
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item.CustomItem.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci))
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
 
             if (ev.OldItem is null)
@@ -471,13 +480,22 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.IsAllowed || ev.Player == null || ev.FirearmItem == null)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value))
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowShooting && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item.CustomItem.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowShooting && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowShooting && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci))
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowShooting && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
         }
 
@@ -916,13 +934,22 @@ namespace UncomplicatedCustomItems.Events
             if (ev.IsAllowed == false)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value))
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowUsingElevators && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item.CustomItem.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowUsingElevators && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowUsingElevators && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci))
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowUsingElevators && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
         }
 
@@ -933,13 +960,22 @@ namespace UncomplicatedCustomItems.Events
             if (ev.IsAllowed == false)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value))
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowOpeningDoors && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item.CustomItem.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowOpeningDoors && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningDoors && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci))
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningDoors && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
         }
 
@@ -983,13 +1019,22 @@ namespace UncomplicatedCustomItems.Events
             if (ev.IsAllowed == false)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value))
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowOpeningGenerators && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item.CustomItem.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowOpeningGenerators && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningGenerators && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci))
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningGenerators && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
 
             if (ev.Player.CurrentItem == null)
@@ -1020,13 +1065,22 @@ namespace UncomplicatedCustomItems.Events
             if (ev.IsAllowed == false)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value))
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item.CustomItem.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowOpeningLockers && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci))
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningLockers && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
 
             if (ev.Player.CurrentItem == null)

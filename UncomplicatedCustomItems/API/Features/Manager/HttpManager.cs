@@ -56,7 +56,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <summary>
         /// Gets the UCS APIs endpoint
         /// </summary>
-        public string Endpoint { get; } = "https://api.ucserver.it/v2";
+        public string Endpoint { get; } = "https://api.ucserver.it/v3";
 
         /// <summary>
         /// Gets the CreditTag storage for the plugin, downloaded from our central server

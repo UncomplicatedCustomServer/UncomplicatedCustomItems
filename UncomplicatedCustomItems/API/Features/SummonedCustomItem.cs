@@ -32,9 +32,7 @@ using Armor = LabApi.Features.Wrappers.BodyArmorItem;
 using Jailbird = LabApi.Features.Wrappers.JailbirdItem;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
-using Scp018 = LabApi.Features.Wrappers.Scp018Projectile;
 using Scp244 = LabApi.Features.Wrappers.Scp244Item;
-using ThrowableItem = LabApi.Features.Wrappers.ThrowableItem;
 
 namespace UncomplicatedCustomItems.API.Features
 {
@@ -43,6 +41,8 @@ namespace UncomplicatedCustomItems.API.Features
     /// </summary>
     public class SummonedCustomItem
     {
+        public static Dictionary<Player, HashSet<SummonedCustomItem>> PlayerCache = [];
+
         /// <summary>
         /// Gets the list of every active CustomItem
         /// </summary>
@@ -154,6 +154,14 @@ namespace UncomplicatedCustomItems.API.Features
 
         public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, Player.Get(player.Id), item, null) { }
 #endif
+
+        public static void Cleanup()
+        {
+            List.Clear();
+            _activeSerials.Clear();
+            PlayerCache.Clear();
+        }
+
         public void SetProperties()
         {
             if (Item is not null)
@@ -783,6 +791,11 @@ namespace UncomplicatedCustomItems.API.Features
             Owner = pickedUp.Player;
             SetProperties();
             HandleEvent(pickedUp.Player, ItemEvents.Pickup, pickedUp.Item.Serial);
+
+            if (!PlayerCache.ContainsKey(pickedUp.Player))
+                PlayerCache.Add(pickedUp.Player, []);
+
+            PlayerCache[pickedUp.Player].Add(this);
         }
 
         public void OnDrop(PlayerDroppedItemEventArgs dropped)
@@ -792,6 +805,11 @@ namespace UncomplicatedCustomItems.API.Features
             Owner = null;
             SaveProperties();
             HandleEvent(dropped.Player, ItemEvents.Drop, dropped.Pickup.Serial);
+
+            if (!PlayerCache.ContainsKey(dropped.Player))
+                PlayerCache.Add(dropped.Player, []);
+
+            PlayerCache[dropped.Player].Remove(this);
         }
 
         public void OnThrew(PlayerThrewProjectileEventArgs ev)
@@ -799,6 +817,11 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = ev.Projectile;
             Item = null;
             Owner = ev.Projectile.LastOwner;
+
+            if (!PlayerCache.ContainsKey(ev.Player))
+                PlayerCache.Add(ev.Player, []);
+
+            PlayerCache[ev.Player].Remove(this);
         }
 
         public void OnDetonated(ProjectileExplodedEventArgs ev)
@@ -995,6 +1018,16 @@ namespace UncomplicatedCustomItems.API.Features
         {
             CustomModuleManager.Destroy(this);
             List.Remove(this);
+            foreach (KeyValuePair<Player, HashSet<SummonedCustomItem>> kvp in PlayerCache)
+            {
+                foreach (SummonedCustomItem sci in kvp.Value.Where(sci => sci == this).ToArray())
+                {
+                    kvp.Value.Remove(sci);
+                }
+
+                PlayerCache[kvp.Key] = kvp.Value;
+            }
+
             _activeSerials.Remove(Serial);
 
             if (IsPickup)

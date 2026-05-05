@@ -18,13 +18,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
     public class CustomItemBackupSystem
     {
-        private static BackupKey key { get; set; }
+        private static BackupKey Key { get; set; }
         private static string Url => "https://ucibackup.thaumiel-servers.workers.dev";
+        
 #if EXILED
         private static string BackupDir => Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups");
 #else
         private static string BackupDir => Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups");
 #endif
+
         public static bool Online = false;
 
         public static void Init()
@@ -38,14 +40,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 File.WriteAllText(Path.Combine(BackupDir, "key.yml"), content);
             }
 
-            if (key is null)
+            if (Key is null)
             {
                 string content = File.ReadAllText(Path.Combine(BackupDir, "key.yml"));
                 BackupKey backup = YamlConfigParser.Deserializer.Deserialize<BackupKey>(content);
-                key = backup;
+                Key = backup;
             }
 
-            if (key.BackupCode == "0")
+            if (Key.BackupCode == "0")
                 GenerateBackupCode();
 
             Timing.RunCoroutine(SendInitialRequest());
@@ -53,7 +55,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public static void Upload()
         {
-            if (!Online || key.BackupCode == "0")
+            if (!Online || Key.BackupCode == "0")
                 return;
 
             Timing.RunCoroutine(UploadBackupData());
@@ -75,8 +77,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             for (int i = 0; i < UnityEngine.Random.Range(16, 48); i++)
                 code += chars[random.Next(chars.Length)];
 
-            key.BackupCode = code;
-            File.WriteAllText(Path.Combine(BackupDir, "key.yml"), YamlConfigParser.Serializer.Serialize(key));
+            Key.BackupCode = code;
+            File.WriteAllText(Path.Combine(BackupDir, "key.yml"), YamlConfigParser.Serializer.Serialize(Key));
         }
 
         private static string ParseItems()
@@ -114,7 +116,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             string BackupCode = code;
             if (string.IsNullOrEmpty(BackupCode))
-                BackupCode = key.BackupCode;
+                BackupCode = Key.BackupCode;
 
             UnityWebRequest request = new($"{Url}/download");
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -160,7 +162,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             byte[] bodyRaw = Encoding.UTF8.GetBytes(ParseItems());   
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.SetRequestHeader("Content-Type", "application/yaml");
-            request.SetRequestHeader("Token", $"{key.BackupCode}");
+            request.SetRequestHeader("Token", $"{Key.BackupCode}");
             request.method = kHttpVerbPOST;
             yield return Timing.WaitUntilDone(request.SendWebRequest());
 

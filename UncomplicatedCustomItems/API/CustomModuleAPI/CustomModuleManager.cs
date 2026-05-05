@@ -17,6 +17,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
     public class CustomModuleManager
     {
         public static List<CustomModuleBase> CustomModules { get; set; } = [];
+
 #if EXILED
         public static List<IPlugin<IConfig>> ActivePlugins { get; set; } = [];
         public static Dictionary<CustomModuleBase, IPlugin<IConfig>> ModuleOwners { get; set; } = [];
@@ -24,6 +25,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
         public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins { get; set; } = [];
         public static Dictionary<CustomModuleBase, LabApi.Loader.Features.Plugins.Plugin> ModuleOwners { get; set; } = [];
 #endif
+
         private static readonly Dictionary<Type, Func<CustomModuleBase>> _factoryCache = [];
         private static readonly object _cacheLock = new();
 

@@ -26,6 +26,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
     public class SummonedAPICustomItem
     {
+        public static Dictionary<Player, HashSet<SummonedAPICustomItem>> PlayerCache = [];
+
         /// <summary>
         /// Gets a list of every summoned <see cref="APICustomItem"/>
         /// </summary>
@@ -77,8 +79,15 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             Serial = item is not null ? item.Serial : pickup.Serial;
             Pickup = pickup;
 
+            if (!PlayerCache.ContainsKey(owner))
+                PlayerCache.Add(owner, []);
+
+            PlayerCache[owner].Add(this);
+
             if (!IsPickup)
+            {
                 SetItemProperties();
+            }
             else
                 SetPickupProperties();
 
@@ -158,8 +167,24 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public SummonedAPICustomItem(APICustomItem customItem, Player player, Item item)
             : this(customItem, player, item, null) { }
 
+        public static void Cleanup()
+        {
+            SummonedCustomItems.Clear();
+            PlayerCache.Clear();
+        }
+
         public void Destroy()
         {
+            foreach (KeyValuePair<Player, HashSet<SummonedAPICustomItem>> kvp in PlayerCache)
+            {
+                foreach (SummonedAPICustomItem item in kvp.Value.Where(item => item == this).ToArray())
+                {
+                    kvp.Value.Remove(item);
+                }
+
+                PlayerCache[kvp.Key] = kvp.Value;
+            }
+
             List.Remove(this);
             SummonedCustomItems.Remove(Serial);
             switch (CustomItem)
@@ -194,7 +219,9 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
 
             if (IsPickup)
+            {
                 Pickup?.Destroy();
+            }
             else if (Item != null)
                 Owner?.RemoveItem(Item.Base);
 
@@ -494,6 +521,11 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             Owner = pickedUp.Player;
             Serial = Item.Serial;
             SetItemProperties();
+
+            if (!PlayerCache.ContainsKey(pickedUp.Player))
+                PlayerCache.Add(pickedUp.Player, []);
+
+            PlayerCache[pickedUp.Player].Add(this);
         }
 
         public void OnDrop(PlayerDroppedItemEventArgs dropped)
@@ -503,6 +535,11 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             Owner = null;
             Serial = Pickup.Serial;
             SaveProperties();
+
+            if (!PlayerCache.ContainsKey(dropped.Player))
+                PlayerCache.Add(dropped.Player, []);
+
+            PlayerCache[dropped.Player].Remove(this);
         }
 
         public void OnThrew(PlayerThrewProjectileEventArgs ev)
@@ -511,6 +548,11 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             Item = null;
             Owner = ev.Projectile.LastOwner;
             Serial = ev.Projectile.Serial;
+
+            if (!PlayerCache.ContainsKey(ev.Player))
+                PlayerCache.Add(ev.Player, []);
+
+            PlayerCache[ev.Player].Remove(this);
         }
 
         public void OnDetonated(ProjectileExplodedEventArgs ev)
