@@ -2,6 +2,7 @@
 using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Helper;
@@ -36,6 +37,14 @@ namespace UncomplicatedCustomItems.Events
         {
             SummonedCustomItem.Cleanup();
             SummonedAPICustomItem.Cleanup();
+            PlayerHandler._capybaras.Clear();
+            PlayerHandler._damageTimes.Clear();
+            PlayerHandler._toolGunPrimitives.Clear();
+            PlayerHandler.Appearance.Clear();
+            PlayerHandler._humeShieldRegenCoroutine.Clear();
+            PlayerHandler.ActiveLights.Clear();
+            PlayerExtensions.PlayerKills.Clear();
+            PlayerHandler.CustomScp268Effects.Clear();
         }
 
         private static void OnDetonated(ProjectileExplodedEventArgs ev)
