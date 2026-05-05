@@ -121,7 +121,14 @@ namespace UncomplicatedCustomItems.Integrations
                     return true;
                 }
 
-                if (Utilities.TryGetCustomItem(GetLabItemFromExiledItem(item).Serial, out ICustomItem customItem))
+                Item labitem = GetLabItemFromExiledItem(item);
+                if (labitem == null)
+                {
+                    LogManager.Error("Failed to convert Exiled item to LabAPI item.");
+                    return true;
+                }
+
+                if (Utilities.TryGetCustomItem(labitem.Serial, out ICustomItem customItem))
                 {
                     LogManager.Debug($"Giving UCI custom item '{customItem.Name}' to {labPlayer.Nickname}");
                     new SummonedCustomItem(customItem, labPlayer);
@@ -139,7 +146,13 @@ namespace UncomplicatedCustomItems.Integrations
 
         internal static Item GetLabItemFromExiledItem(object exiledItem)
         {
+            if (exiledItem == null)
+                return null;
+
             PropertyInfo serialProperty = AccessTools.Property(exiledItem.GetType(), "Serial");
+            if (serialProperty == null)
+                return null;
+
             ushort serial = (ushort)serialProperty.GetValue(exiledItem);
             return Item.Get(serial);
         }
