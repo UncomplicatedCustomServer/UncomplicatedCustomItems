@@ -33,14 +33,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             {
                 uint id = GetFirstFreeId();
                 item.Id = id;
-                CustomItems.TryAdd(item.Id, item);
-                LogManager.Info($"{nameof(APICustomItem)}: Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
             }
-            else
-            {
-                CustomItems.TryAdd(item.Id, item);
-                LogManager.Info($"{nameof(APICustomItem)}: Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
-            }
+
+            CustomItems.TryAdd(item.Id, item);
+            LogManager.Info($"{nameof(APICustomItem)}: Successfully registered APICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
         /// <summary>
@@ -86,13 +82,13 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
             if (item.SpawnLocations.Count() >= 1)
             {
-                foreach (var dic in item.SpawnLocations)
+                foreach (var kvp in item.SpawnLocations)
                 {
                     Vector3 pos;
-                    Room room = Utilities.GetRoomFromName(dic.Key);
+                    Room room = Utilities.GetRoomFromName(kvp.Key);
 
-                    if (dic.Value != Vector3.zero)
-                        pos = room.WorldPosition(dic.Value);
+                    if (kvp.Value != Vector3.zero)
+                        pos = room.WorldPosition(kvp.Value);
 
                     if (item.ReplaceExistingPickup)
                     {
@@ -273,6 +269,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// Gets or sets the rotation of the <see cref="APICustomItem"/> when first spawned as a <see cref="Pickup"/>
         /// </summary>
         public virtual Vector4 Rotation { get; set; }
+
+
 
         /// <summary>
         /// Gets or sets the locations that the <see cref="APICustomItem"/> can spawn.
