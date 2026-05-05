@@ -2,6 +2,7 @@
 using Exiled.API.Interfaces;
 using Exiled.Loader;
 #endif
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +74,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                 }
             }
 #else
-            foreach (var pluginEntry in LabApi.Loader.PluginLoader.Plugins.ToArray())
+            foreach (KeyValuePair<LabApi.Loader.Features.Plugins.Plugin, Assembly> pluginEntry in LabApi.Loader.PluginLoader.Plugins.ToArray())
             {
                 try
                 {
@@ -383,7 +384,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                                 list.Add(raw);
                             }
                             else
-                                LogManager.Debug($"  Value '{rawText}' does not match any required arguments: {string.Join(", ", required)}");
+                                LogManager.Debug($"Value '{rawText}' does not match any required arguments: {string.Join(", ", required)}");
                         }
                     }
                 }

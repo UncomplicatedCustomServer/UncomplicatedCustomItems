@@ -549,7 +549,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         YAMLCustomAction action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
                         CustomAction.Register(YAMLCaster.Converter(action));
-                        LogManager.Debug($"Registering action {action.Id} [{action.Name}] from {Path.Combine(Dir, localDir)}");
+                        LogManager.Debug($"Registering action {action.Id} [{action.Name}] from {fileName}");
                     }
                     else
                     {
@@ -560,7 +560,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                             YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
                             CustomItem.Register(YAMLCaster.Converter(item));
-                            LogManager.Debug($"Registering item {item.Id} [{item.Name}] from {Path.Combine(Dir, localDir)}");
+                            LogManager.Debug($"Registering item {item.Id} [{item.Name}] from {fileName}");
                         }
                         catch (YamlException yamlEx)
                         {
@@ -640,8 +640,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         LogManager.Debug($"Creating CustomAction at {Path.Combine(Dir, localDir)}");
                     }
                 else
+                {
                     foreach (YAMLCustomItem customItem in _examples)
+                    {
                         File.WriteAllText(Path.Combine(Dir, localDir, $"{customItem.Name.ToLower().Replace(" ", "-")}.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(customItem));
+                    }
+                }
 
                 LogManager.Info($"Plugin does not have a item folder, generated one in {Path.Combine(Dir, localDir)}");
             }

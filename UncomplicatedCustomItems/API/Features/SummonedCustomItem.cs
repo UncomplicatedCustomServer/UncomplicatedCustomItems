@@ -55,7 +55,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         private static readonly List<CustomItemType> _managedItems = [CustomItemType.Painkillers, CustomItemType.Medikit, CustomItemType.Adrenaline];
 
-        internal static CoroutineHandle RegenHandle;
+        internal CoroutineHandle RegenHandle;
 
         /// <summary>
         /// The <see cref="ICustomItem"/> reference of the item

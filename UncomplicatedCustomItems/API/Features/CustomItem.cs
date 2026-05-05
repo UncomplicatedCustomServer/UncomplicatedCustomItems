@@ -47,7 +47,7 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         public bool HasModule<T>() where T : CustomModuleBase =>
-            CustomModules.OfType<T>().FirstOrDefault() != null;
+            CustomModules.Keys.OfType<T>().FirstOrDefault() != null;
 
         public bool TryGetModule<T>(out T? module) where T : CustomModuleBase
         {
