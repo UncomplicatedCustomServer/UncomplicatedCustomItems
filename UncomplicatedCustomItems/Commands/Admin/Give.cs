@@ -7,10 +7,8 @@ using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.HarmonyElements.Patches;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using InventorySystem.Items.Usables.Scp330;
-using static UncomplicatedCustomItems.API.Extensions.PlayerExtensions;
 using UncomplicatedCustomItems.Events;
 using MEC;
 

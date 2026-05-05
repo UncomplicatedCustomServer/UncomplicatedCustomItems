@@ -1,4 +1,3 @@
-using CustomPlayerEffects;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;

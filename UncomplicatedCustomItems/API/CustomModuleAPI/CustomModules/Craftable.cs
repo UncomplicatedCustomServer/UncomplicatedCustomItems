@@ -6,7 +6,6 @@ using Scp914;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Events;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {

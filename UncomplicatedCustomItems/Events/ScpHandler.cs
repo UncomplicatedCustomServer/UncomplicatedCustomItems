@@ -1,7 +1,6 @@
 ﻿using LabApi.Events.Arguments.Scp127Events;
 using LabApi.Events.Arguments.Scp914Events;
 using LabApi.Events.Handlers;
-using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;

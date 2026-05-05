@@ -5,7 +5,6 @@ using InventorySystem.Items.Firearms.Extensions;
 using InventorySystem.Items.Firearms.Modules;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
-using UncomplicatedCustomItems.API.Features.SpecificData;
 using UnityEngine;
 using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 

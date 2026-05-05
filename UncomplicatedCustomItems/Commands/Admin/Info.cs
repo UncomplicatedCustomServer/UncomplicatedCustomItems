@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Text;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;

@@ -6,7 +6,6 @@ using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules

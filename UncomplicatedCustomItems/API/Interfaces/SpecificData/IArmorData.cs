@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
+﻿namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
 {
     /// <summary>
     /// The interface associated with <see cref="CustomItemType.Armor"/>

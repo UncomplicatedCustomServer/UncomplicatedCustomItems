@@ -2,7 +2,6 @@ using System;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.User
 {

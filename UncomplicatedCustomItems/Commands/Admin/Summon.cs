@@ -2,7 +2,6 @@
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Interfaces;
 

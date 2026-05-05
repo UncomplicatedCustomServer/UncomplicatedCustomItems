@@ -1,9 +1,7 @@
 using System;
-using InventorySystem.Items.Firearms.Modules;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
-using UncomplicatedCustomItems.API.Features.SpecificData;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules

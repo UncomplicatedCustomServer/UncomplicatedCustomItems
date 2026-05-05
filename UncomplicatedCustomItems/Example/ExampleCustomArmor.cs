@@ -1,12 +1,10 @@
 ﻿using CustomPlayerEffects;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;
-using MEC;
 using System.Linq;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.ToolGun;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.Examples

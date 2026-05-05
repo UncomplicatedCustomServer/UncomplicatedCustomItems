@@ -1,8 +1,3 @@
-using System;
-using System.IO;
-using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
-
 namespace UncomplicatedCustomItems.API.ItemUpdater
 {
     public class ItemUpdateManager

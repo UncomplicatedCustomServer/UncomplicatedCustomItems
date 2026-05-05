@@ -1,5 +1,4 @@
 ﻿using LabApi.Events.Arguments.ServerEvents;
-using System;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
