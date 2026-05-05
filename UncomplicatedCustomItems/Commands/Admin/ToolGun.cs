@@ -30,7 +30,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             if (arguments.Count == 1)
             {
                 Player target = Player.Get(int.Parse(arguments[0]));
-                if (target is null)
+                if (target == null)
                 {
                     response = "Player not found!";
                     return false;
@@ -52,7 +52,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             else
             {
                 Player target = Player.Get(sender);
-                if (target is null)
+                if (target == null)
                 {
                     response = "Player not found!";
                     return false;

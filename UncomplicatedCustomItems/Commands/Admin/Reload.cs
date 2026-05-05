@@ -61,7 +61,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (SummonedCustomItem item in SummonedCustomItem.List.ToArray())
                 {
-                    if (item is null)
+                    if (item == null)
                         continue;
 
                     if (item.Owner != null && !CustomItems.ContainsKey(item.Owner))
@@ -80,7 +80,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List.ToList())
                 {
-                    if (item is null)
+                    if (item == null)
                         continue;
 
                     if (item.Owner != null && !APICustomItems.ContainsKey(item.Owner))

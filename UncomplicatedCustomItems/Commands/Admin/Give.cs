@@ -108,7 +108,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         else
                         {
                             Player target = Player.Get(int.Parse(arguments[1]));
-                            if (target is null)
+                            if (target == null)
                             {
                                 response = "Player not found!";
                                 return false;
@@ -131,7 +131,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     else
                     {
                         Player target = Player.Get(sender);
-                        if (target is null)
+                        if (target == null)
                         {
                             response = "Player not found!";
                             return false;
@@ -185,7 +185,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         else
                         {
                             Player target = Player.Get(int.Parse(arguments[1]));
-                            if (target is null)
+                            if (target == null)
                             {
                                 response = "Player not found!";
                                 return false;
@@ -208,7 +208,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     else
                     {
                         Player target = Player.Get(sender);
-                        if (target is null)
+                        if (target == null)
                         {
                             response = "Player not found!";
                             return false;

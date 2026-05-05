@@ -44,7 +44,7 @@ namespace UncomplicatedCustomItems.Integrations
             }
 
             DisguiseType = LabAPIExtension?.GetType("LabApiExtensions.Extensions.AppearanceExtension");
-            if (DisguiseType is null)
+            if (DisguiseType == null)
             {
                 LogManager.Silent("Could not find LabApiExtensions.Extensions.AppearanceExtension type.");
                 return;
@@ -59,7 +59,7 @@ namespace UncomplicatedCustomItems.Integrations
 
             Disguise = DisguiseType.GetMethod("ChangeAppearance", BindingFlags.Public | BindingFlags.Static, null, paramTypes, null);
 
-            if (Disguise is null)
+            if (Disguise == null)
             {
                 Disguise = DisguiseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
                     .FirstOrDefault(m =>

@@ -62,7 +62,7 @@ namespace UncomplicatedCustomItems.Events
                     continue;
 
                 LogManager.Debug($"{customItem.Name} DoSpawn is set to {customItem.Spawn.DoSpawn}");
-                if (customItem.Spawn is not null && customItem.Spawn.DoSpawn)
+                if (customItem.Spawn != null && customItem.Spawn.DoSpawn)
                 {
                     for (uint count = 0; count < customItem.Spawn.Count; count++)
                     {

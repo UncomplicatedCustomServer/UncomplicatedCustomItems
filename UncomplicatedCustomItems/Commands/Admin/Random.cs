@@ -28,7 +28,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
         {
             string text = string.Empty;
             Player player = Player.Get(sender);
-            if (player is null)
+            if (player == null)
             {
                 response = "Player is null!";
                 return false;

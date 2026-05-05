@@ -105,7 +105,7 @@ namespace UncomplicatedCustomItems
                 FailedToPatch = true;
                 LogManager.Error($"Failed to enable Harmony patches! \nMessage: {ex.Message}\n InnerException: {ex.InnerException?.Message}\n Full Exception: {ex}\n");
 
-                if (ex.InnerException is not null)
+                if (ex.InnerException != null)
                     LogManager.Error($"Inner Exception Details: \n{ex.InnerException}");
             }
             catch (Exception ex)

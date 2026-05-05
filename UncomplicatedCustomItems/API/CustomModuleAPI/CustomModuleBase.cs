@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 
         public bool Check(EventArgs eventArgs)
         {
-            if (eventArgs is IPlayerEvent playerEvent && playerEvent.Player.CurrentItem is not null)
+            if (eventArgs is IPlayerEvent playerEvent && playerEvent.Player.CurrentItem != null)
             {
                 if (!Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var playeritem))
                     return false;

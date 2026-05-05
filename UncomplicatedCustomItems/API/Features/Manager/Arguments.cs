@@ -54,7 +54,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 string playerId = args[0];
                 string itemName = args[1];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 player.AddItem((ItemType)Enum.Parse(typeof(ItemType), itemName, true));
             });
@@ -66,7 +66,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 string playerId = args[0];
                 string itemName = args[1];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 player.RemoveItem((ItemType)Enum.Parse(typeof(ItemType), itemName, true));
             });
@@ -78,7 +78,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 string playerId = args[0];
                 string customItem = args[1];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
                 if (!Utilities.TryGetCustomItemByName(customItem, out var customItem1)) return;
 
                 new SummonedCustomItem(customItem1, player);
@@ -90,7 +90,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 2) return;
                 string playerId = args[0];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 if (float.TryParse(args[1], out float heal))
                     player.Health += heal;
@@ -104,7 +104,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 2) return;
                 string playerId = args[0];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 if (float.TryParse(args[1], out float heal) && player.Health < player.MaxHealth)
                     player.Health += heal;
@@ -128,7 +128,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 string playerId = args[0];
                 string effectName = args[1];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 if (player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effectName) && float.TryParse(args[2], out float duration) && byte.TryParse(args[3], out byte intensity))
                 {
@@ -142,7 +142,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 string playerId = args[0];
                 string effectName = args[1];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 if (player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effectName))
                 {
@@ -155,7 +155,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 1) return;
                 string playerId = args[0];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 player.DisableAllEffects();
             });
@@ -177,7 +177,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 1) return;
                 string playerId = args[0];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 player.Health = player.MaxHealth;
             });
@@ -187,7 +187,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 4) return;
                 string playerId = args[0];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 if (float.TryParse(args[1], out float x) && float.TryParse(args[2], out float y) && float.TryParse(args[3], out float z))
                 {
@@ -200,7 +200,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 1) return;
                 string playerId = args[0];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 if (player.RoleBase is IFpcRole fpcrole)
                     player.Position = Scp106PocketExitFinder.GetBestExitPosition(fpcrole);
@@ -212,7 +212,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 string playerId = args[0];
                 string roleName = args[1];
                 Player player = Player.Get(playerId);
-                if (player is null) return;
+                if (player == null) return;
 
                 if (Enum.TryParse<RoleTypeId>(roleName, true, out var role))
                     player.SetRole(role);
@@ -761,15 +761,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 {
                     if (eventArgs is IPlayerEvent playerEvent && playerEvent.Player != null)
                     {
-                        if (playerEvent.Player.CurrentItem is not null && Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var item))
+                        if (playerEvent.Player.CurrentItem != null && Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var item))
                         {
                             if (item.CustomItem.Arguments != null && item.CustomItem.Arguments.Count > 0)
                                 ArgumentManager.Trigger(item.CustomItem, argumentType, eventArgs);
                         }
                         else if (playerEvent.Player.Items != null && playerEvent.Player.Items.Count() >= 1)
                         {
-                            Item armorItem = playerEvent.Player.Items.Where(i => i.Category is ItemCategory.Armor).FirstOrDefault();
-                            if (armorItem is not null && Utilities.TryGetSummonedCustomItem(armorItem.Serial, out var item1))
+                            Item armorItem = playerEvent.Player.Items.Where(i => i.Category == ItemCategory.Armor).FirstOrDefault();
+                            if (armorItem != null && Utilities.TryGetSummonedCustomItem(armorItem.Serial, out var item1))
                             {
                                 if (item1.CustomItem.Arguments != null && item1.CustomItem.Arguments.Count > 0)
                                     ArgumentManager.Trigger(item1.CustomItem, argumentType, eventArgs);

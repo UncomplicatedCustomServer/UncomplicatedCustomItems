@@ -65,7 +65,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// Gets whether or not the <see cref="SummonedAPICustomItem"/> instance is a <see cref="Pickup"/>
         /// </summary>
-        public bool IsPickup => Pickup is not null;
+        public bool IsPickup => Pickup != null;
 
         private bool NameApplied;
 
@@ -76,7 +76,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             CustomItem = customItem;
             Owner = owner;
             Item = item;
-            Serial = item is not null ? item.Serial : pickup.Serial;
+            Serial = item != null ? item.Serial : pickup.Serial;
             Pickup = pickup;
 
             if (!PlayerCache.ContainsKey(owner))
@@ -469,7 +469,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public void SaveProperties()
         {
-            if (Item is null) return;
+            if (Item == null)
+                return;
 
             switch (CustomItem)
             {
@@ -566,7 +567,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 return;
 
             Triplet<string, string, bool>? badge = null;
-            if (CustomItem.BadgeName is not null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor is not null && CustomItem.BadgeColor.Length > 2)
+            if (CustomItem.BadgeName != null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor != null && CustomItem.BadgeColor.Length > 2)
             {
                 badge = new(player.GroupName ?? "", player.GroupColor ?? "", player.ReferenceHub.serverRoles.HasBadgeHidden);
                 LogManager.Debug($"Badge detected, putting {CustomItem.BadgeName}@{CustomItem.BadgeColor} to player {player.PlayerId}");

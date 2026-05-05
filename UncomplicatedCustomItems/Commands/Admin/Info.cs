@@ -49,7 +49,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             AddInfoLine(sb, "<color=#00ff00>⚖</color> Scale:", $"<b>{customItem.Scale}</b>");
             AddInfoLine(sb, "<color=#00ff00>⚖</color> Weight:", $"<b>{customItem.Weight}</b>");
 
-            if (customItem.Spawn is not null)
+            if (customItem.Spawn != null)
             {
                 ISpawn spawnRoot = customItem.Spawn;
                 AddInfoLine(sb, "<color=#632300>󾠬</color> Does It Spawn:", spawnRoot.DoSpawn ? "Yes" : "No");

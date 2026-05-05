@@ -23,13 +23,13 @@ namespace UncomplicatedCustomItems.Commands.User
         {
             Player player = Player.Get(sender);
 
-            if (player is null || sender.LogName is "SERVER CONSOLE" || sender.LogName.Contains("Dedicated Server"))
+            if (player == null || sender.LogName is "SERVER CONSOLE" || sender.LogName.Contains("Dedicated Server"))
             {
                 response = "Cannot use this command while not in the game!";
                 return false;
             }
 
-            if (player.CurrentItem is null)
+            if (player.CurrentItem == null)
             {
                 foreach (Item item in player.Items)
                 {

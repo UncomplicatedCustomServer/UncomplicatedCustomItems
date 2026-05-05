@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.Events
 
             if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == Plugin.Instance.Config.KeybindSettingId && keybindSetting.SyncIsPressed)
             {
-                if (player.CurrentItem is null)
+                if (player.CurrentItem == null)
                 {
                     foreach (Item item in player.Items)
                     {

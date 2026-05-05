@@ -32,9 +32,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
             }
 
             foreach (CodeInstruction code in codes)
+            {
                 text += $"\n{code}";
-            LogManager.Silent($"{nameof(SCP268CooldownTimeTranspiler)}: Codes: {text}");
-             
+            }
+
+            LogManager.Silent($"{nameof(SCP268CooldownTimeTranspiler)}: Codes: {text}");             
             return codes;
         }
 

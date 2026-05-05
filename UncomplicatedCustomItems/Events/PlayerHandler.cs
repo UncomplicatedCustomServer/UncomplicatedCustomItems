@@ -211,7 +211,7 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnRoleChange(PlayerChangingRoleEventArgs ev)
         {
-            if (ev.Player.CurrentItem is null)
+            if (ev.Player.CurrentItem == null)
                 return;
 
             if (!ev.Player.Connection.isReady)
@@ -232,7 +232,7 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnNoclip(PlayerTogglingNoclipEventArgs ev)
         {
-            if (ev.Player.CurrentItem is null)
+            if (ev.Player.CurrentItem == null)
                 return;
 
             if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
@@ -284,7 +284,7 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
 
-            if (ev.OldItem is null)
+            if (ev.OldItem == null)
                 return;
 
             if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
@@ -628,7 +628,7 @@ namespace UncomplicatedCustomItems.Events
                         return;
                 }
 
-                if (effect is null)
+                if (effect == null)
                     return;
 
                 if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effect))
@@ -674,7 +674,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player == null || ev.Player.IsHost)
                 return;
 
-            if (ev.NewItem is not null)
+            if (ev.NewItem != null)
             {
                 if (SummonedAPICustomItem.TryGet(ev.NewItem.Serial, out var summonedItem))
                 {

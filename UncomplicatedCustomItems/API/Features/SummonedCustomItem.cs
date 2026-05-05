@@ -102,7 +102,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Check if this item is a pickup
         /// </summary>
-        public bool IsPickup => Pickup is not null;
+        public bool IsPickup => Pickup != null;
 
         internal bool FlashLightToggle { get; set; }
 
@@ -126,7 +126,7 @@ namespace UncomplicatedCustomItems.API.Features
             CustomItem = customItem;
             Owner = owner;
             Item = item;
-            Serial = item is not null ? item.Serial : pickup.Serial;
+            Serial = item != null ? item.Serial : pickup.Serial;
             Pickup = pickup;
 
             if (IsPickup)
@@ -164,7 +164,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void SetProperties()
         {
-            if (Item is not null)
+            if (Item != null)
             {
                 switch (CustomItem.CustomItemType)
                 {
@@ -408,7 +408,7 @@ namespace UncomplicatedCustomItems.API.Features
                 extension.UpdateAllMags();
             }
 
-            if (HitscanHitregModule is not null)
+            if (HitscanHitregModule != null)
             {
                 HitscanHitregModule.BaseDamage = wd.Damage;
                 HitscanHitregModule.BasePenetration = wd.Penetration;
@@ -566,7 +566,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void SaveProperties()
         {
-            if (Item is null)
+            if (Item == null)
                 return;
 
             switch (CustomItem.CustomItemType)
@@ -755,7 +755,7 @@ namespace UncomplicatedCustomItems.API.Features
                 return;
             }
 
-            if (CustomItem.BadgeName is not null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor is not null && CustomItem.BadgeColor.Length > 2)
+            if (CustomItem.BadgeName != null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor is not null && CustomItem.BadgeColor.Length > 2)
             {
                 LogManager.Debug($"Badge detected, putting {CustomItem.BadgeName}@{CustomItem.BadgeColor} to player {player.PlayerId}");
 
@@ -887,7 +887,7 @@ namespace UncomplicatedCustomItems.API.Features
 
                         LogManager.Debug($"Firing events for item {CustomItem.Name}");
                         Player randomPlayer = Player.ReadyList.ToList().RandomItem();
-                        if (data.Command is not null && data.Command.Length > 2)
+                        if (data.Command != null && data.Command.Length > 2)
                         {
                             string processedCommand = data.Command
                                 .Replace("{p_id}", player.PlayerId.ToString())
@@ -979,7 +979,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal bool HandleCustomAction(Item item)
         {
-            if (Owner is null)
+            if (Owner == null)
                 return false;
 
             if (_managedItems.Contains(CustomItem.CustomItemType))
