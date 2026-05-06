@@ -67,7 +67,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            if (!Check(eventArgs))
+            if (!Check(eventArgs) || ForceFireHandle.IsRunning)
                 return;
 
             if (eventArgs is PlayerShootingWeaponEventArgs ev)
@@ -108,7 +108,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             for (int i = 0; i < BurstAmount - 1; i++)
             {
                 yield return Timing.WaitForSeconds(TimingBetweenForcedShots);
-                if (item.ActionModule is AutomaticActionModule actionModule)
+                if (item.ActionModule is AutomaticActionModule actionModule && (item.StoredAmmo + item.ChamberedAmmo) >= 1)
                 {
                     actionModule.ServerShoot(item.Base.Owner);
                 }
