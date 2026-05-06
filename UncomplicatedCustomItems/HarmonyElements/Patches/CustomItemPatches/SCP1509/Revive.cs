@@ -18,17 +18,17 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
         {
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
-                if (__instance._nextResurrectTime > NetworkTime.time)
+                if (__instance.NextResurrectTime > NetworkTime.time)
                 {
-                    __instance._nextResurrectTime = NetworkTime.time + data.ReviveCooldown;
+                    __instance.NextResurrectTime = NetworkTime.time + data.ReviveCooldown;
                 }
             }
 
             if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
             {
-                if (__instance._nextResurrectTime > NetworkTime.time)
+                if (__instance.NextResurrectTime > NetworkTime.time)
                 {
-                    __instance._nextResurrectTime = NetworkTime.time + customSCP1509.ReviveCooldown;
+                    __instance.NextResurrectTime = NetworkTime.time + customSCP1509.ReviveCooldown;
                 }
             }
         }
@@ -55,12 +55,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
         {
             if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
             {
-                __instance._revivedPlayerAOEBonusAHP = data.RevivedPlayeraoeBonusahp;
+                __instance.RevivedPlayerAOEBonusAHP = data.RevivedPlayeraoeBonusahp;
             }
 
             if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
             {
-                __instance._revivedPlayerAOEBonusAHP = customSCP1509.RevivedPlayeraoeBonusahp;
+                __instance.RevivedPlayerAOEBonusAHP = customSCP1509.RevivedPlayeraoeBonusahp;
             }
         }
 
