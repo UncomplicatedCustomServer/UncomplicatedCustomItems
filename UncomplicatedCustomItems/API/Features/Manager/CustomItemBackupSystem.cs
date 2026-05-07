@@ -103,8 +103,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static IEnumerator<float> SendInitialRequest()
         {
-            UnityWebRequest request = new($"{Url}");
-            request.method = kHttpVerbGET;
+            UnityWebRequest request = new(Url, "GET");
             yield return Timing.WaitUntilDone(request.SendWebRequest());
             if (request.result == Result.Success)
                 Online = true;
@@ -118,11 +117,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (string.IsNullOrEmpty(BackupCode))
                 BackupCode = Key.BackupCode;
 
-            UnityWebRequest request = new($"{Url}/download");
+            UnityWebRequest request = new($"{Url}/download", "GET");
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/yaml");
             request.SetRequestHeader("Token", $"{BackupCode}");         
-            request.method = kHttpVerbGET;
             yield return Timing.WaitUntilDone(request.SendWebRequest());
             
             if (request.result == Result.Success)
@@ -158,12 +156,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static IEnumerator<float> UploadBackupData()
         {
-            UnityWebRequest request = new($"{Url}/upload");
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(ParseItems());   
+            UnityWebRequest request = new($"{Url}/upload", "POST");
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(ParseItems());
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.SetRequestHeader("Content-Type", "application/yaml");
             request.SetRequestHeader("Token", $"{Key.BackupCode}");
-            request.method = kHttpVerbPOST;
             yield return Timing.WaitUntilDone(request.SendWebRequest());
 
             if (request.result == Result.Success)

@@ -1,0 +1,134 @@
+﻿using HarmonyLib;
+using MEC;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using UnityEngine.Networking;
+
+namespace UncomplicatedCustomItems.API.Features.Networking
+{
+    public class APIRequest
+    {
+        public static IEnumerable<APIRequest> ActiveRequests = [];
+        public static IReadOnlyList<APIRequest> RunningRequests = ActiveRequests.Where(r => r.Handle.IsRunning).ToList().AsReadOnly();
+
+        public static void Cleanup()
+        {
+            foreach (APIRequest request in ActiveRequests.Where(r => !r.Handle.IsRunning).ToArray())
+            {
+                request.RemoveRequest();
+            }
+        }
+
+        public void RemoveRequest()
+        {
+            List<APIRequest> requests = ActiveRequests.ToList();
+            requests.Remove(this);
+            ActiveRequests = requests;
+        }
+
+        public class RequestSettings
+        {
+            public float WaitTime;
+            public bool Loop;
+            public bool Cancel;
+        }
+
+        public enum RequestType
+        {
+            Get,
+            Post,
+            Put,
+            Delete,
+            Options,
+        }
+
+        public CoroutineHandle Handle;
+
+        public virtual string Endpoint => string.Empty;
+
+        public virtual RequestType Type => RequestType.Get;
+
+        public virtual Dictionary<string, object> Payload { get; set; } = [];
+
+        public virtual RequestSettings Settings => new()
+        {
+            WaitTime = 0f,
+            Loop = false,
+            Cancel = false,
+        };
+
+        public string FullEndpoint => $"https://api.ucserver.it/v3/plugin/uci/{Endpoint}";
+
+        public virtual void OnRequestCompleted(UnityWebRequest request) { }
+        public virtual void OnRequestFailed(UnityWebRequest request) { }
+
+        public virtual void SendRequest()
+        {
+            ActiveRequests.AddItem(this);
+            Handle = Timing.RunCoroutine(RequestCoroutine(OnRequestCompleted, OnRequestFailed));
+        }
+
+        public IEnumerator<float> RequestCoroutine(Action<UnityWebRequest> onComplete, Action<UnityWebRequest> onFailed)        
+        {
+            if (Settings.Loop)
+            {
+                while (!Settings.Cancel)
+                {
+                    yield return Timing.WaitForSeconds(Settings.WaitTime);
+                    using UnityWebRequest looprequest = new(FullEndpoint, Type.ToString().ToUpper());
+                    looprequest.downloadHandler = new DownloadHandlerBuffer();
+
+                    if ((Type == RequestType.Post || Type == RequestType.Put) && !Payload.IsEmpty())
+                    {
+                        byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Payload));
+                        looprequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                        looprequest.SetRequestHeader("Content-Type", "application/json");
+                    }
+
+                    yield return Timing.WaitUntilDone(looprequest.SendWebRequest());
+                    if (looprequest.result == UnityWebRequest.Result.Success)
+                    {
+                        onComplete.Invoke(looprequest);
+                        RemoveRequest();
+                    }
+                    else
+                    {
+                        onFailed.Invoke(looprequest);
+                        RemoveRequest();
+                    }
+                }
+
+                yield break;
+            }
+
+            if (Settings.WaitTime > 0f)
+                yield return Timing.WaitForSeconds(Settings.WaitTime);
+
+            using UnityWebRequest request = new(FullEndpoint, Type.ToString().ToUpper());
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Accept", "application/json");
+
+            if ((Type == RequestType.Post || Type == RequestType.Put) && !Payload.IsEmpty())
+            {
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Payload));
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.SetRequestHeader("Content-Type", "application/json");
+            }
+
+            yield return Timing.WaitUntilDone(request.SendWebRequest());
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                onComplete.Invoke(request);
+                RemoveRequest();
+            }
+            else
+            {
+                onFailed.Invoke(request);
+                RemoveRequest();
+            }
+        }
+    }
+}

@@ -9,6 +9,7 @@ using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using UncomplicatedCustomItems.API.Features.Networking;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -36,6 +37,7 @@ namespace UncomplicatedCustomItems.Events
         {
             SummonedCustomItem.Cleanup();
             SummonedAPICustomItem.Cleanup();
+            APIRequest.Cleanup();
             PlayerHandler._capybaras.Clear();
             PlayerHandler._damageTimes.Clear();
             PlayerHandler._toolGunPrimitives.Clear();

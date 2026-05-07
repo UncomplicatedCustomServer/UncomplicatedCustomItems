@@ -26,6 +26,7 @@ using System.Linq;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using UncomplicatedCustomItems.API.Components;
 using MEC;
+using UncomplicatedCustomItems.API.Features.Networking;
 
 // Commands for remote development. You can ignore this :)
 // cd "C:\Program Files (x86)\steam\steamapps\common\SCP Secret Laboratory Dedicated Server"
@@ -192,9 +193,6 @@ namespace UncomplicatedCustomItems
         public override void Disable()
 #endif
         {
-            if (LabApi.Features.Wrappers.Player.Host != null && LabApi.Features.Wrappers.Player.Host.GameObject.TryGetComponent<Presence>(out var presence))
-                UnityEngine.Object.Destroy(presence);
-
             ECRIntegration.Cleanup();
 
             // Cleanup
@@ -239,7 +237,9 @@ namespace UncomplicatedCustomItems
 
         public void OnFinishedLoading()
         {
-            LabApi.Features.Wrappers.Player.Host.GameObject.AddComponent<Presence>().Init(30, 5);
+            PresenceRequest request = new();
+            request.SendRequest();
+
             if (Instance.Config.AllowDevPermissions)
                 LogManager.Security($"Allow Dev Permissions is enabled in your config! Any UCI developers can run commands on your server. If this was not intended, please disable it.");
 
