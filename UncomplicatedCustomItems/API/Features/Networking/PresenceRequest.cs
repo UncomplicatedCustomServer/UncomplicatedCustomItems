@@ -11,6 +11,8 @@ namespace UncomplicatedCustomItems.API.Features.Networking
     {
         public int FailCount { get; set; } = 0;
 
+        public override string Name => nameof(PresenceRequest);
+
         public override RequestType Type => RequestType.Post;
 
         public override string Endpoint => "presence/upload";
@@ -27,37 +29,41 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             ["extra"] = $"PlayerCount: {Player.List.RealList().Count()}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}, EnabledCreditTags: {Plugin.Instance.Config.EnableCreditTags}",
         };
 
-        private readonly RequestSettings _settings = new()
+        public override Dictionary<string, string> Headers { get; set; } = new()
+        {
+            ["Content-Type"] = "application/json"
+        };
+
+        public override RequestSettings Settings { get; set; } = new()
         {
             WaitTime = 30f,
             Loop = true,
             Cancel = false,
         };
 
-        public override RequestSettings Settings => _settings;
-
         public override void OnRequestFailed(UnityWebRequest request)
         {
-            LogManager.Error($"UCI Presence has failed to send: {FailCount}/5 \n Error: {request.error}");
             FailCount++;
+            LogManager.Error($"UCI Presence has failed to send: {FailCount}/5 \n Error: {request.error}");
+
+            if (FailCount >= 5)
+            {
+                LogManager.Warn($"UCI Presence has failed to send: {FailCount}/5 times, stopping presence updates.");
+                Settings.Cancel = true;
+            }
         }
 
         public override void OnRequestCompleted(UnityWebRequest request)
         {
             FailCount = 0;
-
         }
 
         public override void SendRequest()
         {
-            if (FailCount <= 5)
-            {
-                base.SendRequest();
+            if (Settings.Cancel)
                 return;
-            }
 
-            LogManager.Warn($"UCI Presence has failed to send: {FailCount}/5 times stopping...");
-            Settings.Cancel = true;
+            base.SendRequest();
         }
     }
 }

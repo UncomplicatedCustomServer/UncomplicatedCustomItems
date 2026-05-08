@@ -17,6 +17,8 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         private static string BackupDir => Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups");
 #endif
 
+        public override string Name => nameof(BackupDownloadRequest);
+
         public override string Endpoint => "backup/download";
 
         public override RequestType Type => RequestType.Get;

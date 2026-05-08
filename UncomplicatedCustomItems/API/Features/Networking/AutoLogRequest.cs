@@ -15,6 +15,8 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             };
         }
 
+        public override string Name => nameof(AutoLogRequest);
+
         public override string Endpoint => "logs/auto/upload";
 
         public override RequestType Type => RequestType.Post;

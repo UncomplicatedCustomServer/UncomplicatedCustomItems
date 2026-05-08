@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine.Networking;
 
 namespace UncomplicatedCustomItems.API.Features.Networking
@@ -47,6 +48,8 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 
         public CoroutineHandle Handle;
 
+        public virtual string Name => string.Empty;
+
         public virtual string Endpoint => string.Empty;
 
         public virtual RequestType Type => RequestType.Get;
@@ -57,7 +60,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 
         public virtual byte[] RawBody { get; set; } = [];
 
-        public virtual RequestSettings Settings => new()
+        public virtual RequestSettings Settings { get; set; } = new()
         {
             WaitTime = 0f,
             Loop = false,
@@ -66,8 +69,8 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 
         public string FullEndpoint => $"https://api.ucserver.it/v3/plugin/uci/{Endpoint}";
 
-        public virtual void OnRequestCompleted(UnityWebRequest request) { }
-        public virtual void OnRequestFailed(UnityWebRequest request) { }
+        public virtual void OnRequestCompleted(UnityWebRequest request) => LogManager.Debug($"Successed Sending request for {Name}.");
+        public virtual void OnRequestFailed(UnityWebRequest request) => LogManager.Debug($"Failed to send request for {Name}.");
 
         public virtual void SendRequest()
         {

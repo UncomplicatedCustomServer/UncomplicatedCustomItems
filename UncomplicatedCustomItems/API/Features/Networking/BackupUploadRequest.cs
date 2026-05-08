@@ -8,6 +8,8 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 {
     public class BackupUploadRequest : APIRequest
     {
+        public override string Name => nameof(BackupUploadRequest);
+
         public override string Endpoint => "backup/upload";
 
         public override RequestType Type => RequestType.Post;
