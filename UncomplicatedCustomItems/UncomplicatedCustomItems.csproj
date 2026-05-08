@@ -9,7 +9,7 @@
     <FileAlignment>512</FileAlignment>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">LabApi-Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <Configurations>Exiled;LabApi;Exiled-Debug;LabApi-Debug</Configurations>
 	  <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
@@ -56,7 +56,7 @@
   <ItemGroup>
     <PackageReference Include="AudioPlayerApi" Version="1.1.2" />
     <PackageReference Include="Northwood.LabAPI" Version="1.1.6.1" Publicize="true" />
-    <PackageReference Include="ExMod.Exiled" Version="9.13.1" Condition=" '$(Configuration)' == 'Exiled' Or '$(Configuration)' == 'Exiled-Debug'" />
+    <PackageReference Include="ExMod.Exiled" Version="9.13.3" Condition=" '$(Configuration)' == 'Exiled' Or '$(Configuration)' == 'Exiled-Debug'" />
     <PackageReference Include="Lib.Harmony" Version="2.2.2" />
     <PackageReference Include="System.Text.Json" Version="10.0.1" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
