@@ -56,6 +56,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         public override void OnRequestCompleted(UnityWebRequest request)
         {
             FailCount = 0;
+            base.OnRequestCompleted(request);
         }
 
         public override void SendRequest()
