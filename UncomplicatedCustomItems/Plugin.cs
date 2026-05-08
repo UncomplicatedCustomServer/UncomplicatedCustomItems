@@ -24,7 +24,6 @@ using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 using System.Linq;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
-using UncomplicatedCustomItems.API.Components;
 using MEC;
 using UncomplicatedCustomItems.API.Features.Networking;
 
@@ -254,7 +253,7 @@ namespace UncomplicatedCustomItems
 
             ImportManager.Init();
             VersionManager.Init();
-            CustomItemBackupSystem.Init();
+            BackupSystem.Init();
             LabAPIExtensions.Init();
             ECRIntegration.Init();
             ECIIntegration.Init();

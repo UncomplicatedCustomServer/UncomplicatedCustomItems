@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using CommandSystem;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Networking;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -26,30 +26,16 @@ namespace UncomplicatedCustomItems.Commands.Admin
             switch (args[0].ToLower())
             {
                 case "upload":
-                    if (CustomItemBackupSystem.Online)
-                    {
-                        CustomItemBackupSystem.Upload();
+                        BackupUploadRequest upload = new();
+                        upload.SendRequest();
                         response = "Beginning backup upload...";
                         return true;
-                    }
-                    else
-                    {
-                        response = "Failed to find Backup endpoint";
-                        return false;
-                    }
 
                 case "download":
-                    if (CustomItemBackupSystem.Online)
-                    {
-                        CustomItemBackupSystem.Download(customCode);
-                        response = "Beginning backup download...";
-                        return true;
-                    }
-                    else
-                    {
-                        response = "Failed to find Backup endpoint";
-                        return false;
-                    }
+                    BackupDownloadRequest download = new();
+                    download.SendRequest();
+                    response = "Beginning backup download...";
+                    return true;
 
                 default:
                     response = "Available arguments are Download and Upload.";

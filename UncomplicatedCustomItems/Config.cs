@@ -18,6 +18,9 @@ namespace UncomplicatedCustomItems
         [Description("Specifies whether developer (debug) mode is enabled.")]
         public bool Debug { get; set; } = false;
 
+        [Description("If true whenever you get an error from UCI it will be automatically uploaded to our API. No identifiable information is uploaded alongside this besides whats in the log.")]
+        public bool AutomaticErrorUpload { get; set; } = true;
+
         [Description("If true the example custom items written by the plugin will be loaded")]
         public bool LoadExampleapiItems { get; set; } = true;
 

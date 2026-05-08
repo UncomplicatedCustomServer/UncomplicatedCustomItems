@@ -53,6 +53,10 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 
         public virtual Dictionary<string, object> Payload { get; set; } = [];
 
+        public virtual Dictionary<string, string> Headers { get; set; } = [];
+
+        public virtual byte[] RawBody { get; set; } = [];
+
         public virtual RequestSettings Settings => new()
         {
             WaitTime = 0f,
@@ -81,11 +85,22 @@ namespace UncomplicatedCustomItems.API.Features.Networking
                     using UnityWebRequest looprequest = new(FullEndpoint, Type.ToString().ToUpper());
                     looprequest.downloadHandler = new DownloadHandlerBuffer();
 
-                    if ((Type == RequestType.Post || Type == RequestType.Put) && !Payload.IsEmpty())
+                    if ((Type == RequestType.Post || Type == RequestType.Put))
                     {
-                        byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Payload));
-                        looprequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
-                        looprequest.SetRequestHeader("Content-Type", "application/json");
+                        if (!Payload.IsEmpty())
+                        {
+                            byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Payload));
+                            looprequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                        }
+                        else if (!RawBody.IsEmpty())
+                        {
+                            looprequest.uploadHandler = new UploadHandlerRaw(RawBody);
+                        }
+                    }
+
+                    foreach (KeyValuePair<string, string> kvp in Headers)
+                    {
+                        looprequest.SetRequestHeader(kvp.Key, kvp.Value);
                     }
 
                     yield return Timing.WaitUntilDone(looprequest.SendWebRequest());
@@ -111,11 +126,22 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Accept", "application/json");
 
-            if ((Type == RequestType.Post || Type == RequestType.Put) && !Payload.IsEmpty())
+            if ((Type == RequestType.Post || Type == RequestType.Put))
             {
-                byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Payload));
-                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-                request.SetRequestHeader("Content-Type", "application/json");
+                if (!Payload.IsEmpty())
+                {
+                    byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Payload));
+                    request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                }
+                else if (!RawBody.IsEmpty())
+                {
+                    request.uploadHandler = new UploadHandlerRaw(RawBody);
+                }
+            }
+
+            foreach (KeyValuePair<string, string> kvp in Headers)
+            {
+                request.SetRequestHeader(kvp.Key, kvp.Value);
             }
 
             yield return Timing.WaitUntilDone(request.SendWebRequest());
