@@ -283,30 +283,5 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             onCompleted?.Invoke(status, request.downloadHandler.text);
             request.Dispose();
         }
-
-
-        public void ShareLogs(string data, Action<HttpStatusCode, string> onCompleted) =>
-            Timing.RunCoroutine(UploadLogs(data, onCompleted));
-
-        private IEnumerator<float> UploadLogs(string data, Action<HttpStatusCode, string> onCompleted)
-        {
-#if EXILED
-            UnityWebRequest request = new($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={Loader.Version}&using_labapi=false&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.Assembly.GetPath())}");
-#else
-            UnityWebRequest request = new($"{Endpoint}/{Prefix}/error?port={Server.Port}&exiled_version={LabApiProperties.CompiledVersion}&using_labapi=true&plugin_version={Plugin.Instance.Version.ToString(3)}&hash={VersionManager.HashFile(Plugin.Instance.FilePath)}");
-#endif
-
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(data);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "text/plain");
-            request.method = kHttpVerbPUT;
-            yield return Timing.WaitUntilDone(request.SendWebRequest());
-            HttpStatusCode status = (HttpStatusCode)request.responseCode;
-            LogManager.Debug($"Uploaded data to endpoint. Status: {status}");
-            onCompleted?.Invoke(status, request.downloadHandler.text);
-
-            request.Dispose();
-        }
     }
 }

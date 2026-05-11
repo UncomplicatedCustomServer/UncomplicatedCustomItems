@@ -5,12 +5,23 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using System.Collections.Generic;
 using LabApi.Features.Console;
 using System.Text.Json;
+using UncomplicatedCustomItems.API.Features.Networking;
+using System.Text.Json.Serialization;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
     [CommandHandler(typeof(GameConsoleCommandHandler))]
     internal class LogShare : ParentCommand
     {
+        public class Response
+        {
+            [JsonPropertyName("response")]
+            public string Message { get; set; } = string.Empty;
+
+            [JsonPropertyName("code")]
+            public string Id { get; set; } = string.Empty;
+        }
+
         public LogShare() => LoadGeneratedCommands();
 
         public override string Command { get; } = "ucilogs";
@@ -32,43 +43,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
             response = "Uploading logs to the developers... This may take a moment.";
 
             long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            ShareLogsRequest request = new();
             Logger.Info("[ShareTheLog] Starting log upload process...");
-            LogManager.SendReport((status, responseContent, readableSize) =>
-            {
-                long elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - start;
-                if (status == HttpStatusCode.OK)
-                {
-                    try
-                    {
-                        Dictionary<string, JsonElement> data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(responseContent);
-
-                        Logger.Info($"[ShareTheLog] Data size being sent: {readableSize}");
-                        Logger.Info("[ShareTheLog] Successfully shared the UCI logs with the developers!");
-
-                        if (data.TryGetValue("id", out JsonElement idElement))
-                        {
-                            string id = idElement.GetString();
-                            Logger.Info($"[ShareTheLog] Send this ID to the developers: {id}");
-                        }
-                        else
-                            Logger.Warn("[ShareTheLog] Server response did not contain an ID.");
-
-                        Logger.Info($"[ShareTheLog] Operation completed in {elapsed}ms");
-                    }
-                    catch (JsonException jsonEx)
-                    {
-                        Logger.Error($"[ShareTheLog] Failed to parse server response: {jsonEx.Message}");
-                    }
-                }
-                else
-                {
-                    Logger.Error($"[ShareTheLog] Failed to share the UCI logs with the developers. Server response: {status}");
-
-                    if (!string.IsNullOrEmpty(responseContent))
-                        Logger.Debug($"[ShareTheLog] Response body: {responseContent}");
-                }
+            request.SendRequest((request) => {
+                Response response = JsonSerializer.Deserialize<Response>(request.downloadHandler.text);
+                Logger.Info("[ShareTheLog] Successfully shared the UCI logs with the developers!");
+                Logger.Info($"[ShareTheLog] Send this ID to the developers: {response.Id}");
+                Logger.Info($"[ShareTheLog] Operation completed in {DateTimeOffset.Now.ToUnixTimeMilliseconds() - start}ms");
             });
-
             return true;
         }
     }

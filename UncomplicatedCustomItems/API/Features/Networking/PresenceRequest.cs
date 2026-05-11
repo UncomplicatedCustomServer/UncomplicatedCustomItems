@@ -1,4 +1,5 @@
 ﻿using LabApi.Features.Wrappers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Extensions;
@@ -59,7 +60,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             base.OnRequestCompleted(request);
         }
 
-        public override void SendRequest()
+        public override void SendRequest(Action<UnityWebRequest> onComplete = null)
         {
             if (Settings.Cancel)
                 return;

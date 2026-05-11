@@ -18,6 +18,9 @@ namespace UncomplicatedCustomItems
         [Description("Specifies whether developer (debug) mode is enabled.")]
         public bool Debug { get; set; } = false;
 
+        [Description("If true your local admin log will also be upload when you run 'ucilogs'")]
+        public bool AllowLocalAdminLogUpload { get; set; }
+
         [Description("If true whenever you get an error from UCI it will be automatically uploaded to our API. No identifiable information is uploaded alongside this besides whats in the log.")]
         public bool AutomaticErrorUpload { get; set; } = true;
 

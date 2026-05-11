@@ -72,13 +72,13 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         public virtual void OnRequestCompleted(UnityWebRequest request) => LogManager.Debug($"Successed Sending request for {Name}.");
         public virtual void OnRequestFailed(UnityWebRequest request) => LogManager.Debug($"Failed to send request for {Name}.");
 
-        public virtual void SendRequest()
+        public virtual void SendRequest(Action<UnityWebRequest> onComplete = null)
         {
             ActiveRequests.AddItem(this);
-            Handle = Timing.RunCoroutine(RequestCoroutine(OnRequestCompleted, OnRequestFailed));
+            Handle = Timing.RunCoroutine(RequestCoroutine(OnRequestCompleted, OnRequestFailed, onComplete));
         }
 
-        public IEnumerator<float> RequestCoroutine(Action<UnityWebRequest> onComplete, Action<UnityWebRequest> onFailed)        
+        public IEnumerator<float> RequestCoroutine(Action<UnityWebRequest> onComplete, Action<UnityWebRequest> onFailed, Action<UnityWebRequest> action)
         {
             if (Settings.Loop)
             {
@@ -110,11 +110,13 @@ namespace UncomplicatedCustomItems.API.Features.Networking
                     if (looprequest.result == UnityWebRequest.Result.Success)
                     {
                         onComplete.Invoke(looprequest);
+                        action.Invoke(looprequest);
                         RemoveRequest();
                     }
                     else
                     {
                         onFailed.Invoke(looprequest);
+                        action.Invoke(looprequest);
                         RemoveRequest();
                     }
                 }
@@ -151,11 +153,13 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             if (request.result == UnityWebRequest.Result.Success)
             {
                 onComplete.Invoke(request);
+                action.Invoke(request);
                 RemoveRequest();
             }
             else
             {
                 onFailed.Invoke(request);
+                action.Invoke(request);
                 RemoveRequest();
             }
         }
