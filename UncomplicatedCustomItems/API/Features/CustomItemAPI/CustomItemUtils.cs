@@ -6,7 +6,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
     public class CustomItemUtils
     {
-        public static Pickup FindTargetPickupInRoom(Room room, APICustomItem customItem)
+        public static Pickup? FindTargetPickupInRoom(Room room, APICustomItem customItem)
         {
             List<Pickup> pickupsInRoom = [];
             if (customItem.ForceSameItemType)
@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
 
 
-        public static Pickup FilterAndSelectPickup(List<Pickup> pickups, APICustomItem customItem)
+        public static Pickup? FilterAndSelectPickup(List<Pickup> pickups, APICustomItem customItem)
         {
             if (customItem.ForceSameItemType)
                 pickups = pickups.Where(pickup => pickup.Type == customItem.Item).ToList();

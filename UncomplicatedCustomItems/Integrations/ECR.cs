@@ -54,7 +54,7 @@ namespace UncomplicatedCustomItems.Integrations
 
             try
             {
-                MethodBase targetMethod = GetTargetMethod();
+                MethodBase? targetMethod = GetTargetMethod();
                 if (targetMethod == null)
                 {
                     LogManager.Debug("ECR target method not found - ECR may not be installed.");
@@ -84,7 +84,7 @@ namespace UncomplicatedCustomItems.Integrations
         /// Locates the ECR CustomRole.TryAddItem method via reflection.
         /// </summary>
         /// <returns>The MethodBase of the target method, or null if not found.</returns>
-        private static MethodBase GetTargetMethod()
+        private static MethodBase? GetTargetMethod()
         {
             try
             {
@@ -131,7 +131,7 @@ namespace UncomplicatedCustomItems.Integrations
                 string roleName = AccessTools.Property(__instance.GetType(), "Name")?.GetValue(__instance)?.ToString() ?? "Unknown";
                 LogManager.Debug($"ECR Integration intercepted item '{itemName}' for role '{roleName}'");
 
-                Player labPlayer = GetLabPlayerFromExiledPlayer(player);
+                Player? labPlayer = GetLabPlayerFromExiledPlayer(player);
                 if (labPlayer == null)
                 {
                     LogManager.Error("Failed to convert Exiled player to LabAPI player.");
@@ -167,7 +167,7 @@ namespace UncomplicatedCustomItems.Integrations
         /// </summary>
         /// <param name="exiledPlayer">The Exiled player object.</param>
         /// <returns>The corresponding LabAPI Player, or null if conversion fails.</returns>
-        internal static Player GetLabPlayerFromExiledPlayer(object exiledPlayer)
+        internal static Player? GetLabPlayerFromExiledPlayer(object exiledPlayer)
         {
             try
             {
@@ -178,14 +178,14 @@ namespace UncomplicatedCustomItems.Integrations
                     return null;
                 }
 
-                GameObject gameObject = gameObjectProperty.GetValue(exiledPlayer) as GameObject;
+                GameObject? gameObject = gameObjectProperty.GetValue(exiledPlayer) as GameObject;
                 if (gameObject == null)
                 {
                     LogManager.Error("GameObject property returned null.");
                     return null;
                 }
 
-                if (!Player.TryGet(gameObject, out Player labPlayer))
+                if (!Player.TryGet(gameObject, out Player? labPlayer))
                 {
                     LogManager.Error($"GameObject '{gameObject.name}' does not correspond to a valid player.");
                     return null;

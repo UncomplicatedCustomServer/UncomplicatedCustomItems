@@ -55,7 +55,7 @@ namespace UncomplicatedCustomItems.API.Extensions
                         return true;
                 }
             }
-            else if (player.CurrentItem.IsSummonedCustomItem())
+            else if (player.CurrentItem?.IsSummonedCustomItem() ?? false)
                 return true;
 
             return false;

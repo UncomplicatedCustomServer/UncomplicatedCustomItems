@@ -66,18 +66,18 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <summary>
         /// Gets the latest <see cref="Version"/> of the plugin, loaded by the UCS cloud
         /// </summary>
-        public Version LatestVersion
+        public Version? LatestVersion
         {
             get
             {
-                if (_latestVersion is null)
+                if (field == null)
                     Timing.RunCoroutine(LoadLatestVersionCoroutine());
 
-                return _latestVersion;
+                return field;
             }
-        }
 
-        private Version _latestVersion { get; set; } = null;
+            set;
+        }
 
         /// <summary>
         /// Create a new instance of the HttpManager
@@ -118,19 +118,19 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (request.result != Result.Success)
             {
                 LogManager.Warn($"Failed to load latest version: {request.error}");
-                _latestVersion = new Version();
+                LatestVersion = new Version();
                 yield break;
             }
 
-            string versionString = request.downloadHandler.text?.Trim();
+            string versionString = request.downloadHandler.text?.Trim() ?? string.Empty;
             if (!string.IsNullOrEmpty(versionString) && versionString.Contains("."))
             {
-                _latestVersion = new Version(versionString);                
+                LatestVersion = new Version(versionString);                
             }
             else
-                _latestVersion = new Version();
+                LatestVersion = new Version();
 
-            LogManager.Debug($"Latest version loaded: {_latestVersion}");
+            LogManager.Debug($"Latest version loaded: {LatestVersion}");
         }
 
         internal IEnumerator<float> LoadCreditTagsCoroutine()
@@ -141,26 +141,23 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 "https://devtagsbackup.thaumiel-servers.workers.dev/" // Backup
             ];
 
-            UnityWebRequest request = null;
             bool success = false;
-            string jsonResponse = null;
+            string jsonResponse = string.Empty;
 
             foreach (string endpoint in endpoints)
             {
-                using (request = Get(endpoint))
-                {
-                    yield return Timing.WaitUntilDone(request.SendWebRequest());
+                using UnityWebRequest request = Get(endpoint);
+                yield return Timing.WaitUntilDone(request.SendWebRequest());
 
-                    if (request.result == Result.Success)
-                    {
-                        jsonResponse = request.downloadHandler.text;
-                        success = true;
-                        LogManager.Info($"Successfully fetched credits data from {endpoint}");
-                        break;
-                    }
-                    else
-                        LogManager.Warn($"Failed to fetch credits data from {endpoint} - {request.error}");
+                if (request.result == Result.Success)
+                {
+                    jsonResponse = request.downloadHandler.text;
+                    success = true;
+                    LogManager.Info($"Successfully fetched credits data from {endpoint}");
+                    break;
                 }
+                else
+                    LogManager.Warn($"Failed to fetch credits data from {endpoint} - {request.error}");
             }
 
             if (!success)
@@ -171,45 +168,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             try
             {
-                if (jsonResponse.TrimStart().StartsWith("{"))
-                {
-                    Dictionary<string, Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(jsonResponse);
-
-                    foreach (KeyValuePair<string, Dictionary<string, JsonElement>> kvp in Data.Where(kvp => kvp.Value is not null && kvp.Value.ContainsKey("role") && kvp.Value.ContainsKey("color") && kvp.Value.ContainsKey("override") && kvp.Value.ContainsKey("job")))
-                    {
-                        string role = kvp.Value["role"].GetString();
-                        string color = kvp.Value["color"].GetString();
-                        bool overrideStr = kvp.Value["override"].ValueKind switch
-                        {
-                            JsonValueKind.String => bool.Parse(kvp.Value["override"].GetString() ?? string.Empty),
-                            JsonValueKind.True => true,
-                            _ => false
-                        };
-
-                        Credits.TryAdd(kvp.Key, new(role, color, overrideStr));
-                    }
-                }
-                else if (jsonResponse.TrimStart().StartsWith("["))
-                {
-                    List<Dictionary<string, JsonElement>> Data = JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(jsonResponse);
-
-                    foreach (Dictionary<string, JsonElement> item in Data.Where(item => item is not null && item.ContainsKey("SteamID") && item.ContainsKey("role") && item.ContainsKey("color") && item.ContainsKey("override") && item.ContainsKey("job")))
-                    {
-                        string steamId = item["SteamID"].GetString();
-                        string role = item["role"].GetString();
-                        string color = item["color"].GetString();
-                        bool overrideStr = item["override"].ValueKind switch
-                        {
-                            JsonValueKind.String => bool.Parse(item["override"].GetString() ?? string.Empty),
-                            JsonValueKind.True => true,
-                            _ => false
-                        };
-
-                        Credits.TryAdd(steamId, new(role, color, overrideStr));
-                    }
-                }
-                else
-                    LogManager.Error("Unknown JSON format in HttpManager::LoadCreditTags()");
+                Credits = JsonSerializer.Deserialize<Dictionary<string, CreditTag>>(jsonResponse) ?? [];
             }
             catch (JsonException je)
             {
@@ -224,7 +183,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public CreditTag GetCreditTag(Player player) =>
             Credits.GetValueSafe(player.UserId);
 
-        public bool TryGetCreditTag(Player player, out CreditTag output)
+        public bool TryGetCreditTag(Player player, out CreditTag? output)
         {
             output = Credits.GetValueSafe(player.UserId);
             if (output != null)
@@ -239,9 +198,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             if (!Plugin.Instance.Config.EnableCreditTags)
                 return;
 
-            if (TryGetCreditTag(player, out var tag))
+            if (TryGetCreditTag(player, out var tag) && tag != null)
             {
-                if (player.UserGroup != null || player.UserGroup.Permissions != 0 || !string.IsNullOrWhiteSpace(player.UserGroup.BadgeText))
+                if (player.UserGroup != null || player.UserGroup?.Permissions != 0 || !string.IsNullOrWhiteSpace(player.UserGroup.BadgeText))
                 {
                     if (tag.Role == player.GroupName && tag.Color == player.GroupColor)
                         return;

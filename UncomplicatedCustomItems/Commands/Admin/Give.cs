@@ -36,8 +36,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-
-            object customItemobj = null;
+            object customItemobj = null!;
             if (uint.TryParse(arguments[0], out uint id))
             {
                 if (Utilities.TryGetCustomItem(id, out ICustomItem iCustomItem))
@@ -76,20 +75,23 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case ICustomItem customItem:
                     if (customItem.Item == ItemType.SCP330 && customItem.CustomData is CandyData candyData)
                     {
-                        Player player = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
+                        Player? player = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
 
-                        if (player.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6))
+                        if (player?.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6) ?? false)
                         {
-                            response = $"{player.DisplayName}'s Candy Bag is full!";
+                            response = $"{player?.DisplayName}'s Candy Bag is full!";
                             return false;
                         }
-                        Scp330Bag bag = player.Items.FirstOrDefault(i => i.Base is Scp330Bag)?.Base as Scp330Bag;
+
+                        Scp330Bag? bag = player?.Items.FirstOrDefault(i => i.Base is Scp330Bag)?.Base as Scp330Bag;
                         if (bag != null)
+                        {
                             PlayerHandler.CandyIdx.Add(((CustomItem)customItem, bag.ItemSerial, bag.Candies.Count() + 1));
+                        }
                         else
                         {
-                            player.GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
-                            Timing.CallDelayed(Timing.WaitForOneFrame, () => PlayerHandler.CandyIdx.Add(((CustomItem)customItem, bag.ItemSerial, bag.Candies.Count())));
+                            player?.GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () => PlayerHandler.CandyIdx.Add(((CustomItem)customItem, bag!.ItemSerial, bag.Candies.Count())));
                         }
                     }
 
@@ -105,7 +107,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         }
                         else
                         {
-                            Player target = Player.Get(int.Parse(arguments[1]));
+                            Player? target = Player.Get(int.Parse(arguments[1]));
                             if (target == null)
                             {
                                 response = "Player not found!";
@@ -128,7 +130,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     }
                     else
                     {
-                        Player target = Player.Get(sender);
+                        Player? target = Player.Get(sender);
                         if (target == null)
                         {
                             response = "Player not found!";
@@ -152,21 +154,23 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case APICustomItem baseCustomItem:
                     if (baseCustomItem.Item == ItemType.SCP330 && baseCustomItem is CustomCandy customCandy)
                     {
-                        Player player = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
+                        Player? player = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
 
-                        if (player.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6))
+                        if (player?.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6) ?? false)
                         {
-                            response = $"{player.DisplayName}'s Candy Bag is full!";
+                            response = $"{player?.DisplayName}'s Candy Bag is full!";
                             return false;
                         }
 
-                        Scp330Bag bag = player.Items.FirstOrDefault(i => i.Base is Scp330Bag)?.Base as Scp330Bag;
+                        Scp330Bag? bag = player?.Items.FirstOrDefault(i => i.Base is Scp330Bag)?.Base as Scp330Bag;
                         if (bag != null)
+                        {
                             CustomCandy.Candyidx.Add((customCandy, bag.ItemSerial, bag.Candies.Count() + 1));
+                        }
                         else
                         {
-                            player.GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
-                            Timing.CallDelayed(Timing.WaitForOneFrame, () => CustomCandy.Candyidx.Add((customCandy, bag.ItemSerial, bag.Candies.Count())));
+                            player?.GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () => CustomCandy.Candyidx.Add((customCandy, bag!.ItemSerial, bag.Candies.Count())));
                         }
                     }
 
@@ -182,7 +186,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         }
                         else
                         {
-                            Player target = Player.Get(int.Parse(arguments[1]));
+                            Player? target = Player.Get(int.Parse(arguments[1]));
                             if (target == null)
                             {
                                 response = "Player not found!";
@@ -205,7 +209,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     }
                     else
                     {
-                        Player target = Player.Get(sender);
+                        Player? target = Player.Get(sender);
                         if (target == null)
                         {
                             response = "Player not found!";

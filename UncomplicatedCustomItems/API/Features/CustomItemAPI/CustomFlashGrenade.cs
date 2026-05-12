@@ -90,7 +90,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             {
                 OnThrown(ev);
                 if (ExplodeOnImpact)
-                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host).GameObject, ev.Projectile.Base);         
+                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host!).GameObject!, ev.Projectile.Base);         
             }
         }
 

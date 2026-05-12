@@ -39,17 +39,17 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// The owner of this <see cref="SummonedAPICustomItem"/> instance
         /// </summary>
-        public Player Owner;
+        public Player? Owner;
 
         /// <summary>
         /// The <see cref="Item"/> of this <see cref="SummonedAPICustomItem"/> instance
         /// </summary>
-        public Item Item;
+        public Item? Item;
 
         /// <summary>
         /// The <see cref="Pickup"/> of this <see cref="SummonedAPICustomItem"/> instance
         /// </summary>
-        public Pickup Pickup;
+        public Pickup? Pickup;
 
         /// <summary>
         /// The serial of this <see cref="SummonedAPICustomItem"/> instance
@@ -59,7 +59,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// The <see cref="APICustomItem"/> that this <see cref="SummonedAPICustomItem"/> instance represents. 
         /// </summary>
-        public APICustomItem CustomItem;
+        public APICustomItem? CustomItem;
 
         /// <summary>
         /// Gets whether or not the <see cref="SummonedAPICustomItem"/> instance is a <see cref="Pickup"/>
@@ -70,23 +70,22 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private bool PropertiesSet;
 
-        public SummonedAPICustomItem(APICustomItem customItem, Player owner, Item item, Pickup pickup, Quaternion rotation = new())
+        public SummonedAPICustomItem(APICustomItem customItem, Player? owner, Item? item, Pickup? pickup, Quaternion rotation = new())
         {
             CustomItem = customItem;
             Owner = owner;
             Item = item;
-            Serial = item != null ? item.Serial : pickup.Serial;
+            Serial = item?.Serial ?? pickup!.Serial;
             Pickup = pickup;
 
-            if (!PlayerCache.ContainsKey(owner))
+            if (owner != null && !PlayerCache.ContainsKey(owner))
                 PlayerCache.Add(owner, []);
 
-            PlayerCache[owner].Add(this);
+            if (owner != null)
+                PlayerCache[owner].Add(this);
 
             if (!IsPickup)
-            {
                 SetItemProperties();
-            }
             else
                 SetPickupProperties();
 
@@ -118,12 +117,12 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     scp.RegisterEvents();
                     break;
                 default:
-                    CustomItem.RegisterEvents();
+                    CustomItem?.RegisterEvents();
                     break;
             }
 
             if (IsPickup)
-                Pickup.Rotation = rotation;
+                Pickup!.Rotation = rotation;
 
             SummonedCustomItems.TryAdd(Serial, this);
         }
@@ -186,35 +185,39 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
             List.Remove(this);
             SummonedCustomItems.Remove(Serial);
-            switch (CustomItem)
+
+            if (CustomItem != null)
             {
-                case UsableItem usable:
-                    usable.UnregisterEvents();
-                    break;
-                case CustomCandy candy:
-                    candy.UnregisterEvents();
-                    break;
-                case CustomSCP018 scp018:
-                    scp018.UnregisterEvents();
-                    break;
-                case CustomJailbird jailbird:
-                    jailbird.UnregisterEvents();
-                    break;
-                case CustomWeapon weapon:
-                    weapon.UnregisterEvents();
-                    break;
-                case CustomFlashGrenade flash:
-                    flash.UnregisterEvents();
-                    break;
-                case CustomExplosiveGrenade grenade:
-                    grenade.UnregisterEvents();
-                    break;
-                case SCPCustomItem scp:
-                    scp.UnregisterEvents();
-                    break;
-                default:
-                    CustomItem.UnregisterEvents();
-                    break;
+                switch (CustomItem)
+                {
+                    case UsableItem usable:
+                        usable.UnregisterEvents();
+                        break;
+                    case CustomCandy candy:
+                        candy.UnregisterEvents();
+                        break;
+                    case CustomSCP018 scp018:
+                        scp018.UnregisterEvents();
+                        break;
+                    case CustomJailbird jailbird:
+                        jailbird.UnregisterEvents();
+                        break;
+                    case CustomWeapon weapon:
+                        weapon.UnregisterEvents();
+                        break;
+                    case CustomFlashGrenade flash:
+                        flash.UnregisterEvents();
+                        break;
+                    case CustomExplosiveGrenade grenade:
+                        grenade.UnregisterEvents();
+                        break;
+                    case SCPCustomItem scp:
+                        scp.UnregisterEvents();
+                        break;
+                    default:
+                        CustomItem.UnregisterEvents();
+                        break;
+                }
             }
 
             if (IsPickup)
@@ -233,18 +236,24 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private void SetItemProperties()
         {
+            if (Item == null || CustomItem == null)
+                return;
+
             switch (CustomItem)
             {
                 case CustomJailbird jailbirdData:
-                    LabApi.Features.Wrappers.JailbirdItem jailbird = Item as LabApi.Features.Wrappers.JailbirdItem;
-                    ApplyJailbirdStats(jailbird, jailbirdData);
+                    if (Item is LabApi.Features.Wrappers.JailbirdItem jailbird)
+                        ApplyJailbirdStats(jailbird, jailbirdData);
                     break;
 
                 case CustomSCP127 scp127Data:
                     LogManager.Debug($"SCPItem is SCP-127");
-                    FirearmItem scpFirearm = Item as FirearmItem;
-                    scpFirearm.Base.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
-                    scpFirearm.Base.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
+                    if (Item is not FirearmItem scpFirearm)
+                        break;
+                    if (!scpFirearm.Base.TryGetModule<Scp127MagazineModule>(out var scp127magazine))
+                        break;
+                    if (!scpFirearm.Base.TryGetModule<Scp127Hitscan>(out var scp127hitscan))
+                        break;
                     
                     if (!PropertiesSet)
                         scp127magazine.AmmoStored = scp127Data.MaxAmmo;
@@ -255,7 +264,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     break;
 
                 case CustomKeycard keycardData:
-                    KeycardItem keycard = Item as KeycardItem;
+                    if (Item is not KeycardItem keycard)
+                        break;
                     if (!keycard.Base.Customizable)
                     {
                         LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
@@ -273,20 +283,24 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     break;
 
                 case CustomArmor armorData:
-                    Armor armor = Item as Armor;
+                    if (Item is not Armor armor)
+                        break;
                     armor.Base.HelmetEfficacy = armorData.HeadProtection;
                     armor.Base.VestEfficacy = armorData.BodyProtection;
                     armor.Base._staminaUseMultiplier = armorData.StaminaUseMultiplier;
                     break;
 
                 case CustomWeapon weaponData:
-                    FirearmItem firearm = Item as FirearmItem;
-                    firearm.Base.TryGetModule<MagazineModule>(out var magazine);
-                    firearm.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
+                    if (Item is not FirearmItem firearm)
+                        break;
+                    if (!firearm.Base.TryGetModule<MagazineModule>(out var magazine))
+                        break;
+                    if (!firearm.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan))
+                        break;
 
                     firearm.Base.ApplyAttachmentsCode(firearm.GetCodeFromAttachmentNamesRaw(weaponData.Attachments.ToArray()), true);
                     
-                    if (!PropertiesSet && magazine != null)
+                    if (!PropertiesSet)
                     {
                         firearm.StoredAmmo = weaponData.MaxAmmo;
                         firearm.ChamberedAmmo = weaponData.MaxBarrelAmmo;
@@ -302,7 +316,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                 case CustomSCP244 scp244Data:
                     LogManager.Debug($"SCPItem is SCP-244");
-                    Scp244 scp244 = Item as Scp244;
+                    if (Item is not Scp244 scp244)
+                        break;
                     scp244.Base._primed = scp244Data.Primed;
                     break;
             }
@@ -310,16 +325,21 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private void SetPickupProperties()
         {
+            if (Pickup == null || CustomItem == null)
+                return;
+
             switch (CustomItem)
             {
                 case CustomJailbird jailbirdData:
-                    LabApi.Features.Wrappers.JailbirdPickup jailbird = Pickup as LabApi.Features.Wrappers.JailbirdPickup;
-                    ApplyJailbirdStats(jailbird, jailbirdData);
+                    if (Pickup is LabApi.Features.Wrappers.JailbirdPickup jailbird)
+                        ApplyJailbirdStats(jailbird, jailbirdData);
                     break;
 
                 case CustomKeycard keycardData:
-                    var keycard = (LabApi.Features.Wrappers.KeycardPickup)LabApi.Features.Wrappers.KeycardPickup.Create(CustomItem.Item, Pickup.Position);
-                    keycard.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var item);
+                    if (LabApi.Features.Wrappers.KeycardPickup.Create(CustomItem.Item, Pickup.Position) is not LabApi.Features.Wrappers.KeycardPickup keycard)
+                        break;
+                    if (!keycard.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var item))
+                        break;
                     item.ItemSerial = keycard.Serial;
 
                     Wrappers.CustomKeycard customKeycard = new(item);
@@ -332,11 +352,15 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                 case CustomSCP127 scp127Data:
                     LogManager.Debug($"SCPItem is SCP-127");
-                    var scpFirearmPickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
-                    scpFirearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var scpFirearm);
+                    if (LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position) is not LabApi.Features.Wrappers.FirearmPickup scpFirearmPickup)
+                        break;
+                    if (!scpFirearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var scpFirearm))
+                        break;
                     scpFirearm.ItemSerial = scpFirearmPickup.Serial;
-                    scpFirearm.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
-                    scpFirearm.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
+                    if (!scpFirearm.TryGetModule<Scp127MagazineModule>(out var scp127magazine))
+                        break;
+                    if (!scpFirearm.TryGetModule<Scp127Hitscan>(out var scp127hitscan))
+                        break;
 
                     scp127magazine.MagazineInserted = true;
                     if (!PropertiesSet)
@@ -349,11 +373,15 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     break;
 
                 case CustomWeapon weaponData:
-                    var firearmPickup = (LabApi.Features.Wrappers.FirearmPickup)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
-                    firearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var firearm);
+                    if (LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position) is not LabApi.Features.Wrappers.FirearmPickup firearmPickup)
+                        break;
+                    if (!firearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var firearm))
+                        break;
                     firearm.ItemSerial = firearmPickup.Serial;
-                    firearm.TryGetModule<MagazineModule>(out var magazine);
-                    firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
+                    if (!firearm.TryGetModule<MagazineModule>(out var magazine))
+                        break;
+                    if (!firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan))
+                        break;
 
                     if (weaponData.Attachments.Count > 1)
                         firearm.ApplyAttachmentsCode(firearm.GetCodeFromAttachmentNamesRaw(weaponData.Attachments.ToArray()), true);
@@ -375,7 +403,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                 case CustomSCP244 scp244Data:
                     LogManager.Debug($"SCPItem is SCP-244");
-                    Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
+                    if (Scp244Pickup.Create(CustomItem.Item, Pickup.Position) is not Scp244Pickup scp244Pickup)
+                        break;
                     scp244Pickup.Base.MaxDiameter = scp244Data.MaxDiameter;
                     scp244Pickup.Base._activationDot = scp244Data.ActivationDot;
                     scp244Pickup.Base._health = scp244Data.Health;
@@ -385,7 +414,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
         }
 
-        private void ApplyJailbirdStats(object jailbird, CustomJailbird data)
+        private void ApplyJailbirdStats(object? jailbird, CustomJailbird data)
         {
             if (jailbird is LabApi.Features.Wrappers.JailbirdItem jailbirditem)
             {
@@ -418,8 +447,11 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
         }
 
-        private void ApplyFirearmStats(HitscanHitregModuleBase hitscan, object weaponData)
+        private void ApplyFirearmStats(HitscanHitregModuleBase? hitscan, object weaponData)
         {
+            if (hitscan == null)
+                return;
+
             if (weaponData is CustomSCP127 scp127)
             {
                 hitscan.BaseDamage = scp127.Damage;
@@ -450,7 +482,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             customKeycard.RankIndex = keycardData.Rank;
             customKeycard.LabelColor = labelColor;
             customKeycard.LabelText = keycardData.Label;
-            customKeycard.ItemName = CustomItem.Name;
+            customKeycard.ItemName = CustomItem?.Name ?? "";
             customKeycard.CardColor = tintColor;
             customKeycard.PermissionsColor = permissionsColor;
             customKeycard.Permissions = permissions;
@@ -460,39 +492,48 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private void ReplacePickup(Pickup newPickup)
         {
-            Pickup.Destroy();
+            Pickup?.Destroy();
             newPickup.Spawn();
             Pickup = newPickup;
-            Serial = Pickup.Serial;
+            Serial = newPickup.Serial;
         }
 
         public void SaveProperties()
         {
-            if (Item == null)
+            if (Item == null || CustomItem == null)
                 return;
 
             switch (CustomItem)
             {
                 case CustomSCP127 scp127Data:
-                    var scpFirearm = Item as FirearmItem;
-                    scpFirearm.Base.TryGetModule<MagazineModule>(out var scpmagazine);
-                    scpFirearm.Base.TryGetModule<HitscanHitregModuleBase>(out var scphitscan);
+                    if (Item is not FirearmItem scpFirearm)
+                        break;
+                    if (!scpFirearm.Base.TryGetModule<MagazineModule>(out var scpmagazine))
+                        break;
+                    if (!scpFirearm.Base.TryGetModule<HitscanHitregModuleBase>(out var scphitscan))
+                        break;
 
                     SaveFirearmStats(scp127Data, scpmagazine, scphitscan);
                     break;
 
                 case CustomWeapon weaponData:
-                    var firearm = Item as FirearmItem;
-                    firearm.Base.TryGetModule<MagazineModule>(out var magazine);
-                    firearm.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
+                    if (Item is not FirearmItem firearm)
+                        break;
+                    if (!firearm.Base.TryGetModule<MagazineModule>(out var magazine))
+                        break;
+                    if (!firearm.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan))
+                        break;
 
                     SaveFirearmStats(weaponData, magazine, hitscan);
                     break;
             }
         }
 
-        private void SaveFirearmStats(object weaponData, MagazineModule magazine, HitscanHitregModuleBase hitscan)
+        private void SaveFirearmStats(object weaponData, MagazineModule? magazine, HitscanHitregModuleBase? hitscan)
         {
+            if (magazine == null || hitscan == null)
+                return;
+
             if (weaponData is CustomSCP127 scp127)
             {
                 scp127.MaxAmmo = magazine.AmmoStored;
@@ -516,24 +557,33 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         internal void OnPickup(PlayerPickedUpItemEventArgs pickedUp)
         {
+            if (pickedUp.Item == null)
+                return;
+
             Pickup = null;
             Item = pickedUp.Item;
             Owner = pickedUp.Player;
-            Serial = Item.Serial;
+            Serial = pickedUp.Item.Serial;
             SetItemProperties();
 
-            if (!PlayerCache.ContainsKey(pickedUp.Player))
-                PlayerCache.Add(pickedUp.Player, []);
+            if (Owner != null)
+            {
+                if (!PlayerCache.ContainsKey(Owner))
+                    PlayerCache.Add(Owner, []);
 
-            PlayerCache[pickedUp.Player].Add(this);
+                PlayerCache[Owner].Add(this);
+            }
         }
 
         public void OnDrop(PlayerDroppedItemEventArgs dropped)
         {
+            if (dropped.Pickup == null)
+                return;
+
             Pickup = dropped.Pickup;
             Item = null;
             Owner = null;
-            Serial = Pickup.Serial;
+            Serial = dropped.Pickup.Serial;
             SaveProperties();
 
             if (!PlayerCache.ContainsKey(dropped.Player))
@@ -562,11 +612,14 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public void LoadBadge(Player player)
         {
+            if (CustomItem == null)
+                return;
+
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
 
             Triplet<string, string, bool>? badge = null;
-            if (CustomItem.BadgeName != null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor != null && CustomItem.BadgeColor.Length > 2)
+            if (!string.IsNullOrEmpty(CustomItem.BadgeName) && CustomItem.BadgeName.Length > 1 && !string.IsNullOrEmpty(CustomItem.BadgeColor) && CustomItem.BadgeColor.Length > 2)
             {
                 badge = new(player.GroupName ?? "", player.GroupColor ?? "", player.ReferenceHub.serverRoles.HasBadgeHidden);
                 LogManager.Debug($"Badge detected, putting {CustomItem.BadgeName}@{CustomItem.BadgeColor} to player {player.PlayerId}");
@@ -582,9 +635,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public void ResetBadge(Player player)
         {
-            if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
-                return;
-
             if (player.ReferenceHub.serverRoles.HasBadgeHidden)
                 player.ReferenceHub.serverRoles.RefreshHiddenTag();
             else
@@ -599,13 +649,13 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public void HandleSelectedDisplayHint(Player player)
         {
             if (!string.IsNullOrWhiteSpace(Plugin.Instance.Config.SelectedMessage))
-                player.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.SelectedMessageDuration);
+                player.SendHint(Plugin.Instance.Config.SelectedMessage.Replace("%name%", CustomItem?.Name ?? "").Replace("%desc%", CustomItem?.Description ?? "").Replace("%description%", CustomItem?.Description ?? ""), Plugin.Instance.Config.SelectedMessageDuration);
         }
 
         public void HandlePickedUpDisplayHint(Player player)
         {
             if (!string.IsNullOrEmpty(Plugin.Instance.Config.PickedUpMessage))
-                player.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem.Name).Replace("%desc%", CustomItem.Description).Replace("%description%", CustomItem.Description), Plugin.Instance.Config.PickedUpMessageDuration);
+                player.SendHint(Plugin.Instance.Config.PickedUpMessage.Replace("%name%", CustomItem?.Name ?? "").Replace("%desc%", CustomItem?.Description ?? "").Replace("%description%", CustomItem?.Description ?? ""), Plugin.Instance.Config.PickedUpMessageDuration);
         }
 
         /// <summary>
@@ -614,7 +664,17 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <param name="serial"></param>
         /// <param name="item"></param>
         /// <returns><see langword="false"/> if not found : <see langword="true"/> if found</returns>
-        public static bool TryGet(ushort serial, out SummonedAPICustomItem item) => SummonedCustomItems.TryGetValue(serial, out item);
+        public static bool TryGet(ushort serial, out SummonedAPICustomItem? item)
+        {
+            if (SummonedCustomItems.TryGetValue(serial, out SummonedAPICustomItem? found))
+            {
+                item = found;
+                return true;
+            }
+
+            item = null;
+            return false;
+        }
 
         /// <summary>
         /// Tries to get the <see cref="SummonedAPICustomItem"/> by its <see cref="APICustomItem"/>
@@ -622,7 +682,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <param name="serial"></param>
         /// <param name="item"></param>
         /// <returns><see langword="false"/> if not found : <see langword="true"/> if found</returns>
-        public static bool TryGet(APICustomItem baseitem, out SummonedAPICustomItem item)
+        public static bool TryGet(APICustomItem baseitem, out SummonedAPICustomItem? item)
         {
             foreach (SummonedAPICustomItem summoneditem in List)
             {
@@ -642,7 +702,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// </summary>
         /// <param name="serial"></param>
         /// <returns><see cref="SummonedAPICustomItem"/></returns>
-        public static SummonedAPICustomItem Get(ushort serial) => SummonedCustomItems[serial];
+        public static SummonedAPICustomItem? Get(ushort serial) => SummonedCustomItems.TryGetValue(serial, out var item) ? item : null;
 
         /// <summary>
         /// Gets a list of every summoned <see cref="APICustomItem"/> where the <see cref="Owner"/> equals the parameter
@@ -656,6 +716,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// </summary>
         /// <param name="item"></param>
         /// <returns>CustomItem List</returns>
-        public static List<SummonedAPICustomItem> Get(ItemType item) => List.Where(i => i.CustomItem.Item == item).ToList();
+        public static List<SummonedAPICustomItem> Get(ItemType item) => List.Where(i => i.CustomItem?.Item == item).ToList();
     }
 }

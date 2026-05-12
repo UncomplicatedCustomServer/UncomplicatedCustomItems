@@ -11,7 +11,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
     public class BackupSystem
     {
-        internal static BackupKey Key { get; set; }
+        internal static BackupKey? Key { get; set; }
         
 #if EXILED
         private static string BackupDir => Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups");
@@ -48,6 +48,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Random random = new();
             for (int i = 0; i < UnityEngine.Random.Range(16, 48); i++)
                 code += chars[random.Next(chars.Length)];
+
+            if (Key == null)
+            {
+                string content = File.ReadAllText(Path.Combine(BackupDir, "key.yml"));
+                BackupKey backup = YamlConfigParser.Deserializer.Deserialize<BackupKey>(content);
+                Key = backup;
+            }
 
             Key.BackupCode = code;
             File.WriteAllText(Path.Combine(BackupDir, "key.yml"), YamlConfigParser.Serializer.Serialize(Key));

@@ -28,11 +28,14 @@ namespace UncomplicatedCustomItems.Commands
                 return false;
             }
 
-            Player player = Player.Get(int.Parse(arguments[0]));
-            foreach (Item item in player.Items)
+            Player? player = Player.Get(int.Parse(arguments[0]));
+            if (player != null)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out var customItem) && customItem.CustomItem.Id == uint.Parse(arguments[1]))
-                    player.CurrentItem = item;
+                foreach (Item item in player.Items)
+                {
+                    if (Utilities.TryGetSummonedCustomItem(item.Serial, out var customItem) && customItem?.CustomItem.Id == uint.Parse(arguments[1]))
+                        player.CurrentItem = item;
+                }
             }
 
             response = "Agh";

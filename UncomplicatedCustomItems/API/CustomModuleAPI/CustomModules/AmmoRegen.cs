@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LabApi.Events.Arguments.Interfaces;
+using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Extensions;
@@ -25,6 +26,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<float>("RegenDelay", out var regenDelay))
@@ -56,12 +60,12 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             if (!Check(eventArgs))
                 return;
 
-            if (eventArgs is IItemEvent itemEvent)
+            if (eventArgs is PlayerShotWeaponEventArgs eve)
             {
-                if (!Utilities.TryGetSummonedCustomItem(itemEvent.Item.Serial, out var item))
+                if (!Utilities.TryGetSummonedCustomItem(eve.FirearmItem.Serial, out var item))
                     return;
 
-                item.PauseAmmoRegen(itemEvent.Item as FirearmItem, this.RegenDelay);
+                item?.PauseAmmoRegen(eve.FirearmItem, this.RegenDelay);
             }
         }
 

@@ -26,12 +26,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public bool RevealWhenDamaged { get; set; }
         public RoleTypeId RoleId { get; set; }
-        public string DisguiseMessage { get; set; }
-        public string CustomInfo { get; set; }
+        public string DisguiseMessage { get; set; } = string.Empty;
+        public string CustomInfo { get; set; } = string.Empty;
         public TriggerOn Trigger { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
@@ -148,7 +151,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     Appearance.TryAdd(explayer.Id, ev.Player.Role);
 #else
                     LogManager.Debug($"Changing {ev.Player.Nickname} appearance to {ev.Player.Role}");
-                    ev.Attacker.DisguisePlayer(ev.Player.Role);
+                    ev.Attacker?.DisguisePlayer(ev.Player.Role);
                     LogManager.Debug($"Adding or updating {ev.Player.PlayerId} to appearance dictionary");
                     Appearance.TryAdd(ev.Player.PlayerId, ev.Player.Role);
 #endif

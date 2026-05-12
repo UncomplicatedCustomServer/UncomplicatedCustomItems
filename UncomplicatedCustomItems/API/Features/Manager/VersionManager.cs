@@ -8,7 +8,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 {
     internal static class VersionManager
     {
-        public static VersionInfoV2 VersionInfo { get; set; }
+        public static VersionInfoV2? VersionInfo { get; set; }
 
 #nullable enable
         public static void Init()

@@ -25,6 +25,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<string>("GlowColor", out var GlowColor))
@@ -60,7 +63,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public void Run(ItemPickupBase pickupBase)
         {
             Pickup pickup = Pickup.Get(pickupBase);
-            if (!Utilities.TryGetSummonedCustomItem(pickup.Serial, out var item) || item.CustomItem != CustomItem)
+            if (!Utilities.TryGetSummonedCustomItem(pickup.Serial, out var item) || item?.CustomItem != CustomItem)
                 return;
             
             LightSourceToy light = LightSourceToy.Create(pickup.Position);

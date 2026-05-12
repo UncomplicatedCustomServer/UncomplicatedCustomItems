@@ -29,7 +29,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                     if (!data.LockerSettings.Enable)
                         continue;
 
-                    if (!Room.TryGetRoomAtPosition(__instance.gameObject.transform.position, out Room lockerRoom))
+                    if (!Room.TryGetRoomAtPosition(__instance.gameObject.transform.position, out Room? lockerRoom))
                         continue;
 
                     Room customItemRoom = Utilities.GetRoomFromName(data.LockerSettings.Room);
@@ -66,7 +66,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                     {
                         LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in SCP Pedestal");
                         SummonedCustomItem summoned = new(item, pedestalLocker.AddItem(item.Item));
-                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        summoned.Pickup?.Position += data.LockerSettings.Offset;
                         spawnedAmounts[item.Id]++;
                         return false;
                     }
@@ -78,38 +78,22 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         SummonedCustomItem summoned;
                         LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in Rifle Rack");
 
-                        LockerChamber targetChamber = null;
+                        LockerChamber targetChamber = null!;
 
-                        switch (Enum.Parse(typeof(RifleRackLockerChambers), data.LockerSettings.Chamber))
+                        targetChamber = Enum.Parse(typeof(RifleRackLockerChambers), data.LockerSettings.Chamber) switch
                         {
-                            case RifleRackLockerChambers.MainChamber:
-                                targetChamber = riflerack.MainChamber;
-                                break;
-                            case RifleRackLockerChambers.Bullet1:
-                                targetChamber = riflerack.Bullet1;
-                                break;
-                            case RifleRackLockerChambers.Bullet2:
-                                targetChamber = riflerack.Bullet2;
-                                break;
-                            case RifleRackLockerChambers.Bullet3:
-                                targetChamber = riflerack.Bullet3;
-                                break;
-                            case RifleRackLockerChambers.Bullet4:
-                                targetChamber = riflerack.Bullet4;
-                                break;
-                            case RifleRackLockerChambers.HeGrenade1:
-                                targetChamber = riflerack.HeGrenade1;
-                                break;
-                            case RifleRackLockerChambers.HeGrenade2:
-                                targetChamber = riflerack.HeGrenade2;
-                                break;
-                            default:
-                                targetChamber = riflerack.MainChamber;
-                                break;
-                        }
-                        
+                            RifleRackLockerChambers.MainChamber => riflerack.MainChamber,
+                            RifleRackLockerChambers.Bullet1 => riflerack.Bullet1,
+                            RifleRackLockerChambers.Bullet2 => riflerack.Bullet2,
+                            RifleRackLockerChambers.Bullet3 => riflerack.Bullet3,
+                            RifleRackLockerChambers.Bullet4 => riflerack.Bullet4,
+                            RifleRackLockerChambers.HeGrenade1 => riflerack.HeGrenade1,
+                            RifleRackLockerChambers.HeGrenade2 => riflerack.HeGrenade2,
+                            _ => riflerack.MainChamber,
+                        };
+
                         summoned = new SummonedCustomItem(item, targetChamber.AddItem(item.Item));
-                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        summoned.Pickup?.Position += data.LockerSettings.Offset;
                         spawnedAmounts[item.Id]++;
                         return false;
                     }
@@ -121,26 +105,18 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         SummonedCustomItem summoned;
                         LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in WallCabinet");
 
-                        LockerChamber targetChamber = null;
+                        LockerChamber targetChamber = null!;
 
-                        switch (Enum.Parse(typeof(WallCabinetChambers), data.LockerSettings.Chamber))
+                        targetChamber = Enum.Parse(typeof(WallCabinetChambers), data.LockerSettings.Chamber) switch
                         {
-                            case WallCabinetChambers.MainChamber:
-                                targetChamber = wallCabinet.MainChamber;
-                                break;
-                            case WallCabinetChambers.LowerShelf:
-                                targetChamber = wallCabinet.LowerShelf;
-                                break;
-                            case WallCabinetChambers.UpperShelf:
-                                targetChamber = wallCabinet.UpperShelf;
-                                break;
-                            default:
-                                targetChamber = wallCabinet.MainChamber;
-                                break;
-                        }
+                            WallCabinetChambers.MainChamber => wallCabinet.MainChamber,
+                            WallCabinetChambers.LowerShelf => wallCabinet.LowerShelf,
+                            WallCabinetChambers.UpperShelf => wallCabinet.UpperShelf,
+                            _ => wallCabinet.MainChamber,
+                        };
 
                         summoned = new SummonedCustomItem(item, targetChamber.AddItem(item.Item));
-                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        summoned.Pickup?.Position += data.LockerSettings.Offset;
                         spawnedAmounts[item.Id]++;
                         return false;
                     }
@@ -152,35 +128,21 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         SummonedCustomItem summoned;
                         LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in Standard Locker");
 
-                        LockerChamber targetChamber = null;
+                        LockerChamber targetChamber = null!;
 
-                        switch (Enum.Parse(typeof(StandardLockerChambers), data.LockerSettings.Chamber))
+                        targetChamber = Enum.Parse(typeof(StandardLockerChambers), data.LockerSettings.Chamber) switch
                         {
-                            case StandardLockerChambers.BottomLeft:
-                                targetChamber = standardLocker.BottomLeft;
-                                break;
-                            case StandardLockerChambers.BottomMiddle:
-                                targetChamber = standardLocker.BottomMiddle;
-                                break;
-                            case StandardLockerChambers.BottomRight:
-                                targetChamber = standardLocker.BottomRight;
-                                break;
-                            case StandardLockerChambers.MainLeft:
-                                targetChamber = standardLocker.MainLeft;
-                                break;
-                            case StandardLockerChambers.MainMiddle:
-                                targetChamber = standardLocker.MainMiddle;
-                                break;
-                            case StandardLockerChambers.MainRight:
-                                targetChamber = standardLocker.MainRight;
-                                break;
-                            default:
-                                targetChamber = standardLocker.MainMiddle;
-                                break;
-                        }
+                            StandardLockerChambers.BottomLeft => standardLocker.BottomLeft,
+                            StandardLockerChambers.BottomMiddle => standardLocker.BottomMiddle,
+                            StandardLockerChambers.BottomRight => standardLocker.BottomRight,
+                            StandardLockerChambers.MainLeft => standardLocker.MainLeft,
+                            StandardLockerChambers.MainMiddle => standardLocker.MainMiddle,
+                            StandardLockerChambers.MainRight => standardLocker.MainRight,
+                            _ => standardLocker.MainMiddle,
+                        };
 
                         summoned = new SummonedCustomItem(item, targetChamber.AddItem(item.Item));
-                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        summoned.Pickup?.Position += data.LockerSettings.Offset;
                         spawnedAmounts[item.Id]++;
                         return false;
                     }
@@ -192,41 +154,23 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         SummonedCustomItem summoned;
                         LogManager.Debug($"{nameof(LockerSpawningItemPrefix)}: Spawning in Large Locker");
 
-                        LockerChamber targetChamber = null;
+                        LockerChamber targetChamber = null!;
 
-                        switch (Enum.Parse(typeof(LargeLockerChambers), data.LockerSettings.Chamber))
+                        targetChamber = Enum.Parse(typeof(LargeLockerChambers), data.LockerSettings.Chamber) switch
                         {
-                            case LargeLockerChambers.BottomLeft:
-                                targetChamber = largeLocker.BottomLeft;
-                                break;
-                            case LargeLockerChambers.BottomMiddle:
-                                targetChamber = largeLocker.BottomMiddle;
-                                break;
-                            case LargeLockerChambers.BottomRight:
-                                targetChamber = largeLocker.BottomRight;
-                                break;
-                            case LargeLockerChambers.MiddleLeft:
-                                targetChamber = largeLocker.MiddleLeft;
-                                break;
-                            case LargeLockerChambers.MiddleRight:
-                                targetChamber = largeLocker.MiddleRight;
-                                break;
-                            case LargeLockerChambers.TopLeft:
-                                targetChamber = largeLocker.TopLeft;
-                                break;
-                            case LargeLockerChambers.TopMiddle:
-                                targetChamber = largeLocker.TopMiddle;
-                                break;
-                            case LargeLockerChambers.TopRight:
-                                targetChamber = largeLocker.TopRight;
-                                break;
-                            default:
-                                targetChamber = largeLocker.TopMiddle;
-                                break;
-                        }
+                            LargeLockerChambers.BottomLeft => largeLocker.BottomLeft,
+                            LargeLockerChambers.BottomMiddle => largeLocker.BottomMiddle,
+                            LargeLockerChambers.BottomRight => largeLocker.BottomRight,
+                            LargeLockerChambers.MiddleLeft => largeLocker.MiddleLeft,
+                            LargeLockerChambers.MiddleRight => largeLocker.MiddleRight,
+                            LargeLockerChambers.TopLeft => largeLocker.TopLeft,
+                            LargeLockerChambers.TopMiddle => largeLocker.TopMiddle,
+                            LargeLockerChambers.TopRight => largeLocker.TopRight,
+                            _ => largeLocker.TopMiddle,
+                        };
 
                         summoned = new SummonedCustomItem(item, targetChamber.AddItem(item.Item));
-                        summoned.Pickup.Position += data.LockerSettings.Offset;
+                        summoned.Pickup?.Position += data.LockerSettings.Offset;
                         spawnedAmounts[item.Id]++;
                         return false;
                     }

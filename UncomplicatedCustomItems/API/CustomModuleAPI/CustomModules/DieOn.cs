@@ -18,12 +18,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             "DeathMessage",
         ];
 
-        public string DeathMessage { get; set; }
+        public string DeathMessage { get; set; } = string.Empty;
         public bool Vaporize { get; set; }
         public TriggerOn Trigger { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
@@ -56,6 +59,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             if (!Check(eventArgs))
                 return;
                 
+            if (CustomItem == null)
+                return;
+
             if (eventArgs is PlayerUsedItemEventArgs playerUsedItem && HasFlagFast(Trigger, TriggerOn.OnUse))
             {
                 if (Vaporize)

@@ -72,7 +72,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         public virtual void OnRequestCompleted(UnityWebRequest request) => LogManager.Debug($"Successed Sending request for {Name}.");
         public virtual void OnRequestFailed(UnityWebRequest request) => LogManager.Debug($"Failed to send request for {Name}.");
 
-        public virtual void SendRequest(Action<UnityWebRequest> onComplete = null)
+        public virtual void SendRequest(Action<UnityWebRequest> onComplete = null!)
         {
             ActiveRequests.AddItem(this);
             Handle = Timing.RunCoroutine(RequestCoroutine(OnRequestCompleted, OnRequestFailed, onComplete));

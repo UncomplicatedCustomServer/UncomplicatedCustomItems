@@ -27,25 +27,25 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
             switch (__instance)
             {
                 case FirearmDamageHandler firearmDamage:
-                    if (Utilities.TryGetSummonedCustomItem(firearmDamage.Firearm.ItemSerial, out var item) && item.CustomItem.CustomItemType is CustomItemType.Weapon && item.CustomItem.CustomData is WeaponData weaponData)
+                    if (Utilities.TryGetSummonedCustomItem(firearmDamage.Firearm.ItemSerial, out var item) && item != null && item.CustomItem.CustomItemType is CustomItemType.Weapon && item.CustomItem.CustomData is WeaponData weaponData)
                     {
                         __result = weaponData.Damage;
                     }
-                    if (SummonedAPICustomItem.TryGet(firearmDamage.Firearm.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomWeapon customWeapon)
+                    if (SummonedAPICustomItem.TryGet(firearmDamage.Firearm.ItemSerial, out var apiitem) && apiitem != null && apiitem.CustomItem is CustomWeapon customWeapon)
                     {
                         __result = customWeapon.Damage;
                     }
                     break;
 
                 case MicroHidDamageHandler microHidDamage:
-                    if (Utilities.TryGetSummonedCustomItem(Player.Get(microHidDamage.Attacker.Hub).CurrentItem.Serial, out var item1) && item1.CustomItem.CustomItemType is CustomItemType.MicroHID && item1.CustomItem.CustomData is MicroHIDData microData)
+                    if (Utilities.TryGetSummonedCustomItem(Player.Get(microHidDamage.Attacker.Hub).CurrentItem?.Serial ?? 0, out var item1) && item1 != null && item1.CustomItem.CustomItemType is CustomItemType.MicroHID && item1.CustomItem.CustomData is MicroHIDData microData)
                     {
                         __result = microData.Damage;
                     }
                     break;
 
                 case DisruptorDamageHandler disruptorDamage:
-                    if (Utilities.TryGetSummonedCustomItem(Player.Get(disruptorDamage.Attacker.Hub).CurrentItem.Serial, out var item2) && item2.CustomItem.CustomItemType is CustomItemType.ParticleDisruptor && item2.CustomItem.CustomData is ParticleDisruptorData disruptorData)
+                    if (Utilities.TryGetSummonedCustomItem(Player.Get(disruptorDamage.Attacker.Hub).CurrentItem?.Serial ?? 0, out var item2) && item2 != null && item2.CustomItem.CustomItemType is CustomItemType.ParticleDisruptor && item2.CustomItem.CustomData is ParticleDisruptorData disruptorData)
                     {
                         __result = disruptorDamage.FiringState is FiringState.FiringRapid ? disruptorData.BurstDamage : disruptorData.ChargeDamage;
                     }

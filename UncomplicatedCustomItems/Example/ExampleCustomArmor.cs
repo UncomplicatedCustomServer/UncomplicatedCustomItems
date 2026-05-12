@@ -78,8 +78,8 @@ namespace UncomplicatedCustomItems.Examples
                 if (Check(item))
                 {
                     ev.Player.RemoveItem(item);
-                    ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)TimedGrenadeProjectile.SpawnActive(ev.Player.Position, ItemType.GrenadeHE, ev.Player, 0.1);
-                    grenade.MaxRadius = 20f;
+                    ExplosiveGrenadeProjectile? grenade = (ExplosiveGrenadeProjectile?)TimedGrenadeProjectile.SpawnActive(ev.Player.Position, ItemType.GrenadeHE, ev.Player, 0.1);
+                    grenade?.MaxRadius = 20f;
                 }
             }
 

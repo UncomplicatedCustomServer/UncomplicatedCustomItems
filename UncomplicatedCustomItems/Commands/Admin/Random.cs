@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
             string text = string.Empty;
-            Player player = Player.Get(sender);
+            Player? player = Player.Get(sender);
             if (player == null)
             {
                 response = "Player is null!";

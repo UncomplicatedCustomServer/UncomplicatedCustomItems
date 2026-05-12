@@ -18,12 +18,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             "Duration"
         ];
 
-        public string HintOrBroadcast { get; set; }
-        public string Message { get; set; }
+        public string HintOrBroadcast { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
         public uint Duration { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<string>("HintOrBroadcast", out var hob))
@@ -53,6 +56,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public override void Run(EventArgs eventArgs)
         {
             if (!Check(eventArgs))
+                return;
+
+            if (CustomItem == null)
                 return;
 
             LogManager.Debug("Running CantDrop");

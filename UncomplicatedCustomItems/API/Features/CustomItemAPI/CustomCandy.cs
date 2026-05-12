@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// Gets or sets the hint message shown when the candy is eaten
         /// </summary>
-        public virtual string EatingMessage { get; set; }
+        public virtual string EatingMessage { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the hint message duration

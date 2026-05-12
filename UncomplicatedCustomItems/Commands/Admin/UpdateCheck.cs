@@ -12,10 +12,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public class GitHubReleaseInfo
         {
             [JsonPropertyName("tag_name")]
-            public string TagName { get; set; }
+            public string TagName { get; set; } = string.Empty;
 
             [JsonPropertyName("assets")]
-            public Updater.GitHubAssetInfo[] Assets { get; set; }
+            public Updater.GitHubAssetInfo[] Assets { get; set; } = [];
         }
         
         public UpdateCheck() => LoadGeneratedCommands();

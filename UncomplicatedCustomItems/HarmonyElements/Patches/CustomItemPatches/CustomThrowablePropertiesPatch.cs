@@ -43,7 +43,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
 
                 // Find the variable that holds ThrownProjectile
                 // Look for the last instruction that loads from a local before the return
-                LocalBuilder projectileLocal = null;
+                LocalBuilder projectileLocal = null!;
                 for (int i = returnIndex - 1; i >= 0; i--)
                 {
                     CodeInstruction instruction = newInstructions[i];
@@ -110,7 +110,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 if (thrownProjectile == null || throwableItem == null)
                     return;
 
-                if (Utilities.TryGetSummonedCustomItem(throwableItem.ItemSerial, out var summoned))
+                if (Utilities.TryGetSummonedCustomItem(throwableItem.ItemSerial, out var summoned) && summoned != null)
                 {
                     switch (summoned.CustomItem.CustomItemType)
                     {
@@ -161,7 +161,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                             break;
                     }
                 }
-                else if (SummonedAPICustomItem.TryGet(throwableItem.ItemSerial, out var api))
+                else if (SummonedAPICustomItem.TryGet(throwableItem.ItemSerial, out var api) && api != null)
                 {
                     switch (api.CustomItem)
                     {

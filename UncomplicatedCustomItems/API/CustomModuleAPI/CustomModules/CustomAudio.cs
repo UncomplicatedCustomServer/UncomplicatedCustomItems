@@ -21,14 +21,16 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         ];
 
         public TriggerOn Trigger { get; set; }
-        public string AudioPath { get; set; }
+        public string AudioPath { get; set; } = string.Empty;
         public float AudibleDistance { get; set; }
         public float Volume { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
-            base.OnAdded(item);
+            if (CustomItem == null)
+                return;
 
+            base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<TriggerOn>("Trigger", out var trigger))

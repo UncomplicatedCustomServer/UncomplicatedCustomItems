@@ -92,7 +92,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                     if (item.ReplaceExistingPickup)
                     {
-                        Pickup targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
+                        Pickup? targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
                         if (targetPickup != null)
                             new SummonedAPICustomItem(item, targetPickup);
                     }
@@ -109,7 +109,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                         Room room = rooms.RandomItem();
                         if (item.ReplaceExistingPickup && !item.ForceSameItemType)
                         {
-                            Pickup targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
+                            Pickup? targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
                             if (targetPickup != null)
                                 new SummonedAPICustomItem(item, targetPickup);
                         }

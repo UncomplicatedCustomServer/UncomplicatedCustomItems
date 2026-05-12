@@ -23,7 +23,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public string RequiredPermission { get; } = "uci.info";
         public string[] Aliases { get; } = ["info"];
 
-        private string Color = null;
+        private string Color = string.Empty;
         private int Count = 0;
 
         public bool Execute(List<string> args, ICommandSender sender, out string response)

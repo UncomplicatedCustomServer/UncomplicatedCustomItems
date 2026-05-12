@@ -54,9 +54,9 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <returns>Returns whether the <see cref="ItemType"/> is a keycard.</returns>
         public static bool IsKeycard(this ItemType type) => GetCategory(type) == ItemCategory.Keycard;
 
-        public static ItemCategory GetCategory(this ItemType type) => GetItemBase(type).Category;
+        public static ItemCategory? GetCategory(this ItemType type) => GetItemBase(type)?.Category;
 
-        public static ItemBase GetItemBase(this ItemType type)
+        public static ItemBase? GetItemBase(this ItemType type)
         {
             if (!InventoryItemLoader.AvailableItems.TryGetValue(type, out ItemBase itemBase))
                 return null;
@@ -130,7 +130,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <returns>
         /// The corresponding <see cref="SummonedCustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static SummonedCustomItem? TryGetSummonedCustomItem(this Item item) => Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem) ? customItem : null;
+        public static SummonedCustomItem? TryGetSummonedCustomItem(this Item item) => Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem? customItem) ? customItem : null;
 
         /// <summary>
         /// Attempts to retrieve the <see cref="ICustomItem"/> associated with the specified <see cref="Item"/>.

@@ -129,7 +129,7 @@ namespace UncomplicatedCustomItems.API.ItemUpdater
                     }
                     else
                     {
-                        string s = customFlagsObj?.ToString();
+                        string s = customFlagsObj?.ToString() ?? string.Empty;
                         if (!string.IsNullOrWhiteSpace(s) && !string.Equals(s, "None", StringComparison.OrdinalIgnoreCase))
                         {
                             string[] parts = s.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries);
@@ -151,7 +151,7 @@ namespace UncomplicatedCustomItems.API.ItemUpdater
                 }
 
                 TriggerOn dieOnTriggers = 0;
-                Dictionary<string, object> dieOnSettings = null;
+                Dictionary<string, object> dieOnSettings = [];
 
                 foreach (CustomFlags flag in parsedFlags)
                 {

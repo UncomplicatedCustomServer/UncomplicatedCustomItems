@@ -14,7 +14,6 @@ using System.Threading;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
-#nullable enable
     /// <summary>
     /// Manages the action system for <see cref="CustomItem"/>s
     /// </summary>
@@ -26,7 +25,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         internal static readonly ConcurrentDictionary<Type, HashSet<string>> _eventArgPropertyCache = new();
 
-        private static readonly ConcurrentDictionary<string, Type> _typeResolutionCache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, Type?> _typeResolutionCache = new(StringComparer.OrdinalIgnoreCase);
 
         internal static Dictionary<(Type, string), Delegate> CachedDelegates { get; } = [];
 
@@ -100,9 +99,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             try
             {
                 Type enumType = typeof(CommonTypes);
-                foreach (FieldInfo? field in enumType.GetFields(BindingFlags.Public | BindingFlags.Static))
+                foreach (FieldInfo field in enumType.GetFields(BindingFlags.Public | BindingFlags.Static))
                 {
-                    CommonTypesAttribute attr = field.GetCustomAttribute<CommonTypesAttribute>();
+                    CommonTypesAttribute? attr = field.GetCustomAttribute<CommonTypesAttribute>();
                     if (attr?.CommonType != null)
                     {
                         string name = field.Name;
@@ -225,7 +224,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
             }
 
-            _typeResolutionCache[fullName] = null!;
+            _typeResolutionCache[fullName] = null;
             return false;
         }
         
@@ -298,7 +297,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return sb.ToString();
         }
 
-        internal static object? ResolvePlaceholderToObject(string path, object root)
+        internal static object? ResolvePlaceholderToObject(string path, object? root)
         {
             if (string.IsNullOrWhiteSpace(path) || root == null)
                 return null;
@@ -356,7 +355,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         string baseName = part.Substring(0, openBracket).Trim();
                         string inner = part.Substring(openBracket + 1, closeBracket - openBracket - 1).Trim();
 
-                        object? memberContainer = string.IsNullOrEmpty(baseName) ? current : GetMemberValueCached(current!, baseName);
+                        object? memberContainer = string.IsNullOrEmpty(baseName) ? current : GetMemberValueCached(current, baseName);
                         if (memberContainer == null)
                             return null;
 
@@ -400,7 +399,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     }
                     else
                     {
-                        current = GetMemberValueCached(current!, part);
+                        current = GetMemberValueCached(current, part);
                         if (current == null)
                             return null;
                     }
@@ -414,8 +413,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static object? GetMemberValueCached(object target, string memberName)
+        private static object? GetMemberValueCached(object? target, string memberName)
         {
+            if (target == null)
+                return null;
+
             Type type = target.GetType();
             (Type, string) key = (type, memberName.ToLowerInvariant());
 
@@ -445,8 +447,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             MethodInfo? method = type.GetMethod(memberName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase, null, Type.EmptyTypes, null);
             if (method != null)
             {
-                Type? funcType = typeof(Func<,>).MakeGenericType(type, method.ReturnType);
-                Delegate? compiled = method.CreateDelegate(funcType);
+                Type funcType = typeof(Func<,>).MakeGenericType(type, method.ReturnType);
+                Delegate compiled = method.CreateDelegate(funcType);
                 CachedDelegates[key] = compiled;
 
                 return compiled.DynamicInvoke(target);
@@ -465,12 +467,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return list[randomIndex];
         }
 
-        private static object[] ParseAndResolveParameters(string parametersPart, EventArgs eventArgs, ICustomItem? item)
+        private static object?[] ParseAndResolveParameters(string parametersPart, EventArgs eventArgs, ICustomItem? item)
         {
             if (string.IsNullOrWhiteSpace(parametersPart))
                 return [];
 
-            List<object> parameters = [];
+            List<object?> parameters = [];
             List<string> paramTokens = ParseParameterTokens(parametersPart);
 
             foreach (string token in paramTokens)
@@ -480,7 +482,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 if (item != null && _variables.TryGetValue(item, out var dict) && dict.TryGetValue(token, out var varValue))
                 {
-                    parameters.Add(varValue!);
+                    parameters.Add(varValue);
                     continue;
                 }
 
@@ -596,16 +598,16 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return tokens;
         }
 
-        private static string ResolvePlaceholder(string path, object root)
+        private static string ResolvePlaceholder(string path, object? root)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(path))
+                if (string.IsNullOrWhiteSpace(path) || root == null)
                     return "null";
 
                 object? obj = ResolvePlaceholderToObject(path, root);
                 if (obj != null)
-                    return obj?.ToString() ?? "null";
+                    return obj.ToString() ?? "null";
 
                 object? current = root;
                 foreach (string part in path.Split('.'))
@@ -627,7 +629,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static void ExecuteAction(ICustomItem item, string action, EventArgs eventArgs)
+        private static void ExecuteAction(ICustomItem? item, string action, EventArgs eventArgs)
         {
             _executeActionDepth.Value = _executeActionDepth.Value + 1;
             if (_executeActionDepth.Value > Plugin.Instance.Config.MaxActionsExecutionDepth)
@@ -668,7 +670,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return trimmed.StartsWith("if ", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("unless ", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void ExecuteConditional(ICustomItem item, string action, EventArgs eventArgs)
+        private static void ExecuteConditional(ICustomItem? item, string action, EventArgs eventArgs)
         {
             try
             {
@@ -756,7 +758,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static bool IsTruthy(string value)
+        private static bool IsTruthy(string? value)
         {
             return value switch
             {
@@ -767,7 +769,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             };
         }
 
-        private static void HandleComplexAssignment(ICustomItem item, string propertyPath, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
+        private static void HandleComplexAssignment(ICustomItem? item, string propertyPath, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
         {
             try
             {
@@ -832,7 +834,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static void ExecuteRegularAction(ICustomItem item, string action, EventArgs eventArgs)
+        private static void ExecuteRegularAction(ICustomItem? item, string action, EventArgs eventArgs)
         {
             if (string.IsNullOrWhiteSpace(action))
                 return;
@@ -874,7 +876,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             string[] args = parts.Length > 1 ? parts.Skip(1).ToArray() : [];
 
             if (_actionHandlers.TryGetValue(command, out var handler))
-                handler(item, args);
+                handler(item!, args);
             else
                 LogManager.Error($"{nameof(ArgumentManager)} Unknown action: {command}");
         }
@@ -899,7 +901,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     return;
                 }
 
-                ICustomAction foundAction = CustomAction.List.FirstOrDefault(a => string.Equals(a.Name, identifier, StringComparison.OrdinalIgnoreCase));
+                ICustomAction? foundAction = CustomAction.List.FirstOrDefault(a => string.Equals(a.Name, identifier, StringComparison.OrdinalIgnoreCase));
 
                 if (foundAction != null)
                     ExecuteCustomAction(foundAction, eventArgs);
@@ -948,7 +950,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return names.Contains(firstPart);
         }
 
-        private static void ExecuteMethod(object targetObject, string methodName, object[] parameters)
+        private static void ExecuteMethod(object targetObject, string methodName, object?[] parameters)
         {
             try
             {
@@ -963,9 +965,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     string genSpec = methodName.Substring(genOpen + 1, genClose - genOpen - 1);
                     rawName = methodName.Substring(0, genOpen);
 
-                    string[]? genTypeNames = genSpec.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
+                    string[] genTypeNames = genSpec.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
                     List<Type> genTypes = [];
-                    foreach (string? tname in genTypeNames)
+                    foreach (string tname in genTypeNames)
                     {
                         if (!TryResolveType(tname, out Type? resolved) || resolved == null)
                         {
@@ -979,17 +981,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     genericTypeArgs = genTypes.ToArray();
                 }
 
-                MethodInfo[]? methods = targetType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)
+                MethodInfo[] methods = targetType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)
                                 .Where(m => string.Equals(m.Name, rawName, StringComparison.OrdinalIgnoreCase))
                                 .ToArray();
 
                 MethodInfo? method = null;
                 if (genericTypeArgs != null)
                 {
-                    MethodInfo[]? genericDefs = methods.Where(m => m.IsGenericMethodDefinition && m.GetGenericArguments().Length == genericTypeArgs.Length).ToArray();
+                    MethodInfo[] genericDefs = methods.Where(m => m.IsGenericMethodDefinition && m.GetGenericArguments().Length == genericTypeArgs.Length).ToArray();
                     method = genericDefs.FirstOrDefault(m => 
                     {
-                        ParameterInfo[]? methodParams = m.GetParameters();
+                        ParameterInfo[] methodParams = m.GetParameters();
                         int requiredParams = methodParams.Count(p => !p.HasDefaultValue);
                         return parameters.Length >= requiredParams && parameters.Length <= methodParams.Length;
                     });
@@ -1005,7 +1007,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     {
                         method = methods.FirstOrDefault(m => 
                         {
-                            ParameterInfo[]? methodParams = m.GetParameters();
+                            ParameterInfo[] methodParams = m.GetParameters();
                             int requiredParams = methodParams.Count(p => !p.HasDefaultValue);
                             return parameters.Length >= requiredParams && parameters.Length <= methodParams.Length;
                         });
@@ -1048,23 +1050,23 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     LogManager.Error($"Method '{methodName}' not found on type '{targetType.Name}' with {parameters.Length} parameters");
                     
                     LogManager.Debug($"Available methods named '{rawName}':");
-                    foreach (MethodInfo? m in methods)
+                    foreach (MethodInfo m in methods)
                     {
-                        String? paramInfo = string.Join(", ", m.GetParameters().Select(p => 
+                        string? paramInfo = string.Join(", ", m.GetParameters().Select(p => 
                             $"{p.ParameterType.Name} {p.Name}" + (p.HasDefaultValue ? $" = {p.DefaultValue}" : "")));
                         LogManager.Debug($"  {m.Name}({paramInfo})");
                     }
                     return;
                 }
 
-                ParameterInfo[] methodParams = method.GetParameters();
-                object[] convertedParams = new object[methodParams.Length];
+                ParameterInfo[] finalMethodParams = method.GetParameters();
+                object?[] convertedParams = new object?[finalMethodParams.Length];
 
-                for (int i = 0; i < methodParams.Length && i < parameters.Length; i++)
+                for (int i = 0; i < finalMethodParams.Length && i < parameters.Length; i++)
                 {
                     try
                     {
-                        Type expectedType = methodParams[i].ParameterType;
+                        Type expectedType = finalMethodParams[i].ParameterType;
                         object? value = parameters[i];
 
                         if (value != null && expectedType.IsAssignableFrom(value.GetType()))
@@ -1087,13 +1089,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     catch (Exception ex)
                     {
                         LogManager.Error($"Failed to convert parameter {i} for method '{methodName}': {ex.Message}");
-                        convertedParams[i] = methodParams[i].HasDefaultValue ? methodParams[i].DefaultValue : null;
+                        convertedParams[i] = finalMethodParams[i].HasDefaultValue ? finalMethodParams[i].DefaultValue : null;
                     }
                 }
 
-                for (int i = parameters.Length; i < methodParams.Length; i++)
+                for (int i = parameters.Length; i < finalMethodParams.Length; i++)
                 {
-                    convertedParams[i] = methodParams[i].HasDefaultValue ? methodParams[i].DefaultValue : null;
+                    convertedParams[i] = finalMethodParams[i].HasDefaultValue ? finalMethodParams[i].DefaultValue : null;
                 }
 
                 object? result = method.Invoke(targetObject, convertedParams);
@@ -1105,7 +1107,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
         
-        private static void ExecuteMethodCall(ICustomItem item, string methodCall, EventArgs eventArgs)
+        private static void ExecuteMethodCall(ICustomItem? item, string methodCall, EventArgs eventArgs)
         {
             try
             {
@@ -1146,7 +1148,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     return;
                 }
 
-                object[] parameters = ParseAndResolveParameters(parametersPart, eventArgs, item);
+                object?[] parameters = ParseAndResolveParameters(parametersPart, eventArgs, item);
 
                 ExecuteMethod(targetObject, methodName, parameters);
             }
@@ -1156,8 +1158,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static object? ResolveTargetObject(string objectPath, ICustomItem item, EventArgs eventArgs)
+        private static object? ResolveTargetObject(string objectPath, ICustomItem? item, EventArgs eventArgs)
         {
+            if (item == null)
+                return null;
+
             string originalPath = objectPath;
             LogManager.Debug($"Attempting to resolve: {originalPath}");
 
@@ -1173,8 +1178,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 try
                 {
-                    PropertyInfo? propertyInfo = availableProperties[firstToken];
-                    Object? directValue = propertyInfo.GetValue(eventArgs);
+                    PropertyInfo propertyInfo = availableProperties[firstToken];
+                    object? directValue = propertyInfo.GetValue(eventArgs);
                     LogManager.Debug($"Direct property access for '{firstToken}': {directValue?.GetType()?.Name ?? "null"}");
 
                     if (directValue != null && directValue is not Type)
@@ -1312,7 +1317,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 if (TryResolveType(objectPath, out Type? type))
                 {
-                    LogManager.Debug($"Resolved '{objectPath}' as static type: {type.Name}");
+                    LogManager.Debug($"Resolved '{objectPath}' as static type: {type?.Name ?? "null"}");
                     return type;
                 }
             }
@@ -1354,7 +1359,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return properties;
         }
 
-        private static void HandlePlaceholderPropertyAssignment(ICustomItem item, string propertyPathPlaceholder, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
+        private static void HandlePlaceholderPropertyAssignment(ICustomItem? item, string propertyPathPlaceholder, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
         {
             try
             {
@@ -1383,7 +1388,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static PropertyTarget? ResolvePropertyTarget(string path, object root)
+        private static PropertyTarget? ResolvePropertyTarget(string path, object? root)
         {
             try
             {
@@ -1460,7 +1465,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="eventArgs"></param>
         public static void ExecuteCustomAction(uint actionId, EventArgs eventArgs)
         {
-            if (!CustomAction.CustomActions.TryGetValue(actionId, out ICustomAction customAction))
+            if (!CustomAction.CustomActions.TryGetValue(actionId, out ICustomAction? customAction))
             {
                 LogManager.Error($"{nameof(ArgumentManager)}: CustomAction with ID {actionId} not found");
                 return;
@@ -1474,7 +1479,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// </summary>
         /// <param name="customAction"></param>
         /// <param name="eventArgs"></param>
-        public static void ExecuteCustomAction(ICustomAction customAction, EventArgs eventArgs)
+        public static void ExecuteCustomAction(ICustomAction? customAction, EventArgs eventArgs)
         {
             if (customAction?.Actions == null || customAction.Actions.IsEmpty())
                 return;
@@ -1488,7 +1493,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static object? GetPropertyValue(object root, string propertyPath)
+        private static object? GetPropertyValue(object? root, string propertyPath)
         {
             if (root == null)
                 return null;
@@ -1624,7 +1629,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static object? ConvertToOriginalType(object value, Type targetType)
+        private static object? ConvertToOriginalType(object? value, Type targetType)
         {
             try
             {
@@ -1816,16 +1821,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static object?[] ConvertConstructorParameters(ParameterInfo[] ctorParams, object[] parameters)
+        private static object?[] ConvertConstructorParameters(ParameterInfo[] ctorParams, object?[] parameters)
         {
-            object[] converted = new object[ctorParams.Length];
+            object?[] converted = new object?[ctorParams.Length];
 
             for (int i = 0; i < ctorParams.Length; i++)
             {
                 Type expected = ctorParams[i].ParameterType;
                 object? value = parameters[i];
 
-#pragma warning disable CS8601 // Possible null reference assignment.
                 converted[i] = (value, expected) switch
                 {
                     (null, _) => ctorParams[i].HasDefaultValue
@@ -1844,7 +1848,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                     _ => TryConvertOrDefault(value, expected, expected, ctorParams[i])
                 };
-#pragma warning restore CS8601 // Possible null reference assignment.
             }
 
             return converted;
@@ -1854,7 +1857,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         {
             try
             {
-                object[] parameters = ParseAndResolveParameters(parametersPart, eventArgs, item);
+                object?[] parameters = ParseAndResolveParameters(parametersPart, eventArgs, item);
                 ConstructorInfo[] ctors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 ConstructorInfo? ctor = ctors.FirstOrDefault(c => c.GetParameters().Length == parameters.Length &&
                     c.GetParameters().Select((p, i) =>
@@ -1873,7 +1876,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 }
 
                 ParameterInfo[] ctorParams = ctor.GetParameters();
-                object[] converted = ConvertConstructorParameters(ctorParams, parameters);
+                object?[] converted = ConvertConstructorParameters(ctorParams, parameters);
 
                 return ctor.Invoke(converted);
             }
@@ -1884,12 +1887,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static bool TryHandleVariable(ICustomItem item, string action, EventArgs eventArgs)
+        private static bool TryHandleVariable(ICustomItem? item, string action, EventArgs eventArgs)
         {
             if (!action.StartsWith("let ", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            string[]? parts = action.Substring(4).Split('=', (char)2);
+            string[] parts = action.Substring(4).Split('=', (char)2);
             if (parts.Length != 2)
                 return true;
 
@@ -1898,14 +1901,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             object? value = ResolveTargetObject(expr, item, eventArgs) ?? ReplacePlaceholders(expr, eventArgs);
 
-            if (!_variables.TryGetValue(item, out var dict))
-                dict = _variables[item] = [];
+            if (!_variables.TryGetValue(item!, out var dict))
+                dict = _variables[item!] = [];
 
             dict[varName] = value;
             return true;
         }
 
-        private static bool TryHandleDelayed(ICustomItem item, string action, EventArgs eventArgs)
+        private static bool TryHandleDelayed(ICustomItem? item, string action, EventArgs eventArgs)
         {
             if (!action.StartsWith("after ", StringComparison.OrdinalIgnoreCase))
                 return false;

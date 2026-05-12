@@ -77,10 +77,10 @@ namespace UncomplicatedCustomItems.Examples
             for (int i = 0; i <= 5; i++)
             {
                 Vector3 position = ServerHandler.ClusterOffset(ev.Position);
-                ExplosiveGrenadeProjectile grenade = (ExplosiveGrenadeProjectile)ExplosiveGrenadeProjectile.Create(ItemType.GrenadeHE, position, default, Scale/2);
-                grenade.RemainingTime = 1.3f;
-                grenade.MaxRadius = 4f;
-                grenade.Spawn();
+                ExplosiveGrenadeProjectile? grenade = (ExplosiveGrenadeProjectile?)ExplosiveGrenadeProjectile.Create(ItemType.GrenadeHE, position, default, Scale/2);
+                grenade?.RemainingTime = 1.3f;
+                grenade?.MaxRadius = 4f;
+                grenade?.Spawn();
             }
 
             base.OnDetonating(ev);

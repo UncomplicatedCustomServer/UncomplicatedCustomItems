@@ -42,7 +42,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Item:
                     if (item.CustomData is null)
                     {
-                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'IData', found '{item.CustomData.GetType().Name}' The CustomData formatting is incorrect. \n Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667038750244979";
+                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'IData', found '{item.CustomData?.GetType().Name}' The CustomData formatting is incorrect. \n Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667038750244979";
                         return false;
                     }
 
@@ -309,14 +309,14 @@ namespace UncomplicatedCustomItems.API
         /// <param name="serial"></param>
         /// <param name="item"></param>
         /// <returns><see cref="bool"/> <see langword="true"/> if succeeded</returns>
-        public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem item) => SummonedCustomItem.TryGet(serial, out item);
+        public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem? item) => SummonedCustomItem.TryGet(serial, out item);
 
         /// <summary>
         /// Get a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
         /// <param name="serial"></param>
         /// <returns><see cref="SummonedCustomItem"/> if succeeded, <c>default</c> if not</returns>
-        public static SummonedCustomItem GetSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial);
+        public static SummonedCustomItem? GetSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial);
 
         /// <summary>
         /// Check if an item is a <see cref="SummonedCustomItem"/> by it's <see cref="Item.Serial"/>
@@ -446,7 +446,7 @@ namespace UncomplicatedCustomItems.API
         {
             if (spawn.ReplaceExistingPickup)
             {
-                Pickup targetPickup = FindTargetPickupInRoom(room, spawn, customItem);
+                Pickup? targetPickup = FindTargetPickupInRoom(room, spawn, customItem);
                 if (targetPickup != null)
                 {
                     new SummonedCustomItem(customItem, targetPickup);
@@ -465,7 +465,7 @@ namespace UncomplicatedCustomItems.API
 
             if (spawn.ReplaceExistingPickup)
             {
-                Pickup targetPickup = FindTargetPickupInZone(zone, spawn, customItem);
+                Pickup? targetPickup = FindTargetPickupInZone(zone, spawn, customItem);
                 if (targetPickup != null)
                 {
                     new SummonedCustomItem(customItem, targetPickup);
@@ -477,13 +477,13 @@ namespace UncomplicatedCustomItems.API
             new SummonedCustomItem(customItem, randomRoom.Position);
         }
 
-        private static Pickup FindTargetPickupInRoom(Room room, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FindTargetPickupInRoom(Room room, SpawnData spawn, ICustomItem customItem)
         {
             List<Pickup> pickupsInRoom = Pickup.List.Where(pickup => pickup.Room == room && !IsSummonedCustomItem(pickup.Serial)).ToList();
             return FilterAndSelectPickup(pickupsInRoom, spawn, customItem);
         }
 
-        private static Pickup FindTargetPickupInZone(FacilityZone zone, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FindTargetPickupInZone(FacilityZone zone, SpawnData spawn, ICustomItem customItem)
         {
             List<Pickup> pickupsInZone = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
             if (!(spawn.ReplaceItemsInPedestals ?? false))
@@ -495,7 +495,7 @@ namespace UncomplicatedCustomItems.API
             return FilterAndSelectPickup(pickupsInZone, spawn, customItem);
         }
 
-        private static Pickup FilterAndSelectPickup(List<Pickup> pickups, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FilterAndSelectPickup(List<Pickup> pickups, SpawnData spawn, ICustomItem customItem)
         {
             if (spawn.ForceItem)
                 pickups = pickups.Where(pickup => pickup.Type == customItem.Item).ToList();

@@ -22,7 +22,7 @@ namespace UncomplicatedCustomItems.Events
         
         private static void OnValueReceived(ReferenceHub referenceHub, ServerSpecificSettingBase settingBase)
         {
-            if (!Player.TryGet(referenceHub.gameObject, out Player player))
+            if (!Player.TryGet(referenceHub.gameObject, out Player? player))
                 return;
 
             if (settingBase is SSKeybindSetting keybindSetting && keybindSetting.SettingId == Plugin.Instance.Config.KeybindSettingId && keybindSetting.SyncIsPressed)
@@ -33,9 +33,9 @@ namespace UncomplicatedCustomItems.Events
                     {
                         if (item.Type.IsArmor())
                         {
-                            if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem))
+                            if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem? customItem))
                             {
-                                customItem.HandleEvent(player, ItemEvents.SSSS, item.Serial);
+                                customItem?.HandleEvent(player, ItemEvents.SSSS, item.Serial);
                                 break;
                             }
                             else
@@ -43,8 +43,8 @@ namespace UncomplicatedCustomItems.Events
                         }
                     }
                 }
-                else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem item))
-                    item.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
+                else if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem? item))
+                    item?.HandleEvent(player, ItemEvents.SSSS, player.CurrentItem.Serial);
             }
         }
     }

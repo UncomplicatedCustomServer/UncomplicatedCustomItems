@@ -13,10 +13,10 @@ namespace UncomplicatedCustomItems.API.Components
 {
     public class ToolGunUI : MonoBehaviour
     {
-        private Player Owner;
-        private APICustomItem BaseCustomItem;
-        private SummonedCustomItem CustomItem;
-        private StringBuilder Builder;
+        private Player? Owner;
+        private APICustomItem? BaseCustomItem;
+        private SummonedCustomItem? CustomItem;
+        private StringBuilder? Builder;
         private bool Paused;
 
         public void Init(object customItemobj)
@@ -35,22 +35,22 @@ namespace UncomplicatedCustomItems.API.Components
 
         private void Update()
         {
-            Builder.Clear();
+            Builder?.Clear();
             if (Paused)
                 return;
 
             if (BaseCustomItem != null)
             {
-                if (!SummonedAPICustomItem.TryGet(BaseCustomItem, out var item) || item.CustomItem != BaseCustomItem)
+                if (!SummonedAPICustomItem.TryGet(BaseCustomItem, out var item) || item?.CustomItem != BaseCustomItem)
                     Destroy(this);
                 
                 if (BaseCustomItem is not Features.CustomItemAPI.ToolGun)
                     Destroy(this);
 
-                Owner = item.Owner;
+                Owner = item?.Owner;
             }
 
-            if (Owner.Room == null)
+            if (Owner?.Room == null)
                 return;
 
             if (Owner.CurrentItem == null)
@@ -96,12 +96,12 @@ namespace UncomplicatedCustomItems.API.Components
                 
             colorSetting.SyncInputText.TryParseVector3(out Vector3 color);
             string hexcolor = color.ToHexColor();
-            Builder.AppendLine($"<pos=-10em><voffset=-12.3em><color={Owner.RoleBase.RoleColor.ToHex()}>{Owner.Nickname} - {Owner.Role.GetFullName()}</color></voffset>");
-            Builder.AppendLine($"<pos=-10em>{room} - <color=yellow>{Owner.Room.LocalPosition(Owner.Position)}</color>");
-            Builder.AppendLine($"<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>");
-            Builder.AppendLine($"<pos=-10em>Deletion Mode: {DeletionMode}");
-            Builder.AppendLine($"<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>");
-            Owner.SendHint(Builder.ToString(), 0.5f);
+            Builder?.AppendLine($"<pos=-10em><voffset=-12.3em><color={Owner.RoleBase.RoleColor.ToHex()}>{Owner.Nickname} - {Owner.Role.GetFullName()}</color></voffset>");
+            Builder?.AppendLine($"<pos=-10em>{room} - <color=yellow>{Owner.Room.LocalPosition(Owner.Position)}</color>");
+            Builder?.AppendLine($"<pos=-10em>Primitive Color: <color={hexcolor}>{color}</color>");
+            Builder?.AppendLine($"<pos=-10em>Deletion Mode: {DeletionMode}");
+            Builder?.AppendLine($"<pos=-10em>Deleting: <color={deletioncolor}>{deletionbool}</color>");
+            Owner.SendHint(Builder?.ToString() ?? string.Empty, 0.5f);
         }
 
         public void Pause() => Paused = true;

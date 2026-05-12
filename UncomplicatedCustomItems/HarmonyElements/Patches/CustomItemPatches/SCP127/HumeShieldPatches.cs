@@ -15,16 +15,16 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPatch("HsMax", MethodType.Getter)]
         public static void Postfix(Scp127HumeModule __instance, ref float __result)
         {
-            if (__instance != null || __instance.Item != null)
+            if (__instance != null || __instance?.Item != null)
                 return;
 
-            if (APICustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
+            if (APICustomItem.TryGet(__instance?.Item.ItemSerial ?? 0, out var item2) && item2 is CustomSCP127 custom127)
             {
                 try
                 {
                     if (custom127.GiveHumeShield)
                     {
-                        __result = Scp127TierManagerModule.GetTierForItem(__instance.Item)
+                        __result = Scp127TierManagerModule.GetTierForItem(__instance?.Item)
                         switch
                         {
                             Scp127Tier.Tier1 => custom127.Tier1HumeShieldAmount,
@@ -42,14 +42,16 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 }
             }
 
-            if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out var itemhume) && itemhume.CustomItem.CustomItemType == CustomItemType.SCPItem && itemhume.Item.Type == ItemType.GunSCP127)
+            if (Utilities.TryGetSummonedCustomItem(__instance?.Item.ItemSerial ?? 0, out var itemhume) && itemhume?.CustomItem.CustomItemType == CustomItemType.SCPItem && itemhume?.Item?.Type == ItemType.GunSCP127)
             {
                 try
                 {
-                    SCP127Data data = itemhume.CustomItem.CustomData as SCP127Data;
+                    if (itemhume.CustomItem.CustomData is not SCP127Data data)
+                        return;
+
                     if (data.GiveHumeShield)
                     {
-                        __result = Scp127TierManagerModule.GetTierForItem(__instance.Item)
+                        __result = Scp127TierManagerModule.GetTierForItem(__instance?.Item)
                         switch
                         {
                             Scp127Tier.Tier1 => data.Tier1HumeShieldAmount,

@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             "Pickupable",
         ];
 
-        public string ApiType { get; set; }
+        public string ApiType { get; set; } = string.Empty;
         public uint ItemId { get; set; }
         public float TimeTillDespawn { get; set; }
         public float Chance { get; set; }
@@ -33,6 +33,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<string>("ItemType", out var itemType))
@@ -91,7 +94,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             SummonedCustomItem summonedItem = new(itemToSpawn, ev.Position);
                             if (Pickupable == false)
                             {
-                                summonedItem.Pickup.Weight = 5000f;
+                                summonedItem.Pickup?.Weight = 5000f;
                             }
                             if (TimeTillDespawn > 0f)
                             {
@@ -126,7 +129,10 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                         if ((ItemType)ItemId == ItemType.SCP244a || (ItemType)ItemId == ItemType.SCP244b)
                         {
                             LogManager.Debug($"Item is SCP244a or SCP244b");
-                            Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create((ItemType)ItemId, ev.Position);
+                            Scp244Pickup? scp244Pickup = (Scp244Pickup?)Scp244Pickup.Create((ItemType)ItemId, ev.Position);
+                            if (scp244Pickup == null)
+                                return;
+
                             scp244Pickup.Base.MaxDiameter = 0.1f;
                             scp244Pickup.State = Scp244State.Active;
                             scp244Pickup.Spawn();
@@ -141,7 +147,10 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                         }
                         else
                         {
-                            Pickup pickup = Pickup.Create((ItemType)ItemId, ev.Position);
+                            Pickup? pickup = Pickup.Create((ItemType)ItemId, ev.Position);
+                            if (pickup == null)
+                                return;
+                                
                             Vector3 vector3 = new(0f, 1f, 0f);
                             pickup.Transform.position = pickup.Transform.position + vector3;
                             pickup.Spawn();

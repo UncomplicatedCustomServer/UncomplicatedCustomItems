@@ -29,10 +29,13 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public bool AddDurationIfActive { get; set; }
         public bool ClearOnUnequip { get; set; }
         public TriggerOn Trigger { get; set; }
-        private StatusEffectBase StatusEffect { get; set; }
+        private StatusEffectBase? StatusEffect { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
@@ -42,7 +45,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     return;
                 }
 
-                if (!Server.Host.TryGetEffect(EffectName, out var _effect))
+                if (!Server.Host!.TryGetEffect(EffectName, out var _effect))
                 {
                     LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} {EffectName} is not a valid Effect!");
                     return;

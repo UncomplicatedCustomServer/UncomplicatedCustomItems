@@ -20,9 +20,9 @@ namespace UncomplicatedCustomItems.API.Components
     {
         private bool initialized;
 
-        public GameObject Owner { get; private set; }
+        public GameObject? Owner { get; private set; }
 
-        public EffectGrenade Grenade { get; private set; }
+        public EffectGrenade? Grenade { get; private set; }
 
         public void Init(GameObject owner, ThrownProjectile grenade)
         {
@@ -49,17 +49,17 @@ namespace UncomplicatedCustomItems.API.Components
                     {
                         LogManager.Error("collision is null!");
                     }
-                    if (!collision.collider)
+                    if (!collision?.collider)
                     {
                         LogManager.Error("water :|");
                     }
-                    if (collision.collider.gameObject == null)
+                    if (collision?.collider.gameObject == null)
                     {
                         LogManager.Error("Null collider gameobject");
                     }
-                    if (!(collision.collider.gameObject == Owner) && !collision.collider.gameObject.TryGetComponent<EffectGrenade>(out var _))
+                    if (!(collision?.collider.gameObject == Owner) && !collision!.collider.gameObject.TryGetComponent<EffectGrenade>(out var _))
                     {
-                        Grenade.TargetTime = 0.10000000149011612;
+                        Grenade?.TargetTime = 0.10000000149011612;
                     }
                 }
             }

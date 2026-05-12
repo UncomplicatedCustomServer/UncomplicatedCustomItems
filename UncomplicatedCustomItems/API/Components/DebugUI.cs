@@ -22,8 +22,8 @@ namespace UncomplicatedCustomItems.API.Components
     
     public class DebugUI : MonoBehaviour
     {
-        private Player Player;
-        private StringBuilder Builder;
+        private Player? Player;
+        private StringBuilder? Builder;
         public readonly List<Segment> ActiveSegments = [];
 
         public void Init(Player player)
@@ -34,7 +34,7 @@ namespace UncomplicatedCustomItems.API.Components
 
         private void Update()
         {
-            if (ActiveSegments.Count <= 0)
+            if (ActiveSegments.Count <= 0 || Builder == null || Player == null)
                 return;
 
             Builder.Clear();
@@ -59,19 +59,19 @@ namespace UncomplicatedCustomItems.API.Components
 
         private void HandleBaseSegment()
         {
-            if (!ActiveSegments.Contains(Segment.Base))
+            if (!ActiveSegments.Contains(Segment.Base) || Builder == null || Player == null)
                 return;
 
             Builder.AppendLine($"UCI Debug Menu {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             Builder.AppendLine($"");
-            Builder.AppendLine($"Room Name: {Player.CachedRoom.Name}");
-            Builder.AppendLine($"Local Position: {Player.CachedRoom.LocalPosition(Player.Position)}");
-            Builder.AppendLine($"World Position: {Player.CachedRoom.Position}");
+            Builder.AppendLine($"Room Name: {Player.CachedRoom?.Name ?? RoomName.Unnamed}");
+            Builder.AppendLine($"Local Position: {Player.CachedRoom?.LocalPosition(Player.Position)}");
+            Builder.AppendLine($"World Position: {Player.CachedRoom?.Position}");
         }
 
         private void HandleTotalItemsSegment()
         {
-            if (!ActiveSegments.Contains(Segment.TotalItems))
+            if (!ActiveSegments.Contains(Segment.TotalItems) || Builder == null || Player == null)
                 return;
 
             Builder.AppendLine($"Total Custom Items: {CustomItem.List.Count()}");
@@ -82,13 +82,13 @@ namespace UncomplicatedCustomItems.API.Components
 
         private void HandleZoneInformationSegment()
         {
-            if (!ActiveSegments.Contains(Segment.ZoneInformation))
+            if (!ActiveSegments.Contains(Segment.ZoneInformation) || Builder == null || Player == null)
                 return;
 
-            Builder.AppendLine($"Total Custom Items on Surface Zone: {SummonedCustomItem.List.Where(s => s.IsPickup && s.Pickup.Room.Zone == FacilityZone.Surface).Count() + SummonedAPICustomItem.List.Where(s => s.IsPickup && s.Pickup.Room.Zone == FacilityZone.Surface).Count()}");
-            Builder.AppendLine($"Total Custom Items in Entrance Zone: {SummonedCustomItem.List.Where(s => s.IsPickup && s.Pickup.Room.Zone == FacilityZone.Entrance).Count() + SummonedAPICustomItem.List.Where(s => s.IsPickup && s.Pickup.Room.Zone == FacilityZone.Entrance).Count()}");
-            Builder.AppendLine($"Total Custom Items in Heavy Containment Zone: {SummonedCustomItem.List.Where(s => s.IsPickup && s.Pickup.Room.Zone == FacilityZone.HeavyContainment).Count() + SummonedAPICustomItem.List.Where(s => s.IsPickup && s.Pickup.Room.Zone == FacilityZone.HeavyContainment).Count()}");
-            Builder.AppendLine($"Total Custom Items in Light Containment Zone: {SummonedCustomItem.List.Where(s => s.IsPickup && s.Pickup.Room.Zone == FacilityZone.LightContainment).Count() + SummonedAPICustomItem.List.Where(s => s.IsPickup && s.Pickup.Room.Zone == FacilityZone.LightContainment).Count()}");
+            Builder.AppendLine($"Total Custom Items on Surface Zone: {SummonedCustomItem.List.Where(s => s.IsPickup && s.Pickup!.Room!.Zone == FacilityZone.Surface).Count() + SummonedAPICustomItem.List.Where(s => s.IsPickup && s.Pickup!.Room!.Zone == FacilityZone.Surface).Count()}");
+            Builder.AppendLine($"Total Custom Items in Entrance Zone: {SummonedCustomItem.List.Where(s => s.IsPickup && s.Pickup!.Room!.Zone == FacilityZone.Entrance).Count() + SummonedAPICustomItem.List.Where(s => s.IsPickup && s.Pickup!.Room!.Zone == FacilityZone.Entrance).Count()}");
+            Builder.AppendLine($"Total Custom Items in Heavy Containment Zone: {SummonedCustomItem.List.Where(s => s.IsPickup && s.Pickup!.Room!.Zone == FacilityZone.HeavyContainment).Count() + SummonedAPICustomItem.List.Where(s => s.IsPickup && s.Pickup!.Room!.Zone == FacilityZone.HeavyContainment).Count()}");
+            Builder.AppendLine($"Total Custom Items in Light Containment Zone: {SummonedCustomItem.List.Where(s => s.IsPickup && s.Pickup!.Room!.Zone == FacilityZone.LightContainment).Count() + SummonedAPICustomItem.List.Where(s => s.IsPickup && s.Pickup!.Room!.Zone == FacilityZone.LightContainment).Count()}");
         }
     }
 }

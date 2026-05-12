@@ -106,7 +106,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 
                             LogManager.Silent($"{nameof(CustomModuleManager)}: Importing {type.FullName}!");
                             ActivePlugins.TryAdd(pluginEntry.Key);
-                            object instance = null;
+                            object instance = null!;
                             try
                             {
                                 instance = Activator.CreateInstance(type);

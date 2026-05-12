@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (arguments.Count == 1)
             {
-                Player target = Player.Get(int.Parse(arguments[0]));
+                Player? target = Player.Get(int.Parse(arguments[0]));
                 if (target == null)
                 {
                     response = "Player not found!";
@@ -43,13 +43,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
+
                 new SummonedAPICustomItem(customItem, target);
                 response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                 return true;
             }
             else
             {
-                Player target = Player.Get(sender);
+                Player? target = Player.Get(sender);
                 if (target == null)
                 {
                     response = "Player not found!";
@@ -65,6 +66,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
+                
                 new SummonedAPICustomItem(customItem, target);
                 response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                 return true;

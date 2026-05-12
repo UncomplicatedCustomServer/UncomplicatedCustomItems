@@ -35,7 +35,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             {
                 string Status = item.IsPickup ? "Pickup" : " Item ";
                 string Owner = (item.Owner == null) ? "null" : item.Owner.Nickname;
-                response += $"\n   {item.Serial}    {item.CustomItem.Id}   {Status}   {item.CustomItem.Name}   {Owner}";
+                response += $"\n   {item.Serial}    {item.CustomItem?.Id}   {Status}   {item.CustomItem?.Name}   {Owner}";
             }
 
             return true;

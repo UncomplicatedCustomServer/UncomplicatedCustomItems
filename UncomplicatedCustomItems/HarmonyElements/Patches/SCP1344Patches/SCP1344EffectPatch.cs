@@ -11,12 +11,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     {
         public static bool Prefix(Scp1344Item __instance)
         {
-            if (!Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var summonedCustomItem))
+            if (!Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var summonedCustomItem) || summonedCustomItem == null)
                 return true;
 
             if (summonedCustomItem.CustomItem.CustomItemType is CustomItemType.SCPItem && summonedCustomItem.CustomItem.Item is ItemType.SCP1344)
             {
-                ISCP1344Data data = summonedCustomItem.CustomItem.CustomData as ISCP1344Data;
+                if (summonedCustomItem.CustomItem.CustomData is not ISCP1344Data data)
+                    return true;
+                    
                 __instance.Scp1344Effect.IsEnabled = data.Apply1344Effect;
                 __instance.BlindnessEffect.IsEnabled = data.ApplyBlindnessEffect;
                 return false;

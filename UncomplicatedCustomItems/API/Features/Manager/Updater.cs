@@ -18,25 +18,25 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         public class GitHubReleaseInfo
         {
             [JsonPropertyName("tag_name")]
-            public string TagName { get; set; }
+            public string TagName { get; set; } = string.Empty;
 
             [JsonPropertyName("prerelease")]
             public bool PreRelease { get; set; }
 
             [JsonPropertyName("assets")]
-            public GitHubAssetInfo[] Assets { get; set; }
+            public GitHubAssetInfo[] Assets { get; set; } = [];
 
             [JsonPropertyName("body")]
-            public string Body { get; set; }
+            public string Body { get; set; } = string.Empty;
         }
 
         public class GitHubAssetInfo
         {
             [JsonPropertyName("name")]
-            public string Name { get; set; }
+            public string Name { get; set; } = string.Empty;
 
             [JsonPropertyName("browser_download_url")]
-            public string BrowserDownloadUrl { get; set; }
+            public string BrowserDownloadUrl { get; set; } = string.Empty;
         }
         
 #if EXILED
@@ -52,7 +52,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             Version currentVersion = Plugin.Instance.Version;
             LogManager.Updater($"Current version: {currentVersion}. Checking for updates...");
 
-            GitHubReleaseInfo latestRelease = null;
+            GitHubReleaseInfo? latestRelease = null;
             yield return Timing.WaitUntilDone(GetLatestReleaseCoroutine(result => latestRelease = result));
 
             if (latestRelease == null)
@@ -79,13 +79,13 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         public static IEnumerator<float> UpdatePluginCoroutine(string forceArgument)
         {
-            GitHubReleaseInfo latestRelease = null;
+            GitHubReleaseInfo? latestRelease = null;
             yield return Timing.WaitUntilDone(GetLatestReleaseCoroutine(result => latestRelease = result));
 
             if (latestRelease == null)
                 yield break;
 
-            GitHubAssetInfo asset = latestRelease.Assets?.FirstOrDefault(a => a.Name.Equals(PluginDllName, StringComparison.OrdinalIgnoreCase));
+            GitHubAssetInfo? asset = latestRelease.Assets?.FirstOrDefault(a => a.Name.Equals(PluginDllName, StringComparison.OrdinalIgnoreCase));
 
             if (asset == null || string.IsNullOrEmpty(asset.BrowserDownloadUrl))
             {
@@ -134,7 +134,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-        private static IEnumerator<float> GetLatestReleaseCoroutine(Action<GitHubReleaseInfo> onComplete)
+        private static IEnumerator<float> GetLatestReleaseCoroutine(Action<GitHubReleaseInfo?> onComplete)
         {
             UnityWebRequest req = UnityWebRequest.Get(ReleasesApiUrl);
             req.SetRequestHeader("User-Agent", UserAgent);
@@ -155,7 +155,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             try
             {
                 string jsonResponse = req.downloadHandler.text;
-                List<GitHubReleaseInfo> releases = JsonSerializer.Deserialize<List<GitHubReleaseInfo>>(jsonResponse);
+                List<GitHubReleaseInfo>? releases = JsonSerializer.Deserialize<List<GitHubReleaseInfo>>(jsonResponse);
 
                 if (releases == null || releases.Count == 0)
                 {

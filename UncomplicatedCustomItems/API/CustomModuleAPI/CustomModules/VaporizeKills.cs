@@ -15,10 +15,10 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             if (!Check(eventArgs))
                 return;
                 
-            if (eventArgs is PlayerDyingEventArgs ev && Utilities.TryGetSummonedCustomItem(ev.Attacker?.CurrentItem.Serial ?? 0, out var item))
+            if (eventArgs is PlayerDyingEventArgs ev && Utilities.TryGetSummonedCustomItem(ev.Attacker?.CurrentItem?.Serial ?? 0, out var item))
             {
                 LogManager.Silent("Name | Id | CustomFlag(s)");
-                LogManager.Silent($"{item.CustomItem.Name} - {item.CustomItem.Id}");
+                LogManager.Silent($"{item?.CustomItem.Name} - {item?.CustomItem.Id}");
                 LogManager.Debug($"Vaporizing {ev.Player.Nickname}");
                 ev.Player.Vaporize(ev.Attacker);
             }

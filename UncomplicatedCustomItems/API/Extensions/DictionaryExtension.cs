@@ -11,7 +11,7 @@ namespace UncomplicatedCustomItems.API.Extensions
     {
         public static bool TryGetRaw(this Dictionary<object, object> dict, string name, out object value)
         {
-            value = null;
+            value = null!;
             if (dict == null || name == null)
                 return false;
 
@@ -266,7 +266,7 @@ namespace UncomplicatedCustomItems.API.Extensions
                 }
             }
 
-            key = default;
+            key = default!;
             return false;
         }
     }

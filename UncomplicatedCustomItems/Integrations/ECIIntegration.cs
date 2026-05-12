@@ -42,7 +42,7 @@ namespace UncomplicatedCustomItems.Integrations
 
             try
             {
-                MethodBase targetMethod = GetTargetMethod();
+                MethodBase? targetMethod = GetTargetMethod();
                 if (targetMethod == null)
                 {
                     LogManager.Debug("ECI target method not found - ECI may not be installed.");
@@ -68,7 +68,7 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
-        private static MethodBase GetTargetMethod()
+        private static MethodBase? GetTargetMethod()
         {
             try
             {
@@ -114,14 +114,14 @@ namespace UncomplicatedCustomItems.Integrations
                 string itemName = nameProperty?.GetValue(__instance)?.ToString() ?? "Unknown";
                 LogManager.Debug($"ECI Integration intercepted item '{item}' for item '{itemName}'");
 
-                Player labPlayer = ECRIntegration.GetLabPlayerFromExiledPlayer(player);
+                Player? labPlayer = ECRIntegration.GetLabPlayerFromExiledPlayer(player);
                 if (labPlayer == null)
                 {
                     LogManager.Error("Failed to convert Exiled player to LabAPI player.");
                     return true;
                 }
 
-                Item labitem = GetLabItemFromExiledItem(item);
+                Item? labitem = GetLabItemFromExiledItem(item);
                 if (labitem == null)
                 {
                     LogManager.Error("Failed to convert Exiled item to LabAPI item.");
@@ -144,7 +144,7 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
-        internal static Item GetLabItemFromExiledItem(object exiledItem)
+        internal static Item? GetLabItemFromExiledItem(object exiledItem)
         {
             if (exiledItem == null)
                 return null;

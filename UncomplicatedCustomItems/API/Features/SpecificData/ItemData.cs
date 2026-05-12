@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
             new() 
             {
                 Event = ItemEvents.Pickup,
-                Command = null,
+                Command = string.Empty,
                 CoolDown = 1f,
                 ConsoleMessage = "A funny message for the console",
                 BroadcastMessage = "The broadcast uuhh!!!",

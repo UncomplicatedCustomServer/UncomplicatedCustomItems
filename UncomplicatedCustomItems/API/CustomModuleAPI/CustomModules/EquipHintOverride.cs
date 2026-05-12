@@ -14,11 +14,14 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             "Duration"
         ];
 
-        public string Hint { get; set; }
+        public string Hint { get; set; } = string.Empty;
         public uint Duration { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<string>("Hint", out var hint))

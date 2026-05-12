@@ -18,11 +18,14 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public bool LockerSpawning { get; set; }
         public bool ReplacePrimitive { get; set; }
-        public string SchematicName { get; set; }
-        public string ObjectName { get; set; }
+        public string SchematicName { get; set; } = string.Empty;
+        public string ObjectName { get; set; } = string.Empty;
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<bool>("LockerSpawning", out var lockerSpawning))

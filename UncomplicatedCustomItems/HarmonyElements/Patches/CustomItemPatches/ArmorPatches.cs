@@ -15,13 +15,13 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             try
             {
-                if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is ArmorData ad && !item.IsPickup)
+                if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is ArmorData ad && !item.IsPickup)
                 {
                     __result = __instance.ProcessMultiplier(ad.StaminaRegenMultiplier);
                     return false;
                 }
 
-                if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var api) && api.CustomItem is CustomArmor ca && !api.IsPickup)
+                if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var api) && api != null && api.CustomItem is CustomArmor ca && !api.IsPickup)
                 {
                     __result = __instance.ProcessMultiplier(ca.StaminaRegenMultiplier);
                     return false;

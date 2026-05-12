@@ -63,6 +63,7 @@ namespace UncomplicatedCustomItems
         public override LoadPriority Priority => LoadPriority.Highest;
 #endif
 
+#nullable disable
         public static Plugin Instance { get; private set; }
 
         internal Harmony _harmony;
@@ -70,8 +71,9 @@ namespace UncomplicatedCustomItems
         internal static HttpManager HttpManager;
 
         internal FileConfig FileConfig;
+#nullable enable
 
-        internal List<ServerSpecificSettingBase> _settings;
+        internal List<ServerSpecificSettingBase> _settings = [];
 
         private bool FailedToPatch { get; set; }
 
@@ -213,7 +215,7 @@ namespace UncomplicatedCustomItems
             PlayerExtensions.PlayerKills.Clear();
             PlayerHandler.CustomScp268Effects.Clear();
 
-            _settings = null;
+            _settings = null!;
 
             HttpManager.UnregisterEvents();
             _harmony.UnpatchAll();

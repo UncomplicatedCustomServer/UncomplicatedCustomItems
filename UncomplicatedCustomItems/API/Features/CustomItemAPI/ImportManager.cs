@@ -152,7 +152,9 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                             LogManager.Silent($"{nameof(ImportManager)}: Importing It!");
                             ActivePlugins.TryAdd(dic.Key);
 
-                            APICustomItem Item = Activator.CreateInstance(type) as APICustomItem;
+                            if (Activator.CreateInstance(type) is not APICustomItem Item)
+                                continue;
+
                             LogManager.Info($"{nameof(ImportManager)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {dic.Key.Name} - {type.FullName}");
 
                             APICustomItem.Register(Item);

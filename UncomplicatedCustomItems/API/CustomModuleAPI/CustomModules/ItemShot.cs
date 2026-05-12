@@ -41,6 +41,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<bool>("IsGrenade", out var isGrenade))
@@ -106,6 +109,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         {
             if (!Check(eventArgs))
                 return;
+
+            if (CustomItem == null)
+                return;
                 
             if (eventArgs is PlayerShootingWeaponEventArgs ev)
             {
@@ -126,7 +132,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 if ((ItemType == ItemType.GrenadeHE || ItemType == ItemType.GrenadeFlash || ItemType == ItemType.SCP018 || ItemType == ItemType.SCP2176) && IsGrenade)
                 {
                     int fuse = ItemType == ItemType.SCP2176 ? 30 : 10;
-                    Pickup spawned = (Pickup)TimedGrenadeProjectile.SpawnActive(position, ItemType, ev.Player, fuse);
+                    Pickup? spawned = (Pickup?)TimedGrenadeProjectile.SpawnActive(position, ItemType, ev.Player, fuse);
                     if (spawned != null)
                     {
                         ApplyPhysics(ev.Player, spawned);
@@ -141,7 +147,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                 }
 
-                Pickup pickup = Pickup.Create(ItemType, position);
+                Pickup? pickup = Pickup.Create(ItemType, position);
                 if (pickup == null)
                 {
                     LogManager.Warn($"{CustomItem.Name} - Failed to create pickup for ItemType {ItemType}");
@@ -151,7 +157,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 if (pickup.Base.Info.ItemId.GetItemBase() is InventorySystem.Items.ThrowableProjectiles.ThrowableItem throwableItem)
                 {
                     ThrownProjectile thrownProjectile = UnityEngine.Object.Instantiate(throwableItem.Projectile);
-                    if (Pickup.TryGet(thrownProjectile.ItemId.SerialNumber, out var pickup1))
+                    if (Pickup.TryGet(thrownProjectile.ItemId.SerialNumber, out _))
                     {
                         ApplyPhysics(ev.Player, Pickup.Get(thrownProjectile));
 
@@ -187,18 +193,21 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             PlayerEvents.ShootingWeapon -= Run;
         }
 
-        private void ApplyPhysics(Player player, Pickup pickup)
+        private void ApplyPhysics(Player player, Pickup? pickup)
         {
+            if (pickup == null)
+                return;
+
             float num = 1f - Mathf.Abs(Vector3.Dot(player.Camera.forward, Vector3.up));
             Vector3 forward = player.Camera.forward;
             Vector3 vector = player.Camera.up * UpwardsFactor;
             Vector3 vector3 = forward + vector * num;
             Vector3 velocityVector = vector3 * Velocity;
 
-            Rigidbody rb = pickup.PickupStandardPhysics.Rb;
-            rb.centerOfMass = Vector3.zero;
-            rb.angularVelocity = Torque;
-            rb.linearVelocity = velocityVector;
+            Rigidbody? rb = pickup.PickupStandardPhysics?.Rb;
+            rb?.centerOfMass = Vector3.zero;
+            rb?.angularVelocity = Torque;
+            rb?.linearVelocity = velocityVector;
 
             LogManager.Debug($"Applying physics to {pickup.Type} - {pickup.Serial}: VelocityVector: {velocityVector}, StartTorque: {Torque}, ");
         }

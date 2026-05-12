@@ -80,7 +80,7 @@ namespace UncomplicatedCustomItems.API.ToolGun
                 return;
 
             if (SummonedAPICustomItem.TryGet(this, out var item))
-                item.Destroy();
+                item?.Destroy();
 
             base.OnDropped(ev);
         }
@@ -97,9 +97,9 @@ namespace UncomplicatedCustomItems.API.ToolGun
                         primitive.Destroy();
                 }
             }
-            
+
             if (Check(ev.NewItem))
-                ev.Player.GameObject.AddComponent<ToolGunUI>().Init(this);
+                ev.Player.GameObject?.AddComponent<ToolGunUI>().Init(this);
 
             base.OnChangedItem(ev);
         }
@@ -146,8 +146,8 @@ namespace UncomplicatedCustomItems.API.ToolGun
                 }
                 else
                 {
-                    ev.Player.GameObject.GetComponent<ToolGunUI>().Pause();
-                    Timing.CallDelayed(5f, () => ev.Player.GameObject.GetComponent<ToolGunUI>().Unpause());
+                    ev.Player.GameObject?.GetComponent<ToolGunUI>().Pause();
+                    Timing.CallDelayed(5f, () => ev.Player.GameObject?.GetComponent<ToolGunUI>().Unpause());
 
                     SSPlaintextSetting setting = ServerSpecificSettingsSync.GetSettingOfUser<SSPlaintextSetting>(ev.Player.ReferenceHub, 21);
                     string room = string.Empty;
@@ -164,26 +164,29 @@ namespace UncomplicatedCustomItems.API.ToolGun
                         color = new Vector4(x, y, z, w);
                     }
 
-                    if (ev.Player.Room.Name is not RoomName.Unnamed)
+                    if (ev.Player.Room != null)
                     {
-                        room = ev.Player.Room.Name.ToString();                        
-                    }
-                    else
-                        room = ev.Player.Room.GameObject.name;
+                        if (ev.Player.Room.Name is not RoomName.Unnamed)
+                        {
+                            room = ev.Player.Room.Name.ToString();
+                        }
+                        else
+                            room = ev.Player.Room.GameObject.name;
 
-                    Vector3 relativePosition = ev.Player.Room.LocalPosition(hitInfo1.point);
-                    LogManager.Info($"Triggered by {ev.Player.Nickname}. Relative position inside {room}: {relativePosition}");
-                    ev.Player.SendHint($"Relative position inside {room}: {relativePosition}. This was also sent to the console.", 6f);
-                    ev.Player.SendConsoleMessage($"Relative position inside {room}: {relativePosition}", "white");
-                    Vector3 scale = new(0.2f, 0.2f, 0.2f);
-                    PrimitiveObjectToy primitive = PrimitiveObjectToy.Create(hitInfo1.point);
-                    primitive.Type = PrimitiveType.Cube;
-                    primitive.Color = color;
-                    primitive.Scale = scale;
-                    primitive.Flags = AdminToys.PrimitiveFlags.Visible;
-                    primitive.Rotation = ev.Player.Room.Rotation;
-                    primitive.GameObject.name = $"UCI {relativePosition}";
-                    PlayerHandler._toolGunPrimitives.TryAdd(primitive, ev.Player.PlayerId);
+                        Vector3 relativePosition = ev.Player.Room.LocalPosition(hitInfo1.point);
+                        LogManager.Info($"Triggered by {ev.Player.Nickname}. Relative position inside {room}: {relativePosition}");
+                        ev.Player.SendHint($"Relative position inside {room}: {relativePosition}. This was also sent to the console.", 6f);
+                        ev.Player.SendConsoleMessage($"Relative position inside {room}: {relativePosition}", "white");
+                        Vector3 scale = new(0.2f, 0.2f, 0.2f);
+                        PrimitiveObjectToy primitive = PrimitiveObjectToy.Create(hitInfo1.point);
+                        primitive.Type = PrimitiveType.Cube;
+                        primitive.Color = color;
+                        primitive.Scale = scale;
+                        primitive.Flags = AdminToys.PrimitiveFlags.Visible;
+                        primitive.Rotation = ev.Player.Room.Rotation;
+                        primitive.GameObject.name = $"UCI {relativePosition}";
+                        PlayerHandler._toolGunPrimitives.TryAdd(primitive, ev.Player.PlayerId);
+                    }
                 }
             }
 

@@ -112,7 +112,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 if (ev.Projectile is TimedGrenadeProjectile timedprojectile)
                     timedprojectile.RemainingTime = FuseTime;
                 if (ExplodeOnImpact)
-                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host).GameObject, ev.Projectile.Base);         
+                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host!).GameObject!, ev.Projectile.Base);         
             }
 
         }

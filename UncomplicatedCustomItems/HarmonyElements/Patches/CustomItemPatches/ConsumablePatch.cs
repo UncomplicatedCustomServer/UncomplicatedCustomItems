@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPrefix]
         public static bool Prefix(Consumable __instance)
         {
-            if (API.Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out SummonedCustomItem CustomItem))
+            if (API.Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out SummonedCustomItem? CustomItem) && CustomItem != null)
             {
                 LogManager.Debug($"Checking if {CustomItem.CustomItem.Name} is Adrenaline, Painkillers or Medkit");
                 if (CustomItem.CustomItem.CustomItemType is CustomItemType.Adrenaline or CustomItemType.Painkillers or CustomItemType.Medikit)
@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 }
             }
 
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var item))
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var item) && item != null)
             {
                 switch (item.CustomItem)
                 {

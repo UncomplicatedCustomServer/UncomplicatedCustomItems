@@ -20,7 +20,7 @@ namespace UncomplicatedCustomItems.Commands.User
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player player = Player.Get(sender);
+            Player? player = Player.Get(sender);
 
             if (player == null || sender.LogName is "SERVER CONSOLE" || sender.LogName.Contains("Dedicated Server"))
             {
@@ -43,21 +43,21 @@ namespace UncomplicatedCustomItems.Commands.User
                 return false;
             }
 
-            if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out var customItem) && !string.IsNullOrEmpty(customItem.CustomItem.ExtendedDescription))
+            if (Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out var customItem) && !string.IsNullOrEmpty(customItem?.CustomItem.ExtendedDescription))
             {
-                string description = customItem.CustomItem.ExtendedDescription
-                .Replace("%name%", customItem.CustomItem.Name)
-                .Replace("%playername%", customItem.Owner.DisplayName)
-                .Replace("%player%", customItem.Owner.DisplayName)
-                .Replace("%id%", customItem.CustomItem.Id.ToString()
-                .Replace("%serial%", customItem.Serial.ToString()));
+                string description = customItem?.CustomItem.ExtendedDescription ?? string.Empty
+                .Replace("%name%", customItem?.CustomItem.Name)
+                .Replace("%playername%", customItem?.Owner?.DisplayName)
+                .Replace("%player%", customItem?.Owner?.DisplayName)
+                .Replace("%id%", customItem?.CustomItem.Id.ToString()
+                .Replace("%serial%", customItem?.Serial.ToString()));
 
                 response = description;
                 return true;
             }
             else
             {
-                response = $"{customItem.CustomItem.Name} Doesn't have a extended description!";
+                response = $"{customItem?.CustomItem.Name} Doesn't have a extended description!";
                 return false;
             }
         }

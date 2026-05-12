@@ -45,11 +45,15 @@ namespace UncomplicatedCustomItems.Commands.Admin
             long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             ShareLogsRequest request = new();
             Logger.Info("[ShareTheLog] Starting log upload process...");
-            request.SendRequest((request) => {
-                Response response = JsonSerializer.Deserialize<Response>(request.downloadHandler.text);
-                Logger.Info("[ShareTheLog] Successfully shared the UCI logs with the developers!");
-                Logger.Info($"[ShareTheLog] Send this ID to the developers: {response.Id}");
-                Logger.Info($"[ShareTheLog] Operation completed in {DateTimeOffset.Now.ToUnixTimeMilliseconds() - start}ms");
+            request.SendRequest((request) =>
+            {
+                Response? response = JsonSerializer.Deserialize<Response>(request.downloadHandler.text);
+                if (response != null)
+                {
+                    Logger.Info("[ShareTheLog] Successfully shared the UCI logs with the developers!");
+                    Logger.Info($"[ShareTheLog] Send this ID to the developers: {response.Id}");
+                    Logger.Info($"[ShareTheLog] Operation completed in {DateTimeOffset.Now.ToUnixTimeMilliseconds() - start}ms");
+                }
             });
             return true;
         }

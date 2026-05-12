@@ -53,6 +53,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <returns>Value between 0% and 100%</returns>
         public static float Clamp(float? value, float min, float max)
         {
+            value ??= 50f;
             return (float)((value < min) ? min : (value > max) ? max : value)/100;
         }
 
@@ -63,7 +64,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         /// <param name="Coords"></param>
         public static void PlayAudio(SummonedCustomItem CustomItem, Vector3 Coords)
         {
-            if (!CustomItem.TryGetModule<CustomAudio>(out var data))
+            if (!CustomItem.TryGetModule<CustomAudio>(out var data) || data == null)
             {
                 LogManager.Warn($"SoundModule not found on {CustomItem.CustomItem.Name}!");
                 return;

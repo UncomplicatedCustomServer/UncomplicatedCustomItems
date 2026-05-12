@@ -52,12 +52,12 @@ namespace UncomplicatedCustomItems.Events
         {
             if (Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out var item))
             {
-                item.OnDetonated(ev);
+                item?.OnDetonated(ev);
             }
 
             if (SummonedAPICustomItem.TryGet(ev.TimedGrenade.Serial, out var api))
             {
-                api.OnDetonated(ev);
+                api?.OnDetonated(ev);
             }
         }
 
@@ -71,7 +71,7 @@ namespace UncomplicatedCustomItems.Events
                 if (customItem.Item is ItemType.SCP330 && customItem.CustomData is ICandyData data && !data.AllowSpawningAsItem)
                     continue;
 
-                LogManager.Debug($"{customItem.Name} DoSpawn is set to {customItem.Spawn.DoSpawn}");
+                LogManager.Debug($"{customItem.Name} DoSpawn is set to {customItem.Spawn?.DoSpawn}");
                 if (customItem.Spawn != null && customItem.Spawn.DoSpawn)
                 {
                     for (uint count = 0; count < customItem.Spawn.Count; count++)
@@ -113,11 +113,11 @@ namespace UncomplicatedCustomItems.Events
 
             PlayerHandler.DetonationPosition = ev.Position;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem? customItem))
                 return;
 
-            if (customItem.CustomItem.CustomItemType is CustomItemType.Item)
-                customItem.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
+            if (customItem?.CustomItem.CustomItemType is CustomItemType.Item)
+                customItem?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
         }
 
         public static void OnPickup(PickupDestroyedEventArgs ev)

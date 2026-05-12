@@ -70,8 +70,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         CustomItemsPickups[item.CustomItem] = [];
 
                     if (!item.IsPickup)
-                        CustomItems[item.Owner].Add(item.CustomItem);
-                    else if (item.IsPickup && item.Pickup.Position != null && item.Pickup.Position != Vector3.zero)
+                    {
+                        CustomItems[item.Owner!].Add(item.CustomItem);
+                    }
+                    else if (item.IsPickup && item.Pickup?.Position != null && item.Pickup.Position != Vector3.zero)
                         CustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
 
                     item.Destroy();
@@ -85,13 +87,15 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     if (item.Owner != null && !APICustomItems.ContainsKey(item.Owner))
                         APICustomItems[item.Owner] = [];
 
-                    if (!APICustomItemsPickups.ContainsKey(item.CustomItem))
-                        APICustomItemsPickups[item.CustomItem] = [];
+                    if (!APICustomItemsPickups.ContainsKey(item.CustomItem!))
+                        APICustomItemsPickups[item.CustomItem!] = [];
 
                     if (!item.IsPickup)
-                        APICustomItems[item.Owner].Add(item.CustomItem);
-                    else if (item.IsPickup && item.Pickup.Position != null && item.Pickup.Position != Vector3.zero)
-                        APICustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
+                    {
+                        APICustomItems[item.Owner!].Add(item.CustomItem!);                        
+                    }
+                    else if (item.IsPickup && item.Pickup?.Position != null && item.Pickup.Position != Vector3.zero)
+                        APICustomItemsPickups[item.CustomItem!].Add(item.Pickup.Position);
 
                     item.Destroy();
                 }

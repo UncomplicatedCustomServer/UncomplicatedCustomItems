@@ -63,7 +63,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 return;
             
             LogManager.Debug($"Spawned Capybara on {player.DisplayName}");
-            CapybaraToy capybara = CapybaraToy.Create(player.GameObject.transform);
+            CapybaraToy capybara = CapybaraToy.Create(player.GameObject?.transform);
             capybara.CollidersEnabled = false;
             capybara.Position += new Vector3(0, -0.8f, 0);
             player.Scale = new(0.2f, 0.3f, 0.5f);

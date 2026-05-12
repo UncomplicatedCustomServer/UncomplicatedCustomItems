@@ -59,9 +59,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         public CustomKeycard(KeycardItem keycard)
         {
             if (!keycard.Customizable)
+            {
                 LogManager.Warn($"{keycard.ItemTypeId} is not customizable!\nThe keycard type must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
-            else
-                ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
+                return;
+            }
+
+            ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
         }
 
         /// <summary>
@@ -85,7 +88,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                         ArraySegment<object> arguments = new(args);
                         nametagDetail.SetArguments(arguments);
                         NameTagDic.TryAdd(ParentKeycard.ItemSerial, value);
-                        if (Utilities.TryGetSummonedCustomItem(ParentKeycard.ItemSerial, out SummonedCustomItem summonedCustomItem))
+                        if (Utilities.TryGetSummonedCustomItem(ParentKeycard.ItemSerial, out SummonedCustomItem? summonedCustomItem) && summonedCustomItem != null)
                             summonedCustomItem.NameApplied = true;
                     }
                     catch (Exception ex)

@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPatch(nameof(DisruptorAdsModule.BaseAdsInaccuracy), MethodType.Getter)]
         public static bool AimingAccuracyPrefix(DisruptorAdsModule __instance, ref float __result)
         {
-            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem))
+            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) || customItem == null)
                 return true;
             if (customItem.CustomItem.CustomItemType is not CustomItemType.ParticleDisruptor)
                 return true;
@@ -28,7 +28,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPatch(nameof(DisruptorAdsModule.BaseHipInaccuracy), MethodType.Getter)]
         public static bool HipAccuracyPrefix(DisruptorAdsModule __instance, ref float __result)
         {
-            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem))
+            if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) || customItem == null)
                 return true;
             if (customItem.CustomItem.CustomItemType is not CustomItemType.ParticleDisruptor)
                 return true;

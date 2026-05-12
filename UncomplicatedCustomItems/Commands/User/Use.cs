@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems.Commands.User
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player player = Player.Get(sender);
+            Player? player = Player.Get(sender);
 
             if (player == null)
             {
@@ -32,14 +32,19 @@ namespace UncomplicatedCustomItems.Commands.User
                 return false;
             }
 
-            if (player.CurrentItem == null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem item) || item.CustomItem.CustomItemType != CustomItemType.Item)
+            if (player.CurrentItem == null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem? item) || item?.CustomItem.CustomItemType != CustomItemType.Item)
             {
                 response = "You must hold the custom item!";
                 return false;
             }
 
             // Ok now we have to check if the custom item command contains any & (= args)
-            IItemData itemData = item.CustomItem.CustomData as IItemData;
+            if (item.CustomItem.CustomData is not IItemData itemData)
+            {
+                response = "This is not a item type CustomItem.";
+                return false;
+            }
+
             foreach (ItemDataList data in itemData.Data)
             {
                 if (data.Command != null && data.Command.Contains("#"))

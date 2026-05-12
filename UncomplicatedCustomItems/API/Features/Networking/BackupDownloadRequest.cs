@@ -26,7 +26,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         public override Dictionary<string, string> Headers { get; set; } = new()
         {
             ["Content-Type"] = "application/yaml",
-            ["Token"] = BackupSystem.Key.BackupCode
+            ["Token"] = BackupSystem.Key?.BackupCode ?? string.Empty
         };
 
         public override void OnRequestCompleted(UnityWebRequest request)

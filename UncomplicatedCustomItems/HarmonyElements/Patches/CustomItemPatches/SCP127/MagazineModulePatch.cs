@@ -49,12 +49,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 }
             }
 
-            if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out var item) && item.CustomItem.CustomItemType == CustomItemType.SCPItem && item.CustomItem.Item == ItemType.GunSCP127)
+            if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out var item) && item?.CustomItem.CustomItemType == CustomItemType.SCPItem && item.CustomItem.Item == ItemType.GunSCP127)
             {
                 try
                 {
                     Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(__instance.Item);
-                    SCP127Data data = item.CustomItem.CustomData as SCP127Data;
+                    if (item.CustomItem.CustomData is not SCP127Data data)
+                        return;
+
                     __result = new Scp127MagazineModule.RegenerationSettings
                     {
                         BulletsPerSecond = tier

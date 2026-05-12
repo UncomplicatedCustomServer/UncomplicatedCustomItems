@@ -32,7 +32,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         ];
 
         public float Delay { get; set; }
-        public string RoleType { get; set; }
+        public string RoleType { get; set; } = string.Empty;
         public uint RoleId { get; set; }
         public RoleSpawnFlags SpawnFlags { get; set; }
         public bool KeepLocation { get; set; }
@@ -40,6 +40,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+            
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
@@ -123,6 +126,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         private void SwitchRole(Player player)
         {
+            if (CustomItem == null)
+                return;
+
             if (RoleType.ToLower() == "ucr")
             {
                 if (UCR.TryGetCustomRole((int)RoleId, out _))
