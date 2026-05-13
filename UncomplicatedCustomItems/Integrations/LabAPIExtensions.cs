@@ -1,14 +1,13 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using HarmonyLib;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
 using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.Integrations
 {
-#nullable enable
-    // Todo: Update this to the latest version
     internal static class LabAPIExtensions
     {
         private static Assembly? LabAPIExtension;
@@ -43,42 +42,38 @@ namespace UncomplicatedCustomItems.Integrations
                 return;
             }
 
-            DisguiseType = LabAPIExtension?.GetType("LabApiExtensions.Extensions.AppearanceExtension");
+            DisguiseType = LabAPIExtension?.GetType("LabApiExtensions.Managers.FakeRoleManager");
             if (DisguiseType == null)
             {
-                LogManager.Silent("Could not find LabApiExtensions.Extensions.AppearanceExtension type.");
+                LogManager.Silent("Failed to find LabApiExtensions.Managers.FakeRoleManager type.");
                 return;
             }
 
             Type[] paramTypes = [
                 typeof(Player),
-                typeof(RoleTypeId),
-                typeof(bool),
-                typeof(byte)
+                typeof(RoleTypeId)
             ];
 
-            Disguise = DisguiseType.GetMethod("ChangeAppearance", BindingFlags.Public | BindingFlags.Static, null, paramTypes, null);
+            Disguise = AccessTools.Method(DisguiseType, "AddFakeRole", paramTypes);
 
             if (Disguise == null)
             {
                 Disguise = DisguiseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
                     .FirstOrDefault(m =>
                     {
-                        if (m.Name != "ChangeAppearance")
+                        if (m.Name != "AddFakeRole")
                             return false;
 
                         ParameterInfo[] ps = m.GetParameters();
-                        if (ps.Length < 2)
-                            return false;
-
                         bool match0 = ps[0].ParameterType.FullName == typeof(Player).FullName;
-                        bool match1 = ps[1].ParameterType == typeof(RoleTypeId) || ps[1].ParameterType.FullName == typeof(RoleTypeId).FullName;
+                        bool match1 = ps[1].ParameterType == typeof(RoleTypeId);
+
                         return match0 && match1;
                     });
             }
 
             if (Disguise == null)
-                LogManager.Silent("Could not find ChangeAppearance method on AppearanceExtension.");
+                LogManager.Silent("Could not find AddFakeRole method in FakeRoleManager.");
         }
 
         /// <summary>
@@ -90,7 +85,7 @@ namespace UncomplicatedCustomItems.Integrations
         {
             if (Disguise == null)
             {
-                LogManager.Warn("Disguise method not found.");
+                LogManager.Warn("Disguise method was not found.");
                 return;
             }
 
