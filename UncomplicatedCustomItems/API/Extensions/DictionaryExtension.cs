@@ -51,6 +51,20 @@ namespace UncomplicatedCustomItems.API.Extensions
             {
                 if (raw is string)
                 {
+                    if (targetType.IsEnum)
+                    {
+                        try
+                        {
+                            result = (T)Enum.Parse(targetType, rawStr.Replace(" ", ""), ignoreCase: true);
+                            return true;
+                        }
+                        catch (ArgumentException)
+                        {
+                            LogManager.Warn($"Value for '{name}' is not a valid {targetType.Name} enum: '{rawStr}'");
+                            return false;
+                        }
+                    }
+
                     switch (typeCode)
                     {
                         case TypeCode.UInt16:
