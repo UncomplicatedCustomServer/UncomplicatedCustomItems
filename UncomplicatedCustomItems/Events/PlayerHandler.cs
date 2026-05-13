@@ -1185,16 +1185,10 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnDrop(PlayerDroppedItemEventArgs ev)
         {
-            LogManager.Debug($"Item Dropped: {ev.Pickup.Type} - Serial: {ev.Pickup.Serial}");
             if (ev.Pickup == null || ev.Player == null)
                 return;
 
-            LogManager.Debug($"Pickup is not null");
-            foreach (SummonedCustomItem item in SummonedCustomItem.List.ToArray())
-            {
-                LogManager.Debug($"{item.Serial}");
-            }
-
+            LogManager.Debug($"Item Dropped: {ev.Pickup.Type} - Serial: {ev.Pickup.Serial}");
             if (SummonedAPICustomItem.TryGet(ev.Pickup.Serial, out var summonedItem) && summonedItem != null)
             {
                 summonedItem.OnDrop(ev);
