@@ -1,5 +1,4 @@
-﻿#nullable enable
-#if EXILED
+﻿#if EXILED
 using Exiled.CustomRoles.API.Features;
 using Exiled.API.Enums;
 #endif

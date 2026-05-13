@@ -15,7 +15,6 @@ using System.Text.Json;
 
 namespace UncomplicatedCustomItems.API
 {
-#nullable enable
     /// <summary>
     /// Casts the YAML data from <see cref="YAMLCustomItem"/> or <see cref="YAMLCustomAction"/> files into the plugin
     /// </summary>

@@ -3,8 +3,6 @@ using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 {
-#nullable enable
-
     internal class PropertyTarget
     {
         public object? Target { get; set; }
@@ -16,8 +14,10 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
         {
             if (PropertyInfo != null)
                 return PropertyInfo.GetValue(Target);
+
             if (FieldInfo != null)
                 return FieldInfo.GetValue(Target);
+                
             return null;
         }
 

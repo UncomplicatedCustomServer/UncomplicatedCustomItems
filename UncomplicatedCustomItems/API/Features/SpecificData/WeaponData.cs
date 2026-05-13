@@ -2,7 +2,6 @@
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
-#nullable enable
     /// <summary>
     /// The data associated with <see cref="Firearm"/>s <see cref="CustomItemType.Weapon"/> <see cref="CustomItem"/>s
     /// </summary>

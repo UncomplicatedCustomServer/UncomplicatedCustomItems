@@ -217,7 +217,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             }
         }
 
-#nullable enable
         internal void VersionInfo(Action<HttpStatusCode, string?> onCompleted)
         {
             string url = $"https://uciversionmanager.thaumiel-servers.workers.dev/item/{Plugin.Instance.Version.ToString(3)}";

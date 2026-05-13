@@ -134,8 +134,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
         }
 
-#nullable enable
-
         /// <summary>
         /// Gets the <see cref="APICustomItem"/> by its unique Id
         /// </summary>
@@ -205,8 +203,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
 
         public virtual bool Check(Player? player) => Check(player?.CurrentItem);
-
-#nullable disable
 
         /// <summary>
         /// The unique Id of the Custom Item. Can't be less than 1

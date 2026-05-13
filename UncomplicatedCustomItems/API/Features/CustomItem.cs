@@ -14,7 +14,6 @@ namespace UncomplicatedCustomItems.API.Features
 {
     public class CustomItem : ICustomItem
     {
-        #nullable enable
         /// <summary>
         /// Gets a list of every registered <see cref="ICustomItem"/>
         /// </summary>

@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
-#nullable enable
-
     /// <summary>
     /// The data associated with <see cref="CustomItemType.Item"/> <see cref="CustomItem"/>s
     /// </summary>

@@ -6,7 +6,6 @@ using UncomplicatedCustomItems.API.CustomModuleAPI;
 
 namespace UncomplicatedCustomItems.API.Interfaces
 {
-#nullable enable
     public interface ICustomItem
     {
         public abstract uint Id { get; set; }

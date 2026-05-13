@@ -6,7 +6,6 @@ using UncomplicatedCustomItems.API.Features.Helper;
 
 namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 {
-#nullable enable
     internal class EvaluateConditions
     {
         public static bool EvaluateNumericCondition(string condition, EventArgs eventArgs)
