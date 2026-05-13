@@ -100,7 +100,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             {
                 string response = request.downloadHandler.text;
 
-                if (string.IsNullOrEmpty(response) || response == "{}")
+                if (string.IsNullOrEmpty(response) || response == "{}" && !UseCustomEndpoint)
                 {
                     LogManager.Error("Failed to retrieve credits information. \n Retrying with backup endpoint...");
                     UseCustomEndpoint = true;
