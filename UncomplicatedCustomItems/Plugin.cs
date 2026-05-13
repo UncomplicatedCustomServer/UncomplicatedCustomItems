@@ -117,6 +117,7 @@ namespace UncomplicatedCustomItems
             ServerHandler.Register();
             ScpHandler.Register();
             SSSHandler.Register();
+            CreditsRequest.Register();
             CustomModuleManager.Init();
 
             ServerEvent.WaitingForPlayers += OnFinishedLoading;
@@ -214,7 +215,6 @@ namespace UncomplicatedCustomItems
 
             _settings = null!;
 
-            CreditsRequest.Unregister();
             _harmony.UnpatchAll();
             _harmony = null;
 
@@ -222,6 +222,7 @@ namespace UncomplicatedCustomItems
             ServerHandler.Unregister();
             ScpHandler.Unregister();
             SSSHandler.Unregister();
+            CreditsRequest.Unregister();
 
             ServerEvent.WaitingForPlayers -= OnFinishedLoading;
 
