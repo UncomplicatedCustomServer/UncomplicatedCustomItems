@@ -173,7 +173,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public void Destroy()
         {
-            foreach (KeyValuePair<Player, HashSet<SummonedAPICustomItem>> kvp in PlayerCache)
+            foreach (KeyValuePair<Player, HashSet<SummonedAPICustomItem>> kvp in PlayerCache.ToArray())
             {
                 foreach (SummonedAPICustomItem item in kvp.Value.Where(item => item == this).ToArray())
                 {

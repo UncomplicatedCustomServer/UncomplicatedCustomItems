@@ -363,6 +363,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             if (Check(ev.Player))
                 OnCuffed(ev);
         }
+
         private void InternalOnOwnerHandcuffing(PlayerCuffingEventArgs ev)
         {
             if (Check(ev.Player))
@@ -407,64 +408,69 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 if (Check(item))
                     OnEscaping(ev);
             }
-            
         }
+
         private void InternalOnInspecting(PlayerInspectingItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnInspecting(ev);
-
         }
+
         private void InternalOnInspected(PlayerInspectedItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnInspected(ev);
-
         }
+
         private void InternalOnThrowingItem(PlayerThrowingItemEventArgs ev)
         {
             if (Check(ev.Pickup))
                 OnThrowingItem(ev);
-
         }
+
         private void InternalOnThrownItem(PlayerThrewItemEventArgs ev)
         {
             if (Check(ev.Pickup))
                 OnThrownItem(ev);
-
         }
+
         private void InternalOnPickingUp(PlayerPickingUpItemEventArgs ev)
         {
             if (Check(ev.Pickup))
                 OnPickingUp(ev);
-
         }
+
         private void InternalOnPickup(PlayerPickedUpItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnPickup(ev);
         }
+
         private void InternalOnDropping(PlayerDroppingItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnDropping(ev);
-
         }
+
         private void InternalOnDropped(PlayerDroppedItemEventArgs ev)
         {
             if (Check(ev.Pickup))
                 OnDropped(ev);
-
         }
+
         private void InternalOnChangedItem(PlayerChangedItemEventArgs ev)
         {
-            OnChangedItem(ev);
+            if ((ev.OldItem != null && Check(ev.OldItem)) || (ev.NewItem != null && Check(ev.NewItem)))
+                OnChangedItem(ev);
         }
+
         private void InternalOnChangingItem(PlayerChangingItemEventArgs ev)
         {
-            if (Check(ev.NewItem))
+
+            if ((ev.NewItem != null && Check(ev.NewItem)) || (ev.OldItem != null && Check(ev.OldItem)))
                 OnChangingItem(ev);
         }
+
         private void InternalOnDying(PlayerDyingEventArgs ev) 
         {
             foreach (Item item in ev.Player.Items.ToList())
@@ -484,12 +490,14 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private void InternalOnHurt(PlayerHurtEventArgs ev)
         {
-            OnHurt(ev);
+            if (SummonedAPICustomItem.PlayerCache.ContainsKey(ev.Player) || (ev.Attacker != null && SummonedAPICustomItem.PlayerCache.ContainsKey(ev.Attacker)))
+                OnHurt(ev);
         }
 
         private void InternalOnHurting(PlayerHurtingEventArgs ev)
         {
-            OnHurting(ev);
+            if (SummonedAPICustomItem.PlayerCache.ContainsKey(ev.Player) || (ev.Attacker != null && SummonedAPICustomItem.PlayerCache.ContainsKey(ev.Attacker)))
+                OnHurting(ev);
         }
 
         protected virtual void OnHurt(PlayerHurtEventArgs ev) { }

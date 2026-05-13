@@ -1062,7 +1062,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             CustomModuleManager.Destroy(this);
             List.Remove(this);
-            foreach (KeyValuePair<Player, HashSet<SummonedCustomItem>> kvp in PlayerCache)
+            foreach (KeyValuePair<Player, HashSet<SummonedCustomItem>> kvp in PlayerCache.ToArray())
             {
                 foreach (SummonedCustomItem sci in kvp.Value.Where(sci => sci == this).ToArray())
                 {

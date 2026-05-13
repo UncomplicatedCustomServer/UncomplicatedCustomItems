@@ -418,8 +418,10 @@ namespace UncomplicatedCustomItems.Events
                     return;
 
                 List<ICustomItem> candies = CustomItem.List.Where(c => c.CustomData is CandyData candyData && c.Spawn.DoSpawn).ToList();
-                CustomItem? item = candies.RandomItem() as CustomItem;
+                if (candies.IsEmpty())
+                    return;
 
+                CustomItem? item = candies.RandomItem() as CustomItem;
                 if (candies.Count >= 1)
                 {
                     if (CandyIdx.Any(i => i.Item2 == bag.ItemSerial))
