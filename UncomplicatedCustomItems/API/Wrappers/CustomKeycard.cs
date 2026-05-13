@@ -97,7 +97,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                     }
                 }
                 else
-                    LogManager.Error($"{nameof(CustomKeycard)}: This keycard {ParentKeycard.ItemTypeId} doesn't have a NameTag section.");
+                    LogManager.Warn($"{nameof(CustomKeycard)}: This keycard {ParentKeycard.ItemTypeId} doesn't have a NameTag section.");
             }
         }
 

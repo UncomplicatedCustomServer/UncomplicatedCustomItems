@@ -117,14 +117,14 @@ namespace UncomplicatedCustomItems.Integrations
                 Player? labPlayer = ECRIntegration.GetLabPlayerFromExiledPlayer(player);
                 if (labPlayer == null)
                 {
-                    LogManager.Error("Failed to convert Exiled player to LabAPI player.");
+                    LogManager.Debug("Failed to convert Exiled player to LabAPI player.");
                     return true;
                 }
 
                 Item? labitem = GetLabItemFromExiledItem(item);
                 if (labitem == null)
                 {
-                    LogManager.Error("Failed to convert Exiled item to LabAPI item.");
+                    LogManager.Debug("Failed to convert Exiled item to LabAPI item.");
                     return true;
                 }
 
