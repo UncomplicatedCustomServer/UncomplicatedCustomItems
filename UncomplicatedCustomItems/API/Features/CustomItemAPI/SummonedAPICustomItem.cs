@@ -15,7 +15,7 @@ using LabApi.Features.Wrappers;
 using Mirror;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.API.Struct;
+using UncomplicatedCustomItems.API.Features.Networking;
 using UnityEngine;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
 using KeycardItem = LabApi.Features.Wrappers.KeycardItem;
@@ -618,10 +618,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
 
-            Triplet<string, string, bool>? badge = null;
             if (!string.IsNullOrEmpty(CustomItem.BadgeName) && CustomItem.BadgeName.Length > 1 && !string.IsNullOrEmpty(CustomItem.BadgeColor) && CustomItem.BadgeColor.Length > 2)
             {
-                badge = new(player.GroupName ?? "", player.GroupColor ?? "", player.ReferenceHub.serverRoles.HasBadgeHidden);
                 LogManager.Debug($"Badge detected, putting {CustomItem.BadgeName}@{CustomItem.BadgeColor} to player {player.PlayerId}");
 
                 player.GroupName = CustomItem.BadgeName.Replace("@hidden", "");
@@ -636,12 +634,14 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public void ResetBadge(Player player)
         {
             if (player.ReferenceHub.serverRoles.HasBadgeHidden)
+            {
                 player.ReferenceHub.serverRoles.RefreshHiddenTag();
+            }
             else
                 player.ReferenceHub.serverRoles.RefreshLocalTag();
 
             if (Plugin.Instance.Config.EnableCreditTags)
-                Plugin.HttpManager.ApplyCreditTag(player);
+                CreditsRequest.ApplyCreditTag(player);
 
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }

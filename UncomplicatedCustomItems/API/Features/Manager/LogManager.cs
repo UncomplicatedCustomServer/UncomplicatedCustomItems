@@ -1,13 +1,7 @@
 ﻿using Discord;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using Logger = LabApi.Features.Console.Logger;
-using System.Text;
-using System.IO;
-using LabApi.Features.Wrappers;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {

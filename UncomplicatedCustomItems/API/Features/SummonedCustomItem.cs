@@ -16,11 +16,11 @@ using Mirror;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Networking;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
@@ -818,7 +818,7 @@ namespace UncomplicatedCustomItems.API.Features
                 player.ReferenceHub.serverRoles.RefreshLocalTag();
 
             if (Plugin.Instance.Config.EnableCreditTags)
-                Plugin.HttpManager.ApplyCreditTag(player);
+                CreditsRequest.ApplyCreditTag(player);
 
             LogManager.Debug($"{player.Nickname} Badge successfully reset");
         }

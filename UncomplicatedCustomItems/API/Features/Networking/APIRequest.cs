@@ -52,6 +52,8 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 
         public virtual string Endpoint => string.Empty;
 
+        public virtual string CustomEndpoint => string.Empty;
+
         public virtual RequestType Type => RequestType.Get;
 
         public virtual Dictionary<string, object> Payload { get; set; } = [];
@@ -67,9 +69,32 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             Cancel = false,
         };
 
-        public string FullEndpoint => $"https://api.ucserver.it/v3/plugin/uci/{Endpoint}";
+        public virtual bool UseUCIEndpoint => true;
+        
+        public virtual bool UseCustomEndpoint { get; set; }
 
-        public virtual void OnRequestCompleted(UnityWebRequest request) => LogManager.Debug($"Successed Sending request for {Name}.");
+        public string DefaultEndpoint => $"https://api.ucserver.it/";
+
+        public string UCIEndpoint => $"{DefaultEndpoint}v3/plugin/uci/{Endpoint}";
+
+        public string UCSCEndpoint => $"{DefaultEndpoint}{Endpoint}";
+
+        /// <summary>
+        /// Resolves which endpoint to actually hit.
+        /// Priority: CustomEndpoint > UCIEndpoint > UCSCEndpoint
+        /// </summary>
+        public string ResolvedEndpoint
+        {
+            get
+            {
+                if (UseCustomEndpoint && !string.IsNullOrWhiteSpace(CustomEndpoint))
+                    return CustomEndpoint;
+
+                return UseUCIEndpoint ? UCIEndpoint : UCSCEndpoint;
+            }
+        }
+
+        public virtual void OnRequestCompleted(UnityWebRequest request) => LogManager.Debug($"Succeeded Sending request for {Name}.");
         public virtual void OnRequestFailed(UnityWebRequest request) => LogManager.Debug($"Failed to send request for {Name}.");
 
         public virtual void SendRequest(Action<UnityWebRequest> onComplete = null!)
@@ -85,7 +110,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
                 while (!Settings.Cancel)
                 {
                     yield return Timing.WaitForSeconds(Settings.WaitTime);
-                    using UnityWebRequest looprequest = new(FullEndpoint, Type.ToString().ToUpper());
+                    using UnityWebRequest looprequest = new(ResolvedEndpoint, Type.ToString().ToUpper());
                     looprequest.downloadHandler = new DownloadHandlerBuffer();
 
                     if ((Type == RequestType.Post || Type == RequestType.Put))
@@ -127,7 +152,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             if (Settings.WaitTime > 0f)
                 yield return Timing.WaitForSeconds(Settings.WaitTime);
 
-            using UnityWebRequest request = new(FullEndpoint, Type.ToString().ToUpper());
+            using UnityWebRequest request = new(ResolvedEndpoint, Type.ToString().ToUpper());
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Accept", "application/json");
 

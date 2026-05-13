@@ -84,7 +84,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value.Replace("%name%", ParentKeycard.Owner.nicknameSync.MyNick) };
+                        object[] args = [value.Replace("%name%", ParentKeycard.Owner.nicknameSync.MyNick)];
                         ArraySegment<object> arguments = new(args);
                         nametagDetail.SetArguments(arguments);
                         NameTagDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -118,7 +118,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         tintDetail.SetArguments(arguments);
                         KeycardColorsDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -148,7 +148,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         nameDetail.SetArguments(arguments);
                         ItemNameDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -205,7 +205,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value, LabelColor };
+                        object[] args = [value, LabelColor];
                         ArraySegment<object> arguments = new(args);
                         labelDetail.SetArguments(arguments);
                         LabelTextDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -252,7 +252,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value, PermissionsColor };
+                        object[] args = [value, PermissionsColor];
                         ArraySegment<object> arguments = new(args);
                         permsDetail.SetArguments(arguments);
                         PermissionsDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -283,7 +283,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         serialNumberDetail.SetArguments(arguments);
                         SerialNumberDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -345,7 +345,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         rankDetail.SetArguments(arguments);
                         RankIndexDic.TryAdd(ParentKeycard.ItemSerial, value);

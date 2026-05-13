@@ -57,7 +57,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             }
             catch (Exception ex)
             {
-                LogManager.Error($"{nameof(StaminaRegenMultiplierPatch)}: {ex.Message}\n{ex.StackTrace}");
+                LogManager.Error($"{nameof(SprintingDisabledPatch)}: {ex.Message}\n{ex.StackTrace}");
             }
 
             return true;

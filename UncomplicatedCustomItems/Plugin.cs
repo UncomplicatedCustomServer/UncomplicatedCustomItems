@@ -68,10 +68,8 @@ namespace UncomplicatedCustomItems
 
         internal Harmony _harmony;
 
-        internal static HttpManager HttpManager;
-
         internal FileConfig FileConfig;
-#nullable enable
+// #nullable enable
 
         internal List<ServerSpecificSettingBase> _settings = [];
 
@@ -85,7 +83,6 @@ namespace UncomplicatedCustomItems
         {
             Instance = this;
             FileConfig = new();
-            HttpManager = new("uci");
 
             try
             {
@@ -217,7 +214,7 @@ namespace UncomplicatedCustomItems
 
             _settings = null!;
 
-            HttpManager.UnregisterEvents();
+            CreditsRequest.Unregister();
             _harmony.UnpatchAll();
             _harmony = null;
 
@@ -251,7 +248,8 @@ namespace UncomplicatedCustomItems
             else
                 Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine());
 
-            Timing.RunCoroutine(HttpManager.LoadCreditTagsCoroutine());
+            CreditsRequest credit = new();
+            credit.SendRequest();
 
             ImportManager.Init();
             VersionManager.Init();

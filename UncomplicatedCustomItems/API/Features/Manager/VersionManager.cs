@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
+using UncomplicatedCustomItems.API.Features.Networking;
 
 namespace UncomplicatedCustomItems.API.Features.Helper
 {
@@ -12,8 +13,11 @@ namespace UncomplicatedCustomItems.API.Features.Helper
         
         public static void Init()
         {
-            Plugin.HttpManager.VersionInfo((status, content) =>
-            {
+            VersionInfoRequest versionrequest = new();
+            versionrequest.SendRequest((request) => {
+                HttpStatusCode status = (HttpStatusCode)request.responseCode;
+                string content = request.downloadHandler.text;
+
                 if (status is not HttpStatusCode.OK || content is null)
                 {
                     LogManager.Warn($"Failed to gain the current version info from our central servers: API endpoint says {status}");
@@ -40,7 +44,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         LogManager.Info(
                             $"NOTICE!\nYou are currently using version v{Plugin.Instance.Version.ToString(3)}, " +
                             $"which is a PRE-RELEASE or EXPERIMENTAL RELEASE of UncomplicatedCustomItems. " +
-                            $"Latest stable release: {Plugin.HttpManager.LatestVersion} " +
+                            $"Latest stable release: {LatestVersionRequest.LatestVersion} " +
                             $"NOTE: This is NOT a stable version, so it may contain bugs and errors. " +
                             $"For this reason, its use in production is not recommended.");
 

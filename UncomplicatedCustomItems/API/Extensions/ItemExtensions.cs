@@ -159,12 +159,12 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// </returns>
         public static bool CompareSummonedCustomItems(this Item item1, Item item2) => TryGetSummonedCustomItem(item1) == TryGetSummonedCustomItem(item2);
 
-        public static Pickup Create(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default) => Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
+        public static Pickup? Create(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default) => Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
 
-        public static Pickup CreateAndSpawn(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default)
+        public static Pickup? CreateAndSpawn(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default)
         {
-            Pickup pickup = Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
-            pickup.Spawn();
+            Pickup? pickup = Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
+            pickup?.Spawn();
             return pickup;
         }
     }

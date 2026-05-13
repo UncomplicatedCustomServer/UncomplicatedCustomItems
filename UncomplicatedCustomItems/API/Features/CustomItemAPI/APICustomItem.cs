@@ -8,7 +8,6 @@ using System.Linq;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
-using UncomplicatedCustomItems.Events.Handlers;
 using MEC;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
@@ -222,7 +221,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// 
         /// </summary>
-        public virtual string ExtendedDescription { get; set; }
+        public virtual string ExtendedDescription { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the badge name
