@@ -31,7 +31,6 @@ using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UncomplicatedCustomItems.Events.Arguments.ItemInspectionEvents;
 using UncomplicatedCustomItems.Events.Handlers;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
@@ -69,7 +68,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ShootingWeapon += OnShooting;
             PlayerEvent.UsedItem += OnItemUse;
             PlayerEvent.DroppedItem += OnDrop;
-            PlayerEvent.ShotWeapon += OnShot;
             PlayerEvent.UpdatingEffect += OnReceivingEffect;
             PlayerEvent.ThrewProjectile += OnThrownProjectile;
             PlayerEvent.Dying += OnDying;
@@ -88,16 +86,15 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ToggledWeaponFlashlight += OnWeaponFlashlightToggled;
             PlayerEvent.TogglingFlashlight += OnTogglingFlashlight;
             PlayerEvent.ItemUsageEffectsApplying += OnUsingItemCompleted;
-            PlayerEvent.InspectingKeycard += OnInspectingKeycard;
             PlayerEvent.InteractingElevator += OnUsingElevator;
             PlayerEvent.ChangingItem += OnChangingItem;
             PlayerEvent.Death += OnDeath;
             PlayerEvent.ChangingRole += OnRoleChange;
             PlayerEvent.TogglingNoclip += OnNoclip;
             PlayerEvent.ProcessingJailbirdMessage += OnJailbirdMessaging;
-            PlayerEvent.ProcessedJailbirdMessage += OnJailbirdMessage;
             PlayerEvent.ThrewProjectile += OnProjectileThrew;
             InventoryExtensions.OnItemAdded += OnItemAdded;
+            PlayerEvent.InspectedItem += OnItemInspected;
         }
 
         public static void Unregister()
@@ -105,7 +102,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ShootingWeapon -= OnShooting;
             PlayerEvent.UsedItem -= OnItemUse;
             PlayerEvent.DroppedItem -= OnDrop;
-            PlayerEvent.ShotWeapon -= OnShot;
             PlayerEvent.UpdatingEffect -= OnReceivingEffect;
             PlayerEvent.ThrewProjectile -= OnThrownProjectile;
             PlayerEvent.Dying -= OnDying;
@@ -124,16 +120,26 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ToggledWeaponFlashlight -= OnWeaponFlashlightToggled;
             PlayerEvent.TogglingFlashlight -= OnTogglingFlashlight;
             PlayerEvent.ItemUsageEffectsApplying -= OnUsingItemCompleted;
-            PlayerEvent.InspectingKeycard -= OnInspectingKeycard;
             PlayerEvent.InteractingElevator -= OnUsingElevator;
             PlayerEvent.ChangingItem -= OnChangingItem;
             PlayerEvent.Death -= OnDeath;
             PlayerEvent.ChangingRole -= OnRoleChange;
             PlayerEvent.TogglingNoclip -= OnNoclip;
             PlayerEvent.ProcessingJailbirdMessage -= OnJailbirdMessaging;
-            PlayerEvent.ProcessedJailbirdMessage -= OnJailbirdMessage;
             PlayerEvent.ThrewProjectile -= OnProjectileThrew;
             InventoryExtensions.OnItemAdded -= OnItemAdded;
+            PlayerEvent.InspectedItem -= OnItemInspected;
+        }
+
+        private static void OnItemInspected(PlayerInspectedItemEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item, out var customItem) || customItem == null)
+                return;
+
+            if (customItem.CustomItem.CustomItemType != CustomItemType.Item)
+                return;
+
+            customItem.HandleEvent(ev.Player, ItemEvents.Inspect, ev.Item.Serial);
         }
 
         private static void OnItemAdded(ReferenceHub hub, ItemBase itemBase, ItemPickupBase pickupBase)
@@ -171,39 +177,15 @@ namespace UncomplicatedCustomItems.Events
                 api.OnThrew(ev);
         }
 
-        public static void OnJailbirdMessage(PlayerProcessedJailbirdMessageEventArgs ev)
-        {
-            if (ev.JailbirdItem?.Base == null || ev.Player == null)
-                return;
-
-            if (ev.Message is JailbirdMessageType.Inspect)
-                ItemInspectionEvents.OnInspectedItem(new InspectedItemEventArgs(ev.JailbirdItem, ev.Player));
-        }
-
         public static void OnJailbirdMessaging(PlayerProcessingJailbirdMessageEventArgs ev)
         {
             if (ev.JailbirdItem?.Base == null || ev.Player == null)
                 return;
 
-            if (ev.Message is JailbirdMessageType.Inspect)
-            {
-                InspectingItemEventArgs args = new(ev.JailbirdItem, ev.Player);
-                ItemInspectionEvents.OnInspectingItem(args);
-                if (!args.IsAllowed)
-                {
-                    ev.JailbirdItem.Base.SendRpc(JailbirdMessageType.ChargeFailed);
-                    ev.IsAllowed = false;
-                }
-            }
-
             if (Utilities.TryGetSummonedCustomItem(ev.JailbirdItem.Serial, out var item) && item != null && item.CustomItem.CustomItemType is CustomItemType.Jailbird && item.CustomItem.CustomData is JailbirdData data)
             {
                 switch (ev.Message)
                 {
-                    case JailbirdMessageType.Inspect:
-                        item.HandleEvent(ev.Player, ItemEvents.Inspect, ev.JailbirdItem.Serial);
-                        break;
-
                     case JailbirdMessageType.ChargeStarted or JailbirdMessageType.ChargeLoadTriggered:
                         if (item.HasModule<NoCharge>())
                             ev.JailbirdItem.Base.SendRpc(JailbirdMessageType.ChargeFailed);
@@ -351,14 +333,17 @@ namespace UncomplicatedCustomItems.Events
                         ev.Player.HumeShieldRegenRate = 0f;
                         Timing.RunCoroutine(DecayRate(ev.Player, data.Tier1ShieldDecayRate));
                         break;
+
                     case Scp127Tier.Tier2:
                         ev.Player.HumeShieldRegenRate = 0f;
                         Timing.RunCoroutine(DecayRate(ev.Player, data.Tier2ShieldDecayRate));
                         break;
+
                     case Scp127Tier.Tier3:
                         ev.Player.HumeShieldRegenRate = 0f;
                         Timing.RunCoroutine(DecayRate(ev.Player, data.Tier3ShieldDecayRate));
                         break;
+
                     default:
                         LogManager.Error($"{customItem.CustomItem.Name} - {customItem.Serial} has no tier or is unsupported tier?");
                         break;
@@ -366,17 +351,6 @@ namespace UncomplicatedCustomItems.Events
 
                 StopHumeShieldRegen(ev.Player);
             }
-        }
-
-        public static void OnInspectingKeycard(PlayerInspectingKeycardEventArgs ev)
-        {
-            if (ev.Player == null || ev.KeycardItem == null)
-                return;
-
-            if (!Utilities.TryGetSummonedCustomItem(ev.KeycardItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
-                return;
-
-            customItem.HandleEvent(ev.Player, ItemEvents.Inspect, ev.KeycardItem.Serial);
         }
 
         public static void OnUsingItemCompleted(PlayerItemUsageEffectsApplyingEventArgs ev)
@@ -1331,21 +1305,6 @@ namespace UncomplicatedCustomItems.Events
                 _capybaras.TryRemove(ev.Player.PlayerId);
         }
 
-        public static void OnShot(PlayerShotWeaponEventArgs ev)
-        {
-            if (ev.FirearmItem == null || ev.Player == null)
-                return;
-
-            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
-                return;
-
-            if (ev.FirearmItem.ActionModule is AutomaticActionModule actionModule)
-            {
-                actionModule._serverQueuedRequests.Clear();
-                actionModule._clientQueuedShots.Clear();
-            }
-        }
-
         public static void OnReceivingEffect(PlayerEffectUpdatingEventArgs ev)
         {
             if (ev.Effect == null || ev.Player == null)
@@ -1364,24 +1323,16 @@ namespace UncomplicatedCustomItems.Events
             {
                 switch (ev.Effect, summonedItem.CustomItem)
                 {
-                    case (Scp207 or AntiScp207, CustomSCP207 scp207Data):
-                        LogManager.Debug("Effect is from a 207 custom item.");
-                        if (!scp207Data.Apply207Effect)
-                        {
-                            LogManager.Debug("Removing SCP-207 effect.");
-                            ev.Player.DisableEffect(ev.Effect);
-                            ev.IsAllowed = false;
-                        }
+                        case (Scp207 or AntiScp207, CustomSCP207 scp207Data) when !scp207Data.Apply207Effect:
+                        LogManager.Debug("Removing SCP-207 effect.");
+                        ev.Player.DisableEffect(ev.Effect);
+                        ev.IsAllowed = false;
                         break;
 
-                    case (Scp1853, CustomSCP1853 scp1853Data):
-                        LogManager.Debug("Effect is from a 1853 custom item.");
-                        if (!scp1853Data.Apply1853Effect)
-                        {
-                            LogManager.Debug("Removing SCP-1853 effect.");
-                            ev.Player.DisableEffect(ev.Effect);
-                            ev.IsAllowed = false;
-                        }
+                    case (Scp1853, CustomSCP1853 scp1853Data) when !scp1853Data.Apply1853Effect:
+                        LogManager.Debug("Removing SCP-1853 effect.");
+                        ev.Player.DisableEffect(ev.Effect);
+                        ev.IsAllowed = false;
                         break;
                 }
             }
@@ -1391,23 +1342,16 @@ namespace UncomplicatedCustomItems.Events
                 LogManager.Debug($"{ev.Player.Nickname} is receiving {ev.Effect}");
                 switch (ev.Effect)
                 {
-                    case AntiScp207 or Scp207 when customItem.CustomItem.CustomData is SCP207Data scp207Data:
-                        LogManager.Debug("Effect is from a 207 custom item.");
-                        if (!scp207Data.Apply207Effect)
-                        {
-                            LogManager.Debug("Removing SCP-207 effect.");
-                            ev.Player.DisableEffect(ev.Effect);
-                            ev.IsAllowed = false;
-                        }
+                    case AntiScp207 or Scp207 when customItem.CustomItem.CustomData is SCP207Data scp207Data && !scp207Data.Apply207Effect:
+                        LogManager.Debug("Removing SCP-207 effect.");
+                        ev.Player.DisableEffect(ev.Effect);
+                        ev.IsAllowed = false;
                         break;
-                    case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data:
-                        LogManager.Debug("Effect is from a 1853 custom item.");
-                        if (!scp1853Data.Apply1853Effect)
-                        {
-                            LogManager.Debug("Removing SCP-1853 effect.");
-                            ev.Player.DisableEffect(ev.Effect);
-                            ev.IsAllowed = false;
-                        }
+
+                    case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data && scp1853Data.Apply1853Effect:
+                        LogManager.Debug("Removing SCP-1853 effect.");
+                        ev.Player.DisableEffect(ev.Effect);
+                        ev.IsAllowed = false;
                         break;
                 }
             }

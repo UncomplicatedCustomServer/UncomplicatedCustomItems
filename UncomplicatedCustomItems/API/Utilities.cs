@@ -308,15 +308,30 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="serial"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="bool"/> <see langword="true"/> if succeeded</returns>
+        /// <returns><see langword="true"/> if succeeded</returns>
         public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem? item) => SummonedCustomItem.TryGet(serial, out item);
+
+        /// <summary>
+        /// Try to get a <see cref="SummonedCustomItem"/> by it's <see cref="Item"/>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="customItem"></param>
+        /// <returns><see langword="true"/> if succeeded</returns>
+        public static bool TryGetSummonedCustomItem(Item item, out SummonedCustomItem? customItem) => SummonedCustomItem.TryGet(item.Serial, out customItem);
 
         /// <summary>
         /// Get a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
         /// <param name="serial"></param>
-        /// <returns><see cref="SummonedCustomItem"/> if succeeded, <c>default</c> if not</returns>
+        /// <returns><see cref="SummonedCustomItem"/> if succeeded, <see langword="null"/> if not</returns>
         public static SummonedCustomItem? GetSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial);
+
+        /// <summary>
+        /// Get a <see cref="SummonedCustomItem"/> by it's <see cref="Item"/>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns><see cref="SummonedCustomItem"/> if succeeded, <see langword="null"/> if not</returns>
+        public static SummonedCustomItem? GetSummonedCustomItem(Item item) => SummonedCustomItem.Get(item.Serial);
 
         /// <summary>
         /// Check if an item is a <see cref="SummonedCustomItem"/> by it's <see cref="Item.Serial"/>

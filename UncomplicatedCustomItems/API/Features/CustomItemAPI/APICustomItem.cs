@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Events.Arguments.ItemInspectionEvents;
 using UnityEngine;
 using UncomplicatedCustomItems.Events.Handlers;
 using MEC;
@@ -124,11 +123,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             {
                 foreach (Vector3 coords in item.Coordinates.Where(c => c != Vector3.zero))
                 {
-                    if (item.Rotation != Vector4.zero)
+                    if (item.Rotation != Vector3.zero)
                     {
                         item.Rotation.Normalize();
-                        Quaternion rotation = new(item.Rotation.x, item.Rotation.y, item.Rotation.z, item.Rotation.w);
-                        new SummonedAPICustomItem(item, coords, rotation);
+                        new SummonedAPICustomItem(item, coords, Quaternion.Euler(item.Rotation));
                     }
                     else
                         new SummonedAPICustomItem(item, coords);
@@ -268,9 +266,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// Gets or sets the rotation of the <see cref="APICustomItem"/> when first spawned as a <see cref="Pickup"/>
         /// </summary>
-        public virtual Vector4 Rotation { get; set; }
-
-
+        public virtual Vector3 Rotation { get; set; }
 
         /// <summary>
         /// Gets or sets the locations that the <see cref="APICustomItem"/> can spawn.
@@ -321,7 +317,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public virtual void RegisterEvents()
         {
-            ItemInspectionEvents.InspectingItem += new LabApi.Events.LabEventHandler<InspectingItemEventArgs>(InternalOnInspecting);
+            LabApi.Events.Handlers.PlayerEvents.InspectingItem += new LabApi.Events.LabEventHandler<PlayerInspectingItemEventArgs>(InternalOnInspecting);
             LabApi.Events.Handlers.PlayerEvents.Dying += new LabApi.Events.LabEventHandler<PlayerDyingEventArgs>(InternalOnDying);
             LabApi.Events.Handlers.PlayerEvents.DroppingItem += new LabApi.Events.LabEventHandler<PlayerDroppingItemEventArgs>(InternalOnDropping);
             LabApi.Events.Handlers.PlayerEvents.ChangingItem += new LabApi.Events.LabEventHandler<PlayerChangingItemEventArgs>(InternalOnChangingItem);
@@ -333,7 +329,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             LabApi.Events.Handlers.PlayerEvents.Cuffing += new LabApi.Events.LabEventHandler<PlayerCuffingEventArgs>(InternalOnOwnerHandcuffing);
             LabApi.Events.Handlers.PlayerEvents.ChangingRole += new LabApi.Events.LabEventHandler<PlayerChangingRoleEventArgs>(InternalOnOwnerChangingRole);
             LabApi.Events.Handlers.Scp914Events.ProcessingInventoryItem += new LabApi.Events.LabEventHandler<Scp914ProcessingInventoryItemEventArgs>(InternalOnUpgradingInventoryItem);
-            ItemInspectionEvents.InspectedItem += new LabApi.Events.LabEventHandler<InspectedItemEventArgs>(InternalOnInspected);
+            LabApi.Events.Handlers.PlayerEvents.InspectedItem += new LabApi.Events.LabEventHandler<PlayerInspectedItemEventArgs>(InternalOnInspected);
             LabApi.Events.Handlers.PlayerEvents.ThrowingItem += new LabApi.Events.LabEventHandler<PlayerThrowingItemEventArgs>(InternalOnThrowingItem);
             LabApi.Events.Handlers.PlayerEvents.ThrewItem += new LabApi.Events.LabEventHandler<PlayerThrewItemEventArgs>(InternalOnThrownItem);
             LabApi.Events.Handlers.PlayerEvents.DroppedItem += new LabApi.Events.LabEventHandler<PlayerDroppedItemEventArgs>(InternalOnDropped);
@@ -345,7 +341,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public virtual void UnregisterEvents()
         {
-            ItemInspectionEvents.InspectingItem -= new LabApi.Events.LabEventHandler<InspectingItemEventArgs>(InternalOnInspecting);
+            LabApi.Events.Handlers.PlayerEvents.InspectingItem -= new LabApi.Events.LabEventHandler<PlayerInspectingItemEventArgs>(InternalOnInspecting);
             LabApi.Events.Handlers.PlayerEvents.Dying -= new LabApi.Events.LabEventHandler<PlayerDyingEventArgs>(InternalOnDying);
             LabApi.Events.Handlers.PlayerEvents.DroppingItem -= new LabApi.Events.LabEventHandler<PlayerDroppingItemEventArgs>(InternalOnDropping);
             LabApi.Events.Handlers.PlayerEvents.ChangingItem -= new LabApi.Events.LabEventHandler<PlayerChangingItemEventArgs>(InternalOnChangingItem);
@@ -357,7 +353,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             LabApi.Events.Handlers.PlayerEvents.Cuffing -= new LabApi.Events.LabEventHandler<PlayerCuffingEventArgs>(InternalOnOwnerHandcuffing);
             LabApi.Events.Handlers.PlayerEvents.ChangingRole -= new LabApi.Events.LabEventHandler<PlayerChangingRoleEventArgs>(InternalOnOwnerChangingRole);
             LabApi.Events.Handlers.Scp914Events.ProcessingInventoryItem -= new LabApi.Events.LabEventHandler<Scp914ProcessingInventoryItemEventArgs>(InternalOnUpgradingInventoryItem);
-            ItemInspectionEvents.InspectedItem -= new LabApi.Events.LabEventHandler<InspectedItemEventArgs>(InternalOnInspected);
+            LabApi.Events.Handlers.PlayerEvents.InspectedItem -= new LabApi.Events.LabEventHandler<PlayerInspectedItemEventArgs>(InternalOnInspected);
             LabApi.Events.Handlers.PlayerEvents.ThrowingItem -= new LabApi.Events.LabEventHandler<PlayerThrowingItemEventArgs>(InternalOnThrowingItem);
             LabApi.Events.Handlers.PlayerEvents.ThrewItem -= new LabApi.Events.LabEventHandler<PlayerThrewItemEventArgs>(InternalOnThrownItem);
             LabApi.Events.Handlers.PlayerEvents.DroppedItem -= new LabApi.Events.LabEventHandler<PlayerDroppedItemEventArgs>(InternalOnDropped);
@@ -418,13 +414,13 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
             
         }
-        private void InternalOnInspecting(InspectingItemEventArgs ev)
+        private void InternalOnInspecting(PlayerInspectingItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnInspecting(ev);
 
         }
-        private void InternalOnInspected(InspectedItemEventArgs ev)
+        private void InternalOnInspected(PlayerInspectedItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnInspected(ev);
@@ -509,8 +505,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         protected virtual void OnCuffing(PlayerCuffingEventArgs ev) { }
         protected virtual void OnUpgradingItem(Scp914ProcessingInventoryItemEventArgs ev) { }
         protected virtual void OnUpgradingPickup(Scp914ProcessingPickupEventArgs ev) { }
-        protected virtual void OnInspecting(InspectingItemEventArgs ev) { }
-        protected virtual void OnInspected(InspectedItemEventArgs ev) { }
+        protected virtual void OnInspecting(PlayerInspectingItemEventArgs ev) { }
+        protected virtual void OnInspected(PlayerInspectedItemEventArgs ev) { }
         protected virtual void OnThrowingItem(PlayerThrowingItemEventArgs ev) { }
         protected virtual void OnThrownItem(PlayerThrewItemEventArgs ev) { }
         protected virtual void OnPickingUp(PlayerPickingUpItemEventArgs ev) { }
