@@ -44,7 +44,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                 if (!args.TryGetValue<TriggerOn>("Trigger", out var trigger))
                 {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
+                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! Valid values: {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
                     return;
                 }
 

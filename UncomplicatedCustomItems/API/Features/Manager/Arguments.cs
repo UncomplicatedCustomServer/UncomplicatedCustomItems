@@ -331,6 +331,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     player.IsDisarmed = false;
             });
 
+            /*
             ArgumentManager.Register("PlayAudio", (item, args) =>
             {
                 LogManager.Debug($"{nameof(Arguments)}: PlayAudio triggered.");
@@ -344,6 +345,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 AudioApi.PlayAudio(path, volume, player.Position, audibledistance);
             });
+            */
 
             ArgumentManager.Register("Log", (item, args) =>
             {

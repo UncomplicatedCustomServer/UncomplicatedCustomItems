@@ -6,6 +6,7 @@ using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.Integrations;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -16,13 +17,17 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         [
             "Trigger",
             "AudioPath",
-            "AudibleDistance",
+            "MaxAudibleDistance",
+            "MinAudibleDistance",
             "SoundVolume",
         ];
 
+        public SummonedCustomItem? SummonedCustomItem { get; private set; }
+
         public TriggerOn Trigger { get; set; }
         public string AudioPath { get; set; } = string.Empty;
-        public float AudibleDistance { get; set; }
+        public float MaxAudibleDistance { get; set; }
+        public float MinAudibleDistance { get; set; }
         public float Volume { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
@@ -30,12 +35,13 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             if (CustomItem == null)
                 return;
 
+            SummonedCustomItem = item;
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<TriggerOn>("Trigger", out var trigger))
                 {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
+                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! Valid values: {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
                     return;
                 }
 
@@ -45,9 +51,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     return;
                 }
 
-                if (!args.TryGetValue<float>("AudibleDistance", out var audibleDistance))
+                if (!args.TryGetValue<float>("MaxAudibleDistance", out var maxAudibleDistance))
                 {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} AudibleDistance is not a valid float!");
+                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} MaxAudibleDistance is not a valid float!");
+                    return;
+                }
+
+                if (!args.TryGetValue<float>("MinAudibleDistance", out var minAudibleDistance))
+                {
+                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} MinAudibleDistance is not a valid float!");
                     return;
                 }
 
@@ -59,52 +71,53 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                 Trigger = trigger;
                 AudioPath = audioPath;
-                AudibleDistance = audibleDistance;
+                MaxAudibleDistance = maxAudibleDistance;
+                MinAudibleDistance = minAudibleDistance;
                 Volume = volume;
             }
         }
 
         public override void Run(EventArgs eventArgs)
         {
-            if (!Check(eventArgs))
+            if (!Check(eventArgs) || SummonedCustomItem == null)
                 return;
                 
             switch (eventArgs)
             {
                 case PlayerInteractedDoorEventArgs playerInteractedDoor when HasFlagFast(Trigger, TriggerOn.OnDoorInteracted):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerInteractedDoor.Player.Position, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerInteractedDoor.Player.Position);
                     break;
 
                 case PlayerShotWeaponEventArgs playerShotWeapon when HasFlagFast(Trigger, TriggerOn.OnShot):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerShotWeapon.Player.Position, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerShotWeapon.Player.Position);
                     break;
 
                 case PlayerUsedItemEventArgs playerUsedItem when HasFlagFast(Trigger, TriggerOn.OnUse):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerUsedItem.Player.Position, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerUsedItem.Player.Position);
                     break;
 
                 case PlayerReloadedWeaponEventArgs playerReloadedWeapon when HasFlagFast(Trigger, TriggerOn.OnReload):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerReloadedWeapon.Player.Position, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerReloadedWeapon.Player.Position);
                     break;
 
                 case PlayerChangedItemEventArgs playerChangedItem when HasFlagFast(Trigger, TriggerOn.OnChangedItem):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerChangedItem.Player.Position, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerChangedItem.Player.Position);
                     break;
 
                 case PlayerPickedUpItemEventArgs playerPickedUpItem when HasFlagFast(Trigger, TriggerOn.OnAdded):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerPickedUpItem.Player.Position, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerPickedUpItem.Player.Position);
                     break;
 
                 case PlayerDroppedItemEventArgs playerDroppedItem when HasFlagFast(Trigger, TriggerOn.OnDropped):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerDroppedItem.Player.Position, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerDroppedItem.Player.Position);
                     break;
 
                 case PlayerDeathEventArgs playerDeath when HasFlagFast(Trigger, TriggerOn.OnDeath):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerDeath.OldPosition, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerDeath.Player.Position);
                     break;
                 
                 case PlayerHurtEventArgs playerHurt when HasFlagFast(Trigger, TriggerOn.OnHurt):
-                    AudioApi.PlayAudio(AudioPath, Volume, playerHurt.Player.Position, AudibleDistance);
+                    AudioIntegration.Play(SummonedCustomItem, playerHurt.Player.Position);
                     break;
             }
         }

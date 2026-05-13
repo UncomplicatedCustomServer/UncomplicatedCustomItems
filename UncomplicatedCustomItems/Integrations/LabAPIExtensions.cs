@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using HarmonyLib;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
@@ -25,55 +26,58 @@ namespace UncomplicatedCustomItems.Integrations
 
         public static void GetDependencies()
         {
-            foreach (Assembly asm in LabApi.Loader.PluginLoader.Dependencies)
+            Task.Run(() =>
             {
-                if (asm.GetName().Name?.ToLower().Contains("labapiextensions") is true)
+                foreach (Assembly asm in LabApi.Loader.PluginLoader.Dependencies)
                 {
-                    LogManager.Silent($"{nameof(LabAPIExtensions)}: Found LabAPIExtensions Dependency!");
-                    LabAPIExtension = asm;
-                    Found = true;
-                    break;
-                }
-            }
-
-            if (!Found)
-            {
-                LogManager.Silent($"{nameof(LabAPIExtensions)} was not found!");
-                return;
-            }
-
-            DisguiseType = LabAPIExtension?.GetType("LabApiExtensions.Managers.FakeRoleManager");
-            if (DisguiseType == null)
-            {
-                LogManager.Silent("Failed to find LabApiExtensions.Managers.FakeRoleManager type.");
-                return;
-            }
-
-            Type[] paramTypes = [
-                typeof(Player),
-                typeof(RoleTypeId)
-            ];
-
-            Disguise = AccessTools.Method(DisguiseType, "AddFakeRole", paramTypes);
-
-            if (Disguise == null)
-            {
-                Disguise = DisguiseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
-                    .FirstOrDefault(m =>
+                    if (asm.GetName().Name?.ToLower().Contains("labapiextensions") is true)
                     {
-                        if (m.Name != "AddFakeRole")
-                            return false;
+                        MainThreadDispatcher.Dispatch(() => LogManager.Silent($"{nameof(LabAPIExtensions)}: Found LabAPIExtensions Dependency!"));
+                        LabAPIExtension = asm;
+                        Found = true;
+                        break;
+                    }
+                }
 
-                        ParameterInfo[] ps = m.GetParameters();
-                        bool match0 = ps[0].ParameterType.FullName == typeof(Player).FullName;
-                        bool match1 = ps[1].ParameterType == typeof(RoleTypeId);
+                if (!Found)
+                {
+                    MainThreadDispatcher.Dispatch(() => LogManager.Silent($"{nameof(LabAPIExtensions)} was not found!"));
+                    return;
+                }
 
-                        return match0 && match1;
-                    });
-            }
+                DisguiseType = LabAPIExtension?.GetType("LabApiExtensions.Managers.FakeRoleManager");
+                if (DisguiseType == null)
+                {
+                    MainThreadDispatcher.Dispatch(() => LogManager.Silent("Failed to find LabApiExtensions.Managers.FakeRoleManager type."));
+                    return;
+                }
 
-            if (Disguise == null)
-                LogManager.Silent("Could not find AddFakeRole method in FakeRoleManager.");
+                Type[] paramTypes = [
+                    typeof(Player),
+                typeof(RoleTypeId)
+                ];
+
+                Disguise = AccessTools.Method(DisguiseType, "AddFakeRole", paramTypes);
+
+                if (Disguise == null)
+                {
+                    Disguise = DisguiseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                        .FirstOrDefault(m =>
+                        {
+                            if (m.Name != "AddFakeRole")
+                                return false;
+
+                            ParameterInfo[] ps = m.GetParameters();
+                            bool match0 = ps[0].ParameterType.FullName == typeof(Player).FullName;
+                            bool match1 = ps[1].ParameterType == typeof(RoleTypeId);
+
+                            return match0 && match1;
+                        });
+                }
+
+                if (Disguise == null)
+                    MainThreadDispatcher.Dispatch(() => LogManager.Silent("Could not find AddFakeRole method in FakeRoleManager."));
+            });
         }
 
         /// <summary>

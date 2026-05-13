@@ -258,7 +258,7 @@ namespace UncomplicatedCustomItems
             LabAPIExtensions.Init();
             ECRIntegration.Init();
             ECIIntegration.Init();
-            AudioApi.Init();
+            AudioIntegration.Init();
 #if EXILED
             CommonUtilitiesPatch.Initialize();
 #endif
