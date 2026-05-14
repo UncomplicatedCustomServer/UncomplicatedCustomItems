@@ -52,7 +52,7 @@
     <PackageReference Include="Northwood.LabAPI" Version="1.1.6.1" Publicize="true" />
     <PackageReference Include="ExMod.Exiled" Version="9.13.3" Condition=" '$(Configuration)' == 'Exiled' Or '$(Configuration)' == 'Exiled-Debug'" />
     <PackageReference Include="Lib.Harmony" Version="2.2.2" />
-    <PackageReference Include="System.Text.Json" Version="10.0.1" />
+    <PackageReference Include="System.Text.Json" Version="10.0.7" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" />
   </ItemGroup>
 
