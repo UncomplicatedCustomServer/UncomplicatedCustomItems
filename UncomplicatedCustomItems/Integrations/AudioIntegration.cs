@@ -10,8 +10,6 @@ using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Helper;
 using UnityEngine;
-using static UnityEngine.Rendering.RayTracingAccelerationStructure;
-using LabPlugin = LabApi.Loader.Features.Plugins.Plugin;
 
 namespace UncomplicatedCustomItems.Integrations
 {

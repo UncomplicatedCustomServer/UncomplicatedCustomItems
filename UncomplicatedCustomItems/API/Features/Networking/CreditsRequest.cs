@@ -102,7 +102,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 
                 if (string.IsNullOrEmpty(response) || response == "{}" && !UseCustomEndpoint)
                 {
-                    LogManager.Error("Failed to retrieve credits information. \n Retrying with backup endpoint...");
+                    LogManager.Warn("Failed to retrieve credits information. \n Retrying with backup endpoint...");
                     UseCustomEndpoint = true;
                     SendRequest();
                     return;
@@ -124,7 +124,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         public override void OnRequestFailed(UnityWebRequest request)
         {
             base.OnRequestFailed(request);
-            LogManager.Error($"Failed to retrieve credits information. Error: {request.error} \n Retrying with backup endpoint...");
+            LogManager.Warn($"Failed to retrieve credits information. Error: {request.error} \n Retrying with backup endpoint...");
             UseCustomEndpoint = true;
             SendRequest();
         }
