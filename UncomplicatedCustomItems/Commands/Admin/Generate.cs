@@ -2,7 +2,7 @@ using CommandSystem;
 using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin

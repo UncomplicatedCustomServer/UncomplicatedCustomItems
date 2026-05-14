@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using UncomplicatedCustomItems.API.Features.Networking;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     internal static class VersionManager
     {
@@ -78,11 +78,10 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             });
         }
 
-        public static string HashFile(string path)
+        public static string HashPlugin()
         {
-            using FileStream file = new(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            byte[] bytes = SHA256.Create().ComputeHash(file);
-            return BitConverter.ToString(bytes).Replace("-", string.Empty);
+            using FileStream file = new(Plugin.Instance.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return BitConverter.ToString(SHA256.Create().ComputeHash(file)).Replace("-", string.Empty);
         }
     }
 }

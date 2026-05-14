@@ -8,7 +8,7 @@ using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 using System.Text.Json;

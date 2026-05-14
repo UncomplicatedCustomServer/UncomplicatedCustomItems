@@ -5,7 +5,7 @@ using LabApi.Events.Handlers;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Integrations;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules

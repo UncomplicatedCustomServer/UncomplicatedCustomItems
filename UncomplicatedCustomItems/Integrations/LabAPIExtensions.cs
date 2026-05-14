@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using LabApi.Features.Wrappers;
 using PlayerRoles;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.Integrations
 {

@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System;
 using UnityEngine;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {

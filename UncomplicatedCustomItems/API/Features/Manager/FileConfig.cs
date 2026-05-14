@@ -14,7 +14,7 @@ using YamlDotNet.Core;
 using InventorySystem.Items.Usables.Scp330;
 using UncomplicatedCustomItems.API.ItemUpdater;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     public class FileConfig
     {

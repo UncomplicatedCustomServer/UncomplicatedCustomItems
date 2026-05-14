@@ -3,7 +3,7 @@ using InventorySystem.Items.Pickups;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Events;
 using UnityEngine;
 

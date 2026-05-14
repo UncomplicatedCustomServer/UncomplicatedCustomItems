@@ -2,7 +2,7 @@ using System;
 using InventorySystem.Items.Firearms.Attachments;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {

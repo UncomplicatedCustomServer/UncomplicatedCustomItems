@@ -2,7 +2,7 @@ using LabApi.Loader.Features.Yaml;
 using System.IO;
 using System;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     public class BackupKey
     {

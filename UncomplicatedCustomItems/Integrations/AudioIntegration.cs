@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.Integrations

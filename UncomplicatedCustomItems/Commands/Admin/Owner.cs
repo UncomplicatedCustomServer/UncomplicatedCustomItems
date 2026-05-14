@@ -2,7 +2,7 @@ using CommandSystem;
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using System.Net;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.Networking;
 using UncomplicatedCustomItems.API.Interfaces;
 using static EncryptedChannelManager;

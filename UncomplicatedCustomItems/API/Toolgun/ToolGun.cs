@@ -5,7 +5,7 @@ using LabApi.Events.Arguments.PlayerEvents;
 using UnityEngine;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using System.Globalization;
 using UserSettings.ServerSpecific;
 using MEC;

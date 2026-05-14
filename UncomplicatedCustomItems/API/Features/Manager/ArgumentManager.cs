@@ -12,7 +12,7 @@ using UncomplicatedCustomItems.API.Attributes;
 using MEC;
 using System.Threading;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     /// <summary>
     /// Manages the action system for <see cref="CustomItem"/>s

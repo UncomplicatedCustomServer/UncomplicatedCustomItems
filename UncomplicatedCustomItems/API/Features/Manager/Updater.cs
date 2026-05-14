@@ -11,7 +11,7 @@ using UnityEngine.Networking;
 using System.Text.Json;
 using MEC;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     public class Updater
     {

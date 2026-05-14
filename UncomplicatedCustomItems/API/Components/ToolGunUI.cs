@@ -6,7 +6,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Extensions;
 using UnityEngine;
 using UserSettings.ServerSpecific;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
 namespace UncomplicatedCustomItems.API.Components

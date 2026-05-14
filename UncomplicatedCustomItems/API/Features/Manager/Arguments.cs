@@ -16,7 +16,7 @@ using UnityEngine;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using UncomplicatedCustomItems.Integrations;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     public class Arguments
     {

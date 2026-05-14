@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     internal class BadgeManager
     {

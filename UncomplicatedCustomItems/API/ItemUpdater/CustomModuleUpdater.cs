@@ -6,7 +6,7 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.ItemUpdater
 {

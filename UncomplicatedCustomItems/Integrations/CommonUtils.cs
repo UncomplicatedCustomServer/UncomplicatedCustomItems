@@ -8,7 +8,7 @@ using Exiled.API.Features;
 using System.Linq;
 using System;
 using MEC;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using System.Reflection;
 using Exiled.Loader;
 using System.Collections;
