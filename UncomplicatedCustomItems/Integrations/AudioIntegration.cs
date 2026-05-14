@@ -75,7 +75,12 @@ namespace UncomplicatedCustomItems.Integrations
 
         public static void GetAudioPlayerAPI()
         {
+#if EXILED
+            AudioPlayerAPI = Exiled.Loader.Loader.Dependencies.FirstOrDefault(asm => asm.FullName.StartsWith("AudioPlayerApi"));
+#else
             AudioPlayerAPI = PluginLoader.Dependencies.FirstOrDefault(asm => asm.FullName.StartsWith("AudioPlayerApi"));
+#endif
+
             if (AudioPlayerAPI == null)
                 return;
 
@@ -171,7 +176,12 @@ namespace UncomplicatedCustomItems.Integrations
 
         private static void GetSLNAudio()
         {
+#if EXILED
+            SLNAudio = PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name == "SecretLabNAudio").Value ?? Exiled.Loader.Loader.LabAPIPlugins.FirstOrDefault(p => p.Key.Name == "SecretLabNAudio").Value;
+#else
             SLNAudio = PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name == "SecretLabNAudio").Value;
+#endif
+
             if (SLNAudio == null)
                 return;
 

@@ -12,6 +12,22 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 {
     public class APIRequest
     {
+        public class RequestSettings
+        {
+            public float WaitTime;
+            public bool Loop;
+            public bool Cancel;
+        }
+
+        public enum RequestType
+        {
+            Get,
+            Post,
+            Put,
+            Delete,
+            Options,
+        }
+
         public static IEnumerable<APIRequest> ActiveRequests = [];
         public static IReadOnlyList<APIRequest> RunningRequests = ActiveRequests.Where(r => r.Handle.IsRunning).ToList().AsReadOnly();
 
@@ -28,22 +44,6 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             List<APIRequest> requests = ActiveRequests.ToList();
             requests.Remove(this);
             ActiveRequests = requests;
-        }
-
-        public class RequestSettings
-        {
-            public float WaitTime;
-            public bool Loop;
-            public bool Cancel;
-        }
-
-        public enum RequestType
-        {
-            Get,
-            Post,
-            Put,
-            Delete,
-            Options,
         }
 
         public CoroutineHandle Handle;
@@ -70,7 +70,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         };
 
         public virtual bool UseUCIEndpoint => true;
-        
+
         public virtual bool UseCustomEndpoint { get; set; }
 
         public string DefaultEndpoint => $"https://api.ucserver.it/";
