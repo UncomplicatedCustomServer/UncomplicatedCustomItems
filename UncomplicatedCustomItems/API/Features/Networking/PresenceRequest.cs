@@ -65,7 +65,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             base.OnRequestCompleted(request);
         }
 
-        public override void SendRequest(Action<UnityWebRequest> onComplete = null!)
+        public override void SendRequest(Action<UnityWebRequest>? onComplete = null!)
         {
             if (Settings.Cancel)
                 return;
