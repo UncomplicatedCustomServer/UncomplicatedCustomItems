@@ -8,14 +8,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     [HarmonyPatch]
     public class AddLogPatch
     {
-        [HarmonyPatch(typeof(ServerConsole), nameof(ServerConsole.AddLog))]
-        public static void Postfix(string q, ConsoleColor color, bool hideFromOutputs)
+        [HarmonyPatch(typeof(ServerConsole), nameof(ServerConsole.PrintFormattedString))]
+        public static void Postfix(string text, ConsoleColor defaultColor)
         {
-            if (!q.Contains("UncomplicatedCustomItems") || !q.Contains("[ERROR]") || !Plugin.Instance.Config.AutomaticErrorUpload)
+            if (!text.Contains("UncomplicatedCustomItems") || !text.Contains("[ERROR]") || !Plugin.Instance.Config.AutomaticErrorUpload)
                 return;
 
-            q = Regex.Replace(q, @"_Patch\d+", "");
-            string filtered = q.Replace("MonoMod.Utils.DynamicMethodDefinition.", "");
+            text = Regex.Replace(text, @"_Patch\d+", "");
+            string filtered = text.Replace("MonoMod.Utils.DynamicMethodDefinition.", "");
             AutoLogRequest request = new(filtered, "UCI", "ERROR");
             request.SendRequest();
         }

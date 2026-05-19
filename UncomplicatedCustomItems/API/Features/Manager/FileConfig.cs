@@ -373,9 +373,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             },
         ];
 
-        public uint NewId = new();
-
-        public void GenerateCustomItem(uint id, string name, ItemType itemType, CustomItemType customType, string description)
+        public YAMLCustomItem GenerateCustomItem(uint id, string name, ItemType itemType, CustomItemType customType, string description)
         {
             Dictionary<string, object> customData = [];
             switch (customType, itemType)
@@ -480,20 +478,8 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                     break;
             }
 
-            foreach (ICustomItem customItem in CustomItem.List)
-            {
-                if (customItem.Id == id)
-                {
-                    NewId = CustomItem.GetFirstFreeId(1);
-                    break;
-                }
-                else
-                    NewId = id;
-            }
-
             YAMLCustomItem NewItem = new()
             {
-                Id = NewId,
                 Name = name,
                 Description = description,
                 BadgeName = name,
@@ -505,6 +491,17 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                 CustomData = customData,
             };
 
+            foreach (ICustomItem customItem in CustomItem.List)
+            {
+                if (customItem.Id == id)
+                {
+                    NewItem.Id = CustomItem.GetFirstFreeId(1);
+                    break;
+                }
+                else
+                    NewItem.Id = id;
+            }
+
 #if EXILED
             string filePath = Path.Combine(Paths.Configs, "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
             File.WriteAllText(filePath, Loader.Serializer.Serialize(NewItem));            
@@ -515,6 +512,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
 
             CustomItem.Register(YAMLCaster.Converter(NewItem));
             LogManager.Info($"Generated and registered custom item: {NewItem.Name} with ID {NewItem.Id}");
+            return NewItem;
         }
         
 #if EXILED
@@ -544,7 +542,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                     if (Directory.Exists(fileName))
                         continue;
 
-                    string fileContent = File.ReadAllText(fileName);
+                    string fileContent = FileManager.ReadAllTextSafe(fileName);
                     if (IsActionFile(fileContent))
                     {
                         YAMLCustomAction action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
