@@ -1,5 +1,4 @@
 using CustomPlayerEffects;
-using InventorySystem.Items.ThrowableProjectiles;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
@@ -18,11 +17,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public abstract float MaxRadius { get; set; }
 
         /// <summary>
-        /// Gets or sets the multiplier for damage against <see cref="Team.SCPs"/> players.
-        /// </summary>
-        public abstract float ScpDamageMultiplier { get; set; }
-
-        /// <summary>
         /// Gets or sets how long the <see cref="Burned"/> effect will last.
         /// </summary>
         public abstract float BurnDuration { get; set; }
@@ -38,34 +32,39 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public abstract float ConcussDuration { get; set; }
 
         /// <summary>
+        /// Gets or sets the multiplier for damage against <see cref="Team.SCPs"/> players.
+        /// </summary>
+        public virtual float ScpDamageMultiplier { get; set; } = 1.3f;
+
+        /// <summary>
         /// Gets or sets how long the fuse will last.
         /// </summary>
-        public abstract float FuseTime { get; set; }
+        public virtual float FuseTime { get; set; } = 5f;
 
         /// <summary>
         /// Gets or sets wether or not the grenade will explode on impact
         /// </summary>
-        public abstract bool ExplodeOnImpact { get; set; }
+        public virtual bool ExplodeOnImpact { get; set; }
 
         /// <summary>
         /// Gets or sets the time to pull out the pin
         /// </summary>
-        public abstract float PinPullTime { get; set; }
+        public virtual float PinPullTime { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether players can pickup grenade after throw.
         /// </summary>
-        public abstract bool Repickable { get; set; }
+        public virtual bool Repickable { get; set; }
 
         /// <summary>
         /// Gets or sets the player damage multiplier applied.
         /// </summary>
-        public abstract float PlayerDamageMultiplier { get; set; }
+        public virtual float PlayerDamageMultiplier { get; set; } = 1f;
 
         /// <summary>
         /// Gets or sets the door damage multiplier applied.
         /// </summary>
-        public abstract float DoorDamageMultiplier { get; set; }
+        public virtual float DoorDamageMultiplier { get; set; } = 1f;
 
         public override void RegisterEvents()
         {
@@ -113,7 +112,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 if (ev.Projectile is TimedGrenadeProjectile timedprojectile)
                     timedprojectile.RemainingTime = FuseTime;
                 if (ExplodeOnImpact)
-                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host).GameObject, ev.Projectile.Base);         
+                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host!).GameObject!, ev.Projectile.Base);         
             }
 
         }

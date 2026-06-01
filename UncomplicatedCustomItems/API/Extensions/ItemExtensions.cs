@@ -1,4 +1,15 @@
-﻿using InventorySystem;
+﻿// -----------------------------------------------------------------------
+// <copyright file="ItemExtensions.cs" company="ExMod Team">
+// Copyright (c) ExMod Team. All rights reserved.
+// Licensed under the CC BY-SA 3.0 license.
+// </copyright>
+// -----------------------------------------------------------------------
+// This file contains code originally licensed under CC BY-SA 3.0.
+// Modifications and adaptations by UCSC are licensed under GNU AGPL v3.
+// See LICENSE file for full GNU AGPL v3 license text.
+// -----------------------------------------------------------------------
+
+using InventorySystem;
 using InventorySystem.Items;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
@@ -43,9 +54,9 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <returns>Returns whether the <see cref="ItemType"/> is a keycard.</returns>
         public static bool IsKeycard(this ItemType type) => GetCategory(type) == ItemCategory.Keycard;
 
-        public static ItemCategory GetCategory(this ItemType type) => GetItemBase(type).Category;
+        public static ItemCategory? GetCategory(this ItemType type) => GetItemBase(type)?.Category;
 
-        public static ItemBase GetItemBase(this ItemType type)
+        public static ItemBase? GetItemBase(this ItemType type)
         {
             if (!InventoryItemLoader.AvailableItems.TryGetValue(type, out ItemBase itemBase))
                 return null;
@@ -117,7 +128,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <returns>
         /// The corresponding <see cref="SummonedCustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static SummonedCustomItem TryGetSummonedCustomItem(this Item item) => Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem) ? customItem : null;
+        public static SummonedCustomItem? TryGetSummonedCustomItem(this Item item) => Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem? customItem) ? customItem : null;
 
         /// <summary>
         /// Attempts to retrieve the <see cref="ICustomItem"/> associated with the specified <see cref="Item"/>.
@@ -126,7 +137,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <returns>
         /// The corresponding <see cref="ICustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static ICustomItem TryGetCustomItem(this Item item) => Utilities.TryGetCustomItem(item.Serial, out ICustomItem customItem) ? customItem : null;
+        public static ICustomItem? TryGetCustomItem(this Item item) => Utilities.TryGetCustomItem(item.Serial, out ICustomItem customItem) ? customItem : null;
 
         /// <summary>
         /// Compares two <see cref="Item"/> instances to determine if they refer to the same custom item definition.
@@ -148,12 +159,12 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// </returns>
         public static bool CompareSummonedCustomItems(this Item item1, Item item2) => TryGetSummonedCustomItem(item1) == TryGetSummonedCustomItem(item2);
 
-        public static Pickup Create(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default) => Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
+        public static Pickup? Create(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default) => Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
 
-        public static Pickup CreateAndSpawn(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default)
+        public static Pickup? CreateAndSpawn(this Item item, Vector3 pos, Quaternion rot = default, Vector3 scale = default)
         {
-            Pickup pickup = Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
-            pickup.Spawn();
+            Pickup? pickup = Pickup.Create(item.Type, pos, rot, scale == default ? Vector3.one : scale);
+            pickup?.Spawn();
             return pickup;
         }
     }

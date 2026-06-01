@@ -5,8 +5,7 @@ using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Integrations;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
@@ -64,7 +63,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 return;
             
             LogManager.Debug($"Spawned Capybara on {player.DisplayName}");
-            CapybaraToy capybara = CapybaraToy.Create(player.GameObject.transform);
+            CapybaraToy capybara = CapybaraToy.Create(player.GameObject?.transform);
             capybara.CollidersEnabled = false;
             capybara.Position += new Vector3(0, -0.8f, 0);
             player.Scale = new(0.2f, 0.3f, 0.5f);

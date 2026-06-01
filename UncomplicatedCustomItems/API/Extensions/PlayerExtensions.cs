@@ -1,19 +1,14 @@
-﻿using CustomPlayerEffects;
-using Interactables.Interobjects.DoorUtils;
+﻿using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
-using InventorySystem.Items;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.ShotEvents;
-using InventorySystem.Items.Usables.Scp330;
 using LabApi.Features.Wrappers;
 using PlayerStatsSystem;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
 using UncomplicatedCustomItems.API.Interfaces;
-using UncomplicatedCustomItems.HarmonyElements.Patches;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Extensions
@@ -28,11 +23,12 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <param name="player"><see cref="Player" /> trying to interact.</param>
         /// <param name="door"></param>
         /// <returns>Whether the player has the required keycard.</returns>
-        internal static bool HasKeycardPermission(this Player player, IDoorPermissionRequester door) =>
+        public static bool HasKeycardPermission(this Player player, IDoorPermissionRequester door) =>
             player.CurrentItem is KeycardItem keycard && player.CurrentItem.Base is IDoorPermissionProvider keycardProvider && door is IDoorPermissionRequester permissions && permissions.PermissionsPolicy.CheckPermissions(keycardProvider.GetPermissions(permissions));
 
         public static CommandSender GetSender(this Player player) => player.ReferenceHub.queryProcessor._sender;
 
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         public static void Vaporize(this Player player, Player? attacker = null)
         {
             if (!InventoryItemLoader.TryGetItem(ItemType.ParticleDisruptor, out ParticleDisruptor disruptor))
@@ -45,6 +41,7 @@ namespace UncomplicatedCustomItems.API.Extensions
             DisruptorDamageHandler damageHandler = new(shotEvent, Vector3.up, -1);
             player.ReferenceHub.playerStats.KillPlayer(damageHandler);
         }
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 
         public static void GiveCustomItem(this Player player, ICustomItem customitem) => new SummonedCustomItem(customitem, player);
 
@@ -58,7 +55,7 @@ namespace UncomplicatedCustomItems.API.Extensions
                         return true;
                 }
             }
-            else if (player.CurrentItem.IsSummonedCustomItem())
+            else if (player.CurrentItem?.IsSummonedCustomItem() ?? false)
                 return true;
 
             return false;

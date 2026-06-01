@@ -5,8 +5,7 @@ using LabApi.Events.Handlers;
 using Scp914;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Events;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -26,6 +25,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
@@ -64,7 +66,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 foreach (CustomItem customItem in Features.CustomItem.List)
                 {
                     LogManager.Debug($"{customItem.Name}");
-                    if (customItem.TryGetModule<Craftable>(out var data))
+                    if (customItem.TryGetModule<Craftable>(out var data) && data != null)
                     {
                         LogManager.Debug($"{Name} has Craftable CustomFlag");
                         LogManager.Debug($"Checking settings on {Name}");
@@ -105,11 +107,11 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             {
                 foreach (CustomItem customItem in Features.CustomItem.List)
                 {
-                    if (customItem.TryGetModule<Craftable>(out var data))
+                    if (customItem.TryGetModule<Craftable>(out var data) && data != null)
                     {
                         if (UnityEngine.Random.Range(0f, 101f) >= Chance)
                         {
-                            if (processingInventoryItem.Player.CurrentItem.Type == data.OriginalItem && processingInventoryItem.KnobSetting == data.KnobSetting)
+                            if (processingInventoryItem.Player.CurrentItem?.Type == data.OriginalItem && processingInventoryItem.KnobSetting == data.KnobSetting)
                             {
                                 processingInventoryItem.Player.RemoveItem(processingInventoryItem.Item);
                                 new SummonedCustomItem(customItem, processingInventoryItem.Player);

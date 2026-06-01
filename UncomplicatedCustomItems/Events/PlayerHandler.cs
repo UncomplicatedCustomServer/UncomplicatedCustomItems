@@ -6,11 +6,9 @@ using CustomPlayerEffects;
 using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
 using InventorySystem.Items;
-using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.Modules.Scp127;
 using InventorySystem.Items.Jailbird;
 using InventorySystem.Items.Pickups;
-using InventorySystem.Items.ThrowableProjectiles;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;
@@ -22,33 +20,26 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Components;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UncomplicatedCustomItems.Events.Arguments.ItemInspectionEvents;
-using UncomplicatedCustomItems.Events.Handlers;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
 using UserSettings.ServerSpecific;
-using static InventorySystem.Items.Firearms.Modules.AnimatorReloaderModuleBase;
-using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
-using Scp018Projectile = InventorySystem.Items.ThrowableProjectiles.Scp018Projectile;
 using InventorySystem.Items.Autosync;
 
 namespace UncomplicatedCustomItems.Events
 {
     internal class PlayerHandler
     {
-        internal static Dictionary<Player, CoroutineHandle> _relativePosCoroutine = [];
         internal static Dictionary<Player, CoroutineHandle> _humeShieldRegenCoroutine = [];
         internal static Dictionary<int, CapybaraToy> _capybaras = [];
         internal static Dictionary<Player, long> _damageTimes = [];
@@ -57,12 +48,12 @@ namespace UncomplicatedCustomItems.Events
         internal static readonly CachedLayerMask ToolGunMask = new("Default", "Door", "Glass");
         internal static List<Player> CustomScp268Effects = [];
         internal static List<(CustomItem, ushort, int)> CandyIdx = [];
-        private static int AmmoStored = 0;
 
         /// <summary>
         /// The <see cref="Dictionary{TKey,TValue}"/> that handles lights spawned from the <see cref="OnDrop"/> method.
         /// </summary>
         public static Dictionary<Pickup, Light> ActiveLights = [];
+
         /// <summary>
         /// The <see cref="Vector3"/> coordinates of the latest detonation point for a <see cref="ExplosiveGrenadeProjectile"/>.
         /// Triggered by the <see cref="ServerHandler.OnGrenadeExploding"/> method.
@@ -74,7 +65,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ShootingWeapon += OnShooting;
             PlayerEvent.UsedItem += OnItemUse;
             PlayerEvent.DroppedItem += OnDrop;
-            PlayerEvent.ShotWeapon += OnShot;
             PlayerEvent.UpdatingEffect += OnReceivingEffect;
             PlayerEvent.ThrewProjectile += OnThrownProjectile;
             PlayerEvent.Dying += OnDying;
@@ -93,17 +83,15 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ToggledWeaponFlashlight += OnWeaponFlashlightToggled;
             PlayerEvent.TogglingFlashlight += OnTogglingFlashlight;
             PlayerEvent.ItemUsageEffectsApplying += OnUsingItemCompleted;
-            PlayerEvent.InspectingKeycard += OnInspectingKeycard;
             PlayerEvent.InteractingElevator += OnUsingElevator;
             PlayerEvent.ChangingItem += OnChangingItem;
             PlayerEvent.Death += OnDeath;
             PlayerEvent.ChangingRole += OnRoleChange;
             PlayerEvent.TogglingNoclip += OnNoclip;
             PlayerEvent.ProcessingJailbirdMessage += OnJailbirdMessaging;
-            PlayerEvent.ProcessedJailbirdMessage += OnJailbirdMessage;
             PlayerEvent.ThrewProjectile += OnProjectileThrew;
-            PlayerEvent.ChangingAttachments += OnPlayerChangingAttachments;
             InventoryExtensions.OnItemAdded += OnItemAdded;
+            PlayerEvent.InspectedItem += OnItemInspected;
         }
 
         public static void Unregister()
@@ -111,7 +99,6 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ShootingWeapon -= OnShooting;
             PlayerEvent.UsedItem -= OnItemUse;
             PlayerEvent.DroppedItem -= OnDrop;
-            PlayerEvent.ShotWeapon -= OnShot;
             PlayerEvent.UpdatingEffect -= OnReceivingEffect;
             PlayerEvent.ThrewProjectile -= OnThrownProjectile;
             PlayerEvent.Dying -= OnDying;
@@ -130,152 +117,72 @@ namespace UncomplicatedCustomItems.Events
             PlayerEvent.ToggledWeaponFlashlight -= OnWeaponFlashlightToggled;
             PlayerEvent.TogglingFlashlight -= OnTogglingFlashlight;
             PlayerEvent.ItemUsageEffectsApplying -= OnUsingItemCompleted;
-            PlayerEvent.InspectingKeycard -= OnInspectingKeycard;
             PlayerEvent.InteractingElevator -= OnUsingElevator;
             PlayerEvent.ChangingItem -= OnChangingItem;
             PlayerEvent.Death -= OnDeath;
             PlayerEvent.ChangingRole -= OnRoleChange;
             PlayerEvent.TogglingNoclip -= OnNoclip;
             PlayerEvent.ProcessingJailbirdMessage -= OnJailbirdMessaging;
-            PlayerEvent.ProcessedJailbirdMessage -= OnJailbirdMessage;
             PlayerEvent.ThrewProjectile -= OnProjectileThrew;
-            PlayerEvent.ChangingAttachments -= OnPlayerChangingAttachments;
             InventoryExtensions.OnItemAdded -= OnItemAdded;
+            PlayerEvent.InspectedItem -= OnItemInspected;
+        }
+
+        private static void OnItemInspected(PlayerInspectedItemEventArgs ev)
+        {
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item, out var customItem) || customItem == null)
+                return;
+
+            if (customItem.CustomItem.CustomItemType != CustomItemType.Item)
+                return;
+
+            customItem.HandleEvent(ev.Player, ItemEvents.Inspect, ev.Item.Serial);
         }
 
         private static void OnItemAdded(ReferenceHub hub, ItemBase itemBase, ItemPickupBase pickupBase)
         {
-            Player player = Player.Get(hub);
-            if (Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var item))
+            if (itemBase == null)
+                return;
+
+            Player? player = Player.Get(hub);
+            if (player == null)
+                return;
+
+            if (Utilities.TryGetSummonedCustomItem(itemBase.ItemSerial, out var item) && item != null)
             {
-                if (item.TryGetModule<PickupHintOverride>(out var hintoverride))
+                if (item.TryGetModule<PickupHintOverride>(out var hintoverride) && hintoverride != null)
+                {
                     player.SendHint(hintoverride.Hint.Replace("%name%", item.CustomItem.Name).Replace("%desc%", item.CustomItem.Description).Replace("%description%", item.CustomItem.Description), hintoverride.Duration);
+                }
                 else
                     item.HandlePickedUpDisplayHint(player);
             }
 
-            if (SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var api))
+            if (SummonedAPICustomItem.TryGet(itemBase.ItemSerial, out var api) && api != null)
                 api.HandlePickedUpDisplayHint(player);
         }
 
         private static void OnProjectileThrew(PlayerThrewProjectileEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.ThrowableItem.Serial, out var summoned))
-            {
+            if (ev.ThrowableItem == null)
+                return;
+
+            if (Utilities.TryGetSummonedCustomItem(ev.ThrowableItem.Serial, out var summoned) && summoned != null)
                 summoned.OnThrew(ev);
-                switch (summoned.CustomItem.CustomItemType)
-                {
-                    case CustomItemType.ExplosiveGrenade when summoned.CustomItem.CustomData is ExplosiveGrenadeData exdata && ev.Projectile.Base is ExplosionGrenade exGrenade:
-                        exGrenade.MaxRadius = exdata.MaxRadius;
-                        exGrenade.ScpDamageMultiplier = exdata.ScpDamageMultiplier;
-                        exGrenade._burnedDuration = exdata.BurnDuration;
-                        exGrenade._concussedDuration = exdata.ConcussDuration;
-                        exGrenade._deafenedDuration = exdata.DeafenDuration;
-                        exGrenade._fuseTime = exdata.FuseTime;
-                        exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
-                        exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
-                        if (exdata.ExplodeOnImpact)
-                            exGrenade.gameObject.AddComponent<CollisionHandler>().Init(exGrenade.gameObject, exGrenade);
 
-                        break;
-
-                    case CustomItemType.FlashGrenade when summoned.CustomItem.CustomData is FlashGrenadeData flashdata && ev.Projectile.Base is FlashbangGrenade flash:
-                        flash.BlindTime = flashdata.AdditionalBlindedEffect;
-                        flash._minimalEffectDuration = flashdata.MinimalDurationEffect;
-                        flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
-                        flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
-                        flash._fuseTime = flashdata.FuseTime;
-                        if (flashdata.ExplodeOnImpact)
-                            flash.gameObject.AddComponent<CollisionHandler>().Init(flash.gameObject, flash);
-
-                        break;
-
-                    case CustomItemType.SCPItem when summoned.CustomItem.CustomData is SCP018Data scp018data && ev.Projectile.Base is Scp018Projectile scp018:
-                        scp018._friendlyFireTime = scp018data.FriendlyFireTime;
-                        scp018._fuseTime = scp018data.FuseTime;
-                        if (scp018data.ExplodeOnImpact)
-                            scp018.gameObject.AddComponent<CollisionHandler>().Init(scp018.gameObject, scp018);
-
-                        break;
-
-                    default:
-                        LogManager.Warn($"Unsupported ItemType {ev.ThrowableItem.Type} was thrown as a projectile by {ev.Player.DisplayName}");
-                        break;
-                }
-            }
-
-            if (SummonedAPICustomItem.TryGet(ev.ThrowableItem.Serial, out var api))
-            {
+            if (SummonedAPICustomItem.TryGet(ev.ThrowableItem.Serial, out var api) && api != null)
                 api.OnThrew(ev);
-                switch (api.CustomItem)
-                {
-                    case CustomExplosiveGrenade exdata when ev.Projectile.Base is ExplosionGrenade exGrenade:
-                        exGrenade.MaxRadius = exdata.MaxRadius;
-                        exGrenade.ScpDamageMultiplier = exdata.ScpDamageMultiplier;
-                        exGrenade._burnedDuration = exdata.BurnDuration;
-                        exGrenade._concussedDuration = exdata.ConcussDuration;
-                        exGrenade._deafenedDuration = exdata.DeafenDuration;
-                        exGrenade._fuseTime = exdata.FuseTime;
-                        exGrenade._doorDamageOverDistance.Multiply(exdata.DoorDamageMultiplier);
-                        exGrenade._playerDamageOverDistance.Multiply(exdata.PlayerDamageMultiplier);
-                        if (exdata.ExplodeOnImpact)
-                            exGrenade.gameObject.AddComponent<CollisionHandler>().Init(exGrenade.gameObject, exGrenade);
-
-                        break;
-
-                    case CustomFlashGrenade flashdata when ev.Projectile.Base is FlashbangGrenade flash:
-                        flash.BlindTime = flashdata.AdditionalBlindedEffect;
-                        flash._minimalEffectDuration = flashdata.MinimalDurationEffect;
-                        flash._additionalBlurDuration = flashdata.AdditionalBlindedEffect;
-                        flash._surfaceZoneDistanceIntensifier = flashdata.SurfaceDistanceIntensifier;
-                        flash._fuseTime = flashdata.FuseTime;
-                        if (flashdata.ExplodeOnImpact)
-                            flash.gameObject.AddComponent<CollisionHandler>().Init(flash.gameObject, flash);
-
-                        break;
-
-                    case CustomSCP018 scp018data when ev.Projectile.Base is Scp018Projectile scp018:
-                        scp018._friendlyFireTime = scp018data.FriendlyFireTime;
-                        scp018._fuseTime = scp018data.FuseTime;
-                        if (scp018data.ExplodeOnImpact)
-                            scp018.gameObject.AddComponent<CollisionHandler>().Init(scp018.gameObject, scp018);
-
-                        break;
-
-                    default:
-                        LogManager.Warn($"Unsupported ItemType {ev.ThrowableItem.Type} was thrown as a projectile by {ev.Player.DisplayName}");
-                        break;
-                }
-            }
-        }
-
-        public static void OnJailbirdMessage(PlayerProcessedJailbirdMessageEventArgs ev)
-        {
-            if (ev.Message is JailbirdMessageType.Inspect)
-                ItemInspectionEvents.OnInspectedItem(new InspectedItemEventArgs(ev.JailbirdItem, ev.Player));
         }
 
         public static void OnJailbirdMessaging(PlayerProcessingJailbirdMessageEventArgs ev)
         {
-            if (ev.Message is JailbirdMessageType.Inspect)
-            {
-                InspectingItemEventArgs args = new(ev.JailbirdItem, ev.Player);
-                ItemInspectionEvents.OnInspectingItem(args);
-                if (!args.IsAllowed)
-                {
-                    ev.JailbirdItem.Base.SendRpc(JailbirdMessageType.ChargeFailed);
-                    ev.IsAllowed = false;
-                }
-            }
+            if (ev.JailbirdItem?.Base == null || ev.Player == null)
+                return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.JailbirdItem.Serial, out var item) && item.CustomItem.CustomItemType is CustomItemType.Jailbird && item.CustomItem.CustomData is JailbirdData data)
+            if (Utilities.TryGetSummonedCustomItem(ev.JailbirdItem.Serial, out var item) && item != null && item.CustomItem.CustomItemType is CustomItemType.Jailbird && item.CustomItem.CustomData is JailbirdData data)
             {
                 switch (ev.Message)
                 {
-                    case JailbirdMessageType.Inspect:
-                        item.HandleEvent(ev.Player, ItemEvents.Inspect, ev.JailbirdItem.Serial);
-                        break;
-
                     case JailbirdMessageType.ChargeStarted or JailbirdMessageType.ChargeLoadTriggered:
                         if (item.HasModule<NoCharge>())
                             ev.JailbirdItem.Base.SendRpc(JailbirdMessageType.ChargeFailed);
@@ -286,15 +193,32 @@ namespace UncomplicatedCustomItems.Events
                         if (item.CustomItem.CustomData is JailbirdData jailbird && !jailbird.AllowWearStateChanges && item.CustomItem.CustomItemType is CustomItemType.Jailbird)
                         {
                             JailbirdDeteriorationTracker.ReceivedStates[ev.JailbirdItem.Serial] = jailbird.WearState;
-                            ev.IsAllowed = false;
-                            
-                            using (new AutosyncRpc(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer))
-                            {
-                                writer.WriteByte(0);
-                                writer.WriteByte((byte)jailbird.WearState);
-                            }
+                            AutosyncRpc sync = new(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer);
+                            writer.WriteByte(0);
+                            writer.WriteByte((byte)jailbird.WearState);
+                            sync.Send();
+                            sync.Dispose();
                         }
-                        
+
+                        break;
+                }
+            }
+
+            if (SummonedAPICustomItem.TryGet(ev.JailbirdItem.Serial, out var api) && api != null)
+            {
+                switch (ev.Message)
+                {
+                    case JailbirdMessageType.UpdateState:
+                        if (api.CustomItem is CustomJailbird jailbird && jailbird.LockWearState)
+                        {
+                            JailbirdDeteriorationTracker.ReceivedStates[ev.JailbirdItem.Serial] = jailbird.WearState;
+                            AutosyncRpc sync = new(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer);
+                            writer.WriteByte(0);
+                            writer.WriteByte((byte)jailbird.WearState);
+                            sync.Send();
+                            sync.Dispose();
+                        }
+
                         break;
                 }
             }
@@ -302,42 +226,39 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnRoleChange(PlayerChangingRoleEventArgs ev)
         {
-            if (ev.Player.CurrentItem is null)
+            if (ev.Player?.CurrentItem == null)
                 return;
 
-            if (!ev.Player.Connection.isReady)
+            if (ev.Player.Connection is not { isReady: true })
                 return;
 
-            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem != null)
             {
                 StopHumeShieldRegen(ev.Player);
-                summonedItem?.ResetBadge(ev.Player);
+                summonedItem.ResetBadge(ev.Player);
             }
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem? item) || item == null)
                 return;
 
-            item?.ResetBadge(ev.Player);
+            item.ResetBadge(ev.Player);
             StopHumeShieldRegen(ev.Player);
         }
 
         public static void OnNoclip(PlayerTogglingNoclipEventArgs ev)
         {
-            if (ev.Player.CurrentItem is null)
+            if (ev.Player?.CurrentItem == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem item))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem? item) || item == null)
                 return;
 
-            item?.HandleEvent(ev.Player, ItemEvents.Noclip, ev.Player.CurrentItem.Serial);
+            item.HandleEvent(ev.Player, ItemEvents.Noclip, ev.Player.CurrentItem.Serial);
         }
 
         public static void OnDeath(PlayerDeathEventArgs ev)
         {
-            if (!ev.Player.Connection.isReady)
-                return;
-
-            if (ev.Player == null)
+            if (ev.Player?.Connection is not { isReady: true })
                 return;
 
             StopHumeShieldRegen(ev.Player);
@@ -345,39 +266,47 @@ namespace UncomplicatedCustomItems.Events
 
         internal static IEnumerator<float> DecayRate(Player player, float decayRate)
         {
-            for (; ; )
+            while (player != null && player.IsAlive && player.HumeShield > 0)
             {
-                if (player.HumeShield >= 0)
-                {
-                    player.HumeShield -= Time.deltaTime * decayRate;
-                    yield return Timing.WaitForOneFrame;
-                }
-                else
-                {
-                    yield break;
-                }
+                player.HumeShield -= decayRate * Timing.DeltaTime;
+                yield return Timing.WaitForOneFrame;
             }
+
+            if (player != null && player.HumeShield < 0)
+                player.HumeShield = 0;
         }
 
         public static void OnChangingItem(PlayerChangingItemEventArgs ev)
         {
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value) && value != null)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
-
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item?.CustomItem?.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible? invisible) && invisible != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
             }
 
-            if (ev.OldItem is null)
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci) && saci != null)
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item?.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible? invisible1) && invisible1 != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
+            }
+
+            if (ev.OldItem == null)
                 return;
 
-            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
-            {
-                summonedItem?.ResetBadge(ev.Player);
+            if (ev.Player?.CurrentItem == null)
+                return;
 
-                if (summonedItem.Item.Type == ItemType.GunSCP127 && summonedItem.CustomItem is CustomSCP127 customSCP127)
+            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem != null)
+            {
+                summonedItem.ResetBadge(ev.Player);
+
+                if (summonedItem.Item?.Type == ItemType.GunSCP127 && summonedItem.CustomItem is CustomSCP127 customSCP127)
                 {
                     Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(summonedItem.Item.Base);
                     switch (tier)
@@ -403,14 +332,16 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
-            customItem?.ResetBadge(ev.Player);
+            customItem.ResetBadge(ev.Player);
 
-            if (customItem.Item.Type == ItemType.GunSCP127 && customItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+            if (customItem.Item?.Type == ItemType.GunSCP127 && customItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
             {
-                ISCP127Data data = customItem.CustomItem.CustomData as ISCP127Data;
+                if (customItem.CustomItem.CustomData is not ISCP127Data data)
+                    return;
+
                 Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(customItem.Item.Base);
                 switch (tier)
                 {
@@ -418,14 +349,17 @@ namespace UncomplicatedCustomItems.Events
                         ev.Player.HumeShieldRegenRate = 0f;
                         Timing.RunCoroutine(DecayRate(ev.Player, data.Tier1ShieldDecayRate));
                         break;
+
                     case Scp127Tier.Tier2:
                         ev.Player.HumeShieldRegenRate = 0f;
                         Timing.RunCoroutine(DecayRate(ev.Player, data.Tier2ShieldDecayRate));
                         break;
+
                     case Scp127Tier.Tier3:
                         ev.Player.HumeShieldRegenRate = 0f;
                         Timing.RunCoroutine(DecayRate(ev.Player, data.Tier3ShieldDecayRate));
                         break;
+
                     default:
                         LogManager.Error($"{customItem.CustomItem.Name} - {customItem.Serial} has no tier or is unsupported tier?");
                         break;
@@ -435,20 +369,12 @@ namespace UncomplicatedCustomItems.Events
             }
         }
 
-        public static void OnInspectingKeycard(PlayerInspectingKeycardEventArgs ev)
-        {
-            if (ev.Player == null || ev.KeycardItem == null)
-                return;
-
-            if (!Utilities.TryGetSummonedCustomItem(ev.KeycardItem.Serial, out SummonedCustomItem customItem))
-                return;
-
-            customItem.HandleEvent(ev.Player, ItemEvents.Inspect, ev.KeycardItem.Serial);
-        }
-
         public static void OnUsingItemCompleted(PlayerItemUsageEffectsApplyingEventArgs ev)
         {
-            if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var summondItem) && summondItem.CustomItem is CustomSCP268 customSCP268)
+            if (ev.UsableItem == null || ev.Player == null)
+                return;
+
+            if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var summondItem) && summondItem != null && summondItem.CustomItem is CustomSCP268 customSCP268)
             {
                 Timing.CallDelayed(Timing.WaitForOneFrame, () =>
                 {
@@ -465,31 +391,40 @@ namespace UncomplicatedCustomItems.Events
                         ev.UsableItem.DropItem().Destroy();
                 });
             }
-            if (Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out var customItem))
+
+            if (Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out var customItem) && customItem != null)
             {
                 if (customItem.CustomItem.CustomItemType is CustomItemType.SCPItem)
                 {
                     switch (ev.UsableItem.Type)
                     {
                         case ItemType.SCP268:
-                            if (customItem.CustomItem.CustomData is not SCP268Data data)
+                            if (customItem.CustomItem.CustomData is not SCP268Data hat)
                                 break;
 
                             Timing.CallDelayed(Timing.WaitForOneFrame, () =>
                             {
-                                if (!data.ApplyScp268Effect)
+                                if (!hat.ApplyScp268Effect)
                                     ev.Player.DisableEffect<Invisible>();
 
-                                if (data.ApplyScp268Effect)
+                                if (hat.ApplyScp268Effect)
                                 {
-                                    ev.Player.EnableEffect<Invisible>(1, data.Duration, false);
+                                    ev.Player.EnableEffect<Invisible>(1, hat.Duration, false);
                                     CustomScp268Effects.TryAdd(ev.Player);
                                 }
 
-                                if (data.OneTimeUse)
+                                if (hat.OneTimeUse)
                                     ev.UsableItem.DropItem().Destroy();
                             });
 
+                            break;
+
+                        case ItemType.SCP207 or ItemType.AntiSCP207 when customItem.CustomItem.CustomData is SCP207Data cola:
+                            if (!cola.Apply207Effect)
+                            {
+                                ev.IsAllowed = false;
+                                ev.ContinueProcess = false;
+                            }
                             break;
                     }
                 }
@@ -502,13 +437,15 @@ namespace UncomplicatedCustomItems.Events
                     return;
 
                 List<ICustomItem> candies = CustomItem.List.Where(c => c.CustomData is CandyData candyData && c.Spawn.DoSpawn).ToList();
-                CustomItem item = candies.RandomItem() as CustomItem;
+                if (candies.IsEmpty())
+                    return;
 
-                if (candies.Count() >= 1)
+                CustomItem? item = candies.RandomItem() as CustomItem;
+                if (candies.Count >= 1)
                 {
                     if (CandyIdx.Any(i => i.Item2 == bag.ItemSerial))
                     {
-                        if (item.CustomData is CandyData data && bag.Candies[idx] == data.CandyType)
+                        if (item?.CustomData is CandyData data && bag.Candies[idx] == data.CandyType)
                         {
                             if (data.DestroyOnUse)
                             {
@@ -521,20 +458,20 @@ namespace UncomplicatedCustomItems.Events
                                 ev.IsAllowed = false;
                                 ev.ContinueProcess = false;
                                 InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
-                                ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
+                                ev.Player.Connection?.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
                             }
 
                             ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
                         }
                     }
-                    else if (candies.Count > 0 && item.CustomData is CandyData data && UnityEngine.Random.Range(0f, 100f) >= data.Chance && bag.Candies[idx] == data.CandyType)
+                    else if (candies.Count > 0 && item?.CustomData is CandyData data && UnityEngine.Random.Range(0f, 100f) < data.Chance && bag.Candies[idx] == data.CandyType)
                     {
                         if (!data.ApplyEffects)
                         {
                             ev.IsAllowed = false;
                             ev.ContinueProcess = false;
                             InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
-                            ev.Player.Connection.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
+                            ev.Player.Connection?.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
                         }
 
                         if (!data.DestroyOnUse)
@@ -558,41 +495,46 @@ namespace UncomplicatedCustomItems.Events
             if (!ev.IsAllowed || ev.Player == null || ev.FirearmItem == null)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value) && value != null)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowShooting && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item?.CustomItem?.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowShooting && ev.Player.TryGetEffect(out Invisible? invisible) && invisible != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowShooting && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci) && saci != null)
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item?.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowShooting && ev.Player.TryGetEffect(out Invisible? invisible1) && invisible1 != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
         }
 
         public static void OnItemUse(PlayerUsedItemEventArgs ev)
         {
-            if (ev.Player == null)
-                return;
-            if (ev.UsableItem == null)
-                return;
-            if (ev == null)
+            if (ev.Player == null || ev.UsableItem == null || ev == null)
                 return;
 
-            if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var summonedItem))
-                summonedItem?.ResetBadge(ev.Player);
+            if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var summonedItem) && summonedItem != null)
+                summonedItem.ResetBadge(ev.Player);
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
             if (customItem.CustomItem.CustomData is ICandyData)
                 return;
 
             customItem.HandleEvent(ev.Player, ItemEvents.Use, ev.UsableItem.Serial);
-            customItem?.ResetBadge(ev.Player);
+            customItem.ResetBadge(ev.Player);
 
             if (customItem.CustomItem.Reusable)
                 new SummonedCustomItem(customItem.CustomItem, ev.Player);
 
-            if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var item1))
+            if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var item1) && item1 != null)
             {
                 switch (ev.UsableItem.Type, item1.CustomItem)
                 {
@@ -602,21 +544,24 @@ namespace UncomplicatedCustomItems.Events
                             LogManager.Warn($"Invalid Effect: {data207.Effect} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         if (data207.Duration <= -2)
                         {
                             LogManager.Warn($"Invalid Duration: {data207.Duration} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         if (data207.Intensity <= 0)
                         {
                             LogManager.Warn($"Invalid intensity: {data207.Intensity} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {data207.Effect} at intensity {data207.Intensity}, duration is {data207.Duration} to {ev.Player.Nickname}");
                         string s207effect = data207.Effect;
                         float s207duration = data207.Duration;
                         byte s207intensity = data207.Intensity;
-                        ev.Player?.ReferenceHub.playerEffectsController.ChangeState(s207effect, s207intensity, s207duration, true);
+                        ev.Player.ReferenceHub.playerEffectsController.ChangeState(s207effect, s207intensity, s207duration, true);
                         break;
 
                     case (ItemType.SCP1853, CustomSCP1853 data1853):
@@ -625,39 +570,42 @@ namespace UncomplicatedCustomItems.Events
                             LogManager.Warn($"Invalid Effect: {data1853.Effect} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         if (data1853.Duration <= -2)
                         {
                             LogManager.Warn($"Invalid Duration: {data1853.Duration} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         if (data1853.Intensity <= 0)
                         {
                             LogManager.Warn($"Invalid intensity: {data1853.Intensity} for ID: {item1.CustomItem.Id} Name: {item1.CustomItem.Name}");
                             return;
                         }
+
                         LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {data1853.Effect} at intensity {data1853.Intensity}, duration is {data1853.Duration} to {ev.Player.Nickname}");
                         string s1853effect = data1853.Effect;
                         float s1853duration = data1853.Duration;
                         byte s1853intensity = data1853.Intensity;
-                        ev.Player?.ReferenceHub.playerEffectsController.ChangeState(s1853effect, s1853intensity, s1853duration, true);
+                        ev.Player.ReferenceHub.playerEffectsController.ChangeState(s1853effect, s1853intensity, s1853duration, true);
                         break;
                 }
 
-                if (ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207 && item1.CustomItem is CustomSCP207 customSCP207 && !customSCP207.RemoveItemAfterUse)
-                    new SummonedAPICustomItem(item1.CustomItem, ev.Player);
+                if ((ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207) && item1.CustomItem is CustomSCP207 customSCP207 && !customSCP207.RemoveItemAfterUse)
+                    new SummonedAPICustomItem(item1.CustomItem!, ev.Player);
 
                 if (ev.UsableItem.Type == ItemType.SCP1853 && item1.CustomItem is CustomSCP1853 scp1853Data && !scp1853Data.RemoveItemAfterUse)
                     new SummonedAPICustomItem(item1.CustomItem, ev.Player);
             }
 
-            if (Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem item))
+            if (Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem? item) && item != null)
             {
-                ISCP500Data scp500Data = item.CustomItem.CustomData as ISCP500Data;
-                ISCP207Data scp207Data = item.CustomItem.CustomData as ISCP207Data;
-                ISCP1853Data scp1853Data = item.CustomItem.CustomData as ISCP1853Data;
-                ISCP1576Data scp1576Data = item.CustomItem.CustomData as ISCP1576Data;
+                ISCP500Data? scp500Data = item.CustomItem.CustomData as ISCP500Data;
+                ISCP207Data? scp207Data = item.CustomItem.CustomData as ISCP207Data;
+                ISCP1853Data? scp1853Data = item.CustomItem.CustomData as ISCP1853Data;
+                ISCP1576Data? scp1576Data = item.CustomItem.CustomData as ISCP1576Data;
 
-                string effect = null;
+                string? effect = null;
                 byte intensity = 0;
                 float duration = 0;
 
@@ -691,7 +639,7 @@ namespace UncomplicatedCustomItems.Events
                         return;
                 }
 
-                if (effect is null)
+                if (effect == null)
                     return;
 
                 if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effect))
@@ -713,21 +661,21 @@ namespace UncomplicatedCustomItems.Events
                 }
 
                 LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {effect} at intensity {intensity}, duration is {duration} to {ev.Player.Nickname}");
-                ev.Player?.ReferenceHub.playerEffectsController.ChangeState(effect, intensity, duration, true);
+                ev.Player.ReferenceHub.playerEffectsController.ChangeState(effect, intensity, duration, true);
 
                 if (ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207)
                 {
-                    if (!scp207Data.RemoveItemAfterUse)
+                    if (scp207Data != null && !scp207Data.RemoveItemAfterUse)
                         new SummonedCustomItem(item.CustomItem, ev.Player);
                 }
 
                 if (ev.UsableItem.Type == ItemType.SCP1853)
                 {
-                    if (!scp1853Data.RemoveItemAfterUse)
+                    if (scp1853Data != null && !scp1853Data.RemoveItemAfterUse)
                         new SummonedCustomItem(item.CustomItem, ev.Player);
                 }
 
-                if (item.Item.Type == ItemType.Adrenaline || item.Item.Type == ItemType.Medkit || item.Item.Type == ItemType.Painkillers)
+                if (item.Item?.Type == ItemType.Adrenaline || item.Item?.Type == ItemType.Medkit || item.Item?.Type == ItemType.Painkillers)
                     item.HandleCustomAction(item.Item);
             }
         }
@@ -737,52 +685,60 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player == null || ev.Player.IsHost)
                 return;
 
-            if (ev.NewItem is not null)
+            if (ev.NewItem != null)
             {
-                if (SummonedAPICustomItem.TryGet(ev.NewItem.Serial, out var summonedItem))
+                if (SummonedAPICustomItem.TryGet(ev.NewItem.Serial, out var summonedItem) && summonedItem != null)
                 {
-                    summonedItem?.LoadBadge(ev.Player);
+                    summonedItem.LoadBadge(ev.Player);
                     summonedItem.HandleSelectedDisplayHint(ev.Player);
 
                     if (summonedItem.CustomItem is CustomSCP127 data)
                     {
-                        Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(summonedItem.Item.Base);
+                        Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(summonedItem.Item?.Base);
                         StartHumeShieldRegen(ev.Player, data, tier, summonedItem);
                     }
                 }
 
-                if (!Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem customItem))
-                    return;
-
-                if (customItem.TryGetModule<PickupHintOverride>(out var hintoverride))
-                    ev.Player.SendHint(hintoverride.Hint.Replace("%name%", customItem.CustomItem.Name).Replace("%desc%", customItem.CustomItem.Description).Replace("%description%", customItem.CustomItem.Description), hintoverride.Duration);
-                else
-                    customItem.HandleSelectedDisplayHint(ev.Player);
-
-                customItem?.LoadBadge(ev.Player);
-
-                Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                if (Utilities.TryGetSummonedCustomItem(ev.NewItem.Serial, out SummonedCustomItem? customItem) && customItem != null)
                 {
-                    if (customItem.CustomItem.CustomItemType is CustomItemType.Light && customItem.Item is LightItem lightSource)
-                        lightSource.IsEmitting = false;
-                });
+                    if (customItem.TryGetModule<PickupHintOverride>(out var hintoverride) && hintoverride != null)
+                    {
+                        ev.Player.SendHint(hintoverride.Hint.Replace("%name%", customItem.CustomItem.Name).Replace("%desc%", customItem.CustomItem.Description).Replace("%description%", customItem.CustomItem.Description), hintoverride.Duration);
+                    }
+                    else
+                        customItem.HandleSelectedDisplayHint(ev.Player);
 
-                if (customItem.CustomItem.Item == ItemType.GunSCP127 && customItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
-                {
-                    ISCP127Data data = customItem.CustomItem.CustomData as ISCP127Data;
-                    Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(customItem.Item.Base);
-                    StartHumeShieldRegen(ev.Player, data, tier, customItem);
+                    customItem.LoadBadge(ev.Player);
+
+                    Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                    {
+                        if (customItem.CustomItem.CustomItemType is CustomItemType.Light && customItem.Item is LightItem lightSource)
+                            lightSource.IsEmitting = false;
+                    });
+
+                    if (customItem.CustomItem.Item == ItemType.GunSCP127 && customItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
+                    {
+                        if (customItem.CustomItem.CustomData is ISCP127Data data)
+                        {
+                            Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(customItem.Item?.Base);
+                            StartHumeShieldRegen(ev.Player, data, tier, customItem);
+                        }
+                    }
                 }
             }
+
             if (ev.OldItem != null)
             {
-                if (SummonedAPICustomItem.TryGet(ev.OldItem.Serial, out var summonedItem) && summonedItem.CustomItem is ToolGun toolGun)
+                if (SummonedAPICustomItem.TryGet(ev.OldItem.Serial, out var summonedItem) && summonedItem != null && summonedItem.CustomItem is ToolGun toolGun)
                 {
-                    SSTwoButtonsSetting clearList = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(ev.Player.ReferenceHub, 23);
-                    foreach (PrimitiveObjectToy primitive in AdminToy.List.OfType<PrimitiveObjectToy>().ToList())
+                    SSTwoButtonsSetting? clearList = ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(ev.Player.ReferenceHub, 23);
+                    if (clearList != null)
                     {
-                        if (_toolGunPrimitives.TryGetValue(primitive, out int id) && clearList.SyncIsA && ev.Player.PlayerId == id)
-                            primitive.Destroy();
+                        foreach (PrimitiveObjectToy primitive in AdminToy.List.OfType<PrimitiveObjectToy>().ToList())
+                        {
+                            if (_toolGunPrimitives.TryGetValue(primitive, out int id) && clearList.SyncIsA && ev.Player.PlayerId == id)
+                                primitive.Destroy();
+                        }
                     }
                 }
             }
@@ -804,7 +760,7 @@ namespace UncomplicatedCustomItems.Events
 
         internal static void StopHumeShieldRegen(Player player)
         {
-            if (_relativePosCoroutine.TryGetValue(player, out CoroutineHandle handle))
+            if (_humeShieldRegenCoroutine.TryGetValue(player, out CoroutineHandle handle))
             {
                 Timing.KillCoroutines(handle);
                 _humeShieldRegenCoroutine.Remove(player);
@@ -840,9 +796,7 @@ namespace UncomplicatedCustomItems.Events
                     player.HumeShieldRegenRate = (elapsed >= damagePause) ? regenRate : 0f;
                 }
                 else
-                {
                     player.HumeShieldRegenRate = regenRate;
-                }
 
                 if (player.CurrentItem == null || player.CurrentItem.Serial != customItem.Serial)
                     yield break;
@@ -853,79 +807,77 @@ namespace UncomplicatedCustomItems.Events
 
         internal static IEnumerator<float> HumeShieldRegeneration(Player player, ISCP127Data data, Scp127Tier tier, SummonedCustomItem customItem)
         {
-            float regenRate = 0f;
-            float damagePause = 0f;
-
-            switch (tier)
+            float regenRate = tier switch
             {
-                case Scp127Tier.Tier1:
-                    regenRate = data.Tier1ShieldRegenRate;
-                    damagePause = data.Tier1ShieldOnDamagePause;
-                    break;
-                case Scp127Tier.Tier2:
-                    regenRate = data.Tier2ShieldRegenRate;
-                    damagePause = data.Tier2ShieldOnDamagePause;
-                    break;
-                case Scp127Tier.Tier3:
-                    regenRate = data.Tier3ShieldRegenRate;
-                    damagePause = data.Tier3ShieldOnDamagePause;
-                    break;
-            }
+                Scp127Tier.Tier1 => data.Tier1ShieldRegenRate,
+                Scp127Tier.Tier2 => data.Tier2ShieldRegenRate,
+                Scp127Tier.Tier3 => data.Tier3ShieldRegenRate,
+                _ => 0f
+            };
 
-            for (; ; )
+            float damagePause = tier switch
             {
+                Scp127Tier.Tier1 => data.Tier1ShieldOnDamagePause,
+                Scp127Tier.Tier2 => data.Tier2ShieldOnDamagePause,
+                Scp127Tier.Tier3 => data.Tier3ShieldOnDamagePause,
+                _ => 0f
+            };
+
+            while (player != null && player.IsAlive)
+            {
+                if (player.CurrentItem == null || player.CurrentItem.Serial != customItem.Serial)
+                {
+                    player.HumeShieldRegenRate = 0f;
+                    yield break;
+                }
+
                 if (_damageTimes.TryGetValue(player, out long time))
                 {
                     long elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - time;
                     player.HumeShieldRegenRate = (elapsed >= damagePause) ? regenRate : 0f;
                 }
                 else
-                {
                     player.HumeShieldRegenRate = regenRate;
-                }
-
-                if (player.CurrentItem == null || player.CurrentItem.Serial != customItem.Serial)
-                    yield break;
 
                 yield return Timing.WaitForOneFrame;
             }
+
+            player?.HumeShieldRegenRate = 0f;
         }
 
         public static void OnPickup(PlayerPickedUpItemEventArgs ev)
         {
-            if (ev.Item == null)
+            if (ev.Item == null || ev.Player == null)
                 return;
             if (ev.Item.Category != ItemCategory.Armor)
                 return;
 
-            if (SummonedAPICustomItem.TryGet(ev.Item.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.Item.Serial, out var summonedItem) && summonedItem != null)
             {
                 summonedItem.OnPickup(ev);
                 summonedItem.HandlePickedUpDisplayHint(ev.Player);
             }
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Item.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
             customItem.OnPickup(ev);
-            if (customItem.TryGetModule<PickupHintOverride>(out var hintoverride))
+            if (customItem.TryGetModule<PickupHintOverride>(out var hintoverride) && hintoverride != null)
+            {
                 ev.Player.SendHint(hintoverride.Hint.Replace("%name%", customItem.CustomItem.Name).Replace("%desc%", customItem.CustomItem.Description).Replace("%description%", customItem.CustomItem.Description), hintoverride.Duration);
+            }
             else
                 customItem.HandlePickedUpDisplayHint(ev.Player);
         }
 
         public static void OnHurting(PlayerHurtingEventArgs ev)
         {
-            if (ev.Attacker == null)
-                return;
-            if (ev.Player == null)
-                return;
-            if (ev.Attacker.CurrentItem == null)
+            if (ev.Attacker == null || ev.Player == null || ev.Attacker.CurrentItem == null)
                 return;
 
             _damageTimes.TryAdd(ev.Player, DateTimeOffset.Now.ToUnixTimeMilliseconds());
 
-            if (SummonedAPICustomItem.TryGet(ev.Attacker.CurrentItem.Serial, out var summonedItem) && summonedItem.CustomItem is CustomWeapon customWeapon)
+            if (SummonedAPICustomItem.TryGet(ev.Attacker.CurrentItem.Serial, out var summonedItem) && summonedItem != null && summonedItem.CustomItem is CustomWeapon customWeapon)
             {
                 if (customWeapon.EnableFriendlyFire)
                 {
@@ -934,7 +886,7 @@ namespace UncomplicatedCustomItems.Events
                 }
             }
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out var customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
             if (ev.DamageHandler is JailbirdDamageHandler handler && customItem.CustomItem.CustomItemType is CustomItemType.Jailbird && customItem.CustomItem.CustomData is JailbirdData data)
@@ -958,47 +910,11 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.CustomItem.CustomItemType is CustomItemType.Weapon)
             {
-                IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
-                if (weaponData.EnableFriendlyFire)
+                if (customItem.CustomItem.CustomData is IWeaponData weaponData && weaponData.EnableFriendlyFire)
                 {
                     ev.Player.Damage(weaponData.Damage, ev.Attacker);
                     ev.Attacker.SendHitMarker(weaponData.Damage);
                 }
-            }
-
-            switch (customItem.CustomItem.CustomItemType)
-            {
-                case CustomItemType.Weapon:
-                    {
-                        IWeaponData weaponData = customItem.CustomItem.CustomData as IWeaponData;
-                        FirearmDamageHandler damageHandler = ev.DamageHandler as FirearmDamageHandler;
-                        LogManager.Debug($"{damageHandler.Damage}");
-                        LogManager.Debug($"{ev.Player.Health}/{ev.Player.MaxHealth}");
-                        damageHandler.Damage = weaponData.Damage;
-                        LogManager.Debug($"{damageHandler.Damage}");
-                        break;
-                    }
-
-                case CustomItemType.MicroHID:
-                    {
-                        IMicroHIDData microData = customItem.CustomItem.CustomData as IMicroHIDData;
-                        MicroHidDamageHandler damageHandler = ev.DamageHandler as MicroHidDamageHandler;
-                        damageHandler.Damage = microData.Damage;
-                        break;
-                    }
-
-                case CustomItemType.ParticleDisruptor:
-                    {
-                        IParticleDisruptorData disruptorData = customItem.CustomItem.CustomData as IParticleDisruptorData;
-                        DisruptorDamageHandler damageHandler = ev.DamageHandler as DisruptorDamageHandler;
-                        if (damageHandler.FiringState == FiringState.FiringSingle)
-                            damageHandler.Damage = disruptorData.ChargeDamage;
-
-                        if (damageHandler.FiringState == FiringState.FiringRapid)
-                            damageHandler.Damage = disruptorData.BurstDamage;
-
-                        break;
-                    }
             }
         }
 
@@ -1009,11 +925,11 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player.Role == RoleTypeId.Spectator || ev.Player.Role == RoleTypeId.Destroyed)
                 return;
 
-            CapybaraToy[] capybaras = [];
-            capybaras = ev.Player.GameObject.GetComponentsInChildren<CapybaraToy>();
+            CapybaraToy[] capybaras = ev.Player.GameObject?.GetComponentsInChildren<CapybaraToy>() ?? [];
             foreach (CapybaraToy toy in capybaras)
             {
-                toy.Parent = Player.Host.GameObject.transform;
+                if (Player.Host?.GameObject?.transform != null)
+                    toy.Parent = Player.Host.GameObject.transform;
                 toy.Position = new(1000, 1000, 1000);
                 toy.Scale = new(0, 0, 0);
                 toy.Destroy();
@@ -1030,13 +946,22 @@ namespace UncomplicatedCustomItems.Events
             if (ev.IsAllowed == false)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value) && value != null)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowUsingElevators && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item?.CustomItem?.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowUsingElevators && ev.Player.TryGetEffect(out Invisible? invisible) && invisible != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowUsingElevators && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci) && saci != null)
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item?.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowUsingElevators && ev.Player.TryGetEffect(out Invisible? invisible1) && invisible1 != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
         }
 
@@ -1047,13 +972,22 @@ namespace UncomplicatedCustomItems.Events
             if (ev.IsAllowed == false)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value) && value != null)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowOpeningDoors && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item?.CustomItem?.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowOpeningDoors && ev.Player.TryGetEffect(out Invisible? invisible) && invisible != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningDoors && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci) && saci != null)
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item?.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningDoors && ev.Player.TryGetEffect(out Invisible? invisible1) && invisible1 != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
         }
 
@@ -1068,20 +1002,19 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player.CurrentItem == null)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem))
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem? customItem) && customItem != null)
             {
                 switch (customItem.CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
-                        IKeycardData data = customItem.CustomItem.CustomData as IKeycardData;
-                        if (ev.Door.Base.IsMoving && data.OneTimeUse)
+                        if (customItem.CustomItem.CustomData is IKeycardData data && ev.Door.Base.IsMoving && data.OneTimeUse)
                         {
                             Timing.CallDelayed(0.5f, () =>
                             {
                                 ev.Player.SendHint($"{data.OneTimeUseHint.Replace("%name%", customItem.CustomItem.Name)}", 8f);
                                 LogManager.Debug($"OneTimeUse is true removing {customItem.CustomItem.Name}...");
-                                ev.Player.RemoveItem(customItem.Item);
-                                customItem?.ResetBadge(ev.Player);
+                                ev.Player.RemoveItem(customItem.Item!);
+                                customItem.ResetBadge(ev.Player);
                             });
                         }
 
@@ -1097,30 +1030,38 @@ namespace UncomplicatedCustomItems.Events
             if (ev.IsAllowed == false)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value) && value != null)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowOpeningGenerators && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item?.CustomItem?.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowOpeningGenerators && ev.Player.TryGetEffect(out Invisible? invisible) && invisible != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningGenerators && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci) && saci != null)
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item?.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningGenerators && ev.Player.TryGetEffect(out Invisible? invisible1) && invisible1 != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
 
             if (ev.Player.CurrentItem == null)
                 return;
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem))
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem? customItem) && customItem != null)
             {
                 if (customItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
-                    IKeycardData data = customItem.CustomItem.CustomData as IKeycardData;
-                    if (data.OneTimeUse)
+                    if (customItem.CustomItem.CustomData is IKeycardData data && data.OneTimeUse)
                     {
                         Timing.CallDelayed(0.5f, () =>
                         {
                             ev.Player.SendHint($"{data.OneTimeUseHint.Replace("%name%", customItem.CustomItem.Name)}", 8f);
                             LogManager.Debug($"OneTimeUse is true removing {customItem.CustomItem.Name}...");
-                            ev.Player.RemoveItem(customItem.Item);
+                            ev.Player.RemoveItem(customItem.Item!);
                         });
                     }
                 }
@@ -1134,19 +1075,28 @@ namespace UncomplicatedCustomItems.Events
             if (ev.IsAllowed == false)
                 return;
 
-            foreach (Item item in ev.Player.Items)
+            if (SummonedCustomItem.PlayerCache.TryGetValue(ev.Player, out var value) && value != null)
             {
-                if (Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem customItem1) && customItem1.CustomItem.CustomItemType is CustomItemType.SCPItem && customItem1.CustomItem.CustomData is SCP268Data data && data.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                foreach (SummonedCustomItem item in value)
+                {
+                    if (item?.CustomItem?.CustomItemType is CustomItemType.SCPItem && item.CustomItem.CustomData is SCP268Data data && data.AllowOpeningLockers && ev.Player.TryGetEffect(out Invisible? invisible) && invisible != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible.TimeLeft, false));
+                }
+            }
 
-                if (SummonedAPICustomItem.TryGet(item.Serial, out var customitem2) && customitem2.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowEquipingItems && ev.Player.TryGetEffect(out Invisible invisible1) && CustomScp268Effects.Contains(ev.Player))
-                    Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+            if (SummonedAPICustomItem.PlayerCache.TryGetValue(ev.Player, out var saci) && saci != null)
+            {
+                foreach (SummonedAPICustomItem item in saci)
+                {
+                    if (item?.CustomItem is CustomSCP268 customSCP268 && customSCP268.AllowOpeningLockers && ev.Player.TryGetEffect(out Invisible? invisible1) && invisible1 != null && CustomScp268Effects.Contains(ev.Player))
+                        Timing.CallDelayed(Timing.WaitForOneFrame, () => ev.Player.EnableEffect<Invisible>(1, invisible1.TimeLeft, false));
+                }
             }
 
             if (ev.Player.CurrentItem == null)
                 return;
 
-            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem.CustomItem is CustomKeycard keycard)
+            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem != null && summonedItem.CustomItem is CustomKeycard keycard)
             {
                 if (ev.Chamber.IsOpen && keycard.OneTimeUse)
                 {
@@ -1154,23 +1104,22 @@ namespace UncomplicatedCustomItems.Events
                     {
                         ev.Player.SendHint($"{keycard.OneTimeUseMessage.Replace("%name%", summonedItem.CustomItem.Name)}", keycard.OneTimeUseMessageDuration);
                         LogManager.Debug($"OneTimeUse is true removing {summonedItem.CustomItem.Name}...");
-                        ev.Player.RemoveItem(summonedItem.Item);
+                        ev.Player.RemoveItem(summonedItem.Item!);
                     });
                 }
             }
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem))
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem? customItem) && customItem != null)
             {
                 if (customItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
-                    IKeycardData data = customItem.CustomItem.CustomData as IKeycardData;
-                    if (ev.Chamber.IsOpen && data.OneTimeUse)
+                    if (customItem.CustomItem.CustomData is IKeycardData data && ev.Chamber.IsOpen && data.OneTimeUse)
                     {
                         Timing.CallDelayed(0.5f, () =>
                         {
                             ev.Player.SendHint($"{data.OneTimeUseHint.Replace("%name%", customItem.CustomItem.Name)}", 8f);
                             LogManager.Debug($"OneTimeUse is true removing {customItem.CustomItem.Name}...");
-                            ev.Player.RemoveItem(customItem.Item);
+                            ev.Player.RemoveItem(customItem.Item!);
                         });
                     }
                 }
@@ -1181,7 +1130,7 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.FirearmItem == null || ev.Player == null)
                 return;
-            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
             customItem.FlashLightToggle = ev.NewState;
@@ -1191,8 +1140,8 @@ namespace UncomplicatedCustomItems.Events
         {
             if (ev.CoinItem == null || ev.Player == null)
                 return;
-                
-            if (!Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem customItem))
+
+            if (!Utilities.TryGetSummonedCustomItem(ev.CoinItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
             if (customItem.CustomItem.CustomItemType is CustomItemType.Item)
@@ -1204,7 +1153,7 @@ namespace UncomplicatedCustomItems.Events
             if (ev.LightItem == null || ev.Player == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
             if (customItem.CustomItem.CustomItemType is CustomItemType.Item)
@@ -1216,21 +1165,20 @@ namespace UncomplicatedCustomItems.Events
             if (ev.LightItem == null || ev.Player == null)
                 return;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.LightItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
             if (customItem.CustomItem.CustomItemType is CustomItemType.Light)
             {
                 ev.LightItem.IsEmitting = false;
-                IFlashlightData data = customItem.CustomItem.CustomData as IFlashlightData;
-                if (ev.NewState && customItem.Light.Intensity >= 0 && !customItem.Toggled)
+                if (customItem.CustomItem.CustomData is IFlashlightData data && ev.NewState && customItem.Light?.Intensity >= 0 && !customItem.Toggled)
                 {
                     ev.IsAllowed = false;
                     ev.LightItem.IsEmitting = false;
                     customItem.Light.Intensity = data.Intensity;
                     customItem.Toggled = true;
                 }
-                else if (customItem.Toggled && customItem.Light.Intensity >= 1)
+                else if (customItem.Toggled && customItem.Light?.Intensity >= 1)
                 {
                     ev.IsAllowed = false;
                     ev.LightItem.IsEmitting = false;
@@ -1245,45 +1193,40 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Projectile == null || ev.Player == null)
                 return;
 
-            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
-                summonedItem?.ResetBadge(ev.Player);
+            if (ev.Player.CurrentItem != null && SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem != null)
+                summonedItem.ResetBadge(ev.Player);
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Projectile.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
-            customItem?.ResetBadge(ev.Player);
+            customItem.ResetBadge(ev.Player);
         }
 
         public static void OnDrop(PlayerDroppedItemEventArgs ev)
         {
-            LogManager.Debug($"Item Dropped: {ev.Pickup.Type} - Serial: {ev.Pickup.Serial}");
-            if (ev.Pickup == null)
+            if (ev.Pickup == null || ev.Player == null)
                 return;
 
-            LogManager.Debug($"Pickup is not null");
-            foreach (SummonedCustomItem item in SummonedCustomItem.List.ToArray())
-            {
-                LogManager.Debug($"{item.Serial}");
-            }
-            if (SummonedAPICustomItem.TryGet(ev.Pickup.Serial, out var summonedItem))
+            LogManager.Debug($"Item Dropped: {ev.Pickup.Type} - Serial: {ev.Pickup.Serial}");
+            if (SummonedAPICustomItem.TryGet(ev.Pickup.Serial, out var summonedItem) && summonedItem != null)
             {
                 summonedItem.OnDrop(ev);
-                summonedItem?.ResetBadge(ev.Player);
+                summonedItem.ResetBadge(ev.Player);
                 StopHumeShieldRegen(ev.Player);
-                
-                ev.Pickup.GameObject.transform.localScale = summonedItem.CustomItem.Scale;
-                ev.Pickup.Weight = summonedItem.CustomItem.Weight;
+
+                ev.Pickup.GameObject.transform.localScale = summonedItem.CustomItem?.Scale ?? Vector3.one;
+                ev.Pickup.Weight = summonedItem.CustomItem?.Weight ?? 1f;
 
                 if (summonedItem.CustomItem is ToolGun)
                     summonedItem.Destroy();
             }
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem summonedCustomItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Pickup.Serial, out SummonedCustomItem? summonedCustomItem) || summonedCustomItem == null)
                 return;
 
             LogManager.Debug($"Pickup is a CustomItem");
             summonedCustomItem.OnDrop(ev);
-            summonedCustomItem?.ResetBadge(ev.Player);
+            summonedCustomItem.ResetBadge(ev.Player);
             StopHumeShieldRegen(ev.Player);
 
             try
@@ -1300,21 +1243,20 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnDying(PlayerDyingEventArgs ev)
         {
-            CustomScp268Effects.Remove(ev.Player);
+            if (ev.Player != null)
+                CustomScp268Effects.Remove(ev.Player);
 
-            if (ev.Attacker == null)
+            if (ev.Attacker == null || ev.Player == null)
                 return;
-            if (ev.Player == null)
+            if (ev.Attacker.Connection is not { isReady: true })
                 return;
-            if (!ev.Attacker.Connection.isReady)
-                return;
-            if (!ev.Player.Connection.isReady)
+            if (ev.Player.Connection is not { isReady: true })
                 return;
             if (ev.Attacker.CurrentItem == null)
                 return;
             if (!ev.Attacker.CurrentItem.Type.IsWeapon())
                 return;
-            if (!Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
             PlayerExtensions.PlayerKills.TryGetValue(ev.Attacker, out int kills);
@@ -1323,6 +1265,9 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnVerified(PlayerJoinedEventArgs ev)
         {
+            if (ev.Player == null)
+                return;
+
             if (BadgeManager.devBadges.ContainsKey(ev.Player.UserId) && Plugin.Instance.Config.AllowDevPermissions)
             {
                 LogManager.Debug($"Applying developer usergroup to {ev.Player.DisplayName} - {ev.Player.PlayerId} - {ev.Player.UserId}");
@@ -1343,11 +1288,12 @@ namespace UncomplicatedCustomItems.Events
             {
                 LogManager.Debug($"{nameof(OnVerified)}: Changing {entry.Key} appearance to {entry.Value}");
 #if EXILED
-                Exiled.API.Features.Player.TryGet(entry.Key, out Exiled.API.Features.Player player);
-                Exiled.API.Extensions.MirrorExtensions.ChangeAppearance(player, entry.Value);
+                Exiled.API.Features.Player.TryGet(entry.Key, out Exiled.API.Features.Player? player);
+                if (player != null)
+                    Exiled.API.Extensions.MirrorExtensions.ChangeAppearance(player, entry.Value);
 #else
-                Player.TryGet(entry.Key, out Player player);
-                player.DisguisePlayer(entry.Value);
+                Player.TryGet(entry.Key, out Player? player);
+                player?.DisguisePlayer(entry.Value);
 #endif
             }
         }
@@ -1371,26 +1317,9 @@ namespace UncomplicatedCustomItems.Events
                 _capybaras.TryRemove(ev.Player.PlayerId);
         }
 
-        public static void OnShot(PlayerShotWeaponEventArgs ev)
-        {
-            if (ev.FirearmItem == null || ev.Player == null)
-                return;
-
-            if (!Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out SummonedCustomItem customItem))
-                return;
-
-            if (ev.FirearmItem.ActionModule is AutomaticActionModule actionModule)
-            {
-                actionModule._serverQueuedRequests.Clear();
-                actionModule._clientQueuedShots.Clear();
-            }
-        }
-
         public static void OnReceivingEffect(PlayerEffectUpdatingEventArgs ev)
         {
-            if (ev.Effect == null)
-                return;
-            if (ev.Player == null)
+            if (ev.Effect == null || ev.Player == null)
                 return;
 
             if (CustomScp268Effects.Contains(ev.Player) && ev.Effect is Invisible invisible && invisible.TimeLeft < 1)
@@ -1402,54 +1331,39 @@ namespace UncomplicatedCustomItems.Events
             if (ev.Player.CurrentItem == null)
                 return;
 
-            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem))
+            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem != null)
             {
                 switch (ev.Effect, summonedItem.CustomItem)
                 {
-                    case (Scp207 or AntiScp207, CustomSCP207 scp207Data):
-                        LogManager.Debug("Effect is from a 207 custom item.");
-                        if (!scp207Data.Apply207Effect)
-                        {
-                            LogManager.Debug("Removing SCP-207 effect.");
-                            ev.Player.DisableEffect(ev.Effect);
-                            ev.IsAllowed = false;
-                        }
+                        case (Scp207 or AntiScp207, CustomSCP207 scp207Data) when !scp207Data.Apply207Effect:
+                        LogManager.Debug("Removing SCP-207 effect.");
+                        ev.Player.DisableEffect(ev.Effect);
+                        ev.IsAllowed = false;
                         break;
 
-                    case (Scp1853, CustomSCP1853 scp1853Data):
-                        LogManager.Debug("Effect is from a 1853 custom item.");
-                        if (!scp1853Data.Apply1853Effect)
-                        {
-                            LogManager.Debug("Removing SCP-1853 effect.");
-                            ev.Player.DisableEffect(ev.Effect);
-                            ev.IsAllowed = false;
-                        }
+                    case (Scp1853, CustomSCP1853 scp1853Data) when !scp1853Data.Apply1853Effect:
+                        LogManager.Debug("Removing SCP-1853 effect.");
+                        ev.Player.DisableEffect(ev.Effect);
+                        ev.IsAllowed = false;
                         break;
                 }
             }
 
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem customItem))
+            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem? customItem) && customItem != null)
             {
                 LogManager.Debug($"{ev.Player.Nickname} is receiving {ev.Effect}");
                 switch (ev.Effect)
                 {
-                    case AntiScp207 or Scp207 when customItem.CustomItem.CustomData is SCP207Data scp207Data:
-                        LogManager.Debug("Effect is from a 207 custom item.");
-                        if (!scp207Data.Apply207Effect)
-                        {
-                            LogManager.Debug("Removing SCP-207 effect.");
-                            ev.Player.DisableEffect(ev.Effect);
-                            ev.IsAllowed = false;
-                        }
+                    case AntiScp207 or Scp207 when customItem.CustomItem.CustomData is SCP207Data scp207Data && !scp207Data.Apply207Effect:
+                        LogManager.Debug("Removing SCP-207 effect.");
+                        ev.Player.DisableEffect(ev.Effect);
+                        ev.IsAllowed = false;
                         break;
-                    case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data:
-                        LogManager.Debug("Effect is from a 1853 custom item.");
-                        if (!scp1853Data.Apply1853Effect)
-                        {
-                            LogManager.Debug("Removing SCP-1853 effect.");
-                            ev.Player.DisableEffect(ev.Effect);
-                            ev.IsAllowed = false;
-                        }
+
+                    case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data && !scp1853Data.Apply1853Effect:
+                        LogManager.Debug("Removing SCP-1853 effect.");
+                        ev.Player.DisableEffect(ev.Effect);
+                        ev.IsAllowed = false;
                         break;
                 }
             }
@@ -1461,13 +1375,16 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public static void DestroyLightOnPickup(Pickup pickup)
         {
+            if (pickup == null)
+                return;
+
             if (Utilities.IsSummonedCustomItem(pickup.Serial))
             {
                 LogManager.Debug($"{pickup.Type} is a Customitem");
-                if (pickup == null || !ActiveLights.ContainsKey(pickup))
+                if (!ActiveLights.ContainsKey(pickup))
                     return;
 
-                Light itemLight = ActiveLights[pickup];
+                Light? itemLight = ActiveLights[pickup];
                 if (itemLight != null && itemLight.Base != null)
                 {
                     itemLight.Destroy();

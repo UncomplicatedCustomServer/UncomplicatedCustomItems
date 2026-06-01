@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData

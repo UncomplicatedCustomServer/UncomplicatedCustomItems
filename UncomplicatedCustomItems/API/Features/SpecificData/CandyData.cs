@@ -6,7 +6,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     public class CandyData : Data, ICandyData
     {
         public virtual CandyKindID CandyType { get; set; }
-        public virtual string EatingMessage { get; set; }
+        public virtual string EatingMessage { get; set; } = string.Empty;
         public virtual float EatingMessageDuration { get; set; }
         public virtual bool DestroyOnUse { get; set; }
         public virtual float Chance { get; set; }

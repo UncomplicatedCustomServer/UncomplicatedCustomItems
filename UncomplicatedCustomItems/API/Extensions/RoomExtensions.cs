@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
-    internal static class RoomExtensions
+    public static class RoomExtensions
     {
         /// <summary>
         /// Returns the local space position, based on a world space position.

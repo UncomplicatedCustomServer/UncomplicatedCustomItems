@@ -11,7 +11,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     {
         private static bool Prefix(ChargeFireModeModule __instance)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.MicroHid.ItemSerial, out SummonedCustomItem customItem) && customItem.CustomItem.CustomData is IMicroHIDData md)
+            if (Utilities.TryGetSummonedCustomItem(__instance.MicroHid.ItemSerial, out SummonedCustomItem? customItem) && customItem != null && customItem.CustomItem.CustomData is IMicroHIDData md)
             {
                 if (!md.CanExplode)
                     return false;

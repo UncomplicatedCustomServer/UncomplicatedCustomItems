@@ -1,6 +1,5 @@
 ﻿using InventorySystem.Items.Jailbird;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {

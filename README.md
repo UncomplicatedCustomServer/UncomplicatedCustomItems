@@ -57,7 +57,7 @@
 
 ## Requirements
 
-- **LabApi** >= `v1.2.0` **or** **Exiled** >= `v9.9.2`
+- **LabApi** >= `v1.1.5` **or** **Exiled** >= `v9.9.2`
 
 ## Installation 
 #### LabApi:
@@ -78,67 +78,71 @@
 After installation, UCI will generate default configuration files in your server's config directory. Here's a basic example of creating a custom item:
 
 ```yaml
-# Sets the ID of the custom item. Custom items cannot share IDs.
 id: 2
-# Sets the name of the custom item.
 name: FunnyGun
-# Sets the description of the custom item. This is shown as part of a hint when the item is equipped or picked up.
 description: A weapon that has a shotgun-like bullet spread
-# The extended description of the custom item. Used by the `.customiteminfo` command
 extended_description: ''
-# Sets the badge name of the custom item. Remove the text in quotes to disable it.
 badge_name: FunnyGun
-# Sets the badge color of the custom item.
 badge_color: pumpkin
-# Sets the weight of the custom item. This affects movement speed when equipped.
 weight: 2
-# Sets the item the custom item will use.
 item: GunFRMG0
-# Sets the scale of the custom item when dropped.
 scale:
   x: 1
   y: 1
   z: 1
-# Defines the spawn settings for the custom item. Information on rooms can be found in the UCI Information forum on Discord.
 spawn:
-# If true, the custom item can spawn. If false, it will not.
   do_spawn: true
-  # The number of custom items to spawn.
   count: 1
   spawn_settings:
-  - chance: 30
-    rotation:
-      x: 0
-      y: 0
-      z: 0
-      w: 0
-    # The room(s) where the custom item can spawn.
-    dynamic_spawn:
-    - room: Lcz914
-      coords:
-        x: 1
-        y: 1
-        z: 1
-# Sets the custom flags of the custom item. Information about custom flags can be found in the UCI Information forum on Discord.
-custom_flags: InfiniteAmmo, ItemGlow, DistruptorTracer
-# Settings for the CustomFlags. You can remove any unused settings.
-flag_settings: []
+  - chance: 100
+    locker_settings:
+      enable: true
+      locker_type: RifleRack
+      room: HczWarhead
+      zone: HeavyContainment
+      chamber: MainChamber
+      offset:
+        x: 0
+        y: 0
+        z: 0
+  - chance: 100
+    locker_settings:
+      enable: true
+      locker_type: RifleRack
+      room: Hcz049
+      zone: HeavyContainment
+      chamber: MainChamber
+      offset:
+        x: 0
+        y: 0
+        z: 0
+custom_modules:
+  InfiniteAmmo: []
+  ItemGlow:
+  - GlowColor: '#00FF00'
+    range: 5
+    intensity: 2
+  DistruptorTracer: []
+  PickupHintOverride:
+  - hint: 'This is a funny gun!'
+    duration: 5
+  EquipHintOverride:
+  - hint: 'You have equipped the funny gun!'
+    duration: 5
 arguments:
   OnShotWeapon: action Example
   OnAimedWeapon: Player::Damage(10, "Test", 'AIMING')
-# Sets the custom data type the item will use.
 custom_item_type: Weapon
-# Specifies the modifications the custom item will have.
 custom_data:
   damage: 2.75
   max_ammo: 150
   max_magazine_ammo: 150
-  max_barrel_ammo: 100
+  max_barrel_ammo: 15
   penetration: 1.24000001
   inaccuracy: 1.24000001
   aiming_inaccuracy: 1.24000001
   damage_falloff_distance: 1
-  attachments: DotScope
+  attachments: DotSight
   enable_friendly_fire: false
 ```
 
@@ -195,7 +199,7 @@ Your donations help us maintain and improve our plugins for the entire SCP:SL co
 
 - **Mr. Baguetter**
   - Discord: `@ender1992`
-  - Email: `baguetter@thaumielscpsl.site`
+  - Email: `Mr.Baguetter1@gmail.com`
 
 ### Community
 

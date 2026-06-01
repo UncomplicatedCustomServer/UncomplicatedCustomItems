@@ -1,7 +1,8 @@
 ﻿using CommandSystem;
 using System;
 using LabApi.Features.Wrappers;
-using static UncomplicatedCustomItems.API.Features.Helper.HttpManager;
+using UncomplicatedCustomItems.API.Features.Networking;
+using static UncomplicatedCustomItems.API.Features.Networking.CreditsRequest;
 
 namespace UncomplicatedCustomItems.Commands.User
 {
@@ -32,14 +33,14 @@ namespace UncomplicatedCustomItems.Commands.User
                 return false;
             }
 
-            CreditTag credits = Plugin.HttpManager.GetCreditTag(player);
+            CreditTag credits = CreditsRequest.GetCreditTag(player);
             if (credits is null)
             {
                 response = "You do not have a credit tag!";
                 return true;
             }
 
-            Plugin.HttpManager.ApplyCreditTag(player);
+            CreditsRequest.ApplyCreditTag(player);
             response = $"Applied Credit Tag with name: {credits.Role} color: {credits.Color}";
             return true;
         }

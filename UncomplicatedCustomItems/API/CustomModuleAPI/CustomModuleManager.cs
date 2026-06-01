@@ -1,23 +1,23 @@
+#if EXILED
 using Exiled.API.Interfaces;
 using Exiled.Loader;
-using Mirror;
+#endif
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using UncomplicatedCustomItems.API.Attributes;
-using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI
 {
     public class CustomModuleManager
     {
         public static List<CustomModuleBase> CustomModules { get; set; } = [];
+
 #if EXILED
         public static List<IPlugin<IConfig>> ActivePlugins { get; set; } = [];
         public static Dictionary<CustomModuleBase, IPlugin<IConfig>> ModuleOwners { get; set; } = [];
@@ -25,6 +25,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
         public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins { get; set; } = [];
         public static Dictionary<CustomModuleBase, LabApi.Loader.Features.Plugins.Plugin> ModuleOwners { get; set; } = [];
 #endif
+
         private static readonly Dictionary<Type, Func<CustomModuleBase>> _factoryCache = [];
         private static readonly object _cacheLock = new();
 
@@ -33,7 +34,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 #if EXILED
             foreach (IPlugin<IConfig> plugin in Loader.Plugins)
             {
-                LogManager.Silent($"{nameof(ImportManager.Actor)}: Passing plugin {plugin.Name}");
+                LogManager.Silent($"{nameof(CustomModuleManager)}: Passing plugin {plugin.Name}");
                 foreach (Type type in plugin.Assembly.GetTypes())
                 {
                     if (!type.IsClass || type.IsAbstract)
@@ -75,7 +76,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                 }
             }
 #else
-            foreach (var pluginEntry in LabApi.Loader.PluginLoader.Plugins.ToArray())
+            foreach (KeyValuePair<LabApi.Loader.Features.Plugins.Plugin, Assembly> pluginEntry in LabApi.Loader.PluginLoader.Plugins.ToArray())
             {
                 try
                 {
@@ -105,7 +106,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 
                             LogManager.Silent($"{nameof(CustomModuleManager)}: Importing {type.FullName}!");
                             ActivePlugins.TryAdd(pluginEntry.Key);
-                            object instance = null;
+                            object instance = null!;
                             try
                             {
                                 instance = Activator.CreateInstance(type);
@@ -147,6 +148,51 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                 }
             }
 #endif
+        }
+
+#if EXILED
+        public static void RegisterCustomModule<T>(IPlugin<IConfig> owner) where T : CustomModuleBase
+#else
+        public static void RegisterCustomModule<T>(LabApi.Loader.Features.Plugins.Plugin owner) where T : CustomModuleBase
+#endif
+        {
+            Type type = typeof(T);
+
+            object instance;
+            try
+            {
+                instance = Activator.CreateInstance(type);
+            }
+            catch (MissingMethodException)
+            {
+                LogManager.Error($"{nameof(CustomModuleManager)}: No parameterless constructor for {type.FullName}.");
+                return;
+            }
+
+            if (instance is not CustomModuleBase module)
+            {
+                LogManager.Error($"{nameof(CustomModuleManager)}: Instance of {type.FullName} could not be cast to CustomModuleBase.");
+                return;
+            }
+
+            if (CustomModules.Any(m => m.GetType() == type))
+            {
+                LogManager.Warn($"{nameof(CustomModuleManager)}: CustomModule {module.Name} ({type.FullName}) is already registered. Skipping.");
+                return;
+            }
+
+            CustomModules.TryAdd(module);
+            ModuleOwners[module] = owner;
+            LogManager.Info($"{nameof(CustomModuleManager)}: Manually registered CustomModule {module.Name} - {type.FullName}");
+
+            try
+            {
+                module.OnRegistered();
+            }
+            catch (Exception regEx)
+            {
+                LogManager.Error($"{nameof(CustomModuleManager)}: Error in OnRegistered for {module.Name}: {regEx}");
+            }
         }
 
         private static CustomModuleBase CreateInstanceFast(Type type)
@@ -340,7 +386,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                                 list.Add(raw);
                             }
                             else
-                                LogManager.Debug($"  Value '{rawText}' does not match any required arguments: {string.Join(", ", required)}");
+                                LogManager.Debug($"Value '{rawText}' does not match any required arguments: {string.Join(", ", required)}");
                         }
                     }
                 }

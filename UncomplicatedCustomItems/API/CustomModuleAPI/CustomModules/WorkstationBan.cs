@@ -13,11 +13,14 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             if (!Check(eventArgs))
                 return;
                 
+            if (CustomItem == null)
+                return;
+
             if (eventArgs is PlayerChangingAttachmentsEventArgs ev)
             {
-                if (Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out var item))
+                if (Utilities.TryGetSummonedCustomItem(ev.FirearmItem.Serial, out var item) && item != null)
                 {
-                    if (item.TryGetModule<WorkstationBanHintOverride>(out var hintOverride))
+                    if (item.TryGetModule<WorkstationBanHintOverride>(out var hintOverride) && hintOverride != null)
                     {
                         ev.Player.SendHint(hintOverride.HintOverride.Replace("%name%", CustomItem.Name), hintOverride.DurationOverride);                        
                     }

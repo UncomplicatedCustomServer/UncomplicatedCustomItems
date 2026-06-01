@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Extensions;
 using UnityEngine;
 
@@ -59,9 +59,12 @@ namespace UncomplicatedCustomItems.API.Wrappers
         public CustomKeycard(KeycardItem keycard)
         {
             if (!keycard.Customizable)
+            {
                 LogManager.Warn($"{keycard.ItemTypeId} is not customizable!\nThe keycard type must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
-            else
-                ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
+                return;
+            }
+
+            ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
         }
 
         /// <summary>
@@ -81,11 +84,11 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value.Replace("%name%", ParentKeycard.Owner.nicknameSync.MyNick) };
+                        object[] args = [value.Replace("%name%", ParentKeycard.Owner.nicknameSync.MyNick)];
                         ArraySegment<object> arguments = new(args);
                         nametagDetail.SetArguments(arguments);
                         NameTagDic.TryAdd(ParentKeycard.ItemSerial, value);
-                        if (Utilities.TryGetSummonedCustomItem(ParentKeycard.ItemSerial, out SummonedCustomItem summonedCustomItem))
+                        if (Utilities.TryGetSummonedCustomItem(ParentKeycard.ItemSerial, out SummonedCustomItem? summonedCustomItem) && summonedCustomItem != null)
                             summonedCustomItem.NameApplied = true;
                     }
                     catch (Exception ex)
@@ -94,7 +97,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                     }
                 }
                 else
-                    LogManager.Error($"{nameof(CustomKeycard)}: This keycard {ParentKeycard.ItemTypeId} doesn't have a NameTag section.");
+                    LogManager.Warn($"{nameof(CustomKeycard)}: This keycard {ParentKeycard.ItemTypeId} doesn't have a NameTag section.");
             }
         }
 
@@ -115,7 +118,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         tintDetail.SetArguments(arguments);
                         KeycardColorsDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -145,7 +148,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         nameDetail.SetArguments(arguments);
                         ItemNameDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -202,7 +205,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value, LabelColor };
+                        object[] args = [value, LabelColor];
                         ArraySegment<object> arguments = new(args);
                         labelDetail.SetArguments(arguments);
                         LabelTextDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -249,7 +252,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value, PermissionsColor };
+                        object[] args = [value, PermissionsColor];
                         ArraySegment<object> arguments = new(args);
                         permsDetail.SetArguments(arguments);
                         PermissionsDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -280,7 +283,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         serialNumberDetail.SetArguments(arguments);
                         SerialNumberDic.TryAdd(ParentKeycard.ItemSerial, value);
@@ -342,7 +345,7 @@ namespace UncomplicatedCustomItems.API.Wrappers
                 {
                     try
                     {
-                        object[] args = { value };
+                        object[] args = [value];
                         ArraySegment<object> arguments = new(args);
                         rankDetail.SetArguments(arguments);
                         RankIndexDic.TryAdd(ParentKeycard.ItemSerial, value);

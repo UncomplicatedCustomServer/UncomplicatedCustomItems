@@ -3,10 +3,9 @@ using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
@@ -61,7 +60,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (SummonedCustomItem item in SummonedCustomItem.List.ToArray())
                 {
-                    if (item is null)
+                    if (item == null)
                         continue;
 
                     if (item.Owner != null && !CustomItems.ContainsKey(item.Owner))
@@ -71,8 +70,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         CustomItemsPickups[item.CustomItem] = [];
 
                     if (!item.IsPickup)
-                        CustomItems[item.Owner].Add(item.CustomItem);
-                    else if (item.IsPickup && item.Pickup.Position != null && item.Pickup.Position != Vector3.zero)
+                    {
+                        CustomItems[item.Owner!].Add(item.CustomItem);
+                    }
+                    else if (item.IsPickup && item.Pickup?.Position != null && item.Pickup.Position != Vector3.zero)
                         CustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
 
                     item.Destroy();
@@ -80,19 +81,21 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List.ToList())
                 {
-                    if (item is null)
+                    if (item == null)
                         continue;
 
                     if (item.Owner != null && !APICustomItems.ContainsKey(item.Owner))
                         APICustomItems[item.Owner] = [];
 
-                    if (!APICustomItemsPickups.ContainsKey(item.CustomItem))
-                        APICustomItemsPickups[item.CustomItem] = [];
+                    if (!APICustomItemsPickups.ContainsKey(item.CustomItem!))
+                        APICustomItemsPickups[item.CustomItem!] = [];
 
                     if (!item.IsPickup)
-                        APICustomItems[item.Owner].Add(item.CustomItem);
-                    else if (item.IsPickup && item.Pickup.Position != null && item.Pickup.Position != Vector3.zero)
-                        APICustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
+                    {
+                        APICustomItems[item.Owner!].Add(item.CustomItem!);                        
+                    }
+                    else if (item.IsPickup && item.Pickup?.Position != null && item.Pickup.Position != Vector3.zero)
+                        APICustomItemsPickups[item.CustomItem!].Add(item.Pickup.Position);
 
                     item.Destroy();
                 }

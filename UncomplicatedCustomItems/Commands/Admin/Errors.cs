@@ -25,12 +25,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            string requestedId = arguments?.FirstOrDefault();
+            string requestedId = arguments?.FirstOrDefault() ?? string.Empty;
 
             if (CustomItem.ErrorCustomItems.IsEmpty())
             {
                 if (!string.IsNullOrEmpty(requestedId))
+                {
                     response = $"No errors were found for id '{requestedId}'.";
+                }
                 else
                     response = "No errors were found! :D";
 
@@ -42,7 +44,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
             if (!string.IsNullOrEmpty(requestedId))
             {
                 if (uint.TryParse(requestedId, out uint requestedNumeric))
+                {
                     items = items.Where(it => uint.TryParse(it.Id, out uint n) && n == requestedNumeric);
+                }
                 else
                     items = items.Where(it => string.Equals(it.Id, requestedId, StringComparison.OrdinalIgnoreCase));
 
@@ -75,7 +79,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 response += "\n<color=#FFFFFF>\ud83d\udcc4</color> <b>File:</b> " + Path.GetFileName(errorItem.Path);
 
                 Exception exception = errorItem.Exception;
-                YamlException ex = (YamlException)(object)((exception is YamlException) ? exception : null);
+                YamlException? ex = (YamlException?)(object?)((exception is YamlException) ? exception : null);
                 if (ex != null)
                     response += $"\n<color=#00FFFF>\ud83d\udd22</color> Line: {ex.Start.Line}, Column: {ex.Start.Column}";
 

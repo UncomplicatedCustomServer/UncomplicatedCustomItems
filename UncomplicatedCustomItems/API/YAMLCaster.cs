@@ -8,7 +8,7 @@ using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 using System.Text.Json;
@@ -27,9 +27,8 @@ namespace UncomplicatedCustomItems.API
         /// <returns>The <see cref="Dictionary{string, object}"/> of the class</returns>
         public static Dictionary<string, object> Encode(Data element)
         {
-            Dictionary<string, object> serialized = new();
-
-            var namingPolicy = JsonNamingPolicy.SnakeCaseLower;
+            Dictionary<string, object> serialized = [];
+            JsonNamingPolicy namingPolicy = JsonNamingPolicy.SnakeCaseLower;
 
             foreach (PropertyInfo property in element.GetType().GetProperties())
             {
@@ -44,7 +43,7 @@ namespace UncomplicatedCustomItems.API
 
             return serialized;
         }
-
+        
         /// <summary>
         /// As YAML is a big shit, decode the serialized <see cref="Dictionary{string, object}"/> into a fullified class, giving the <paramref name="baseElement"/>
         /// Missing properties will be set to their default values.
@@ -115,7 +114,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="value">The value to convert</param>
         /// <param name="targetType">The target type</param>
         /// <returns>Converted value</returns>
-        private static object ConvertComplexValue(object value, Type targetType)
+        private static object? ConvertComplexValue(object value, Type targetType)
         {
             if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>))
             {
@@ -147,7 +146,7 @@ namespace UncomplicatedCustomItems.API
                                 .Build();
 
                             string yamlString = yamlSerializer.Serialize(item);
-                            object convertedItem = yamlDeserializer.Deserialize(yamlString, elementType);
+                            object? convertedItem = yamlDeserializer.Deserialize(yamlString, elementType);
                             targetList.Add(convertedItem);
                         }
                     }

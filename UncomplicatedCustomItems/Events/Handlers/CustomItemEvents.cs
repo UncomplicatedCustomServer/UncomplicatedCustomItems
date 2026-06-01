@@ -3,7 +3,6 @@ using UncomplicatedCustomItems.Events.Arguments.CustomItemEvents;
 
 namespace UncomplicatedCustomItems.Events.Handlers
 {
-#nullable enable
     public class CustomItemEvents
     {
         public static event LabEventHandler<SummonedCustomItemEventArgs>? SummonedCustomItem;

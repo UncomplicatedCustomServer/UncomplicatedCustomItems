@@ -14,8 +14,9 @@ using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.API.Enums;
 using UnityEngine;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using UncomplicatedCustomItems.Integrations;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     public class Arguments
     {
@@ -39,7 +40,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: PlayerBroadcast triggered.");
                 if (args == null || args.Length < 2) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
                 string msg = string.Join(" ", args.Skip(1));
                 if (string.IsNullOrWhiteSpace(msg)) return;
@@ -53,8 +54,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 2) return;
                 string playerId = args[0];
                 string itemName = args[1];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 player.AddItem((ItemType)Enum.Parse(typeof(ItemType), itemName, true));
             });
@@ -65,8 +66,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 2) return;
                 string playerId = args[0];
                 string itemName = args[1];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 player.RemoveItem((ItemType)Enum.Parse(typeof(ItemType), itemName, true));
             });
@@ -77,8 +78,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 2) return;
                 string playerId = args[0];
                 string customItem = args[1];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
                 if (!Utilities.TryGetCustomItemByName(customItem, out var customItem1)) return;
 
                 new SummonedCustomItem(customItem1, player);
@@ -89,8 +90,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: Heal triggered.");
                 if (args.Length < 2) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 if (float.TryParse(args[1], out float heal))
                     player.Health += heal;
@@ -103,8 +104,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: HealIfNotFull triggered.");
                 if (args.Length < 2) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 if (float.TryParse(args[1], out float heal) && player.Health < player.MaxHealth)
                     player.Health += heal;
@@ -127,8 +128,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 4) return;
                 string playerId = args[0];
                 string effectName = args[1];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 if (player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effectName) && float.TryParse(args[2], out float duration) && byte.TryParse(args[3], out byte intensity))
                 {
@@ -141,8 +142,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 2) return;
                 string playerId = args[0];
                 string effectName = args[1];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 if (player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effectName))
                 {
@@ -154,8 +155,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 if (args.Length < 1) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 player.DisableAllEffects();
             });
@@ -176,8 +177,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 if (args.Length < 1) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 player.Health = player.MaxHealth;
             });
@@ -186,8 +187,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 if (args.Length < 4) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 if (float.TryParse(args[1], out float x) && float.TryParse(args[2], out float y) && float.TryParse(args[3], out float z))
                 {
@@ -199,8 +200,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             {
                 if (args.Length < 1) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 if (player.RoleBase is IFpcRole fpcrole)
                     player.Position = Scp106PocketExitFinder.GetBestExitPosition(fpcrole);
@@ -211,8 +212,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 if (args.Length < 2) return;
                 string playerId = args[0];
                 string roleName = args[1];
-                Player player = Player.Get(playerId);
-                if (player is null) return;
+                Player? player = Player.Get(playerId);
+                if (player == null) return;
 
                 if (Enum.TryParse<RoleTypeId>(roleName, true, out var role))
                     player.SetRole(role);
@@ -223,7 +224,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: SendHint triggered.");
                 if (args == null || args.Length < 2) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
                 int duration = 5;
                 duration = int.Parse(args[1]);
@@ -238,7 +239,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: Kill triggered.");
                 if (args == null || args.Length < 2) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
                 string msg = string.Join(" ", args.Skip(1));
 
@@ -250,7 +251,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: Damage triggered.");
                 if (args == null || args.Length < 3) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
                 int amount = int.Parse(args[1]);
                 string msg = string.Join(" ", args.Skip(2));
@@ -263,7 +264,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: ClearInventory triggered.");
                 if (args == null || args.Length < 1) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
 
                 player.ClearItems();
@@ -274,7 +275,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: DropCurrentItem triggered.");
                 if (args.Length < 1) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
 
                 player.CurrentItem?.DropItem();
@@ -285,7 +286,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: DropItem triggered.");
                 if (args == null || args.Length < 2) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
                 string itemName = args[1];
                 ItemType dropitemtype = (ItemType)Enum.Parse(typeof(ItemType), itemName, true);
@@ -298,7 +299,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: DestroyItem triggered.");
                 if (args == null || args.Length < 2) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
                 string itemName = args[1];
                 ItemType destroyitemtype = (ItemType)Enum.Parse(typeof(ItemType), itemName, true);
@@ -311,7 +312,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: DestroyCurrentItem triggered.");
                 if (args.Length < 1) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
 
                 player.CurrentItem?.DropItem().Destroy();
@@ -322,7 +323,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: Disarm triggered.");
                 if (args.Length < 1) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
 
                 if (!player.IsDisarmed)
@@ -336,13 +337,20 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 LogManager.Debug($"{nameof(Arguments)}: PlayAudio triggered.");
                 if (args.Length < 4) return;
                 string playerId = args[0];
-                Player player = Player.Get(playerId);
+                Player? player = Player.Get(playerId);
                 if (player == null) return;
                 if (!float.TryParse(args[1], out float volume)) return;
-                if (!float.TryParse(args[2], out float audibledistance)) return;
-                string path = string.Join(" ", args.Skip(3));
+                if (!float.TryParse(args[2], out float max)) return;
+                if (!float.TryParse(args[3], out float min)) return;
+                string path = string.Join(" ", args.Skip(4));
 
-                AudioApi.PlayAudio(path, volume, player.Position, audibledistance);
+                AudioIntegration.Play(path, max, min, volume, player.Position);
+            });
+
+            ArgumentManager.Register("Log", (item, args) =>
+            {
+                LogManager.Debug("Log triggered");
+                LabApi.Features.Console.Logger.Info(string.Join(" ", args));
             });
         }
 
@@ -755,17 +763,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 {
                     if (eventArgs is IPlayerEvent playerEvent && playerEvent.Player != null)
                     {
-                        if (playerEvent.Player.CurrentItem is not null && Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var item))
+                        if (playerEvent.Player.CurrentItem != null && Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var item))
                         {
-                            if (item.CustomItem.Arguments != null && item.CustomItem.Arguments.Count > 0)
+                            if (item?.CustomItem.Arguments != null && item.CustomItem.Arguments.Count > 0)
                                 ArgumentManager.Trigger(item.CustomItem, argumentType, eventArgs);
                         }
                         else if (playerEvent.Player.Items != null && playerEvent.Player.Items.Count() >= 1)
                         {
-                            Item armorItem = playerEvent.Player.Items.Where(i => i.Category is ItemCategory.Armor).FirstOrDefault();
-                            if (armorItem is not null && Utilities.TryGetSummonedCustomItem(armorItem.Serial, out var item1))
+                            Item armorItem = playerEvent.Player.Items.Where(i => i.Category == ItemCategory.Armor).FirstOrDefault();
+                            if (armorItem != null && Utilities.TryGetSummonedCustomItem(armorItem.Serial, out var item1))
                             {
-                                if (item1.CustomItem.Arguments != null && item1.CustomItem.Arguments.Count > 0)
+                                if (item1?.CustomItem.Arguments != null && item1.CustomItem.Arguments.Count > 0)
                                     ArgumentManager.Trigger(item1.CustomItem, argumentType, eventArgs);
                             }
                         }
@@ -884,6 +892,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             HandleEvent(ev);
         }
+        
         private static void OnUsingRadio(PlayerUsingRadioEventArgs ev) => HandleEvent(ev);
         private static void OnUsedRadio(PlayerUsedRadioEventArgs ev) => HandleEvent(ev);
         private static void OnAimedWeapon(PlayerAimedWeaponEventArgs ev) => HandleEvent(ev);

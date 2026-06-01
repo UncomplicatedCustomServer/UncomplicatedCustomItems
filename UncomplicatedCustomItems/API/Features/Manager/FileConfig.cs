@@ -6,7 +6,6 @@ using Exiled.Loader;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Interfaces;
@@ -15,9 +14,9 @@ using YamlDotNet.Core;
 using InventorySystem.Items.Usables.Scp330;
 using UncomplicatedCustomItems.API.ItemUpdater;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
-    internal class FileConfig
+    public class FileConfig
     {
         public static readonly List<YAMLCustomItem> _examples =
         [
@@ -374,9 +373,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             },
         ];
 
-        public uint NewId = new();
-
-        public void GenerateCustomItem(uint id, string name, ItemType itemType, CustomItemType customType, string description)
+        public YAMLCustomItem GenerateCustomItem(uint id, string name, ItemType itemType, CustomItemType customType, string description)
         {
             Dictionary<string, object> customData = [];
             switch (customType, itemType)
@@ -481,20 +478,8 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     break;
             }
 
-            foreach (ICustomItem customItem in CustomItem.List)
-            {
-                if (customItem.Id == id)
-                {
-                    NewId = CustomItem.GetFirstFreeId(1);
-                    break;
-                }
-                else
-                    NewId = id;
-            }
-
             YAMLCustomItem NewItem = new()
             {
-                Id = NewId,
                 Name = name,
                 Description = description,
                 BadgeName = name,
@@ -506,6 +491,17 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 CustomData = customData,
             };
 
+            foreach (ICustomItem customItem in CustomItem.List)
+            {
+                if (customItem.Id == id)
+                {
+                    NewItem.Id = CustomItem.GetFirstFreeId(1);
+                    break;
+                }
+                else
+                    NewItem.Id = id;
+            }
+
 #if EXILED
             string filePath = Path.Combine(Paths.Configs, "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
             File.WriteAllText(filePath, Loader.Serializer.Serialize(NewItem));            
@@ -516,6 +512,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
             CustomItem.Register(YAMLCaster.Converter(NewItem));
             LogManager.Info($"Generated and registered custom item: {NewItem.Name} with ID {NewItem.Id}");
+            return NewItem;
         }
         
 #if EXILED
@@ -534,7 +531,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return Directory.GetFiles(Path.Combine(Dir, localDir));
         }
 
-        private bool IsActionFile(string fileContent) => fileContent.Contains("actions:") || fileContent.Contains("parameters:");
+        internal bool IsActionFile(string fileContent) => fileContent.Contains("actions:") || fileContent.Contains("parameters:");
 
         public void LoadAll(string localDir = "")
         {
@@ -545,23 +542,23 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     if (Directory.Exists(fileName))
                         continue;
 
-                    string fileContent = File.ReadAllText(fileName);
+                    string fileContent = FileManager.ReadAllTextSafe(fileName);
                     if (IsActionFile(fileContent))
                     {
                         YAMLCustomAction action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
                         CustomAction.Register(YAMLCaster.Converter(action));
-                        LogManager.Debug($"Registering action {action.Id} [{action.Name}] from {Path.Combine(Dir, localDir)}");
+                        LogManager.Debug($"Registering action {action.Id} [{action.Name}] from {fileName}");
                     }
                     else
                     {
                         try
                         {
                             if (ItemUpdateManager.TryUpdate(Path.Combine(Dir, localDir, fileName)))
-                                LogManager.Info($"Updated Item {fileName}");
+                                LogManager.Silent($"Updated Item {fileName}");
 
                             YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
                             CustomItem.Register(YAMLCaster.Converter(item));
-                            LogManager.Debug($"Registering item {item.Id} [{item.Name}] from {Path.Combine(Dir, localDir)}");
+                            LogManager.Debug($"Registering item {item.Id} [{item.Name}] from {fileName}");
                         }
                         catch (YamlException yamlEx)
                         {
@@ -641,8 +638,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                         LogManager.Debug($"Creating CustomAction at {Path.Combine(Dir, localDir)}");
                     }
                 else
+                {
                     foreach (YAMLCustomItem customItem in _examples)
+                    {
                         File.WriteAllText(Path.Combine(Dir, localDir, $"{customItem.Name.ToLower().Replace(" ", "-")}.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(customItem));
+                    }
+                }
 
                 LogManager.Info($"Plugin does not have a item folder, generated one in {Path.Combine(Dir, localDir)}");
             }

@@ -21,5 +21,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// Gets or sets the stamina regen multiplier
         /// </summary>
         public abstract float StaminaRegenMultiplier { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the player is allowed to sprint with this armor
+        /// </summary>
+        public virtual bool AllowSprinting { get; set; } = true;
     }
 }

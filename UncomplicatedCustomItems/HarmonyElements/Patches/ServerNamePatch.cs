@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {

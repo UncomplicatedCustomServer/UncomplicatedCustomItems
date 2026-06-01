@@ -13,12 +13,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
         [HarmonyPostfix]
         public static void MaxPostfix(Scp1509Item __instance, ref float __result)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
+            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.HumeshieldMax;
             }
 
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem != null && apiitem.CustomItem is CustomSCP1509 customSCP1509)
             {
                 __result = customSCP1509.HumeshieldMax;
             }
@@ -28,12 +28,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
         [HarmonyPostfix]
         public static void RegenPostfix(Scp1509Item __instance, ref float __result)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
+            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.HumeshieldRegeneration;
             }
 
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem != null && apiitem.CustomItem is CustomSCP1509 customSCP1509)
             {
                 __result = customSCP1509.HumeshieldRegeneration;
             }
@@ -43,12 +43,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
         [HarmonyPostfix]
         public static void RegenRatePostfix(Scp1509Item __instance, ref float __result)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
+            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.HumeshieldRegenRate;
             }
 
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem != null && apiitem.CustomItem is CustomSCP1509 customSCP1509)
             {
                 __result = customSCP1509.HumeshieldRegenRate;
             }
@@ -58,12 +58,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
         [HarmonyPostfix]
         public static void DecayRatePostfix(Scp1509Item __instance, ref float __result)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
+            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.HumeshieldDecayRate;
             }
 
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem != null && apiitem.CustomItem is CustomSCP1509 customSCP1509)
             {
                 __result = customSCP1509.HumeshieldDecayRate;
             }
@@ -73,12 +73,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
         [HarmonyPostfix]
         public static void DamagepausePostfix(Scp1509Item __instance, ref float __result)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
+            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.HumeshieldOnDamagePauseTime;
             }
 
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem != null && apiitem.CustomItem is CustomSCP1509 customSCP1509)
             {
                 __result = customSCP1509.HumeshieldOnDamagePauseTime;
             }
@@ -88,12 +88,12 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches.SCP
         [HarmonyPostfix]
         public static void DecayDelayPostfix(Scp1509Item __instance, ref float __result)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is SCP1509Data data)
+            if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is SCP1509Data data)
             {
                 __result = data.UnequipHumeshieldDecayDelay;
             }
 
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem.CustomItem is CustomSCP1509 customSCP1509)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var apiitem) && apiitem != null && apiitem.CustomItem is CustomSCP1509 customSCP1509)
             {
                 __result = customSCP1509.UnequipHumeshieldDecayDelay;
             }

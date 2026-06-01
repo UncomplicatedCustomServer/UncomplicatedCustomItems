@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
@@ -25,7 +25,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             "Pickupable",
         ];
 
-        public string ApiType { get; set; }
+        public string ApiType { get; set; } = string.Empty;
         public uint ItemId { get; set; }
         public float TimeTillDespawn { get; set; }
         public float Chance { get; set; }
@@ -33,6 +33,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<string>("ItemType", out var itemType))
@@ -91,12 +94,12 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             SummonedCustomItem summonedItem = new(itemToSpawn, ev.Position);
                             if (Pickupable == false)
                             {
-                                summonedItem.Pickup.Weight = 5000f;
+                                summonedItem.Pickup?.Weight = 5000f;
                             }
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(summonedItem.Serial, (float)TimeTillDespawn));
+                                DespawnAfter(summonedItem.Serial, (float)TimeTillDespawn);
                             }
                         }
                         else
@@ -114,7 +117,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                                 if (TimeTillDespawn > 0f)
                                 {
                                     LogManager.Debug($"Starting Despawn Coroutine");
-                                    Timing.RunCoroutine(TimeTillDespawnCoroutine(exCustomItem.Serial, (float)TimeTillDespawn));
+                                    DespawnAfter(exCustomItem.Serial, (float)TimeTillDespawn);
                                 }
                             }
                             else
@@ -126,7 +129,10 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                         if ((ItemType)ItemId == ItemType.SCP244a || (ItemType)ItemId == ItemType.SCP244b)
                         {
                             LogManager.Debug($"Item is SCP244a or SCP244b");
-                            Scp244Pickup scp244Pickup = (Scp244Pickup)Scp244Pickup.Create((ItemType)ItemId, ev.Position);
+                            Scp244Pickup? scp244Pickup = (Scp244Pickup?)Scp244Pickup.Create((ItemType)ItemId, ev.Position);
+                            if (scp244Pickup == null)
+                                return;
+
                             scp244Pickup.Base.MaxDiameter = 0.1f;
                             scp244Pickup.State = Scp244State.Active;
                             scp244Pickup.Spawn();
@@ -136,12 +142,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(scp244Pickup.Serial, (float)TimeTillDespawn));
+                                DespawnAfter(scp244Pickup.Serial, (float)TimeTillDespawn);
                             }
                         }
                         else
                         {
-                            Pickup pickup = Pickup.Create((ItemType)ItemId, ev.Position);
+                            Pickup? pickup = Pickup.Create((ItemType)ItemId, ev.Position);
+                            if (pickup == null)
+                                return;
+                                
                             Vector3 vector3 = new(0f, 1f, 0f);
                             pickup.Transform.position = pickup.Transform.position + vector3;
                             pickup.Spawn();
@@ -151,7 +160,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                Timing.RunCoroutine(TimeTillDespawnCoroutine(pickup.Serial, (float)TimeTillDespawn));
+                                DespawnAfter(pickup.Serial, (float)TimeTillDespawn);
                             }
                         }
                     }
@@ -170,15 +179,16 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             ServerEvents.ProjectileExploded -= Run;
         }
 
-        public static IEnumerator<float> TimeTillDespawnCoroutine(ushort serial, float despawnTime)
+        public static void DespawnAfter(ushort serial, float time)
         {
-            yield return Timing.WaitForSeconds(despawnTime);
-            Pickup pickup = Pickup.Get(serial);
-            if (pickup != null)
+            Timing.CallDelayed(Timing.WaitForSeconds(time), () =>
             {
-                pickup.Destroy();
-                LogManager.Debug($"Destroyed pickup. Type: {pickup.Type} Previous owner: {pickup.LastOwner} Serial: {pickup.Serial}");
-            }
+                if (Pickup.TryGet(serial, out var pickup))
+                {
+                    pickup.Destroy();
+                    LogManager.Debug($"Destroyed pickup. Type: {pickup.Type} Previous owner: {pickup.LastOwner} Serial: {pickup.Serial}");
+                }
+            });
         }
     }
 }

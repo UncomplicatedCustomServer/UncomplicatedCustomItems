@@ -4,7 +4,7 @@ using InventorySystem.Items.Firearms.Modules.Scp127;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
@@ -28,19 +28,20 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 return;
             }
 
-            if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out var item) && item.CustomItem.CustomItemType == CustomItemType.SCPItem && item.Item.Type == ItemType.GunSCP127)
+            if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out var item) && item?.CustomItem.CustomItemType == CustomItemType.SCPItem && item?.Item?.Type == ItemType.GunSCP127)
             {
                 try
                 {
-                    SCP127Data data = item.CustomItem.CustomData as SCP127Data;
-                    __result = Scp127TierManagerModule.GetTierForItem(__instance.Item)
-                    switch
-                    {
-                        Scp127Tier.Tier1 => data.Tier1BulletFireRate,
-                        Scp127Tier.Tier2 => data.Tier2BulletFireRate,
-                        Scp127Tier.Tier3 => data.Tier3BulletFireRate,
-                        _ => __result
-                    };
+                    if (item.CustomItem.CustomData is SCP127Data data)
+
+                        __result = Scp127TierManagerModule.GetTierForItem(__instance.Item)
+                        switch
+                        {
+                            Scp127Tier.Tier1 => data.Tier1BulletFireRate,
+                            Scp127Tier.Tier2 => data.Tier2BulletFireRate,
+                            Scp127Tier.Tier3 => data.Tier3BulletFireRate,
+                            _ => __result
+                        };
                 }
                 catch (Exception ex)
                 {

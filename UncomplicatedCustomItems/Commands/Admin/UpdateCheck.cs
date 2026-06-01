@@ -1,8 +1,8 @@
 using CommandSystem;
 using System;
-using UncomplicatedCustomItems.API.Features.Helper;
-using LabApi.Features.Wrappers;
+using UncomplicatedCustomItems.API.Features.Manager;
 using System.Text.Json.Serialization;
+using MEC;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -12,10 +12,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public class GitHubReleaseInfo
         {
             [JsonPropertyName("tag_name")]
-            public string TagName { get; set; }
+            public string TagName { get; set; } = string.Empty;
 
             [JsonPropertyName("assets")]
-            public Updater.GitHubAssetInfo[] Assets { get; set; }
+            public Updater.GitHubAssetInfo[] Assets { get; set; } = [];
         }
         
         public UpdateCheck() => LoadGeneratedCommands();
@@ -35,11 +35,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
 
             response = $"Currently running version {Plugin.Instance.Version}. Checking for updates...";
-#if EXILED
-			Server.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
-#else
-            Player.Host?.ReferenceHub.StartCoroutine(Updater.CheckForUpdatesCoroutine());
-#endif
+            Timing.RunCoroutine(Updater.CheckForUpdatesCoroutine());
             return true;
         }
     }

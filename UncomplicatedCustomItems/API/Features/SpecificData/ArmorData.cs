@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -28,5 +26,10 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets the stamina regen multiplier
         /// </summary>
         public virtual float StaminaRegenMultiplier { get; set; } = 2f;
+
+        /// <summary>
+        /// Gets or sets whether the player is allowed to sprint with this armor
+        /// </summary>
+        public virtual bool AllowSprinting { get; set; } = true;
     }
 }

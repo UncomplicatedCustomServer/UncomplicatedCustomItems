@@ -5,7 +5,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Extensions;
 using LabApi.Features.Wrappers;
 using MapGeneration;
@@ -36,13 +36,13 @@ namespace UncomplicatedCustomItems.API
                 LogManager.Warn($"{item.Name} - {OldId} ID is already used asigning new ID...\n{item.Name} new ID is {NewId}");
                 CustomItem.Register(item);
             }
-            
+
             switch (item.CustomItemType)
             {
                 case CustomItemType.Item:
                     if (item.CustomData is null)
                     {
-                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'IData', found '{item.CustomData.GetType().Name}' The CustomData formatting is incorrect. \n Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667038750244979";
+                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'IData', found '{item.CustomData?.GetType().Name}' The CustomData formatting is incorrect. \n Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667038750244979";
                         return false;
                     }
 
@@ -203,7 +203,7 @@ namespace UncomplicatedCustomItems.API
                         error = $"The Item has been flagged as 'MicroHID' but the item {item.Item} is not a MicroHID!";
                         return false;
                     }
-                    
+
                     break;
 
                 case CustomItemType.ParticleDisruptor:
@@ -264,7 +264,7 @@ namespace UncomplicatedCustomItems.API
                 LogManager.Warn($"{action.Name} - {OldId} ID is already used asigning new ID...\n{action.Name} new ID is {NewId}");
                 CustomAction.Register(action);
             }
-            
+
             error = "";
             return true;
         }
@@ -293,7 +293,7 @@ namespace UncomplicatedCustomItems.API
 
                 if (data.BroadcastMessage.Length > 1 && data.BroadcastDuration > 0)
                 {
-                    player.SendBroadcast( data.BroadcastMessage, data.BroadcastDuration);
+                    player.SendBroadcast(data.BroadcastMessage, data.BroadcastDuration);
                 }
 
                 if (data.HintMessage.Length > 1 && data.HintDuration > 0)
@@ -308,15 +308,30 @@ namespace UncomplicatedCustomItems.API
         /// </summary>
         /// <param name="serial"></param>
         /// <param name="item"></param>
-        /// <returns><see cref="bool"/> <see langword="true"/> if succeeded</returns>
-        public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem item) => SummonedCustomItem.TryGet(serial, out item);
+        /// <returns><see langword="true"/> if succeeded</returns>
+        public static bool TryGetSummonedCustomItem(ushort serial, out SummonedCustomItem? item) => SummonedCustomItem.TryGet(serial, out item);
+
+        /// <summary>
+        /// Try to get a <see cref="SummonedCustomItem"/> by it's <see cref="Item"/>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="customItem"></param>
+        /// <returns><see langword="true"/> if succeeded</returns>
+        public static bool TryGetSummonedCustomItem(Item item, out SummonedCustomItem? customItem) => SummonedCustomItem.TryGet(item.Serial, out customItem);
 
         /// <summary>
         /// Get a <see cref="SummonedCustomItem"/> by it's serial
         /// </summary>
         /// <param name="serial"></param>
-        /// <returns><see cref="SummonedCustomItem"/> if succeeded, <c>default</c> if not</returns>
-        public static SummonedCustomItem GetSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial);
+        /// <returns><see cref="SummonedCustomItem"/> if succeeded, <see langword="null"/> if not</returns>
+        public static SummonedCustomItem? GetSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial);
+
+        /// <summary>
+        /// Get a <see cref="SummonedCustomItem"/> by it's <see cref="Item"/>
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns><see cref="SummonedCustomItem"/> if succeeded, <see langword="null"/> if not</returns>
+        public static SummonedCustomItem? GetSummonedCustomItem(Item item) => SummonedCustomItem.Get(item.Serial);
 
         /// <summary>
         /// Check if an item is a <see cref="SummonedCustomItem"/> by it's <see cref="Item.Serial"/>
@@ -395,7 +410,7 @@ namespace UncomplicatedCustomItems.API
 
                 if (spawn.Zones.Count > 0)
                     HandleZoneSpawn(customItem, spawn);
-                
+
                 Events.Handlers.CustomItemEvents.OnSummonedCustomItem(new(customItem));
             }
         }
@@ -420,15 +435,16 @@ namespace UncomplicatedCustomItems.API
                 if (room == null)
                     continue;
 
+                LogManager.Debug($"Got room {room.Name} from DynamicSpawn {customItem.Name} - {customItem.Id}");
                 spawn.Rotation.Normalize();
                 Quaternion rotation = Quaternion.Euler(spawn.Rotation);
 
                 Vector3 spawnPosition = GetDynamicSpawnPosition(room, dynamicSpawn, spawn, customItem);
-                if (spawnPosition != Vector3.zero && spawn.Rotation != Vector3.zero)
+                if (spawn.Rotation != Vector3.zero)
                 {
-                    new SummonedCustomItem(customItem, spawnPosition, rotation);                    
+                    new SummonedCustomItem(customItem, spawnPosition, rotation);
                 }
-                else if (spawnPosition != Vector3.zero)
+                else
                     new SummonedCustomItem(customItem, spawnPosition);
             }
         }
@@ -436,29 +452,24 @@ namespace UncomplicatedCustomItems.API
         internal static Room GetRoomFromName(string room)
         {
             if (Enum.TryParse(room, out RoomName roomName))
-            {
                 return Room.Get(roomName).FirstOrDefault();
-            }
-            
-            return Room.List.GetByGameObjectName($"{room}");
+
+            return Room.List.GetByGameObjectName(room);
         }
 
         private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, SpawnData spawn, ICustomItem customItem)
         {
-            if (dynamicSpawn.Coords != Vector3.zero)
-            {
-                return room.WorldPosition(dynamicSpawn.Coords);
-            }
-
             if (spawn.ReplaceExistingPickup)
             {
-                Pickup targetPickup = FindTargetPickupInRoom(room, spawn, customItem);
+                Pickup? targetPickup = FindTargetPickupInRoom(room, spawn, customItem);
                 if (targetPickup != null)
                 {
                     new SummonedCustomItem(customItem, targetPickup);
                     return Vector3.zero;
                 }
             }
+            else
+                return room.WorldPosition(dynamicSpawn.Coords);
 
             return room.Position;
         }
@@ -469,25 +480,25 @@ namespace UncomplicatedCustomItems.API
 
             if (spawn.ReplaceExistingPickup)
             {
-                Pickup targetPickup = FindTargetPickupInZone(zone, spawn, customItem);
+                Pickup? targetPickup = FindTargetPickupInZone(zone, spawn, customItem);
                 if (targetPickup != null)
                 {
                     new SummonedCustomItem(customItem, targetPickup);
                     return;
                 }
             }
-            
+
             Room randomRoom = Room.List.Where(room => room.Zone == zone).ToList().RandomItem();
             new SummonedCustomItem(customItem, randomRoom.Position);
         }
 
-        private static Pickup FindTargetPickupInRoom(Room room, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FindTargetPickupInRoom(Room room, SpawnData spawn, ICustomItem customItem)
         {
             List<Pickup> pickupsInRoom = Pickup.List.Where(pickup => pickup.Room == room && !IsSummonedCustomItem(pickup.Serial)).ToList();
             return FilterAndSelectPickup(pickupsInRoom, spawn, customItem);
         }
 
-        private static Pickup FindTargetPickupInZone(FacilityZone zone, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FindTargetPickupInZone(FacilityZone zone, SpawnData spawn, ICustomItem customItem)
         {
             List<Pickup> pickupsInZone = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
             if (!(spawn.ReplaceItemsInPedestals ?? false))
@@ -499,29 +510,31 @@ namespace UncomplicatedCustomItems.API
             return FilterAndSelectPickup(pickupsInZone, spawn, customItem);
         }
 
-        private static Pickup FilterAndSelectPickup(List<Pickup> pickups, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FilterAndSelectPickup(List<Pickup> pickups, SpawnData spawn, ICustomItem customItem)
         {
             if (spawn.ForceItem)
                 pickups = pickups.Where(pickup => pickup.Type == customItem.Item).ToList();
 
             return pickups.Count > 0 ? pickups.RandomItem() : null;
         }
-                
+
         /// <summary>
         /// Reproduce the SCP:SL <see cref="ItemType.Painkillers"/> healing process but with custom things :)
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="Data"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
-        internal static IEnumerator<float> PainkillersCoroutine(Player player, IPainkillersData Data)
+        internal static IEnumerator<float> PainkillersCoroutine(Player player, IPainkillersData data)
         {
             float TotalHealed = 0;
-            yield return Timing.WaitForSeconds(Data.TimeBeforeStartHealing);
-            while (TotalHealed < Data.TotalHealing && player.IsAlive)
+            yield return Timing.WaitForSeconds(data.TimeBeforeStartHealing);
+
+            while (TotalHealed < data.TotalHealing && player.IsAlive)
             {
-                player.Heal(Data.TickHeal);
-                TotalHealed += Data.TickHeal;
-                yield return Timing.WaitForSeconds(Data.TickTime);
+                float healAmount = Math.Min(data.TickHeal, data.TotalHealing - TotalHealed);
+                player.Heal(healAmount);
+                TotalHealed += healAmount;
+                yield return Timing.WaitForSeconds(data.TickTime);
             }
         }
     }

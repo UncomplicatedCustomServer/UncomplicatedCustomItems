@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using System.Net;
 using System.Text;
 using CommandSystem;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -24,7 +23,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
             StringBuilder sb = new();
-            VersionInfoV2 info = VersionManager.VersionInfo;
+            VersionInfoV2? info = VersionManager.VersionInfo;
+            if (info == null)
+            {
+                response = "Failed to get version info.";
+                return false;
+            }
 
             sb.AppendLine();
             sb.AppendLine($"Version name: {info.CodeName}");

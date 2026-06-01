@@ -5,7 +5,7 @@ using LabApi.Events.Handlers;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -18,12 +18,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             "DeathMessage",
         ];
 
-        public string DeathMessage { get; set; }
+        public string DeathMessage { get; set; } = string.Empty;
         public bool Vaporize { get; set; }
         public TriggerOn Trigger { get; set; }
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
@@ -41,7 +44,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                 if (!args.TryGetValue<TriggerOn>("Trigger", out var trigger))
                 {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
+                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! Valid values: {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
                     return;
                 }
 
@@ -56,6 +59,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             if (!Check(eventArgs))
                 return;
                 
+            if (CustomItem == null)
+                return;
+
             if (eventArgs is PlayerUsedItemEventArgs playerUsedItem && HasFlagFast(Trigger, TriggerOn.OnUse))
             {
                 if (Vaporize)

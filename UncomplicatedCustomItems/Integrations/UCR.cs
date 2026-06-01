@@ -8,7 +8,7 @@ using Exiled.Loader;
 using LabApi.Features.Wrappers;
 using LabApi.Loader;
 #endif
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.Integrations
 {
@@ -17,15 +17,15 @@ namespace UncomplicatedCustomItems.Integrations
 #if EXILED
         public static Assembly Assembly => Loader.Plugins.FirstOrDefault(p => p.Name is "UncomplicatedCustomRoles")?.Assembly;
 
-        public static Type CustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.CustomRole");
+        public static Type? CustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.CustomRole");
 
-        public static Type SummonedCustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.SummonedCustomRole");
+        public static Type? SummonedCustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.SummonedCustomRole");
 
         public static bool Available => CustomRole is not null && SummonedCustomRole is not null;
 
         public static bool TryGetCustomRole(int id, out object customRole)
         {
-            customRole = null;
+            customRole = null!;
 
             if (!Available)
             {
@@ -38,10 +38,10 @@ namespace UncomplicatedCustomItems.Integrations
 
             try
             {
-                MethodInfo TryGetCustomRole = CustomRole.GetMethod("TryGet", BindingFlags.Public | BindingFlags.Static);
+                MethodInfo? TryGetCustomRole = CustomRole?.GetMethod("TryGet", BindingFlags.Public | BindingFlags.Static);
                 if (TryGetCustomRole is not null)
                 {
-                    object[] parameters = new object[] { id, null };
+                    object[] parameters = new object[] { id, null! };
                     bool success = (bool)TryGetCustomRole.Invoke(null, parameters);
 
                     if (success)
@@ -64,9 +64,9 @@ namespace UncomplicatedCustomItems.Integrations
 
         public static void GiveCustomRole(int id, Player player)
         {
-            MethodInfo GiveCustomRole = SummonedCustomRole.GetMethod("Summon", BindingFlags.Public | BindingFlags.Static);
+            MethodInfo? GiveCustomRole = SummonedCustomRole?.GetMethod("Summon", BindingFlags.Public | BindingFlags.Static);
 
-            if (!Available)
+            if (!Available || GiveCustomRole == null)
                 return;
 
             LogManager.Silent($"UCR role found, trying to give the role {id} to {player}");
@@ -84,15 +84,15 @@ namespace UncomplicatedCustomItems.Integrations
 #else
         public static Assembly Assembly => PluginLoader.Plugins.FirstOrDefault(p => p.Key.Name is "UncomplicatedCustomRoles").Value;
 
-        public static Type CustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.CustomRole");
+        public static Type? CustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.CustomRole");
 
-        public static Type SummonedCustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.SummonedCustomRole");
+        public static Type? SummonedCustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.SummonedCustomRole");
 
         public static bool Available => CustomRole is not null && SummonedCustomRole is not null;
 
         public static bool TryGetCustomRole(int id, out object customRole)
         {
-            customRole = null;
+            customRole = null!;
 
             if (!Available)
             {
@@ -105,10 +105,10 @@ namespace UncomplicatedCustomItems.Integrations
 
             try
             {
-                MethodInfo TryGetCustomRole = CustomRole.GetMethod("TryGet", BindingFlags.Public | BindingFlags.Static);
+                MethodInfo? TryGetCustomRole = CustomRole?.GetMethod("TryGet", BindingFlags.Public | BindingFlags.Static);
                 if (TryGetCustomRole is not null)
                 {
-                    object[] parameters = [id, null];
+                    object[] parameters = [id, null!];
                     bool success = (bool)TryGetCustomRole.Invoke(null, parameters);
 
                     if (success)
@@ -131,9 +131,9 @@ namespace UncomplicatedCustomItems.Integrations
 
         public static void GiveCustomRole(int id, Player player)
         {
-            MethodInfo GiveCustomRole = SummonedCustomRole.GetMethod("Summon", BindingFlags.Public | BindingFlags.Static);
+            MethodInfo? GiveCustomRole = SummonedCustomRole?.GetMethod("Summon", BindingFlags.Public | BindingFlags.Static);
 
-            if (!Available)
+            if (!Available || GiveCustomRole == null)
                 return;
 
             LogManager.Silent($"UCR role found, trying to give the role {id} to {player}");

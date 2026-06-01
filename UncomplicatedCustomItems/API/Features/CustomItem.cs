@@ -6,16 +6,14 @@ using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Extensions;
-using System.Text;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 
 namespace UncomplicatedCustomItems.API.Features
 {
     public class CustomItem : ICustomItem
     {
-        #nullable enable
         /// <summary>
         /// Gets a list of every registered <see cref="ICustomItem"/>
         /// </summary>
@@ -28,8 +26,8 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal static List<ErrorCustomItem> ErrorCustomItems { get; set; } = [];
 
-        internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = new();
-        internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = new();
+        internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = [];
+        internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = [];
 
         /// <summary>
         /// Register a new <see cref="ICustomItem"/> inside the plugin
@@ -44,11 +42,11 @@ namespace UncomplicatedCustomItems.API.Features
                 return;
             }
             CustomItems.TryAdd(item.Id, item);
-            LogManager.Info($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
+            LogManager.Silent($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
         public bool HasModule<T>() where T : CustomModuleBase =>
-            CustomModules.OfType<T>().FirstOrDefault() != null;
+            CustomModules.Keys.OfType<T>().FirstOrDefault() != null;
 
         public bool TryGetModule<T>(out T? module) where T : CustomModuleBase
         {
@@ -158,7 +156,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public virtual Dictionary<CustomModuleBase, List<object>> CustomModules { get; set; } = [];
 
-        public virtual Dictionary<ArgumentType, string> Arguments { get; set; }
+        public virtual Dictionary<ArgumentType, string> Arguments { get; set; } = [];
 
         /// <summary>
         /// The <see cref="CustomItemType"/> of the Custom Item
@@ -169,38 +167,5 @@ namespace UncomplicatedCustomItems.API.Features
         /// The <see cref="IData">Custom Data</see>, based on the CustomItemType
         /// </summary>
         public virtual IData CustomData { get; set; } = new ItemData();
-
-        public override string ToString()
-        {
-            StringBuilder sb = new();
-            
-            sb.AppendLine($"CustomItem [{Name}]");
-            sb.AppendLine($"  Id: {Id}");
-            sb.AppendLine($"  Description: {Description}");
-            
-            if (!string.IsNullOrEmpty(ExtendedDescription))
-                sb.AppendLine($"  Extended Description: {ExtendedDescription}");
-            
-            sb.AppendLine($"  Item Type: {Item}");
-            sb.AppendLine($"  Custom Item Type: {CustomItemType}");
-            sb.AppendLine($"  Weight: {Weight}");
-            sb.AppendLine($"  Scale: {Scale}");
-            sb.AppendLine($"  Reusable: {Reusable}");
-            sb.AppendLine($"  Badge: {BadgeName} ({BadgeColor})");
-            
-            if (CustomFlags.HasValue)
-                sb.AppendLine($"  Custom Flags: {CustomFlags.Value}");
-            
-            if (Spawn != null)
-                sb.AppendLine($"  Spawn: {Spawn}");
-            
-            if (CustomData != null)
-                sb.AppendLine($"  Custom Data: {CustomData.GetType().Name}");
-            
-            if (Arguments != null && Arguments.Count > 0)
-                sb.AppendLine($"  Arguments: {Arguments.Count} defined");
-            
-            return sb.ToString().TrimEnd();
-        }
     }
 }

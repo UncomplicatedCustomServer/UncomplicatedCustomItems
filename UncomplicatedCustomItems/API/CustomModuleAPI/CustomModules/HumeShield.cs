@@ -5,7 +5,7 @@ using LabApi.Events.Handlers;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -27,6 +27,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {

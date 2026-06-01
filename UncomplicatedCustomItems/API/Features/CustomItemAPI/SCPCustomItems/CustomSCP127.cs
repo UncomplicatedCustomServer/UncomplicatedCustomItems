@@ -25,5 +25,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public abstract float Tier2ShieldOnDamagePause { get; set; }
         public abstract float Tier3ShieldOnDamagePause { get; set; }
         public abstract bool MuteVoiceLines { get; set; }
+        public virtual bool AllowXPGain { get; set; } = true;
     }
 }

@@ -4,7 +4,7 @@ using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -22,6 +22,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             base.OnAdded(item);
             foreach (Dictionary<object, object> args in Arguments)
             {
@@ -49,13 +52,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 
             if (eventArgs is PlayerDeathEventArgs ev)
             {
-                if (!Utilities.TryGetSummonedCustomItem(ev.Attacker?.CurrentItem.Serial ?? 0, out var item))
+                if (!Utilities.TryGetSummonedCustomItem(ev.Attacker?.CurrentItem?.Serial ?? 0, out var item))
                     return;
 
-                if (ev.Attacker.Health >= ev.Attacker.MaxHealth && ConvertToAhpIfFull)
-                    ev.Attacker.ArtificialHealth += HealAmount;
+                if (ev.Attacker?.Health >= ev.Attacker?.MaxHealth && ConvertToAhpIfFull)
+                {
+                    ev.Attacker?.ArtificialHealth += HealAmount;
+                }
                 else
-                    ev.Attacker.Heal(HealAmount);
+                    ev.Attacker?.Heal(HealAmount);
             }
         }
 

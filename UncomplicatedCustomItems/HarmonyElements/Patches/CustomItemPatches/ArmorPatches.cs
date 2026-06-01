@@ -3,7 +3,7 @@ using HarmonyLib;
 using InventorySystem.Items.Armor;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
@@ -15,13 +15,13 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             try
             {
-                if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item.CustomItem.CustomData is ArmorData ad && !item.IsPickup)
+                if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is ArmorData ad && !item.IsPickup)
                 {
                     __result = __instance.ProcessMultiplier(ad.StaminaRegenMultiplier);
                     return false;
                 }
 
-                if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var api) && api.CustomItem is CustomArmor ca && !api.IsPickup)
+                if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var api) && api != null && api.CustomItem is CustomArmor ca && !api.IsPickup)
                 {
                     __result = __instance.ProcessMultiplier(ca.StaminaRegenMultiplier);
                     return false;
@@ -30,6 +30,34 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             catch (Exception ex)
             {
                 LogManager.Error($"{nameof(StaminaRegenMultiplierPatch)}: {ex.Message}\n{ex.StackTrace}");
+            }
+
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(BodyArmor), nameof(BodyArmor.SprintingDisabled), MethodType.Getter)]
+    internal static class SprintingDisabledPatch
+    {
+        public static bool Prefix(BodyArmor __instance, ref bool __result)
+        {
+            try
+            {
+                if (Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is ArmorData ad && !item.IsPickup)
+                {
+                    __result = !ad.AllowSprinting;
+                    return false;
+                }
+
+                if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var api) && api != null && api.CustomItem is CustomArmor ca && !api.IsPickup)
+                {
+                    __result = !ca.AllowSprinting;
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"{nameof(SprintingDisabledPatch)}: {ex.Message}\n{ex.StackTrace}");
             }
 
             return true;

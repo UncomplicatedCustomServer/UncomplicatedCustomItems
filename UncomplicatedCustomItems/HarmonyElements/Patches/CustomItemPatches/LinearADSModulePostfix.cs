@@ -13,10 +13,10 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPostfix]
         public static void EffectiveHipInaccuracyPostfix(LinearAdsModule __instance, ref float __result)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var item) && item.CustomItem.CustomData is WeaponData wd)
+            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is WeaponData wd)
                 __result = wd.Inaccuracy;
 
-            if (SummonedAPICustomItem.TryGet(__instance.Firearm.ItemSerial, out var api) && api.CustomItem is CustomWeapon cw)
+            if (SummonedAPICustomItem.TryGet(__instance.Firearm.ItemSerial, out var api) && api != null && api.CustomItem is CustomWeapon cw)
                 __result = cw.Inaccuracy;
         }
 
@@ -24,10 +24,10 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPostfix]
         public static void EffectiveAdsInaccuracyPostfix(LinearAdsModule __instance, ref float __result)
         {
-            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var item) && item.CustomItem.CustomData is WeaponData wd)
+            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var item) && item != null && item.CustomItem.CustomData is WeaponData wd)
                 __result = wd.AimingInaccuracy;
 
-            if (SummonedAPICustomItem.TryGet(__instance.Firearm.ItemSerial, out var api) && api.CustomItem is CustomWeapon cw)
+            if (SummonedAPICustomItem.TryGet(__instance.Firearm.ItemSerial, out var api) && api != null && api.CustomItem is CustomWeapon cw)
                 __result = cw.AimingInaccuracy;
         }
     }

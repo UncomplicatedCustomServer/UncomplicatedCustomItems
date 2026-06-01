@@ -8,7 +8,7 @@ using System.Linq;
 using UncomplicatedCustomItems.Commands.Admin;
 using UncomplicatedCustomItems.API.Interfaces;
 using LabApi.Features.Permissions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using Random = UncomplicatedCustomItems.Commands.Admin.Random;
 
 namespace UncomplicatedCustomItems.Commands
@@ -40,8 +40,8 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new Owner());
             Subcommands.Add(new VersionInfo());
             Subcommands.Add(new CustomModuleInfo());
+            Subcommands.Add(new Backup());
             
-            Subcommands.Add(new PresenceDebug());
             Subcommands.Add(new EquipCustomItemDebug());
         }
 

@@ -1,386 +1,163 @@
 ﻿using Discord;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net;
-using Logger = LabApi.Features.Console.Logger;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using LabApi.Features.Wrappers;
-using System.Linq;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using UncomplicatedCustomItems.API.Interfaces;
+using Logger = LabApi.Features.Console.Logger;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     internal class LogManager
     {
+        public class Log
+        {
+            public Log(DateTime logTime, LogLevel level, string message)
+            {
+                LogLevel = level;
+                Message = message;
+                LogTime = logTime;
+            }
+
+            public LogLevel LogLevel { get; set; }
+            public string Message { get; set; } = string.Empty;
+            public DateTime LogTime { get; set; }
+        }
+
         // We should store the data here
-        public static readonly List<LogEntry> History = [];
+        public static readonly List<Log> History = [];
 
         public static bool MessageSent { get; internal set; }
-        
+
         public static void Debug(string message)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Debug.ToString(), message));
+            History.Add(new(DateTime.Now, LogLevel.Debug, message));
             if (Plugin.Instance.Config.Debug)
-                Logger.Raw($"[DEBUG] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Green);
+                Logger.Raw($"[DEBUG] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {FormatLogMessage(message)}", ConsoleColor.Green);
         }
 
         public static void Info(string message)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Info.ToString(), message));
-            Logger.Info(message);
+            History.Add(new(DateTime.Now, LogLevel.Info, message));
+            Logger.Info(FormatLogMessage(message));
         }
 
         public static void Warn(string message, string error = "CS0000")
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Warn.ToString(), message, error));
-            Logger.Warn(message);
+            History.Add(new(DateTime.Now, LogLevel.Warn, message));
+            Logger.Warn(FormatLogMessage(message));
         }
 
         public static void Error(string message, string error = "CS0000")
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), LogLevel.Error.ToString(), message, error));
-            Logger.Error(message);
+            History.Add(new(DateTime.Now, LogLevel.Error, message));
+            Logger.Error(FormatLogMessage(message));
         }
-        
-        public static void Raw(string message, ConsoleColor color, string logLevel, string category)
+
+        public static void Raw(string message, ConsoleColor color, LogLevel logLevel, string category)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), logLevel, message));
-            Logger.Raw($"[{category}] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", color);
+            History.Add(new(DateTime.Now, logLevel, message));
+            Logger.Raw($"[{category}] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {FormatLogMessage(message)}", color);
         }
-        
+
         public static void Updater(string message)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Updater", message));
+            History.Add(new(DateTime.Now, LogLevel.Info, message));
             Logger.Raw($"[Updater] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Blue);
         }
-        
+
         public static void Silent(string message)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SILENT", message));
+            History.Add(new(DateTime.Now, LogLevel.Debug, message));
             if (Plugin.Instance.Config.ShowSilentLogs)
                 Logger.Raw($"[Silent] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.White);
         }
 
-        public static void System(string message) => History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "SYSTEM", message));
+        public static void System(string message) => History.Add(new(DateTime.Now, LogLevel.Info, message));
 
         public static void Security(string message)
         {
-            History.Add(new(DateTimeOffset.Now.ToUnixTimeMilliseconds(), "Security", message));
+            History.Add(new(DateTime.Now, LogLevel.Info, message));
             Logger.Raw($"[Security] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.DarkMagenta);
         }
 
-        public static HttpStatusCode SendReport(out HttpContent content, out string readableSize)
+        internal static string FormatLogMessage(string message)
         {
-            content = null;
-            readableSize = null;
+            StackTrace stackTrace = new(true);
+            StackFrame? frame = stackTrace.GetFrame(2);
 
-            if (MessageSent || !Plugin.Instance.IsPrerelease)
+            string source = "Unknown";
+
+            if (frame != null)
             {
-                return HttpStatusCode.Forbidden;
-            }
-
-            if (History.Count < 1)
-            {
-                return HttpStatusCode.Forbidden;
-            }
-
-            string formattedContent = FormatLogsForReport();
-
-            int byteSize = Encoding.UTF8.GetByteCount(formattedContent);
-            readableSize = byteSize switch
-            {
-                < 1024 => $"{byteSize} bytes",
-                < 1024 * 1024 => $"{(byteSize / 1024.0):F2} KB",
-                _ => $"{(byteSize / 1024.0 / 1024.0):F2} MB"
-            };
-
-            HttpStatusCode response = Plugin.HttpManager.ShareLogs(formattedContent, out content);
-
-            if (response == HttpStatusCode.OK)
-            {
-                MessageSent = true;
-            }
-
-            return response;
-        }
-
-        public static async Task<(HttpStatusCode statusCode, HttpContent content, string readableSize)> SendReportAsync()
-        {
-            if (!Plugin.Instance.IsPrerelease && MessageSent)
-                return (HttpStatusCode.Forbidden, null, null);
-
-            if (History.Count < 1)
-                return (HttpStatusCode.Forbidden, null, null);
-
-            string formattedContent = await Task.Run(() => FormatLogsForReport()).ConfigureAwait(false);
-
-            int byteSize = Encoding.UTF8.GetByteCount(formattedContent);
-            string readableSize = byteSize switch
-            {
-                < 1024 => $"{byteSize} bytes",
-                < 1024 * 1024 => $"{(byteSize / 1024.0):F2} KB",
-                _ => $"{(byteSize / 1024.0 / 1024.0):F2} MB"
-            };
-
-            try
-            {
-                var (statusCode, content) = await Plugin.HttpManager.ShareLogsAsync(formattedContent).ConfigureAwait(false);
-
-                if (statusCode == HttpStatusCode.OK)
-                    MessageSent = true;
-
-                return (statusCode, content, readableSize);
-            }
-            catch (HttpRequestException ex)
-            {
-                Error($"HTTP error during log upload: {ex.Message}");
-                return (HttpStatusCode.ServiceUnavailable, null, readableSize);
-            }
-            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
-            {
-                Error("Log upload timed out");
-                return (HttpStatusCode.RequestTimeout, null, readableSize);
-            }
-            catch (Exception ex)
-            {
-                Error($"Unexpected error during log upload: {ex.Message}");
-                return (HttpStatusCode.InternalServerError, null, readableSize);
-            }
-        }
-
-        private static async Task<string> GetLocalAdminLogContentAsync()
-        {
-            try
-            {
-                string scpSlPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SCP Secret Laboratory");
-                string localAdminLogsPath = Path.Combine(scpSlPath, "LocalAdminLogs", Server.Port.ToString());
-
-                if (!Directory.Exists(localAdminLogsPath))
-                    return $"LocalAdmin logs directory not found at: {localAdminLogsPath}";
-
-                string latestLogFile = Directory.GetFiles(localAdminLogsPath, "LocalAdmin Log*.txt")
-                    .OrderByDescending(f => File.GetLastWriteTime(f))
-                    .FirstOrDefault();
-
-                if (string.IsNullOrEmpty(latestLogFile))
-                    return "No LocalAdmin log files found in directory.";
-
-                using FileStream fs = new(latestLogFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                using StreamReader reader = new(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-
-                string content = await reader.ReadToEndAsync().ConfigureAwait(false);
-                return RedactSensitiveData(content);
-            }
-            catch (Exception ex)
-            {
-                return RedactSensitiveData($"Error reading LocalAdmin log file: {ex.Message}");
-            }
-        }
-
-        private static readonly Regex IpRegex = new(@"\b(?:25[0-5]|2[0-4]\d|1?\d{1,2})(?:\.(?:25[0-5]|2[0-4]\d|1?\d{1,2})){3}\b", RegexOptions.Compiled);
-        private static readonly Regex ScpSlAuthTokenRegex = new(@"\b[a-zA-Z0-9_-]{8,32}-[a-zA-Z0-9_/-]{4,32}\b", RegexOptions.Compiled);
-        private static readonly Regex SteamIdRegex = new(@"\b7656119\d{10}\b", RegexOptions.Compiled);
-
-        public static string RedactSensitiveData(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-
-            input = IpRegex.Replace(input, "[REDACTED_IP]");
-            input = ScpSlAuthTokenRegex.Replace(input, "[REDACTED_TOKEN]");
-            input = SteamIdRegex.Replace(input, "[REDACTED_STEAMID]");
-
-            return input;
-        }
-        
-        private static string FormatLogsForReport()
-        {
-            StringBuilder sb = new();
-
-            sb.AppendLine("╔═══════════════════════════════════════════════════════════════════╗");
-            sb.AppendLine("║                    UncomplicatedCustomItems                       ║");
-            sb.AppendLine("║                           Log Report                              ║");
-            sb.AppendLine("╚═══════════════════════════════════════════════════════════════════╝");
-            sb.AppendLine();
-
-            sb.AppendLine($"Generated: {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}");
-            sb.AppendLine($"Server Port: {Server.Port}");
-            sb.AppendLine($"Total Entries: {History.Count}");
-            sb.AppendLine($"Total CustomItems: {CustomItem.List.Count + CustomItem.UnregisteredList.Count}");
-
-            var logSummary = History.GroupBy(h => h.Level).ToDictionary(g => g.Key, g => g.Count());
-
-            sb.AppendLine("Log Level Summary:");
-            foreach (var kvp in logSummary.OrderByDescending(x => x.Value))
-                sb.AppendLine($"  • {kvp.Key}: {kvp.Value} entries");
-
-            sb.AppendLine();
-
-            if (History.Count > 0)
-            {
-                DateTimeOffset firstLog = History.First().DateTimeOffset;
-                DateTimeOffset lastLog = History.Last().DateTimeOffset;
-                sb.AppendLine($"Time Range: {firstLog:yyyy-MM-dd HH:mm:ss} to {lastLog:yyyy-MM-dd HH:mm:ss}");
-                sb.AppendLine($"Duration: {lastLog - firstLog}");
-                sb.AppendLine();
-            }
-
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine("                              LOG ENTRIES");
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine();
-
-            var groupedLogs = History.GroupBy(h => h.Level).OrderBy(g => GetLogLevelPriority(g.Key));
-
-            foreach (var group in groupedLogs)
-            {
-                sb.AppendLine($"┌─ {group.Key.ToUpper()} LOGS ({group.Count()} entries) ─");
-                sb.AppendLine();
-
-                foreach (LogEntry entry in group)
+                MethodBase? method = frame.GetMethod();
+                if (method?.DeclaringType != null)
                 {
-                    sb.AppendLine(FormatLogEntry(entry));
-                }
-
-                sb.AppendLine();
-            }
-
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine("                            RAW LOGS");
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine();
-
-            foreach (LogEntry element in History)
-                sb.AppendLine($"{element}");
-
-            sb.AppendLine();
-
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine("                         LOCALADMINLOG FILE");
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine();
-
-            string localAdminPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SCP Secret Laboratory", "LocalAdminLogs", Server.Port.ToString());
-            string latestFile = Directory.Exists(localAdminPath) ? Directory.GetFiles(localAdminPath, "LocalAdmin Log*.txt").OrderByDescending(File.GetLastWriteTime).FirstOrDefault() : null;
-
-            if (string.IsNullOrEmpty(latestFile) || !File.Exists(latestFile))
-            {
-                sb.AppendLine("No LocalAdmin log file found.");
-            }
-            else
-            {
-                FileInfo fileInfo = new(latestFile);
-                if (fileInfo.Length > 1 * 1024 * 1024)
-                    sb.AppendLine($"LocalAdmin log skipped (too large: {fileInfo.Length / 1024.0 / 1024.0:F2} MB)");
-                else
-                {
-                    try
-                    {
-                        using FileStream fs = new(latestFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                        using StreamReader reader = new(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-                        string content = reader.ReadToEnd();
-                        sb.AppendLine(RedactSensitiveData(content));
-                    }
-                    catch (Exception ex)
-                    {
-                        sb.AppendLine($"Error reading LocalAdmin log file: {ex.Message}");
-                    }
+                    source = GetReadableMethodName(method);
                 }
             }
 
-            AppendCustomItemFiles(sb);
-
-            sb.AppendLine();
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine("                           END OF REPORT");
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-
-            return sb.ToString();
+            message = Regex.Replace(message, @"_Patch\d+", "");
+            return $"[{source}] {message}";
         }
 
-        private static void AppendCustomItemFiles(StringBuilder sb)
+        private static string GetReadableMethodName(MethodBase method)
         {
-            sb.AppendLine();
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine("                       CUSTOMITEM RAW CONFIG FILES");
-            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
-            sb.AppendLine();
+            Type declaringType = method.DeclaringType!;
+            string typeName = declaringType.FullName ?? declaringType.Name;
+            string methodName = method.Name;
 
-            try
+            bool isCompilerGenerated = method.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length > 0
+                || declaringType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length > 0
+                || typeName.Contains("<>")
+                || typeName.Contains("__")
+                || methodName.StartsWith("<");
+
+            if (!isCompilerGenerated)
             {
-                string cfgDir = Plugin.Instance.FileConfig.Dir;
-                if (string.IsNullOrEmpty(cfgDir) || !Directory.Exists(cfgDir))
-                {
-                    sb.AppendLine($"CustomItems directory not found at: {cfgDir}");
-                    return;
-                }
-
-                string[] files = Directory.GetFiles(cfgDir, "*.yml", SearchOption.TopDirectoryOnly).Concat(Directory.Exists(Path.Combine(cfgDir, "Actions")) ? Directory.GetFiles(Path.Combine(cfgDir, "Actions"), "*.yml", SearchOption.TopDirectoryOnly) : Array.Empty<string>()).OrderBy(x => x).ToArray();
-                if (files.Length == 0)
-                {
-                    sb.AppendLine("No customitem .yml files found.");
-                    return;
-                }
-
-                foreach (string file in files)
-                {
-                    sb.AppendLine($"--- File: {Path.GetFileName(file)} ---");
-                    try
-                    {
-                        FileInfo fi = new(file);
-                        if (fi.Length > 1 * 1024 * 1024)
-                        {
-                            sb.AppendLine($"Skipped (too large: {fi.Length / 1024.0 / 1024.0:F2} MB)");
-                            sb.AppendLine();
-                            continue;
-                        }
-
-                        using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                        using StreamReader reader = new(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-                        sb.AppendLine(reader.ReadToEnd());
-                    }
-                    catch (Exception ex)
-                    {
-                        sb.AppendLine($"Error reading file: {ex.Message}");
-                    }
-
-                    sb.AppendLine();
-                }
-            }
-            catch (Exception ex)
-            {
-                sb.AppendLine($"Error enumerating customitem files: {ex.Message}");
+                return FormatTypeAndMethod(typeName, methodName, method.IsStatic);
             }
 
-            sb.AppendLine();
-        }
-
-        private static string FormatLogEntry(LogEntry entry)
-        {
-            string timestamp = entry.DateTimeOffset.ToString("HH:mm:ss.fff");
-            string errorPart = !string.IsNullOrEmpty(entry.Error) ? $"[{entry.Error}] " : "";
-
-            return $" {timestamp} │ {errorPart}{entry.Content}";
-        }
-        
-        private static int GetLogLevelPriority(string level)
-        {
-            return level.ToUpper() switch
+            if (typeName.Contains("+<>c") && methodName.StartsWith("<"))
             {
-                "SECURITY" => 0,
-                "ERROR" => 1,
-                "WARN" => 2,
-                "INFO" => 3,
-                "DEBUG" => 4,
-                "UPDATER" => 5,
-                "SYSTEM" => 6,
-                "SILENT" => 7,
-                _ => 8
-            };
+                int endIdx = methodName.IndexOf(">b__");
+                if (endIdx > 1)
+                {
+                    return FormatTypeAndMethod(typeName.Substring(0, typeName.IndexOf("+<>c")), methodName.Substring(1, endIdx - 1), true);
+                }
+            }
+
+            if (typeName.Contains("+<") && typeName.Contains(">d__"))
+            {
+                int start = typeName.IndexOf("+<") + 2;
+                int end = typeName.IndexOf(">d__", start);
+                if (start > 1 && end > start)
+                {
+                    return FormatTypeAndMethod(typeName.Substring(0, typeName.IndexOf("+<")), typeName.Substring(start, end - start), false);
+                }
+            }
+
+            if (methodName.StartsWith("<") && methodName.Contains(">g__"))
+            {
+                int endIdx = methodName.IndexOf(">g__");
+                if (endIdx > 1)
+                {
+                    string outerType = typeName;
+                    if (outerType.Contains("+<"))
+                        outerType = outerType.Substring(0, outerType.IndexOf("+<"));
+
+                    return FormatTypeAndMethod(outerType, methodName.Substring(1, endIdx - 1), method.IsStatic);
+                }
+            }
+
+            return FormatTypeAndMethod(typeName, methodName, method.IsStatic);
+        }
+
+        private static string FormatTypeAndMethod(string typeName, string methodName, bool isStatic)
+        {
+            string separator = isStatic ? "." : "::";
+            return $"{typeName}{separator}{methodName}()";
         }
     }
 }

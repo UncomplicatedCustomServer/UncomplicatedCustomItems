@@ -2,7 +2,6 @@
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Interfaces;
 
@@ -30,7 +29,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            object customItemobj = null;
+            object customItemobj = null!;
             if (Utilities.TryGetCustomItem(uint.Parse(arguments[0]), out var iCustomItem))
             {
                 customItemobj = iCustomItem;

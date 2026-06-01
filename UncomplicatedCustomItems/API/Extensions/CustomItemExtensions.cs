@@ -2,8 +2,7 @@ using System;
 using InventorySystem.Items.Firearms.Attachments;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
@@ -21,17 +20,25 @@ namespace UncomplicatedCustomItems.API.Extensions
             {
                 if (pickup)
                 {
-                    FirearmPickup firearm = customitem.Pickup as FirearmPickup;
+                    if (customitem.Pickup is not FirearmPickup firearm)
+                        return;
+
                     if (firearm.Base.TryApplyAttachment(attachmentname))
+                    {
                         LogManager.Debug($"Added {attachmentname} to {customitem.CustomItem.Name}");
+                    }
                     else
                         LogManager.Error($"Failed to add {attachmentname} to {customitem.CustomItem.Name}");
                 }
                 else
                 {
-                    FirearmItem firearm = customitem.Item as FirearmItem;
+                    if (customitem.Item is not FirearmItem firearm)
+                        return;
+
                     if (firearm.Base.TryApplyAttachment(attachmentname))
+                    {
                         LogManager.Debug($"Added {attachmentname} to {customitem.CustomItem.Name}");
+                    }
                     else
                         LogManager.Error($"Failed to add {attachmentname} to {customitem.CustomItem.Name}");
                 }

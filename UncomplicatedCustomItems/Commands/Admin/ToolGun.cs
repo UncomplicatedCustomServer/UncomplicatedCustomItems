@@ -2,8 +2,6 @@ using CommandSystem;
 using LabApi.Features.Wrappers;
 using System.Collections.Generic;
 using System.Linq;
-using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Interfaces;
 
@@ -29,8 +27,8 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (arguments.Count == 1)
             {
-                Player target = Player.Get(int.Parse(arguments[0]));
-                if (target is null)
+                Player? target = Player.Get(int.Parse(arguments[0]));
+                if (target == null)
                 {
                     response = "Player not found!";
                     return false;
@@ -45,14 +43,15 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
+
                 new SummonedAPICustomItem(customItem, target);
                 response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                 return true;
             }
             else
             {
-                Player target = Player.Get(sender);
-                if (target is null)
+                Player? target = Player.Get(sender);
+                if (target == null)
                 {
                     response = "Player not found!";
                     return false;
@@ -67,6 +66,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     response = $"{target.Nickname} Inventory is full!";
                     return false;
                 }
+                
                 new SummonedAPICustomItem(customItem, target);
                 response = $"Successfully gave '{customItem.Name}' to player {target.Nickname}";
                 return true;

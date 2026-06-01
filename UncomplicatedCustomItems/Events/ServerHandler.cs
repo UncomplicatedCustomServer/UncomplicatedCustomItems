@@ -1,20 +1,15 @@
-﻿using InventorySystem.Items.Usables.Scp244;
-using LabApi.Events.Arguments.ServerEvents;
-using LabApi.Features.Wrappers;
-using MEC;
-using Mirror;
-using System;
-using System.Collections.Generic;
 ﻿using LabApi.Events.Arguments.ServerEvents;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
+using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UnityEngine;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
+using UncomplicatedCustomItems.API.Features.Networking;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -22,32 +17,47 @@ namespace UncomplicatedCustomItems.Events
     {
         public static void Register()
         {
+            ServerEvent.WaitingForPlayers += OnWaitingForPlayers;
             ServerEvent.PickupDestroyed += OnPickup;
             ServerEvent.ProjectileExploding += OnGrenadeExploding;
-            ServerEvent.PickupCreated += OnPickupCreation;
             ServerEvent.RoundStarted += SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded += OnDetonated;
         }
 
         public static void Unregister()
         {
+            ServerEvent.WaitingForPlayers -= OnWaitingForPlayers;
             ServerEvent.PickupDestroyed -= OnPickup;
             ServerEvent.ProjectileExploding -= OnGrenadeExploding;
-            ServerEvent.PickupCreated -= OnPickupCreation;
             ServerEvent.RoundStarted -= SpawnItemsOnRoundStarted;
             ServerEvent.ProjectileExploded -= OnDetonated;
+        }
+
+        private static void OnWaitingForPlayers()
+        {
+            SummonedCustomItem.Cleanup();
+            SummonedAPICustomItem.Cleanup();
+            APIRequest.Cleanup();
+            PlayerHandler._capybaras.Clear();
+            PlayerHandler._damageTimes.Clear();
+            PlayerHandler._toolGunPrimitives.Clear();
+            PlayerHandler.Appearance.Clear();
+            PlayerHandler._humeShieldRegenCoroutine.Clear();
+            PlayerHandler.ActiveLights.Clear();
+            PlayerExtensions.PlayerKills.Clear();
+            PlayerHandler.CustomScp268Effects.Clear();
         }
 
         private static void OnDetonated(ProjectileExplodedEventArgs ev)
         {
             if (Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out var item))
             {
-                item.OnDetonated(ev);
+                item?.OnDetonated(ev);
             }
 
             if (SummonedAPICustomItem.TryGet(ev.TimedGrenade.Serial, out var api))
             {
-                api.OnDetonated(ev);
+                api?.OnDetonated(ev);
             }
         }
 
@@ -61,8 +71,8 @@ namespace UncomplicatedCustomItems.Events
                 if (customItem.Item is ItemType.SCP330 && customItem.CustomData is ICandyData data && !data.AllowSpawningAsItem)
                     continue;
 
-                LogManager.Debug($"{customItem.Name} DoSpawn is set to {customItem.Spawn.DoSpawn}");
-                if (customItem.Spawn is not null && customItem.Spawn.DoSpawn)
+                LogManager.Debug($"{customItem.Name} DoSpawn is set to {customItem.Spawn?.DoSpawn}");
+                if (customItem.Spawn != null && customItem.Spawn.DoSpawn)
                 {
                     for (uint count = 0; count < customItem.Spawn.Count; count++)
                     {
@@ -84,7 +94,7 @@ namespace UncomplicatedCustomItems.Events
                     {
                         for (uint count = 0; count < item.AmountToSpawn; count++)
                         {
-                            float chance = Random.Range(0f, 101f);
+                            float chance = UnityEngine.Random.Range(0f, 101f);
                             if (chance >= item.ChanceToSpawn)
                             {
                                 LogManager.Debug($"Spawning {item.Name} ({count + 1}/{item.AmountToSpawn})");
@@ -103,11 +113,11 @@ namespace UncomplicatedCustomItems.Events
 
             PlayerHandler.DetonationPosition = ev.Position;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem? customItem))
                 return;
 
-            if (customItem.CustomItem.CustomItemType is CustomItemType.Item)
-                customItem.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
+            if (customItem?.CustomItem.CustomItemType is CustomItemType.Item)
+                customItem?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
         }
 
         public static void OnPickup(PickupDestroyedEventArgs ev)

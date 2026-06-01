@@ -2,7 +2,8 @@ using CommandSystem;
 using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
@@ -54,10 +55,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 string Description = arguments[4];
                 FileConfig FileConfig = Plugin.Instance.FileConfig;
+                YAMLCustomItem item = FileConfig.GenerateCustomItem(itemId, itemName, itemType, customType, Description);
 
-                FileConfig.GenerateCustomItem(itemId, itemName, itemType, customType, Description);
-
-                response = $"New custom item '{itemName}' (ID: {FileConfig.NewId}) has been created.";
+                response = $"New custom item '{itemName}' (ID: {item.Id}) has been created.";
                 return true;
             }
             else

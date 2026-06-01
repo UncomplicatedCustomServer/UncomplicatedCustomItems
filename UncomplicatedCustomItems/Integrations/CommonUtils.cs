@@ -8,7 +8,7 @@ using Exiled.API.Features;
 using System.Linq;
 using System;
 using MEC;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using System.Reflection;
 using Exiled.Loader;
 using System.Collections;
@@ -20,6 +20,7 @@ namespace UncomplicatedCustomItems.Integrations
 {
     internal class CommonUtilitiesPatch
     {
+        private static bool _loaded;
         private static Assembly commonUtilitiesAssembly;
         private static MethodInfo _targetMethod;
         private static Type _commonUtilsPlugin;
@@ -33,6 +34,9 @@ namespace UncomplicatedCustomItems.Integrations
 
         internal static void Initialize()
         {
+            if (_loaded)
+                return;
+
             commonUtilitiesAssembly = Loader.Plugins.FirstOrDefault(p => p.Name == "Common Utilities")?.Assembly;
 
             if (commonUtilitiesAssembly == null)
@@ -97,6 +101,7 @@ namespace UncomplicatedCustomItems.Integrations
             }
 
             Plugin.Instance._harmony.Patch(_targetMethod, prefix: new HarmonyMethod(typeof(CommonUtilitiesPatch).GetMethod(nameof(Prefix), BindingFlags.Public | BindingFlags.Static)));
+            _loaded = true;
 
             LogManager.Silent("Common Utilities integration patch applied successfully.");
         }
@@ -226,7 +231,14 @@ namespace UncomplicatedCustomItems.Integrations
                         if (Utilities.TryGetCustomItemByName(item, out ICustomItem customItem))
                         {
                             LogManager.Silent($"Granting UCI item '{customItem.Name}' to {player.Nickname} via CommonUtilities integration.");
-                            Timing.RunCoroutine(ItemAddCoroutine(player, customItem));
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () => 
+                            {
+                                if (player?.IsConnected == true)
+                                {
+                                    new SummonedCustomItem(customItem, player);
+                                }
+                            });
+
                             return;
                         }
                     }
@@ -236,16 +248,7 @@ namespace UncomplicatedCustomItems.Integrations
                 }
             }
         }
-
-        public static IEnumerator<float> ItemAddCoroutine(Player player, ICustomItem customItem)
-        {
-            yield return Timing.WaitForSeconds(0.5f);
-            if (player?.IsConnected == true)
-            {
-                 new SummonedCustomItem(customItem, player);
-            }
-        }
-
+        
         public static double CalculateChance(IEnumerable<object> itemChances, bool additiveProbabilities)
         {
             Object randomInstanceProvider = _commonUtilsRandomField?.GetValue(null);

@@ -69,7 +69,7 @@ namespace UncomplicatedCustomItems.Examples
 
         protected override void OnHurt(PlayerHurtEventArgs ev)
         {
-            if (!Check(ev.Attacker.CurrentItem))
+            if (!Check(ev.Attacker?.CurrentItem))
                 return;
 
             ev.Player.EnableEffect<Burned>(3, 6, false);

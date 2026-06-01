@@ -1,12 +1,9 @@
 ﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using System;
 using UncomplicatedCustomItems.API.Enums;
 using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
-#nullable enable
-
     /// <summary>
     /// The data associated with <see cref="CustomItemType.Item"/> <see cref="CustomItem"/>s
     /// </summary>
@@ -17,7 +14,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
             new() 
             {
                 Event = ItemEvents.Pickup,
-                Command = null,
+                Command = string.Empty,
                 CoolDown = 1f,
                 ConsoleMessage = "A funny message for the console",
                 BroadcastMessage = "The broadcast uuhh!!!",

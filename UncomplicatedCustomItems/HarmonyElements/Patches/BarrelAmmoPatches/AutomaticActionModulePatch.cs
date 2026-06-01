@@ -2,7 +2,7 @@
 using InventorySystem.Items.Firearms.Modules;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
@@ -14,7 +14,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPrefix]
         public static bool Prefix(AutomaticActionModule __instance, ref int __result)
         {
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem) && summonItem.CustomItem is CustomWeapon customWeapon)
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var summonItem) && summonItem?.CustomItem is CustomWeapon customWeapon)
             {
                 if (customWeapon.MaxBarrelAmmo > 16)
                 {
@@ -27,7 +27,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 return false;
             }
 
-            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) && customItem.CustomItem.CustomData is WeaponData data)
+            if (Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) && customItem?.CustomItem.CustomData is WeaponData data)
             {
                 if (data.MaxBarrelAmmo > 16)
                 {

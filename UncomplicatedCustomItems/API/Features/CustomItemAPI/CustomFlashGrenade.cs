@@ -24,27 +24,27 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// Gets or sets the how mush the flash grenade going to be intensified when explode at <see cref="RoomName.Surface"/>.
         /// </summary>
-        public abstract float SurfaceDistanceIntensifier { get; set; }
+        public virtual float SurfaceDistanceIntensifier { get; set; } = 2f;
 
         /// <summary>
         /// Gets or sets how long the fuse will last.
         /// </summary>
-        public abstract float FuseTime { get; set; }
+        public virtual float FuseTime { get; set; } = 5f;
 
         /// <summary>
         /// Gets or sets wether or not the grenade will explode on impact
         /// </summary>
-        public abstract bool ExplodeOnImpact { get; set; }
+        public virtual bool ExplodeOnImpact { get; set; }
 
         /// <summary>
         /// Gets or sets the time to pull out the pin
         /// </summary>
-        public abstract float PinPullTime { get; set; }
+        public virtual float PinPullTime { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether players can pickup grenade after throw.
         /// </summary>
-        public abstract bool Repickable { get; set; }
+        public virtual bool Repickable { get; set; }
 
         public override void RegisterEvents()
         {
@@ -90,7 +90,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             {
                 OnThrown(ev);
                 if (ExplodeOnImpact)
-                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host).GameObject, ev.Projectile.Base);         
+                    ev.Projectile.GameObject.AddComponent<CollisionHandler>().Init((ev.Player ?? Player.Host!).GameObject!, ev.Projectile.Base);         
             }
         }
 

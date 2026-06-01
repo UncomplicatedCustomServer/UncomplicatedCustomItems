@@ -24,25 +24,30 @@ namespace UncomplicatedCustomItems.Commands.User
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player player = Player.Get(sender);
+            Player? player = Player.Get(sender);
 
-            if (player is null)
+            if (player == null)
             {
                 response = "Can't use this command while not in the game!";
                 return false;
             }
 
-            if (player.CurrentItem is null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem item) || item.CustomItem.CustomItemType != CustomItemType.Item)
+            if (player.CurrentItem == null || !Utilities.TryGetSummonedCustomItem(player.CurrentItem.Serial, out SummonedCustomItem? item) || item?.CustomItem.CustomItemType != CustomItemType.Item)
             {
                 response = "You must hold the custom item!";
                 return false;
             }
 
             // Ok now we have to check if the custom item command contains any & (= args)
-            IItemData itemData = item.CustomItem.CustomData as IItemData;
+            if (item.CustomItem.CustomData is not IItemData itemData)
+            {
+                response = "This is not a item type CustomItem.";
+                return false;
+            }
+
             foreach (ItemDataList data in itemData.Data)
             {
-                if (data.Command is not null && data.Command.Contains("#"))
+                if (data.Command != null && data.Command.Contains("#"))
                 {
                     // yes, the command requires args
                     // Let's see how many

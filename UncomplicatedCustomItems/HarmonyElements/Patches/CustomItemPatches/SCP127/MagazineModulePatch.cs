@@ -4,7 +4,7 @@ using InventorySystem.Items.Firearms.Modules.Scp127;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
@@ -17,6 +17,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             if (__result is not Scp127MagazineModule.RegenerationSettings original)
                 return;
+                
             if (APICustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
             {
                 try
@@ -48,12 +49,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 }
             }
 
-            if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out var item) && item.CustomItem.CustomItemType == CustomItemType.SCPItem && item.CustomItem.Item == ItemType.GunSCP127)
+            if (Utilities.TryGetSummonedCustomItem(__instance.Item.ItemSerial, out var item) && item?.CustomItem.CustomItemType == CustomItemType.SCPItem && item.CustomItem.Item == ItemType.GunSCP127)
             {
                 try
                 {
                     Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(__instance.Item);
-                    SCP127Data data = item.CustomItem.CustomData as SCP127Data;
+                    if (item.CustomItem.CustomData is not SCP127Data data)
+                        return;
+
                     __result = new Scp127MagazineModule.RegenerationSettings
                     {
                         BulletsPerSecond = tier

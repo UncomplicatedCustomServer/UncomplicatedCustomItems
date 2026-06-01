@@ -5,6 +5,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
@@ -29,14 +30,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 response = $"usage: <Item Serial>";
                 return false;
             }
-            if (Utilities.TryGetSummonedCustomItem(ushort.Parse(args[0]), out SummonedCustomItem customItem))
+            if (Utilities.TryGetSummonedCustomItem(ushort.Parse(args[0]), out SummonedCustomItem? customItem) && customItem != null)
             {
-                response = $"\nData for {customItem.CustomItem.Name} - Serial {customItem.Serial}:\n[\U0001F4C1] Position: {customItem.Pickup?.Position}\n[\U0001F4CC] Relative Position Inside Room: {customItem.Pickup.Room?.LocalPosition(customItem.Pickup.Position)}\n[\U0001F4C4] Room: {customItem.Pickup.Room?.Name}";
+                response = $"\nData for {customItem.CustomItem.Name} - Serial {customItem.Serial}:\n[\U0001F4C1] Position: {customItem.Pickup?.Position}\n[\U0001F4CC] Relative Position Inside Room: {customItem.Pickup?.Room?.LocalPosition(customItem.Pickup.Position)}\n[\U0001F4C4] Room: {customItem.Pickup?.Room?.Name}";
                 return true;
             }
-            if (SummonedAPICustomItem.TryGet(ushort.Parse(args[0]), out var baseCustomItem))
+            if (SummonedAPICustomItem.TryGet(ushort.Parse(args[0]), out var baseCustomItem) && baseCustomItem != null)
             {
-                response = $"\nData for {baseCustomItem.CustomItem.Name} - Serial {baseCustomItem.Serial}:\n[\U0001F4C1] Position: {baseCustomItem.Pickup?.Position}\n[\U0001F4CC] Relative Position Inside Room: {baseCustomItem.Pickup.Room?.LocalPosition(customItem.Pickup.Position)}\n[\U0001F4C4] Room: {baseCustomItem.Pickup.Room?.Name}";
+                response = $"\nData for {baseCustomItem.CustomItem?.Name} - Serial {baseCustomItem.Serial}:\n[\U0001F4C1] Position: {baseCustomItem.Pickup?.Position}\n[\U0001F4CC] Relative Position Inside Room: {baseCustomItem.Pickup?.Room?.LocalPosition(baseCustomItem.Pickup?.Position ?? Vector3.zero)}\n[\U0001F4C4] Room: {baseCustomItem.Pickup?.Room?.Name}";
                 return true;
             }
 

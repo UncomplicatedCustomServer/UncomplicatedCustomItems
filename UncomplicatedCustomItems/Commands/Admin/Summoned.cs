@@ -27,15 +27,15 @@ namespace UncomplicatedCustomItems.Commands.Admin
             foreach (SummonedCustomItem Item in SummonedCustomItem.List)
             {
                 string Status = Item.IsPickup ? "Pickup" : " Item ";
-                string Owner = (Item.Owner is null) ? "null" : Item.Owner.Nickname;
+                string Owner = (Item.Owner == null) ? "null" : Item.Owner.Nickname;
                 response += $"\n   {Item.Serial}    {Item.CustomItem.Id}   {Status}   {Item.CustomItem.Name}   {Owner}";
             }
             
             foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List)
             {
                 string Status = item.IsPickup ? "Pickup" : " Item ";
-                string Owner = (item.Owner is null) ? "null" : item.Owner.Nickname;
-                response += $"\n   {item.Serial}    {item.CustomItem.Id}   {Status}   {item.CustomItem.Name}   {Owner}";
+                string Owner = (item.Owner == null) ? "null" : item.Owner.Nickname;
+                response += $"\n   {item.Serial}    {item.CustomItem?.Id}   {Status}   {item.CustomItem?.Name}   {Owner}";
             }
 
             return true;

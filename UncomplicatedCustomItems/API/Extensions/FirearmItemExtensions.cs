@@ -6,9 +6,9 @@ using InventorySystem.Items.Firearms.Attachments.Components;
 using InventorySystem.Items.Firearms.Modules;
 using LabApi.Features.Wrappers;
 using FirearmPickup = InventorySystem.Items.Firearms.FirearmPickup;
-using static InventorySystem.Items.Firearms.Modules.AnimatorReloaderModuleBase;
 using static InventorySystem.Items.Firearms.Modules.AutomaticActionModule;
 using static InventorySystem.Items.Firearms.Modules.PumpActionModule;
+using System.Linq;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
@@ -27,18 +27,18 @@ namespace UncomplicatedCustomItems.API.Extensions
             {
                 if (attachments.Contains(attachment.Name))
                     attachmentNamesRaw += num;
+
                 num *= 2U;
             }
 
             return attachmentNamesRaw;
         }
 
-        public static Attachment GetAttachmentByName(this Firearm firearm, AttachmentName name)
+        public static Attachment? GetAttachmentByName(this Firearm firearm, AttachmentName name)
         {
-            foreach (Attachment attachment in firearm.Attachments)
+            foreach (Attachment attachment in firearm.Attachments.Where(a => a.Name == name))
             {
-                if (attachment.Name == name)
-                    return attachment;
+                return attachment;
             }
 
             return null;
@@ -46,16 +46,14 @@ namespace UncomplicatedCustomItems.API.Extensions
         
         public static bool TryApplyAttachment(this Firearm firearm, AttachmentName name)
         {
-            Attachment targetAttachment = firearm.GetAttachmentByName(name);
+            Attachment? targetAttachment = firearm.GetAttachmentByName(name);
             if (targetAttachment == null)
                 return false;
 
             uint newCode = firearm.GetCurrentAttachmentsCode();
-
             for (int i = 0; i < firearm.Attachments.Length; i++)
             {
-                Attachment attachment = firearm.Attachments[i];
-                if (attachment.Slot == targetAttachment.Slot)
+                if (firearm.Attachments[i].Slot == targetAttachment.Slot)
                 {
                     uint bitToRemove = 1u << i;
                     newCode &= ~bitToRemove;
@@ -86,8 +84,7 @@ namespace UncomplicatedCustomItems.API.Extensions
 
             firearm.ItemSerial = firearmPickup.Info.Serial;
             AttachmentCodeSync.ServerSetCode(firearmPickup.Info.Serial, AttachmentsUtils.GetRandomAttachmentsCode(firearmPickup.Info.ItemId));
-            bool success = TryApplyAttachment(firearm, name);
-            if (success && firearm.WorldModel != null)
+            if (TryApplyAttachment(firearm, name) && firearm.WorldModel != null)
             {
                 firearm.WorldModel.Setup(firearm.ItemId, firearm.WorldModel.WorldmodelType, firearm.GetCurrentAttachmentsCode());
                 return true;
@@ -103,25 +100,25 @@ namespace UncomplicatedCustomItems.API.Extensions
 
             if (dryFire)
             {
-                actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+                actionModule.SendRpc(item.CurrentOwner?.ReferenceHub, writer =>
                 {
                     writer.WriteSubheader(MessageHeader.RpcDryFire);
                 });
 
-                actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+                actionModule.SendRpc(other => other != item.CurrentOwner?.ReferenceHub, writer =>
                 {
                     writer.WriteSubheader(MessageHeader.RpcDryFire);
                 });
             }
             else
             {
-                actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+                actionModule.SendRpc(item.CurrentOwner?.ReferenceHub, writer =>
                 {
                     writer.WriteSubheader(MessageHeader.RpcFire);
                     writer.WriteByte((byte)chambersFired);
                 });
 
-                actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+                actionModule.SendRpc(other => other != item.CurrentOwner?.ReferenceHub, writer =>
                 {
                     writer.WriteSubheader(MessageHeader.RpcFire);
                     writer.WriteByte((byte)chambersFired);
@@ -138,25 +135,25 @@ namespace UncomplicatedCustomItems.API.Extensions
 
             if (dryFire)
             {
-                actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+                actionModule.SendRpc(item.CurrentOwner?.ReferenceHub, writer =>
                 {
                     writer.WriteSubheader(DoubleActionModule.MessageType.RpcDryFire);
                 });
 
-                actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+                actionModule.SendRpc(other => other != item.CurrentOwner?.ReferenceHub, writer =>
                 {
                     writer.WriteSubheader(DoubleActionModule.MessageType.RpcDryFire);
                 });
             }
             else
             {
-                actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+                actionModule.SendRpc(item.CurrentOwner?.ReferenceHub, writer =>
                 {
                     writer.WriteSubheader(DoubleActionModule.MessageType.RpcFire);
                     writer.WriteByte((byte)chambersFired);
                 });
 
-                actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+                actionModule.SendRpc(other => other != item.CurrentOwner?.ReferenceHub, writer =>
                 {
                     writer.WriteSubheader(DoubleActionModule.MessageType.RpcFire);
                     writer.WriteByte((byte)chambersFired);
@@ -171,13 +168,13 @@ namespace UncomplicatedCustomItems.API.Extensions
             if (!item.Base.TryGetModule<PumpActionModule>(out var actionModule))
                 return false;
 
-            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            actionModule.SendRpc(item.CurrentOwner?.ReferenceHub, writer =>
             {
                 writer.WriteSubheader(RpcType.Shoot);
                 writer.WriteByte((byte)chambersFired);
             });
 
-            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            actionModule.SendRpc(other => other != item.CurrentOwner?.ReferenceHub, writer =>
             {
                 writer.WriteSubheader(RpcType.Shoot);
                 writer.WriteByte((byte)chambersFired);
@@ -191,13 +188,13 @@ namespace UncomplicatedCustomItems.API.Extensions
             if (!item.Base.TryGetModule<DisruptorActionModule>(out var actionModule))
                 return false;
 
-            actionModule.SendRpc(item.CurrentOwner.ReferenceHub, writer =>
+            actionModule.SendRpc(item.CurrentOwner?.ReferenceHub, writer =>
             {
                 writer.WriteSubheader(DisruptorActionModule.MessageType.RpcStartFiring);
                 writer.WriteByte((byte)chambersFired);
             });
 
-            actionModule.SendRpc(other => other != item.CurrentOwner.ReferenceHub, writer =>
+            actionModule.SendRpc(other => other != item.CurrentOwner?.ReferenceHub, writer =>
             {
                 writer.WriteSubheader(DisruptorActionModule.MessageType.RpcStartFiring);
                 writer.WriteByte((byte)chambersFired);

@@ -19,7 +19,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// Gets or sets the hint message shown when the candy is eaten
         /// </summary>
-        public virtual string EatingMessage { get; set; }
+        public virtual string EatingMessage { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the hint message duration
@@ -69,6 +69,9 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             if (ev.UsableItem.Base is Scp330Bag bag)
             {
                 List<APICustomItem> candies = List.Where(c => c is CustomCandy candyData && c.Spawn).ToList();
+                if (candies.IsEmpty())
+                    return;
+
                 APICustomItem item = candies.RandomItem();
 
                 if (candies.Count > 0 && item is CustomCandy data && UnityEngine.Random.Range(0f, 101f) >= data.Chance && bag.Candies[bag.SelectedCandyId] == data.CandyType)
@@ -91,7 +94,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 if (index >= 0 && index <= bag.Candies.Count)
                 {
                     List<APICustomItem> candies = List.Where(c => c is CustomCandy candyData && c.Spawn).ToList();
-                    if (candies.Count() >= 1)
+                    if (!candies.IsEmpty())
                     {
                         APICustomItem item = candies.RandomItem();
 
@@ -118,7 +121,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
                             ev.Player.SendHint(EatingMessage, EatingMessageDuration);
                         }
-                        else if (candies.Count > 0 && item is CustomCandy data && UnityEngine.Random.Range(0f, 101f) >= data.Chance && bag.Candies[index] == data.CandyType)
+                        else if (!candies.IsEmpty() && item is CustomCandy data && UnityEngine.Random.Range(0f, 101f) >= data.Chance && bag.Candies[index] == data.CandyType)
                         {
                             if (!ApplyEffects)
                             {

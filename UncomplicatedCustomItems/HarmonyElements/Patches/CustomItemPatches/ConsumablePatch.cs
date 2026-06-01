@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
+﻿using HarmonyLib;
 using InventorySystem.Items.Usables;
 using LabApi.Features.Wrappers;
 using MEC;
+using PlayerStatsSystem;
+using System;
+using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -16,7 +18,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPrefix]
         public static bool Prefix(Consumable __instance)
         {
-            if (API.Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out SummonedCustomItem CustomItem))
+            if (API.Utilities.TryGetSummonedCustomItem(__instance.ItemSerial, out SummonedCustomItem? CustomItem) && CustomItem != null)
             {
                 LogManager.Debug($"Checking if {CustomItem.CustomItem.Name} is Adrenaline, Painkillers or Medkit");
                 if (CustomItem.CustomItem.CustomItemType is CustomItemType.Adrenaline or CustomItemType.Painkillers or CustomItemType.Medikit)
@@ -26,7 +28,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 }
             }
 
-            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var item))
+            if (SummonedAPICustomItem.TryGet(__instance.ItemSerial, out var item) && item != null)
             {
                 switch (item.CustomItem)
                 {
@@ -39,7 +41,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         return false;
 
                     case CustomAdrenaline adrenaline:
-                        Player.Get(__instance.Owner).CreateAhpProcess(adrenaline.Amount, limit: 1000f, decay: adrenaline.Decay, efficacy: adrenaline.Efficacy, sustain: adrenaline.Sustain, adrenaline.Persistant);
+                        Player.Get(__instance.Owner).ReferenceHub.playerStats.GetModule<AhpStat>().ServerAddProcess(adrenaline.Amount, limit: 1000f, decay: adrenaline.Decay, efficacy: adrenaline.Efficacy, sustain: adrenaline.Sustain, adrenaline.Persistant);
                         return false;
                 }
             }
@@ -51,17 +53,19 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         /// Reproduce the SCP:SL <see cref="ItemType.Painkillers"/> healing process but with custom things :)
         /// </summary>
         /// <param name="player"></param>
-        /// <param name="Data"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
-        internal static IEnumerator<float> PainkillersCoroutine(Player player, CustomPainkillers Data)
+        internal static IEnumerator<float> PainkillersCoroutine(Player player, CustomPainkillers data)
         {
             float TotalHealed = 0;
-            yield return Timing.WaitForSeconds(Data.TimeBeforeStartHealing);
-            while (TotalHealed < Data.TotalHealing && player.IsAlive)
+            yield return Timing.WaitForSeconds(data.TimeBeforeStartHealing);
+
+            while (TotalHealed < data.TotalHealing && player.IsAlive)
             {
-                player.Heal(Data.TickHeal);
-                TotalHealed += Data.TickHeal;
-                yield return Timing.WaitForSeconds(Data.TickTime);
+                float healAmount = Math.Min(data.TickHeal, data.TotalHealing - TotalHealed);
+                player.Heal(healAmount);
+                TotalHealed += healAmount;
+                yield return Timing.WaitForSeconds(data.TickTime);
             }
         }
     }

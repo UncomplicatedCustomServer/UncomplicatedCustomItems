@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> args, ICommandSender sender, out string response)
         {
-            if (!Player.TryGet(sender, out Player player))
+            if (!Player.TryGet(sender, out Player? player))
             {
                 response = "You must be a Player to use this command!";
                 return false;
@@ -27,10 +27,10 @@ namespace UncomplicatedCustomItems.Commands.Admin
             switch (args[0].ToLower())
             {
                 case "ui":
-                    if (!player.GameObject.TryGetComponent<DebugUI>(out uI))
+                    if (!player.GameObject!.TryGetComponent<DebugUI>(out uI))
                     {
-                        player.GameObject.AddComponent<DebugUI>().Init(player);
-                        uI = player.GameObject.GetComponent<DebugUI>();
+                        player.GameObject?.AddComponent<DebugUI>().Init(player);
+                        uI = player.GameObject?.GetComponent<DebugUI>()!;
                     }
 
                     switch (args[1].ToLower().Replace(" ", "_"))

@@ -6,7 +6,7 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.ItemUpdater
 {
@@ -129,7 +129,7 @@ namespace UncomplicatedCustomItems.API.ItemUpdater
                     }
                     else
                     {
-                        string s = customFlagsObj?.ToString();
+                        string s = customFlagsObj?.ToString() ?? string.Empty;
                         if (!string.IsNullOrWhiteSpace(s) && !string.Equals(s, "None", StringComparison.OrdinalIgnoreCase))
                         {
                             string[] parts = s.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries);
@@ -151,7 +151,7 @@ namespace UncomplicatedCustomItems.API.ItemUpdater
                 }
 
                 TriggerOn dieOnTriggers = 0;
-                Dictionary<string, object> dieOnSettings = null;
+                Dictionary<string, object> dieOnSettings = [];
 
                 foreach (CustomFlags flag in parsedFlags)
                 {
@@ -318,9 +318,9 @@ namespace UncomplicatedCustomItems.API.ItemUpdater
                 File.WriteAllText(yamlPath, updatedYaml);
 
                 if (customModules.Count > 0)
-                    LogManager.Info($"Successfully converted custom_flags and flag_settings to custom_modules in {yamlPath}");
+                    LogManager.Debug($"Successfully converted custom_flags and flag_settings to custom_modules in {yamlPath}");
                 else
-                    LogManager.Info($"Removed custom_flags and flag_settings from {yamlPath} (no custom_modules present; wrote empty mapping).");
+                    LogManager.Debug($"Removed custom_flags and flag_settings from {yamlPath} (no custom_modules present; wrote empty mapping).");
 
                 return true;
             }

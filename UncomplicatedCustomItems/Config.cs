@@ -18,6 +18,12 @@ namespace UncomplicatedCustomItems
         [Description("Specifies whether developer (debug) mode is enabled.")]
         public bool Debug { get; set; } = false;
 
+        [Description("If true your local admin log will also be upload when you run 'ucilogs'")]
+        public bool AllowLocalAdminLogUpload { get; set; }
+
+        [Description("If true whenever you get an error from UCI it will be automatically uploaded to our API. No identifiable information is uploaded alongside this besides whats in the log.")]
+        public bool AutomaticErrorUpload { get; set; } = true;
+
         [Description("If true the example custom items written by the plugin will be loaded")]
         public bool LoadExampleapiItems { get; set; } = true;
 
@@ -48,6 +54,11 @@ namespace UncomplicatedCustomItems
         [Description("The hint message displayed whenever you select a custom item. %name% is replaced with the item's name, and %desc% with its description.")]
         public string SelectedMessage { get; set; } = "You have picked up a %name% who's a %desc%";
 
+        [Description("DO NOT EDIT THIS. If this is edited you will loose access to any uploaded CustomItems")]
+        public string BackupCode { get; set; } = "0";
+
+        public float MaxActionsExecutionDepth { get; set; } = 50f;
+
         [Description("If false, the UCS credit tag system will not be activated. Please do not disable it, as many contributors worked on this plugin for free.")]
         public bool EnableCreditTags { get; set; } = true;
 
@@ -69,6 +80,9 @@ namespace UncomplicatedCustomItems
 
         [Description("If filled the update checker will use the provided token. You can get a token from 'https://github.com/settings/tokens'")]
         public string GithubToken { get; set; } = string.Empty;
+
+        [Description("If true the updater will update the plugin whenever a new version is released.")]
+        public bool AllowAutomaticUpdates { get; set; }
 
         [Description("If true, the plugin will check for prereleases when triggered")]
         public bool AllowPreReleases { get; set; }

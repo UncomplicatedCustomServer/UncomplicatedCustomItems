@@ -12,7 +12,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// Gets or sets the command (<see cref="string"/>) that will be executed when the <see cref="ItemEvents"/> will be fired
         /// </summary>
-        public virtual string Command { get; set; } = null;
+        public virtual string Command { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets when the delay after <see cref="ItemEvents"/> is fired. 

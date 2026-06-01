@@ -1,5 +1,7 @@
 using CommandSystem;
+#if EXILED
 using Exiled.API.Interfaces;
+#endif
 using System.Collections.Generic;
 using System.Text;
 using UncomplicatedCustomItems.API.CustomModuleAPI;

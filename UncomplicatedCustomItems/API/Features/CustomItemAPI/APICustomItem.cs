@@ -6,10 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features.Helper;
-using UncomplicatedCustomItems.Events.Arguments.ItemInspectionEvents;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UnityEngine;
-using UncomplicatedCustomItems.Events.Handlers;
 using MEC;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
@@ -33,14 +31,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             {
                 uint id = GetFirstFreeId();
                 item.Id = id;
-                CustomItems.TryAdd(item.Id, item);
-                LogManager.Info($"{nameof(APICustomItem)}: Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
             }
-            else
-            {
-                CustomItems.TryAdd(item.Id, item);
-                LogManager.Info($"{nameof(APICustomItem)}: Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
-            }
+
+            CustomItems.TryAdd(item.Id, item);
+            LogManager.Info($"{nameof(APICustomItem)}: Successfully registered APICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
         /// <summary>
@@ -79,24 +73,23 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         {
             if (!ignoreChance)
             {
-                float roll = UnityEngine.Random.Range(0f, 101f);
-                if (roll >= item.ChanceToSpawn)
+                if (UnityEngine.Random.Range(0f, 101f) >= item.ChanceToSpawn)
                     return;
             }
 
             if (item.SpawnLocations.Count() >= 1)
             {
-                foreach (var dic in item.SpawnLocations)
+                foreach (KeyValuePair<string, Vector3> kvp in item.SpawnLocations)
                 {
                     Vector3 pos;
-                    Room room = Utilities.GetRoomFromName(dic.Key);
+                    Room room = Utilities.GetRoomFromName(kvp.Key);
 
-                    if (dic.Value != Vector3.zero)
-                        pos = room.WorldPosition(dic.Value);
+                    if (kvp.Value != Vector3.zero)
+                        pos = room.WorldPosition(kvp.Value);
 
                     if (item.ReplaceExistingPickup)
                     {
-                        Pickup targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
+                        Pickup? targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
                         if (targetPickup != null)
                             new SummonedAPICustomItem(item, targetPickup);
                     }
@@ -113,7 +106,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                         Room room = rooms.RandomItem();
                         if (item.ReplaceExistingPickup && !item.ForceSameItemType)
                         {
-                            Pickup targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
+                            Pickup? targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
                             if (targetPickup != null)
                                 new SummonedAPICustomItem(item, targetPickup);
                         }
@@ -128,11 +121,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             {
                 foreach (Vector3 coords in item.Coordinates.Where(c => c != Vector3.zero))
                 {
-                    if (item.Rotation != Vector4.zero)
+                    if (item.Rotation != Vector3.zero)
                     {
                         item.Rotation.Normalize();
-                        Quaternion rotation = new(item.Rotation.x, item.Rotation.y, item.Rotation.z, item.Rotation.w);
-                        new SummonedAPICustomItem(item, coords, rotation);
+                        new SummonedAPICustomItem(item, coords, Quaternion.Euler(item.Rotation));
                     }
                     else
                         new SummonedAPICustomItem(item, coords);
@@ -191,8 +183,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             return false;
         }
 
-#nullable enable
-
         public virtual bool Check(Pickup? pickup)
         {
             if (pickup != null)
@@ -210,8 +200,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         }
 
         public virtual bool Check(Player? player) => Check(player?.CurrentItem);
-
-#nullable disable
 
         /// <summary>
         /// The unique Id of the Custom Item. Can't be less than 1
@@ -231,7 +219,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// 
         /// </summary>
-        public virtual string ExtendedDescription { get; set; }
+        public virtual string ExtendedDescription { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the badge name
@@ -271,7 +259,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// Gets or sets the rotation of the <see cref="APICustomItem"/> when first spawned as a <see cref="Pickup"/>
         /// </summary>
-        public virtual Vector4 Rotation { get; set; }
+        public virtual Vector3 Rotation { get; set; }
 
         /// <summary>
         /// Gets or sets the locations that the <see cref="APICustomItem"/> can spawn.
@@ -322,7 +310,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public virtual void RegisterEvents()
         {
-            ItemInspectionEvents.InspectingItem += new LabApi.Events.LabEventHandler<InspectingItemEventArgs>(InternalOnInspecting);
+            LabApi.Events.Handlers.PlayerEvents.InspectingItem += new LabApi.Events.LabEventHandler<PlayerInspectingItemEventArgs>(InternalOnInspecting);
             LabApi.Events.Handlers.PlayerEvents.Dying += new LabApi.Events.LabEventHandler<PlayerDyingEventArgs>(InternalOnDying);
             LabApi.Events.Handlers.PlayerEvents.DroppingItem += new LabApi.Events.LabEventHandler<PlayerDroppingItemEventArgs>(InternalOnDropping);
             LabApi.Events.Handlers.PlayerEvents.ChangingItem += new LabApi.Events.LabEventHandler<PlayerChangingItemEventArgs>(InternalOnChangingItem);
@@ -334,7 +322,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             LabApi.Events.Handlers.PlayerEvents.Cuffing += new LabApi.Events.LabEventHandler<PlayerCuffingEventArgs>(InternalOnOwnerHandcuffing);
             LabApi.Events.Handlers.PlayerEvents.ChangingRole += new LabApi.Events.LabEventHandler<PlayerChangingRoleEventArgs>(InternalOnOwnerChangingRole);
             LabApi.Events.Handlers.Scp914Events.ProcessingInventoryItem += new LabApi.Events.LabEventHandler<Scp914ProcessingInventoryItemEventArgs>(InternalOnUpgradingInventoryItem);
-            ItemInspectionEvents.InspectedItem += new LabApi.Events.LabEventHandler<InspectedItemEventArgs>(InternalOnInspected);
+            LabApi.Events.Handlers.PlayerEvents.InspectedItem += new LabApi.Events.LabEventHandler<PlayerInspectedItemEventArgs>(InternalOnInspected);
             LabApi.Events.Handlers.PlayerEvents.ThrowingItem += new LabApi.Events.LabEventHandler<PlayerThrowingItemEventArgs>(InternalOnThrowingItem);
             LabApi.Events.Handlers.PlayerEvents.ThrewItem += new LabApi.Events.LabEventHandler<PlayerThrewItemEventArgs>(InternalOnThrownItem);
             LabApi.Events.Handlers.PlayerEvents.DroppedItem += new LabApi.Events.LabEventHandler<PlayerDroppedItemEventArgs>(InternalOnDropped);
@@ -346,7 +334,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         public virtual void UnregisterEvents()
         {
-            ItemInspectionEvents.InspectingItem -= new LabApi.Events.LabEventHandler<InspectingItemEventArgs>(InternalOnInspecting);
+            LabApi.Events.Handlers.PlayerEvents.InspectingItem -= new LabApi.Events.LabEventHandler<PlayerInspectingItemEventArgs>(InternalOnInspecting);
             LabApi.Events.Handlers.PlayerEvents.Dying -= new LabApi.Events.LabEventHandler<PlayerDyingEventArgs>(InternalOnDying);
             LabApi.Events.Handlers.PlayerEvents.DroppingItem -= new LabApi.Events.LabEventHandler<PlayerDroppingItemEventArgs>(InternalOnDropping);
             LabApi.Events.Handlers.PlayerEvents.ChangingItem -= new LabApi.Events.LabEventHandler<PlayerChangingItemEventArgs>(InternalOnChangingItem);
@@ -358,7 +346,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             LabApi.Events.Handlers.PlayerEvents.Cuffing -= new LabApi.Events.LabEventHandler<PlayerCuffingEventArgs>(InternalOnOwnerHandcuffing);
             LabApi.Events.Handlers.PlayerEvents.ChangingRole -= new LabApi.Events.LabEventHandler<PlayerChangingRoleEventArgs>(InternalOnOwnerChangingRole);
             LabApi.Events.Handlers.Scp914Events.ProcessingInventoryItem -= new LabApi.Events.LabEventHandler<Scp914ProcessingInventoryItemEventArgs>(InternalOnUpgradingInventoryItem);
-            ItemInspectionEvents.InspectedItem -= new LabApi.Events.LabEventHandler<InspectedItemEventArgs>(InternalOnInspected);
+            LabApi.Events.Handlers.PlayerEvents.InspectedItem -= new LabApi.Events.LabEventHandler<PlayerInspectedItemEventArgs>(InternalOnInspected);
             LabApi.Events.Handlers.PlayerEvents.ThrowingItem -= new LabApi.Events.LabEventHandler<PlayerThrowingItemEventArgs>(InternalOnThrowingItem);
             LabApi.Events.Handlers.PlayerEvents.ThrewItem -= new LabApi.Events.LabEventHandler<PlayerThrewItemEventArgs>(InternalOnThrownItem);
             LabApi.Events.Handlers.PlayerEvents.DroppedItem -= new LabApi.Events.LabEventHandler<PlayerDroppedItemEventArgs>(InternalOnDropped);
@@ -373,6 +361,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             if (Check(ev.Player))
                 OnCuffed(ev);
         }
+
         private void InternalOnOwnerHandcuffing(PlayerCuffingEventArgs ev)
         {
             if (Check(ev.Player))
@@ -417,64 +406,69 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 if (Check(item))
                     OnEscaping(ev);
             }
-            
         }
-        private void InternalOnInspecting(InspectingItemEventArgs ev)
+
+        private void InternalOnInspecting(PlayerInspectingItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnInspecting(ev);
-
         }
-        private void InternalOnInspected(InspectedItemEventArgs ev)
+
+        private void InternalOnInspected(PlayerInspectedItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnInspected(ev);
-
         }
+
         private void InternalOnThrowingItem(PlayerThrowingItemEventArgs ev)
         {
             if (Check(ev.Pickup))
                 OnThrowingItem(ev);
-
         }
+
         private void InternalOnThrownItem(PlayerThrewItemEventArgs ev)
         {
             if (Check(ev.Pickup))
                 OnThrownItem(ev);
-
         }
+
         private void InternalOnPickingUp(PlayerPickingUpItemEventArgs ev)
         {
             if (Check(ev.Pickup))
                 OnPickingUp(ev);
-
         }
+
         private void InternalOnPickup(PlayerPickedUpItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnPickup(ev);
         }
+
         private void InternalOnDropping(PlayerDroppingItemEventArgs ev)
         {
             if (Check(ev.Item))
                 OnDropping(ev);
-
         }
+
         private void InternalOnDropped(PlayerDroppedItemEventArgs ev)
         {
             if (Check(ev.Pickup))
                 OnDropped(ev);
-
         }
+
         private void InternalOnChangedItem(PlayerChangedItemEventArgs ev)
         {
-            OnChangedItem(ev);
+            if ((ev.OldItem != null && Check(ev.OldItem)) || (ev.NewItem != null && Check(ev.NewItem)))
+                OnChangedItem(ev);
         }
+
         private void InternalOnChangingItem(PlayerChangingItemEventArgs ev)
         {
-            if (Check(ev.NewItem))
+
+            if ((ev.NewItem != null && Check(ev.NewItem)) || (ev.OldItem != null && Check(ev.OldItem)))
                 OnChangingItem(ev);
         }
+
         private void InternalOnDying(PlayerDyingEventArgs ev) 
         {
             foreach (Item item in ev.Player.Items.ToList())
@@ -494,12 +488,14 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private void InternalOnHurt(PlayerHurtEventArgs ev)
         {
-            OnHurt(ev);
+            if (SummonedAPICustomItem.PlayerCache.ContainsKey(ev.Player) || (ev.Attacker != null && SummonedAPICustomItem.PlayerCache.ContainsKey(ev.Attacker)))
+                OnHurt(ev);
         }
 
         private void InternalOnHurting(PlayerHurtingEventArgs ev)
         {
-            OnHurting(ev);
+            if (SummonedAPICustomItem.PlayerCache.ContainsKey(ev.Player) || (ev.Attacker != null && SummonedAPICustomItem.PlayerCache.ContainsKey(ev.Attacker)))
+                OnHurting(ev);
         }
 
         protected virtual void OnHurt(PlayerHurtEventArgs ev) { }
@@ -510,8 +506,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         protected virtual void OnCuffing(PlayerCuffingEventArgs ev) { }
         protected virtual void OnUpgradingItem(Scp914ProcessingInventoryItemEventArgs ev) { }
         protected virtual void OnUpgradingPickup(Scp914ProcessingPickupEventArgs ev) { }
-        protected virtual void OnInspecting(InspectingItemEventArgs ev) { }
-        protected virtual void OnInspected(InspectedItemEventArgs ev) { }
+        protected virtual void OnInspecting(PlayerInspectingItemEventArgs ev) { }
+        protected virtual void OnInspected(PlayerInspectedItemEventArgs ev) { }
         protected virtual void OnThrowingItem(PlayerThrowingItemEventArgs ev) { }
         protected virtual void OnThrownItem(PlayerThrewItemEventArgs ev) { }
         protected virtual void OnPickingUp(PlayerPickingUpItemEventArgs ev) { }

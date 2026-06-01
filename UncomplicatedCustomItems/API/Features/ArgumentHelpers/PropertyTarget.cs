@@ -5,7 +5,7 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 {
     internal class PropertyTarget
     {
-        public object Target { get; set; }
+        public object? Target { get; set; }
         public PropertyInfo? PropertyInfo { get; set; }
         public FieldInfo? FieldInfo { get; set; }
         public string MemberName { get; set; } = string.Empty;
@@ -14,8 +14,10 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
         {
             if (PropertyInfo != null)
                 return PropertyInfo.GetValue(Target);
+
             if (FieldInfo != null)
                 return FieldInfo.GetValue(Target);
+
             return null;
         }
 
@@ -23,16 +25,46 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
         {
             if (PropertyInfo != null)
             {
-                object? convertedValue = Convert.ChangeType(value, PropertyInfo.PropertyType);
-                PropertyInfo.SetValue(Target, convertedValue);
+                PropertyInfo.SetValue(Target, SafeConvert(value, PropertyInfo.PropertyType));
+                return;
             }
-            else if (FieldInfo != null)
+
+            FieldInfo?.SetValue(Target, SafeConvert(value, FieldInfo.FieldType));
+        }
+
+        private static object? SafeConvert(object? value, Type targetType)
+        {
+            if (value == null)
+                return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
+
+            if (targetType.IsAssignableFrom(value.GetType()))
+                return value;
+
+            if (value is string s && targetType.IsEnum)
+                return Enum.Parse(targetType, s, ignoreCase: true);
+
+            if (value is string str)
             {
-                object? convertedValue = Convert.ChangeType(value, FieldInfo.FieldType);
-                FieldInfo.SetValue(Target, convertedValue);
+                try
+                {
+                    return Convert.ChangeType(str, targetType);
+                }
+                catch
+                {
+                    return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
+                }
+            }
+
+            try
+            {
+                return Convert.ChangeType(value, targetType);
+            }
+            catch
+            {
+                return value;
             }
         }
-        
+
         public Type? GetMemberType()
         {
             return PropertyInfo?.PropertyType ?? FieldInfo?.FieldType;

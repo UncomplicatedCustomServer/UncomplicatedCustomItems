@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -25,6 +25,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
+            if (CustomItem == null)
+                return;
+
             foreach (Dictionary<object, object> args in Arguments)
             {
                 if (!args.TryGetValue<bool>("PercentageBased", out var percentageBased))
@@ -63,13 +66,13 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     if (PercentageBased && ev.DamageHandler is AttackerDamageHandler handler)
                     {
                         float healAmount = handler.Damage * (LifeStealPercentage / 100f);
-                        ev.Attacker.Heal(healAmount);
-                        LogManager.Debug($"Healed {ev.Attacker.Nickname} for {healAmount} health based on {LifeStealPercentage}% of damage dealt.");
+                        ev.Attacker?.Heal(healAmount);
+                        LogManager.Debug($"Healed {ev.Attacker?.Nickname} for {healAmount} health based on {LifeStealPercentage}% of damage dealt.");
                     }
                     else
                     {
-                        ev.Attacker.Heal(LifeStealAmount);
-                        LogManager.Debug($"Healed {ev.Attacker.Nickname} for {LifeStealAmount} health.");
+                        ev.Attacker?.Heal(LifeStealAmount);
+                        LogManager.Debug($"Healed {ev.Attacker?.Nickname} for {LifeStealAmount} health.");
                     }
                 }
             }

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.Extensions
 {
@@ -11,7 +11,7 @@ namespace UncomplicatedCustomItems.API.Extensions
     {
         public static bool TryGetRaw(this Dictionary<object, object> dict, string name, out object value)
         {
-            value = null;
+            value = null!;
             if (dict == null || name == null)
                 return false;
 
@@ -51,6 +51,20 @@ namespace UncomplicatedCustomItems.API.Extensions
             {
                 if (raw is string)
                 {
+                    if (targetType.IsEnum)
+                    {
+                        try
+                        {
+                            result = (T)Enum.Parse(targetType, rawStr.Replace(" ", ""), ignoreCase: true);
+                            return true;
+                        }
+                        catch (ArgumentException)
+                        {
+                            LogManager.Warn($"Value for '{name}' is not a valid {targetType.Name} enum: '{rawStr}'");
+                            return false;
+                        }
+                    }
+
                     switch (typeCode)
                     {
                         case TypeCode.UInt16:
@@ -266,7 +280,7 @@ namespace UncomplicatedCustomItems.API.Extensions
                 }
             }
 
-            key = default;
+            key = default!;
             return false;
         }
     }

@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         public string Name => GetRoleFileElement(Content, "name:");
 
-        internal ErrorCustomItem(string path, string[] content, Exception exception, string message = null)
+        internal ErrorCustomItem(string path, string[] content, Exception exception, string? message = null)
         {
             Path = path;
             Content = content;
