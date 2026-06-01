@@ -11,27 +11,32 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// Gets or sets the amount of damage dealt with a Jailbird melee hit.
         /// </summary>
-        public float MeleeDamage { get; set; } = 3f;
+        public virtual float MeleeDamage { get; set; } = 3f;
 
         /// <summary>
         /// Gets or sets the amount of damage dealt with a Jailbird charge hit.
         /// </summary>
-        public float ChargeDamage { get; set; } = 3f;
+        public virtual float ChargeDamage { get; set; } = 3f;
 
         /// <summary>
         /// Gets or sets the amount of time in seconds that the <see cref="CustomPlayerEffects.Flashed"/> effect will be applied on being hit.
         /// </summary>
-        public float FlashDuration { get; set; } = 3f;
+        public virtual float FlashDuration { get; set; } = 3f;
 
         /// <summary>
         /// Gets or sets the radius of the Jailbird's hit register.
         /// </summary>
-        public float Radius { get; set; } = 3f;
+        public virtual float Radius { get; set; } = 3f;
 
         /// <summary>
         /// Gets or sets the current <see cref="JailbirdWearState"/> of the <see cref="JailbirdItem"/>
         /// </summary>
-        public JailbirdWearState WearState { get; set; }
+        public virtual JailbirdWearState WearState { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the <see cref="JailbirdWearState"/> is allowed to change.
+        /// </summary>
+        public virtual bool LockWearState { get; set; }
 
         public override void RegisterEvents()
         {

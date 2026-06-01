@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UnityEngine.Networking;
 
 namespace UncomplicatedCustomItems.API.Features.Networking
@@ -65,7 +65,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             base.OnRequestCompleted(request);
         }
 
-        public override void SendRequest(Action<UnityWebRequest> onComplete = null!)
+        public override void SendRequest(Action<UnityWebRequest>? onComplete = null!)
         {
             if (Settings.Cancel)
                 return;

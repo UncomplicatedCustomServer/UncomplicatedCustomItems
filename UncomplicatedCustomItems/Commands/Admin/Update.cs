@@ -1,6 +1,6 @@
 ﻿using CommandSystem;
 using System;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using MEC;
 
 namespace UncomplicatedCustomItems.Commands.Admin

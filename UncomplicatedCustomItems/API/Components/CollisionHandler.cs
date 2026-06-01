@@ -11,7 +11,7 @@
 
 using System;
 using InventorySystem.Items.ThrowableProjectiles;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Components

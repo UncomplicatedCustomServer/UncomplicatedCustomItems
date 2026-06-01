@@ -12,7 +12,7 @@ using UncomplicatedCustomItems.API.Attributes;
 using MEC;
 using System.Threading;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     /// <summary>
     /// Manages the action system for <see cref="CustomItem"/>s
@@ -129,31 +129,40 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             return _commonTypeMap.TryGetValue(name.Trim(), out type);
         }
 
-        internal static string ReplacePlaceholders(string action, EventArgs args)
+        internal static string ReplacePlaceholders(string action, EventArgs args, ICustomItem? item = null)
         {
-            if (action.IndexOf('{') == -1) 
+            if (action.IndexOf('{') == -1)
                 return action;
-            
+
             StringBuilder sb = new(action.Length + 32);
             int lastIndex = 0;
-            int start;
-            
-            while ((start = action.IndexOf('{', lastIndex)) != -1)
+
+            while (true)
             {
+                int start = action.IndexOf('{', lastIndex);
+                if (start == -1) break;
                 int end = action.IndexOf('}', start);
-                if (end == -1) 
-                    break;
+                if (end == -1) break;
 
                 sb.Append(action, lastIndex, start - lastIndex);
+
                 string placeholder = action.Substring(start + 1, end - start - 1);
-                string value = ResolvePlaceholder(placeholder, args);
-                sb.Append(value);
+
+                if (item != null && _variables.TryGetValue(item, out var dict) && dict.TryGetValue(placeholder, out var varVal))
+                {
+                    sb.Append(varVal?.ToString() ?? "null");
+                }
+                else
+                {
+                    sb.Append(ResolvePlaceholder(placeholder, args));
+                }
+
                 lastIndex = end + 1;
             }
-            
+
             if (lastIndex < action.Length)
                 sb.Append(action, lastIndex, action.Length - lastIndex);
-            
+
             return sb.ToString();
         }
 
@@ -1160,8 +1169,18 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static object? ResolveTargetObject(string objectPath, ICustomItem? item, EventArgs eventArgs)
         {
-            if (item == null)
-                return null;
+            string firstToken = objectPath.Split('.')[0].Trim();
+
+            if (item != null && _variables.TryGetValue(item, out var varDict))
+            {
+                if (varDict.TryGetValue(firstToken, out object? varValue))
+                {
+                    if (objectPath.Length == firstToken.Length)
+                        return varValue;
+
+                    return ResolvePlaceholderToObject(objectPath.Substring(firstToken.Length + 1), varValue);
+                }
+            }
 
             string originalPath = objectPath;
             LogManager.Debug($"Attempting to resolve: {originalPath}");
@@ -1169,11 +1188,9 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             LogManager.Debug($"EventArgs type: {eventArgs.GetType().Name}");
             LogManager.Debug($"EventArgs properties: {string.Join(", ", eventArgs.GetType().GetProperties().Select(p => p.Name))}");
 
-            var availableProperties = GetEventArgsProperties(eventArgs);
+            Dictionary<string, PropertyInfo> availableProperties = GetEventArgsProperties(eventArgs);
             LogManager.Debug($"Available EventArgs properties: {string.Join(", ", availableProperties.Keys)}");
 
-            string firstToken = originalPath.Split('.')[0];
-            
             if (availableProperties.ContainsKey(firstToken) && originalPath == firstToken)
             {
                 try
@@ -1510,9 +1527,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     return null;
 
                 string part = parts[i];
-                current = GetMemberValueCached(current, part);
-                if (current == null)
-                    throw new ArgumentException(LogAndReturnWarn($"Property or field not found: {part}"));
+                current = GetMemberValueCached(current, part) ?? throw new ArgumentException(LogAndReturnWarn($"Property or field not found: {part}"));
             }
 
             return current;
@@ -1781,11 +1796,14 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             for (int i = openIndex; i < s.Length; i++)
             {
                 if (s[i] == '(')
+                {
                     depth++;
+                }
                 else if (s[i] == ')')
                 {
                     depth--;
-                    if (depth == 0) return i;
+                    if (depth == 0)
+                        return i;
                 }
             }
 
@@ -1832,9 +1850,7 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
                 converted[i] = (value, expected) switch
                 {
-                    (null, _) => ctorParams[i].HasDefaultValue
-                        ? ctorParams[i].DefaultValue
-                        : (expected.IsValueType ? Activator.CreateInstance(expected) : null),
+                    (null, _) => ctorParams[i].HasDefaultValue ? ctorParams[i].DefaultValue : (expected.IsValueType ? Activator.CreateInstance(expected) : null),
 
                     var (v, e) when e.IsAssignableFrom(v.GetType()) => v,
 
@@ -1889,22 +1905,29 @@ namespace UncomplicatedCustomItems.API.Features.Helper
 
         private static bool TryHandleVariable(ICustomItem? item, string action, EventArgs eventArgs)
         {
-            if (!action.StartsWith("let ", StringComparison.OrdinalIgnoreCase))
+            if (!action.StartsWith("var", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            string[] parts = action.Substring(4).Split('=', (char)2);
+            if (item == null)
+            {
+                LogManager.Warn("'var' variable used outside of a CustomItem context. ignored.");
+                return true;
+            }
+
+            string[] parts = action.Substring(4).Split(['='], 2);
             if (parts.Length != 2)
                 return true;
 
             string varName = parts[0].Trim();
             string expr = parts[1].Trim();
 
-            object? value = ResolveTargetObject(expr, item, eventArgs) ?? ReplacePlaceholders(expr, eventArgs);
+            object? value = ResolveTargetObject(expr, item, eventArgs) ?? (object)ReplacePlaceholders(expr, eventArgs, item);
 
-            if (!_variables.TryGetValue(item!, out var dict))
-                dict = _variables[item!] = [];
+            if (!_variables.TryGetValue(item, out var dict))
+                dict = _variables[item] = [];
 
             dict[varName] = value;
+            LogManager.Debug($"Variable '{varName}' set to: {value?.ToString() ?? "null"}");
             return true;
         }
 

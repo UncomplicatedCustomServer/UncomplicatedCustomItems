@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using LabApi.Features;
 using LabApi.Features.Wrappers;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using System;
 using System.Linq;
 using System.IO;

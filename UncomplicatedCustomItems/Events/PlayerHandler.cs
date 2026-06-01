@@ -25,7 +25,7 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Interfaces.SpecificData;
@@ -193,11 +193,30 @@ namespace UncomplicatedCustomItems.Events
                         if (item.CustomItem.CustomData is JailbirdData jailbird && !jailbird.AllowWearStateChanges && item.CustomItem.CustomItemType is CustomItemType.Jailbird)
                         {
                             JailbirdDeteriorationTracker.ReceivedStates[ev.JailbirdItem.Serial] = jailbird.WearState;
-                            using (new AutosyncRpc(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer))
-                            {
-                                writer.WriteByte(0);
-                                writer.WriteByte((byte)jailbird.WearState);
-                            }
+                            AutosyncRpc sync = new(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer);
+                            writer.WriteByte(0);
+                            writer.WriteByte((byte)jailbird.WearState);
+                            sync.Send();
+                            sync.Dispose();
+                        }
+
+                        break;
+                }
+            }
+
+            if (SummonedAPICustomItem.TryGet(ev.JailbirdItem.Serial, out var api) && api != null)
+            {
+                switch (ev.Message)
+                {
+                    case JailbirdMessageType.UpdateState:
+                        if (api.CustomItem is CustomJailbird jailbird && jailbird.LockWearState)
+                        {
+                            JailbirdDeteriorationTracker.ReceivedStates[ev.JailbirdItem.Serial] = jailbird.WearState;
+                            AutosyncRpc sync = new(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer);
+                            writer.WriteByte(0);
+                            writer.WriteByte((byte)jailbird.WearState);
+                            sync.Send();
+                            sync.Dispose();
                         }
 
                         break;
@@ -445,7 +464,7 @@ namespace UncomplicatedCustomItems.Events
                             ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
                         }
                     }
-                    else if (candies.Count > 0 && item?.CustomData is CandyData data && UnityEngine.Random.Range(0f, 100f) >= data.Chance && bag.Candies[idx] == data.CandyType)
+                    else if (candies.Count > 0 && item?.CustomData is CandyData data && UnityEngine.Random.Range(0f, 100f) < data.Chance && bag.Candies[idx] == data.CandyType)
                     {
                         if (!data.ApplyEffects)
                         {
@@ -572,7 +591,7 @@ namespace UncomplicatedCustomItems.Events
                         break;
                 }
 
-                if (ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207 && item1.CustomItem is CustomSCP207 customSCP207 && !customSCP207.RemoveItemAfterUse)
+                if ((ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207) && item1.CustomItem is CustomSCP207 customSCP207 && !customSCP207.RemoveItemAfterUse)
                     new SummonedAPICustomItem(item1.CustomItem!, ev.Player);
 
                 if (ev.UsableItem.Type == ItemType.SCP1853 && item1.CustomItem is CustomSCP1853 scp1853Data && !scp1853Data.RemoveItemAfterUse)
@@ -1341,7 +1360,7 @@ namespace UncomplicatedCustomItems.Events
                         ev.IsAllowed = false;
                         break;
 
-                    case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data && scp1853Data.Apply1853Effect:
+                    case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data && !scp1853Data.Apply1853Effect:
                         LogManager.Debug("Removing SCP-1853 effect.");
                         ev.Player.DisableEffect(ev.Effect);
                         ev.IsAllowed = false;

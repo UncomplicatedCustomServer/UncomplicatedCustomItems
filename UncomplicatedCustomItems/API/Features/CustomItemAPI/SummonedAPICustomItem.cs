@@ -14,7 +14,7 @@ using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using Mirror;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.Networking;
 using UnityEngine;
 using Armor = LabApi.Features.Wrappers.BodyArmorItem;
@@ -425,11 +425,11 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 jailbirditem.Base.MeleeDamage = data.MeleeDamage;
                 JailbirdDeteriorationTracker.ReceivedStates[jailbirditem.Serial] = data.WearState;
                 JailbirdDeteriorationTracker._anyReceived = true;
-                using (new AutosyncRpc(jailbirditem.Base.ItemId, out NetworkWriter writer))
-                {
-                    writer.WriteByte(0);
-                    writer.WriteByte((byte)data.WearState);
-                }
+                AutosyncRpc sync = new(jailbirditem.Base.ItemId, out NetworkWriter writer);
+                writer.WriteByte(0);
+                writer.WriteByte((byte)data.WearState);
+                sync.Send();
+                sync.Dispose();
             }
             else if (jailbird is LabApi.Features.Wrappers.JailbirdPickup jailbirdpickup)
             {

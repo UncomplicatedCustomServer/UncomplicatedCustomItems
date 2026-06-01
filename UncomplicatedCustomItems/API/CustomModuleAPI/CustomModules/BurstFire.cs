@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using System;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using LabApi.Loader.Features.Yaml;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine.Networking;
 using YamlDotNet.Core;
@@ -11,12 +11,6 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 {
     public class BackupDownloadRequest : APIRequest
     {
-#if EXILED
-        private static string BackupDir => Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups");
-#else
-        private static string BackupDir => Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups");
-#endif
-
         public override string Name => nameof(BackupDownloadRequest);
 
         public override string Endpoint => "backup/download";
@@ -31,7 +25,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 
         public override void OnRequestCompleted(UnityWebRequest request)
         {
-            string FileDirectory = Path.Combine(BackupDir, $"BackupDownload_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}");
+            string FileDirectory = Path.Combine(Path.Combine(Plugin.Instance.FileConfig.Dir, "Backups"), $"BackupDownload_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}");
             if (!Directory.Exists(FileDirectory))
                 Directory.CreateDirectory(FileDirectory);
 

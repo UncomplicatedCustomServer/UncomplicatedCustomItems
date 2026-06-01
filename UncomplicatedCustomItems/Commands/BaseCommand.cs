@@ -8,7 +8,7 @@ using System.Linq;
 using UncomplicatedCustomItems.Commands.Admin;
 using UncomplicatedCustomItems.API.Interfaces;
 using LabApi.Features.Permissions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using Random = UncomplicatedCustomItems.Commands.Admin.Random;
 
 namespace UncomplicatedCustomItems.Commands

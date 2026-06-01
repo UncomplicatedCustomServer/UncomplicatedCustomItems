@@ -14,8 +14,9 @@ using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.API.Enums;
 using UnityEngine;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
+using UncomplicatedCustomItems.Integrations;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     public class Arguments
     {
@@ -331,7 +332,6 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                     player.IsDisarmed = false;
             });
 
-            /*
             ArgumentManager.Register("PlayAudio", (item, args) =>
             {
                 LogManager.Debug($"{nameof(Arguments)}: PlayAudio triggered.");
@@ -340,12 +340,12 @@ namespace UncomplicatedCustomItems.API.Features.Helper
                 Player? player = Player.Get(playerId);
                 if (player == null) return;
                 if (!float.TryParse(args[1], out float volume)) return;
-                if (!float.TryParse(args[2], out float audibledistance)) return;
-                string path = string.Join(" ", args.Skip(3));
+                if (!float.TryParse(args[2], out float max)) return;
+                if (!float.TryParse(args[3], out float min)) return;
+                string path = string.Join(" ", args.Skip(4));
 
-                AudioApi.PlayAudio(path, volume, player.Position, audibledistance);
+                AudioIntegration.Play(path, max, min, volume, player.Position);
             });
-            */
 
             ArgumentManager.Register("Log", (item, args) =>
             {

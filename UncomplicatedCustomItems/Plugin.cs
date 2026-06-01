@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
 using UncomplicatedCustomItems.Integrations;

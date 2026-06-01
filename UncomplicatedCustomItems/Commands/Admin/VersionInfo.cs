@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using CommandSystem;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin

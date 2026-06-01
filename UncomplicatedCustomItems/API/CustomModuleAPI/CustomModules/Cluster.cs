@@ -6,7 +6,7 @@ using LabApi.Features.Wrappers;
 using MEC;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Events;
 using UnityEngine;
 

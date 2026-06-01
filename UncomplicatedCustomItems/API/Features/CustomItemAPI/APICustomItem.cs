@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 using UnityEngine;
 using MEC;
 
@@ -73,14 +73,13 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         {
             if (!ignoreChance)
             {
-                float roll = UnityEngine.Random.Range(0f, 101f);
-                if (roll >= item.ChanceToSpawn)
+                if (UnityEngine.Random.Range(0f, 101f) >= item.ChanceToSpawn)
                     return;
             }
 
             if (item.SpawnLocations.Count() >= 1)
             {
-                foreach (var kvp in item.SpawnLocations)
+                foreach (KeyValuePair<string, Vector3> kvp in item.SpawnLocations)
                 {
                     Vector3 pos;
                     Room room = Utilities.GetRoomFromName(kvp.Key);
@@ -183,7 +182,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
             return false;
         }
-
 
         public virtual bool Check(Pickup? pickup)
         {

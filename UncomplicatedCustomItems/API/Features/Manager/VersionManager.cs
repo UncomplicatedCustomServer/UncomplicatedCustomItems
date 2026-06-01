@@ -5,7 +5,11 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using UncomplicatedCustomItems.API.Features.Networking;
 
-namespace UncomplicatedCustomItems.API.Features.Helper
+#if EXILED
+using Exiled.API.Features;
+#endif
+
+namespace UncomplicatedCustomItems.API.Features.Manager
 {
     internal static class VersionManager
     {
@@ -78,11 +82,15 @@ namespace UncomplicatedCustomItems.API.Features.Helper
             });
         }
 
-        public static string HashFile(string path)
+        public static string HashPlugin()
         {
+#if EXILED
+            string path = Path.Combine(Paths.Plugins, "UncomplicatedCustomItems-Exiled.dll");
+#else
+            string path = Plugin.Instance.FilePath;
+#endif
             using FileStream file = new(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            byte[] bytes = SHA256.Create().ComputeHash(file);
-            return BitConverter.ToString(bytes).Replace("-", string.Empty);
+            return BitConverter.ToString(SHA256.Create().ComputeHash(file)).Replace("-", string.Empty);
         }
     }
 }

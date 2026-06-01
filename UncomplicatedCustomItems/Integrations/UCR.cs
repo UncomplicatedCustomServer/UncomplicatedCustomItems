@@ -8,7 +8,7 @@ using Exiled.Loader;
 using LabApi.Features.Wrappers;
 using LabApi.Loader;
 #endif
-using UncomplicatedCustomItems.API.Features.Helper;
+using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.Integrations
 {

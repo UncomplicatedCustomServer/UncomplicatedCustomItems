@@ -31,11 +31,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
                 if (!args.IsAllowed)
                 {
                     JailbirdDeteriorationTracker.ReceivedStates[__instance._jailbird.ItemSerial] = previousState;
-                    using (new AutosyncRpc(__instance._jailbird.ItemId, out NetworkWriter writer))
-                    {
-                        writer.WriteByte(0);
-                        writer.WriteByte((byte)previousState);
-                    }
+                    AutosyncRpc sync = new(__instance._jailbird.ItemId, out NetworkWriter writer);
+                    writer.WriteByte(0);
+                    writer.WriteByte((byte)args.NewWearState);
+                    sync.Send();
+                    sync.Dispose();
 
                     return false;
                 }
@@ -43,11 +43,11 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
                 if (args.NewWearState != newState)
                 {
                     JailbirdDeteriorationTracker.ReceivedStates[__instance._jailbird.ItemSerial] = args.NewWearState;
-                    using (new AutosyncRpc(__instance._jailbird.ItemId, out NetworkWriter writer))
-                    {
-                        writer.WriteByte(0);
-                        writer.WriteByte((byte)args.NewWearState);
-                    }
+                    AutosyncRpc sync = new(__instance._jailbird.ItemId, out NetworkWriter writer);
+                    writer.WriteByte(0);
+                    writer.WriteByte((byte)args.NewWearState);
+                    sync.Send();
+                    sync.Dispose();
 
                     return false;
                 }
