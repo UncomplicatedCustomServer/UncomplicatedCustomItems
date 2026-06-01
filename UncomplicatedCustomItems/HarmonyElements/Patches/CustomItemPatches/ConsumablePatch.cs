@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using HarmonyLib;
+﻿using HarmonyLib;
 using InventorySystem.Items.Usables;
 using LabApi.Features.Wrappers;
 using MEC;
+using PlayerStatsSystem;
+using System;
+using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
@@ -40,7 +41,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         return false;
 
                     case CustomAdrenaline adrenaline:
-                        Player.Get(__instance.Owner).CreateAhpProcess(adrenaline.Amount, limit: 1000f, decay: adrenaline.Decay, efficacy: adrenaline.Efficacy, sustain: adrenaline.Sustain, adrenaline.Persistant);
+                        Player.Get(__instance.Owner).ReferenceHub.playerStats.GetModule<AhpStat>().ServerAddProcess(adrenaline.Amount, limit: 1000f, decay: adrenaline.Decay, efficacy: adrenaline.Efficacy, sustain: adrenaline.Sustain, adrenaline.Persistant);
                         return false;
                 }
             }

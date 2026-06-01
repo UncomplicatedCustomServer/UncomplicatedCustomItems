@@ -13,6 +13,7 @@ using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
 using Mirror;
+using PlayerStatsSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1041,7 +1042,7 @@ namespace UncomplicatedCustomItems.API.Features
                     
                     case CustomItemType.Adrenaline:
                         IAdrenalineData? adrenalineData = CustomItem.CustomData as IAdrenalineData;
-                        Owner.CreateAhpProcess(adrenalineData?.Amount ?? 0, limit: 1000f, decay: adrenalineData?.Decay ?? 0, efficacy: adrenalineData?.Efficacy ?? 0, sustain: adrenalineData?.Sustain ?? 0f, adrenalineData?.Persistant ?? false);
+                        Owner.ReferenceHub.playerStats.GetModule<AhpStat>().ServerAddProcess(adrenalineData?.Amount ?? 0, limit: 1000f, decay: adrenalineData?.Decay ?? 0, efficacy: adrenalineData?.Efficacy ?? 0, sustain: adrenalineData?.Sustain ?? 0f, adrenalineData?.Persistant ?? false);
                         break;
                     
                     default:
