@@ -70,6 +70,28 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
+        public static void Play(SummonedCustomItem customItem)
+        {
+            if (!FoundAny)
+            {
+                LogManager.Warn("No supported audio plugin found! Install either AudioPlayerApi or SecretLabNAudio to use the custom audio custom flag.\nIf you need support join our Discord server: https://discord.gg/5StRGu8EJV");
+                return;
+            }
+
+            if (FoundSLNAudio)
+            {
+                PlayAudioSLN(customItem);
+                return;
+            }
+
+            if (FoundAudioAPI)
+            {
+                PlayAudioPlayerAPI(customItem);
+                return;
+            }
+        }
+
+        [Obsolete]
         public static void Play(SummonedCustomItem customItem, Vector3 coords)
         {
             if (!FoundAny)
@@ -184,9 +206,108 @@ namespace UncomplicatedCustomItems.Integrations
                 LogManager.Warn($"Failed to load audio file '{Path.GetFileName(path)}'");
         }
 
+        private static void PlayAudioPlayerAPI(SummonedCustomItem customItem)
+        {
+            if (customItem.Owner == null)
+            {
+                return;
+            }
+
+            if (!customItem.TryGetModule<CustomAudio>(out CustomAudio? data) || data == null)
+            {
+                LogManager.Warn($"CustomAudio Module not found on {customItem.CustomItem.Name}!");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(data.AudioPath))
+            {
+                LogManager.Warn("Audio path is null.");
+                return;
+            }
+
+            if (!File.Exists(data.AudioPath))
+            {
+                LogManager.Warn($"Audio file not found: '{data.AudioPath}'.");
+                return;
+            }
+
+            string ext = Path.GetExtension(data.AudioPath).ToLowerInvariant();
+            if (ext != ".ogg")
+            {
+                LogManager.Warn($"Unsupported format '{ext}'. AudioPlayerApi requires .ogg.");
+                return;
+            }
+
+            if (APILoadClip == null || APICreateOrGet == null || APIAddSpeaker == null || APIAddClip == null)
+            {
+                LogManager.Warn("AudioPlayerApi method resolution failed. see previous debug output.");
+                return;
+            }
+
+            string clipId = $"sound_{Guid.NewGuid()}";
+
+            Type speakerType = APIAddSpeaker.ReturnType;
+            MemberInfo? transformMember = (MemberInfo?)speakerType.GetProperty("Transform", BindingFlags.Public | BindingFlags.Instance) ?? speakerType.GetField("Transform", BindingFlags.Public | BindingFlags.Instance);
+            if (transformMember == null)
+            {
+                LogManager.Warn($"Could not find Transform member on {speakerType.Name}.");
+                return;
+            }
+
+            ParameterExpression playerParam = Expression.Parameter(APIAudioPlayer, "p");
+            MethodCallExpression callAddSpeaker = Expression.Call(
+                playerParam,
+                APIAddSpeaker,
+                Expression.Constant("Main"),
+                Expression.Constant(Vector3.zero),
+                Expression.Constant(1f),
+                Expression.Constant(true),
+                Expression.Constant(data.MinAudibleDistance),
+                Expression.Constant(data.MaxAudibleDistance)
+            );
+
+            ParameterExpression speakerVar = Expression.Variable(speakerType, "speaker");
+            BinaryExpression assignSpeaker = Expression.Assign(speakerVar, callAddSpeaker);
+            MemberExpression speakerTransform = Expression.MakeMemberAccess(speakerVar, transformMember);
+            MemberExpression parentProp = Expression.Property(speakerTransform, "parent");
+            BinaryExpression assignParent = Expression.Assign(
+                parentProp,
+                Expression.Constant(customItem.Owner.ReferenceHub.transform, typeof(Transform))
+            );
+
+            BlockExpression body = Expression.Block([speakerVar], assignSpeaker, assignParent);
+
+            object? player = APICreateOrGet.Invoke(null, [
+                $"UCI_Audio_{Guid.NewGuid()}",
+                null,
+                null,
+                true,
+                true,
+                null,
+                (byte)255,
+                Expression.Lambda(typeof(Action<>).MakeGenericType(APIAudioPlayer), body, playerParam).Compile(),
+                null
+            ]);
+
+            if (player == null)
+            {
+                LogManager.Warn("Failed to create AudioPlayer!");
+                return;
+            }
+
+            APIAddClip.Invoke(player, [clipId, Clamp(data.Volume, 0f, 100f), false, true]);
+            if ((bool)(APILoadClip.Invoke(null, [data.AudioPath, clipId]) ?? false))
+            {
+                LogManager.Debug($"Playing '{Path.GetFileName(data.AudioPath)}' via AudioPlayerApi at {customItem.Owner.Position}");
+            }
+            else
+                LogManager.Warn($"Failed to load audio file '{Path.GetFileName(data.AudioPath)}'");
+        }
+
+        [Obsolete]
         private static void PlayAudioPlayerAPI(SummonedCustomItem customItem, Vector3 coords)
         {
-            if (!customItem.TryGetModule<CustomAudio>(out var data) || data == null)
+            if (!customItem.TryGetModule<CustomAudio>(out CustomAudio? data) || data == null)
             {
                 LogManager.Warn($"CustomAudio Module not found on {customItem.CustomItem.Name}!");
                 return;
@@ -296,6 +417,93 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
+        public static void PlayAudioSLN(SummonedCustomItem customItem)
+        {
+            try
+            {
+                if (customItem.Owner == null)
+                {
+                    return;
+                }
+
+                if (!customItem.TryGetModule<CustomAudio>(out CustomAudio? data) || data == null)
+                {
+                    LogManager.Warn($"CustomAudio Module not found on {customItem.CustomItem.Name}!");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(data.AudioPath))
+                {
+                    LogManager.Warn("Audio path is null. please fill out the config properly.");
+                    return;
+                }
+
+                if (!File.Exists(data.AudioPath))
+                {
+                    LogManager.Warn($"Audio file not found: '{data.AudioPath}'. check your config path.");
+                    return;
+                }
+
+                string ext = Path.GetExtension(data.AudioPath).ToLowerInvariant();
+                if (ext != ".ogg")
+                {
+                    LogManager.Warn($"Unsupported audio format '{ext}' for file '{Path.GetFileName(data.AudioPath)}'. SecretLabNAudio only supports .ogg files. ");
+                    return;
+                }
+
+                if (!FoundSLNAudio || SLNCreate == null || SLNUseFile == null || SLNSpeakerSettings == null)
+                {
+                    LogManager.Warn("SecretLabNAudio is not loaded or required types/methods were not found.");
+                    LogManager.Debug($"{FoundSLNAudio} - {SLNCreate != null} - {SLNUseFile != null} - {SLNSpeakerSettings != null}");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(data.AudioPath))
+                {
+                    LogManager.Warn($"Audio path is null please fill out the config properly.");
+                    return;
+                }
+
+                PropertyInfo? defaultProp = SLNSpeakerSettings.GetProperty("Default", BindingFlags.Public | BindingFlags.Static);
+                object settings = defaultProp?.GetValue(null) ?? Activator.CreateInstance(SLNSpeakerSettings)!;
+
+                void SetProp(string name, object value)
+                {
+                    if (SLNSpeakerSettings == null)
+                        return;
+
+                    PropertyInfo prop = SLNSpeakerSettings.GetProperty(name);
+                    MethodInfo? setter = prop?.GetSetMethod(nonPublic: true);
+                    if (setter != null)
+                    {
+                        object boxed = settings;
+                        setter.Invoke(boxed, [value]);
+                        settings = boxed;
+                    }
+                }
+
+                SetProp("IsSpatial", true);
+                SetProp("Volume", Clamp(data.Volume, 0f, 100f));
+                SetProp("MinDistance", data.MinAudibleDistance);
+                SetProp("MaxDistance", data.MaxAudibleDistance);
+
+                object? player = SLNCreate.Invoke(null, [(byte)1, settings, customItem.Owner.ReferenceHub.transform, Vector3.zero, true]);
+                if (player == null)
+                {
+                    LogManager.Warn("Failed to create SecretLabNAudio AudioPlayer!");
+                    return;
+                }
+
+                SLNUseFile.Invoke(null, [player, data.AudioPath, false, data.Volume]);
+
+                LogManager.Debug($"Playing {Path.GetFileName(data.AudioPath)} via SecretLabNAudio at {customItem.Owner.Position}");
+            }
+            catch (TargetInvocationException tie)
+            {
+                LogManager.Error($"PlayAudioSLN reflection invoke failed.\n Inner: {tie.InnerException?.GetType().Name}: {tie.InnerException?.Message}\n {tie.InnerException?.StackTrace}");
+            }
+        }
+
         public static void PlayAudioSLN(string path, float max, float min, float volume, Vector3 coords)
         {
             try
@@ -372,11 +580,12 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
+        [Obsolete]
         public static void PlayAudioSLN(SummonedCustomItem customItem, Vector3 coords)
         {
             try
             {
-                if (!customItem.TryGetModule<CustomAudio>(out var data) || data == null)
+                if (!customItem.TryGetModule<CustomAudio>(out CustomAudio? data) || data == null)
                 {
                     LogManager.Warn($"CustomAudio Module not found on {customItem.CustomItem.Name}!");
                     return;

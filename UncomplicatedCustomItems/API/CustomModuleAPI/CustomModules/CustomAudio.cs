@@ -85,39 +85,39 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             switch (eventArgs)
             {
                 case PlayerInteractedDoorEventArgs playerInteractedDoor when HasFlagFast(Trigger, TriggerOn.OnDoorInteracted):
-                    AudioIntegration.Play(SummonedCustomItem, playerInteractedDoor.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerShotWeaponEventArgs playerShotWeapon when HasFlagFast(Trigger, TriggerOn.OnShot):
-                    AudioIntegration.Play(SummonedCustomItem, playerShotWeapon.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerUsedItemEventArgs playerUsedItem when HasFlagFast(Trigger, TriggerOn.OnUse):
-                    AudioIntegration.Play(SummonedCustomItem, playerUsedItem.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerReloadedWeaponEventArgs playerReloadedWeapon when HasFlagFast(Trigger, TriggerOn.OnReload):
-                    AudioIntegration.Play(SummonedCustomItem, playerReloadedWeapon.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerChangedItemEventArgs playerChangedItem when HasFlagFast(Trigger, TriggerOn.OnChangedItem):
-                    AudioIntegration.Play(SummonedCustomItem, playerChangedItem.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerPickedUpItemEventArgs playerPickedUpItem when HasFlagFast(Trigger, TriggerOn.OnAdded):
-                    AudioIntegration.Play(SummonedCustomItem, playerPickedUpItem.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerDroppedItemEventArgs playerDroppedItem when HasFlagFast(Trigger, TriggerOn.OnDropped):
-                    AudioIntegration.Play(SummonedCustomItem, playerDroppedItem.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerDeathEventArgs playerDeath when HasFlagFast(Trigger, TriggerOn.OnDeath):
-                    AudioIntegration.Play(SummonedCustomItem, playerDeath.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
                 
                 case PlayerHurtEventArgs playerHurt when HasFlagFast(Trigger, TriggerOn.OnHurt):
-                    AudioIntegration.Play(SummonedCustomItem, playerHurt.Player.Position);
+                    AudioIntegration.Play(SummonedCustomItem);
                     break;
             }
         }
