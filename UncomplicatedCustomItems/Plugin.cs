@@ -54,7 +54,7 @@ namespace UncomplicatedCustomItems
 #else
         public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
 #endif
-        public override Version Version => new(4, 1, 0);
+        public override Version Version => new(4, 1, 1);
 
         public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
