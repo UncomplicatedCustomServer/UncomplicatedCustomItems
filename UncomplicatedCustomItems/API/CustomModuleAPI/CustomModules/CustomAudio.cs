@@ -25,6 +25,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public SummonedCustomItem? SummonedCustomItem { get; private set; }
 
         public TriggerOn Trigger { get; set; }
+        public bool ParentToPlayer { get; set; } = true;
         public string AudioPath { get; set; } = string.Empty;
         public float MaxAudibleDistance { get; set; }
         public float MinAudibleDistance { get; set; }
@@ -69,6 +70,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     return;
                 }
 
+                if (args.TryGetValue<bool>("ParentToPlayer", out var parent))
+                    ParentToPlayer = parent;
+
                 Trigger = trigger;
                 AudioPath = audioPath;
                 MaxAudibleDistance = maxAudibleDistance;
@@ -85,38 +89,92 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             switch (eventArgs)
             {
                 case PlayerInteractedDoorEventArgs playerInteractedDoor when HasFlagFast(Trigger, TriggerOn.OnDoorInteracted):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerInteractedDoor.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerShotWeaponEventArgs playerShotWeapon when HasFlagFast(Trigger, TriggerOn.OnShot):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerShotWeapon.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerUsedItemEventArgs playerUsedItem when HasFlagFast(Trigger, TriggerOn.OnUse):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerUsedItem.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerReloadedWeaponEventArgs playerReloadedWeapon when HasFlagFast(Trigger, TriggerOn.OnReload):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerReloadedWeapon.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerChangedItemEventArgs playerChangedItem when HasFlagFast(Trigger, TriggerOn.OnChangedItem):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerChangedItem.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerPickedUpItemEventArgs playerPickedUpItem when HasFlagFast(Trigger, TriggerOn.OnAdded):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerPickedUpItem.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerDroppedItemEventArgs playerDroppedItem when HasFlagFast(Trigger, TriggerOn.OnDropped):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerDroppedItem.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
 
                 case PlayerDeathEventArgs playerDeath when HasFlagFast(Trigger, TriggerOn.OnDeath):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerDeath.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
                 
                 case PlayerHurtEventArgs playerHurt when HasFlagFast(Trigger, TriggerOn.OnHurt):
+                    if (!ParentToPlayer)
+                    {
+                        AudioIntegration.Play(SummonedCustomItem, playerHurt.Player.Position);
+                        return;
+                    }
+
                     AudioIntegration.Play(SummonedCustomItem);
                     break;
             }

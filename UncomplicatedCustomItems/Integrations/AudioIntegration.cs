@@ -91,7 +91,6 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
-        [Obsolete]
         public static void Play(SummonedCustomItem customItem, Vector3 coords)
         {
             if (!FoundAny)
@@ -304,7 +303,6 @@ namespace UncomplicatedCustomItems.Integrations
                 LogManager.Warn($"Failed to load audio file '{Path.GetFileName(data.AudioPath)}'");
         }
 
-        [Obsolete]
         private static void PlayAudioPlayerAPI(SummonedCustomItem customItem, Vector3 coords)
         {
             if (!customItem.TryGetModule<CustomAudio>(out CustomAudio? data) || data == null)
@@ -580,7 +578,6 @@ namespace UncomplicatedCustomItems.Integrations
             }
         }
 
-        [Obsolete]
         public static void PlayAudioSLN(SummonedCustomItem customItem, Vector3 coords)
         {
             try
