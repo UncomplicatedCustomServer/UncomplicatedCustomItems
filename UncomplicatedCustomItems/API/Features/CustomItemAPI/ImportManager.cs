@@ -5,12 +5,12 @@ using Exiled.Loader;
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Manager;
 using System.Linq;
 using UncomplicatedCustomItems.API.Interfaces;
+using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
@@ -24,8 +24,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 return;
 
             ActivePlugins.Clear();
-            // Call a delayed task
-            Task.Run(Actor);
+            Actor();
         }
 
         internal static Type[] BannedTypes =
@@ -57,7 +56,8 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         ];
 
 #if EXILED
-        public static List<IPlugin<IConfig>> ActivePlugins => new();
+        private static readonly List<IPlugin<IConfig>> _activePlugins = [];
+        public static List<IPlugin<IConfig>> ActivePlugins => _activePlugins;
 
         internal static void Actor()
         {
@@ -79,12 +79,16 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                                 {
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomWeapon":
                                         continue;
+
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomKeycard":
                                         continue;
+
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomGrenade":
                                         continue;
+
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomArmor":
                                         continue;
+
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomCandy":
                                         continue;
                                 };
@@ -96,7 +100,9 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                             LogManager.Silent($"{nameof(ImportManager.Actor)}: Importing It!");
                             ActivePlugins.TryAdd(plugin);
 
-                            APICustomItem Item = Activator.CreateInstance(type) as APICustomItem;
+                            if (Activator.CreateInstance(type) is not APICustomItem Item)
+                                continue;
+
                             LogManager.Info($"{nameof(ImportManager.Actor)}: Imported CustomItem {Item.Name} ({Item.Id}) through Attribute from plugin {plugin.Name} (v{plugin.Version})");
 
                             APICustomItem.Register(Item);
@@ -112,14 +118,15 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             }
         }
 #else
-        public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins => [];
+        private static readonly List<LabApi.Loader.Features.Plugins.Plugin> _activePlugins = [];
+        public static List<LabApi.Loader.Features.Plugins.Plugin> ActivePlugins => _activePlugins;
         
         internal static void Actor()
         {
             LogManager.Info($"{nameof(ImportManager)}: Checking for CustomItems registered in other plugins to import...");
             _alreadyLoaded = true;
 
-            foreach (var dic in LabApi.Loader.PluginLoader.Plugins)
+            foreach (KeyValuePair<LabApi.Loader.Features.Plugins.Plugin, Assembly> dic in LabApi.Loader.PluginLoader.Plugins)
             {
                 LogManager.Silent($"{nameof(ImportManager)}: Passing plugin {dic.Key.Name}");
                 foreach (Type type in dic.Value.GetTypes())
@@ -135,12 +142,16 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                                 {
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomWeapon":
                                         continue;
+
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomKeycard":
                                         continue;
+
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomGrenade":
                                         continue;
+
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomArmor":
                                         continue;
+                                        
                                     case "UncomplicatedCustomItems.Examples.ExampleCustomCandy":
                                         continue;
                                 };

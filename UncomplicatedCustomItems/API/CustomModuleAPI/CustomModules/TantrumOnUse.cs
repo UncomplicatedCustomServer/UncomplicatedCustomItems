@@ -21,7 +21,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 if (Physics.Raycast(ev.Player.Position, Vector3.down, out RaycastHit hitInfo, 3f))
                     targetPosition = hitInfo.point + Vector3.up * 1.25f;
 
-                TantrumHazard tantrum = TantrumHazard.Spawn(targetPosition, ev.Player.Rotation, new Vector3(1, 1, 1));
+                TantrumHazard tantrum = TantrumHazard.Spawn(targetPosition, ev.Player.Rotation, Vector3.one);
 
                 foreach (TeslaGate gate in TeslaGate.AllGates)
                 {

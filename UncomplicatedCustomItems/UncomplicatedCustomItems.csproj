@@ -7,11 +7,10 @@
     <Deterministic>true</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
     <Configuration Condition=" '$(Configuration)' == '' ">LabApi-Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <Configurations>Exiled;LabApi;Exiled-Debug;LabApi-Debug</Configurations>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'LabApi' ">
@@ -58,36 +57,25 @@
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp" Publicize="true" HintPath="$(SL_REFERENCES)\Assembly-CSharp.dll" />
-    <Reference Include="Mirror" Publicize="true" HintPath="$(SL_REFERENCES)\Mirror.dll" />
-    <Reference Include="NorthwoodLib" HintPath="$(SL_REFERENCES)\NorthwoodLib.dll" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Assembly-CSharp-firstpass" Publicize="true" HintPath="$(SL_REFERENCES)\Assembly-CSharp-firstpass.dll" />
+    <Reference Include="Mirror" Publicize="true" HintPath="$(SL_REFERENCES)\Mirror.dll" />
+    <Reference Include="Mirror.Components" HintPath="$(SL_REFERENCES)\Mirror.Components.dll" />
+    <Reference Include="NorthwoodLib" HintPath="$(SL_REFERENCES)\NorthwoodLib.dll" />
     <Reference Include="BouncyCastle.Cryptography" HintPath="$(SL_REFERENCES)\BouncyCastle.Cryptography.dll" />
     <Reference Include="Caress" HintPath="$(SL_REFERENCES)\Caress.dll" />
     <Reference Include="CommandSystem.Core" HintPath="$(SL_REFERENCES)\CommandSystem.Core.dll" />
-    <Reference Include="Mirror.Components" HintPath="$(SL_REFERENCES)\Mirror.Components.dll" />
     <Reference Include="Mono.Security" HintPath="$(SL_REFERENCES)\Mono.Security.dll" />
-    <Reference Include="UnityEngine.UnityWebRequestModule" HintPath="$(SL_REFERENCES)\UnityEngine.UnityWebRequestModule.dll" />
     <Reference Include="Pooling" HintPath="$(SL_REFERENCES)\Pooling.dll" />
-    <Reference Include="System" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe" HintPath="$(SL_REFERENCES)\System.Runtime.CompilerServices.Unsafe.dll" />
     <Reference Include="Unity.Mathematics" HintPath="$(SL_REFERENCES)\Unity.Mathematics.dll" />
     <Reference Include="UnityEngine" HintPath="$(SL_REFERENCES)\UnityEngine.dll" />
     <Reference Include="UnityEngine.CoreModule" HintPath="$(SL_REFERENCES)\UnityEngine.CoreModule.dll" />
     <Reference Include="UnityEngine.AudioModule" HintPath="$(SL_REFERENCES)\UnityEngine.AudioModule.dll" />
     <Reference Include="UnityEngine.PhysicsModule" HintPath="$(SL_REFERENCES)\UnityEngine.PhysicsModule.dll" />
+    <Reference Include="UnityEngine.UnityWebRequestModule" HintPath="$(SL_REFERENCES)\UnityEngine.UnityWebRequestModule.dll" />
     <Reference Include="YamlDotNet" HintPath="$(SL_REFERENCES)\YamlDotNet.dll" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
-  
   <Target Name="PostBuildCopyExiled" AfterTargets="Build" Condition="'$(Configuration)' == 'Exiled' Or '$(Configuration)' == 'Exiled-Debug'">
     <Message Text="Copying UncomplicatedCustomItems-Exiled.dll to EXILED plugin folder..." Importance="high" />
     <Copy SourceFiles="$(OutputPath)UncomplicatedCustomItems-Exiled.dll" DestinationFolder="$(APPDATA)\EXILED\Plugins" SkipUnchangedFiles="true" Condition="'$(OS)' == 'Windows_NT'" />

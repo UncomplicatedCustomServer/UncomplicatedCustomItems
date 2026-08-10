@@ -1,5 +1,6 @@
-﻿using LabApi.Events.Arguments.ServerEvents;
+using LabApi.Events.Arguments.ServerEvents;
 using UncomplicatedCustomItems.API;
+using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
@@ -15,6 +16,8 @@ namespace UncomplicatedCustomItems.Events
 {
     internal class ServerHandler
     {
+        private static readonly System.Random _clusterRandom = new();
+
         public static void Register()
         {
             ServerEvent.WaitingForPlayers += OnWaitingForPlayers;
@@ -36,6 +39,7 @@ namespace UncomplicatedCustomItems.Events
         private static void OnWaitingForPlayers()
         {
             SummonedCustomItem.Cleanup();
+            SummonedCustomItem.CleanupCooldownStates();
             SummonedAPICustomItem.Cleanup();
             APIRequest.Cleanup();
             PlayerHandler._capybaras.Clear();
@@ -46,18 +50,28 @@ namespace UncomplicatedCustomItems.Events
             PlayerHandler.ActiveLights.Clear();
             PlayerExtensions.PlayerKills.Clear();
             PlayerHandler.CustomScp268Effects.Clear();
+            PlayerHandler.CandyIdx.Clear();
+            CustomCandy.Candyidx.Clear();
+
+            HarmonyElements.Patches.LockerSpawningItemPrefix.Reset();
+
+            Capybara.capybaras.Clear();
+            Disguise.Appearance.Clear();
         }
 
         private static void OnDetonated(ProjectileExplodedEventArgs ev)
         {
-            if (Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out var item))
+            if (ev.TimedGrenade == null)
+                return;
+
+            if (Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out var item) && item != null)
             {
-                item?.OnDetonated(ev);
+                item.OnDetonated(ev);
             }
 
-            if (SummonedAPICustomItem.TryGet(ev.TimedGrenade.Serial, out var api))
+            if (SummonedAPICustomItem.TryGet(ev.TimedGrenade.Serial, out var api) && api != null)
             {
-                api?.OnDetonated(ev);
+                api.OnDetonated(ev);
             }
         }
 
@@ -94,11 +108,10 @@ namespace UncomplicatedCustomItems.Events
                     {
                         for (uint count = 0; count < item.AmountToSpawn; count++)
                         {
-                            float chance = UnityEngine.Random.Range(0f, 101f);
-                            if (chance >= item.ChanceToSpawn)
+                            if (Random.Range(0f, 100f) < item.ChanceToSpawn)
                             {
                                 LogManager.Debug($"Spawning {item.Name} ({count + 1}/{item.AmountToSpawn})");
-                                APICustomItem.SummonItem(item);
+                                APICustomItem.SummonItem(item, ignoreChance: true);
                             }
                         }
                     }
@@ -108,16 +121,16 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnGrenadeExploding(ProjectileExplodingEventArgs ev)
         {
-            if (ev.TimedGrenade == null || ev.Player == null || ev.Position == null)
+            if (ev.TimedGrenade == null || ev.Player == null)
                 return;
 
             PlayerHandler.DetonationPosition = ev.Position;
 
-            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem? customItem))
+            if (!Utilities.TryGetSummonedCustomItem(ev.TimedGrenade.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
-            if (customItem?.CustomItem.CustomItemType is CustomItemType.Item)
-                customItem?.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
+            if (customItem.CustomItem.CustomItemType is CustomItemType.Item)
+                customItem.HandleEvent(ev.Player, ItemEvents.Detonation, ev.TimedGrenade.Serial);
         }
 
         public static void OnPickup(PickupDestroyedEventArgs ev)
@@ -128,11 +141,13 @@ namespace UncomplicatedCustomItems.Events
 
         internal static Vector3 ClusterOffset(Vector3 position)
         {
-            System.Random random = new();
-            float x = position.x - 1 + ((float)random.NextDouble() * random.Next(0, 3));
-            float y = position.y;
-            float z = position.z - 1 + ((float)random.NextDouble() * random.Next(0, 3));
-            return new Vector3(x, y, z);
+            lock (_clusterRandom)
+            {
+                float x = position.x - 1f + (float)_clusterRandom.NextDouble() * 3f;
+                float y = position.y;
+                float z = position.z - 1f + (float)_clusterRandom.NextDouble() * 3f;
+                return new Vector3(x, y, z);
+            }
         }
     }
 }

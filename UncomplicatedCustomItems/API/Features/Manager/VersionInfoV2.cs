@@ -13,7 +13,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
         [JsonPropertyName("pluginHash")]
         public string Hash { get; set; } = string.Empty;
 
-       [JsonPropertyName("recallReason")]
+        [JsonPropertyName("recallReason")]
         public string RecallReason { get; set; } = string.Empty;
 
         [JsonPropertyName("recalled")]

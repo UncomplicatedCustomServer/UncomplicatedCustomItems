@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
@@ -29,7 +30,10 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
                 return;
             }
 
-            FieldInfo?.SetValue(Target, SafeConvert(value, FieldInfo.FieldType));
+            if (FieldInfo != null)
+            {
+                FieldInfo.SetValue(Target, SafeConvert(value, FieldInfo.FieldType));
+            }
         }
 
         private static object? SafeConvert(object? value, Type targetType)
@@ -37,17 +41,19 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
             if (value == null)
                 return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
 
-            if (targetType.IsAssignableFrom(value.GetType()))
+            Type underlying = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+            if (underlying.IsAssignableFrom(value.GetType()))
                 return value;
 
-            if (value is string s && targetType.IsEnum)
-                return Enum.Parse(targetType, s, ignoreCase: true);
+            if (value is string s && underlying.IsEnum)
+                return Enum.Parse(underlying, s, ignoreCase: true);
 
             if (value is string str)
             {
                 try
                 {
-                    return Convert.ChangeType(str, targetType);
+                    return Convert.ChangeType(str, underlying, CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -57,7 +63,7 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 
             try
             {
-                return Convert.ChangeType(value, targetType);
+                return Convert.ChangeType(value, underlying, CultureInfo.InvariantCulture);
             }
             catch
             {

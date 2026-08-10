@@ -1,31 +1,22 @@
 using System;
-using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
-using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Integrations;
+using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
     public class CustomAudio : CustomModuleBase
     {
         public override string Name => "CustomAudio";
-        public override List<string> RequiredArguments => 
-        [
-            "Trigger",
-            "AudioPath",
-            "MaxAudibleDistance",
-            "MinAudibleDistance",
-            "SoundVolume",
-        ];
 
+        [YamlIgnore]
         public SummonedCustomItem? SummonedCustomItem { get; private set; }
 
         public TriggerOn Trigger { get; set; }
-        public bool ParentToPlayer { get; set; } = true;
+        public bool ParentToPlayer { get; set; } = false;
         public string AudioPath { get; set; } = string.Empty;
         public float MaxAudibleDistance { get; set; }
         public float MinAudibleDistance { get; set; }
@@ -33,52 +24,8 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void OnAdded(SummonedCustomItem item)
         {
-            if (CustomItem == null)
-                return;
-
             SummonedCustomItem = item;
             base.OnAdded(item);
-            foreach (Dictionary<object, object> args in Arguments)
-            {
-                if (!args.TryGetValue<TriggerOn>("Trigger", out var trigger))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! Valid values: {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
-                    return;
-                }
-
-                if (!args.TryGetValue<string>("AudioPath", out var audioPath))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} AudioPath is not a valid string!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("MaxAudibleDistance", out var maxAudibleDistance))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} MaxAudibleDistance is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("MinAudibleDistance", out var minAudibleDistance))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} MinAudibleDistance is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("SoundVolume", out var volume))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} SoundVolume is not a valid float!");
-                    return;
-                }
-
-                if (args.TryGetValue<bool>("ParentToPlayer", out var parent))
-                    ParentToPlayer = parent;
-
-                Trigger = trigger;
-                AudioPath = audioPath;
-                MaxAudibleDistance = maxAudibleDistance;
-                MinAudibleDistance = minAudibleDistance;
-                Volume = volume;
-            }
         }
 
         public override void Run(EventArgs eventArgs)

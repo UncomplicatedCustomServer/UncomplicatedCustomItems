@@ -135,41 +135,50 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 Plugin.Instance.FileConfig.Welcome(loadExamples: true);
                 Plugin.Instance.FileConfig.Welcome(Server.Port.ToString());
                 Plugin.Instance.FileConfig.Welcome("Actions");
-                Plugin.Instance.FileConfig.LoadAll();
-                Plugin.Instance.FileConfig.LoadAll(Server.Port.ToString());
-                Plugin.Instance.FileConfig.LoadAll("Actions");
+                Plugin.Instance.FileConfig.LoadAllAsync().GetAwaiter().GetResult();
+                Plugin.Instance.FileConfig.LoadAllAsync(Server.Port.ToString()).GetAwaiter().GetResult();
+                Plugin.Instance.FileConfig.LoadAllAsync("Actions").GetAwaiter().GetResult();
+
                 ImportManager.Actor();
 
                 foreach (ICustomItem item in CustomItem.List)
-                    ReloadedItems++;
+                {
+                    ReloadedItems++;                    
+                }
+
                 foreach (ICustomAction action in CustomAction.List)
-                    ReloadedActions++;
+                {
+                    ReloadedActions++;                    
+                }
+
                 foreach (APICustomItem item in APICustomItem.List)
-                    ReloadedAPIItems++;
+                {
+                    ReloadedAPIItems++;                    
+                }
 
                 int NewItems = BeforeItems - ReloadedItems;
                 int NewActions = BeforeActions - ReloadedActions;
                 int NewApiItems = BeforeAPIItems - ReloadedAPIItems;
 
-                foreach (var entry in CustomItemsPickups)
+                foreach (KeyValuePair<ICustomItem, List<Vector3>> entry in CustomItemsPickups)
                 {
                     foreach (Vector3 pos in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedCustomItem(entry.Key, pos));
                 }
 
-                foreach (var entry in APICustomItemsPickups)
+                foreach (KeyValuePair<APICustomItem, List<Vector3>> entry in APICustomItemsPickups)
                 {
                     foreach (Vector3 pos in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedAPICustomItem(entry.Key, pos));
                 }
 
-                foreach (var entry in CustomItems)
+                foreach (KeyValuePair<Player, List<ICustomItem>> entry in CustomItems)
                 {
                     foreach (ICustomItem customItem in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedCustomItem(customItem, entry.Key));
                 }
 
-                foreach (var entry in APICustomItems)
+                foreach (KeyValuePair<Player, List<APICustomItem>> entry in APICustomItems)
                 {
                     foreach (APICustomItem customItem in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedAPICustomItem(customItem, entry.Key));

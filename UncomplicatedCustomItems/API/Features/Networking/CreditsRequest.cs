@@ -124,6 +124,9 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         public override void OnRequestFailed(UnityWebRequest request)
         {
             base.OnRequestFailed(request);
+            if (UseCustomEndpoint)
+                return;
+
             LogManager.Warn($"Failed to retrieve credits information. Error: {request.error} \n Retrying with backup endpoint...");
             UseCustomEndpoint = true;
             SendRequest();

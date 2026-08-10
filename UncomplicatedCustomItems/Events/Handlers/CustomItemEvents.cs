@@ -21,6 +21,14 @@ namespace UncomplicatedCustomItems.Events.Handlers
 
         internal static void OnSummoningCustomItem(SummoningCustomItemEventArgs ev) => SummoningCustomItem?.Invoke(ev);
 
+        internal static bool HasCheckedCustomFlagSubscribers => CheckedCustomFlag != null;
+
+        internal static bool HasCheckingCustomFlagSubscribers => CheckingCustomFlag != null;
+
+        internal static bool HasRanCustomItemCommandSubscribers => RanCustomItemCommand != null;
+
+        internal static bool HasRunningCustomItemCommandSubscribers => RunningCustomItemCommand != null;
+
         internal static void OnCheckedCustomFlag(CheckedCustomFlagEventArgs ev) => CheckedCustomFlag?.Invoke(ev);
 
         internal static void OnCheckingCustomFlag(CheckingCustomFlagEventArgs ev) => CheckingCustomFlag?.Invoke(ev);

@@ -1,7 +1,11 @@
 using HarmonyLib;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Extensions;
+using UncomplicatedCustomItems.API.Features;
+using UncomplicatedCustomItems.API.Features.SpecificData;
+using UncomplicatedCustomItems.API.YamlObjects;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -10,8 +14,39 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
     {
         public static void Postfix(Firearm firearm, AttachmentParam param, ref float __result)
         {
-            if ((firearm.IsSummonedCustomItem() || firearm.IsSummonedAPICustomItem()) && param is AttachmentParam.MagazineCapacityModifier)
+            if (!SummonedCustomItem.TryGet(firearm.ItemSerial, out var item))
+                return;
+
+            if (item.CustomItem.CustomData is not WeaponData data)
+                return;
+
+            if (param == AttachmentParam.MagazineCapacityModifier)
                 __result = 0f;
+
+            foreach (ParameterObject paramobj in data.ParameterModifiers)
+            {
+                if (param != paramobj.Parameter)
+                    continue;
+
+                switch (paramobj.Type)
+                {
+                    case MathType.Multiplier:
+                        __result *= paramobj.Value;
+                        break;
+
+                    case MathType.Division:
+                        __result /= paramobj.Value;
+                        break;
+
+                    case MathType.Addition:
+                        __result += paramobj.Value;
+                        break;
+
+                    case MathType.Subtraction:
+                        __result -= paramobj.Value;
+                        break;
+                }
+            }
         }
     }
 }

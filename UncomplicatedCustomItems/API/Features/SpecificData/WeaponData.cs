@@ -1,4 +1,6 @@
-﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+﻿using System.Collections.Generic;
+using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.YamlObjects;
 
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
@@ -53,5 +55,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets if the <see cref="CustomItem"/> can damage the friendly team.
         /// </summary>
         public virtual bool EnableFriendlyFire { get; set; } = false;
+
+        public List<ParameterObject> ParameterModifiers { get; set; }
     }
 }

@@ -4,8 +4,6 @@ using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
 using System;
-using System.Collections.Generic;
-using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
@@ -16,65 +14,12 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
     public class SpawnItemWhenDetonated : CustomModuleBase
     {
         public override string Name => "SpawnItemWhenDetonated";
-        public override List<string> RequiredArguments =>
-        [
-            "ItemType",
-            "ItemId",
-            "TimeTillDespawn",
-            "Chance",
-            "Pickupable",
-        ];
 
-        public string ApiType { get; set; } = string.Empty;
+        public string ItemType { get; set; } = string.Empty;
         public uint ItemId { get; set; }
         public float TimeTillDespawn { get; set; }
-        public float Chance { get; set; }
-        public bool Pickupable { get; set; }
-
-        public override void OnAdded(SummonedCustomItem item)
-        {
-            if (CustomItem == null)
-                return;
-
-            foreach (Dictionary<object, object> args in Arguments)
-            {
-                if (!args.TryGetValue<string>("ItemType", out var itemType))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} ItemType is not a valid string!");
-                    return;
-                }
-
-                if (!args.TryGetValue<uint>("ItemId", out var itemId))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} ItemId is not a valid uint!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("TimeTillDespawn", out var timeTillDespawn))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} TimeTillDespawn is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("Chance", out var chance))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Chance is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<bool>("Pickupable", out var pickupable))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Pickupable is not a valid Boolean!");
-                    return;
-                }
-
-                ApiType = itemType;
-                ItemId = itemId;
-                TimeTillDespawn = timeTillDespawn;
-                Chance = chance;
-                Pickupable = pickupable;
-            }
-        }
+        public float Chance { get; set; } = 100f;
+        public bool Pickupable { get; set; } = true;
 
         public override void Run(EventArgs eventArgs)
         {
@@ -83,53 +28,64 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 
             if (eventArgs is ProjectileExplodedEventArgs ev)
             {
-                float chance = UnityEngine.Random.Range(0f, 101f);
-                if (chance >= Chance)
+                float roll = UnityEngine.Random.Range(0f, 100f);
+                if (roll < Chance)
                 {
-                    LogManager.Debug($"Loaded FlagSettings.");
-                    if (ApiType.ToLower() == "uci")
+                    LogManager.Debug($"SpawnItemWhenDetonated triggered.");
+                    string apiType = ItemType.ToLower();
+
+                    if (apiType == "uci")
                     {
-                        if (Utilities.TryGetCustomItem((uint)ItemId, out ICustomItem itemToSpawn))
+                        if (Utilities.TryGetCustomItem(ItemId, out ICustomItem itemToSpawn))
                         {
                             SummonedCustomItem summonedItem = new(itemToSpawn, ev.Position);
-                            if (Pickupable == false)
+                            if (!Pickupable && summonedItem.Pickup != null)
                             {
-                                summonedItem.Pickup?.Weight = 5000f;
+                                summonedItem.Pickup.Weight = 5000f;
                             }
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                DespawnAfter(summonedItem.Serial, (float)TimeTillDespawn);
+                                DespawnAfter(summonedItem.Serial, TimeTillDespawn);
                             }
                         }
                         else
+                        {
                             LogManager.Warn($"{ItemId} is not a UCI CustomItem ID!");
+                        }
                     }
 #if EXILED
-                        else if (ApiType == "ECI" || ApiType == "eci")
-                        {
-                            if (Exiled.CustomItems.API.Features.CustomItem.TryGet((uint)ItemId, out Exiled.CustomItems.API.Features.CustomItem ExCustomItem))
-                            {
-                                Exiled.API.Features.Pickups.Pickup exCustomItem = ExCustomItem.Spawn(ev.Position);
-                                if (!Pickupable)
-                                    exCustomItem.Weight = 5000f;
-
-                                if (TimeTillDespawn > 0f)
-                                {
-                                    LogManager.Debug($"Starting Despawn Coroutine");
-                                    DespawnAfter(exCustomItem.Serial, (float)TimeTillDespawn);
-                                }
-                            }
-                            else
-                                LogManager.Warn($"{ItemId} is not a Exiled CustomItem ID!");
-                        }
-#endif
-                    else if (ApiType.ToLower() == "normal")
+                    else if (apiType == "eci")
                     {
-                        if ((ItemType)ItemId == ItemType.SCP244a || (ItemType)ItemId == ItemType.SCP244b)
+                        if (Exiled.CustomItems.API.Features.CustomItem.TryGet(ItemId, out Exiled.CustomItems.API.Features.CustomItem? ExCustomItem) && ExCustomItem != null)
+                        {
+                            Exiled.API.Features.Pickups.Pickup? exCustomItem = ExCustomItem.Spawn(ev.Position);
+                            if (exCustomItem == null)
+                            {
+                                LogManager.Warn($"{ItemId} failed to spawn an Exiled CustomItem pickup!");
+                                return;
+                            }
+
+                            if (!Pickupable)
+                                exCustomItem.Weight = 5000f;
+
+                            if (TimeTillDespawn > 0f)
+                            {
+                                LogManager.Debug($"Starting Despawn Coroutine");
+                                DespawnAfter(exCustomItem.Serial, TimeTillDespawn);
+                            }
+                        }
+                        else
+                            LogManager.Warn($"{ItemId} is not an Exiled CustomItem ID!");
+                    }
+#endif
+                    else if (apiType == "normal")
+                    {
+                        ItemType enumType = (ItemType)ItemId;
+                        if (enumType == global::ItemType.SCP244a || enumType == global::ItemType.SCP244b)
                         {
                             LogManager.Debug($"Item is SCP244a or SCP244b");
-                            Scp244Pickup? scp244Pickup = (Scp244Pickup?)Scp244Pickup.Create((ItemType)ItemId, ev.Position);
+                            Scp244Pickup? scp244Pickup = (Scp244Pickup?)Scp244Pickup.Create(enumType, ev.Position);
                             if (scp244Pickup == null)
                                 return;
 
@@ -142,17 +98,16 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                DespawnAfter(scp244Pickup.Serial, (float)TimeTillDespawn);
+                                DespawnAfter(scp244Pickup.Serial, TimeTillDespawn);
                             }
                         }
                         else
                         {
-                            Pickup? pickup = Pickup.Create((ItemType)ItemId, ev.Position);
+                            Pickup? pickup = Pickup.Create(enumType, ev.Position);
                             if (pickup == null)
                                 return;
-                                
-                            Vector3 vector3 = new(0f, 1f, 0f);
-                            pickup.Transform.position = pickup.Transform.position + vector3;
+
+                            pickup.Transform.position += Vector3.up;
                             pickup.Spawn();
                             if (!Pickupable)
                                 pickup.Weight = 5000f;
@@ -160,11 +115,10 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                             if (TimeTillDespawn > 0f)
                             {
                                 LogManager.Debug($"Starting Despawn Coroutine");
-                                DespawnAfter(pickup.Serial, (float)TimeTillDespawn);
+                                DespawnAfter(pickup.Serial, TimeTillDespawn);
                             }
                         }
                     }
-
                 }
             }
         }

@@ -59,7 +59,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         private void CreateCapy(Player player)
         {
-            if (capybaras.ContainsKey(player))
+            if (player == null || capybaras.ContainsKey(player))
                 return;
             
             LogManager.Debug($"Spawned Capybara on {player.DisplayName}");
@@ -75,11 +75,10 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         private void DestroyCapy(Player player)
         {
-            if (!capybaras.ContainsKey(player))
+            if (player == null || !capybaras.TryGetValue(player, out CapybaraToy? toy))
                 return;
 
-            CapybaraToy toy = capybaras[player];
-            toy.Destroy();
+            toy?.Destroy();
             player.DisableEffect<Fade>();
             player.Scale = new(1f, 1f, 1f);
             capybaras.Remove(player);

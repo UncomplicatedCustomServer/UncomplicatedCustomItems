@@ -9,8 +9,8 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class ItemData : Data, IItemData
     {
-        public virtual List<ItemDataList> Data { get; set; } = new List<ItemDataList>
-        {
+        public virtual List<ItemDataList> Data { get; set; } =
+        [
             new() 
             {
                 Event = ItemEvents.Pickup,
@@ -23,6 +23,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
                 HintDuration = 2.3f,
                 DestroyAfterUse = false
             }
-        };  
+        ];  
     }
 }

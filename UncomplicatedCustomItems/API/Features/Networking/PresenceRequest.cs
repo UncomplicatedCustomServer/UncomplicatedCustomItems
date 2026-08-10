@@ -18,22 +18,17 @@ namespace UncomplicatedCustomItems.API.Features.Networking
 
         public override string Endpoint => "presence/upload";
 
-        public override Dictionary<string, object> Payload
+        public override Dictionary<string, object> Payload { get; set; } = new()
         {
-            get => new()
-            {
-                ["serverName"] = Server.ServerListName ?? "unknown",
-                ["pluginVersion"] = Plugin.Instance?.Version.ToString(3) ?? "unknown",
-                ["serverPort"] = Server.Port,
-                ["serverIp"] = Server.IpAddress ?? "unknown",
-                ["hideIP"] = Plugin.Instance?.Config.HideipOnList.ToString() ?? "false",
-                ["scpslVersion"] = GameCore.Version.VersionString ?? "unknown",
-                ["showOnList"] = Plugin.Instance?.Config.ShowOnuciList.ToString() ?? "false",
-                ["extra"] = $"PlayerCount: {Player.List?.RealList()?.Count() ?? 0}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}, EnabledCreditTags: {Plugin.Instance?.Config.EnableCreditTags}",
-            };
-
-            set;
-        }
+            ["serverName"] = Server.ServerListName ?? "unknown",
+            ["pluginVersion"] = Plugin.Instance?.Version.ToString(3) ?? "unknown",
+            ["serverPort"] = Server.Port,
+            ["serverIp"] = Server.IpAddress ?? "unknown",
+            ["hideIP"] = Plugin.Instance?.Config.HideipOnList.ToString() ?? "false",
+            ["scpslVersion"] = GameCore.Version.VersionString ?? "unknown",
+            ["showOnList"] = Plugin.Instance?.Config.ShowOnuciList.ToString() ?? "false",
+            ["extra"] = $"PlayerCount: {Player.List?.RealList()?.Count() ?? 0}, MaxPlayers: {Server.MaxPlayers}, Idling: {Server.IdleModeActive}, EnabledCreditTags: {Plugin.Instance?.Config.EnableCreditTags}",
+        };
 
         public override Dictionary<string, string> Headers { get; set; } = new()
         {

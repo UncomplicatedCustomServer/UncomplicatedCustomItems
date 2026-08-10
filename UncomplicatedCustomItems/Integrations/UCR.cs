@@ -15,7 +15,7 @@ namespace UncomplicatedCustomItems.Integrations
     internal class UCR
     {
 #if EXILED
-        public static Assembly Assembly => Loader.Plugins.FirstOrDefault(p => p.Name is "UncomplicatedCustomRoles")?.Assembly;
+        public static Assembly? Assembly => Loader.Plugins.FirstOrDefault(p => p.Name is "UncomplicatedCustomRoles")?.Assembly;
 
         public static Type? CustomRole => Assembly?.GetType("UncomplicatedCustomRoles.API.Features.CustomRole");
 

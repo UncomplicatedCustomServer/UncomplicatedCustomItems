@@ -8,10 +8,7 @@ using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
 using System;
-using System.Collections.Generic;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
-using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
@@ -21,70 +18,13 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
     public class SwitchRoleOn : CustomModuleBase
     {
         public override string Name => "SwitchRoleOn";
-        public override List<string> RequiredArguments =>
-        [
-            "Delay",
-            "RoleType",
-            "RoleId",
-            "SpawnFlags",
-            "KeepLocation",
-            "Trigger",
-        ];
 
         public float Delay { get; set; }
         public string RoleType { get; set; } = string.Empty;
         public uint RoleId { get; set; }
-        public RoleSpawnFlags SpawnFlags { get; set; }
+        public RoleSpawnFlags SpawnFlags { get; set; } = RoleSpawnFlags.All;
         public bool KeepLocation { get; set; }
         public TriggerOn Trigger { get; set; }
-
-        public override void OnAdded(SummonedCustomItem item)
-        {
-            if (CustomItem == null)
-                return;
-            
-            base.OnAdded(item);
-            foreach (Dictionary<object, object> args in Arguments)
-            {
-                if (!args.TryGetValue<float>("Delay", out var delay))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Delay is not a valid float!");
-                    return;
-                }
-                if (!args.TryGetValue<string>("RoleType", out var roleType))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} RoleType is not a valid string!");
-                    return;
-                }
-                if (!args.TryGetValue<uint>("RoleId", out var roleId))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} RoleId is not a valid uint!");
-                    return;
-                }
-                if (!args.TryGetValue<RoleSpawnFlags>("SpawnFlags", out var spawnFlags))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} SpawnFlags is not a valid enum value! {string.Join(", ", Enum.GetNames(typeof(RoleSpawnFlags)))}");
-                    return;
-                }
-                if (!args.TryGetValue<bool>("KeepLocation", out var keepLocation))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} KeepLocation is not a valid bool!");
-                    return;
-                }
-                if (!args.TryGetValue<TriggerOn>("Trigger", out var trigger))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
-                    return;
-                }
-
-                Delay = delay;
-                RoleType = roleType;
-                RoleId = roleId;
-                SpawnFlags = spawnFlags;
-                KeepLocation = keepLocation;
-                Trigger = trigger;
-            }
-        }
 
         public override void Run(EventArgs eventArgs)
         {
@@ -96,12 +36,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 case PlayerShotWeaponEventArgs shotWeaponEvent when HasFlagFast(Trigger, TriggerOn.OnShot):
                     SwitchRole(shotWeaponEvent.Player);
                     break;
+
                 case PlayerUsedItemEventArgs usedItemEvent when HasFlagFast(Trigger, TriggerOn.OnUse):
                     SwitchRole(usedItemEvent.Player);
                     break;
+
                 case PlayerChangedItemEventArgs changedItemEvent when HasFlagFast(Trigger, TriggerOn.OnChangedItem):
                     SwitchRole(changedItemEvent.Player);
                     break;
+                    
                 case PlayerPickedUpItemEventArgs pickedUpItemEvent when HasFlagFast(Trigger, TriggerOn.OnAdded):
                     SwitchRole(pickedUpItemEvent.Player);
                     break;
@@ -126,31 +69,28 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         private void SwitchRole(Player player)
         {
-            if (CustomItem == null)
+            if (CustomItem == null || player == null)
                 return;
 
-            if (RoleType.ToLower() == "ucr")
+            string type = RoleType.ToLower();
+
+            if (type == "ucr")
             {
                 if (UCR.TryGetCustomRole((int)RoleId, out _))
                 {
                     if (Delay > 0f)
                     {
-                        Timing.CallDelayed((float)Delay, () =>
-                        {
-                            UCR.GiveCustomRole((int)RoleId, player);
-                        });
+                        Timing.CallDelayed(Delay, () => UCR.GiveCustomRole((int)RoleId, player));
                     }
                     else
                     {
                         UCR.GiveCustomRole((int)RoleId, player);
                     }
+
                     if (KeepLocation)
                     {
-                        Vector3 OldPos = player.Position;
-                        Timing.CallDelayed(0.1f, () =>
-                        {
-                            player.Position = OldPos;
-                        });
+                        Vector3 oldPos = player.Position;
+                        Timing.CallDelayed(0.1f, () => player.Position = oldPos);
                     }
                 }
                 else
@@ -159,61 +99,44 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 }
             }
 #if EXILED
-                    else if (RoleType.ToLower() == "ecr")
+            else if (type == "ecr")
+            {
+                if (CustomRole.TryGet(RoleId, out CustomRole? ECRRole) && ECRRole != null)
+                {
+                    if (Delay > 0f)
                     {
-                        if (CustomRole.TryGet((uint)RoleId, out CustomRole? ECRRole))
-                        {
-                            if (Delay > 0f)
-                            {
-                                Timing.CallDelayed((float)Delay, () =>
-                                {
-                                    ECRRole.AddRole(player);
-                                });
-                            }
-                            else
-                            {
-                                ECRRole.AddRole(player);
-                            }
-
-                            if (KeepLocation)
-                            {
-                                Vector3 OldPos = player.Position;
-                                Timing.CallDelayed(0.1f, () =>
-                                {
-                                    player.Position = OldPos;
-                                });
-                            }
-                        }
-                        else
-                            LogManager.Warn($"{RoleId} Is not a ECR role");
+                        Timing.CallDelayed(Delay, () => ECRRole.AddRole(player));
                     }
+                    else
+                    {
+                        ECRRole.AddRole(player);
+                    }
+
+                    if (KeepLocation)
+                    {
+                        Vector3 oldPos = player.Position;
+                        Timing.CallDelayed(0.1f, () => player.Position = oldPos);
+                    }
+                }
+                else
+                    LogManager.Warn($"{RoleId} Is not an ECR role");
+            }
 #endif
-            else if (RoleType.ToLower() == "normal")
+            else if (type == "normal")
             {
                 if (player.Role != (RoleTypeId)RoleId)
                 {
                     if (Delay > 0f)
                     {
-                        Timing.CallDelayed((float)Delay, () =>
-                        {
-                            player.SetRole((RoleTypeId)RoleId, RoleChangeReason.ItemUsage, (RoleSpawnFlags)SpawnFlags);
-                        });
+                        Timing.CallDelayed(Delay, () => player.SetRole((RoleTypeId)RoleId, RoleChangeReason.ItemUsage, SpawnFlags));
                     }
                     else
-                        player.SetRole((RoleTypeId)RoleId, RoleChangeReason.ItemUsage, (RoleSpawnFlags)SpawnFlags);
+                        player.SetRole((RoleTypeId)RoleId, RoleChangeReason.ItemUsage, SpawnFlags);
                 }
             }
-#if EXILED
-            else if (RoleType.ToLower() != "ucr" || RoleType.ToLower() != "normal" || RoleType.ToLower() != "ecr")
-#else
-            else if (RoleType.ToLower() != "ucr" || RoleType.ToLower() != "normal")
-#endif
+            else
             {
-#if EXILED
-                LogManager.Warn($"The role_type field in {CustomItem.Name} is currently {RoleType} and should be 'Normal', 'UCR', or 'ECR'");
-#else
-                LogManager.Warn($"The role_type field in {CustomItem.Name} is currently {RoleType} and should be 'Normal' or 'UCR'");
-#endif
+                LogManager.Warn($"The role_type field in {CustomItem.Name} is currently '{RoleType}'");
             }
         }
     }

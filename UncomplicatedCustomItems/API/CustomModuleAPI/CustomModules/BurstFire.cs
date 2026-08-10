@@ -1,12 +1,9 @@
-using System.Collections.Generic;
-using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Manager;
 using System;
+using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
-using MEC;
 using LabApi.Features.Wrappers;
+using MEC;
 using InventorySystem.Items.Firearms.Modules;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
@@ -14,59 +11,15 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
     public class BurstFire : CustomModuleBase
     {
         public override string Name => "BurstFire";
-        public override List<string> RequiredArguments =>
-        [
-            "BurstAmount",
-            "CoolDown",
-            "ForceFire",
-            "TimingBetweenForcedShots"
-        ];
 
-        public CoroutineHandle CooldownHandle { get; set; }
-        public CoroutineHandle ForceFireHandle { get; set; }
         public uint TotalFired { get; set; }
         public uint BurstAmount { get; set; }
         public bool ForceFire { get; set; }
         public float CoolDown { get; set; }
         public float TimingBetweenForcedShots { get; set; }
 
-        public override void OnAdded(SummonedCustomItem item)
-        {
-            if (CustomItem == null)
-                return;
-
-            foreach (Dictionary<object, object> args in Arguments)
-            {
-                if (!args.TryGetValue<bool>("ForceFire", out var force))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} ForceFire is not a valid Boolean!");
-                    return;
-                }
-
-                if (!args.TryGetValue<uint>("BurstAmount", out var burst))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} BurstAmount is not a valid UInt!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("CoolDown", out var cool))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} CoolDown is not a valid Float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("TimingBetweenForcedShots", out var timing))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} TimingBetweenForcedShots is not a valid Float!");
-                    return;
-                }
-
-                BurstAmount = burst;
-                ForceFire = force;
-                CoolDown = cool;
-                TimingBetweenForcedShots = timing;
-            }
-        }
+        public CoroutineHandle CooldownHandle { get; set; }
+        public CoroutineHandle ForceFireHandle { get; set; }
 
         public override void Run(EventArgs eventArgs)
         {
@@ -111,7 +64,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             for (int i = 0; i < BurstAmount - 1; i++)
             {
                 yield return Timing.WaitForSeconds(TimingBetweenForcedShots);
-                if (item.ActionModule is AutomaticActionModule actionModule && (item.StoredAmmo + item.ChamberedAmmo) >= 1)
+                if (item?.Base != null && item.Base.Owner != null && item.ActionModule is AutomaticActionModule actionModule && (item.StoredAmmo + item.ChamberedAmmo) >= 1)
                 {
                     actionModule.ServerShoot(item.Base.Owner);
                 }

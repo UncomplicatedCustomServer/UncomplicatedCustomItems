@@ -4,6 +4,7 @@ using Exiled.Loader;
 #endif
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,6 +12,7 @@ using System.Reflection;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
+using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI
 {
@@ -26,6 +28,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
         public static Dictionary<CustomModuleBase, LabApi.Loader.Features.Plugins.Plugin> ModuleOwners { get; set; } = [];
 #endif
 
+        private static readonly Dictionary<Type, ModuleAccessors> _accessorCache = [];
+        private static readonly object _accessorCacheLock = new();
+
         private static readonly Dictionary<Type, Func<CustomModuleBase>> _factoryCache = [];
         private static readonly object _cacheLock = new();
 
@@ -34,7 +39,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 #if EXILED
             foreach (IPlugin<IConfig> plugin in Loader.Plugins)
             {
-                LogManager.Silent($"{nameof(CustomModuleManager)}: Passing plugin {plugin.Name}");
+                LogManager.Silent($"Passing plugin {plugin.Name}");
                 foreach (Type type in plugin.Assembly.GetTypes())
                 {
                     if (!type.IsClass || type.IsAbstract)
@@ -42,36 +47,21 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                     if (!typeof(CustomModuleBase).IsAssignableFrom(type))
                         continue;
 
-                    LogManager.Silent($"{nameof(CustomModuleManager)}: Importing {type.FullName}!");
+                    LogManager.Silent($"Importing {type.FullName}!");
                     ActivePlugins.TryAdd(plugin);
-                    object instance = null;
                     try
                     {
-                        instance = Activator.CreateInstance(type);
-                    }
-                    catch (MissingMethodException)
-                    {
-                        LogManager.Error($"{nameof(CustomModuleManager)}: No parameterless constructor for {type.FullName} (plugin {plugin.Name}).");
-                        continue;
-                    }
+                        CustomModuleBase module = CreateInstanceFast(type);
+                        if (!type.FullName.Contains("UncomplicatedCustomItems"))
+                            LogManager.Info($"Imported CustomModule {module.Name} from plugin {plugin.Name} - {type.FullName}");
 
-                    if (instance is not CustomModuleBase module)
-                    {
-                        LogManager.Error($"{nameof(CustomModuleManager)}: Instance of {type.FullName} could not be cast to CustomModuleBase.");
-                        continue;
-                    }
-
-                    LogManager.Info($"{nameof(CustomModuleManager)}: Imported CustomModule {module.Name} from plugin {plugin.Name} - {type.FullName}");
-                    CustomModules.TryAdd(module);
-                    ModuleOwners[module] = plugin;
-
-                    try
-                    {
+                        CustomModules.TryAdd(module);
+                        ModuleOwners[module] = plugin;
                         module.OnRegistered();
                     }
                     catch (Exception regEx)
                     {
-                        LogManager.Error($"{nameof(CustomModuleManager)}: Error in OnRegistered for {module.Name}: {regEx}");
+                        LogManager.Error($"Error in OnRegistered for {type.FullName}: {regEx}");
                     }
                 }
             }
@@ -80,7 +70,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
             {
                 try
                 {
-                    LogManager.Silent($"{nameof(CustomModuleManager)}: Passing plugin {pluginEntry.Key.Name}");
+                    LogManager.Silent($"Passing plugin {pluginEntry.Key.Name}");
                     Type[] types;
                     try
                     {
@@ -88,7 +78,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                     }
                     catch (ReflectionTypeLoadException rtlEx)
                     {
-                        LogManager.Error($"{nameof(CustomModuleManager)}: Failed to get types from plugin {pluginEntry.Key.Name}: {rtlEx}");
+                        LogManager.Error($"Failed to get types from plugin {pluginEntry.Key.Name}: {rtlEx}");
                         foreach (Exception loaderEx in rtlEx.LoaderExceptions ?? [])
                             LogManager.Error($" - LoaderException: {loaderEx}");
 
@@ -104,47 +94,27 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                             if (!typeof(CustomModuleBase).IsAssignableFrom(type))
                                 continue;
 
-                            LogManager.Silent($"{nameof(CustomModuleManager)}: Importing {type.FullName}!");
+                            LogManager.Silent($"Importing {type.FullName}!");
                             ActivePlugins.TryAdd(pluginEntry.Key);
-                            object instance = null!;
-                            try
-                            {
-                                instance = Activator.CreateInstance(type);
-                            }
-                            catch (MissingMethodException)
-                            {
-                                LogManager.Error($"{nameof(CustomModuleManager)}: No parameterless constructor for {type.FullName} (plugin {pluginEntry.Key.Name}).");
-                                continue;
-                            }
 
-                            if (instance is not CustomModuleBase module)
-                            {
-                                LogManager.Error($"{nameof(CustomModuleManager)}: Instance of {type.FullName} could not be cast to CustomModuleBase.");
-                                continue;
-                            }
+                            CustomModuleBase module = CreateInstanceFast(type);
 
-                            LogManager.Info($"{nameof(CustomModuleManager)}: Imported CustomModule {module.Name} from plugin {pluginEntry.Key.Name} - {type.FullName}");
+                            if (!type.FullName.Contains("UncomplicatedCustomItems"))
+                                LogManager.Info($"Imported CustomModule {module.Name} from plugin {pluginEntry.Key.Name} - {type.FullName}");
+
                             CustomModules.TryAdd(module);
                             ModuleOwners[module] = pluginEntry.Key;
-
-                            try
-                            {
-                                module.OnRegistered();
-                            }
-                            catch (Exception regEx)
-                            {
-                                LogManager.Error($"{nameof(CustomModuleManager)}: Error in OnRegistered for {module.Name}: {regEx}");
-                            }
+                            module.OnRegistered();
                         }
                         catch (Exception e)
                         {
-                            LogManager.Error($"{nameof(CustomModuleManager)}: Error while registering CustomModule: {e}");
+                            LogManager.Error($"Error while registering CustomModule {type.FullName}: {e}");
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    LogManager.Error($"{nameof(CustomModuleManager)}: Unexpected error with plugin {pluginEntry.Key.Name}: {e}");
+                    LogManager.Error($"Unexpected error with plugin {pluginEntry.Key.Name}: {e}");
                 }
             }
 #endif
@@ -158,44 +128,27 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
         {
             Type type = typeof(T);
 
-            object instance;
-            try
-            {
-                instance = Activator.CreateInstance(type);
-            }
-            catch (MissingMethodException)
-            {
-                LogManager.Error($"{nameof(CustomModuleManager)}: No parameterless constructor for {type.FullName}.");
-                return;
-            }
-
-            if (instance is not CustomModuleBase module)
-            {
-                LogManager.Error($"{nameof(CustomModuleManager)}: Instance of {type.FullName} could not be cast to CustomModuleBase.");
-                return;
-            }
-
             if (CustomModules.Any(m => m.GetType() == type))
             {
-                LogManager.Warn($"{nameof(CustomModuleManager)}: CustomModule {module.Name} ({type.FullName}) is already registered. Skipping.");
+                LogManager.Warn($"CustomModule {type.FullName} is already registered. Skipping.");
                 return;
             }
 
-            CustomModules.TryAdd(module);
-            ModuleOwners[module] = owner;
-            LogManager.Info($"{nameof(CustomModuleManager)}: Manually registered CustomModule {module.Name} - {type.FullName}");
-
             try
             {
+                CustomModuleBase module = CreateInstanceFast(type);
+                CustomModules.TryAdd(module);
+                ModuleOwners[module] = owner;
+                LogManager.Info($"Registered CustomModule {module.Name} - {type.FullName}");
                 module.OnRegistered();
             }
             catch (Exception regEx)
             {
-                LogManager.Error($"{nameof(CustomModuleManager)}: Error in OnRegistered for {module.Name}: {regEx}");
+                LogManager.Error($"Error in OnRegistered for {type.FullName}: {regEx}");
             }
         }
 
-        private static CustomModuleBase CreateInstanceFast(Type type)
+        public static CustomModuleBase CreateInstanceFast(Type type)
         {
             if (!_factoryCache.TryGetValue(type, out Func<CustomModuleBase> factory))
             {
@@ -211,7 +164,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                     }
                 }
             }
-            
+
             return factory();
         }
 
@@ -234,40 +187,16 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                 CustomModuleBase instance;
                 try
                 {
-                    instance = CreateInstanceFast(customModule.GetType());
+                    Type moduleType = customModule.GetType();
+                    instance = CloneModule(customModule, moduleType);
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Error($"Failed to instantiate module {customModule?.Name}: {ex}");
+                    LogManager.Error($"Failed to instantiate or deserialize module {customModule?.Name}: {ex}");
                     continue;
                 }
 
                 instance.CustomItem = item.CustomItem;
-                if (item.CustomItem.CustomModules.TryGetValue(customModule, out List<object> rawList) && rawList is { Count: > 0 })
-                {
-                    List<Dictionary<object, object>> args = [];
-                    foreach (object raw in rawList)
-                    {
-                        if (raw is Dictionary<object, object> dict)
-                        {
-                            args.Add(dict);
-                            continue;
-                        }
-
-                        List<string> required = instance.RequiredArguments ?? [];
-                        args.Add(required.Count > 0 ? new Dictionary<object, object> { { required[0], raw } } : []);
-                    }
-
-                    instance.Arguments = args;
-                }
-                else
-                {
-                    instance.Arguments =
-                    [
-                        []
-                    ];
-                }
-
                 instance.RegisterEvents();
                 instance.OnAdded(item);
 
@@ -278,24 +207,8 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
         public static Dictionary<CustomModuleBase, List<object>> Decode(Dictionary<object, List<object>> args)
         {
             Dictionary<CustomModuleBase, List<object>> result = [];
-            if (args == null)
-            {
-                LogManager.Debug("CustomModuleManager.Decode: args is null");
+            if (args == null || CustomModules == null)
                 return result;
-            }
-
-            if (CustomModules == null)
-            {
-                LogManager.Debug("CustomModuleManager.Decode: CustomModules is null");
-                return result;
-            }
-
-            LogManager.Debug($"CustomModuleManager.Decode: starting. arg count = {args.Count}. available modules = {CustomModules.Count}");
-            foreach (KeyValuePair<object, List<object>> top in args)
-            {
-                string k = top.Key?.ToString() ?? "<null>";
-                string vt = top.Value == null ? "<null>" : $"List<{(top.Value.Count>0 ? top.Value[0]?.GetType().Name : "unknown")}>";
-            }
 
             foreach (KeyValuePair<object, List<object>> kvp in args)
             {
@@ -308,21 +221,19 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                     if (key.Length == 0)
                         continue;
 
-                    CustomModuleBase module = CustomModules.FirstOrDefault(cm => string.Equals(cm?.Name, key, StringComparison.OrdinalIgnoreCase));
-                    if (module == null)
+                    CustomModuleBase? templateModule = CustomModules.FirstOrDefault(cm => string.Equals(cm?.Name, key, StringComparison.OrdinalIgnoreCase));
+                    if (templateModule == null)
+                    {
+                        LogManager.Warn($"No registered module named '{key}' found. Known modules: {string.Join(", ", CustomModules.Select(m => m?.Name))}");
                         continue;
+                    }
 
-                    LogManager.Debug($"  Found module: {module.Name}");
+                    Type moduleType = templateModule.GetType();
 
-                    HashSet<string> required = new(module.RequiredArguments ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);                    
                     if (kvp.Value == null || kvp.Value.Count == 0)
                     {
-                        if (!result.TryGetValue(module, out List<object> list))
-                        {
-                            list = [];
-                            result[module] = list;
-                        }
-                        list.Add(new Dictionary<object, object>());
+                        CustomModuleBase defaultInstance = CreateInstanceFast(moduleType);
+                        result[defaultInstance] = [];
                         continue;
                     }
 
@@ -331,73 +242,158 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                         if (raw == null)
                             continue;
 
-                        if (raw is Dictionary<object, object> rawDict)
+                        try
                         {
-                            Dictionary<object, object> filtered = [];
-                            
-                            if (required.IsEmpty())
+                            CustomModuleBase? deserializedModule = PopulateModule(moduleType, raw);
+                            if (deserializedModule != null)
                             {
-                                foreach (KeyValuePair<object, object> inner in rawDict)
-                                    filtered[inner.Key] = inner.Value;
-                            }
-                            else
-                            {
-                                foreach (KeyValuePair<object, object> inner in rawDict)
-                                {
-                                    string innerKey = inner.Key?.ToString().Trim() ?? "<null>";
-                                    if (required.Contains(innerKey))
-                                        filtered[innerKey] = inner.Value;
-                                }
-                            }
-
-                            if (filtered.Count > 0)
-                            {
-                                if (!result.TryGetValue(module, out List<object> list))
+                                if (!result.TryGetValue(deserializedModule, out List<object> list))
                                 {
                                     list = [];
-                                    result[module] = list;
+                                    result[deserializedModule] = list;
                                 }
 
-                                list.Add(filtered);
+                                list.Add(raw);
                             }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            string rawText = raw.ToString().Trim();
-
-                            if (required.Count == 0)
-                            {
-                                if (!result.TryGetValue(module, out List<object> list))
-                                {
-                                    list = [];
-                                    result[module] = list;
-                                }
-                                
-                                list.Add(raw);
-                            }
-                            else if (required.Contains(rawText))
-                            {
-                                if (!result.TryGetValue(module, out List<object> list))
-                                {
-                                    list = [];
-                                    result[module] = list;
-                                }
-
-                                list.Add(raw);
-                            }
-                            else
-                                LogManager.Debug($"Value '{rawText}' does not match any required arguments: {string.Join(", ", required)}");
+                            LogManager.Error($"Exception deserializing module {templateModule.Name}: {ex}");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Error($"CustomModuleManager.Decode: exception while processing entry: {ex}");
+                    LogManager.Error($"Exception while processing entry: {ex}");
                 }
             }
 
-            LogManager.Debug($"CustomModuleManager.Decode: completed. Result contains {result.Count} modules");
             return result;
+        }
+
+        private static ModuleAccessors GetAccessors(Type moduleType)
+        {
+            if (_accessorCache.TryGetValue(moduleType, out ModuleAccessors cached))
+                return cached;
+
+            lock (_accessorCacheLock)
+            {
+                if (_accessorCache.TryGetValue(moduleType, out cached))
+                    return cached;
+
+                Dictionary<string, (Action<CustomModuleBase, object?>, Type)> setters = new(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Func<CustomModuleBase, object?>> getters = new(StringComparer.OrdinalIgnoreCase);
+
+                foreach (PropertyInfo prop in moduleType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    if (prop.GetIndexParameters().Length > 0)
+                        continue;
+
+                    if (prop.GetCustomAttribute<YamlIgnoreAttribute>() != null)
+                        continue;
+
+                    if (prop.CanRead && prop.GetGetMethod(nonPublic: false) != null)
+                        getters[prop.Name] = BuildGetter(prop);
+
+                    if (prop.CanWrite && prop.GetSetMethod(nonPublic: false) != null)
+                        setters[prop.Name] = (BuildSetter(prop), prop.PropertyType);
+                }
+
+                cached = new ModuleAccessors(setters, getters);
+                _accessorCache[moduleType] = cached;
+                return cached;
+            }
+        }
+
+        private static Action<CustomModuleBase, object?> BuildSetter(PropertyInfo prop)
+        {
+            ParameterExpression instanceParam = Expression.Parameter(typeof(CustomModuleBase), "instance");
+            ParameterExpression valueParam = Expression.Parameter(typeof(object), "value");
+
+            UnaryExpression instanceCast = Expression.Convert(instanceParam, prop.DeclaringType!);
+            UnaryExpression valueCast = Expression.Convert(valueParam, prop.PropertyType);
+            MethodCallExpression call = Expression.Call(instanceCast, prop.GetSetMethod()!, valueCast);
+
+            return Expression.Lambda<Action<CustomModuleBase, object?>>(call, instanceParam, valueParam).Compile();
+        }
+
+        private static Func<CustomModuleBase, object?> BuildGetter(PropertyInfo prop)
+        {
+            ParameterExpression instanceParam = Expression.Parameter(typeof(CustomModuleBase), "instance");
+            UnaryExpression instanceCast = Expression.Convert(instanceParam, prop.DeclaringType!);
+            MemberExpression propertyAccess = Expression.Property(instanceCast, prop);
+            UnaryExpression convert = Expression.Convert(propertyAccess, typeof(object));
+
+            return Expression.Lambda<Func<CustomModuleBase, object?>>(convert, instanceParam).Compile();
+        }
+
+        private static CustomModuleBase? PopulateModule(Type moduleType, object raw)
+        {
+            CustomModuleBase instance = CreateInstanceFast(moduleType);
+
+            if (raw is not IDictionary dict)
+            {
+                LogManager.Warn($"Expected a mapping for module {moduleType.Name} but got {raw?.GetType().Name ?? "null"}.");
+                return instance;
+            }
+
+            ModuleAccessors accessors = GetAccessors(moduleType);
+
+            foreach (DictionaryEntry entry in dict)
+            {
+                string keyName = entry.Key?.ToString() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(keyName))
+                    continue;
+
+                if (!accessors.Setters.TryGetValue(keyName, out var setter))
+                {
+                    LogManager.Warn($"'{keyName}' in the config for module {moduleType.Name} doesn't match any settable property. Known properties: {string.Join(", ", accessors.Setters.Keys)}");
+                    continue;
+                }
+
+                try
+                {
+                    setter.Set(instance, ConvertValue(entry.Value, setter.Type));
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error($"Failed to set {keyName} on {moduleType.Name}: {ex}");
+                }
+            }
+
+            return instance;
+        }
+
+        private static CustomModuleBase CloneModule(CustomModuleBase source, Type moduleType)
+        {
+            CustomModuleBase clone = CreateInstanceFast(moduleType);
+            ModuleAccessors accessors = GetAccessors(moduleType);
+
+            foreach (KeyValuePair<string, Func<CustomModuleBase, object?>> getter in accessors.Getters)
+            {
+                if (!accessors.Setters.TryGetValue(getter.Key, out var setter))
+                    continue;
+
+                setter.Set(clone, getter.Value(source));
+            }
+
+            return clone;
+        }
+
+        private static object? ConvertValue(object? value, Type targetType)
+        {
+            if (value == null)
+                return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
+
+            Type underlying = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+            if (underlying.IsInstanceOfType(value))
+                return value;
+
+            if (underlying.IsEnum)
+                return Enum.Parse(underlying, value.ToString()!, ignoreCase: true);
+
+            return Convert.ChangeType(value, underlying);
         }
     }
 }

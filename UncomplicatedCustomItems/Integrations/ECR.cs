@@ -7,6 +7,7 @@ using UncomplicatedCustomItems.API;
 using LabApi.Features.Wrappers;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Interfaces;
+using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.Integrations
 {
@@ -18,6 +19,9 @@ namespace UncomplicatedCustomItems.Integrations
     {
         private static bool _isPatched = false;
         private static bool _isEcrFound = false;
+
+        private static readonly Dictionary<Type, PropertyInfo?> NamePropertyCache = [];
+        private static readonly Dictionary<Type, PropertyInfo?> GameObjectPropertyCache = [];
 
         /// <summary>
         /// Initializes the ECR integration by attempting to patch the ECR plugin.
@@ -36,7 +40,7 @@ namespace UncomplicatedCustomItems.Integrations
             if (TryPatchECRIntegration())
             {
                 _isEcrFound = true;
-                LogManager.Silent("ECR Integration patched successfully.");
+                LogManager.Silent("ECI Integration patched successfully.");
             }
 
             if (_isEcrFound)
@@ -128,7 +132,9 @@ namespace UncomplicatedCustomItems.Integrations
         {
             try
             {
-                string roleName = AccessTools.Property(__instance.GetType(), "Name")?.GetValue(__instance)?.ToString() ?? "Unknown";
+                Type type = __instance.GetType();
+                PropertyInfo? nameProperty = NamePropertyCache.GetOrAdd(type, () => AccessTools.Property(type, "GameObject"));
+                string roleName = nameProperty?.GetValue(__instance)?.ToString() ?? "Unknown";
                 LogManager.Debug($"ECR Integration intercepted item '{itemName}' for role '{roleName}'");
 
                 Player? labPlayer = GetLabPlayerFromExiledPlayer(player);
@@ -171,7 +177,8 @@ namespace UncomplicatedCustomItems.Integrations
         {
             try
             {
-                PropertyInfo gameObjectProperty = AccessTools.Property(exiledPlayer.GetType(), "GameObject");
+                Type type = exiledPlayer.GetType();
+                PropertyInfo? gameObjectProperty = GameObjectPropertyCache.GetOrAdd(type, () => AccessTools.Property(type, "GameObject"));
                 if (gameObjectProperty == null)
                 {
                     LogManager.Error("Could not find 'GameObject' property on Exiled Player object.");

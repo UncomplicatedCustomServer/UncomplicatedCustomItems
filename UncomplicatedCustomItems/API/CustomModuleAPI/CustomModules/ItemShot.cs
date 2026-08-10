@@ -6,11 +6,11 @@ using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using Mirror;
 using System;
-using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Components;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
+using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
@@ -18,17 +18,6 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
     public class ItemShot : CustomModuleBase
     {
         public override string Name => "ItemShot";
-        public override List<string> RequiredArguments => 
-        [
-            "IsGrenade",
-            "GrenadeExplodeOnImpact",
-            "IsCustomItem",
-            "Velocity",
-            "UpwardsFactor",
-            "Torque",
-            "CustomItemId",
-            "ItemType"
-        ];
 
         public bool IsGrenade { get; set; }
         public bool GrenadeExplodeOnImpact { get; set; }
@@ -39,78 +28,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public uint CustomItemId { get; set; }
         public ItemType ItemType { get; set; }
 
-        public override void OnAdded(SummonedCustomItem item)
-        {
-            if (CustomItem == null)
-                return;
-
-            foreach (Dictionary<object, object> args in Arguments)
-            {
-                if (!args.TryGetValue<bool>("IsGrenade", out var isGrenade))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} IsGrenade is not a valid Boolean!");
-                    return;
-                }
-
-                if (!args.TryGetValue<bool>("GrenadeExplodeOnImpact", out var grenadeExplodeOnImpact))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} GrenadeExplodeOnImpact is not a valid Boolean!");
-                    return;
-                }
-
-                if (!args.TryGetValue<bool>("IsCustomItem", out var isCustomItem))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} IsCustomItem is not a valid Boolean!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("Velocity", out var velocity))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Velocity is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("UpwardsFactor", out var upwardsFactor))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} UpwardsFactor is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<Vector3>("Torque", out var torque))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Torque is not a valid Vector3!");
-                    return;
-                }
-
-                if (!args.TryGetValue<uint>("CustomItemId", out var customItemId))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} CustomItemId is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<ItemType>("ItemType", out var itemType))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} ItemType is not a valid Vector3!");
-                    return;
-                }
-
-                IsGrenade = isGrenade;
-                GrenadeExplodeOnImpact = grenadeExplodeOnImpact;
-                IsCustomItem = isCustomItem;
-                Velocity = velocity;
-                UpwardsFactor = upwardsFactor;
-                Torque = torque;
-                CustomItemId = customItemId;
-                ItemType = itemType;
-            }
-        }
-
         public override void Run(EventArgs eventArgs)
         {
-            if (!Check(eventArgs))
-                return;
-
-            if (CustomItem == null)
+            if (!Check(eventArgs) || CustomItem == null)
                 return;
                 
             if (eventArgs is PlayerShootingWeaponEventArgs ev)
@@ -121,7 +41,14 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                 if (IsCustomItem)
                 {
-                    SummonedCustomItem summoned = new(Utilities.GetCustomItem(CustomItemId), position);
+                    ICustomItem? customItem = Utilities.GetCustomItem(CustomItemId);
+                    if (customItem == null)
+                    {
+                        LogManager.Warn($"{CustomItem.Name} - CustomItem with Id {CustomItemId} was not found for ItemShot");
+                        return;
+                    }
+
+                    SummonedCustomItem summoned = new(customItem, position);
                     ApplyPhysics(ev.Player, summoned.Pickup);
                     if (summoned.Pickup is TimedGrenadeProjectile grenadePickup)
                         grenadePickup.Base.ServerActivate();
@@ -144,7 +71,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                         LogManager.Debug($"{CustomItem.Name} - {ItemType} spawned (ItemShot) - {spawned.Serial}");
                     }
-
+                    return;
                 }
 
                 Pickup? pickup = Pickup.Create(ItemType, position);
@@ -157,9 +84,10 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 if (pickup.Base.Info.ItemId.GetItemBase() is InventorySystem.Items.ThrowableProjectiles.ThrowableItem throwableItem)
                 {
                     ThrownProjectile thrownProjectile = UnityEngine.Object.Instantiate(throwableItem.Projectile);
-                    if (Pickup.TryGet(thrownProjectile.ItemId.SerialNumber, out _))
+                    Pickup? thrownPickup = Pickup.Get(thrownProjectile);
+                    if (thrownPickup != null)
                     {
-                        ApplyPhysics(ev.Player, Pickup.Get(thrownProjectile));
+                        ApplyPhysics(ev.Player, thrownPickup);
 
                         pickup.Base.Info.Locked = true;
                         thrownProjectile.NetworkInfo = pickup.Base.Info;
@@ -205,11 +133,14 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             Vector3 velocityVector = vector3 * Velocity;
 
             Rigidbody? rb = pickup.PickupStandardPhysics?.Rb;
-            rb?.centerOfMass = Vector3.zero;
-            rb?.angularVelocity = Torque;
-            rb?.linearVelocity = velocityVector;
+            if (rb != null)
+            {
+                rb.centerOfMass = Vector3.zero;
+                rb.angularVelocity = Torque;
+                rb.linearVelocity = velocityVector;
+            }
 
-            LogManager.Debug($"Applying physics to {pickup.Type} - {pickup.Serial}: VelocityVector: {velocityVector}, StartTorque: {Torque}, ");
+            LogManager.Debug($"Applying physics to {pickup.Type} - {pickup.Serial}: VelocityVector: {velocityVector}, StartTorque: {Torque}");
         }
     }
 }

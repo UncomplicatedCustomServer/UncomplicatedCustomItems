@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using LabApi.Features.Wrappers;
@@ -13,6 +15,9 @@ namespace UncomplicatedCustomItems.Integrations
     {
         private static bool _isPatched = false;
         private static bool _isECIFound = false;
+
+        private static readonly Dictionary<Type, PropertyInfo?> NamePropertyCache = [];
+        private static readonly Dictionary<Type, PropertyInfo?> SerialPropertyCache = [];
 
         public static void Init()
         {
@@ -110,7 +115,8 @@ namespace UncomplicatedCustomItems.Integrations
         {
             try
             {
-                PropertyInfo nameProperty = AccessTools.Property(__instance.GetType(), "Name");
+                Type type = __instance.GetType();
+                PropertyInfo? nameProperty = NamePropertyCache.GetOrAdd(type, () => AccessTools.Property(type, "Name"));
                 string itemName = nameProperty?.GetValue(__instance)?.ToString() ?? "Unknown";
                 LogManager.Debug($"ECI Integration intercepted item '{item}' for item '{itemName}'");
 
@@ -149,7 +155,8 @@ namespace UncomplicatedCustomItems.Integrations
             if (exiledItem == null)
                 return null;
 
-            PropertyInfo serialProperty = AccessTools.Property(exiledItem.GetType(), "Serial");
+            Type type = exiledItem.GetType();
+            PropertyInfo? serialProperty = SerialPropertyCache.GetOrAdd(type, () => AccessTools.Property(type, "Serial"));
             if (serialProperty == null)
                 return null;
 

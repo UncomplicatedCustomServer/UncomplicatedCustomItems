@@ -51,6 +51,7 @@ namespace UncomplicatedCustomItems.API.Features
         public static List<SummonedCustomItem> List { get; } = [];
 
         private static readonly HashSet<ushort> _activeSerials = [];
+        private static readonly Dictionary<ushort, SummonedCustomItem> _bySerial = [];
 
         /// <summary>
         /// Gets the list of items that can be managed by the function <see cref="HandleCustomAction"/>
@@ -81,7 +82,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// </summary>
         public static List<string?> CommandsList(List<ItemDataList> commands)
         {
-            List<string?> result = [];
+            List<string?> result = new(commands.Count);
 
             foreach (ItemDataList data in commands)
                 result.Add(data.Command);
@@ -98,7 +99,29 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// The serial of the item or pickup, used for identification
         /// </summary>
-        public ushort Serial { get; internal set; }
+        public ushort Serial
+        {
+            get;
+            internal set
+            {
+                if (field == value)
+                    return;
+
+                if (field != 0)
+                {
+                    _bySerial.Remove(field);
+                    _activeSerials.Remove(field);
+                }
+
+                field = value;
+
+                if (value != 0)
+                {
+                    _bySerial[value] = this;
+                    _activeSerials.Add(value);
+                }
+            }
+        }
 
         /// <summary>
         /// Check if this item is a pickup
@@ -137,7 +160,6 @@ namespace UncomplicatedCustomItems.API.Features
 
             SetProperties();
             List.Add(this);
-            _activeSerials.Add(this.Serial);
             CustomModuleManager.Load(this);
 
             if (Item is FirearmItem firearm)
@@ -153,7 +175,7 @@ namespace UncomplicatedCustomItems.API.Features
         public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
 #if EXILED
-        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player) : this(customItem, Player.Get(player.Id), Player.Get(player.Id).AddItem(customItem.Item), null) { }
+        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player) : this(customItem, Player.Get(player.Id), Player.Get(player.Id)?.AddItem(customItem.Item), null) { }
 
         public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, Player.Get(player.Id), item, null) { }
 #endif
@@ -162,7 +184,16 @@ namespace UncomplicatedCustomItems.API.Features
         {
             List.Clear();
             _activeSerials.Clear();
+            _bySerial.Clear();
             PlayerCache.Clear();
+        }
+
+        public static void OnPlayerLeft(Player player)
+        {
+            if (player == null)
+                return;
+
+            PlayerCache.Remove(player);
         }
 
         public void SetProperties()
@@ -242,7 +273,7 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.Weapon when CustomItem.CustomData is WeaponData weaponData:
                         HandleWeaponPickup(weaponData);
                         break;
-                        
+
                     case CustomItemType.MicroHID when CustomItem.CustomData is MicroHIDData microData && Pickup != null:
                         MicroHIDPickup microHID = (MicroHIDPickup)Pickup;
                         Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.MicroHID.MicroHIDItem>(out var microHIDItem);
@@ -269,20 +300,28 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void HandleKeycardItem(KeycardItem keycardItem, IKeycardData kd)
         {
-            ColorUtility.TryParseHtmlString(kd.PermissionsColor, out Color permissionsColor);
-            ColorUtility.TryParseHtmlString(kd.TintColor, out Color tintColor);
-            ColorUtility.TryParseHtmlString(kd.LabelColor, out Color labelColor);
-
-            Color32 permissionsColor32 = permissionsColor;
-            Color32 tintColor32 = tintColor;
-            Color32 labelColor32 = labelColor;
-
-            KeycardLevels permissions = new(kd.Containment, kd.Armory, kd.Admin);
-
             if (!keycardItem.Base.Customizable)
             {
                 LogManager.Warn($"{CustomItem.Name} is not customizable!\nThe item field must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
                 return;
+            }
+
+            if (!ColorUtility.TryParseHtmlString(kd.PermissionsColor, out Color permissionsColor))
+            {
+                LogManager.Warn($"{CustomItem.Name} Dosent have a valid hex code for property PermissionsColor");
+                permissionsColor = Color.black;
+            }
+
+            if (!ColorUtility.TryParseHtmlString(kd.TintColor, out Color tintColor))
+            {
+                LogManager.Warn($"{CustomItem.Name} Dosent have a valid hex code for property TintColor");
+                tintColor = Color.black;
+            }
+
+            if (!ColorUtility.TryParseHtmlString(kd.LabelColor, out Color labelColor))
+            {
+                LogManager.Warn($"{CustomItem.Name} Dosent have a valid hex code for property LabelColor");
+                labelColor = Color.black;
             }
 
             CustomKeycard customKeycard = new(keycardItem.Base);
@@ -292,14 +331,12 @@ namespace UncomplicatedCustomItems.API.Features
             customKeycard.SerialNumber = kd.SerialNumber;
             customKeycard.WearIndex = kd.WearDetail;
             customKeycard.RankIndex = kd.Rank;
-            customKeycard.LabelColor = labelColor32;
+            customKeycard.LabelColor = labelColor;
             customKeycard.LabelText = kd.Label;
             customKeycard.ItemName = CustomItem.Name;
-            customKeycard.CardColor = tintColor32;
-            customKeycard.PermissionsColor = permissionsColor32;
-            customKeycard.Permissions = permissions;
-
-            LogManager.Debug($"{labelColor32} {labelColor} {kd.LabelColor}");
+            customKeycard.CardColor = tintColor;
+            customKeycard.PermissionsColor = permissionsColor;
+            customKeycard.Permissions = new(kd.Containment, kd.Armory, kd.Admin);
 
             KeycardDetailSynchronizer.Database.Remove(keycardItem.Serial);
             KeycardDetailSynchronizer.ServerProcessItem(keycardItem.Base);
@@ -312,14 +349,23 @@ namespace UncomplicatedCustomItems.API.Features
             if (keycardPickup == null)
                 return;
 
-            ColorUtility.TryParseHtmlString(kd.PermissionsColor, out Color permissionsColor);
-            ColorUtility.TryParseHtmlString(kd.TintColor, out Color tintColor);
-            ColorUtility.TryParseHtmlString(kd.LabelColor, out Color labelColor);
+            if (!ColorUtility.TryParseHtmlString(kd.PermissionsColor, out Color permissionsColor))
+            {
+                LogManager.Warn($"{CustomItem.Name} Dosent have a valid hex code for property PermissionsColor");
+                permissionsColor = Color.black;
+            }
 
-            Color32 permissionsColor32 = permissionsColor;
-            Color32 tintColor32 = tintColor;
-            Color32 labelColor32 = labelColor;
-            KeycardLevels permissions = new(kd.Containment, kd.Armory, kd.Admin);
+            if (!ColorUtility.TryParseHtmlString(kd.TintColor, out Color tintColor))
+            {
+                LogManager.Warn($"{CustomItem.Name} Dosent have a valid hex code for property TintColor");
+                tintColor = Color.black;
+            }
+
+            if (!ColorUtility.TryParseHtmlString(kd.LabelColor, out Color labelColor))
+            {
+                LogManager.Warn($"{CustomItem.Name} Dosent have a valid hex code for property LabelColor");
+                labelColor = Color.black;
+            }
 
             keycardPickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.Keycards.KeycardItem>(out var item);
             item.ItemSerial = keycardPickup.Serial;
@@ -328,14 +374,13 @@ namespace UncomplicatedCustomItems.API.Features
             customKeycard.SerialNumber = kd.SerialNumber;
             customKeycard.WearIndex = kd.WearDetail;
             customKeycard.RankIndex = kd.Rank;
-            customKeycard.LabelColor = labelColor32;
+            customKeycard.LabelColor = labelColor;
             customKeycard.LabelText = kd.Label;
             customKeycard.ItemName = CustomItem.Name;
-            customKeycard.CardColor = tintColor32;
-            customKeycard.PermissionsColor = permissionsColor32;
-            customKeycard.Permissions = permissions;
+            customKeycard.CardColor = tintColor;
+            customKeycard.PermissionsColor = permissionsColor;
+            customKeycard.Permissions = new(kd.Containment, kd.Armory, kd.Admin);
 
-            LogManager.Debug($"{labelColor32} {labelColor} {kd.LabelColor}");
             KeycardDetailSynchronizer.Database.Remove(keycardPickup.Serial);
             KeycardDetailSynchronizer.ServerProcessPickup(keycardPickup.Base);
 
@@ -358,7 +403,7 @@ namespace UncomplicatedCustomItems.API.Features
             {
                 if (!MagazineModule.MagazineInserted)
                     MagazineModule.ServerInsertEmptyMagazine();
-                    
+
                 MagazineModule.ServerSetInstanceAmmo(Serial, wd.MaxAmmo);
 
                 if (firearmItem.ActionModule is AutomaticActionModule actionModule)
@@ -391,13 +436,13 @@ namespace UncomplicatedCustomItems.API.Features
             Firearm firearm = AttachmentPreview.Get(firearmPickup.Base.CurId);
             firearm.ItemSerial = firearmPickup.Serial;
 
-            firearm.TryGetModule<MagazineModule>(out var mag);
-            MagazineModule = mag;
-            firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
-            HitscanHitregModule = hitscan;
-            firearm.TryGetModule<AutomaticActionModule>(out var actionModule);
-            
-            if (wd.Attachments.Count() > 1)
+            if (firearm.TryGetModule<MagazineModule>(out var mag))
+                MagazineModule = mag;
+
+            if (firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan))
+                HitscanHitregModule = hitscan;
+
+            if (!string.IsNullOrWhiteSpace(wd.Attachments))
             {
                 foreach (AttachmentName attachment in GetAttachments())
                 {
@@ -415,10 +460,14 @@ namespace UncomplicatedCustomItems.API.Features
 
             if (!PropertiesSet)
             {
-                if (!MagazineModule.MagazineInserted)
-                    MagazineModule.ServerInsertEmptyMagazine();
+                if (MagazineModule != null)
+                {
+                    if (!MagazineModule.MagazineInserted)
+                        MagazineModule.ServerInsertEmptyMagazine();
 
-                MagazineModule.ServerSetInstanceAmmo(firearmPickup.Serial, wd.MaxAmmo);
+                    MagazineModule.ServerSetInstanceAmmo(firearmPickup.Serial, wd.MaxAmmo);
+                }
+
                 firearmPickup.Base.Worldmodel.TryGetExtension<WorldmodelMagazineExtension>(out var extension);
                 extension.UpdateAllMags();
             }
@@ -684,31 +733,25 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (CustomItem.CustomData is IWeaponData weaponData)
             {
-                List<AttachmentName> names = [];
                 string attachmentsString = weaponData.Attachments;
 
                 if (string.IsNullOrWhiteSpace(attachmentsString))
                     return [];
 
-                List<string> attachmentsList = attachmentsString
-                    .Split(',')
-                    .Select(att => att.Trim())
-                    .Where(att => !string.IsNullOrEmpty(att))
-                    .ToList();
+                string[] attachmentsArray = attachmentsString.Split([','], StringSplitOptions.RemoveEmptyEntries);
+                List<AttachmentName> names = new(attachmentsArray.Length);
 
-                foreach (string attachment in attachmentsList)
+                foreach (string rawAttachment in attachmentsArray)
                 {
-                    if (Enum.TryParse(attachment, out AttachmentName name))
+                    if (Enum.TryParse(rawAttachment.Trim(), out AttachmentName name))
                         names.Add(name);
                 }
 
                 return names.ToArray();
             }
-            else
-            {
-                LogManager.Warn("CustomData is not in the expected IWeaponData format or is null.");
-                return [];
-            }
+
+            LogManager.Warn("CustomData is not in the expected IWeaponData format or is null.");
+            return [];
         }
 
         internal void StopAmmoRegen()
@@ -734,15 +777,12 @@ namespace UncomplicatedCustomItems.API.Features
 
         internal IEnumerator<float> AmmoRegen(FirearmItem firearm)
         {
+            if (!TryGetModule<CustomModuleAPI.CustomModules.AmmoRegen>(out var regen) || regen == null)
+                yield break;
+
             while (true)
             {
-                if (!TryGetModule<CustomModuleAPI.CustomModules.AmmoRegen>(out var regen) || regen == null)
-                    yield break;
-
-                if (firearm == null || firearm.CurrentOwner == null)
-                    yield break;
-
-                if (!firearm.CurrentOwner.IsAlive)
+                if (firearm == null || firearm.CurrentOwner == null || !firearm.CurrentOwner.IsAlive)
                     yield break;
 
                 if (firearm.CurrentOwner.CurrentItem?.Serial != firearm.Serial)
@@ -793,7 +833,7 @@ namespace UncomplicatedCustomItems.API.Features
                 return;
             }
 
-            if (CustomItem.BadgeName != null && CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor is not null && CustomItem.BadgeColor.Length > 2)
+            if (CustomItem.BadgeName.Length > 1 && CustomItem.BadgeColor.Length > 2)
             {
                 LogManager.Debug($"Badge detected, putting {CustomItem.BadgeName}@{CustomItem.BadgeColor} to player {player.PlayerId}");
 
@@ -832,24 +872,26 @@ namespace UncomplicatedCustomItems.API.Features
             SetProperties();
             HandleEvent(pickedUp.Player, ItemEvents.Pickup, pickedUp.Item.Serial);
 
-            if (!PlayerCache.ContainsKey(pickedUp.Player))
-                PlayerCache.Add(pickedUp.Player, []);
+            if (!PlayerCache.TryGetValue(pickedUp.Player, out var set))
+            {
+                set = [];
+                PlayerCache[pickedUp.Player] = set;
+            }
 
-            PlayerCache[pickedUp.Player].Add(this);
+            set.Add(this);
         }
 
         public void OnDrop(PlayerDroppedItemEventArgs dropped)
         {
             Pickup = dropped.Pickup;
             Item = null;
+            if (Owner != null && PlayerCache.TryGetValue(Owner, out var set))
+            {
+                set.Remove(this);
+            }
             Owner = null;
             SaveProperties();
             HandleEvent(dropped.Player, ItemEvents.Drop, dropped.Pickup.Serial);
-
-            if (!PlayerCache.ContainsKey(dropped.Player))
-                PlayerCache.Add(dropped.Player, []);
-
-            PlayerCache[dropped.Player].Remove(this);
         }
 
         public void OnThrew(PlayerThrewProjectileEventArgs ev)
@@ -858,10 +900,10 @@ namespace UncomplicatedCustomItems.API.Features
             Item = null;
             Owner = ev.Projectile.LastOwner;
 
-            if (!PlayerCache.ContainsKey(ev.Player))
-                PlayerCache.Add(ev.Player, []);
-
-            PlayerCache[ev.Player].Remove(this);
+            if (ev.Player != null && PlayerCache.TryGetValue(ev.Player, out var set))
+            {
+                set.Remove(this);
+            }
         }
 
         public void OnDetonated(ProjectileExplodedEventArgs ev)
@@ -873,16 +915,24 @@ namespace UncomplicatedCustomItems.API.Features
         {
             Type moduleType = typeof(T);
 
-            CheckingCustomFlagEventArgs args = new(CustomItem, moduleType);
-            Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
+            if (Events.Handlers.CustomItemEvents.HasCheckingCustomFlagSubscribers)
+                Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(new(CustomItem, moduleType));
 
-            if (!args.IsAllowed)
-                return false;
+            bool has = false;
+            for (int i = 0; i < CustomModules.Count; i++)
+            {
+                if (CustomModules[i] is T)
+                {
+                    has = true;
+                    break;
+                }
+            }
 
-            bool has = CustomModules.OfType<T>().Any();
+            if (Plugin.Instance.Config.ShowSilentLogs)
+                LogManager.Silent($"{CustomItem.Name} has {(has ? moduleType.Name : $"no {moduleType.Name}")}");
 
-            LogManager.Silent($"{CustomItem.Name} has {(has ? moduleType.Name : $"no {moduleType.Name}")}");
-            Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new (CustomItem, moduleType, has));
+            if (Events.Handlers.CustomItemEvents.HasCheckedCustomFlagSubscribers)
+                Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new(CustomItem, moduleType, has));
 
             return has;
         }
@@ -891,22 +941,27 @@ namespace UncomplicatedCustomItems.API.Features
         {
             Type moduleType = typeof(T);
 
-            CheckingCustomFlagEventArgs args = new(CustomItem, moduleType);
-            Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(args);
+            if (Events.Handlers.CustomItemEvents.HasCheckingCustomFlagSubscribers)
+                Events.Handlers.CustomItemEvents.OnCheckingCustomFlag(new(CustomItem, moduleType));
 
-            if (!args.IsAllowed)
+            module = null;
+            for (int i = 0; i < CustomModules.Count; i++)
             {
-                module = null;
-                return false;
+                if (CustomModules[i] is T targetModule)
+                {
+                    module = targetModule;
+                    break;
+                }
             }
 
-            module = CustomModules.OfType<T>().FirstOrDefault();
+            if (Plugin.Instance.Config.ShowSilentLogs)
+                LogManager.Silent($"{CustomItem.Name} has {(module != null ? moduleType.Name : $"no {moduleType.Name}")}");
 
-            LogManager.Silent($"{CustomItem.Name} has {(module != null ? moduleType.Name : $"no {moduleType.Name}")}");
-            Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new (CustomItem, moduleType, module != null));
+            if (Events.Handlers.CustomItemEvents.HasCheckedCustomFlagSubscribers)
+                Events.Handlers.CustomItemEvents.OnCheckedCustomFlag(new(CustomItem, moduleType, module != null));
+
             return module != null;
         }
-
 
         private static readonly Dictionary<Player, Dictionary<ushort, bool>> _cooldownStates = [];
 
@@ -928,48 +983,53 @@ namespace UncomplicatedCustomItems.API.Features
                         }
 
                         LogManager.Debug($"Firing events for item {CustomItem.Name}");
-                        Player randomPlayer = Player.ReadyList.ToList().RandomItem();
-                        if (data.Command != null && data.Command.Length > 2)
+
+                        if (!string.IsNullOrEmpty(data.Command) && data.Command.Length > 2)
                         {
-                            string processedCommand = data.Command
-                                .Replace("{p_id}", player.PlayerId.ToString())
-                                .Replace("{rp_id}", randomPlayer.PlayerId.ToString())
-                                .Replace("{p_pos}", player.Position.ToString())
-                                .Replace("{p_role}", player.Role.ToString())
-                                .Replace("{p_health}", player.Health.ToString())
-                                .Replace("{p_zone}", player.Zone.ToString())
-                                .Replace("{p_room}", player.Room?.ToString() ?? "null")
-                                .Replace("{p_rotation}", player.Rotation.ToString())
-                                .Replace("{pj_pos}", PlayerHandler.DetonationPosition.ToString())
-                                .Replace("{pj_pos_mer}", PlayerHandler.DetonationPosition.ToString().Replace(",", " "))
-                                .Replace("{p_pos_mer}", player.Position.ToString().Replace(",", " "));
+                            string cmd = data.Command;
+                            bool hasPlaceholders = cmd.IndexOf('{') >= 0;
 
-                            if (data.Command.Contains("{p_id}") || data.Command.Contains("{rp_id}") ||
-                                data.Command.Contains("{p_pos}") || data.Command.Contains("{p_role}") ||
-                                data.Command.Contains("{p_health}") || data.Command.Contains("{p_zone}") ||
-                                data.Command.Contains("{p_room}") || data.Command.Contains("{p_rotation}") ||
-                                data.Command.Contains("{pj_pos}") || data.Command.Contains("{pj_pos_mer}") ||
-                                data.Command.Contains("{p_pos_mer}"))
+                            Player? randomPlayer = null;
+                            if (hasPlaceholders && cmd.Contains("{rp_id}"))
                             {
-                                RunningCustomItemCommandEventArgs args = new(processedCommand, data.Command, this);
-                                Events.Handlers.CustomItemEvents.OnRunningCustomItemCommand(args);
+                                List<Player> readyList = Player.ReadyList.ToList();
+                                if (readyList.Count > 0)
+                                    randomPlayer = readyList[UnityEngine.Random.Range(0, readyList.Count)];
+                            }
 
-                                if (args.IsAllowed)
+                            string processedCommand = cmd;
+                            if (hasPlaceholders)
+                            {
+                                processedCommand = processedCommand
+                                    .Replace("{p_id}", player.PlayerId.ToString())
+                                    .Replace("{rp_id}", randomPlayer?.PlayerId.ToString() ?? "0")
+                                    .Replace("{p_pos}", player.Position.ToString())
+                                    .Replace("{p_role}", player.Role.ToString())
+                                    .Replace("{p_health}", player.Health.ToString())
+                                    .Replace("{p_zone}", player.Zone.ToString())
+                                    .Replace("{p_room}", player.Room?.ToString() ?? "null")
+                                    .Replace("{p_rotation}", player.Rotation.ToString())
+                                    .Replace("{pj_pos}", PlayerHandler.DetonationPosition.ToString())
+                                    .Replace("{pj_pos_mer}", PlayerHandler.DetonationPosition.ToString().Replace(",", " "))
+                                    .Replace("{p_pos_mer}", player.Position.ToString().Replace(",", " "));
+                            }
+
+                            RunningCustomItemCommandEventArgs args = new(processedCommand, data.Command, this);
+                            Events.Handlers.CustomItemEvents.OnRunningCustomItemCommand(args);
+
+                            if (args.IsAllowed)
+                            {
+                                if (hasPlaceholders)
+                                {
                                     Server.RunCommand(processedCommand, player.GetSender());
-
-                                Events.Handlers.CustomItemEvents.OnRanCustomItemCommand(new(processedCommand, data.Command, this));
-                            }
-                            else
-                            {
-                                RunningCustomItemCommandEventArgs args = new(processedCommand, data.Command, this);
-                                Events.Handlers.CustomItemEvents.OnRunningCustomItemCommand(args);
-
-                                if (args.IsAllowed)
+                                }
+                                else
                                     Server.RunCommand(processedCommand, new SilentCommandSender());
-
-                                Events.Handlers.CustomItemEvents.OnRanCustomItemCommand(new(processedCommand, data.Command, this));
                             }
+
+                            Events.Handlers.CustomItemEvents.OnRanCustomItemCommand(new(processedCommand, data.Command, this));
                         }
+
                         StartCooldown(player, playerItemSerial, data.CoolDown);
 
                         Utilities.ParseResponse(player, itemData);
@@ -988,23 +1048,35 @@ namespace UncomplicatedCustomItems.API.Features
                 if (itemStates.TryGetValue(serial, out bool isOnCooldown))
                     return isOnCooldown;
             }
-            
+
             return false;
         }
 
         public void StartCooldown(Player player, ushort serial, float cooldown)
         {
-            if (!_cooldownStates.ContainsKey(player))
-                _cooldownStates[player] = [];
+            if (!_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool>? itemStates))
+            {
+                itemStates = [];
+                _cooldownStates[player] = itemStates;
+            }
 
-            _cooldownStates[player][serial] = true;
+            itemStates[serial] = true;
             Timing.CallDelayed(Timing.WaitForSeconds(cooldown), () =>
             {
-                if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> itemStates))
-                    itemStates[serial] = false;
+                if (_cooldownStates.TryGetValue(player, out Dictionary<ushort, bool> states))
+                {
+                    states[serial] = false;
+                    if (states.Count == 0 || !states.Values.Any(v => v))
+                        _cooldownStates.Remove(player);
+                }
 
                 LogManager.Debug($"Cooldown complete for item {CustomItem.Name}");
             });
+        }
+
+        internal static void CleanupCooldownStates()
+        {
+            _cooldownStates.Clear();
         }
 
         public void HandleSelectedDisplayHint(Player player)
@@ -1032,19 +1104,19 @@ namespace UncomplicatedCustomItems.API.Features
                         IMedikitData? medikitData = CustomItem.CustomData as IMedikitData;
                         Owner.Heal(medikitData?.Health ?? 0f);
                         break;
-                    
+
                     case CustomItemType.Painkillers:
                         if (CustomItem.CustomData is not IPainkillersData data)
                             break;
 
                         Timing.RunCoroutine(Utilities.PainkillersCoroutine(Owner, data));
                         break;
-                    
+
                     case CustomItemType.Adrenaline:
                         IAdrenalineData? adrenalineData = CustomItem.CustomData as IAdrenalineData;
                         Owner.ReferenceHub.playerStats.GetModule<AhpStat>().ServerAddProcess(adrenalineData?.Amount ?? 0, limit: 1000f, decay: adrenalineData?.Decay ?? 0, efficacy: adrenalineData?.Efficacy ?? 0, sustain: adrenalineData?.Sustain ?? 0f, adrenalineData?.Persistant ?? false);
                         break;
-                    
+
                     default:
                         return false;
                 }
@@ -1052,7 +1124,7 @@ namespace UncomplicatedCustomItems.API.Features
                 HandleEvent(Owner, ItemEvents.Use, Serial);
                 if (!CustomItem.Reusable)
                     Owner.RemoveItem(item.Base);
- 
+
                 return true;
             }
 
@@ -1063,52 +1135,45 @@ namespace UncomplicatedCustomItems.API.Features
         {
             CustomModuleManager.Destroy(this);
             List.Remove(this);
-            foreach (KeyValuePair<Player, HashSet<SummonedCustomItem>> kvp in PlayerCache.ToArray())
-            {
-                foreach (SummonedCustomItem sci in kvp.Value.Where(sci => sci == this).ToArray())
-                {
-                    kvp.Value.Remove(sci);
-                }
 
-                PlayerCache[kvp.Key] = kvp.Value;
+            if (Owner != null && PlayerCache.TryGetValue(Owner, out var ownerSet))
+            {
+                ownerSet.Remove(this);
+                if (ownerSet.Count == 0)
+                    PlayerCache.Remove(Owner);
+            }
+            else
+            {
+                foreach (KeyValuePair<Player, HashSet<SummonedCustomItem>> kvp in PlayerCache)
+                {
+                    kvp.Value.Remove(this);
+                }
             }
 
-            _activeSerials.Remove(Serial);
-
             if (IsPickup)
-            {                
+            {
                 Pickup?.Destroy();
             }
             else if (Item != null)
                 Owner?.RemoveItem(Item.Base);
 
+            Serial = 0;
             Pickup = null;
             Item = null;
-            Serial = 0;
             Owner = null;
             CustomItem = null!;
             StopAmmoRegen();
         }
 
-        
         public static bool TryGet(ushort serial, out SummonedCustomItem? item)
         {
-            if (!_activeSerials.Contains(serial))
-            {
-                item = null;
-                return false;
-            }
-
-            item = List.FirstOrDefault(sci => sci.Serial == serial);
-            return item != null;
+            return _bySerial.TryGetValue(serial, out item);
         }
 
         public static SummonedCustomItem? Get(ushort serial)
         {
-            if (!_activeSerials.Contains(serial))
-                return null;
-
-            return List.FirstOrDefault(sci => sci.Serial == serial);
+            _bySerial.TryGetValue(serial, out var item);
+            return item;
         }
 
         public static SummonedCustomItem? Get(Player owner, ushort serial)
@@ -1116,10 +1181,10 @@ namespace UncomplicatedCustomItems.API.Features
             if (owner?.PlayerId == null)
                 return null;
 
-            if (!_activeSerials.Contains(serial))
-                return null;
+            if (_bySerial.TryGetValue(serial, out var item) && item.Owner?.PlayerId == owner.PlayerId)
+                return item;
 
-            return List.FirstOrDefault(sci => sci.Serial == serial && sci.Owner?.PlayerId == owner.PlayerId);
+            return null;
         }
 
         public static List<SummonedCustomItem> Get(Player owner)
@@ -1127,15 +1192,23 @@ namespace UncomplicatedCustomItems.API.Features
             if (owner?.PlayerId == null)
                 return [];
 
-            return List.Where(sci => sci.Owner?.PlayerId == owner.PlayerId).ToList();
+            if (PlayerCache.TryGetValue(owner, out var items))
+                return items.ToList();
+
+            return [];
         }
 
         public static List<SummonedCustomItem> Get(ItemType item)
         {
             List<SummonedCustomItem> result = [];
-            List<SummonedCustomItem> items = List.Count > 100 ? List.AsParallel().Where(sci => sci.CustomItem.Item == item).ToList() : List.Where(sci => sci.CustomItem.Item == item).ToList();
+            for (int i = 0; i < List.Count; i++)
+            {
+                SummonedCustomItem sci = List[i];
+                if (sci.CustomItem?.Item == item)
+                    result.Add(sci);
+            }
 
-            return items;
+            return result;
         }
     }
 }

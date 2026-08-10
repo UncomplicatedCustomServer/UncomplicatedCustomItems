@@ -1,68 +1,18 @@
 using System;
-using System.Collections.Generic;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
-using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Manager;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
     public class HumeShield : CustomModuleBase
     {
         public override string Name => "HumeShield";
-        public override List<string> RequiredArguments => 
-        [
-            "RegenRate",
-            "MaxHumeShield",
-            "RegenCoolDown",
-            "Trigger"
-        ];
         
         public float RegenRate { get; set; }
         public float MaxHumeShield { get; set; }
         public float RegenCoolDown { get; set; }
         public TriggerOn Trigger { get; set; }
-
-        public override void OnAdded(SummonedCustomItem item)
-        {
-            if (CustomItem == null)
-                return;
-
-            base.OnAdded(item);
-            foreach (Dictionary<object, object> args in Arguments)
-            {
-                if (!args.TryGetValue<float>("RegenRate", out var regenRate))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} RegenRate is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("MaxHumeShield", out var maxHumeShield))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} MaxHumeShield is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("RegenCoolDown", out var regenCoolDown))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} RegenCoolDown is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<TriggerOn>("Trigger", out var trigger))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Trigger is not a valid enum value! {string.Join(", ", Enum.GetNames(typeof(TriggerOn)))}");
-                    return;
-                }
-
-                RegenRate = regenRate;
-                MaxHumeShield = maxHumeShield;
-                RegenCoolDown = regenCoolDown;
-                Trigger = trigger;
-            }
-        }
 
         public override void Run(EventArgs eventArgs)
         {
@@ -89,7 +39,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     playerChangedItem.Player.HumeShieldRegenRate = RegenRate;
                     break;
 
-                case PlayerUsedItemEventArgs playerUsedItem when HasFlagFast(Trigger, TriggerOn.OnChangedItem):
+                case PlayerUsedItemEventArgs playerUsedItem when HasFlagFast(Trigger, TriggerOn.OnUse):
                     playerUsedItem.Player.MaxHumeShield = MaxHumeShield;
                     playerUsedItem.Player.HumeShieldRegenCooldown = RegenCoolDown;
                     playerUsedItem.Player.HumeShieldRegenRate = RegenRate;

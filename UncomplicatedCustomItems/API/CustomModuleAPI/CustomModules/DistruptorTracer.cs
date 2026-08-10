@@ -37,13 +37,12 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     return;
 
                 float maxDistance = hitscanHitregModuleBase.DamageFalloffDistance + hitscanHitregModuleBase.FullDamageDistance;
-
                 Ray baseRay = new(ev.Player.Camera.position + ev.Player.Camera.forward, ev.Player.Camera.forward);
 
                 if (ev.FirearmItem.ActionModule is AutomaticActionModule autoModule)
                 {
                     int amount = Mathf.Min(autoModule.AmmoStored, autoModule.ChamberSize);
-                    for (int i = 0; i <= amount; i++)
+                    for (int i = 0; i < amount; i++)
                     {
                         Ray ray = hitscanHitregModuleBase.RandomizeRay(baseRay, hitscanHitregModuleBase.CurrentInaccuracy);
 
@@ -54,8 +53,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                         }
                         else
                         {
-                            Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
-                            hitInfo.point = endPoint;
+                            hitInfo.point = ray.origin + (ray.direction * maxDistance);
                             hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
                             impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
                         }
@@ -63,7 +61,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 }
                 else if (ev.FirearmItem.ActionModule is PumpActionModule pumpModule)
                 {
-                    for (int i = 0; i <= pumpModule._baseShotsPerTriggerPull; i++)
+                    for (int i = 0; i < pumpModule._baseShotsPerTriggerPull; i++)
                     {
                         Ray ray = hitscanHitregModuleBase.RandomizeRay(baseRay, hitscanHitregModuleBase.CurrentInaccuracy);
 
@@ -74,8 +72,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                         }
                         else
                         {
-                            Vector3 endPoint = ray.origin + (ray.direction * maxDistance);
-                            hitInfo.point = endPoint;
+                            hitInfo.point = ray.origin + (ray.direction * maxDistance);
                             hitregmodule._templateShotData = new(disruptor, FiringState.FiringSingle);
                             impactmodule.ServerSendTracer(hitInfo, position1, null, impactmodule.BaseSettings.TracerPrefab);
                         }

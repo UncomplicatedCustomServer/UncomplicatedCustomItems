@@ -8,6 +8,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
     public class NoCharge : CustomModuleBase
     {
         public override string Name => "NoCharge";
+
         public override void Run(EventArgs eventArgs)
         {
             if (!Check(eventArgs))

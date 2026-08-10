@@ -28,57 +28,86 @@ namespace UncomplicatedCustomItems.API.Features.Manager
         // We should store the data here
         public static readonly List<Log> History = [];
 
+        private const int MaxHistory = 1000;
+        private static readonly object _historyLock = new();
+
+        internal static void AddToHistory(LogLevel level, string message)
+        {
+            lock (_historyLock)
+            {
+                History.Add(new(DateTime.Now, level, message));
+                if (History.Count > MaxHistory)
+                    History.RemoveRange(0, History.Count - MaxHistory);
+            }
+        }
+
+        internal static List<Log> SnapshotHistory()
+        {
+            lock (_historyLock)
+                return new(History);
+        }
+
+        internal static void ClearHistory()
+        {
+            lock (_historyLock)
+                History.Clear();
+        }
+
         public static bool MessageSent { get; internal set; }
 
         public static void Debug(string message)
         {
-            History.Add(new(DateTime.Now, LogLevel.Debug, message));
-            if (Plugin.Instance.Config.Debug)
-                Logger.Raw($"[DEBUG] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {FormatLogMessage(message)}", ConsoleColor.Green);
+            if (!Plugin.Instance.Config.Debug)
+                return;
+
+            AddToHistory(LogLevel.Debug, message);
+            Logger.Raw($"[DEBUG] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {FormatLogMessage(message)}", ConsoleColor.Green);
         }
 
         public static void Info(string message)
         {
-            History.Add(new(DateTime.Now, LogLevel.Info, message));
+            AddToHistory(LogLevel.Info, message);
             Logger.Info(FormatLogMessage(message));
         }
 
         public static void Warn(string message, string error = "CS0000")
         {
-            History.Add(new(DateTime.Now, LogLevel.Warn, message));
+            AddToHistory(LogLevel.Warn, message);
             Logger.Warn(FormatLogMessage(message));
         }
 
         public static void Error(string message, string error = "CS0000")
         {
-            History.Add(new(DateTime.Now, LogLevel.Error, message));
+            AddToHistory(LogLevel.Error, message);
             Logger.Error(FormatLogMessage(message));
         }
 
         public static void Raw(string message, ConsoleColor color, LogLevel logLevel, string category)
         {
-            History.Add(new(DateTime.Now, logLevel, message));
+            AddToHistory(logLevel, message);
             Logger.Raw($"[{category}] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {FormatLogMessage(message)}", color);
         }
 
         public static void Updater(string message)
         {
-            History.Add(new(DateTime.Now, LogLevel.Info, message));
+            AddToHistory(LogLevel.Info, message);
             Logger.Raw($"[Updater] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.Blue);
         }
 
         public static void Silent(string message)
         {
-            History.Add(new(DateTime.Now, LogLevel.Debug, message));
-            if (Plugin.Instance.Config.ShowSilentLogs)
-                Logger.Raw($"[Silent] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.White);
+            if (!Plugin.Instance.Config.ShowSilentLogs)
+                return;
+
+            AddToHistory(LogLevel.Debug, message);
+            Logger.Raw($"[Silent] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.White);
         }
 
-        public static void System(string message) => History.Add(new(DateTime.Now, LogLevel.Info, message));
+        public static void System(string message) => AddToHistory(LogLevel.Info, message);
 
         public static void Security(string message)
         {
-            History.Add(new(DateTime.Now, LogLevel.Info, message));
+            AddToHistory(LogLevel.Info, message);
             Logger.Raw($"[Security] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {message}", ConsoleColor.DarkMagenta);
         }
 

@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
                     JailbirdDeteriorationTracker.ReceivedStates[__instance._jailbird.ItemSerial] = previousState;
                     AutosyncRpc sync = new(__instance._jailbird.ItemId, out NetworkWriter writer);
                     writer.WriteByte(0);
-                    writer.WriteByte((byte)args.NewWearState);
+                    writer.WriteByte((byte)previousState);
                     sync.Send();
                     sync.Dispose();
 

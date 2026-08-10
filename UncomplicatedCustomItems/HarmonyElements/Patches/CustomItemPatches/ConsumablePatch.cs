@@ -57,15 +57,17 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         /// <returns></returns>
         internal static IEnumerator<float> PainkillersCoroutine(Player player, CustomPainkillers data)
         {
-            float TotalHealed = 0;
+            float totalHealed = 0;
             yield return Timing.WaitForSeconds(data.TimeBeforeStartHealing);
 
-            while (TotalHealed < data.TotalHealing && player.IsAlive)
+            float tickWait = Timing.WaitForSeconds(data.TickTime);
+
+            while (totalHealed < data.TotalHealing && player.IsAlive)
             {
-                float healAmount = Math.Min(data.TickHeal, data.TotalHealing - TotalHealed);
+                float healAmount = Math.Min(data.TickHeal, data.TotalHealing - totalHealed);
                 player.Heal(healAmount);
-                TotalHealed += healAmount;
-                yield return Timing.WaitForSeconds(data.TickTime);
+                totalHealed += healAmount;
+                yield return tickWait;
             }
         }
     }
