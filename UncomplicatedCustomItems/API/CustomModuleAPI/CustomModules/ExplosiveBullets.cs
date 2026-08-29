@@ -1,7 +1,7 @@
-using System;
-using LabApi.Events.Arguments.PlayerEvents;
-using LabApi.Events.Handlers;
+using InventorySystem.Items.Firearms.Modules.Misc;
 using LabApi.Features.Wrappers;
+using UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
@@ -11,14 +11,14 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public float DamageRadius { get; set; }
 
-        public override void Run(EventArgs eventArgs)
+        public void Prescan(Player player, Item item, Ray ray, HitscanResult result)
         {
-            if (!Check(eventArgs))
+            if (!Check(item))
                 return;
-                
-            if (eventArgs is PlayerPlacedBulletHoleEventArgs playerPlacedBullet)
+
+            foreach (HitRayPair pair in result.Obstacles)
             {
-                ExplosiveGrenadeProjectile? grenade = (ExplosiveGrenadeProjectile?)TimedGrenadeProjectile.SpawnActive(playerPlacedBullet.HitPosition, ItemType.GrenadeHE, playerPlacedBullet.Player, 0.2);
+                ExplosiveGrenadeProjectile? grenade = (ExplosiveGrenadeProjectile?)TimedGrenadeProjectile.SpawnActive(pair.Hit.point, ItemType.GrenadeHE, player, 0.2);
                 if (grenade != null)
                 {
                     grenade.MaxRadius = DamageRadius;
@@ -29,12 +29,12 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void RegisterEvents()
         {
-            PlayerEvents.PlacedBulletHole += Run;
+            AppendPrescanPatch.OnAppendPrescan += Prescan;
         }
 
         public override void UnregisterEvents()
         {
-            PlayerEvents.PlacedBulletHole -= Run;
+            AppendPrescanPatch.OnAppendPrescan -= Prescan;
         }
     }
 }

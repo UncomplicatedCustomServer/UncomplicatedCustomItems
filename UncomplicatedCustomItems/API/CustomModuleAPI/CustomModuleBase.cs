@@ -1,9 +1,10 @@
-using System;
-using System.Collections.Generic;
 using LabApi.Events.Arguments.Interfaces;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;
+using System;
+using System.Collections.Generic;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
+using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
 using YamlDotNet.Serialization;
@@ -50,6 +51,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 
             return true;
         }
+
+        public bool Check(Item item) => MatchesSerial(item.Serial);
+
 
         private bool Matches(Player? player) => player?.CurrentItem != null && MatchesSerial(player.CurrentItem.Serial);
 
