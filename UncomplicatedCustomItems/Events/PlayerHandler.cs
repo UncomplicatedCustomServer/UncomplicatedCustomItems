@@ -35,6 +35,8 @@ using UserSettings.ServerSpecific;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
 using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using InventorySystem.Items.Autosync;
+using static InventorySystem.Items.Usables.StatusMessage;
+using InventorySystem.Items.Usables;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -436,6 +438,16 @@ namespace UncomplicatedCustomItems.Events
                             {
                                 ev.IsAllowed = false;
                                 ev.ContinueProcess = false;
+
+                                if (cola.RemoveItemAfterUse)
+                                {
+                                    ev.UsableItem.DropItem().Destroy();
+                                }
+                                else
+                                {
+                                    ev.UsableItem.Base.OnUsingCancelled();
+                                    ev.Player.Connection?.Send(new StatusMessage(StatusType.Cancel, ev.UsableItem.Serial), 0);
+                                }
                             }
                             break;
                     }
@@ -468,8 +480,8 @@ namespace UncomplicatedCustomItems.Events
                             {
                                 ev.IsAllowed = false;
                                 ev.ContinueProcess = false;
-                                InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
-                                ev.Player.Connection?.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
+                                bag.OnUsingCancelled();
+                                ev.Player.Connection?.Send(new StatusMessage(StatusType.Cancel, bag.ItemSerial), 0);
                             }
 
                             ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
@@ -481,8 +493,8 @@ namespace UncomplicatedCustomItems.Events
                         {
                             ev.IsAllowed = false;
                             ev.ContinueProcess = false;
-                            InventorySystem.Items.Usables.UsableItemsController.GetHandler(ev.Player.ReferenceHub).CurrentUsable.Item?.OnUsingCancelled();
-                            ev.Player.Connection?.Send(new InventorySystem.Items.Usables.StatusMessage(InventorySystem.Items.Usables.StatusMessage.StatusType.Cancel, bag.ItemSerial), 0);
+                            bag.OnUsingCancelled();
+                            ev.Player.Connection?.Send(new StatusMessage(StatusType.Cancel, bag.ItemSerial), 0);
                         }
 
                         if (!data.DestroyOnUse)
@@ -494,10 +506,6 @@ namespace UncomplicatedCustomItems.Events
                         ev.Player.SendHint(data.EatingMessage, data.EatingMessageDuration);
                     }
                 }
-            }
-            else
-            {
-                LogManager.Info("Selected candy is not tracked as serialized.");
             }
         }
 
@@ -855,8 +863,6 @@ namespace UncomplicatedCustomItems.Events
         public static void OnPickup(PlayerPickedUpItemEventArgs ev)
         {
             if (ev.Item == null || ev.Player == null)
-                return;
-            if (ev.Item.Category != ItemCategory.Armor)
                 return;
 
             if (SummonedAPICustomItem.TryGet(ev.Item.Serial, out var summonedItem) && summonedItem != null)
@@ -1350,7 +1356,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 switch (ev.Effect, summonedItem.CustomItem)
                 {
-                    case (Scp207 or AntiScp207, CustomSCP207 scp207Data) when !scp207Data.Apply207Effect:
+                    case (CustomPlayerEffects.Scp207 or CustomPlayerEffects.AntiScp207, CustomSCP207 scp207Data) when !scp207Data.Apply207Effect:
                         LogManager.Debug("Removing SCP-207 effect.");
                         ev.Player.DisableEffect(ev.Effect);
                         ev.IsAllowed = false;
@@ -1371,7 +1377,7 @@ namespace UncomplicatedCustomItems.Events
 
                 switch (ev.Effect)
                 {
-                    case AntiScp207 or Scp207 when customItem.CustomItem.CustomData is SCP207Data scp207Data && !scp207Data.Apply207Effect:
+                    case CustomPlayerEffects.AntiScp207 or CustomPlayerEffects.Scp207 when customItem.CustomItem.CustomData is SCP207Data scp207Data && !scp207Data.Apply207Effect:
                         LogManager.Debug("Removing SCP-207 effect.");
                         ev.Player.DisableEffect(ev.Effect);
                         ev.IsAllowed = false;
