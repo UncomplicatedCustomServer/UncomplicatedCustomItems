@@ -10,5 +10,6 @@ namespace UncomplicatedCustomItems.API.Enums
         Subtract = 3,
         Division = 4,
         Divide = 4,
+        Set = 5
     }
 }

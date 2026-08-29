@@ -50,6 +50,10 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                     case MathType.Subtraction:
                         __result -= paramobj.Value;
                         break;
+
+                    case MathType.Set:
+                        __result = paramobj.Value;
+                        break;
                 }
             }
         }

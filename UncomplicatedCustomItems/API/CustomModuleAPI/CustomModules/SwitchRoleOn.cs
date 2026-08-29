@@ -9,6 +9,7 @@ using MEC;
 using PlayerRoles;
 using System;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
+using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
@@ -30,7 +31,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         {
             if (!Check(eventArgs))
                 return;
-                
+
             switch (eventArgs)
             {
                 case PlayerShotWeaponEventArgs shotWeaponEvent when HasFlagFast(Trigger, TriggerOn.OnShot):
@@ -41,30 +42,94 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     SwitchRole(usedItemEvent.Player);
                     break;
 
+                case PlayerReloadedWeaponEventArgs reloadedWeaponEvent when HasFlagFast(Trigger, TriggerOn.OnReload):
+                    SwitchRole(reloadedWeaponEvent.Player);
+                    break;
+
                 case PlayerChangedItemEventArgs changedItemEvent when HasFlagFast(Trigger, TriggerOn.OnChangedItem):
                     SwitchRole(changedItemEvent.Player);
                     break;
-                    
+
                 case PlayerPickedUpItemEventArgs pickedUpItemEvent when HasFlagFast(Trigger, TriggerOn.OnAdded):
                     SwitchRole(pickedUpItemEvent.Player);
                     break;
+
+                case PlayerDroppedItemEventArgs droppedItemEvent when HasFlagFast(Trigger, TriggerOn.OnDropped):
+                    SwitchRole(droppedItemEvent.Player);
+                    break;
+
+                case PlayerDeathEventArgs deathEvent when HasFlagFast(Trigger, TriggerOn.OnDeath):
+                    SwitchRole(ResolveDeathTarget(deathEvent.Player, deathEvent.Attacker) ?? deathEvent.Player);
+                    break;
+
+                case PlayerDyingEventArgs dyingEvent when HasFlagFast(Trigger, TriggerOn.OnDeath):
+                    SwitchRole(ResolveDeathTarget(dyingEvent.Player, dyingEvent.Attacker) ?? dyingEvent.Player);
+                    break;
+
+                case PlayerHurtEventArgs hurtEvent when HasFlagFast(Trigger, TriggerOn.OnHurt):
+                    SwitchRole(ResolveHurtTarget(hurtEvent) ?? hurtEvent.Player);
+                    break;
+
+                case PlayerInteractedDoorEventArgs doorEvent when HasFlagFast(Trigger, TriggerOn.OnDoorInteracted):
+                    SwitchRole(doorEvent.Player);
+                    break;
+
+                case PlayerInspectedItemEventArgs inspectedEvent when HasFlagFast(Trigger, TriggerOn.OnInspected):
+                    SwitchRole(inspectedEvent.Player);
+                    break;
             }
+        }
+
+        private Player? ResolveHurtTarget(PlayerHurtEventArgs ev)
+        {
+            if (ev.Player?.CurrentItem != null && Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out var victimItem) && victimItem?.CustomItem == CustomItem)
+                return ev.Player;
+
+            if (ev.Attacker?.CurrentItem != null && Utilities.TryGetSummonedCustomItem(ev.Attacker.CurrentItem.Serial, out var attackerItem) && attackerItem?.CustomItem == CustomItem)
+                return ev.Attacker;
+
+            return ev.Player;
+        }
+
+        private Player? ResolveDeathTarget(Player? victim, Player? attacker)
+        {
+            if (victim?.CurrentItem != null && Utilities.TryGetSummonedCustomItem(victim.CurrentItem.Serial, out var victimItem) && victimItem?.CustomItem == CustomItem)
+                return victim;
+
+            if (attacker?.CurrentItem != null && Utilities.TryGetSummonedCustomItem(attacker.CurrentItem.Serial, out var attackerItem) && attackerItem?.CustomItem == CustomItem)
+                return attacker;
+
+            return victim;
         }
 
         public override void RegisterEvents()
         {
             PlayerEvents.ShotWeapon += Run;
             PlayerEvents.UsedItem += Run;
+            PlayerEvents.ReloadedWeapon += Run;
             PlayerEvents.ChangedItem += Run;
             PlayerEvents.PickedUpItem += Run;
+            PlayerEvents.DroppedItem += Run;
+            PlayerEvents.Death += Run;
+            PlayerEvents.Dying += Run;
+            PlayerEvents.Hurt += Run;
+            PlayerEvents.InteractedDoor += Run;
+            PlayerEvents.InspectedItem += Run;
         }
 
         public override void UnregisterEvents()
         {
             PlayerEvents.ShotWeapon -= Run;
             PlayerEvents.UsedItem -= Run;
+            PlayerEvents.ReloadedWeapon -= Run;
             PlayerEvents.ChangedItem -= Run;
             PlayerEvents.PickedUpItem -= Run;
+            PlayerEvents.DroppedItem -= Run;
+            PlayerEvents.Death -= Run;
+            PlayerEvents.Dying -= Run;
+            PlayerEvents.Hurt -= Run;
+            PlayerEvents.InteractedDoor -= Run;
+            PlayerEvents.InspectedItem -= Run;
         }
 
         private void SwitchRole(Player player)
