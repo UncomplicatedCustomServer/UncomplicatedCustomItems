@@ -12,6 +12,7 @@ using System.Reflection;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
+using UnityEngine;
 using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI
@@ -383,7 +384,19 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
         private static object? ConvertValue(object? value, Type targetType)
         {
             if (value == null)
-                return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
+            {
+                if (targetType.IsValueType)
+                    return Activator.CreateInstance(targetType);
+
+                if (targetType.IsGenericType)
+                {
+                    Type definition = targetType.GetGenericTypeDefinition();
+                    if (definition == typeof(Dictionary<,>) || definition == typeof(List<>))
+                        return Activator.CreateInstance(targetType);
+                }
+
+                return null;
+            }
 
             Type underlying = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
@@ -393,7 +406,106 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
             if (underlying.IsEnum)
                 return Enum.Parse(underlying, value.ToString()!, ignoreCase: true);
 
-            return Convert.ChangeType(value, underlying);
+            if (underlying == typeof(Vector3))
+                return ConvertVector3(value);
+
+            if (TryConvertDictionary(value, underlying, out object? dictionary))
+                return dictionary;
+
+            if (TryConvertList(value, underlying, out object? list))
+                return list;
+
+            try
+            {
+                return Convert.ChangeType(value, underlying);
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Failed to convert value '{value}' to '{targetType.Name}': {ex}");
+                return null;
+            }
+        }
+
+        private static bool TryConvertDictionary(object? value, Type targetType, out object? result)
+        {
+            result = null;
+
+            if (!targetType.IsGenericType || targetType.GetGenericTypeDefinition() != typeof(Dictionary<,>))
+                return false;
+
+            if (value is not IDictionary source)
+                return false;
+
+            Type keyType = targetType.GetGenericArguments()[0];
+            Type valueType = targetType.GetGenericArguments()[1];
+
+            IDictionary dictionary = (IDictionary)Activator.CreateInstance(targetType);
+            foreach (DictionaryEntry entry in source)
+            {
+                if (entry.Key == null)
+                    continue;
+
+                object? key = ConvertValue(entry.Key, keyType);
+                object? val = ConvertValue(entry.Value, valueType);
+                dictionary[key] = val;
+            }
+
+            result = dictionary;
+            return true;
+        }
+
+        private static bool TryConvertList(object? value, Type targetType, out object? result)
+        {
+            result = null;
+
+            if (!targetType.IsGenericType || targetType.GetGenericTypeDefinition() != typeof(List<>))
+                return false;
+
+            if (value is not IList source)
+                return false;
+
+            Type elementType = targetType.GetGenericArguments()[0];
+            IList list = (IList)Activator.CreateInstance(targetType);
+            foreach (object item in source)
+                list.Add(ConvertValue(item, elementType));
+
+            result = list;
+            return true;
+        }
+
+        private static object? ConvertVector3(object value)
+        {
+            if (value is Vector3 vector)
+                return vector;
+
+            if (value is string raw)
+            {
+                string[] parts = raw.Split([' ', ',', ';'], StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 3 && float.TryParse(parts[0], out float x) && float.TryParse(parts[1], out float y) && float.TryParse(parts[2], out float z))
+                    return new Vector3(x, y, z);
+            }
+
+            if (value is IDictionary dictionary)
+            {
+                float x = TryReadFloat(dictionary, "x", 0f);
+                float y = TryReadFloat(dictionary, "y", 0f);
+                float z = TryReadFloat(dictionary, "z", 0f);
+                return new Vector3(x, y, z);
+            }
+
+            return new Vector3();
+        }
+
+        private static float TryReadFloat(IDictionary dictionary, string key, float fallback)
+        {
+            if (!dictionary.Contains(key) || dictionary[key] == null)
+                return fallback;
+
+            object raw = dictionary[key]!;
+            if (raw is float f)
+                return f;
+
+            return float.TryParse(raw.ToString(), out float parsed) ? parsed : fallback;
         }
     }
 }

@@ -56,6 +56,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// </summary>
         public virtual bool EnableFriendlyFire { get; set; } = false;
 
-        public List<ParameterObject> ParameterModifiers { get; set; }
+        public List<ParameterObject> ParameterModifiers { get; set; } = [];
     }
 }

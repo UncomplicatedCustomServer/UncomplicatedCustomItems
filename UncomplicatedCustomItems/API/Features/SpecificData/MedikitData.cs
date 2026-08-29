@@ -11,10 +11,5 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets the <see cref="Player.Health"/> that will be regenerated with the use of the medikit
         /// </summary>
         public virtual float Health { get; set; } = 50f;
-
-        /// <summary>
-        /// Gets or sets whether the value can surpass the <see cref="Player.MaxHealth"/>
-        /// </summary>
-        public virtual bool MoreThanMax { get; set; } = false;
     }
 }

@@ -16,8 +16,10 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) || customItem == null)
                 return true;
+
             if (customItem.CustomItem.CustomItemType is not CustomItemType.ParticleDisruptor)
                 return true;
+
             if (customItem.CustomItem.CustomData is not ParticleDisruptorData data)
                 return true;
 
@@ -30,8 +32,10 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             if (!Utilities.TryGetSummonedCustomItem(__instance.Firearm.ItemSerial, out var customItem) || customItem == null)
                 return true;
+
             if (customItem.CustomItem.CustomItemType is not CustomItemType.ParticleDisruptor)
                 return true;
+
             if (customItem.CustomItem.CustomData is not ParticleDisruptorData data)
                 return true;
 

@@ -392,11 +392,11 @@ namespace UncomplicatedCustomItems.API.Features
 
         public void HandleWeaponItem(FirearmItem firearmItem, IWeaponData wd)
         {
-            firearmItem.Base.TryGetModule<MagazineModule>(out var mag);
-            MagazineModule = mag;
+            if (firearmItem.Base.TryGetModule<MagazineModule>(out var mag))
+                MagazineModule = mag;
 
-            firearmItem.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan);
-            HitscanHitregModule = hitscan;
+            if (firearmItem.Base.TryGetModule<HitscanHitregModuleBase>(out var hitscan))
+                HitscanHitregModule = hitscan;
 
             firearmItem.Base.ApplyAttachmentsCode(firearmItem.GetCodeFromAttachmentNamesRaw(GetAttachments()), true);
             if (!PropertiesSet && MagazineModule != null)
@@ -413,6 +413,8 @@ namespace UncomplicatedCustomItems.API.Features
                     actionModule.BoltLocked = false;
                     actionModule.ServerResync();
                 }
+
+                MagazineModule.ServerResyncData();
             }
 
             if (HitscanHitregModule != null)
@@ -423,7 +425,6 @@ namespace UncomplicatedCustomItems.API.Features
                 HitscanHitregModule.DamageFalloffDistance = wd.DamageFalloffDistance;
             }
 
-            MagazineModule?.ServerResyncData();
             PropertiesSet = true;
         }
 
@@ -447,7 +448,9 @@ namespace UncomplicatedCustomItems.API.Features
                 foreach (AttachmentName attachment in GetAttachments())
                 {
                     if (firearmPickup.Base.TryApplyAttachment(attachment))
+                    {
                         LogManager.Debug($"Added {attachment} to {CustomItem.Name}");
+                    }
                     else
                         LogManager.Error($"Failed to add {attachment} to {CustomItem.Name}");
                 }
@@ -854,7 +857,9 @@ namespace UncomplicatedCustomItems.API.Features
                 return;
 
             if (player.ReferenceHub.serverRoles.HasBadgeHidden)
+            {
                 player.ReferenceHub.serverRoles.RefreshHiddenTag();
+            }
             else
                 player.ReferenceHub.serverRoles.RefreshLocalTag();
 

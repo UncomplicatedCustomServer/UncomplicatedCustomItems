@@ -31,5 +31,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         /// Gets or sets whether the AHP should be persistent
         /// </summary>
         public virtual bool Persistant { get; set; } = false;
+
+        public virtual float StaminaGain { get; set; } = 0f;
     }
 }

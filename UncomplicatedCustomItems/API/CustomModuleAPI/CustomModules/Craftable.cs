@@ -2,6 +2,7 @@ using System;
 using LabApi.Events.Arguments.Scp914Events;
 using LabApi.Events.Handlers;
 using Scp914;
+using Scp914.Processors;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
 
@@ -14,6 +15,22 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public Scp914KnobSetting KnobSetting { get; set; }
         public ItemType OriginalItem { get; set; }
         public float Chance { get; set; } = 100f;
+
+        public override void OnAdded(SummonedCustomItem item)
+        {
+            if (item.IsPickup)
+            {
+                if (!item.Pickup?.GameObject.TryGetComponent<StandardItemProcessor>(out _) ?? false)
+                    item.Pickup?.GameObject.AddComponent<StandardItemProcessor>();
+            }
+            else
+            {
+                if (!item.Item?.GameObject.TryGetComponent<StandardItemProcessor>(out _) ?? false)
+                    item.Item?.GameObject.AddComponent<StandardItemProcessor>();
+            }
+
+            base.OnAdded(item);
+        }
 
         public override void Run(EventArgs eventArgs)
         {

@@ -194,6 +194,11 @@ namespace UncomplicatedCustomItems.API
                 {
                     property.SetValue(obj, string.Empty, null);                    
                 }
+                else if (property.PropertyType.IsGenericType && (property.PropertyType.GetGenericTypeDefinition() == typeof(List<>) || property.PropertyType.GetGenericTypeDefinition() == typeof(HashSet<>) || property.PropertyType.GetGenericTypeDefinition() == typeof(Dictionary<,>)))
+                {
+                    object defaultValue = Activator.CreateInstance(property.PropertyType);
+                    property.SetValue(obj, defaultValue, null);
+                }
                 else
                     property.SetValue(obj, null, null);
             }

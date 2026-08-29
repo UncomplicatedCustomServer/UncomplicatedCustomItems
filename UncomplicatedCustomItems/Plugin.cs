@@ -54,7 +54,7 @@ namespace UncomplicatedCustomItems
 #else
         public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
 #endif
-        public override Version Version => new(4, 1, 1);
+        public override Version Version => new(4, 2, 0);
 
         public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
@@ -260,10 +260,8 @@ namespace UncomplicatedCustomItems
             ECRIntegration.Init();
             ECIIntegration.Init();
             AudioIntegration.Init();
+            MapEditorIntegration.Init();
             FileConfig.SetupWatcher();
-#if EXILED
-            CommonUtilitiesPatch.Initialize();
-#endif
 
             if (FailedToPatch)
                 Timing.RunCoroutine(PatchWarningCoroutine());

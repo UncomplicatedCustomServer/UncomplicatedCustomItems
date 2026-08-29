@@ -1,4 +1,5 @@
 using LabApi.Features.Wrappers;
+using System;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
@@ -12,6 +13,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// <summary>
         /// Gets or sets whether the value can surpass the <see cref="Player.MaxHealth"/>
         /// </summary>
+        [Obsolete]
         public bool MoreThanMax { get; set; } = false;
     }
 }

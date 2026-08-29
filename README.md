@@ -124,7 +124,7 @@ custom_data:
   enable_friendly_fire: false
 ```
 
-Detailed guides and property descriptions are available on the [UCI Documentation Wiki](https://docs.uci.ucsserver.it).
+Detailed guides and property descriptions are available on the [UCI Documentation Wiki](https://docs.uci.ucserver.it).
 
 ---
 
