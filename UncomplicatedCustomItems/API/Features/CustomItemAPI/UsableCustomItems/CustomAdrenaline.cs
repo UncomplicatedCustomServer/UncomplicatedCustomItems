@@ -26,5 +26,10 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// Gets or sets whether the AHP should be persistent
         /// </summary>
         public bool Persistant { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the amount of stamina that will be gained when using this item
+        /// </summary>
+        public virtual float StaminaGain { get; set; } = 0f;
     }
 }

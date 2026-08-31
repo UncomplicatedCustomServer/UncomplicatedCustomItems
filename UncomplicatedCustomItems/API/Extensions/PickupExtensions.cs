@@ -52,6 +52,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// The corresponding <see cref="SummonedCustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
         public static SummonedCustomItem? TryGetSummonedCustomItem(this Pickup pickup) => Utilities.TryGetSummonedCustomItem(pickup.Serial, out SummonedCustomItem? customItem) ? customItem : null;
+        
         /// <summary>
         /// Attempts to retrieve the <see cref="ICustomItem"/> associated with the specified <see cref="Pickup"/>.
         /// </summary>

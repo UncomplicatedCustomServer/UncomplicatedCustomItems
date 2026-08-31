@@ -91,7 +91,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         else
                         {
                             player?.GiveCandy(candyData.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
-                            Timing.CallDelayed(Timing.WaitForOneFrame, () => PlayerHandler.CandyIdx.Add(((CustomItem)customItem, bag!.ItemSerial, bag.Candies.Count())));
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                            {
+                                Scp330Bag? newBag = player?.Items.FirstOrDefault(i => i.Base is Scp330Bag)?.Base as Scp330Bag;
+                                if (newBag != null)
+                                    PlayerHandler.CandyIdx.Add(((CustomItem)customItem, newBag.ItemSerial, newBag.Candies.Count()));
+                            });
                         }
                     }
 
@@ -170,7 +175,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         else
                         {
                             player?.GiveCandy(customCandy.CandyType, InventorySystem.Items.ItemAddReason.Undefined);
-                            Timing.CallDelayed(Timing.WaitForOneFrame, () => CustomCandy.Candyidx.Add((customCandy, bag!.ItemSerial, bag.Candies.Count())));
+                            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                            {
+                                Scp330Bag? newBag = player?.Items.FirstOrDefault(i => i.Base is Scp330Bag)?.Base as Scp330Bag;
+                                if (newBag != null)
+                                    CustomCandy.Candyidx.Add((customCandy, newBag.ItemSerial, newBag.Candies.Count()));
+                            });
                         }
                     }
 

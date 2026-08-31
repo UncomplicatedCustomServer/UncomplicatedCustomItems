@@ -58,13 +58,13 @@ namespace UncomplicatedCustomItems.API.Wrappers
         /// <exception cref="ArgumentNullException"></exception>
         public CustomKeycard(KeycardItem keycard)
         {
+            ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
+
             if (!keycard.Customizable)
             {
                 LogManager.Warn($"{keycard.ItemTypeId} is not customizable!\nThe keycard type must be 'KeycardCustomMetalCase', 'KeycardCustomManagement', 'KeycardCustomSite02', or 'KeycardCustomTaskForce'!");
                 return;
             }
-
-            ParentKeycard = keycard ?? throw new ArgumentNullException(nameof(keycard));
         }
 
         /// <summary>

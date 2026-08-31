@@ -23,11 +23,22 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
         public bool Execute(List<string> arguments, ICommandSender sender, out string response)
         {
-            APICustomItem customItem = APICustomItem.CustomItems.Values.Where(c => c.Name == "ToolGun").FirstOrDefault();
+            APICustomItem? customItem = APICustomItem.CustomItems.Values.FirstOrDefault(c => c.Name == "ToolGun");
+            if (customItem == null)
+            {
+                response = "ToolGun custom item is not configured!";
+                return false;
+            }
 
             if (arguments.Count == 1)
             {
-                Player? target = Player.Get(int.Parse(arguments[0]));
+                if (!int.TryParse(arguments[0], out int playerId))
+                {
+                    response = "Invalid player id!";
+                    return false;
+                }
+
+                Player? target = Player.Get(playerId);
                 if (target == null)
                 {
                     response = "Player not found!";

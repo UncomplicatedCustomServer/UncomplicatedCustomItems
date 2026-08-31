@@ -28,20 +28,25 @@ namespace UncomplicatedCustomItems.API.Extensions
 
         public static CommandSender GetSender(this Player player) => player.ReferenceHub.queryProcessor._sender;
 
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+        private static ParticleDisruptor? DisruptorCache = null;
+
         public static void Vaporize(this Player player, Player? attacker = null)
         {
-            if (!InventoryItemLoader.TryGetItem(ItemType.ParticleDisruptor, out ParticleDisruptor disruptor))
-                return;
+            if (DisruptorCache == null)
+            {
+                if (!InventoryItemLoader.TryGetItem(ItemType.ParticleDisruptor, out ParticleDisruptor disruptor))
+                    return;
+
+                DisruptorCache = disruptor;
+            }
 
             if (attacker != null)
-                disruptor.Owner = attacker.ReferenceHub;
+                DisruptorCache.Owner = attacker.ReferenceHub;
 
-            DisruptorShotEvent shotEvent = new(disruptor, DisruptorActionModule.FiringState.FiringSingle);
+            DisruptorShotEvent shotEvent = new(DisruptorCache, DisruptorActionModule.FiringState.FiringSingle);
             DisruptorDamageHandler damageHandler = new(shotEvent, Vector3.up, -1);
             player.ReferenceHub.playerStats.KillPlayer(damageHandler);
         }
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 
         public static void GiveCustomItem(this Player player, ICustomItem customitem) => new SummonedCustomItem(customitem, player);
 

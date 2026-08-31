@@ -17,7 +17,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 
             if (eventArgs is PlayerReloadingWeaponEventArgs playerReloading)
             {
-                if (playerReloading.FirearmItem.StoredAmmo >= 0 || playerReloading.FirearmItem.ChamberedAmmo >= 1)
+                if (playerReloading.FirearmItem.ChamberedAmmo >= 1)
                     playerReloading.IsAllowed = false;
             }
 
@@ -33,7 +33,8 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     actionModule.ServerResync();
                 }
 
-                playerReloaded.Player.SetAmmo(playerReloaded.FirearmItem.AmmoType, playerReloaded.Player.Ammo[playerReloaded.FirearmItem.AmmoType] -= 1);
+                ushort currentAmmo = playerReloaded.Player.Ammo[playerReloaded.FirearmItem.AmmoType];
+                playerReloaded.Player.SetAmmo(playerReloaded.FirearmItem.AmmoType, currentAmmo > 0 ? (ushort)(currentAmmo - 1) : (ushort)0);
             }
 
             if (eventArgs is PlayerChangedItemEventArgs playerChangedItem)

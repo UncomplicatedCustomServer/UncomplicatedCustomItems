@@ -15,5 +15,6 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums
         OnDeath = 1 << 6,
         OnHurt = 1 << 7,
         OnDoorInteracted = 1 << 8,
+        OnInspected = 1 << 9,
     }
 }

@@ -113,7 +113,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
                     using UnityWebRequest looprequest = new(ResolvedEndpoint, Type.ToString().ToUpper());
                     looprequest.downloadHandler = new DownloadHandlerBuffer();
 
-                    if ((Type == RequestType.Post || Type == RequestType.Put))
+                    if (Type == RequestType.Post || Type == RequestType.Put)
                     {
                         if (!Payload.IsEmpty())
                         {
@@ -156,7 +156,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Accept", "application/json");
 
-            if ((Type == RequestType.Post || Type == RequestType.Put))
+            if (Type == RequestType.Post || Type == RequestType.Put)
             {
                 if (!Payload.IsEmpty())
                 {

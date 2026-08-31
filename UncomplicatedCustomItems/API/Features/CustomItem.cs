@@ -37,7 +37,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (!Utilities.CustomItemValidator(item, out string error))
             {
-                LogManager.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}\nError code: 0x029");
+                LogManager.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}");
                 UnregisteredCustomItems.TryAdd(item.Id, item);
                 return;
             }
@@ -119,7 +119,7 @@ namespace UncomplicatedCustomItems.API.Features
         [Description("Sets the badge color. This uses the badge colors available for server")]
         public virtual string BadgeColor { get; set; } = "pumpkin";
 
-        /// <su/mmary>
+        /// <summary>
         /// The weight of the item
         /// </summary>
         [Description("The weight of the custom item")]

@@ -29,7 +29,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             ["plugin_version"] = Plugin.Instance.Version.ToString(3),
             ["labapi_version"] = LabApiProperties.CurrentVersion,
             ["port"] = Server.Port,
-            ["log_data"] = string.Join("\n", LogManager.History.Select(l => $"[{l.LogTime}] [{l.LogLevel}] {l.Message}")),
+            ["log_data"] = string.Join("\n", LogManager.SnapshotHistory().Select(l => $"[{l.LogTime}] [{l.LogLevel}] {l.Message}")),
             ["local_log_data"] = ProcessLocalAdminLogs(),
         };
 

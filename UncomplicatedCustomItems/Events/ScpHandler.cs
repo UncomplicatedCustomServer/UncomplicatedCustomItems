@@ -30,6 +30,9 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnPickupUpgrade(Scp914ProcessingPickupEventArgs ev)
         {
+            if (ev.Pickup == null)
+                return;
+
             if (ev.Pickup.IsCustomItem() || ev.Pickup.IsSummonedAPICustomItem())
             {
                 ev.IsAllowed = false;
@@ -39,12 +42,15 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnItemUpgrade(Scp914ProcessingInventoryItemEventArgs ev)
         {
-            if (ev.Item.IsSummonedCustomItem() || ev.Item.IsSummonedAPICustomItem())
+            if (ev.Item != null && (ev.Item.IsSummonedCustomItem() || ev.Item.IsSummonedAPICustomItem()))
                 ev.IsAllowed = false;
         }
 
         private static void On127Talking(Scp127TalkingEventArgs ev)
         {
+            if (ev.Scp127Item == null)
+                return;
+
             if (SummonedAPICustomItem.TryGet(ev.Scp127Item.Serial, out var api) && api != null && api.CustomItem is CustomSCP127 customSCP127 && customSCP127.MuteVoiceLines)
                 ev.IsAllowed = false;
 
@@ -54,6 +60,9 @@ namespace UncomplicatedCustomItems.Events
 
         private static void On127GainingExperience(Scp127GainingExperienceEventArgs ev)
         {
+            if (ev.Scp127Item == null)
+                return;
+
             if (SummonedAPICustomItem.TryGet(ev.Scp127Item.Serial, out var api) && api != null && api.CustomItem is CustomSCP127 customSCP127 && !customSCP127.AllowXPGain)
                 ev.IsAllowed = false;
 

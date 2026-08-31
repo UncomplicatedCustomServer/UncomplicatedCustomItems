@@ -1,69 +1,38 @@
-using System.Collections.Generic;
 using InventorySystem.Items.Pickups;
 using LabApi.Features.Wrappers;
-using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Events;
 using UnityEngine;
+using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
     public class ItemGlow : CustomModuleBase
     {
         public override string Name => "ItemGlow";
-        public override List<string> RequiredArguments =>
-        [
-            "GlowColor",
-            "Intensity",
-            "Range",
-        ];
 
-        public float Intensity { get; set; }
-        public float Range { get; set; }
-        public Color Color { get; set; }
+        public string GlowColor { get; set; } = "#FFFFFF";
+        public float Intensity { get; set; } = 1f;
+        public float Range { get; set; } = 5f;
+
+        [YamlIgnore]
+        public Color Color { get; set; } = Color.white;
 
         public override void OnAdded(SummonedCustomItem item)
         {
-            if (CustomItem == null)
-                return;
-
-            foreach (Dictionary<object, object> args in Arguments)
+            if (ColorUtility.TryParseHtmlString(GlowColor, out var color))
             {
-                if (!args.TryGetValue<string>("GlowColor", out var GlowColor))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} GlowColor is not a valid string!");
-                    return;
-                }
-
-                if (!ColorUtility.TryParseHtmlString(GlowColor, out var color))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} GlowColor is not a valid Hexcode!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("Intensity", out var intensity))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Intensity is not a valid float!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("Range", out var range))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Range is not a valid float!");
-                    return;
-                }             
-
-                Color = color;
-                Intensity = intensity;
-                Range = range;   
+                Color = color;                
             }
+            else
+                LogManager.Warn($"[ItemGlow] GlowColor '{GlowColor}' is not a valid hex code.");
         }
 
         public void Run(ItemPickupBase pickupBase)
         {
             Pickup pickup = Pickup.Get(pickupBase);
-            if (!Utilities.TryGetSummonedCustomItem(pickup.Serial, out var item) || item?.CustomItem != CustomItem)
+            if (pickup == null || !Utilities.TryGetSummonedCustomItem(pickup.Serial, out var item) || item?.CustomItem != CustomItem)
                 return;
             
             LightSourceToy light = LightSourceToy.Create(pickup.Position);

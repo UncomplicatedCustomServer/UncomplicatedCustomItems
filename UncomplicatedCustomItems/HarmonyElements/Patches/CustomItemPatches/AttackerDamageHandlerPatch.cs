@@ -26,29 +26,20 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
         {
             switch (__instance)
             {
-                case FirearmDamageHandler firearmDamage:
-                    if (Utilities.TryGetSummonedCustomItem(firearmDamage.Firearm.ItemSerial, out var item) && item != null && item.CustomItem.CustomItemType is CustomItemType.Weapon && item.CustomItem.CustomData is WeaponData weaponData)
-                    {
-                        __result = weaponData.Damage;
-                    }
-                    if (SummonedAPICustomItem.TryGet(firearmDamage.Firearm.ItemSerial, out var apiitem) && apiitem != null && apiitem.CustomItem is CustomWeapon customWeapon)
-                    {
-                        __result = customWeapon.Damage;
-                    }
-                    break;
-
-                case MicroHidDamageHandler microHidDamage:
-                    if (Utilities.TryGetSummonedCustomItem(Player.Get(microHidDamage.Attacker.Hub).CurrentItem?.Serial ?? 0, out var item1) && item1 != null && item1.CustomItem.CustomItemType is CustomItemType.MicroHID && item1.CustomItem.CustomData is MicroHIDData microData)
-                    {
+                case MicroHidDamageHandler microHidDamage when microHidDamage.Attacker.Hub != null:
+                    Player? microPlayer = Player.Get(microHidDamage.Attacker.Hub);
+                    ushort microSerial = microPlayer?.CurrentItem?.Serial ?? 0;
+                    if (Utilities.TryGetSummonedCustomItem(microSerial, out var item1) && item1 != null && item1.CustomItem.CustomItemType is CustomItemType.MicroHID && item1.CustomItem.CustomData is MicroHIDData microData)
                         __result = microData.Damage;
-                    }
+
                     break;
 
-                case DisruptorDamageHandler disruptorDamage:
-                    if (Utilities.TryGetSummonedCustomItem(Player.Get(disruptorDamage.Attacker.Hub).CurrentItem?.Serial ?? 0, out var item2) && item2 != null && item2.CustomItem.CustomItemType is CustomItemType.ParticleDisruptor && item2.CustomItem.CustomData is ParticleDisruptorData disruptorData)
-                    {
+                case DisruptorDamageHandler disruptorDamage when disruptorDamage.Attacker.Hub != null:
+                    Player? disruptorPlayer = Player.Get(disruptorDamage.Attacker.Hub);
+                    ushort disruptorSerial = disruptorPlayer?.CurrentItem?.Serial ?? 0;
+                    if (Utilities.TryGetSummonedCustomItem(disruptorSerial, out var item2) && item2 != null && item2.CustomItem.CustomItemType is CustomItemType.ParticleDisruptor && item2.CustomItem.CustomData is ParticleDisruptorData disruptorData)
                         __result = disruptorDamage.FiringState is FiringState.FiringRapid ? disruptorData.BurstDamage : disruptorData.ChargeDamage;
-                    }
+
                     break;
             }
         }

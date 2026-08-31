@@ -10,10 +10,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            if (!Check(eventArgs))
-                return;
-                
-            if (CustomItem == null)
+            if (!Check(eventArgs) || CustomItem == null)
                 return;
 
             if (eventArgs is PlayerChangingAttachmentsEventArgs ev)
@@ -25,7 +22,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                         ev.Player.SendHint(hintOverride.HintOverride.Replace("%name%", CustomItem.Name), hintOverride.DurationOverride);                        
                     }
                     else
+                    {
                         ev.Player.SendHint(Plugin.Instance.Config.WorkstationBanHint.Replace("%name%", CustomItem.Name), Plugin.Instance.Config.WorkstationBanHintDuration);
+                    }
 
                     ev.IsAllowed = false;
                 }

@@ -54,7 +54,7 @@ namespace UncomplicatedCustomItems
 #else
         public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
 #endif
-        public override Version Version => new(4, 1, 1);
+        public override Version Version => new(4, 2, 0);
 
         public Assembly Assembly => Assembly.GetExecutingAssembly();
 #if EXILED
@@ -69,7 +69,6 @@ namespace UncomplicatedCustomItems
         internal Harmony _harmony;
 
         internal FileConfig FileConfig;
-// #nullable enable
 
         internal List<ServerSpecificSettingBase> _settings = [];
 
@@ -87,9 +86,9 @@ namespace UncomplicatedCustomItems
             try
             {
 #if EXILED
-    			_harmony = new($"com.ucs.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+    			_harmony = new($"com.ucsc.uci_exiled-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #else
-                _harmony = new($"com.ucs.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+                _harmony = new($"com.ucsc.uci_labapi-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
 #endif
 
 #if DEBUG
@@ -151,7 +150,7 @@ namespace UncomplicatedCustomItems
                 }
             }
 
-            LogManager.History.Clear();
+            LogManager.ClearHistory();
 
             LogManager.Info("===========================================");
             LogManager.Info("Thanks for using UncomplicatedCustomItems");
@@ -167,9 +166,10 @@ namespace UncomplicatedCustomItems
             FileConfig.Welcome(loadExamples: true);
             FileConfig.Welcome(Server.Port.ToString());
             FileConfig.Welcome("Actions");
-            FileConfig.LoadAll();
-            FileConfig.LoadAll(Server.Port.ToString());
-            FileConfig.LoadAll("Actions");
+
+            FileConfig.LoadAllAsync().GetAwaiter().GetResult();
+            FileConfig.LoadAllAsync(Server.Port.ToString()).GetAwaiter().GetResult();
+            FileConfig.LoadAllAsync("Actions").GetAwaiter().GetResult();
 
 #if EXILED
             if (Round.IsStarted)
@@ -223,6 +223,7 @@ namespace UncomplicatedCustomItems
             ScpHandler.Unregister();
             SSSHandler.Unregister();
             CreditsRequest.Unregister();
+            FileConfig.KillWatcher();
 
             ServerEvent.WaitingForPlayers -= OnFinishedLoading;
 
@@ -259,9 +260,8 @@ namespace UncomplicatedCustomItems
             ECRIntegration.Init();
             ECIIntegration.Init();
             AudioIntegration.Init();
-#if EXILED
-            CommonUtilitiesPatch.Initialize();
-#endif
+            MapEditorIntegration.Init();
+            FileConfig.SetupWatcher();
 
             if (FailedToPatch)
                 Timing.RunCoroutine(PatchWarningCoroutine());

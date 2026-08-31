@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace UncomplicatedCustomItems.API.ItemUpdater
 {
     public class ItemUpdateManager
@@ -6,9 +9,20 @@ namespace UncomplicatedCustomItems.API.ItemUpdater
 
         public static bool TryUpdate(string path)
         {
-            bool updated;
-            updated = CustomModuleUpdater.TryUpdateCustomModules(path, out _);
+            bool updated = CustomModuleUpdater.TryUpdateCustomModules(path, out _);
+            if (updated)
+                UpdatedCount++;
+
             return updated;
+        }
+
+        public static async Task<bool> TryUpdateAsync(string path)
+        {
+            (bool Updated, _) = await CustomModuleUpdater.TryUpdateCustomModulesAsync(path).ConfigureAwait(false);
+            if (Updated)
+                UpdatedCount++;
+
+            return Updated;
         }
     }
 }

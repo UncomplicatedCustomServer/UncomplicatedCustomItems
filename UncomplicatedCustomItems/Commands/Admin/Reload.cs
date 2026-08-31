@@ -1,4 +1,5 @@
-﻿using CommandSystem;
+﻿using System;
+using CommandSystem;
 using LabApi.Features.Wrappers;
 using MEC;
 using System.Collections.Generic;
@@ -51,6 +52,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
             if (CustomItem.List.Count > 0)
             {
                 CustomItems.Clear();
+                CustomItemsPickups.Clear();
+                APICustomItems.Clear();
+                APICustomItemsPickups.Clear();
                 int BeforeItems = CustomItem.List.Count();
                 int BeforeActions = CustomAction.List.Count();
                 int BeforeAPIItems = APICustomItem.List.Count();
@@ -60,7 +64,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 foreach (SummonedCustomItem item in SummonedCustomItem.List.ToArray())
                 {
-                    if (item == null)
+                    if (item == null || item.CustomItem == null)
                         continue;
 
                     if (item.Owner != null && !CustomItems.ContainsKey(item.Owner))
@@ -71,17 +75,33 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (!item.IsPickup)
                     {
-                        CustomItems[item.Owner!].Add(item.CustomItem);
+                        if (item.Owner != null)
+                            CustomItems[item.Owner].Add(item.CustomItem);
                     }
-                    else if (item.IsPickup && item.Pickup?.Position != null && item.Pickup.Position != Vector3.zero)
-                        CustomItemsPickups[item.CustomItem].Add(item.Pickup.Position);
+                    else if (item.IsPickup)
+                    {
+                        try
+                        {
+                            Pickup? pickup = item.Pickup;
+                            if (pickup != null && pickup.Base != null && !pickup.IsDestroyed)
+                            {
+                                Vector3 pos = pickup.Position;
+                                if (pos != Vector3.zero)
+                                    CustomItemsPickups[item.CustomItem].Add(pos);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Debug($"Skipped pickup position for {item.CustomItem.Name}: {ex.Message}");
+                        }
+                    }
 
                     item.Destroy();
                 }
 
                 foreach (SummonedAPICustomItem item in SummonedAPICustomItem.List.ToList())
                 {
-                    if (item == null)
+                    if (item == null || item.CustomItem == null)
                         continue;
 
                     if (item.Owner != null && !APICustomItems.ContainsKey(item.Owner))
@@ -92,10 +112,26 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (!item.IsPickup)
                     {
-                        APICustomItems[item.Owner!].Add(item.CustomItem!);                        
+                        if (item.Owner != null)
+                            APICustomItems[item.Owner].Add(item.CustomItem!);
                     }
-                    else if (item.IsPickup && item.Pickup?.Position != null && item.Pickup.Position != Vector3.zero)
-                        APICustomItemsPickups[item.CustomItem!].Add(item.Pickup.Position);
+                    else if (item.IsPickup)
+                    {
+                        try
+                        {
+                            Pickup? pickup = item.Pickup;
+                            if (pickup != null && pickup.Base != null && !pickup.IsDestroyed)
+                            {
+                                Vector3 pos = pickup.Position;
+                                if (pos != Vector3.zero)
+                                    APICustomItemsPickups[item.CustomItem!].Add(pos);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogManager.Debug($"Skipped API pickup position for {item.CustomItem!.Name}: {ex.Message}");
+                        }
+                    }
 
                     item.Destroy();
                 }
@@ -135,41 +171,50 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 Plugin.Instance.FileConfig.Welcome(loadExamples: true);
                 Plugin.Instance.FileConfig.Welcome(Server.Port.ToString());
                 Plugin.Instance.FileConfig.Welcome("Actions");
-                Plugin.Instance.FileConfig.LoadAll();
-                Plugin.Instance.FileConfig.LoadAll(Server.Port.ToString());
-                Plugin.Instance.FileConfig.LoadAll("Actions");
+                Plugin.Instance.FileConfig.LoadAllAsync().GetAwaiter().GetResult();
+                Plugin.Instance.FileConfig.LoadAllAsync(Server.Port.ToString()).GetAwaiter().GetResult();
+                Plugin.Instance.FileConfig.LoadAllAsync("Actions").GetAwaiter().GetResult();
+
                 ImportManager.Actor();
 
                 foreach (ICustomItem item in CustomItem.List)
-                    ReloadedItems++;
+                {
+                    ReloadedItems++;                    
+                }
+
                 foreach (ICustomAction action in CustomAction.List)
-                    ReloadedActions++;
+                {
+                    ReloadedActions++;                    
+                }
+
                 foreach (APICustomItem item in APICustomItem.List)
-                    ReloadedAPIItems++;
+                {
+                    ReloadedAPIItems++;                    
+                }
 
                 int NewItems = BeforeItems - ReloadedItems;
                 int NewActions = BeforeActions - ReloadedActions;
                 int NewApiItems = BeforeAPIItems - ReloadedAPIItems;
 
-                foreach (var entry in CustomItemsPickups)
+                foreach (KeyValuePair<ICustomItem, List<Vector3>> entry in CustomItemsPickups)
                 {
                     foreach (Vector3 pos in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedCustomItem(entry.Key, pos));
                 }
 
-                foreach (var entry in APICustomItemsPickups)
+                foreach (KeyValuePair<APICustomItem, List<Vector3>> entry in APICustomItemsPickups)
                 {
                     foreach (Vector3 pos in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedAPICustomItem(entry.Key, pos));
                 }
 
-                foreach (var entry in CustomItems)
+                foreach (KeyValuePair<Player, List<ICustomItem>> entry in CustomItems)
                 {
                     foreach (ICustomItem customItem in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedCustomItem(customItem, entry.Key));
                 }
 
-                foreach (var entry in APICustomItems)
+                foreach (KeyValuePair<Player, List<APICustomItem>> entry in APICustomItems)
                 {
                     foreach (APICustomItem customItem in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedAPICustomItem(customItem, entry.Key));

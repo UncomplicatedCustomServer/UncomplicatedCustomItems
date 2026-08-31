@@ -2,10 +2,13 @@
 using Exiled.API.Features;
 using Exiled.API.Extensions;
 using Exiled.Loader;
+#else
+using LabApi.Features.Wrappers;
 #endif
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Interfaces;
@@ -13,11 +16,16 @@ using UnityEngine;
 using YamlDotNet.Core;
 using InventorySystem.Items.Usables.Scp330;
 using UncomplicatedCustomItems.API.ItemUpdater;
+using LabApi.Loader.Features.Yaml;
+using System.Linq;
 
 namespace UncomplicatedCustomItems.API.Features.Manager
 {
     public class FileConfig
     {
+        private FileSystemWatcher? DirWatcher { get; set; }
+        private FileSystemWatcher? PortWatcher { get; set; }
+
         public static readonly List<YAMLCustomItem> _examples =
         [
             new()
@@ -488,30 +496,30 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                 CustomItemType = customType,
                 Scale = Vector3.one,
                 Spawn = new(),
+                Id = CustomItem.CustomItems.ContainsKey(id) ? CustomItem.GetFirstFreeId(1) : id,
                 CustomData = customData,
             };
 
-            foreach (ICustomItem customItem in CustomItem.List)
-            {
-                if (customItem.Id == id)
-                {
-                    NewItem.Id = CustomItem.GetFirstFreeId(1);
-                    break;
-                }
-                else
-                    NewItem.Id = id;
-            }
-
 #if EXILED
             string filePath = Path.Combine(Paths.Configs, "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
-            File.WriteAllText(filePath, Loader.Serializer.Serialize(NewItem));            
 #else
             string filePath = Path.Combine(LabApi.Loader.Features.Paths.PathManager.Configs.ToString(), "UncomplicatedCustomItems", $"{name.ToLower().Replace(" ", "-")}.yml");
-            File.WriteAllText(filePath, LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(NewItem));
+#endif
+            
+            string serializedItem =
+#if EXILED
+            Loader.Serializer.Serialize(NewItem);
+#else
+            YamlConfigParser.Serializer.Serialize(NewItem);
 #endif
 
-            CustomItem.Register(YAMLCaster.Converter(NewItem));
-            LogManager.Info($"Generated and registered custom item: {NewItem.Name} with ID {NewItem.Id}");
+            MainThreadDispatcher.Dispatch(() =>
+            {
+                File.WriteAllText(filePath, serializedItem);
+                CustomItem.Register(YAMLCaster.Converter(NewItem));
+                LogManager.Info($"Generated and registered custom item: {NewItem.Name} with ID {NewItem.Id}");
+            });
+
             return NewItem;
         }
         
@@ -533,86 +541,172 @@ namespace UncomplicatedCustomItems.API.Features.Manager
 
         internal bool IsActionFile(string fileContent) => fileContent.Contains("actions:") || fileContent.Contains("parameters:");
 
-        public void LoadAll(string localDir = "")
+        public void SetupWatcher()
         {
-            foreach (string fileName in List(localDir))
+            DirWatcher = new FileSystemWatcher(Dir)
             {
-                try
-                {
-                    if (Directory.Exists(fileName))
-                        continue;
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
+                EnableRaisingEvents = true
+            };
 
-                    string fileContent = FileManager.ReadAllTextSafe(fileName);
-                    if (IsActionFile(fileContent))
+            DirWatcher.Changed += OnChanged;
+
+            PortWatcher = new FileSystemWatcher(Path.Combine(Dir, Server.Port.ToString()))
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
+                EnableRaisingEvents = true
+            };
+            
+            PortWatcher.Changed += OnChanged;
+        }
+
+        public void KillWatcher()
+        {
+            PortWatcher?.Dispose();
+            DirWatcher?.Dispose();
+        }
+
+        private void OnChanged(object sender, FileSystemEventArgs ev)
+        {
+            try
+            {
+                if (!File.Exists(ev.FullPath) || (!ev.FullPath.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) && !ev.FullPath.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase)))
+                    return;
+
+                using FileStream stream = new(ev.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, true);
+                using StreamReader streamReader = new(stream);
+                string fileContent = streamReader.ReadToEnd();
+                        
+                if (string.IsNullOrWhiteSpace(fileContent))
+                    return;
+
+                YAMLCustomItem yamlitem = YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
+                if (yamlitem == null)
+                {
+                    LogManager.Warn($"Could not deserialize {ev.FullPath}");
+                    return;
+                }
+
+                MainThreadDispatcher.Dispatch(() =>
+                {
+                    List<Vector3> pickuppos = [];
+                    List<Player> owners = [];
+
+                    if (Utilities.TryGetCustomItem(yamlitem.Id, out ICustomItem item))
                     {
-                        YAMLCustomAction action = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
-                        CustomAction.Register(YAMLCaster.Converter(action));
-                        LogManager.Debug($"Registering action {action.Id} [{action.Name}] from {fileName}");
+                        foreach (SummonedCustomItem summoned in SummonedCustomItem.List.Where(i => i.CustomItem?.Id == item.Id).ToArray())
+                        {
+                            if (summoned.IsPickup && summoned.Pickup != null)
+                            {
+                                pickuppos.Add(summoned.Pickup.Position);
+                                summoned.Destroy();
+                            }
+                            else if (summoned.Owner != null)
+                            {
+                                owners.Add(summoned.Owner);
+                                summoned.Destroy();
+                            }
+                        }
+
+                        CustomItem.Unregister(item);
+                        ICustomItem replacement = YAMLCaster.Converter(yamlitem);
+                        CustomItem.Register(replacement);
+                        foreach (Vector3 pos in pickuppos)
+                        {
+                            new SummonedCustomItem(replacement, pos);
+                        }
+
+                        foreach (Player owner in owners)
+                        {
+                            new SummonedCustomItem(replacement, owner);
+                        }
+
+                        LogManager.Info($"Reloaded {item.Name}");
                     }
                     else
                     {
-                        try
-                        {
-                            if (ItemUpdateManager.TryUpdate(Path.Combine(Dir, localDir, fileName)))
-                                LogManager.Silent($"Updated Item {fileName}");
+                        CustomItem.Register(YAMLCaster.Converter(yamlitem));
+                        LogManager.Info($"Registered new item {yamlitem.Name}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error($"Failed to process file change for {ev.Name}: {ex.Message}");
+            }
+        }
 
-                            YAMLCustomItem item = LabApi.Loader.Features.Yaml.YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
-                            CustomItem.Register(YAMLCaster.Converter(item));
-                            LogManager.Debug($"Registering item {item.Id} [{item.Name}] from {fileName}");
+        public async Task LoadAllAsync(string localDir = "")
+        {
+            await Task.Run(async () =>
+            {
+                foreach (string filepath in List(localDir))
+                {
+                    try
+                    {
+                        if (Directory.Exists(filepath))
+                            continue;
+
+                        using FileStream stream = new(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, true);
+                        using StreamReader streamReader = new(stream);
+                        string fileContent = streamReader.ReadToEnd();
+                        
+                        if (IsActionFile(fileContent))
+                        {
+                            YAMLCustomAction action = YamlConfigParser.Deserializer.Deserialize<YAMLCustomAction>(fileContent);
+                            CustomAction.Register(YAMLCaster.Converter(action));
+                            LogManager.Debug($"Registering action {action.Id} [{action.Name}] from {filepath}");
                         }
-                        catch (YamlException yamlEx)
+                        else
                         {
-                            CustomItem.ErrorCustomItems.Add(new ErrorCustomItem(fileName, File.ReadAllLines(fileName), yamlEx));
-                            string errorMessage = $"Failed to parse {fileName}. YAML syntax error: {yamlEx.Message}";
-
-                            if (yamlEx.Start.Line > 0)
+                            try
                             {
-                                errorMessage += $" at line {yamlEx.Start.Line}, column {yamlEx.Start.Column}";
-
-                                string[] lines = fileContent.Split('\n');
-                                if (yamlEx.Start.Line <= lines.Length)
+                                if (await ItemUpdateManager.TryUpdateAsync(filepath).ConfigureAwait(false))
                                 {
-                                    string problematicLine = lines[yamlEx.Start.Line - 1];
-                                    errorMessage += $"\nProblematic line: \"{problematicLine.Trim()}\"";
+                                    LogManager.Silent($"Updated Item {filepath}");
+                                    fileContent = FileManager.ReadAllTextSafe(filepath);
                                 }
-                            }
 
-                            if (Plugin.Instance.Config.Debug)
-                            {
-                                LogManager.Error($"{errorMessage}\nStack trace: {yamlEx.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
+                                YAMLCustomItem item = YamlConfigParser.Deserializer.Deserialize<YAMLCustomItem>(fileContent);
+                                CustomItem.Register(YAMLCaster.Converter(item));
+                                LogManager.Debug($"Registering item {item.Id} [{item.Name}] from {filepath}");
                             }
-                            else
+                            catch (YamlException yamlEx)
                             {
-                                LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            string errorMessage = $"Failed to process {fileName}. Error: {ex.Message}";
+                                CustomItem.ErrorCustomItems.Add(new ErrorCustomItem(filepath, File.ReadAllLines(filepath), yamlEx));
+                                string errorMessage = $"Failed to parse {filepath}. YAML syntax error: {yamlEx.Message}";
+                                if (yamlEx.Start.Line > 0)
+                                {
+                                    errorMessage += $" at line {yamlEx.Start.Line}, column {yamlEx.Start.Column}";
+                                    string[] lines = fileContent.Split('\n');
+                                    if (yamlEx.Start.Line <= lines.Length)
+                                        errorMessage += $"\nProblematic line: \"{lines[yamlEx.Start.Line - 1].Trim()}\"";
+                                }
 
-                            if (ex.Message.Contains("type") || ex.Message.Contains("convert"))
-                            {
-                                errorMessage += "\nThis appears to be a type mismatch error. Check that your values match the expected types for each field.";
+                                LogManager.Error(errorMessage + (Plugin.Instance.Config.Debug ? $"\nStack trace: {yamlEx.StackTrace}" : ""));
                             }
-                            else if (ex.Message.Contains("property") || ex.Message.Contains("member"))
+                            catch (Exception ex)
                             {
-                                errorMessage += "\nThis appears to be related to an unknown property. Check for typos in your YAML field names.";
+                                string errorMessage = $"Failed to process {filepath}. Error: {ex.Message}";
+                                if (ex.Message.Contains("type") || ex.Message.Contains("convert"))
+                                {
+                                    errorMessage += "\nType mismatch error.";                                        
+                                }
+                                else if (ex.Message.Contains("property") || ex.Message.Contains("member"))
+                                {
+                                    errorMessage += "\nUnknown property error.";
+                                }
+                                    
+                                LogManager.Error(errorMessage + (Plugin.Instance.Config.Debug ? $"\nStack trace: {ex.StackTrace}" : ""));
                             }
-
-                            if (Plugin.Instance.Config.Debug)
-                            {
-                                LogManager.Error($"{errorMessage}\nStack trace: {ex.StackTrace}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
-                            }
-                            else
-                                LogManager.Error($"{errorMessage}\nIf this was caused by a plugin update you can update your customitem here: https://uci.ucserver.it/uciupdater");
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        LogManager.Error($"Failed to process {filepath}: {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    LogManager.Error($"Failed to process {fileName}: {ex.Message}");
-                }
-            }
+            }).ConfigureAwait(false);
         }
 
         public void Welcome(string localDir = "", bool loadExamples = false)
@@ -621,30 +715,30 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             {
                 Directory.CreateDirectory(Path.Combine(Dir, localDir));
                 if (!loadExamples)
+                {
                     if (localDir != "Actions")
                     {
-                        File.WriteAllText(Path.Combine(Dir, localDir, "example-item.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(new YAMLCustomItem()
+
+                        File.WriteAllText(Path.Combine(Dir, localDir, "example-item.yml"), YamlConfigParser.Serializer.Serialize(new YAMLCustomItem()
                         {
                             Id = CustomItem.GetFirstFreeId(1)
                         }));
-                        LogManager.Debug($"Creating CustomItem at {Path.Combine(Dir, localDir)}");
                     }
                     else
                     {
-                        File.WriteAllText(Path.Combine(Dir, localDir, "example-action.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(new YAMLCustomAction()
+                        File.WriteAllText(Path.Combine(Dir, localDir, "example-action.yml"), YamlConfigParser.Serializer.Serialize(new YAMLCustomAction()
                         {
                             Id = CustomAction.GetFirstFreeId(1)
                         }));
-                        LogManager.Debug($"Creating CustomAction at {Path.Combine(Dir, localDir)}");
                     }
+                }
                 else
                 {
                     foreach (YAMLCustomItem customItem in _examples)
                     {
-                        File.WriteAllText(Path.Combine(Dir, localDir, $"{customItem.Name.ToLower().Replace(" ", "-")}.yml"), LabApi.Loader.Features.Yaml.YamlConfigParser.Serializer.Serialize(customItem));
+                        File.WriteAllText(Path.Combine(Dir, localDir, $"{customItem.Name.ToLower().Replace(" ", "-")}.yml"), YamlConfigParser.Serializer.Serialize(customItem));
                     }
                 }
-
                 LogManager.Info($"Plugin does not have a item folder, generated one in {Path.Combine(Dir, localDir)}");
             }
         }

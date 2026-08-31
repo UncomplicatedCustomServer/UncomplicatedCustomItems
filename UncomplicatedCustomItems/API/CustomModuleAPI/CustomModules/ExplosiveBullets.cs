@@ -1,63 +1,40 @@
-using System;
-using System.Collections.Generic;
-using LabApi.Events.Arguments.PlayerEvents;
-using LabApi.Events.Handlers;
+using InventorySystem.Items.Firearms.Modules.Misc;
 using LabApi.Features.Wrappers;
-using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Manager;
+using UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches;
+using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
     public class ExplosiveBullets : CustomModuleBase
     {
         public override string Name => "ExplosiveBullets";
-        public override List<string> RequiredArguments =>
-        [
-            "DamageRadius"
-        ];
 
         public float DamageRadius { get; set; }
 
-        public override void OnAdded(SummonedCustomItem item)
+        public void Prescan(Player player, Item item, Ray ray, HitscanResult result)
         {
-            if (CustomItem == null)
+            if (!Check(item))
                 return;
 
-            base.OnAdded(item);
-            foreach (Dictionary<object, object> args in Arguments)
+            foreach (HitRayPair pair in result.Obstacles)
             {
-                if (!args.TryGetValue<float>("DamageRadius", out var damageRadius))
+                ExplosiveGrenadeProjectile? grenade = (ExplosiveGrenadeProjectile?)TimedGrenadeProjectile.SpawnActive(pair.Hit.point, ItemType.GrenadeHE, player, 0.2);
+                if (grenade != null)
                 {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} DamageRadius is not a valid float!");
-                    return;
+                    grenade.MaxRadius = DamageRadius;
+                    grenade.FuseEnd();
                 }
-
-                DamageRadius = damageRadius;
-            }
-        }
-
-        public override void Run(EventArgs eventArgs)
-        {
-            if (!Check(eventArgs))
-                return;
-                
-            if (eventArgs is PlayerPlacedBulletHoleEventArgs playerPlacedBullet)
-            {
-                ExplosiveGrenadeProjectile? grenade = (ExplosiveGrenadeProjectile?)TimedGrenadeProjectile.SpawnActive(playerPlacedBullet.HitPosition, ItemType.GrenadeHE, playerPlacedBullet.Player, 0.2);
-                grenade?.MaxRadius = DamageRadius;
-                grenade?.FuseEnd();
             }
         }
 
         public override void RegisterEvents()
         {
-            PlayerEvents.PlacedBulletHole += Run;
+            AppendPrescanPatch.OnAppendPrescan += Prescan;
         }
 
         public override void UnregisterEvents()
         {
-            PlayerEvents.PlacedBulletHole -= Run;
+            AppendPrescanPatch.OnAppendPrescan -= Prescan;
         }
     }
 }

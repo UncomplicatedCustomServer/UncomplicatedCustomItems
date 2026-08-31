@@ -1,4 +1,7 @@
-﻿namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
+﻿using System.Collections.Generic;
+using UncomplicatedCustomItems.API.YamlObjects;
+
+namespace UncomplicatedCustomItems.API.Interfaces.SpecificData
 {
     /// <summary>
     /// The interface associated with <see cref="CustomItemType.Weapon"/>
@@ -24,6 +27,8 @@
         public abstract string Attachments { get; set; }
 
         public abstract bool EnableFriendlyFire { get; set; }
+
+        public abstract List<ParameterObject> ParameterModifiers { get; set; }
     }
 
 }

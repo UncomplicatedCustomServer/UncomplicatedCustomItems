@@ -81,19 +81,24 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             {
                 foreach (KeyValuePair<string, Vector3> kvp in item.SpawnLocations)
                 {
-                    Vector3 pos;
-                    Room room = Utilities.GetRoomFromName(kvp.Key);
-
-                    if (kvp.Value != Vector3.zero)
-                        pos = room.WorldPosition(kvp.Value);
+                    Room? room = Utilities.GetRoomFromName(kvp.Key);
+                    if (room == null)
+                        continue;
 
                     if (item.ReplaceExistingPickup)
                     {
                         Pickup? targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
                         if (targetPickup != null)
+                        {
                             new SummonedAPICustomItem(item, targetPickup);
+                            continue;
+                        }
                     }
 
+                    if (kvp.Value != Vector3.zero)
+                        new SummonedAPICustomItem(item, room.WorldPosition(kvp.Value));
+                    else
+                        new SummonedAPICustomItem(item, room.Position);
                 }
             }
             if (item.Zones.Count() >= 1)
@@ -101,20 +106,21 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 foreach (FacilityZone zone in item.Zones)
                 {
                     List<Room> rooms = Room.List.Where(r => r != null && r.Zone == zone).ToList();
-                    if (rooms.Count() > 1)
+                    if (rooms.Count <= 0)
+                        continue;
+
+                    Room room = rooms.RandomItem();
+                    if (item.ReplaceExistingPickup && !item.ForceSameItemType)
                     {
-                        Room room = rooms.RandomItem();
-                        if (item.ReplaceExistingPickup && !item.ForceSameItemType)
+                        Pickup? targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
+                        if (targetPickup != null)
                         {
-                            Pickup? targetPickup = CustomItemUtils.FindTargetPickupInRoom(room, item);
-                            if (targetPickup != null)
-                                new SummonedAPICustomItem(item, targetPickup);
+                            new SummonedAPICustomItem(item, targetPickup);
+                            continue;
                         }
                     }
-                    else
-                    {
-                        Room room = rooms.FirstOrDefault();
-                    }
+
+                    new SummonedAPICustomItem(item, room.Position);
                 }
             }
             if (item.Coordinates.Count() >= 1)
@@ -186,7 +192,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public virtual bool Check(Pickup? pickup)
         {
             if (pickup != null)
-                return SummonedAPICustomItem.SerialList.Contains(pickup.Serial);
+                return SummonedAPICustomItem.SummonedCustomItems.ContainsKey(pickup.Serial);
 
             return false;
         }
@@ -194,7 +200,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         public virtual bool Check(Item? item)
         {
             if (item != null)
-                return SummonedAPICustomItem.SerialList.Contains(item.Serial);
+                return SummonedAPICustomItem.SummonedCustomItems.ContainsKey(item.Serial);
 
             return false;
         }

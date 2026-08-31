@@ -125,15 +125,15 @@ namespace UncomplicatedCustomItems.API.Features.Manager
 
             ArgumentManager.Register("ApplyEffect", (item, args) =>
             {
-                if (args.Length < 4) return;
+                if (args.Length < 5) return;
                 string playerId = args[0];
                 string effectName = args[1];
                 Player? player = Player.Get(playerId);
                 if (player == null) return;
 
-                if (player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effectName) && float.TryParse(args[2], out float duration) && byte.TryParse(args[3], out byte intensity))
+                if (player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == effectName) && float.TryParse(args[2], out float duration) && byte.TryParse(args[3], out byte intensity) && bool.TryParse(args[4], out bool addDuration))
                 {
-                    player.ReferenceHub.playerEffectsController.ChangeState(effectName, intensity, duration, bool.Parse(args[4]));
+                    player.ReferenceHub.playerEffectsController.ChangeState(effectName, intensity, duration, addDuration);
                 }
             });
 

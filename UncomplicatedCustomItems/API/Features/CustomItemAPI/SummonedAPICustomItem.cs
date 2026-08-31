@@ -171,19 +171,22 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             PlayerCache.Clear();
         }
 
+        public static void OnPlayerLeft(Player player)
+        {
+            if (player != null)
+                PlayerCache.Remove(player);
+        }
+
         public void Destroy()
         {
             foreach (KeyValuePair<Player, HashSet<SummonedAPICustomItem>> kvp in PlayerCache.ToArray())
             {
-                foreach (SummonedAPICustomItem item in kvp.Value.Where(item => item == this).ToArray())
-                {
-                    kvp.Value.Remove(item);
-                }
+                kvp.Value.Remove(this);
 
-                PlayerCache[kvp.Key] = kvp.Value;
+                if (kvp.Value.Count == 0)
+                    PlayerCache.Remove(kvp.Key);
             }
 
-            List.Remove(this);
             SummonedCustomItems.Remove(Serial);
 
             if (CustomItem != null)
@@ -383,7 +386,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                     if (!firearm.TryGetModule<HitscanHitregModuleBase>(out var hitscan))
                         break;
 
-                    if (weaponData.Attachments.Count > 1)
+                    if (weaponData.Attachments.Count > 0)
                         firearm.ApplyAttachmentsCode(firearm.GetCodeFromAttachmentNamesRaw(weaponData.Attachments.ToArray()), true);
                     else
                     {
@@ -471,9 +474,23 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         private void ApplyKeycardData(Wrappers.CustomKeycard customKeycard, CustomKeycard keycardData)
         {
-            ColorUtility.TryParseHtmlString(keycardData.PermissionsColor, out var permissionsColor);
-            ColorUtility.TryParseHtmlString(keycardData.TintColor, out var tintColor);
-            ColorUtility.TryParseHtmlString(keycardData.LabelColor, out var labelColor);
+            if (!ColorUtility.TryParseHtmlString(keycardData.PermissionsColor, out Color permissionsColor))
+            {
+                LogManager.Warn($"{CustomItem?.Name} Dosent have a valid hex code for property PermissionsColor");
+                permissionsColor = Color.black;
+            }
+
+            if (!ColorUtility.TryParseHtmlString(keycardData.TintColor, out Color tintColor))
+            {
+                LogManager.Warn($"{CustomItem?.Name} Dosent have a valid hex code for property TintColor");
+                tintColor = Color.black;
+            }
+
+            if (!ColorUtility.TryParseHtmlString(keycardData.LabelColor, out Color labelColor))
+            {
+                LogManager.Warn($"{CustomItem?.Name} Dosent have a valid hex code for property LabelColor");
+                labelColor = Color.black;
+            }
 
             KeycardLevels permissions = new(keycardData.Containment, keycardData.Armory, keycardData.Admin);
 

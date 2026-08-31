@@ -14,6 +14,7 @@ namespace UncomplicatedCustomItems.Integrations
         private static Assembly? LabAPIExtension;
         private static Type? DisguiseType;
         private static MethodInfo? Disguise;
+        private static Action<Player, RoleTypeId, bool, byte>? DisguiseDelegate;
         private static bool Found;
 
         public static void Init()
@@ -32,7 +33,7 @@ namespace UncomplicatedCustomItems.Integrations
                 {
                     if (asm.GetName().Name?.ToLower().Contains("labapiextensions") is true)
                     {
-                        MainThreadDispatcher.Dispatch(() => LogManager.Silent($"{nameof(LabAPIExtensions)}: Found LabAPIExtensions Dependency!"));
+                        LogManager.Silent($"{nameof(LabAPIExtensions)}: Found LabAPIExtensions Dependency!");
                         LabAPIExtension = asm;
                         Found = true;
                         break;
@@ -41,20 +42,20 @@ namespace UncomplicatedCustomItems.Integrations
 
                 if (!Found)
                 {
-                    MainThreadDispatcher.Dispatch(() => LogManager.Silent($"{nameof(LabAPIExtensions)} was not found!"));
+                    LogManager.Silent($"{nameof(LabAPIExtensions)} was not found!");
                     return;
                 }
 
                 DisguiseType = LabAPIExtension?.GetType("LabApiExtensions.Managers.FakeRoleManager");
                 if (DisguiseType == null)
                 {
-                    MainThreadDispatcher.Dispatch(() => LogManager.Silent("Failed to find LabApiExtensions.Managers.FakeRoleManager type."));
+                    LogManager.Silent("Failed to find LabApiExtensions.Managers.FakeRoleManager type.");
                     return;
                 }
 
                 Type[] paramTypes = [
                     typeof(Player),
-                typeof(RoleTypeId)
+                    typeof(RoleTypeId)
                 ];
 
                 Disguise = AccessTools.Method(DisguiseType, "AddFakeRole", paramTypes);
@@ -75,8 +76,21 @@ namespace UncomplicatedCustomItems.Integrations
                         });
                 }
 
-                if (Disguise == null)
-                    MainThreadDispatcher.Dispatch(() => LogManager.Silent("Could not find AddFakeRole method in FakeRoleManager."));
+                if (Disguise != null)
+                {
+                    try
+                    {
+                        DisguiseDelegate = (Action<Player, RoleTypeId, bool, byte>)Delegate.CreateDelegate(typeof(Action<Player, RoleTypeId, bool, byte>), Disguise, false);
+                    }
+                    catch
+                    {
+                        // Fall back to MethodInfo.Invoke if signature doesnt match four parameters
+                    }
+                }
+                else
+                {
+                    LogManager.Silent("Could not find AddFakeRole method in FakeRoleManager.");
+                }
             });
         }
 
@@ -87,6 +101,12 @@ namespace UncomplicatedCustomItems.Integrations
         /// <param name="role"></param>
         public static void DisguisePlayer(this Player player, RoleTypeId role)
         {
+            if (DisguiseDelegate != null)
+            {
+                DisguiseDelegate(player, role, false, 0);
+                return;
+            }
+
             if (Disguise == null)
             {
                 LogManager.Warn("Disguise method was not found.");

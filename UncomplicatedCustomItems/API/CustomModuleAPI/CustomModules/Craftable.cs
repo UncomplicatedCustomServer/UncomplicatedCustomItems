@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using LabApi.Events.Arguments.Scp914Events;
 using LabApi.Events.Handlers;
 using Scp914;
-using UncomplicatedCustomItems.API.Extensions;
+using Scp914.Processors;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
 
@@ -12,47 +11,25 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
     public class Craftable : CustomModuleBase
     {
         public override string Name => "Craftable";
-        public override List<string> RequiredArguments =>
-        [
-            "KnobSetting",
-            "OriginalItem",
-            "Chance",
-        ];
 
-        public Scp914KnobSetting? KnobSetting { get; set; }
-        public ItemType? OriginalItem { get; set; }
-        public float? Chance { get; set; }
+        public Scp914KnobSetting KnobSetting { get; set; }
+        public ItemType OriginalItem { get; set; }
+        public float Chance { get; set; } = 100f;
 
         public override void OnAdded(SummonedCustomItem item)
         {
-            if (CustomItem == null)
-                return;
+            if (item.IsPickup)
+            {
+                if (!item.Pickup?.GameObject.TryGetComponent<StandardItemProcessor>(out _) ?? false)
+                    item.Pickup?.GameObject.AddComponent<StandardItemProcessor>();
+            }
+            else
+            {
+                if (!item.Item?.GameObject.TryGetComponent<StandardItemProcessor>(out _) ?? false)
+                    item.Item?.GameObject.AddComponent<StandardItemProcessor>();
+            }
 
             base.OnAdded(item);
-            foreach (Dictionary<object, object> args in Arguments)
-            {
-                if (!args.TryGetValue<Scp914KnobSetting>("KnobSetting", out var knobSetting))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} KnobSetting is not a valid enum value! {string.Join(", ", Enum.GetNames(typeof(Scp914KnobSetting)))}");
-                    return;
-                }
-
-                if (!args.TryGetValue<ItemType>("OriginalItem", out var originalItem))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} OriginalItem is not a valid enum value! {string.Join(", ", Enum.GetNames(typeof(Scp914KnobSetting)))}!");
-                    return;
-                }
-
-                if (!args.TryGetValue<float>("Chance", out var chance))
-                {
-                    LogManager.Warn($"{CustomItem.Name} - {CustomItem.Id} Chance is not a valid float!");
-                    return;
-                }
-
-                KnobSetting = knobSetting;
-                OriginalItem = originalItem;
-                Chance = chance;
-            }
         }
 
         public override void Run(EventArgs eventArgs)
@@ -62,41 +39,28 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 
             if (eventArgs is Scp914ProcessingPickupEventArgs processingPickup)
             {
-                LogManager.Debug($"Triggered");
-                foreach (CustomItem customItem in Features.CustomItem.List)
+                if (processingPickup.Pickup == null)
+                    return;
+
+                LogManager.Debug($"Triggered Craftable pickup processing");
+                foreach (CustomItem customItem in Features.CustomItem.CustomItems.Values)
                 {
-                    LogManager.Debug($"{customItem.Name}");
                     if (customItem.TryGetModule<Craftable>(out var data) && data != null)
                     {
-                        LogManager.Debug($"{Name} has Craftable CustomFlag");
-                        LogManager.Debug($"Checking settings on {Name}");
-                        if (UnityEngine.Random.Range(0f, 101f) >= data.Chance)
+                        if (UnityEngine.Random.Range(0f, 100f) < data.Chance)
                         {
-                            LogManager.Debug($"{Name} Passed chance");
                             try
                             {
-                                LogManager.Debug($"Checking if {data.OriginalItem} equals {processingPickup.Pickup} and {data.KnobSetting} equals {processingPickup.KnobSetting}");
                                 if (processingPickup.Pickup.Type == data.OriginalItem && processingPickup.KnobSetting == data.KnobSetting)
                                 {
-                                    LogManager.Debug($"Check passed!");
-                                    LogManager.Debug($"Spawning {Name} at {processingPickup.Pickup.Position}...");
-                                    try
-                                    {
-                                        processingPickup.Pickup.Destroy();
-                                        new SummonedCustomItem(customItem, processingPickup.NewPosition);
-                                        LogManager.Debug($"CustomItem created successfully at {processingPickup.NewPosition}");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        LogManager.Error($"Error during CustomItem creation: {ex.Message}\n{ex.StackTrace}");
-                                    }
+                                    processingPickup.Pickup.Destroy();
+                                    new SummonedCustomItem(customItem, processingPickup.NewPosition);
+                                    LogManager.Debug($"CustomItem created successfully at {processingPickup.NewPosition}");
                                 }
-                                else
-                                    LogManager.Debug($"{processingPickup.KnobSetting} != {data.KnobSetting} or {processingPickup.Pickup} != {data.OriginalItem}");
                             }
                             catch (Exception ex)
                             {
-                                LogManager.Error($"Exception: {ex.Message}\n{ex.StackTrace}");
+                                LogManager.Error($"Error during Craftable CustomItem creation: {ex.Message}\n{ex.StackTrace}");
                             }
                         }
                     }
@@ -105,17 +69,20 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
             if (eventArgs is Scp914ProcessingInventoryItemEventArgs processingInventoryItem)
             {
-                foreach (CustomItem customItem in Features.CustomItem.List)
+                if (processingInventoryItem.Item == null)
+                    return;
+
+                foreach (CustomItem customItem in Features.CustomItem.CustomItems.Values)
                 {
                     if (customItem.TryGetModule<Craftable>(out var data) && data != null)
                     {
-                        if (UnityEngine.Random.Range(0f, 101f) >= Chance)
+                        if (UnityEngine.Random.Range(0f, 100f) < data.Chance)
                         {
-                            if (processingInventoryItem.Player.CurrentItem?.Type == data.OriginalItem && processingInventoryItem.KnobSetting == data.KnobSetting)
+                            if (processingInventoryItem.Item.Type == data.OriginalItem && processingInventoryItem.KnobSetting == data.KnobSetting)
                             {
                                 processingInventoryItem.Player.RemoveItem(processingInventoryItem.Item);
                                 new SummonedCustomItem(customItem, processingInventoryItem.Player);
-                                LogManager.Debug($"Gave {Name} to {processingInventoryItem.Player.Nickname}...");
+                                LogManager.Debug($"Gave {customItem.Name} to {processingInventoryItem.Player.Nickname}...");
                             }
                         }
                     }

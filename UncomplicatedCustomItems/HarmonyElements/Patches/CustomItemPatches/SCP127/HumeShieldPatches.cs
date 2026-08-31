@@ -15,17 +15,18 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPatch("HsMax", MethodType.Getter)]
         public static void Postfix(Scp127HumeModule __instance, ref float __result)
         {
-            if (__instance != null || __instance?.Item != null)
+            if (__instance == null || __instance.Item == null)
                 return;
 
-            if (APICustomItem.TryGet(__instance?.Item.ItemSerial ?? 0, out var item2) && item2 is CustomSCP127 custom127)
+            ushort serial = __instance.Item.ItemSerial;
+
+            if (APICustomItem.TryGet(serial, out var item2) && item2 is CustomSCP127 custom127)
             {
                 try
                 {
                     if (custom127.GiveHumeShield)
                     {
-                        __result = Scp127TierManagerModule.GetTierForItem(__instance?.Item)
-                        switch
+                        __result = Scp127TierManagerModule.GetTierForItem(__instance.Item) switch
                         {
                             Scp127Tier.Tier1 => custom127.Tier1HumeShieldAmount,
                             Scp127Tier.Tier2 => custom127.Tier2HumeShieldAmount,
@@ -34,7 +35,9 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         };
                     }
                     else
+                    {
                         __result = 0f;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -42,7 +45,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 }
             }
 
-            if (Utilities.TryGetSummonedCustomItem(__instance?.Item.ItemSerial ?? 0, out var itemhume) && itemhume?.CustomItem.CustomItemType == CustomItemType.SCPItem && itemhume?.Item?.Type == ItemType.GunSCP127)
+            if (Utilities.TryGetSummonedCustomItem(serial, out var itemhume) && itemhume?.CustomItem.CustomItemType == CustomItemType.SCPItem && itemhume?.Item?.Type == ItemType.GunSCP127)
             {
                 try
                 {
@@ -51,8 +54,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
 
                     if (data.GiveHumeShield)
                     {
-                        __result = Scp127TierManagerModule.GetTierForItem(__instance?.Item)
-                        switch
+                        __result = Scp127TierManagerModule.GetTierForItem(__instance.Item) switch
                         {
                             Scp127Tier.Tier1 => data.Tier1HumeShieldAmount,
                             Scp127Tier.Tier2 => data.Tier2HumeShieldAmount,
@@ -61,7 +63,9 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         };
                     }
                     else
+                    {
                         __result = 0f;
+                    }
                 }
                 catch (Exception ex)
                 {

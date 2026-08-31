@@ -14,5 +14,7 @@
         public abstract float Sustain { get; set; }
 
         public abstract bool Persistant { get; set; }
+
+        public abstract float StaminaGain { get; set; }
     }
 }

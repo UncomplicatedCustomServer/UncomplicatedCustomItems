@@ -17,8 +17,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         {
             if (APICustomItem.TryGet(__instance.Item.ItemSerial, out var item2) && item2 is CustomSCP127 custom127)
             {
-                __result = Scp127TierManagerModule.GetTierForItem(__instance.Item)
-                switch
+                __result = Scp127TierManagerModule.GetTierForItem(__instance.Item) switch
                 {
                     Scp127Tier.Tier1 => custom127.Tier1BulletFireRate,
                     Scp127Tier.Tier2 => custom127.Tier2BulletFireRate,
@@ -33,15 +32,15 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                 try
                 {
                     if (item.CustomItem.CustomData is SCP127Data data)
-
-                        __result = Scp127TierManagerModule.GetTierForItem(__instance.Item)
-                        switch
+                    {
+                        __result = Scp127TierManagerModule.GetTierForItem(__instance.Item) switch
                         {
                             Scp127Tier.Tier1 => data.Tier1BulletFireRate,
                             Scp127Tier.Tier2 => data.Tier2BulletFireRate,
                             Scp127Tier.Tier3 => data.Tier3BulletFireRate,
                             _ => __result
                         };
+                    }
                 }
                 catch (Exception ex)
                 {

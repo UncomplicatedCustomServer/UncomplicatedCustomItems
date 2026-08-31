@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API.Features.Manager;
@@ -8,6 +9,8 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 {
     internal class EvaluateConditions
     {
+        private static readonly Regex PredicateRegex = new(@"^\s*(?<prop>[A-Za-z0-9_\.]+)\s*(==|=)\s*(?<val>.+)\s*$", RegexOptions.Compiled);
+
         public static bool EvaluateNumericCondition(string condition, EventArgs eventArgs)
         {
             string[] operators = [" >= ", " <= ", " > ", " < "];
@@ -27,10 +30,11 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
             if (foundOperator == null || parts == null)
                 return false;
 
-            string leftValue = ArgumentManager.ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = ArgumentManager.ReplacePlaceholders(parts[1].Trim(), eventArgs);
+            string leftValue = TrimQuotes(ArgumentManager.ReplacePlaceholders(parts[0].Trim(), eventArgs));
+            string rightValue = TrimQuotes(ArgumentManager.ReplacePlaceholders(parts[1].Trim(), eventArgs));
 
-            if (!double.TryParse(leftValue, out double left) || !double.TryParse(rightValue, out double right))
+            if (!double.TryParse(leftValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double left) ||
+                !double.TryParse(rightValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double right))
                 return false;
 
             return foundOperator switch
@@ -46,12 +50,16 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
         public static bool EvaluateEqualityCondition(string condition, EventArgs eventArgs)
         {
             bool isNotEquals = condition.Contains(" != ");
-            string[] parts = condition.Split([isNotEquals ? " != " : " == "], StringSplitOptions.None);
-            if (parts.Length != 2)
+            string op = isNotEquals ? " != " : " == ";
+            int idx = condition.IndexOf(op, StringComparison.Ordinal);
+            if (idx == -1)
                 return false;
 
-            string leftValue = ArgumentManager.ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = ArgumentManager.ReplacePlaceholders(parts[1].Trim().Trim('"', '\''), eventArgs);
+            string leftPart = condition.Substring(0, idx).Trim();
+            string rightPart = condition.Substring(idx + op.Length).Trim();
+
+            string leftValue = TrimQuotes(ArgumentManager.ReplacePlaceholders(leftPart, eventArgs));
+            string rightValue = TrimQuotes(ArgumentManager.ReplacePlaceholders(rightPart, eventArgs));
 
             bool areEqual = string.Equals(leftValue, rightValue, StringComparison.OrdinalIgnoreCase);
             return isNotEquals ? !areEqual : areEqual;
@@ -74,7 +82,7 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 
             if (leftObj is IEnumerable leftEnum && leftObj is not string)
             {
-                if (TryParsePredicate(rightPart, out String? predProp, out String? predOp, out String? predValue))
+                if (TryParsePredicate(rightPart, out string? predProp, out string? predOp, out string? predValue))
                 {
                     foreach (object? el in leftEnum)
                     {
@@ -108,24 +116,30 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
 
         public static bool EvaluateIsCondition(string condition, EventArgs eventArgs)
         {
-            string[] parts = condition.Split([" is "], (int)StringSplitOptions.None, (StringSplitOptions)StringComparison.OrdinalIgnoreCase);
-            if (parts.Length != 2)
+            int idx = condition.IndexOf(" is ", StringComparison.OrdinalIgnoreCase);
+            if (idx == -1)
                 return false;
 
-            string leftValue = ArgumentManager.ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = parts[1].Trim().Trim('"', '\'');
+            string leftRaw = condition.Substring(0, idx).Trim();
+            string rightRaw = condition.Substring(idx + 4).Trim();
+
+            string leftValue = TrimQuotes(ArgumentManager.ReplacePlaceholders(leftRaw, eventArgs));
+            string rightValue = TrimQuotes(ArgumentManager.ReplacePlaceholders(rightRaw, eventArgs));
 
             return string.Equals(leftValue, rightValue, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool EvaluateEqualsCondition(string condition, EventArgs eventArgs)
         {
-            string[] parts = condition.Split([" equals "], (int)StringSplitOptions.None, (StringSplitOptions)StringComparison.OrdinalIgnoreCase);
-            if (parts.Length != 2)
+            int idx = condition.IndexOf(" equals ", StringComparison.OrdinalIgnoreCase);
+            if (idx == -1)
                 return false;
 
-            string leftValue = ArgumentManager.ReplacePlaceholders(parts[0].Trim(), eventArgs);
-            string rightValue = ArgumentManager.ReplacePlaceholders(parts[1].Trim().Trim('"', '\''), eventArgs);
+            string leftRaw = condition.Substring(0, idx).Trim();
+            string rightRaw = condition.Substring(idx + 8).Trim();
+
+            string leftValue = TrimQuotes(ArgumentManager.ReplacePlaceholders(leftRaw, eventArgs));
+            string rightValue = TrimQuotes(ArgumentManager.ReplacePlaceholders(rightRaw, eventArgs));
 
             return string.Equals(leftValue, rightValue, StringComparison.OrdinalIgnoreCase);
         }
@@ -135,16 +149,16 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
             if (string.IsNullOrEmpty(s))
                 return s;
 
-            if ((s.StartsWith("\"") && s.EndsWith("\"")) || (s.StartsWith("'") && s.EndsWith("'")))
+            if (s.Length >= 2 && ((s.StartsWith("\"") && s.EndsWith("\"")) || (s.StartsWith("'") && s.EndsWith("'"))))
                 return s.Substring(1, s.Length - 2);
-                
+
             return s;
         }
 
         internal static bool TryParsePredicate(string token, out string property, out string op, out string value)
         {
             property = op = value = string.Empty;
-            Match? m = Regex.Match(token, @"^\s*(?<prop>[A-Za-z0-9_\.]+)\s*(==|=)\s*(?<val>.+)\s*$");
+            Match m = PredicateRegex.Match(token);
             if (!m.Success)
                 return false;
 
@@ -157,15 +171,18 @@ namespace UncomplicatedCustomItems.API.Features.ArgumentHelpers
         internal static bool TryGetMemberStringValue(object target, string memberPath, out string? value)
         {
             value = null;
+            if (target == null || string.IsNullOrWhiteSpace(memberPath))
+                return false;
+
             try
             {
                 object? current = target;
-                foreach (String? part in memberPath.Split('.'))
+                foreach (string part in memberPath.Split('.'))
                 {
                     if (current == null)
                         return false;
 
-                    Type? t = current.GetType();
+                    Type t = current.GetType();
                     PropertyInfo? prop = t.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                     if (prop != null)
                     {

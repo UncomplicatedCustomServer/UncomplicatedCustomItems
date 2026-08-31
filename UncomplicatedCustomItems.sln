@@ -17,8 +17,8 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}.Debug|Any CPU.ActiveCfg = Exiled|Any CPU
-		{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}.Debug|Any CPU.Build.0 = Exiled|Any CPU
+		{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}.Debug|Any CPU.ActiveCfg = LabApi-Debug|Any CPU
+		{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}.Debug|Any CPU.Build.0 = LabApi-Debug|Any CPU
 		{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}.Debug|x64.ActiveCfg = LabApi|x64
 		{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}.Debug|x64.Build.0 = LabApi|x64
 		{B39EE633-0EFE-42FC-B3E8-C6C4C86029E5}.Exiled|Any CPU.ActiveCfg = Exiled|Any CPU

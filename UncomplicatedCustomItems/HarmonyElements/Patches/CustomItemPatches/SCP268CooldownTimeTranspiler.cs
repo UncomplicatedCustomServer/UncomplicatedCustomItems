@@ -2,6 +2,7 @@
 using InventorySystem.Items.Usables;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Text;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
@@ -13,8 +14,6 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
     [HarmonyPatch(typeof(Scp268), nameof(Scp268.ServerOnUsingCompleted))]
     internal static class SCP268CooldownTimeTranspiler
     {
-        private static string text = string.Empty;
-
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -31,12 +30,13 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches.CustomItemPatches
                 }
             }
 
+            StringBuilder sb = new();
             foreach (CodeInstruction code in codes)
             {
-                text += $"\n{code}";
+                sb.Append('\n').Append(code);
             }
 
-            LogManager.Silent($"{nameof(SCP268CooldownTimeTranspiler)}: Codes: {text}");             
+            LogManager.Silent($"{nameof(SCP268CooldownTimeTranspiler)}: Codes: {sb}");             
             return codes;
         }
 
