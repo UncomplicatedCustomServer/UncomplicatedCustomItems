@@ -1,111 +1,107 @@
 using System;
-using CustomPlayerEffects;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Manager;
-using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
-    public class Effect : CustomModuleBase
+    public class DestroyOn : CustomModuleBase
     {
-        public override string Name => "Effect";
+        public override string Name => "DestroyOn";
 
-        public string EffectName { get; set; } = string.Empty;
-        public byte Intensity { get; set; } = 1;
-        public float Duration { get; set; }
-        public bool AddDurationIfActive { get; set; }
-        public bool ClearOnUnequip { get; set; }
         public TriggerOn Trigger { get; set; }
-
-        [YamlIgnore]
-        private StatusEffectBase? StatusEffect { get; set; }
-
-        public override void OnAdded(SummonedCustomItem item)
-        {
-            base.OnAdded(item);
-            if (!string.IsNullOrEmpty(EffectName) && Server.Host != null)
-            {
-                if (Server.Host.TryGetEffect(EffectName, out var effect))
-                {                    
-                    StatusEffect = effect;
-                }
-                else
-                    LogManager.Warn($"Could not find effect '{EffectName}'.");
-            }
-        }
 
         public override void Run(EventArgs eventArgs)
         {
-            if (!Check(eventArgs) || StatusEffect == null)
+            if (!Check(eventArgs))
                 return;
-                
-            float applyDuration = Duration >= 0 ? Duration : float.MaxValue;
 
-            Player? target;
+            SummonedCustomItem? toDestroy = null;
+
             switch (eventArgs)
             {
                 case PlayerShotWeaponEventArgs shot when HasFlagFast(Trigger, TriggerOn.OnShot):
-                    target = shot.Player;
+                    if (Utilities.TryGetSummonedCustomItem(shot.FirearmItem.Serial, out var shotSci))
+                        toDestroy = shotSci;
+
                     break;
 
                 case PlayerUsedItemEventArgs used when HasFlagFast(Trigger, TriggerOn.OnUse):
-                    target = used.Player;
+                    if (Utilities.TryGetSummonedCustomItem(used.UsableItem.Serial, out var usedSci))
+                        toDestroy = usedSci;
+
                     break;
 
                 case PlayerReloadedWeaponEventArgs reloaded when HasFlagFast(Trigger, TriggerOn.OnReload):
-                    target = reloaded.Player;
+                    if (Utilities.TryGetSummonedCustomItem(reloaded.FirearmItem.Serial, out var reloadSci))
+                        toDestroy = reloadSci;
+
                     break;
 
-                case PlayerChangedItemEventArgs changed:
-                    if (ClearOnUnequip)
-                        changed.Player.DisableEffect(StatusEffect);
+                case PlayerChangedItemEventArgs changed when HasFlagFast(Trigger, TriggerOn.OnChangedItem):
+                    if (changed.NewItem != null && Utilities.TryGetSummonedCustomItem(changed.NewItem.Serial, out var newSci))
+                    {
+                        toDestroy = newSci;
+                    }
+                    else if (changed.OldItem != null && Utilities.TryGetSummonedCustomItem(changed.OldItem.Serial, out var oldSci))
+                    {
+                        toDestroy = oldSci;
+                    }
 
-                    if (!HasFlagFast(Trigger, TriggerOn.OnChangedItem))
-                        return;
-
-                    target = changed.Player;
                     break;
 
                 case PlayerPickedUpItemEventArgs picked when HasFlagFast(Trigger, TriggerOn.OnAdded):
-                    target = picked.Player;
+                    if (Utilities.TryGetSummonedCustomItem(picked.Item.Serial, out var pickedSci))
+                        toDestroy = pickedSci;
+
                     break;
 
                 case PlayerDroppedItemEventArgs dropped when HasFlagFast(Trigger, TriggerOn.OnDropped):
-                    target = dropped.Player;
+                    if (Utilities.TryGetSummonedCustomItem(dropped.Pickup.Serial, out var droppedSci))
+                        toDestroy = droppedSci;
+
                     break;
 
                 case PlayerDeathEventArgs death when HasFlagFast(Trigger, TriggerOn.OnDeath):
-                    target = ResolveDeathTarget(death.Player, death.Attacker);
+                    Player? deathTarget = ResolveDeathTarget(death.Player, death.Attacker);
+                    if (deathTarget?.CurrentItem != null && Utilities.TryGetSummonedCustomItem(deathTarget.CurrentItem.Serial, out var deathSci))
+                        toDestroy = deathSci;
+
                     break;
 
                 case PlayerDyingEventArgs dying when HasFlagFast(Trigger, TriggerOn.OnDeath):
-                    target = ResolveDeathTarget(dying.Player, dying.Attacker);
+                    Player? dyingTarget = ResolveDeathTarget(dying.Player, dying.Attacker);
+                    if (dyingTarget?.CurrentItem != null && Utilities.TryGetSummonedCustomItem(dyingTarget.CurrentItem.Serial, out var dyingSci))
+                        toDestroy = dyingSci;
+
                     break;
 
                 case PlayerHurtEventArgs hurt when HasFlagFast(Trigger, TriggerOn.OnHurt):
-                    target = ResolveHurtTarget(hurt);
+                    Player? hurtTarget = ResolveHurtTarget(hurt);
+                    if (hurtTarget?.CurrentItem != null && Utilities.TryGetSummonedCustomItem(hurtTarget.CurrentItem.Serial, out var hurtSci))
+                        toDestroy = hurtSci;
+
                     break;
 
                 case PlayerInteractedDoorEventArgs door when HasFlagFast(Trigger, TriggerOn.OnDoorInteracted):
-                    target = door.Player;
+                    if (door.Player.CurrentItem != null && Utilities.TryGetSummonedCustomItem(door.Player.CurrentItem.Serial, out var doorSci))
+                        toDestroy = doorSci;
+
                     break;
 
                 case PlayerInspectedItemEventArgs inspected when HasFlagFast(Trigger, TriggerOn.OnInspected):
-                    target = inspected.Player;
+                    if (Utilities.TryGetSummonedCustomItem(inspected.Item.Serial, out var inspectedSci))
+                        toDestroy = inspectedSci;
+
                     break;
 
                 default:
                     return;
             }
 
-            if (target == null)
-                return;
-
-            target.EnableEffect(StatusEffect, Intensity, applyDuration, AddDurationIfActive);
+            toDestroy?.Destroy();
         }
 
         private Player? ResolveHurtTarget(PlayerHurtEventArgs ev)

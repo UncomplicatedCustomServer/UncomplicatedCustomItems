@@ -18,8 +18,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             if (!Check(eventArgs))
                 return;
 
-            Player? target = null;
-
+            Player? target;
             switch (eventArgs)
             {
                 case PlayerShotWeaponEventArgs shot when HasFlagFast(Trigger, TriggerOn.OnShot):

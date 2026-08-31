@@ -23,12 +23,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             if (SummonedCustomItem.TryGet(__instance.ItemSerial, out SummonedCustomItem? item) && item != null && item.CustomItem.CustomItemType is CustomItemType.Medikit or CustomItemType.Adrenaline or CustomItemType.Painkillers)
             {
                 Apply(__instance, item.CustomItem.CustomData);
+                __instance._alreadyActivated = true;
                 return false;
             }
 
             if (APICustomItem.TryGet(__instance.ItemSerial, out APICustomItem? apiitem) && apiitem != null && apiitem is CustomMedkit or CustomPainkillers or CustomAdrenaline)
             {
                 Apply(__instance, apiitem);
+                __instance._alreadyActivated = true;
                 return false;
             }
 

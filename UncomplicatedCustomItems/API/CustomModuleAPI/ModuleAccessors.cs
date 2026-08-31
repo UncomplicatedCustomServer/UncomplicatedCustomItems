@@ -1,13 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Features.Manager;
-using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI
 {

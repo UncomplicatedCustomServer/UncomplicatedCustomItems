@@ -1,7 +1,6 @@
 using System;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
-using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 {
