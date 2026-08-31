@@ -1,5 +1,4 @@
-﻿using Achievements;
-using CustomPlayerEffects;
+﻿using CustomPlayerEffects;
 using HarmonyLib;
 using InventorySystem.Items.Usables;
 using LabApi.Features.Wrappers;
@@ -10,7 +9,7 @@ using System.Collections.Generic;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -37,20 +36,20 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             return true;
         }
 
-        private static void Apply(Consumable instance, IData data)
+        private static void Apply(Consumable instance, Data data)
         {
             switch (data)
             {
-                case IMedikitData medkit:
+                case MedikitData medkit:
                     instance.Owner.playerStats.GetModule<HealthStat>().ServerHeal(medkit.Health);
                     instance.Owner.playerEffectsController.UseMedicalItem(instance);
                     break;
 
-                case IPainkillersData painkillers:
+                case PainkillersData painkillers:
                     Timing.RunCoroutine(PainkillersCoroutine(instance, painkillers));
                     break;
 
-                case IAdrenalineData adrenaline:
+                case AdrenalineData adrenaline:
                     instance.Owner.playerStats.GetModule<StaminaStat>().AddAmount(adrenaline.StaminaGain);
                     instance.Owner.playerStats.GetModule<AhpStat>().ServerAddProcess(adrenaline.Amount);
                     instance.Owner.playerEffectsController.EnableEffect<Invigorated>(8f, addDuration: true);
@@ -83,7 +82,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             }
         }
 
-        internal static IEnumerator<float> PainkillersCoroutine(Consumable consumable, IPainkillersData data)
+        internal static IEnumerator<float> PainkillersCoroutine(Consumable consumable, PainkillersData data)
         {
             float TotalHealed = 0;
             Player player = Player.Get(consumable.Owner);

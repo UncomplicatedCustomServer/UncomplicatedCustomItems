@@ -348,8 +348,12 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
 
                 if (!accessors.Setters.TryGetValue(keyName, out var setter))
                 {
-                    LogManager.Warn($"'{keyName}' in the config for module {moduleType.Name} doesn't match any settable property. Known properties: {string.Join(", ", accessors.Setters.Keys)}");
-                    continue;
+                    string pascal = ToPascalCase(keyName);
+                    if (!accessors.Setters.TryGetValue(pascal, out setter))
+                    {
+                        LogManager.Warn($"'{keyName}' in the config for module {moduleType.Name} doesn't match any settable property. Known properties: {string.Join(", ", accessors.Setters.Keys)}");
+                        continue;
+                    }
                 }
 
                 try
@@ -363,6 +367,22 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
             }
 
             return instance;
+        }
+
+        private static string ToPascalCase(string snake)
+        {
+            if (string.IsNullOrWhiteSpace(snake))
+                return snake; 
+
+            string[] parts = snake.Split(['_', '-'], StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (parts[i].Length == 0)
+                    continue;
+                    
+                parts[i] = char.ToUpperInvariant(parts[i][0]) + (parts[i].Length > 1 ? parts[i].Substring(1) : string.Empty);
+            }
+            return string.Concat(parts);
         }
 
         private static CustomModuleBase CloneModule(CustomModuleBase source, Type moduleType)

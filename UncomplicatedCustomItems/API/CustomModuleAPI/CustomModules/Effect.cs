@@ -40,8 +40,26 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
         public override void Run(EventArgs eventArgs)
         {
-            if (!Check(eventArgs) || StatusEffect == null)
+            if (!Check(eventArgs))
                 return;
+
+            if (string.IsNullOrEmpty(EffectName))
+                return;
+
+            if (StatusEffect == null && Server.Host != null)
+            {
+                if (!Server.Host.TryGetEffect(EffectName, out var eff))
+                {
+                    LogManager.Warn($"Could not find effect '{EffectName}'.");
+                    return;
+                }
+                StatusEffect = eff;
+            }
+            else if (StatusEffect == null)
+            {
+                LogManager.Warn($"Could not find effect '{EffectName}' - StatusEffect is null and Host is null.");
+                return;
+            }
                 
             float applyDuration = Duration >= 0 ? Duration : float.MaxValue;
 
@@ -52,8 +70,8 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     target = shot.Player;
                     break;
 
-                case PlayerUsedItemEventArgs used when HasFlagFast(Trigger, TriggerOn.OnUse):
-                    target = used.Player;
+                case PlayerItemUsageEffectsApplyingEventArgs usageApplying when HasFlagFast(Trigger, TriggerOn.OnUse):
+                    target = usageApplying.Player;
                     break;
 
                 case PlayerReloadedWeaponEventArgs reloaded when HasFlagFast(Trigger, TriggerOn.OnReload):
@@ -105,7 +123,24 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
             if (target == null)
                 return;
 
-            target.EnableEffect(StatusEffect, Intensity, applyDuration, AddDurationIfActive);
+            if (!target.TryGetEffect(EffectName, out var targetEffect) || targetEffect == null)
+            {
+                LogManager.Warn($"Could not find effect '{EffectName}' for player {target.Nickname}.");
+                return;
+            }
+
+            if (!targetEffect.AllowEnabling && Intensity > targetEffect.Intensity)
+            {
+                targetEffect.ForceIntensity(Intensity);
+                targetEffect.ServerChangeDuration(applyDuration, AddDurationIfActive);
+                target.ReferenceHub.playerEffectsController.ServerSyncEffect(targetEffect);
+                LogManager.Debug($"Force applied {EffectName} to {target.Nickname} Intensity={Intensity} Duration={applyDuration}");
+            }
+            else
+            {
+                target.EnableEffect(targetEffect, Intensity, applyDuration, AddDurationIfActive);
+                LogManager.Debug($"Applied {EffectName} to {target.Nickname} Intensity={Intensity} Duration={applyDuration} AddDuration={AddDurationIfActive}");
+            }
         }
 
         private Player? ResolveHurtTarget(PlayerHurtEventArgs ev)
@@ -133,7 +168,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public override void RegisterEvents()
         {
             PlayerEvents.ShotWeapon += Run;
-            PlayerEvents.UsedItem += Run;
+            PlayerEvents.ItemUsageEffectsApplying += Run;
             PlayerEvents.ReloadedWeapon += Run;
             PlayerEvents.ChangedItem += Run;
             PlayerEvents.PickedUpItem += Run;
@@ -148,7 +183,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         public override void UnregisterEvents()
         {
             PlayerEvents.ShotWeapon -= Run;
-            PlayerEvents.UsedItem -= Run;
+            PlayerEvents.ItemUsageEffectsApplying -= Run;
             PlayerEvents.ReloadedWeapon -= Run;
             PlayerEvents.ChangedItem -= Run;
             PlayerEvents.PickedUpItem -= Run;
