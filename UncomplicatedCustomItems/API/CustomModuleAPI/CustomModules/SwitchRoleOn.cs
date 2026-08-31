@@ -9,7 +9,6 @@ using MEC;
 using PlayerRoles;
 using System;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
-using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;

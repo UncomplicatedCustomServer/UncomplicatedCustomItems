@@ -34,7 +34,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     StatusEffect = effect;
                 }
                 else
-                    LogManager.Warn($"[Effect] Could not find effect '{EffectName}'.");
+                    LogManager.Warn($"Could not find effect '{EffectName}'.");
             }
         }
 

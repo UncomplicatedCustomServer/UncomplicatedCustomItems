@@ -4,7 +4,6 @@ using LabApi.Features.Wrappers;
 using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
-using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Interfaces;
 using YamlDotNet.Serialization;
