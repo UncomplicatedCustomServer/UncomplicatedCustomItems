@@ -1,4 +1,4 @@
-﻿using Interactables.Interobjects.DoorUtils;
+using Interactables.Interobjects.DoorUtils;
 using InventorySystem;
 using InventorySystem.Items.Autosync;
 using InventorySystem.Items.Firearms;
@@ -24,7 +24,7 @@ using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.Networking;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
@@ -298,7 +298,7 @@ namespace UncomplicatedCustomItems.API.Features
             }
         }
 
-        public void HandleKeycardItem(KeycardItem keycardItem, IKeycardData kd)
+        public void HandleKeycardItem(KeycardItem keycardItem, KeycardData kd)
         {
             if (!keycardItem.Base.Customizable)
             {
@@ -343,7 +343,7 @@ namespace UncomplicatedCustomItems.API.Features
             NameApplied = true;
         }
 
-        public void HandleKeycardPickup(IKeycardData kd)
+        public void HandleKeycardPickup(KeycardData kd)
         {
             LabApi.Features.Wrappers.KeycardPickup? keycardPickup = (LabApi.Features.Wrappers.KeycardPickup?)LabApi.Features.Wrappers.KeycardPickup.Create(CustomItem.Item, Pickup?.Position ?? Vector3.one);
             if (keycardPickup == null)
@@ -390,7 +390,7 @@ namespace UncomplicatedCustomItems.API.Features
             Serial = Pickup.Serial;
         }
 
-        public void HandleWeaponItem(FirearmItem firearmItem, IWeaponData wd)
+        public void HandleWeaponItem(FirearmItem firearmItem, WeaponData wd)
         {
             if (firearmItem.Base.TryGetModule<MagazineModule>(out var mag))
                 MagazineModule = mag;
@@ -428,7 +428,7 @@ namespace UncomplicatedCustomItems.API.Features
             PropertiesSet = true;
         }
 
-        public void HandleWeaponPickup(IWeaponData wd)
+        public void HandleWeaponPickup(WeaponData wd)
         {
             var firearmPickup = (LabApi.Features.Wrappers.FirearmPickup?)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup?.Position ?? Vector3.one);
             if (firearmPickup == null)
@@ -490,7 +490,7 @@ namespace UncomplicatedCustomItems.API.Features
             PropertiesSet = true;
         }
 
-        public void CreateAndAttachLightToItem(Transform parentTransform, IFlashlightData data, Vector3 localPos)
+        public void CreateAndAttachLightToItem(Transform parentTransform, FlashlightData data, Vector3 localPos)
         {
             Light newLight = Light.Create(parentTransform);
             ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
@@ -517,7 +517,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (Pickup.Type is ItemType.Flashlight && !PropertiesSet)
             {
                 Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Flashlight.FlashlightItem>(out var flashItem);
-                if (CustomItem.CustomData is not IFlashlightData data)
+                if (CustomItem.CustomData is not FlashlightData data)
                     return;
 
                 Light newLight = Light.Create(flashItem.gameObject.transform.position);
@@ -540,7 +540,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (Pickup.Type is ItemType.Lantern && !PropertiesSet)
             {
                 Pickup.Base.Info.ItemId.TryGetTemplate<InventorySystem.Items.ToggleableLights.Lantern.LanternItem>(out var lantern);
-                if (CustomItem.CustomData is not IFlashlightData data)
+                if (CustomItem.CustomData is not FlashlightData data)
                     return;
 
                 Light newLight = Light.Create(lantern.gameObject.transform.position);
@@ -566,7 +566,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (Item == null)
                 return;
 
-            if ((Item.Type == ItemType.SCP244a || Item.Type == ItemType.SCP244b) && CustomItem.CustomData is ISCP244Data scp244Data)
+            if ((Item.Type == ItemType.SCP244a || Item.Type == ItemType.SCP244b) && CustomItem.CustomData is SCP244Data scp244Data)
             {
                 LogManager.Debug($"SCPItem is SCP-244");
                 Scp244? scp244 = Item as Scp244;
@@ -574,7 +574,7 @@ namespace UncomplicatedCustomItems.API.Features
                 return;
             }
 
-            if (Item.Type == ItemType.GunSCP127 && CustomItem.CustomData is ISCP127Data scp127Data)
+            if (Item.Type == ItemType.GunSCP127 && CustomItem.CustomData is SCP127Data scp127Data)
             {
                 LogManager.Debug($"SCPItem is SCP-127");
                 if (Item is not FirearmItem scpFirearm)
@@ -602,7 +602,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (Pickup == null)
                 return;
 
-            if ((Pickup.Type == ItemType.SCP244a || Pickup.Type == ItemType.SCP244b) && CustomItem.CustomData is ISCP244Data s244a)
+            if ((Pickup.Type == ItemType.SCP244a || Pickup.Type == ItemType.SCP244b) && CustomItem.CustomData is SCP244Data s244a)
             {
                 LogManager.Debug($"SCPItem is SCP-244");
                 Scp244Pickup? scp244Pickup = (Scp244Pickup?)Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
@@ -620,7 +620,7 @@ namespace UncomplicatedCustomItems.API.Features
                 return;
             }
 
-            if (Pickup.Type == ItemType.GunSCP127 && CustomItem.CustomData is ISCP127Data s127)
+            if (Pickup.Type == ItemType.GunSCP127 && CustomItem.CustomData is SCP127Data s127)
             {
                 LogManager.Debug($"SCPItem is SCP-127");
                 var scpFirearmPickup = (LabApi.Features.Wrappers.FirearmPickup?)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
@@ -734,7 +734,7 @@ namespace UncomplicatedCustomItems.API.Features
 
         private AttachmentName[] GetAttachments()
         {
-            if (CustomItem.CustomData is IWeaponData weaponData)
+            if (CustomItem.CustomData is WeaponData weaponData)
             {
                 string attachmentsString = weaponData.Attachments;
 
@@ -753,7 +753,7 @@ namespace UncomplicatedCustomItems.API.Features
                 return names.ToArray();
             }
 
-            LogManager.Warn("CustomData is not in the expected IWeaponData format or is null.");
+            LogManager.Warn("CustomData is not in the expected WeaponData format or is null.");
             return [];
         }
 
@@ -811,7 +811,7 @@ namespace UncomplicatedCustomItems.API.Features
                 }
                 else
                 {
-                    if (CustomItem.CustomData is not IFlashlightData data)
+                    if (CustomItem.CustomData is not FlashlightData data)
                         yield break;
 
                     Light?.Intensity = data.Intensity;
@@ -974,7 +974,7 @@ namespace UncomplicatedCustomItems.API.Features
         {
             if (CustomItem.CustomItemType == CustomItemType.Item)
             {
-                if (CustomItem.CustomData is not IItemData itemData)
+                if (CustomItem.CustomData is not ItemData itemData)
                     return;
 
                 foreach (ItemDataList data in itemData.Data)
@@ -1103,29 +1103,6 @@ namespace UncomplicatedCustomItems.API.Features
 
             if (_managedItems.Contains(CustomItem.CustomItemType))
             {
-                switch (CustomItem.CustomItemType)
-                {
-                    case CustomItemType.Medikit:
-                        IMedikitData? medikitData = CustomItem.CustomData as IMedikitData;
-                        Owner.Heal(medikitData?.Health ?? 0f);
-                        break;
-
-                    case CustomItemType.Painkillers:
-                        if (CustomItem.CustomData is not IPainkillersData data)
-                            break;
-
-                        Timing.RunCoroutine(Utilities.PainkillersCoroutine(Owner, data));
-                        break;
-
-                    case CustomItemType.Adrenaline:
-                        IAdrenalineData? adrenalineData = CustomItem.CustomData as IAdrenalineData;
-                        Owner.ReferenceHub.playerStats.GetModule<AhpStat>().ServerAddProcess(adrenalineData?.Amount ?? 0, limit: 1000f, decay: adrenalineData?.Decay ?? 0, efficacy: adrenalineData?.Efficacy ?? 0, sustain: adrenalineData?.Sustain ?? 0f, adrenalineData?.Persistant ?? false);
-                        break;
-
-                    default:
-                        return false;
-                }
-
                 HandleEvent(Owner, ItemEvents.Use, Serial);
                 if (!CustomItem.Reusable)
                     Owner.RemoveItem(item.Base);

@@ -1,12 +1,10 @@
-﻿using System.ComponentModel;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-
+using System.ComponentModel;
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// Holds the configuration data specific to custom items of type <see cref="CustomItemType.Keycard"/>.
     /// </summary>
-    public class KeycardData : Data, IKeycardData
+    public class KeycardData : Data
     {
         /// <summary>
         /// Sets the Containment access level. Valid range 0-3.

@@ -7,7 +7,7 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Interfaces;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UnityEngine;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
 using UncomplicatedCustomItems.API.Features.Networking;
@@ -82,7 +82,7 @@ namespace UncomplicatedCustomItems.Events
         {
             foreach (ICustomItem customItem in CustomItem.List)
             {
-                if (customItem.Item is ItemType.SCP330 && customItem.CustomData is ICandyData data && !data.AllowSpawningAsItem)
+                if (customItem.Item is ItemType.SCP330 && customItem.CustomData is CandyData data && !data.AllowSpawningAsItem)
                     continue;
 
                 LogManager.Debug($"{customItem.Name} DoSpawn is set to {customItem.Spawn?.DoSpawn}");

@@ -1,9 +1,9 @@
-﻿using CommandSystem;
+using CommandSystem;
 using System;
 using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Enums;
 using LabApi.Features.Wrappers;
 
@@ -39,7 +39,7 @@ namespace UncomplicatedCustomItems.Commands.User
             }
 
             // Ok now we have to check if the custom item command contains any & (= args)
-            if (item.CustomItem.CustomData is not IItemData itemData)
+            if (item.CustomItem.CustomData is not ItemData itemData)
             {
                 response = "This is not a item type CustomItem.";
                 return false;

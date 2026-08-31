@@ -2,7 +2,7 @@ using HarmonyLib;
 using InventorySystem.Items.Usables.Scp1344;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -16,7 +16,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
 
             if (summonedCustomItem.CustomItem.CustomItemType is CustomItemType.SCPItem && summonedCustomItem.CustomItem.Item is ItemType.SCP1344)
             {
-                if (summonedCustomItem.CustomItem.CustomData is not ISCP1344Data data)
+                if (summonedCustomItem.CustomItem.CustomData is not SCP1344Data data)
                     return true;
                     
                 __instance.Scp1344Effect.IsEnabled = data.Apply1344Effect;

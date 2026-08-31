@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using UncomplicatedCustomItems.API.Features;
@@ -51,7 +51,7 @@ namespace UncomplicatedCustomItems.API
         /// <param name="baseElement"></param>
         /// <param name="data"></param>
         /// <returns>The class</returns>
-        public static IData Decode(Data baseElement, Dictionary<string, object> data)
+        public static Data Decode(Data baseElement, Dictionary<string, object> data)
         {
             JsonNamingPolicy namingPolicy = JsonNamingPolicy.SnakeCaseLower;
             foreach (PropertyInfo property in baseElement.GetType().GetProperties())
@@ -219,33 +219,33 @@ namespace UncomplicatedCustomItems.API
         {
             return (type, item) switch
             {
-                (CustomItemType.Item, _) => (Data)Decode(new ItemData(), data),
-                (CustomItemType.Keycard, _) => (Data)Decode(new KeycardData(), data),
-                (CustomItemType.Armor, _) => (Data)Decode(new ArmorData(), data),
-                (CustomItemType.Weapon, _) => (Data)Decode(new WeaponData(), data),
-                (CustomItemType.Medikit, ItemType.Medkit) => (Data)Decode(new MedikitData(), data),
-                (CustomItemType.Painkillers, ItemType.Painkillers) => (Data)Decode(new PainkillersData(), data),
-                (CustomItemType.Adrenaline, ItemType.Adrenaline) => (Data)Decode(new AdrenalineData(), data),
-                (CustomItemType.Jailbird, ItemType.Jailbird) => (Data)Decode(new JailbirdData(), data),
-                (CustomItemType.ExplosiveGrenade, ItemType.GrenadeHE) => (Data)Decode(new ExplosiveGrenadeData(), data),
-                (CustomItemType.FlashGrenade, ItemType.GrenadeFlash) => (Data)Decode(new FlashGrenadeData(), data),
-                (CustomItemType.MicroHID, ItemType.MicroHID) => (Data)Decode(new MicroHIDData(), data),
-                (CustomItemType.ParticleDisruptor, ItemType.ParticleDisruptor) => (Data)Decode(new ParticleDisruptorData(), data),
-                (CustomItemType.Light, _) => (Data)Decode(new FlashlightData(), data),
-                (CustomItemType.Candy, ItemType.SCP330) => (Data)Decode(new CandyData(), data),
-                (CustomItemType.SCPItem, ItemType.SCP018) => (Data)Decode(new SCP018Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP207) => (Data)Decode(new SCP207Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP1509) => (Data)Decode(new SCP1509Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP500) => (Data)Decode(new SCP500Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP2176) => (Data)Decode(new SCP2176Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP244a) => (Data)Decode(new SCP244Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP244b) => (Data)Decode(new SCP244Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP1853) => (Data)Decode(new SCP1853Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP1576) => (Data)Decode(new SCP1576Data(), data),
-                (CustomItemType.SCPItem, ItemType.GunSCP127) => (Data)Decode(new SCP127Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP1344) => (Data)Decode(new SCP1344Data(), data),
-                (CustomItemType.SCPItem, ItemType.SCP268) => (Data)Decode(new SCP268Data(), data),
-                (CustomItemType.SCPItem, _) => (Data)Decode(new SCPItemData(), data),
+                (CustomItemType.Item, _) => Decode(new ItemData(), data),
+                (CustomItemType.Keycard, _) => Decode(new KeycardData(), data),
+                (CustomItemType.Armor, _) => Decode(new ArmorData(), data),
+                (CustomItemType.Weapon, _) => Decode(new WeaponData(), data),
+                (CustomItemType.Medikit, ItemType.Medkit) => Decode(new MedikitData(), data),
+                (CustomItemType.Painkillers, ItemType.Painkillers) => Decode(new PainkillersData(), data),
+                (CustomItemType.Adrenaline, ItemType.Adrenaline) => Decode(new AdrenalineData(), data),
+                (CustomItemType.Jailbird, ItemType.Jailbird) => Decode(new JailbirdData(), data),
+                (CustomItemType.ExplosiveGrenade, ItemType.GrenadeHE) => Decode(new ExplosiveGrenadeData(), data),
+                (CustomItemType.FlashGrenade, ItemType.GrenadeFlash) => Decode(new FlashGrenadeData(), data),
+                (CustomItemType.MicroHID, ItemType.MicroHID) => Decode(new MicroHIDData(), data),
+                (CustomItemType.ParticleDisruptor, ItemType.ParticleDisruptor) => Decode(new ParticleDisruptorData(), data),
+                (CustomItemType.Light, _) => Decode(new FlashlightData(), data),
+                (CustomItemType.Candy, ItemType.SCP330) => Decode(new CandyData(), data),
+                (CustomItemType.SCPItem, ItemType.SCP018) => Decode(new SCP018Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP207) => Decode(new SCP207Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP1509) => Decode(new SCP1509Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP500) => Decode(new SCP500Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP2176) => Decode(new SCP2176Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP244a) => Decode(new SCP244Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP244b) => Decode(new SCP244Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP1853) => Decode(new SCP1853Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP1576) => Decode(new SCP1576Data(), data),
+                (CustomItemType.SCPItem, ItemType.GunSCP127) => Decode(new SCP127Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP1344) => Decode(new SCP1344Data(), data),
+                (CustomItemType.SCPItem, ItemType.SCP268) => Decode(new SCP268Data(), data),
+                (CustomItemType.SCPItem, _) => Decode(new SCPItemData(), data),
 
                 _ => new Data(),
             };

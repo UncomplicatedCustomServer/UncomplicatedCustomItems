@@ -1,13 +1,11 @@
-﻿using MapGeneration;
+using MapGeneration;
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// The data associated with <see cref="CustomItemType.FlashGrenade"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class FlashGrenadeData : Data, IFlashGrenadeData
+    public class FlashGrenadeData : Data
     {
         /// <summary>
         /// Gets or sets the minimum duration of player can take the effect.

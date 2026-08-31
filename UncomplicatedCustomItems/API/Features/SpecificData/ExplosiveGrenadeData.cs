@@ -1,11 +1,9 @@
-﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// The data associated with <see cref="CustomItemType.ExplosiveGrenade"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class ExplosiveGrenadeData : Data, IExplosiveGrenadeData
+    public class ExplosiveGrenadeData : Data
     {
         /// <summary>
         /// Gets or sets the maximum radius of the grenade.

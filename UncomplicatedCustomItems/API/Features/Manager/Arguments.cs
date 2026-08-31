@@ -761,11 +761,25 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             {
                 if (EventTypeMapping.TryGetValue(typeof(T), out ArgumentType argumentType))
                 {
+                    bool handledViaItemEvent = false;
+                    // For IItemEvent / IUsableItemEvent, try to get the item directly from the event (works even after the item was removed from CurrentItem, e.g. UsedItem for consumables)
+                    if (eventArgs is IItemEvent itemEvent && itemEvent.Item != null && Utilities.TryGetSummonedCustomItem(itemEvent.Item.Serial, out var directItem))
+                    {
+                        if (directItem?.CustomItem.Arguments != null && directItem.CustomItem.Arguments.TryGetValue(argumentType, out _))
+                        {
+                            ArgumentManager.Trigger(directItem.CustomItem, argumentType, eventArgs);
+                            handledViaItemEvent = true;
+                        }
+                    }
+
+                    if (handledViaItemEvent)
+                        return;
+
                     if (eventArgs is IPlayerEvent playerEvent && playerEvent.Player != null)
                     {
                         if (playerEvent.Player.CurrentItem != null && Utilities.TryGetSummonedCustomItem(playerEvent.Player.CurrentItem.Serial, out var item))
                         {
-                            if (item?.CustomItem.Arguments != null && item.CustomItem.Arguments.Count > 0)
+                            if (item?.CustomItem.Arguments != null && item.CustomItem.Arguments.TryGetValue(argumentType, out _))
                                 ArgumentManager.Trigger(item.CustomItem, argumentType, eventArgs);
                         }
                         else if (playerEvent.Player.Items != null && playerEvent.Player.Items.Count() >= 1)
@@ -773,7 +787,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                             Item armorItem = playerEvent.Player.Items.Where(i => i.Category == ItemCategory.Armor).FirstOrDefault();
                             if (armorItem != null && Utilities.TryGetSummonedCustomItem(armorItem.Serial, out var item1))
                             {
-                                if (item1?.CustomItem.Arguments != null && item1.CustomItem.Arguments.Count > 0)
+                                if (item1?.CustomItem.Arguments != null && item1.CustomItem.Arguments.TryGetValue(argumentType, out _))
                                     ArgumentManager.Trigger(item1.CustomItem, argumentType, eventArgs);
                             }
                         }

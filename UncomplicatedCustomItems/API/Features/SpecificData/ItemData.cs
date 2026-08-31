@@ -1,13 +1,11 @@
-﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
 using UncomplicatedCustomItems.API.Enums;
 using System.Collections.Generic;
-
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// The data associated with <see cref="CustomItemType.Item"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class ItemData : Data, IItemData
+    public class ItemData : Data
     {
         public virtual List<ItemDataList> Data { get; set; } =
         [

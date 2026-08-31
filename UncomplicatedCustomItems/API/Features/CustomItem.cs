@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+
 using UnityEngine;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Manager;
@@ -164,8 +164,8 @@ namespace UncomplicatedCustomItems.API.Features
         public virtual CustomItemType CustomItemType { get; set; } = CustomItemType.Item;
 
         /// <summary>
-        /// The <see cref="IData">Custom Data</see>, based on the CustomItemType
+        /// The <see cref="Data">Custom Data</see>, based on the CustomItemType
         /// </summary>
-        public virtual IData CustomData { get; set; } = new ItemData();
+        public virtual Data CustomData { get; set; } = new ItemData();
     }
 }

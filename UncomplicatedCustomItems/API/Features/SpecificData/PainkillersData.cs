@@ -1,11 +1,9 @@
-﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// The data associated with <see cref="CustomItemType.Painkillers"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class PainkillersData : Data, IPainkillersData
+    public class PainkillersData : Data
     {
         /// <summary>
         /// Gets or sets the heal that will be granted to the player every <see cref="TickTime"/>

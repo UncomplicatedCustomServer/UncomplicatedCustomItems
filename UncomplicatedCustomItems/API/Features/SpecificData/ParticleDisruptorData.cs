@@ -1,11 +1,9 @@
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// The data associated with <see cref="CustomItemType.ParticalDisruptor"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class ParticleDisruptorData : Data, IParticleDisruptorData
+    public class ParticleDisruptorData : Data
     {
         /// <summary>
         /// The damage of the ammo. Negative to heal

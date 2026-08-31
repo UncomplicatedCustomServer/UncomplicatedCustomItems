@@ -1,17 +1,15 @@
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// The data associated with <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCPItemData : Data, ISCPItemData
+    public class SCPItemData : Data
     {
 
     }
 
-    public class SCP1509Data : Data, ISCP1509Data
+    public class SCP1509Data : Data
     {
         public bool CanResurrect { get; set; }
         public double ReviveCooldown { get; set; }
@@ -28,7 +26,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP500"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCP500Data : Data, ISCP500Data
+    public class SCP500Data : Data
     {
         public virtual string Effect { get; set; } = "Flashed";
         public virtual float Duration { get; set; } = 20;
@@ -38,7 +36,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP207"/> or <see cref="ItemType.AntiSCP207"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCP207Data : Data, ISCP207Data
+    public class SCP207Data : Data
     {
         public virtual string Effect { get; set; } = "Flashed";
         public virtual float Duration { get; set; } = 20;
@@ -47,7 +45,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual bool RemoveItemAfterUse { get; set; } = true;
     }
 
-    public class SCP268Data : Data, ISCP268Data
+    public class SCP268Data : Data
     {
         public bool ApplyScp268Effect { get; set; }
         public float Duration { get; set; }
@@ -64,14 +62,14 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP018"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCP018Data : Data, ISCP018Data
+    public class SCP018Data : Data
     {
         public virtual float FriendlyFireTime { get; set; } = 2f;
         public virtual float FuseTime { get; set; } = 2f;
         public virtual bool ExplodeOnImpact { get; set; } = false;
     }
 
-    public class SCP1344Data : Data, ISCP1344Data
+    public class SCP1344Data : Data
     {
         public virtual bool Apply1344Effect { get; set; }
         public virtual bool ApplyBlindnessEffect { get; set; }
@@ -81,7 +79,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP2176"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCP2176Data : Data, ISCP2176Data
+    public class SCP2176Data : Data
     {
         public virtual float FuseTime { get; set; } = 2f;
     }
@@ -89,7 +87,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP244a"/> or <see cref="ItemType.SCP244b"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCP244Data : Data, ISCP244Data
+    public class SCP244Data : Data
     {
         public virtual float ActivationDot { get; set; } = 1f;
         public virtual float Health { get; set; } = 1f;
@@ -100,7 +98,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP1853"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCP1853Data : Data, ISCP1853Data
+    public class SCP1853Data : Data
     {
         public virtual string Effect { get; set; } = "Flashed";
         public virtual float Duration { get; set; } = 20;
@@ -112,13 +110,13 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="ItemType.SCP1576"/> <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCP1576Data : Data, ISCP1576Data
+    public class SCP1576Data : Data
     {
         public virtual string Effect { get; set; } = "Flashed";
         public virtual float Duration { get; set; } = 20;
         public virtual byte Intensity { get; set; } = 1;
     }
-    public class SCP127Data : Data, ISCP127Data
+    public class SCP127Data : Data
     {
         public virtual bool GiveHumeShield { get; set; } = false;
         public virtual float Tier1BulletFireRate { get; set; } = 1f;

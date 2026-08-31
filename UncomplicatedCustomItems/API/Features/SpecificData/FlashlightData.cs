@@ -1,10 +1,9 @@
-﻿using System.ComponentModel;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UnityEngine;
+using System.ComponentModel;
 
+using UnityEngine;
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
-    public class FlashlightData : Data, IFlashlightData
+    public class FlashlightData : Data
     {
         public virtual string HexColor { get; set; } = string.Empty;
 

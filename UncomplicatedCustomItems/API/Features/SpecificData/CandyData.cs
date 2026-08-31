@@ -1,9 +1,7 @@
 using InventorySystem.Items.Usables.Scp330;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
-    public class CandyData : Data, ICandyData
+    public class CandyData : Data
     {
         public virtual CandyKindID CandyType { get; set; }
         public virtual string EatingMessage { get; set; } = string.Empty;

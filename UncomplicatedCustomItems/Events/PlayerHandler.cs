@@ -28,7 +28,7 @@ using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Interfaces;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+
 using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
 using UserSettings.ServerSpecific;
@@ -353,7 +353,7 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.Item?.Type == ItemType.GunSCP127 && customItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
             {
-                if (customItem.CustomItem.CustomData is not ISCP127Data data)
+                if (customItem.CustomItem.CustomData is not SCP127Data data)
                     return;
 
                 Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(customItem.Item.Base);
@@ -604,7 +604,7 @@ namespace UncomplicatedCustomItems.Events
             if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
 
-            if (customItem.CustomItem.CustomData is ICandyData)
+            if (customItem.CustomItem.CustomData is CandyData)
                 return;
 
             customItem.HandleEvent(ev.Player, ItemEvents.Use, ev.UsableItem.Serial);
@@ -613,10 +613,10 @@ namespace UncomplicatedCustomItems.Events
             if (customItem.CustomItem.Reusable)
                 new SummonedCustomItem(customItem.CustomItem, ev.Player);
 
-            ISCP500Data? scp500Data = customItem.CustomItem.CustomData as ISCP500Data;
-            ISCP207Data? scp207Data = customItem.CustomItem.CustomData as ISCP207Data;
-            ISCP1853Data? scp1853Data = customItem.CustomItem.CustomData as ISCP1853Data;
-            ISCP1576Data? scp1576Data = customItem.CustomItem.CustomData as ISCP1576Data;
+            SCP500Data? scp500Data = customItem.CustomItem.CustomData as SCP500Data;
+            SCP207Data? scp207Data = customItem.CustomItem.CustomData as SCP207Data;
+            SCP1853Data? scp1853Data = customItem.CustomItem.CustomData as SCP1853Data;
+            SCP1576Data? scp1576Data = customItem.CustomItem.CustomData as SCP1576Data;
 
             string? effect = null;
             byte intensity = 0;
@@ -727,7 +727,7 @@ namespace UncomplicatedCustomItems.Events
 
                     if (customItem.CustomItem.Item == ItemType.GunSCP127 && customItem.CustomItem.CustomItemType == CustomItemType.SCPItem)
                     {
-                        if (customItem.CustomItem.CustomData is ISCP127Data data)
+                        if (customItem.CustomItem.CustomData is SCP127Data data)
                         {
                             Scp127Tier tier = Scp127TierManagerModule.GetTierForItem(customItem.Item?.Base);
                             StartHumeShieldRegen(ev.Player, data, tier, customItem);
@@ -761,7 +761,7 @@ namespace UncomplicatedCustomItems.Events
             _humeShieldRegenCoroutine[player] = handle;
         }
 
-        internal static void StartHumeShieldRegen(Player player, ISCP127Data data, Scp127Tier tier, SummonedCustomItem customItem)
+        internal static void StartHumeShieldRegen(Player player, SCP127Data data, Scp127Tier tier, SummonedCustomItem customItem)
         {
             StopHumeShieldRegen(player);
             CoroutineHandle handle = Timing.RunCoroutine(HumeShieldRegeneration(player, data, tier, customItem));
@@ -820,7 +820,7 @@ namespace UncomplicatedCustomItems.Events
             }
         }
 
-        internal static IEnumerator<float> HumeShieldRegeneration(Player player, ISCP127Data data, Scp127Tier tier, SummonedCustomItem customItem)
+        internal static IEnumerator<float> HumeShieldRegeneration(Player player, SCP127Data data, Scp127Tier tier, SummonedCustomItem customItem)
         {
             float regenRate = tier switch
             {
@@ -923,7 +923,7 @@ namespace UncomplicatedCustomItems.Events
 
             if (customItem.CustomItem.CustomItemType is CustomItemType.Weapon)
             {
-                if (customItem.CustomItem.CustomData is IWeaponData weaponData && weaponData.EnableFriendlyFire)
+                if (customItem.CustomItem.CustomData is WeaponData weaponData && weaponData.EnableFriendlyFire)
                 {
                     ev.Player.Damage(weaponData.Damage, ev.Attacker);
                     ev.Attacker.SendHitMarker(weaponData.Damage);
@@ -1017,7 +1017,7 @@ namespace UncomplicatedCustomItems.Events
                 switch (customItem.CustomItem.CustomItemType)
                 {
                     case CustomItemType.Keycard:
-                        if (customItem.CustomItem.CustomData is IKeycardData data && ev.Door.Base != null && ev.Door.Base.IsMoving && data.OneTimeUse)
+                        if (customItem.CustomItem.CustomData is KeycardData data && ev.Door.Base != null && ev.Door.Base.IsMoving && data.OneTimeUse)
                         {
                             Timing.CallDelayed(0.5f, () =>
                             {
@@ -1066,7 +1066,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (customItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
-                    if (customItem.CustomItem.CustomData is IKeycardData data && data.OneTimeUse)
+                    if (customItem.CustomItem.CustomData is KeycardData data && data.OneTimeUse)
                     {
                         Timing.CallDelayed(0.5f, () =>
                         {
@@ -1125,7 +1125,7 @@ namespace UncomplicatedCustomItems.Events
             {
                 if (customItem.CustomItem.CustomItemType == CustomItemType.Keycard)
                 {
-                    if (customItem.CustomItem.CustomData is IKeycardData data && ev.Chamber != null && ev.Chamber.IsOpen && data.OneTimeUse)
+                    if (customItem.CustomItem.CustomData is KeycardData data && ev.Chamber != null && ev.Chamber.IsOpen && data.OneTimeUse)
                     {
                         Timing.CallDelayed(0.5f, () =>
                         {
@@ -1183,7 +1183,7 @@ namespace UncomplicatedCustomItems.Events
             if (customItem.CustomItem.CustomItemType is CustomItemType.Light)
             {
                 ev.LightItem.IsEmitting = false;
-                if (customItem.CustomItem.CustomData is IFlashlightData data && ev.NewState && customItem.Light?.Intensity >= 0 && !customItem.Toggled)
+                if (customItem.CustomItem.CustomData is FlashlightData data && ev.NewState && customItem.Light?.Intensity >= 0 && !customItem.Toggled)
                 {
                     ev.IsAllowed = false;
                     ev.LightItem.IsEmitting = false;

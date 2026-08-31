@@ -7,7 +7,7 @@ using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
 {
@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
 
             if (summonedCustomItem.CustomItem.CustomItemType is CustomItemType.SCPItem && summonedCustomItem.CustomItem.Item is ItemType.SCP1344)
             {
-                if (summonedCustomItem.CustomItem.CustomData is not ISCP1344Data data)
+                if (summonedCustomItem.CustomItem.CustomData is not SCP1344Data data)
                     return;
 
                 if (data.AllowUnequip)

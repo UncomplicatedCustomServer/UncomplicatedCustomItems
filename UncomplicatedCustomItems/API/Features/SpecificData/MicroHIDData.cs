@@ -1,11 +1,9 @@
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// The data associated with <see cref="CustomItemType.MicroHID"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class MicroHIDData : Data, IMicroHIDData
+    public class MicroHIDData : Data
     {
         /// <summary>
         /// Gets or sets the amount of damage done to a player/>

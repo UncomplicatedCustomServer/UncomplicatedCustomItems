@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using UncomplicatedCustomItems.API.Interfaces.SpecificData;
-using UncomplicatedCustomItems.API.YamlObjects;
+using System.Collections.Generic;
 
+using UncomplicatedCustomItems.API.YamlObjects;
 namespace UncomplicatedCustomItems.API.Features.SpecificData
 {
     /// <summary>
     /// The data associated with <see cref="Firearm"/>s <see cref="CustomItemType.Weapon"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class WeaponData : Data, IWeaponData
+    public class WeaponData : Data
     {
         /// <summary>
         /// The damage of the ammo. Negative to heal

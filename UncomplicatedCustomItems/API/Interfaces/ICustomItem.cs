@@ -1,4 +1,4 @@
-﻿using UncomplicatedCustomItems.API.Interfaces.SpecificData;
+using UncomplicatedCustomItems.API.Features.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Enums;
 using System.Collections.Generic;
@@ -36,6 +36,6 @@ namespace UncomplicatedCustomItems.API.Interfaces
 
         public abstract CustomItemType CustomItemType { get; set; }
 
-        public abstract IData CustomData { get; set; }
+        public abstract Data CustomData { get; set; }
     }
 }
