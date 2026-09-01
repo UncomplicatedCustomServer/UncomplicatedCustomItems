@@ -16,16 +16,7 @@ namespace UncomplicatedCustomItems.API.Extensions
     public static class PlayerExtensions
     {
         public static Dictionary<Player, int> PlayerKills { get; set; } = [];
-
-        /// <summary>
-        /// Checks whether the player has a keycard of a specific permission.
-        /// </summary>
-        /// <param name="player"><see cref="Player" /> trying to interact.</param>
-        /// <param name="door"></param>
-        /// <returns>Whether the player has the required keycard.</returns>
-        public static bool HasKeycardPermission(this Player player, IDoorPermissionRequester door) =>
-            player.CurrentItem is KeycardItem keycard && player.CurrentItem.Base is IDoorPermissionProvider keycardProvider && door is IDoorPermissionRequester permissions && permissions.PermissionsPolicy.CheckPermissions(keycardProvider.GetPermissions(permissions));
-
+        
         public static CommandSender GetSender(this Player player) => player.ReferenceHub.queryProcessor._sender;
 
         private static ParticleDisruptor? DisruptorCache = null;

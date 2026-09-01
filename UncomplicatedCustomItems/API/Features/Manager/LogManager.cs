@@ -61,7 +61,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                 return;
 
             AddToHistory(LogLevel.Debug, message);
-            Logger.Raw($"[DEBUG] [{Plugin.Instance.GetType().Assembly.GetName().Name}] {FormatLogMessage(message)}", ConsoleColor.Green);
+            Logger.Raw($"[DEBUG] [{Plugin.Instance.Assembly.GetName().Name}] {FormatLogMessage(message)}", ConsoleColor.Green);
         }
 
         public static void Info(string message)
@@ -122,9 +122,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             {
                 MethodBase? method = frame.GetMethod();
                 if (method?.DeclaringType != null)
-                {
                     source = GetReadableMethodName(method);
-                }
             }
 
             message = Regex.Replace(message, @"_Patch\d+", "");
@@ -137,24 +135,16 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             string typeName = declaringType.FullName ?? declaringType.Name;
             string methodName = method.Name;
 
-            bool isCompilerGenerated = method.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length > 0
-                || declaringType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length > 0
-                || typeName.Contains("<>")
-                || typeName.Contains("__")
-                || methodName.StartsWith("<");
+            bool isCompilerGenerated = method.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length > 0 || declaringType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length > 0 || typeName.Contains("<>") || typeName.Contains("__") || methodName.StartsWith("<");
 
             if (!isCompilerGenerated)
-            {
                 return FormatTypeAndMethod(typeName, methodName, method.IsStatic);
-            }
 
             if (typeName.Contains("+<>c") && methodName.StartsWith("<"))
             {
                 int endIdx = methodName.IndexOf(">b__");
                 if (endIdx > 1)
-                {
                     return FormatTypeAndMethod(typeName.Substring(0, typeName.IndexOf("+<>c")), methodName.Substring(1, endIdx - 1), true);
-                }
             }
 
             if (typeName.Contains("+<") && typeName.Contains(">d__"))
@@ -162,9 +152,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                 int start = typeName.IndexOf("+<") + 2;
                 int end = typeName.IndexOf(">d__", start);
                 if (start > 1 && end > start)
-                {
                     return FormatTypeAndMethod(typeName.Substring(0, typeName.IndexOf("+<")), typeName.Substring(start, end - start), false);
-                }
             }
 
             if (methodName.StartsWith("<") && methodName.Contains(">g__"))

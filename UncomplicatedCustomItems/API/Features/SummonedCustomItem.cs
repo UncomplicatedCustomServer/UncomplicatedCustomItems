@@ -239,6 +239,9 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.ParticleDisruptor when Item is ParticleDisruptorItem pd && CustomItem.CustomData is ParticleDisruptorData pdData:
                         pd.Base.TryGetModule<DisruptorHitregModule>(out var hitregModule);
+                        if (pdData.Penetration > 1)
+                            pdData.Penetration /= 100;
+
                         hitregModule.BasePenetration = pdData.Penetration;
                         break;
 
@@ -284,6 +287,9 @@ namespace UncomplicatedCustomItems.API.Features
                     case CustomItemType.ParticleDisruptor when CustomItem.CustomData is ParticleDisruptorData pdData && Pickup != null:
                         Pickup.Base.Info.ItemId.TryGetTemplate<ParticleDisruptor>(out var particleDisruptor);
                         particleDisruptor.TryGetModule<DisruptorHitregModule>(out var hitregModule2);
+                        if (pdData.Penetration > 1)
+                            pdData.Penetration /= 100;
+                            
                         hitregModule2.BasePenetration = pdData.Penetration;
                         break;
 
@@ -419,6 +425,9 @@ namespace UncomplicatedCustomItems.API.Features
 
             if (HitscanHitregModule != null)
             {
+                if (wd.Penetration > 1)
+                    wd.Penetration /= 100;
+                
                 HitscanHitregModule.BaseDamage = wd.Damage;
                 HitscanHitregModule.BasePenetration = wd.Penetration;
                 HitscanHitregModule.BaseBulletInaccuracy = wd.Inaccuracy;
@@ -477,6 +486,9 @@ namespace UncomplicatedCustomItems.API.Features
 
             if (HitscanHitregModule != null)
             {
+                if (wd.Penetration > 1)
+                    wd.Penetration /= 100;
+
                 HitscanHitregModule.BaseDamage = wd.Damage;
                 HitscanHitregModule.BasePenetration = wd.Penetration;
                 HitscanHitregModule.BaseBulletInaccuracy = wd.Inaccuracy;
@@ -580,20 +592,27 @@ namespace UncomplicatedCustomItems.API.Features
                 if (Item is not FirearmItem scpFirearm)
                     return;
 
-                scpFirearm.Base.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
-                Scp127MagazineModule = scp127magazine;
-                scpFirearm.Base.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
-                Scp127Hitscan = scp127hitscan;
+                if (scpFirearm.Base.TryGetModule<Scp127MagazineModule>(out var scp127magazine))
+                    Scp127MagazineModule = scp127magazine;
 
-                if (!PropertiesSet)
-                    Scp127MagazineModule.AmmoStored = scp127Data.MaxAmmo;
+                if (scpFirearm.Base.TryGetModule<Scp127Hitscan>(out var scp127hitscan))
+                    Scp127Hitscan = scp127hitscan;
 
-                Scp127Hitscan.BaseDamage = scp127Data.Damage;
-                Scp127Hitscan.BasePenetration = scp127Data.Penetration;
-                Scp127Hitscan.BaseBulletInaccuracy = scp127Data.Inaccuracy;
-                Scp127Hitscan.DamageFalloffDistance = scp127Data.DamageFalloffDistance;
-                Scp127MagazineModule.ServerResyncData();
-                PropertiesSet = true;
+                if (Scp127Hitscan != null && Scp127MagazineModule != null)
+                {
+                    if (!PropertiesSet)
+                        Scp127MagazineModule.AmmoStored = scp127Data.MaxAmmo;
+
+                    if (scp127Data.Penetration > 1)
+                        scp127Data.Penetration /= 100;
+
+                    Scp127Hitscan.BaseDamage = scp127Data.Damage;
+                    Scp127Hitscan.BasePenetration = scp127Data.Penetration;
+                    Scp127Hitscan.BaseBulletInaccuracy = scp127Data.Inaccuracy;
+                    Scp127Hitscan.DamageFalloffDistance = scp127Data.DamageFalloffDistance;
+                    Scp127MagazineModule.ServerResyncData();
+                    PropertiesSet = true;
+                }
             }
         }
 
@@ -629,20 +648,27 @@ namespace UncomplicatedCustomItems.API.Features
 
                 scpFirearmPickup.Base.Info.ItemId.TryGetTemplate<Firearm>(out var scpFirearm);
                 scpFirearm.ItemSerial = scpFirearmPickup.Serial;
-                scpFirearm.TryGetModule<Scp127MagazineModule>(out var scp127magazine);
-                Scp127MagazineModule = scp127magazine;
-                scpFirearm.TryGetModule<Scp127Hitscan>(out var scp127hitscan);
-                Scp127Hitscan = scp127hitscan;
+                if (scpFirearm.TryGetModule<Scp127MagazineModule>(out var scp127magazine))
+                    Scp127MagazineModule = scp127magazine;
 
-                Scp127MagazineModule.MagazineInserted = true;
-                if (!PropertiesSet)
-                    Scp127MagazineModule.AmmoStored = s127.MaxAmmo;
+                if (scpFirearm.TryGetModule<Scp127Hitscan>(out var scp127hitscan))
+                    Scp127Hitscan = scp127hitscan;
 
-                Scp127Hitscan.BaseDamage = s127.Damage;
-                Scp127Hitscan.BasePenetration = s127.Penetration;
-                Scp127Hitscan.BaseBulletInaccuracy = s127.Inaccuracy;
-                Scp127Hitscan.DamageFalloffDistance = s127.DamageFalloffDistance;
-                Scp127MagazineModule.ServerResyncData();
+                if (Scp127Hitscan != null && Scp127MagazineModule != null)
+                {
+                    Scp127MagazineModule.MagazineInserted = true;
+                    if (!PropertiesSet)
+                        Scp127MagazineModule.AmmoStored = s127.MaxAmmo;
+
+                    if (s127.Penetration > 1)
+                        s127.Penetration /= 100;
+
+                    Scp127Hitscan.BaseDamage = s127.Damage;
+                    Scp127Hitscan.BasePenetration = s127.Penetration;
+                    Scp127Hitscan.BaseBulletInaccuracy = s127.Inaccuracy;
+                    Scp127Hitscan.DamageFalloffDistance = s127.DamageFalloffDistance;
+                    Scp127MagazineModule.ServerResyncData();
+                }
 
                 Pickup.Destroy();
                 scpFirearmPickup.Spawn();
@@ -674,6 +700,7 @@ namespace UncomplicatedCustomItems.API.Features
                             case MagazineModule mag when MagazineModule == null:
                                 MagazineModule = mag;
                                 break;
+
                             case HitscanHitregModuleBase hitscan when HitscanHitregModule == null:
                                 HitscanHitregModule = hitscan;
                                 break;
@@ -712,6 +739,7 @@ namespace UncomplicatedCustomItems.API.Features
                             case Scp127MagazineModule mag when Scp127MagazineModule == null:
                                 Scp127MagazineModule = mag;
                                 break;
+
                             case Scp127Hitscan hitscan when Scp127Hitscan == null:
                                 Scp127Hitscan = hitscan;
                                 break;
@@ -829,7 +857,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (string.IsNullOrWhiteSpace(CustomItem.BadgeColor) || string.IsNullOrWhiteSpace(CustomItem.BadgeName))
                 return;
 
-            ServerRoles? serverRoles = player.ReferenceHub?.serverRoles;
+            ServerRoles? serverRoles = player.ReferenceHub.serverRoles;
             if (serverRoles == null)
             {
                 LogManager.Debug("LoadBadge aborted: ServerRole not available yet.");
@@ -891,9 +919,8 @@ namespace UncomplicatedCustomItems.API.Features
             Pickup = dropped.Pickup;
             Item = null;
             if (Owner != null && PlayerCache.TryGetValue(Owner, out var set))
-            {
                 set.Remove(this);
-            }
+
             Owner = null;
             SaveProperties();
             HandleEvent(dropped.Player, ItemEvents.Drop, dropped.Pickup.Serial);
@@ -906,9 +933,7 @@ namespace UncomplicatedCustomItems.API.Features
             Owner = ev.Projectile.LastOwner;
 
             if (ev.Player != null && PlayerCache.TryGetValue(ev.Player, out var set))
-            {
                 set.Remove(this);
-            }
         }
 
         public void OnDetonated(ProjectileExplodedEventArgs ev)

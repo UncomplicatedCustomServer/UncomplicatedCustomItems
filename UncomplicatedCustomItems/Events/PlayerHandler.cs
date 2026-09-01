@@ -402,7 +402,7 @@ namespace UncomplicatedCustomItems.Events
                     }
 
                     if (customSCP268.OneTimeUse)
-                        ev.UsableItem.DropItem().Destroy();
+                        ev.Player.RemoveItem(ev.UsableItem);
                 });
             }
 
@@ -428,7 +428,7 @@ namespace UncomplicatedCustomItems.Events
                                 }
 
                                 if (hat.OneTimeUse)
-                                    ev.UsableItem.DropItem().Destroy();
+                                    ev.Player.RemoveItem(ev.UsableItem);
                             });
 
                             break;
@@ -441,7 +441,7 @@ namespace UncomplicatedCustomItems.Events
 
                                 if (cola.RemoveItemAfterUse)
                                 {
-                                    ev.UsableItem.DropItem().Destroy();
+                                    ev.Player.RemoveItem(ev.UsableItem);
                                 }
                                 else
                                 {
@@ -1249,9 +1249,8 @@ namespace UncomplicatedCustomItems.Events
             try
             {
                 if (ev.Pickup.GameObject != null && ev.Pickup.GameObject.transform != null)
-                {
                     ev.Pickup.GameObject.transform.localScale = summonedCustomItem.CustomItem.Scale;
-                }
+                
                 ev.Pickup.Weight = summonedCustomItem.CustomItem.Weight;
             }
             catch (Exception ex)

@@ -19,9 +19,11 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
         public abstract string Name { get; }
 
         [YamlIgnore]
+        [Obsolete]
         public virtual List<string> RequiredArguments => [];
 
         [YamlIgnore]
+        [Obsolete]
         public virtual List<Dictionary<object, object>> Arguments { get; set; } = [];
 
         public virtual void Run(EventArgs eventArgs) { }

@@ -18,7 +18,8 @@ namespace UncomplicatedCustomItems.API.Features.Manager
         public static void Init()
         {
             VersionInfoRequest versionrequest = new();
-            versionrequest.SendRequest((request) => {
+            versionrequest.SendRequest((request) =>
+            {
                 HttpStatusCode status = (HttpStatusCode)request.responseCode;
                 string content = request.downloadHandler.text;
 
