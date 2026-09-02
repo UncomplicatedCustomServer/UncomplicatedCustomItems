@@ -88,7 +88,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         AchievementHandlerBase.ServerAchieve(instance.Owner.networkIdentity.connectionToClient, AchievementName.CrisisAverted);
 
                     module.ServerHeal(scp500.InstantHealth);
-                    instance.ServerAddRegeneration(scp._healProgress, scp500.RegenSpeedMultiplier, scp500.HPGainMultiplier);
+                    instance.ServerAddRegeneration(scp._healProgress, scp500.RegenSpeedMultiplier, scp500.hpGainMultiplier);
                     instance.Owner.playerEffectsController.UseMedicalItem(instance);
                     break;
             }

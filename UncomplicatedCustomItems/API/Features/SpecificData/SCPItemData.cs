@@ -32,7 +32,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public bool ApplyHeal { get; set; }
         public int InstantHealth { get; set; }
         public float RegenSpeedMultiplier { get; set; }
-        public float HPGainMultiplier { get; set; }
+        public float hpGainMultiplier { get; set; }
     }
 
     /// <summary>
