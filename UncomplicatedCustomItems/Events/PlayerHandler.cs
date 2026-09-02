@@ -520,38 +520,7 @@ namespace UncomplicatedCustomItems.Events
                 return;
 
             if (SummonedAPICustomItem.TryGet(ev.UsableItem.Serial, out var summonedApiItem) && summonedApiItem != null)
-            {
                 summonedApiItem.ResetBadge(ev.Player);
-
-                switch (ev.UsableItem.Type, summonedApiItem.CustomItem)
-                {
-                    case (ItemType.SCP1853, CustomSCP1853 data1853):
-                        if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == data1853.Effect))
-                        {
-                            LogManager.Warn($"Invalid Effect: {data1853.Effect} for ID: {summonedApiItem.CustomItem.Id} Name: {summonedApiItem.CustomItem.Name}");
-                            break;
-                        }
-
-                        if (data1853.Duration <= -2)
-                        {
-                            LogManager.Warn($"Invalid Duration: {data1853.Duration} for ID: {summonedApiItem.CustomItem.Id} Name: {summonedApiItem.CustomItem.Name}");
-                            break;
-                        }
-
-                        if (data1853.Intensity <= 0)
-                        {
-                            LogManager.Warn($"Invalid intensity: {data1853.Intensity} for ID: {summonedApiItem.CustomItem.Id} Name: {summonedApiItem.CustomItem.Name}");
-                            break;
-                        }
-
-                        LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {data1853.Effect} at intensity {data1853.Intensity}, duration is {data1853.Duration} to {ev.Player.Nickname}");
-                        ev.Player.ReferenceHub.playerEffectsController.ChangeState(data1853.Effect, data1853.Intensity, data1853.Duration, true);
-                        break;
-                }
-
-                if (ev.UsableItem.Type == ItemType.SCP1853 && summonedApiItem.CustomItem is CustomSCP1853 scp1853data && !scp1853data.RemoveItemAfterUse)
-                    new SummonedAPICustomItem(summonedApiItem.CustomItem, ev.Player);
-            }
 
             if (!Utilities.TryGetSummonedCustomItem(ev.UsableItem.Serial, out SummonedCustomItem? customItem) || customItem == null)
                 return;
@@ -566,7 +535,6 @@ namespace UncomplicatedCustomItems.Events
                 new SummonedCustomItem(customItem.CustomItem, ev.Player);
 
             SCP207Data? scp207Data = customItem.CustomItem.CustomData as SCP207Data;
-            SCP1853Data? scp1853Data = customItem.CustomItem.CustomData as SCP1853Data;
             SCP1576Data? scp1576Data = customItem.CustomItem.CustomData as SCP1576Data;
 
             string? effect = null;
@@ -575,12 +543,6 @@ namespace UncomplicatedCustomItems.Events
 
             switch (ev.UsableItem.Type)
             {
-                case ItemType.SCP1853 when scp1853Data is not null:
-                    effect = scp1853Data.Effect;
-                    intensity = scp1853Data.Intensity;
-                    duration = scp1853Data.Duration;
-                    break;
-
                 case ItemType.SCP1576 when scp1576Data is not null:
                     effect = scp1576Data.Effect;
                     intensity = scp1576Data.Intensity;
@@ -610,12 +572,6 @@ namespace UncomplicatedCustomItems.Events
 
                 LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {effect} at intensity {intensity}, duration is {duration} to {ev.Player.Nickname}");
                 ev.Player.ReferenceHub.playerEffectsController.ChangeState(effect, intensity, duration, true);
-
-                if (ev.UsableItem.Type == ItemType.SCP1853)
-                {
-                    if (scp1853Data != null && !scp1853Data.RemoveItemAfterUse)
-                        new SummonedCustomItem(customItem.CustomItem, ev.Player);
-                }
             }
 
             if (customItem.Item?.Type == ItemType.Adrenaline || customItem.Item?.Type == ItemType.Medkit || customItem.Item?.Type == ItemType.Painkillers)
@@ -1279,36 +1235,6 @@ namespace UncomplicatedCustomItems.Events
             {
                 ev.Player.DisableEffect(ev.Effect);
                 CustomScp268Effects.Remove(ev.Player);
-            }
-
-            if (ev.Player.CurrentItem == null)
-                return;
-
-            if (SummonedAPICustomItem.TryGet(ev.Player.CurrentItem.Serial, out var summonedItem) && summonedItem != null)
-            {
-                switch (ev.Effect, summonedItem.CustomItem)
-                {
-                    case (Scp1853, CustomSCP1853 scp1853Data) when !scp1853Data.Apply1853Effect:
-                        LogManager.Debug("Removing SCP-1853 effect.");
-                        ev.Player.DisableEffect(ev.Effect);
-                        ev.IsAllowed = false;
-                        break;
-                }
-            }
-
-            if (Utilities.TryGetSummonedCustomItem(ev.Player.CurrentItem.Serial, out SummonedCustomItem? customItem) && customItem != null)
-            {
-                if (Plugin.Instance.Config.Debug)
-                    LogManager.Debug($"{ev.Player.Nickname} is receiving {ev.Effect}");
-
-                switch (ev.Effect)
-                {
-                    case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data && !scp1853Data.Apply1853Effect:
-                        LogManager.Debug("Removing SCP-1853 effect.");
-                        ev.Player.DisableEffect(ev.Effect);
-                        ev.IsAllowed = false;
-                        break;
-                }
             }
         }
 

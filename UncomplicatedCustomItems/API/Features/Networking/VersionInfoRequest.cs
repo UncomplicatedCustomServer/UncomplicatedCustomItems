@@ -7,5 +7,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
         public override string Name => nameof(VersionInfoRequest);
 
         public override RequestType Type => RequestType.Get;
+
+        public override bool UseCustomEndpoint { get; set; } = true;
     }
 }

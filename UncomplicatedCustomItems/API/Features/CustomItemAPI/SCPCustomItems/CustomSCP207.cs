@@ -5,15 +5,15 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
     public abstract class CustomSCP207 : SCPCustomItem
     {
         [Obsolete]
-        public abstract string Effect { get; set; }
+        public virtual string Effect { get; set; } = string.Empty;
         [Obsolete]
-        public abstract float Duration { get; set; }
+        public virtual float Duration { get; set; }
         [Obsolete]
-        public abstract byte Intensity { get; set; }
+        public virtual byte Intensity { get; set; }
 
-        public float InstantHealth { get; set; }
-        public bool BypassMax { get; set; }
-        public float StaminaGain { get; set; }
+        public virtual float InstantHealth { get; set; }
+        public virtual bool BypassMax { get; set; }
+        public virtual float StaminaGain { get; set; }
         public abstract bool Apply207Effect { get; set; }
         public abstract bool RemoveItemAfterUse { get; set; }
     }

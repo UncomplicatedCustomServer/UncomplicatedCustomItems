@@ -14,6 +14,6 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
         /// Gets or sets whether the value can surpass the <see cref="Player.MaxHealth"/>
         /// </summary>
         [Obsolete]
-        public bool MoreThanMax { get; set; } = false;
+        public virtual bool MoreThanMax { get; set; } = false;
     }
 }

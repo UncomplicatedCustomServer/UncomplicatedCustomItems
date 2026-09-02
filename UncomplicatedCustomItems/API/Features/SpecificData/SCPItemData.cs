@@ -4,10 +4,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// <summary>
     /// The data associated with <see cref="CustomItemType.SCPItem"/> <see cref="CustomItem"/>s
     /// </summary>
-    public class SCPItemData : Data
-    {
-
-    }
+    public class SCPItemData : Data;
 
     public class SCP1509Data : Data
     {
@@ -32,7 +29,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public bool ApplyHeal { get; set; }
         public int InstantHealth { get; set; }
         public float RegenSpeedMultiplier { get; set; }
-        public float hpGainMultiplier { get; set; }
+        public float HpGainMultiplier { get; set; }
     }
 
     /// <summary>
@@ -102,9 +99,6 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP1853Data : Data
     {
-        public virtual string Effect { get; set; } = "Flashed";
-        public virtual float Duration { get; set; } = 20;
-        public virtual byte Intensity { get; set; } = 1;
         public virtual bool Apply1853Effect { get; set; } = false;
         public virtual bool RemoveItemAfterUse { get; set; } = true;
     }
@@ -118,6 +112,7 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
         public virtual float Duration { get; set; } = 20;
         public virtual byte Intensity { get; set; } = 1;
     }
+    
     public class SCP127Data : Data
     {
         public virtual bool GiveHumeShield { get; set; } = false;

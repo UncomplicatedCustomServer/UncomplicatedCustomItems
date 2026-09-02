@@ -20,14 +20,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPatch(typeof(Consumable), nameof(Consumable.ActivateEffects))]
         public static bool Prefix(Consumable __instance)
         {
-            if (SummonedCustomItem.TryGet(__instance.ItemSerial, out SummonedCustomItem? item) && item != null && (item.CustomItem.CustomItemType is CustomItemType.Medikit or CustomItemType.Adrenaline or CustomItemType.Painkillers || item.CustomItem.Item is ItemType.SCP207 or ItemType.AntiSCP207 or ItemType.SCP500))
+            if (SummonedCustomItem.TryGet(__instance.ItemSerial, out SummonedCustomItem? item) && item != null && (item.CustomItem.CustomItemType is CustomItemType.Medikit or CustomItemType.Adrenaline or CustomItemType.Painkillers || (item.CustomItem.CustomItemType is CustomItemType.SCPItem && item.CustomItem.Item is ItemType.SCP207 or ItemType.AntiSCP207 or ItemType.SCP500 or ItemType.SCP1853)))
             {
                 Apply(__instance, item.CustomItem);
                 __instance._alreadyActivated = true;
                 return false;
             }
 
-            if (APICustomItem.TryGet(__instance.ItemSerial, out APICustomItem? apiitem) && apiitem != null && apiitem is CustomMedkit or CustomPainkillers or CustomAdrenaline or CustomSCP207)
+            if (APICustomItem.TryGet(__instance.ItemSerial, out APICustomItem? apiitem) && apiitem != null && apiitem is CustomMedkit or CustomPainkillers or CustomAdrenaline or CustomSCP207 or CustomSCP1853)
             {
                 Apply(__instance, apiitem);
                 __instance._alreadyActivated = true;
@@ -88,8 +88,16 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                         AchievementHandlerBase.ServerAchieve(instance.Owner.networkIdentity.connectionToClient, AchievementName.CrisisAverted);
 
                     module.ServerHeal(scp500.InstantHealth);
-                    instance.ServerAddRegeneration(scp._healProgress, scp500.RegenSpeedMultiplier, scp500.hpGainMultiplier);
+                    instance.ServerAddRegeneration(scp._healProgress, scp500.RegenSpeedMultiplier, scp500.HpGainMultiplier);
                     instance.Owner.playerEffectsController.UseMedicalItem(instance);
+                    break;
+
+                case SCP1853Data scp1853:
+                    if (scp1853.Apply1853Effect)
+                        instance.Owner.playerEffectsController.EnableEffect<Scp1853>();
+
+                    if (!scp1853.RemoveItemAfterUse)
+                        Timing.CallDelayed(0.5f, () => new SummonedCustomItem(item, Player.Get(instance.Owner)));
                     break;
             }
         }
@@ -132,6 +140,14 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
                     }
 
                     if (!custom207.RemoveItemAfterUse)
+                        Timing.CallDelayed(0.5f, () => new SummonedAPICustomItem(item, Player.Get(instance.Owner)));
+                    break;
+
+                case CustomSCP1853 custom1853:
+                    if (custom1853.Apply1853Effect)
+                        instance.Owner.playerEffectsController.EnableEffect<Scp1853>();
+
+                    if (!custom1853.RemoveItemAfterUse)
                         Timing.CallDelayed(0.5f, () => new SummonedAPICustomItem(item, Player.Get(instance.Owner)));
                     break;
             }

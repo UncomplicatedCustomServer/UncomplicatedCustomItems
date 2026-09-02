@@ -11,6 +11,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             PlayerEvent.CancelledUsingItem += new LabApi.Events.LabEventHandler<PlayerCancelledUsingItemEventArgs>(InternalOnUsingCancelled);
             PlayerEvent.UsingItem += new LabApi.Events.LabEventHandler<PlayerUsingItemEventArgs>(InternalOnUsing);
             PlayerEvent.UsedItem += new LabApi.Events.LabEventHandler<PlayerUsedItemEventArgs>(InternalOnUsed);
+            PlayerEvent.ItemUsageEffectsApplying += new LabApi.Events.LabEventHandler<PlayerItemUsageEffectsApplyingEventArgs>(InternalOnEffectsApplying);
 
             base.RegisterEvents();
         }
@@ -21,6 +22,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
             PlayerEvent.CancelledUsingItem -= new LabApi.Events.LabEventHandler<PlayerCancelledUsingItemEventArgs>(InternalOnUsingCancelled);
             PlayerEvent.UsingItem -= new LabApi.Events.LabEventHandler<PlayerUsingItemEventArgs>(InternalOnUsing);
             PlayerEvent.UsedItem -= new LabApi.Events.LabEventHandler<PlayerUsedItemEventArgs>(InternalOnUsed);
+            PlayerEvent.ItemUsageEffectsApplying -= new LabApi.Events.LabEventHandler<PlayerItemUsageEffectsApplyingEventArgs>(InternalOnEffectsApplying);
 
             base.UnregisterEvents();
         }
@@ -50,10 +52,16 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
                 OnUsed(ev);
         }
 
+        private void InternalOnEffectsApplying(PlayerItemUsageEffectsApplyingEventArgs ev)
+        {
+            if (Check(ev.UsableItem))
+                OnEffectsApplying(ev);
+        }
 
         protected virtual void OnUsingCancelling(PlayerCancellingUsingItemEventArgs ev) { }
         protected virtual void OnUsingCancelled(PlayerCancelledUsingItemEventArgs ev) { }
         protected virtual void OnUsing(PlayerUsingItemEventArgs ev) { }
         protected virtual void OnUsed(PlayerUsedItemEventArgs ev) { }
+        protected virtual void OnEffectsApplying(PlayerItemUsageEffectsApplyingEventArgs ev) { }
     }
 }
