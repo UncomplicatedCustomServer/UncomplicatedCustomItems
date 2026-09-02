@@ -1,26 +1,26 @@
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
+using System;
 using CommandSystem;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    public class VersionInfo : ISubcommand
+    public class VersionInfo : Subcommand
     {
-        public string Name { get; } = "versioninfo";
+        public override string Name { get; } = "versioninfo";
 
-        public string Description { get; } = "Gets the information about the installed UCI version";
+        public override string Description { get; } = "Gets the information about the installed UCI version";
 
-        public string RequiredPermission { get; } = "uci.versioninfo";
+        public override string RequiredPermission { get; } = "uci.versioninfo";
 
-        public string VisibleArgs { get; } = "";
+        public override string VisibleArgs { get; } = "";
 
-        public int RequiredArgsCount { get; } = 0;
+        public override int RequiredArgsCount { get; } = 0;
 
-        public string[] Aliases { get; } = ["vi"];
+        public override string[] Aliases { get; } = ["vi"];
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             StringBuilder sb = new();
             VersionInfoV2? info = VersionManager.VersionInfo;

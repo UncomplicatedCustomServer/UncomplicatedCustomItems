@@ -1,27 +1,27 @@
+﻿using System;
 using CommandSystem;
 using LabApi.Features.Wrappers;
-using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    internal class ToolGun : ISubcommand
+    internal class ToolGun : Subcommand
     {
-        public string Name { get; } = "toolgun";
+        public override string Name { get; } = "toolgun";
 
-        public string Description { get; } = "Get the ToolGun";
+        public override string Description { get; } = "Get the ToolGun";
 
-        public string VisibleArgs { get; } = "<Player Id/Name>";
+        public override string VisibleArgs { get; } = "<Player Id/Name>";
 
-        public int RequiredArgsCount { get; } = 1;
+        public override int RequiredArgsCount { get; } = 1;
 
-        public string RequiredPermission { get; } = "uci.toolgun";
+        public override string RequiredPermission { get; } = "uci.toolgun";
 
-        public string[] Aliases { get; } = ["tg"];
+        public override string[] Aliases { get; } = ["tg"];
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             APICustomItem? customItem = APICustomItem.CustomItems.Values.FirstOrDefault(c => c.Name == "ToolGun");
             if (customItem == null)
@@ -32,7 +32,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (arguments.Count == 1)
             {
-                if (!int.TryParse(arguments[0], out int playerId))
+                if (!int.TryParse(arguments.At(0), out int playerId))
                 {
                     response = "Invalid player id!";
                     return false;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
@@ -6,25 +6,24 @@ using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    public class Random : ISubcommand
+    public class Random : Subcommand
     {
-        public string Name { get; } = "random";
+        public override string Name { get; } = "random";
 
-        public string Description { get; } = "Gets a random Item or CustomItem";
+        public override string Description { get; } = "Gets a random Item or CustomItem";
 
-        public string VisibleArgs { get; } = "";
+        public override string VisibleArgs { get; } = "";
 
-        public int RequiredArgsCount { get; } = 1;
+        public override int RequiredArgsCount { get; } = 1;
 
-        public string RequiredPermission { get; } = "uci.random";
+        public override string RequiredPermission { get; } = "uci.random";
 
-        public string[] Aliases { get; } = ["ran"];
+        public override string[] Aliases { get; } = ["ran"];
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             string text = string.Empty;
             Player? player = Player.Get(sender);
@@ -34,7 +33,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            switch (arguments[0])
+            switch (arguments.At(0))
             {
                 case "Item":
                     string item = Enum.GetNames(typeof(ItemType)).RandomItem();

@@ -1,6 +1,5 @@
 ﻿using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 
@@ -27,7 +26,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// Determines whether the specified <see cref="Pickup"/> is a CustomItem.
         /// </summary>
         /// <param name="pickup">The pickup to check.</param>
-        /// <returns><c>true</c> if the pickup is a <see cref="ICustomItem"/>; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the pickup is a <see cref="CustomItem"/>; otherwise, <c>false</c>.</returns>
         public static bool IsCustomItem(this Pickup pickup) => Utilities.IsCustomItem(pickup.Serial);
 
         /// <summary>
@@ -54,13 +53,13 @@ namespace UncomplicatedCustomItems.API.Extensions
         public static SummonedCustomItem? TryGetSummonedCustomItem(this Pickup pickup) => Utilities.TryGetSummonedCustomItem(pickup.Serial, out SummonedCustomItem? customItem) ? customItem : null;
         
         /// <summary>
-        /// Attempts to retrieve the <see cref="ICustomItem"/> associated with the specified <see cref="Pickup"/>.
+        /// Attempts to retrieve the <see cref="CustomItem"/> associated with the specified <see cref="Pickup"/>.
         /// </summary>
         /// <param name="pickup">The pickup to query.</param>
         /// <returns>
-        /// The corresponding <see cref="ICustomItem"/> if found; otherwise, <c>null</c>.
+        /// The corresponding <see cref="CustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static ICustomItem? TryGetCustomItem(this Pickup pickup) => Utilities.TryGetCustomItem(pickup.Serial, out ICustomItem customItem) ? customItem : null;
+        public static CustomItem? TryGetCustomItem(this Pickup pickup) => Utilities.TryGetCustomItem(pickup.Serial, out CustomItem customItem) ? customItem : null;
 
         /// <summary>
         /// Compares two <see cref="Pickup"/> instances to determine if they refer to the same CustomItem definition.
@@ -68,7 +67,7 @@ namespace UncomplicatedCustomItems.API.Extensions
         /// <param name="pickup1">The first pickup to compare.</param>
         /// <param name="pickup2">The second pickup to compare.</param>
         /// <returns>
-        /// <c>true</c> if both pickups refer to the same <see cref="ICustomItem"/> definition; otherwise, <c>false</c>.
+        /// <c>true</c> if both pickups refer to the same <see cref="CustomItem"/> definition; otherwise, <c>false</c>.
         /// </returns>
         public static bool CompareCustomItems(this Pickup pickup1, Pickup pickup2) => TryGetCustomItem(pickup1) == TryGetCustomItem(pickup2);
 

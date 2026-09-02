@@ -1,29 +1,29 @@
+﻿using System;
 using CommandSystem;
 using LabApi.Features.Wrappers;
-using System.Collections.Generic;
 using System.Net;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.Networking;
-using UncomplicatedCustomItems.API.Interfaces;
 using static EncryptedChannelManager;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    public class Owner : ISubcommand
+    public class Owner : Subcommand
     {
-        public string Name { get; } = "owner";
+        public override string Name { get; } = "owner";
 
-        public string Description { get; } = "Get the 'Server Owner' role on our Discord server";
+        public override string Description { get; } = "Get the 'Server Owner' role on our Discord server";
 
-        public string RequiredPermission { get; } = "uci.owner";
+        public override string RequiredPermission { get; } = "uci.owner";
 
-        public string VisibleArgs { get; } = "Discord ID";
+        public override string VisibleArgs { get; } = "Discord ID";
 
-        public int RequiredArgsCount { get; } = 1;
+        public override int RequiredArgsCount { get; } = 1;
 
-        public string[] Aliases { get; } = [""];
+        public override string[] Aliases { get; } = [""];
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             string res = string.Empty;
 
@@ -33,12 +33,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            AddServerOwnerRequest ownerrequest = new(player, arguments[0]);
+            AddServerOwnerRequest ownerrequest = new(player, arguments.At(0));
             ownerrequest.SendRequest((request) => {
                 HttpStatusCode status = (HttpStatusCode)request.responseCode;
                 res = status switch
                 {
-                    HttpStatusCode.OK => $"The request has been accepted!\nNow {arguments[0]} will be flagged as an Server Owner!",
+                    HttpStatusCode.OK => $"The request has been accepted!\nNow {arguments.At(0)} will be flagged as an Server Owner!",
                     HttpStatusCode.Forbidden => "Sorry but your server seems to not be on the public list!\nRetry in three minutes if you think that this is an error!",
                     HttpStatusCode.BadRequest => "It seems that the Discord user ID is invalid!",
                     HttpStatusCode.InternalServerError => "The central server is having some issues, please report this message to the Discord as a bug!",

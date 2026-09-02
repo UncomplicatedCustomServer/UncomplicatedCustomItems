@@ -10,7 +10,6 @@ using UncomplicatedCustomItems.API.Components;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
@@ -41,7 +40,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                 if (IsCustomItem)
                 {
-                    ICustomItem? customItem = Utilities.GetCustomItem(CustomItemId);
+                    CustomItem? customItem = Utilities.GetCustomItem(CustomItemId);
                     if (customItem == null)
                     {
                         LogManager.Warn($"{CustomItem.Name} - CustomItem with Id {CustomItemId} was not found for ItemShot");
@@ -144,3 +143,4 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         }
     }
 }
+

@@ -1,4 +1,4 @@
-using LabApi.Events.Arguments.ServerEvents;
+﻿using LabApi.Events.Arguments.ServerEvents;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules;
 using UncomplicatedCustomItems.API.Enums;
@@ -6,7 +6,6 @@ using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UnityEngine;
 using ServerEvent = LabApi.Events.Handlers.ServerEvents;
@@ -80,7 +79,7 @@ namespace UncomplicatedCustomItems.Events
         /// </summary>
         public static void SpawnItemsOnRoundStarted()
         {
-            foreach (ICustomItem customItem in CustomItem.List)
+            foreach (CustomItem customItem in CustomItem.List)
             {
                 if (customItem.Item is ItemType.SCP330 && customItem.CustomData is CandyData data && !data.AllowSpawningAsItem)
                     continue;

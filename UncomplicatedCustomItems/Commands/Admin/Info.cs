@@ -8,25 +8,24 @@ using System.Text;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Extensions;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    internal class Info : ISubcommand
+    internal class Info : Subcommand
     {
-        public string Name { get; } = "info";
-        public string Description { get; } = "Get info on a summoned custom item";
-        public string VisibleArgs { get; } = "<Item Id>";
-        public int RequiredArgsCount { get; } = 1;
-        public string RequiredPermission { get; } = "uci.info";
-        public string[] Aliases { get; } = ["info"];
+        public override string Name { get; } = "info";
+        public override string Description { get; } = "Get info on a summoned custom item";
+        public override string VisibleArgs { get; } = "<Item Id>";
+        public override int RequiredArgsCount { get; } = 1;
+        public override string RequiredPermission { get; } = "uci.info";
+        public override string[] Aliases { get; } = ["info"];
 
         private string Color = string.Empty;
         private int Count = 0;
 
-        public bool Execute(List<string> args, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> args, ICommandSender sender, out string response)
         {
             if (args.Count == 0)
             {
@@ -34,9 +33,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            if (!ushort.TryParse(args[0], out ushort id) || !Utilities.TryGetCustomItem(id, out ICustomItem customItem))
+            if (!ushort.TryParse(args.At(0), out ushort id) || !Utilities.TryGetCustomItem(id, out CustomItem customItem))
             {
-                response = $"CustomItem {args[0]} not found!";
+                response = $"CustomItem {args.At(0)} not found!";
                 return false;
             }
 
@@ -50,7 +49,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (customItem.Spawn != null)
             {
-                ISpawn spawnRoot = customItem.Spawn;
+                Spawn spawnRoot = customItem.Spawn;
                 AddInfoLine(sb, "<color=#632300>󾠬</color> Does It Spawn:", spawnRoot.DoSpawn ? "Yes" : "No");
                 AddInfoLine(sb, "<color=#632300>🔢</color> Spawn Count:", spawnRoot.Count.ToString());
 
@@ -118,7 +117,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             return true;
         }
 
-        private void ProcessCustomModules(ICustomItem customItem, StringBuilder sb)
+        private void ProcessCustomModules(CustomItem customItem, StringBuilder sb)
         {
             if (customItem.CustomModules == null || customItem.CustomModules.Count == 0)
                 return;

@@ -1,21 +1,21 @@
-using System.Collections.Generic;
+﻿using System;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Components;
-using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    public class Debug : ISubcommand
+    public class Debug : Subcommand
     {
-        public string Name { get; } = "debug";
-        public string Description { get; } = "use UCI's debug commands";
-        public string VisibleArgs { get; } = "";
-        public int RequiredArgsCount { get; } = 1;
-        public string RequiredPermission { get; } = "uci.debug";
-        public string[] Aliases { get; } = ["deb"];
+        public override string Name { get; } = "debug";
+        public override string Description { get; } = "use UCI's debug commands";
+        public override string VisibleArgs { get; } = "";
+        public override int RequiredArgsCount { get; } = 1;
+        public override string RequiredPermission { get; } = "uci.debug";
+        public override string[] Aliases { get; } = ["deb"];
 
-        public bool Execute(List<string> args, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> args, ICommandSender sender, out string response)
         {
             if (!Player.TryGet(sender, out Player? player))
             {
@@ -24,7 +24,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
 
             DebugUI uI;
-            switch (args[0].ToLower())
+            switch (args.At(0).ToLower())
             {
                 case "ui":
                     if (!player.GameObject!.TryGetComponent<DebugUI>(out uI))
@@ -33,7 +33,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         uI = player.GameObject?.GetComponent<DebugUI>()!;
                     }
 
-                    switch (args[1].ToLower().Replace(" ", "_"))
+                    switch (args.At(1).ToLower().Replace(" ", "_"))
                     {
                         case "all":
                             if (uI.ActiveSegments.Contains(Segment.All))

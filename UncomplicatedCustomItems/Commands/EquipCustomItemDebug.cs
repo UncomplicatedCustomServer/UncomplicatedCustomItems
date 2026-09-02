@@ -1,26 +1,26 @@
-using System.Collections.Generic;
+﻿using System;
 using CommandSystem;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
-using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands
 {
-    public class EquipCustomItemDebug : ISubcommand
+    public class EquipCustomItemDebug : Subcommand
     {
-        public string Name { get; } = "equipcustomitem";
+        public override string Name { get; } = "equipcustomitem";
 
-        public string Description { get; } = "";
+        public override string Description { get; } = "";
 
-        public string VisibleArgs { get; } = string.Empty;
+        public override string VisibleArgs { get; } = string.Empty;
 
-        public int RequiredArgsCount { get; } = 0;
+        public override int RequiredArgsCount { get; } = 0;
 
-        public string RequiredPermission { get; } = "uci.equipcustomitem";
+        public override string RequiredPermission { get; } = "uci.equipcustomitem";
 
-        public string[] Aliases { get; } = ["eci"];
+        public override string[] Aliases { get; } = ["eci"];
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (!Plugin.Instance.Config.Debug)
             {
@@ -28,12 +28,12 @@ namespace UncomplicatedCustomItems.Commands
                 return false;
             }
 
-            Player? player = Player.Get(int.Parse(arguments[0]));
+            Player? player = Player.Get(int.Parse(arguments.At(0)));
             if (player != null)
             {
                 foreach (Item item in player.Items)
                 {
-                    if (Utilities.TryGetSummonedCustomItem(item.Serial, out var customItem) && customItem?.CustomItem.Id == uint.Parse(arguments[1]))
+                    if (Utilities.TryGetSummonedCustomItem(item.Serial, out var customItem) && customItem?.CustomItem.Id == uint.Parse(arguments.At(1)))
                         player.CurrentItem = item;
                 }
             }

@@ -1,9 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using LabApi.Loader.Features.Yaml;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine.Networking;
 using YamlDotNet.Core;
 
@@ -29,7 +28,7 @@ namespace UncomplicatedCustomItems.API.Features.Networking
             if (!Directory.Exists(FileDirectory))
                 Directory.CreateDirectory(FileDirectory);
 
-            foreach (ICustomItem item in CustomItem.List.ToArray())
+            foreach (CustomItem item in CustomItem.List.ToArray())
             {
                 CustomItem.Unregister(item);
             }

@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features;
@@ -6,7 +6,6 @@ using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API;
 using LabApi.Features.Wrappers;
 using UnityEngine;
-using UncomplicatedCustomItems.API.Interfaces;
 using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.Integrations
@@ -144,14 +143,14 @@ namespace UncomplicatedCustomItems.Integrations
                     return true;
                 }
 
-                if (uint.TryParse(itemName, out uint id) && Utilities.TryGetCustomItem(id, out ICustomItem item))
+                if (uint.TryParse(itemName, out uint id) && Utilities.TryGetCustomItem(id, out CustomItem item))
                 {
                     LogManager.Debug($"Giving UCI custom item '{item.Name}' to {labPlayer.Nickname}");
                     new SummonedCustomItem(item, labPlayer);
                     __result = true;
                     return false;
                 }
-                else if (Utilities.TryGetCustomItemByName(itemName, out ICustomItem customItem))
+                else if (Utilities.TryGetCustomItemByName(itemName, out CustomItem customItem))
                 {
                     LogManager.Debug($"Giving UCI custom item '{customItem.Name}' to {labPlayer.Nickname}");
                     new SummonedCustomItem(customItem, labPlayer);

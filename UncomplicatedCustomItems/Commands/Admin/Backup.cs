@@ -1,20 +1,20 @@
-using System.Collections.Generic;
+﻿using System;
 using CommandSystem;
 using UncomplicatedCustomItems.API.Features.Networking;
-using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Features;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    public class Backup : ISubcommand
+    public class Backup : Subcommand
     {
-        public string Name { get; } = "backup";
-        public string Description { get; } = "Backups your CustomItems";
-        public string VisibleArgs { get; } = "[Upload|Download]";
-        public int RequiredArgsCount { get; } = 1;
-        public string RequiredPermission { get; } = "uci.backup";
-        public string[] Aliases { get; } = ["back"];
+        public override string Name { get; } = "backup";
+        public override string Description { get; } = "Backups your CustomItems";
+        public override string VisibleArgs { get; } = "[Upload|Download]";
+        public override int RequiredArgsCount { get; } = 1;
+        public override string RequiredPermission { get; } = "uci.backup";
+        public override string[] Aliases { get; } = ["back"];
 
-        public bool Execute(List<string> args, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> args, ICommandSender sender, out string response)
         {
             if (args.Count < 1)
             {
@@ -22,8 +22,8 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 return false;
             }
 
-            string customCode = args.Count > 1 ? args[1] : string.Empty;
-            switch (args[0].ToLower())
+            string customCode = args.Count > 1 ? args.At(1) : string.Empty;
+            switch (args.At(0).ToLower())
             {
                 case "upload":
                         BackupUploadRequest upload = new();

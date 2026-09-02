@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using static InventorySystem.Items.Firearms.Modules.DisruptorActionModule;
 

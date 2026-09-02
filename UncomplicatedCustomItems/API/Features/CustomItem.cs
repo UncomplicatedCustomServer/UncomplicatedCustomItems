@@ -1,8 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.API.Interfaces;
 
 using UnityEngine;
 using UncomplicatedCustomItems.API.Enums;
@@ -12,37 +11,37 @@ using UncomplicatedCustomItems.API.CustomModuleAPI;
 
 namespace UncomplicatedCustomItems.API.Features
 {
-    public class CustomItem : ICustomItem
+    public class CustomItem
     {
         /// <summary>
-        /// Gets a list of every registered <see cref="ICustomItem"/>
+        /// Gets a list of every registered <see cref="CustomItem"/>
         /// </summary>
-        public static List<ICustomItem> List => CustomItems.Values.ToList();
+        public static List<CustomItem> List => CustomItems.Values.ToList();
 
         /// <summary>
-        /// Gets a list of every unregistered <see cref="ICustomItem"/>
+        /// Gets a list of every unregistered <see cref="CustomItem"/>
         /// </summary>
-        public static List<ICustomItem> UnregisteredList => UnregisteredCustomItems.Values.ToList();
+        public static List<CustomItem> UnregisteredList => UnregisteredCustomItems.Values.ToList();
 
         internal static List<ErrorCustomItem> ErrorCustomItems { get; set; } = [];
 
-        internal static Dictionary<uint, ICustomItem> CustomItems { get; set; } = [];
-        internal static Dictionary<uint, ICustomItem> UnregisteredCustomItems { get; set; } = [];
+        internal static Dictionary<uint, CustomItem> CustomItems { get; set; } = [];
+        internal static Dictionary<uint, CustomItem> UnregisteredCustomItems { get; set; } = [];
 
         /// <summary>
-        /// Register a new <see cref="ICustomItem"/> inside the plugin
+        /// Register a new <see cref="CustomItem"/> inside the plugin
         /// </summary>
         /// <param name="item"></param>
-        public static void Register(ICustomItem item)
+        public static void Register(CustomItem item)
         {
             if (!Utilities.CustomItemValidator(item, out string error))
             {
-                LogManager.Warn($"Unable to register the ICustomItem with the Id {item.Id} and name '{item.Name}':\n{error}");
+                LogManager.Warn($"Unable to register the CustomItem with the Id {item.Id} and name '{item.Name}':\n{error}");
                 UnregisteredCustomItems.TryAdd(item.Id, item);
                 return;
             }
             CustomItems.TryAdd(item.Id, item);
-            LogManager.Silent($"Successfully registered ICustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
+            LogManager.Silent($"Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }
 
         public bool HasModule<T>() where T : CustomModuleBase =>
@@ -55,13 +54,13 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Unregister a <see cref="ICustomItem"/> from the plugin by its class
+        /// Unregister a <see cref="CustomItem"/> from the plugin by its class
         /// </summary>
         /// <param name="item"></param>
-        public static void Unregister(ICustomItem item) => Unregister(item.Id);
+        public static void Unregister(CustomItem item) => Unregister(item.Id);
 
         /// <summary>
-        /// Unregister a <see cref="ICustomItem"/> from the plugin by its Id
+        /// Unregister a <see cref="CustomItem"/> from the plugin by its Id
         /// </summary>
         /// <param name="item"></param>
         public static void Unregister(uint item)
@@ -146,7 +145,7 @@ namespace UncomplicatedCustomItems.API.Features
         /// <summary>
         /// The Spawn data for the custom item.
         /// </summary>
-        public virtual ISpawn Spawn { get; set; } = new Spawn();
+        public virtual Spawn Spawn { get; set; } = new Spawn();
 
         /// <summary>
         /// Custom flags of the item

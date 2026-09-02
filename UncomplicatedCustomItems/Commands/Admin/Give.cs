@@ -1,11 +1,10 @@
-﻿using CommandSystem;
+﻿using System;
+using CommandSystem;
 using LabApi.Features.Wrappers;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using InventorySystem.Items.Usables.Scp330;
@@ -14,19 +13,19 @@ using MEC;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    internal class Give : ISubcommand
+    internal class Give : Subcommand
     {
-        public string Name { get; } = "give";
+        public override string Name { get; } = "give";
 
-        public string Description { get; } = "Give a Custom Item to a specific player or to yourself";
+        public override string Description { get; } = "Give a Custom Item to a specific player or to yourself";
 
-        public string VisibleArgs { get; } = "<Item Id> <Player Id/All>";
+        public override string VisibleArgs { get; } = "<Item Id> <Player Id/All>";
 
-        public int RequiredArgsCount { get; } = 1;
+        public override int RequiredArgsCount { get; } = 1;
 
-        public string RequiredPermission { get; } = "uci.give";
+        public override string RequiredPermission { get; } = "uci.give";
 
-        public string[] Aliases { get; } = ["g"];
+        public override string[] Aliases { get; } = ["g"];
 
         private static string StripTags(string input)
         {
@@ -34,14 +33,14 @@ namespace UncomplicatedCustomItems.Commands.Admin
             return Regex.Replace(input, "<.*?>", "");
         }
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             object customItemobj = null!;
-            if (uint.TryParse(arguments[0], out uint id))
+            if (uint.TryParse(arguments.At(0), out uint id))
             {
-                if (Utilities.TryGetCustomItem(id, out ICustomItem iCustomItem))
+                if (Utilities.TryGetCustomItem(id, out CustomItem CustomItem))
                 {
-                    customItemobj = iCustomItem;
+                    customItemobj = CustomItem;
                 }
 
                 else if (APICustomItem.CustomItems.TryGetValue(id, out var baseItem))
@@ -51,11 +50,11 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
             else
             {
-                string name = StripTags(arguments[0]);
+                string name = StripTags(arguments.At(0));
 
-                if (Utilities.TryGetCustomItemByName(name, out ICustomItem iCustomItem))
+                if (Utilities.TryGetCustomItemByName(name, out CustomItem CustomItem))
                 {
-                    customItemobj = iCustomItem;
+                    customItemobj = CustomItem;
                 }
 
                 else if (APICustomItem.CustomItems.Values.Any(c => c.Name == name))
@@ -66,16 +65,16 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
             if (customItemobj == null)
             {
-                response = $"Custom item '{arguments[0]}' not found!";
+                response = $"Custom item '{arguments.At(0)}' not found!";
                 return false;
             }
 
             switch (customItemobj)
             {
-                case ICustomItem customItem:
+                case CustomItem customItem:
                     if (customItem.Item == ItemType.SCP330 && customItem.CustomData is CandyData candyData)
                     {
-                        Player? player = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
+                        Player? player = arguments.Count == 2 ? Player.Get(int.Parse(arguments.At(1))) : Player.Get(sender);
 
                         if (player?.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6) ?? false)
                         {
@@ -102,7 +101,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (arguments.Count == 2)
                     {
-                        if (arguments[1].ToLower() == "all")
+                        if (arguments.At(1).ToLower() == "all")
                         {
                             foreach (Player player in Player.ReadyList.Where(p => !p.IsInventoryFull))
                                 new SummonedCustomItem(customItem, player);
@@ -112,7 +111,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         }
                         else
                         {
-                            Player? target = Player.Get(int.Parse(arguments[1]));
+                            Player? target = Player.Get(int.Parse(arguments.At(1)));
                             if (target == null)
                             {
                                 response = "Player not found!";
@@ -159,7 +158,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 case APICustomItem baseCustomItem:
                     if (baseCustomItem.Item == ItemType.SCP330 && baseCustomItem is CustomCandy customCandy)
                     {
-                        Player? player = arguments.Count == 2 ? Player.Get(int.Parse(arguments[1])) : Player.Get(sender);
+                        Player? player = arguments.Count == 2 ? Player.Get(int.Parse(arguments.At(1))) : Player.Get(sender);
 
                         if (player?.Items.Any(i => i.Base is Scp330Bag bag && bag.Candies.Count >= 6) ?? false)
                         {
@@ -186,7 +185,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                     if (arguments.Count == 2)
                     {
-                        if (arguments[1].ToLower() == "all")
+                        if (arguments.At(1).ToLower() == "all")
                         {
                             foreach (Player player in Player.ReadyList.Where(p => !p.IsInventoryFull))
                                 new SummonedAPICustomItem(baseCustomItem, player);
@@ -196,7 +195,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         }
                         else
                         {
-                            Player? target = Player.Get(int.Parse(arguments[1]));
+                            Player? target = Player.Get(int.Parse(arguments.At(1)));
                             if (target == null)
                             {
                                 response = "Player not found!";

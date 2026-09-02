@@ -1,6 +1,4 @@
-#if EXILED
-using Exiled.CustomRoles.API.Features;
-using Exiled.API.Enums;
+﻿#if EXILED
 #endif
 using CustomPlayerEffects;
 using Interactables.Interobjects.DoorUtils;
@@ -27,9 +25,6 @@ using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.API.Interfaces;
-
-using UncomplicatedCustomItems.Integrations;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 using Light = LabApi.Features.Wrappers.LightSourceToy;
@@ -37,6 +32,7 @@ using PlayerEvent = LabApi.Events.Handlers.PlayerEvents;
 using InventorySystem.Items.Autosync;
 using static InventorySystem.Items.Usables.StatusMessage;
 using InventorySystem.Items.Usables;
+using UncomplicatedCustomItems.Integrations;
 
 namespace UncomplicatedCustomItems.Events
 {
@@ -432,24 +428,6 @@ namespace UncomplicatedCustomItems.Events
                             });
 
                             break;
-
-                        case ItemType.SCP207 or ItemType.AntiSCP207 when customItem.CustomItem.CustomData is SCP207Data cola:
-                            if (!cola.Apply207Effect)
-                            {
-                                ev.IsAllowed = false;
-                                ev.ContinueProcess = false;
-
-                                if (cola.RemoveItemAfterUse)
-                                {
-                                    ev.Player.RemoveItem(ev.UsableItem);
-                                }
-                                else
-                                {
-                                    ev.UsableItem.Base.OnUsingCancelled();
-                                    ev.Player.Connection?.Send(new StatusMessage(StatusType.Cancel, ev.UsableItem.Serial), 0);
-                                }
-                            }
-                            break;
                     }
                 }
             }
@@ -460,7 +438,7 @@ namespace UncomplicatedCustomItems.Events
                 if (idx < 0 || idx >= bag.Candies.Count)
                     return;
 
-                List<ICustomItem> candies = CustomItem.CustomItems.Values.Where(c => c.CustomData is CandyData candyData && c.Spawn != null && c.Spawn.DoSpawn).ToList();
+                List<CustomItem> candies = CustomItem.CustomItems.Values.Where(c => c.CustomData is CandyData candyData && c.Spawn != null && c.Spawn.DoSpawn).ToList();
                 if (candies.Count == 0)
                     return;
 
@@ -547,29 +525,6 @@ namespace UncomplicatedCustomItems.Events
 
                 switch (ev.UsableItem.Type, summonedApiItem.CustomItem)
                 {
-                    case (ItemType.SCP207 or ItemType.AntiSCP207, CustomSCP207 data207):
-                        if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == data207.Effect))
-                        {
-                            LogManager.Warn($"Invalid Effect: {data207.Effect} for ID: {summonedApiItem.CustomItem.Id} Name: {summonedApiItem.CustomItem.Name}");
-                            break;
-                        }
-
-                        if (data207.Duration <= -2)
-                        {
-                            LogManager.Warn($"Invalid Duration: {data207.Duration} for ID: {summonedApiItem.CustomItem.Id} Name: {summonedApiItem.CustomItem.Name}");
-                            break;
-                        }
-
-                        if (data207.Intensity <= 0)
-                        {
-                            LogManager.Warn($"Invalid intensity: {data207.Intensity} for ID: {summonedApiItem.CustomItem.Id} Name: {summonedApiItem.CustomItem.Name}");
-                            break;
-                        }
-
-                        LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {data207.Effect} at intensity {data207.Intensity}, duration is {data207.Duration} to {ev.Player.Nickname}");
-                        ev.Player.ReferenceHub.playerEffectsController.ChangeState(data207.Effect, data207.Intensity, data207.Duration, true);
-                        break;
-
                     case (ItemType.SCP1853, CustomSCP1853 data1853):
                         if (!ev.Player.ReferenceHub.playerEffectsController.AllEffects.Any(e => e.name == data1853.Effect))
                         {
@@ -594,9 +549,6 @@ namespace UncomplicatedCustomItems.Events
                         break;
                 }
 
-                if ((ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207) && summonedApiItem.CustomItem is CustomSCP207 customSCP207 && !customSCP207.RemoveItemAfterUse)
-                    new SummonedAPICustomItem(summonedApiItem.CustomItem, ev.Player);
-
                 if (ev.UsableItem.Type == ItemType.SCP1853 && summonedApiItem.CustomItem is CustomSCP1853 scp1853data && !scp1853data.RemoveItemAfterUse)
                     new SummonedAPICustomItem(summonedApiItem.CustomItem, ev.Player);
             }
@@ -613,7 +565,6 @@ namespace UncomplicatedCustomItems.Events
             if (customItem.CustomItem.Reusable)
                 new SummonedCustomItem(customItem.CustomItem, ev.Player);
 
-            SCP500Data? scp500Data = customItem.CustomItem.CustomData as SCP500Data;
             SCP207Data? scp207Data = customItem.CustomItem.CustomData as SCP207Data;
             SCP1853Data? scp1853Data = customItem.CustomItem.CustomData as SCP1853Data;
             SCP1576Data? scp1576Data = customItem.CustomItem.CustomData as SCP1576Data;
@@ -624,18 +575,6 @@ namespace UncomplicatedCustomItems.Events
 
             switch (ev.UsableItem.Type)
             {
-                case ItemType.SCP500 when scp500Data is not null:
-                    effect = scp500Data.Effect;
-                    intensity = scp500Data.Intensity;
-                    duration = scp500Data.Duration;
-                    break;
-
-                case ItemType.SCP207 or ItemType.AntiSCP207 when scp207Data is not null:
-                    effect = scp207Data.Effect;
-                    intensity = scp207Data.Intensity;
-                    duration = scp207Data.Duration;
-                    break;
-
                 case ItemType.SCP1853 when scp1853Data is not null:
                     effect = scp1853Data.Effect;
                     intensity = scp1853Data.Intensity;
@@ -671,12 +610,6 @@ namespace UncomplicatedCustomItems.Events
 
                 LogManager.Debug($"{nameof(OnItemUse)}: Applying effect {effect} at intensity {intensity}, duration is {duration} to {ev.Player.Nickname}");
                 ev.Player.ReferenceHub.playerEffectsController.ChangeState(effect, intensity, duration, true);
-
-                if (ev.UsableItem.Type == ItemType.SCP207 || ev.UsableItem.Type == ItemType.AntiSCP207)
-                {
-                    if (scp207Data != null && !scp207Data.RemoveItemAfterUse)
-                        new SummonedCustomItem(customItem.CustomItem, ev.Player);
-                }
 
                 if (ev.UsableItem.Type == ItemType.SCP1853)
                 {
@@ -1355,12 +1288,6 @@ namespace UncomplicatedCustomItems.Events
             {
                 switch (ev.Effect, summonedItem.CustomItem)
                 {
-                    case (CustomPlayerEffects.Scp207 or CustomPlayerEffects.AntiScp207, CustomSCP207 scp207Data) when !scp207Data.Apply207Effect:
-                        LogManager.Debug("Removing SCP-207 effect.");
-                        ev.Player.DisableEffect(ev.Effect);
-                        ev.IsAllowed = false;
-                        break;
-
                     case (Scp1853, CustomSCP1853 scp1853Data) when !scp1853Data.Apply1853Effect:
                         LogManager.Debug("Removing SCP-1853 effect.");
                         ev.Player.DisableEffect(ev.Effect);
@@ -1376,12 +1303,6 @@ namespace UncomplicatedCustomItems.Events
 
                 switch (ev.Effect)
                 {
-                    case CustomPlayerEffects.AntiScp207 or CustomPlayerEffects.Scp207 when customItem.CustomItem.CustomData is SCP207Data scp207Data && !scp207Data.Apply207Effect:
-                        LogManager.Debug("Removing SCP-207 effect.");
-                        ev.Player.DisableEffect(ev.Effect);
-                        ev.IsAllowed = false;
-                        break;
-
                     case Scp1853 when customItem.CustomItem.CustomData is SCP1853Data scp1853Data && !scp1853Data.Apply1853Effect:
                         LogManager.Debug("Removing SCP-1853 effect.");
                         ev.Player.DisableEffect(ev.Effect);

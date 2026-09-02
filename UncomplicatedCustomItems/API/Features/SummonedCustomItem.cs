@@ -1,5 +1,4 @@
-using Interactables.Interobjects.DoorUtils;
-using InventorySystem;
+﻿using InventorySystem;
 using InventorySystem.Items.Autosync;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
@@ -13,7 +12,6 @@ using LabApi.Events.Arguments.ServerEvents;
 using LabApi.Features.Wrappers;
 using MEC;
 using Mirror;
-using PlayerStatsSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +21,6 @@ using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.Networking;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.API.Interfaces;
 
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Commands;
@@ -39,7 +36,7 @@ using Scp244 = LabApi.Features.Wrappers.Scp244Item;
 namespace UncomplicatedCustomItems.API.Features
 {
     /// <summary>
-    /// Handles the information and methods for every summoned <see cref="ICustomItem"/>
+    /// Handles the information and methods for every summoned <see cref="CustomItem"/>
     /// </summary>
     public class SummonedCustomItem
     {
@@ -61,9 +58,9 @@ namespace UncomplicatedCustomItems.API.Features
         internal CoroutineHandle RegenHandle;
 
         /// <summary>
-        /// The <see cref="ICustomItem"/> reference of the item
+        /// The <see cref="CustomItem"/> reference of the item
         /// </summary>
-        public ICustomItem CustomItem { get; internal set; }
+        public CustomItem CustomItem { get; internal set; }
 
         /// <summary>
         /// The <see cref="Player">Owner</see> of the item
@@ -147,7 +144,7 @@ namespace UncomplicatedCustomItems.API.Features
         public Scp127MagazineModule? Scp127MagazineModule { get; set; }
         public Scp127Hitscan? Scp127Hitscan { get; set; }
 
-        public SummonedCustomItem(ICustomItem customItem, Player? owner, Item? item, Pickup? pickup, Quaternion rotation = new())
+        public SummonedCustomItem(CustomItem customItem, Player? owner, Item? item, Pickup? pickup, Quaternion rotation = new())
         {
             CustomItem = customItem;
             Owner = owner;
@@ -166,18 +163,18 @@ namespace UncomplicatedCustomItems.API.Features
                 StartAmmoRegen(firearm);
         }
 
-        public SummonedCustomItem(ICustomItem customItem, Pickup pickup) : this(customItem, null, null, pickup) { }
+        public SummonedCustomItem(CustomItem customItem, Pickup pickup) : this(customItem, null, null, pickup) { }
 
-        public SummonedCustomItem(ICustomItem customItem, Vector3 position, Quaternion rotation = new()) : this(customItem, null, null, customItem.Item.CreateAndSpawn(position), rotation) { }
+        public SummonedCustomItem(CustomItem customItem, Vector3 position, Quaternion rotation = new()) : this(customItem, null, null, customItem.Item.CreateAndSpawn(position), rotation) { }
 
-        public SummonedCustomItem(ICustomItem customItem, Player player) : this(customItem, player, player.AddItem(customItem.Item), null) { }
+        public SummonedCustomItem(CustomItem customItem, Player player) : this(customItem, player, player.AddItem(customItem.Item), null) { }
 
-        public SummonedCustomItem(ICustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
+        public SummonedCustomItem(CustomItem customItem, Player player, Item item) : this(customItem, player, item, null) { }
 
 #if EXILED
-        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player) : this(customItem, Player.Get(player.Id), Player.Get(player.Id)?.AddItem(customItem.Item), null) { }
+        public SummonedCustomItem(CustomItem customItem, Exiled.API.Features.Player player) : this(customItem, Player.Get(player.Id), Player.Get(player.Id)?.AddItem(customItem.Item), null) { }
 
-        public SummonedCustomItem(ICustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, Player.Get(player.Id), item, null) { }
+        public SummonedCustomItem(CustomItem customItem, Exiled.API.Features.Player player, Item item) : this(customItem, Player.Get(player.Id), item, null) { }
 #endif
 
         public static void Cleanup()

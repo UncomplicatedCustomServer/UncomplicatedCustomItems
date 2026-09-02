@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features
 {
     /// <summary>
-    /// Spawn settings for <see cref="ICustomItem"/>.
+    /// Spawn settings for <see cref="CustomItem"/>.
     /// </summary>
-    public class Spawn : ISpawn
+    public class Spawn
     {
         /// <summary>
         /// Determines whether the item can naturally spawn.

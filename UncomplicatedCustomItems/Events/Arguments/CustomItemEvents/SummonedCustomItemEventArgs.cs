@@ -1,13 +1,13 @@
+﻿using UncomplicatedCustomItems.API.Features;
 using System;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Events.Arguments.CustomItemEvents
 {
     public class SummonedCustomItemEventArgs : EventArgs
     {
-        public ICustomItem CustomItem { get; }
+        public CustomItem CustomItem { get; }
 
-        public SummonedCustomItemEventArgs(ICustomItem customItem)
+        public SummonedCustomItemEventArgs(CustomItem customItem)
         {
             CustomItem = customItem;
         }

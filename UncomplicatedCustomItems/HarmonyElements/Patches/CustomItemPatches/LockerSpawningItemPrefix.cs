@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using HarmonyLib;
 using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
@@ -6,7 +6,6 @@ using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Enums.LockerChambers;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
 using System.Collections.Generic;
 
 namespace UncomplicatedCustomItems.HarmonyElements.Patches
@@ -24,7 +23,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
         [HarmonyPatch(nameof(MapGeneration.Distributors.Locker.FillChamber))]
         public static bool Prefix(MapGeneration.Distributors.Locker __instance)
         {
-            foreach (ICustomItem item in CustomItem.CustomItems.Values)
+            foreach (CustomItem item in CustomItem.CustomItems.Values)
             {
                 if (item.Spawn is null || item.Spawn.SpawnSettings is null)
                     continue;
@@ -64,7 +63,7 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             return true;
         }
 
-        internal static bool HandleLockerSpawn(SpawnData data, Locker locker, ICustomItem item)
+        internal static bool HandleLockerSpawn(SpawnData data, Locker locker, CustomItem item)
         {
             if (item.Spawn is null || spawnedAmounts[item.Id] >= item.Spawn.Count)
                 return true;

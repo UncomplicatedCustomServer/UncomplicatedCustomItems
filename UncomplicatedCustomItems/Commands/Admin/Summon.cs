@@ -1,27 +1,27 @@
-﻿using CommandSystem;
+﻿using UncomplicatedCustomItems.API.Features;
+using System;
+using CommandSystem;
 using LabApi.Features.Wrappers;
-using System.Collections.Generic;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    internal class Summon : ISubcommand
+    internal class Summon : Subcommand
     {
-        public string Name { get; } = "summon";
+        public override string Name { get; } = "summon";
 
-        public string Description { get; } = "Summon an existing Custom Item";
+        public override string Description { get; } = "Summon an existing Custom Item";
 
-        public string VisibleArgs { get; } = "<Item Id>";
+        public override string VisibleArgs { get; } = "<Item Id>";
 
-        public int RequiredArgsCount { get; } = 1;
+        public override int RequiredArgsCount { get; } = 1;
 
-        public string RequiredPermission { get; } = "uci.summon";
+        public override string RequiredPermission { get; } = "uci.summon";
 
-        public string[] Aliases { get; } = ["spawn", "s"];
+        public override string[] Aliases { get; } = ["spawn", "s"];
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (!Round.IsRoundStarted)
             {
@@ -30,16 +30,16 @@ namespace UncomplicatedCustomItems.Commands.Admin
             }
 
             object customItemobj = null!;
-            if (Utilities.TryGetCustomItem(uint.Parse(arguments[0]), out var iCustomItem))
+            if (Utilities.TryGetCustomItem(uint.Parse(arguments.At(0)), out var CustomItem))
             {
-                customItemobj = iCustomItem;
+                customItemobj = CustomItem;
             }
-            else if (APICustomItem.CustomItems.TryGetValue(uint.Parse(arguments[0]), out var baseCustomItem))
+            else if (APICustomItem.CustomItems.TryGetValue(uint.Parse(arguments.At(0)), out var baseCustomItem))
             {
                 customItemobj = baseCustomItem;
             }
             
-            if (customItemobj is ICustomItem customItem)
+            if (customItemobj is CustomItem customItem)
             {
                 response = $"Successfully summoned 1 '{customItem.Name}' to it's spawn point";
                 Utilities.SummonCustomItem(customItem, true);

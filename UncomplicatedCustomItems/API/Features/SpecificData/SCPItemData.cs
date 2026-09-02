@@ -28,9 +28,11 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP500Data : Data
     {
-        public virtual string Effect { get; set; } = "Flashed";
-        public virtual float Duration { get; set; } = 20;
-        public virtual byte Intensity { get; set; } = 1;
+        public bool AllowAchievement { get; set; }
+        public bool ApplyHeal { get; set; }
+        public int InstantHealth { get; set; }
+        public float RegenSpeedMultiplier { get; set; }
+        public float HPGainMultiplier { get; set; }
     }
 
     /// <summary>
@@ -38,9 +40,9 @@ namespace UncomplicatedCustomItems.API.Features.SpecificData
     /// </summary>
     public class SCP207Data : Data
     {
-        public virtual string Effect { get; set; } = "Flashed";
-        public virtual float Duration { get; set; } = 20;
-        public virtual byte Intensity { get; set; } = 1;
+        public float InstantHealth { get; set; }
+        public bool BypassMax { get; set; }
+        public float StaminaGain { get; set; }
         public virtual bool Apply207Effect { get; set; } = false;
         public virtual bool RemoveItemAfterUse { get; set; } = true;
     }

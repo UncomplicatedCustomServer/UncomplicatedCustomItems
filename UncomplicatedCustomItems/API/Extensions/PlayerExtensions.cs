@@ -1,5 +1,4 @@
-﻿using Interactables.Interobjects.DoorUtils;
-using InventorySystem;
+﻿using InventorySystem;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Firearms.ShotEvents;
@@ -8,7 +7,6 @@ using PlayerStatsSystem;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Extensions
@@ -39,7 +37,7 @@ namespace UncomplicatedCustomItems.API.Extensions
             player.ReferenceHub.playerStats.KillPlayer(damageHandler);
         }
 
-        public static void GiveCustomItem(this Player player, ICustomItem customitem) => new SummonedCustomItem(customitem, player);
+        public static void GiveCustomItem(this Player player, CustomItem customitem) => new SummonedCustomItem(customitem, player);
 
         public static bool HasCustomItem(this Player player, bool currentitem = false)
         {

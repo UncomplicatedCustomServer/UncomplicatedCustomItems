@@ -1,6 +1,5 @@
 ﻿#if EXILED
 using Exiled.API.Features;
-using Exiled.API.Extensions;
 using Exiled.Loader;
 #else
 using LabApi.Features.Wrappers;
@@ -11,7 +10,6 @@ using System.IO;
 using System.Threading.Tasks;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UncomplicatedCustomItems.API.Enums;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 using YamlDotNet.Core;
 using InventorySystem.Items.Usables.Scp330;
@@ -592,7 +590,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                     List<Vector3> pickuppos = [];
                     List<Player> owners = [];
 
-                    if (Utilities.TryGetCustomItem(yamlitem.Id, out ICustomItem item))
+                    if (Utilities.TryGetCustomItem(yamlitem.Id, out CustomItem item))
                     {
                         foreach (SummonedCustomItem summoned in SummonedCustomItem.List.Where(i => i.CustomItem?.Id == item.Id).ToArray())
                         {
@@ -609,7 +607,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                         }
 
                         CustomItem.Unregister(item);
-                        ICustomItem replacement = YAMLCaster.Converter(yamlitem);
+                        CustomItem replacement = YAMLCaster.Converter(yamlitem);
                         CustomItem.Register(replacement);
                         foreach (Vector3 pos in pickuppos)
                         {

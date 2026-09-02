@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
@@ -7,7 +6,6 @@ using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Integrations
 {
@@ -134,7 +132,7 @@ namespace UncomplicatedCustomItems.Integrations
                     return true;
                 }
 
-                if (Utilities.TryGetCustomItem(labitem.Serial, out ICustomItem customItem))
+                if (Utilities.TryGetCustomItem(labitem.Serial, out CustomItem customItem))
                 {
                     LogManager.Debug($"Giving UCI custom item '{customItem.Name}' to {labPlayer.Nickname}");
                     new SummonedCustomItem(customItem, labPlayer);

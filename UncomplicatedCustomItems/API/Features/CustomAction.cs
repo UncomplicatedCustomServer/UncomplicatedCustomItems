@@ -1,27 +1,26 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features
 {
-    public class CustomAction : ICustomAction
+    public class CustomAction
     {
         /// <summary>
-        /// Gets a list of every registered <see cref="ICustomAction"/>
+        /// Gets a list of every registered <see cref="CustomAction"/>
         /// </summary>
-        public static List<ICustomAction> List => CustomActions.Values.ToList();
+        public static List<CustomAction> List => CustomActions.Values.ToList();
 
         /// <summary>
-        /// Gets a list of every unregistered <see cref="ICustomAction"/>
+        /// Gets a list of every unregistered <see cref="CustomAction"/>
         /// </summary>
-        public static List<ICustomAction> UnregisteredList => UnregisteredCustomActions.Values.ToList();
+        public static List<CustomAction> UnregisteredList => UnregisteredCustomActions.Values.ToList();
 
-        internal static Dictionary<uint, ICustomAction> CustomActions { get; set; } = [];
-        internal static Dictionary<uint, ICustomAction> UnregisteredCustomActions { get; set; } = [];
+        internal static Dictionary<uint, CustomAction> CustomActions { get; set; } = [];
+        internal static Dictionary<uint, CustomAction> UnregisteredCustomActions { get; set; } = [];
 
-        public static void Register(ICustomAction action)
+        public static void Register(CustomAction action)
         {
             if (!Utilities.CustomActionValidator(action, out string error))
             {
@@ -35,13 +34,13 @@ namespace UncomplicatedCustomItems.API.Features
         }
 
         /// <summary>
-        /// Unregister a <see cref="ICustomAction"/> from the plugin by its class
+        /// Unregister a <see cref="CustomAction"/> from the plugin by its class
         /// </summary>
         /// <param name="action"></param>
-        public static void Unregister(ICustomAction action) => Unregister(action.Id);
+        public static void Unregister(CustomAction action) => Unregister(action.Id);
 
         /// <summary>
-        /// Unregister a <see cref="ICustomAction"/> from the plugin by its Id
+        /// Unregister a <see cref="CustomAction"/> from the plugin by its Id
         /// </summary>
         /// <param name="action"></param>
         public static void Unregister(uint action)

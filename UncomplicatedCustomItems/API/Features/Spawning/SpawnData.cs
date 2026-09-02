@@ -1,7 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using MapGeneration;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Features
@@ -29,7 +28,7 @@ namespace UncomplicatedCustomItems.API.Features
         public virtual LockerSpawn LockerSettings { get; set; } = new();
 
         /// <summary>
-        /// The <see cref="IDynamicSpawn"/> locations where the item is allowed to spawn.
+        /// The <see cref="DynamicSpawn"/> locations where the item is allowed to spawn.
         /// If this is empty, the <see cref="Zones"/> parameter will be used instead.
         /// </summary>
         [Description("The room(s) where the custom item can spawn.")]

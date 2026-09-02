@@ -1,16 +1,15 @@
-#if EXILED
+﻿#if EXILED
 using Exiled.API.Interfaces;
 using Exiled.Loader;
 #endif
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Manager;
 using System.Linq;
-using UncomplicatedCustomItems.API.Interfaces;
-using System.Reflection;
 
 namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 {
@@ -29,8 +28,7 @@ namespace UncomplicatedCustomItems.API.Features.CustomItemAPI
 
         internal static Type[] BannedTypes =
         [
-            typeof(CustomItem),
-            typeof(ICustomItem)
+            typeof(CustomItem)
         ];
 
         internal static Type[] CustomItemTypes =

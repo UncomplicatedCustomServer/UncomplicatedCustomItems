@@ -6,10 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.Commands.Admin;
-using UncomplicatedCustomItems.API.Interfaces;
-using LabApi.Features.Permissions;
 using UncomplicatedCustomItems.API.Features.Manager;
 using Random = UncomplicatedCustomItems.Commands.Admin.Random;
+using UncomplicatedCustomItems.API.Features;
+using LabApi.Features.Permissions;
 
 namespace UncomplicatedCustomItems.Commands
 {
@@ -45,7 +45,7 @@ namespace UncomplicatedCustomItems.Commands
             Subcommands.Add(new EquipCustomItemDebug());
         }
 
-        internal static List<ISubcommand> Subcommands { get; } = [];
+        internal static List<Subcommand> Subcommands { get; } = [];
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
@@ -54,13 +54,13 @@ namespace UncomplicatedCustomItems.Commands
                 if (arguments.Count == 0)
                 {
                     response = $"UncomplicatedCustomItems v{Plugin.Instance.Version} by FoxWorn3365, SpGerg & Mr. Baguetter\n\n<size=35>Available commands:</size>";
-                    foreach (ISubcommand command in Subcommands)
+                    foreach (Subcommand command in Subcommands)
                         response += $"\n- uci {command.Name}{(command.VisibleArgs != string.Empty ? $" {command.VisibleArgs}" : "")} - {command.Description}";
 
                     return true;
                 }
 
-                ISubcommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
+                Subcommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
 
                 cmd ??= Subcommands.FirstOrDefault(cmd => cmd.Aliases.Contains(arguments.At(0)));
 
@@ -85,14 +85,13 @@ namespace UncomplicatedCustomItems.Commands
                     return false;
                 }
 
-                List<string> args = [.. arguments];
-                args.RemoveAt(0);
+                ArraySegment<string> args = arguments.Count > 1 ? new ArraySegment<string>(arguments.Array!, arguments.Offset + 1, arguments.Count - 1) : default;
 
                 return cmd.Execute(args, sender, out response);
             }
             catch (Exception ex)
             {
-                ISubcommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
+                Subcommand cmd = Subcommands.FirstOrDefault(cmd => cmd.Name == arguments.At(0));
                 cmd ??= Subcommands.FirstOrDefault(cmd => cmd.Aliases.Contains(arguments.At(0)));
 
                 LogManager.Error($"Error when running command {cmd.Name} \n\n {ex.Message} \n\n {ex.StackTrace}");

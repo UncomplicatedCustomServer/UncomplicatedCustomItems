@@ -15,7 +15,6 @@ using LabApi.Features.Wrappers;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.Extensions
@@ -131,13 +130,13 @@ namespace UncomplicatedCustomItems.API.Extensions
         public static SummonedCustomItem? TryGetSummonedCustomItem(this Item item) => Utilities.TryGetSummonedCustomItem(item.Serial, out SummonedCustomItem? customItem) ? customItem : null;
 
         /// <summary>
-        /// Attempts to retrieve the <see cref="ICustomItem"/> associated with the specified <see cref="Item"/>.
+        /// Attempts to retrieve the <see cref="CustomItem"/> associated with the specified <see cref="Item"/>.
         /// </summary>
         /// <param name="item">The item to query.</param>
         /// <returns>
-        /// The corresponding <see cref="ICustomItem"/> if found; otherwise, <c>null</c>.
+        /// The corresponding <see cref="CustomItem"/> if found; otherwise, <c>null</c>.
         /// </returns>
-        public static ICustomItem? TryGetCustomItem(this Item item) => Utilities.TryGetCustomItem(item.Serial, out ICustomItem customItem) ? customItem : null;
+        public static CustomItem? TryGetCustomItem(this Item item) => Utilities.TryGetCustomItem(item.Serial, out CustomItem customItem) ? customItem : null;
 
         /// <summary>
         /// Compares two <see cref="Item"/> instances to determine if they refer to the same custom item definition.

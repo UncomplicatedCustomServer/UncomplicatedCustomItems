@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,7 +11,6 @@ using MEC;
 using UncomplicatedCustomItems.API.Attributes;
 using UncomplicatedCustomItems.API.Enums;
 using UncomplicatedCustomItems.API.Features.ArgumentHelpers;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.API.Features.Manager
 {
@@ -22,7 +21,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
     {
         private static readonly Dictionary<string, Type> _commonTypeMap = BuildCommonTypeMap();
 
-        internal static readonly ConcurrentDictionary<string, Action<ICustomItem, string[]>> _actionHandlers = new(StringComparer.OrdinalIgnoreCase);
+        internal static readonly ConcurrentDictionary<string, Action<CustomItem, string[]>> _actionHandlers = new(StringComparer.OrdinalIgnoreCase);
 
         internal static readonly ConcurrentDictionary<Type, HashSet<string>> _eventArgPropertyCache = new();
 
@@ -30,7 +29,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
 
         internal static ConcurrentDictionary<(Type, string), Delegate> CachedDelegates { get; } = new();
 
-        internal static readonly ConcurrentDictionary<ICustomItem, ConcurrentDictionary<string, object?>> _variables = new();
+        internal static readonly ConcurrentDictionary<CustomItem, ConcurrentDictionary<string, object?>> _variables = new();
 
         private static readonly char[] _identifierDelimiters = ['.', '(', ')', '[', ']', ',', ' ', '\t'];
 
@@ -71,7 +70,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
         /// </summary>
         /// <param name="name"></param>
         /// <param name="handler"></param>
-        public static void Register(string name, Action<ICustomItem, string[]> handler) => _actionHandlers[name] = handler;
+        public static void Register(string name, Action<CustomItem, string[]> handler) => _actionHandlers[name] = handler;
 
         /// <summary>
         /// Triggers the actions registered in <see cref="CustomItem"/>s
@@ -79,7 +78,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
         /// <param name="customItem"></param>
         /// <param name="type"></param>
         /// <param name="eventArgs"></param>
-        public static void Trigger(ICustomItem customItem, ArgumentType type, EventArgs eventArgs)
+        public static void Trigger(CustomItem customItem, ArgumentType type, EventArgs eventArgs)
         {
             if (customItem?.Arguments == null || customItem.Arguments.Count == 0)
                 return;
@@ -134,7 +133,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             return _commonTypeMap.TryGetValue(name.Trim(), out type);
         }
 
-        internal static string ReplacePlaceholders(string action, EventArgs args, ICustomItem? item = null)
+        internal static string ReplacePlaceholders(string action, EventArgs args, CustomItem? item = null)
         {
             if (string.IsNullOrEmpty(action) || action.IndexOf('{') == -1)
                 return action;
@@ -487,7 +486,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             return list[randomIndex];
         }
 
-        private static object?[] ParseAndResolveParameters(string parametersPart, EventArgs eventArgs, ICustomItem? item)
+        private static object?[] ParseAndResolveParameters(string parametersPart, EventArgs eventArgs, CustomItem? item)
         {
             if (string.IsNullOrWhiteSpace(parametersPart))
                 return [];
@@ -636,7 +635,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             }
         }
 
-        private static void ExecuteAction(ICustomItem? item, string action, EventArgs eventArgs)
+        private static void ExecuteAction(CustomItem? item, string action, EventArgs eventArgs)
         {
             _executeActionDepth.Value = _executeActionDepth.Value + 1;
             if (_executeActionDepth.Value > Plugin.Instance.Config.MaxActionsExecutionDepth)
@@ -677,7 +676,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             return trimmed.StartsWith("if ", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("unless ", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void ExecuteConditional(ICustomItem? item, string action, EventArgs eventArgs)
+        private static void ExecuteConditional(CustomItem? item, string action, EventArgs eventArgs)
         {
             try
             {
@@ -775,7 +774,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             };
         }
 
-        private static void HandleComplexAssignment(ICustomItem? item, string propertyPath, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
+        private static void HandleComplexAssignment(CustomItem? item, string propertyPath, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
         {
             try
             {
@@ -843,7 +842,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             }
         }
 
-        private static void ExecuteRegularAction(ICustomItem? item, string action, EventArgs eventArgs)
+        private static void ExecuteRegularAction(CustomItem? item, string action, EventArgs eventArgs)
         {
             if (string.IsNullOrWhiteSpace(action))
                 return;
@@ -910,7 +909,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
                     return;
                 }
 
-                ICustomAction? foundAction = CustomAction.List.FirstOrDefault(a => string.Equals(a.Name, identifier, StringComparison.OrdinalIgnoreCase));
+                CustomAction? foundAction = CustomAction.List.FirstOrDefault(a => string.Equals(a.Name, identifier, StringComparison.OrdinalIgnoreCase));
 
                 if (foundAction != null)
                     ExecuteCustomAction(foundAction, eventArgs);
@@ -1118,7 +1117,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             }
         }
         
-        private static void ExecuteMethodCall(ICustomItem? item, string methodCall, EventArgs eventArgs)
+        private static void ExecuteMethodCall(CustomItem? item, string methodCall, EventArgs eventArgs)
         {
             try
             {
@@ -1169,7 +1168,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             }
         }
 
-        private static object? ResolveTargetObject(string objectPath, ICustomItem? item, EventArgs eventArgs)
+        private static object? ResolveTargetObject(string objectPath, CustomItem? item, EventArgs eventArgs)
         {
             string firstToken = objectPath.Split('.')[0].Trim();
 
@@ -1346,7 +1345,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             return properties;
         }
 
-        private static void HandlePlaceholderPropertyAssignment(ICustomItem? item, string propertyPathPlaceholder, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
+        private static void HandlePlaceholderPropertyAssignment(CustomItem? item, string propertyPathPlaceholder, string valueExpression, AssignmentOperator operatorType, EventArgs eventArgs)
         {
             try
             {
@@ -1454,7 +1453,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
         /// <param name="eventArgs"></param>
         public static void ExecuteCustomAction(uint actionId, EventArgs eventArgs)
         {
-            if (!CustomAction.CustomActions.TryGetValue(actionId, out ICustomAction? customAction))
+            if (!CustomAction.CustomActions.TryGetValue(actionId, out CustomAction? customAction))
             {
                 LogManager.Error($"{nameof(ArgumentManager)}: CustomAction with ID {actionId} not found");
                 return;
@@ -1468,7 +1467,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
         /// </summary>
         /// <param name="customAction"></param>
         /// <param name="eventArgs"></param>
-        public static void ExecuteCustomAction(ICustomAction? customAction, EventArgs eventArgs)
+        public static void ExecuteCustomAction(CustomAction? customAction, EventArgs eventArgs)
         {
             if (customAction?.Actions == null || customAction.Actions.IsEmpty())
                 return;
@@ -1729,7 +1728,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             return converted;
         }
 
-        private static object? CreateInstanceFromType(Type type, string parametersPart, EventArgs eventArgs, ICustomItem? item)
+        private static object? CreateInstanceFromType(Type type, string parametersPart, EventArgs eventArgs, CustomItem? item)
         {
             try
             {
@@ -1764,7 +1763,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             }
         }
 
-        private static bool TryHandleVariable(ICustomItem? item, string action, EventArgs eventArgs)
+        private static bool TryHandleVariable(CustomItem? item, string action, EventArgs eventArgs)
         {
             if (!action.StartsWith("var ", StringComparison.OrdinalIgnoreCase) && !action.StartsWith("var\t", StringComparison.OrdinalIgnoreCase))
                 return false;
@@ -1791,7 +1790,7 @@ namespace UncomplicatedCustomItems.API.Features.Manager
             return true;
         }
 
-        private static bool TryHandleDelayed(ICustomItem? item, string action, EventArgs eventArgs)
+        private static bool TryHandleDelayed(CustomItem? item, string action, EventArgs eventArgs)
         {
             if (!action.StartsWith("after ", StringComparison.OrdinalIgnoreCase))
                 return false;

@@ -6,7 +6,6 @@ using MEC;
 using System;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
@@ -36,7 +35,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
 
                     if (apiType == "uci")
                     {
-                        if (Utilities.TryGetCustomItem(ItemId, out ICustomItem itemToSpawn))
+                        if (Utilities.TryGetCustomItem(ItemId, out CustomItem itemToSpawn))
                         {
                             SummonedCustomItem summonedItem = new(itemToSpawn, ev.Position);
                             if (!Pickupable && summonedItem.Pickup != null)
@@ -146,3 +145,4 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
         }
     }
 }
+

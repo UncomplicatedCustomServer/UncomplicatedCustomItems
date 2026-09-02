@@ -7,35 +7,34 @@ using System.Linq;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
 using UncomplicatedCustomItems.API.Features.Manager;
-using UncomplicatedCustomItems.API.Interfaces;
 using UnityEngine;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    internal class Reload : ISubcommand
+    internal class Reload : Subcommand
     {
-        public string Name { get; } = "reload";
+        public override string Name { get; } = "reload";
 
-        public string Description { get; } = "Reloads all custom items";
+        public override string Description { get; } = "Reloads all custom items";
 
-        public string VisibleArgs { get; } = string.Empty;
+        public override string VisibleArgs { get; } = string.Empty;
 
-        public int RequiredArgsCount { get; } = 0;
+        public override int RequiredArgsCount { get; } = 0;
 
-        public string RequiredPermission { get; } = "uci.reload";
+        public override string RequiredPermission { get; } = "uci.reload";
 
-        public string[] Aliases { get; } = [""];
+        public override string[] Aliases { get; } = [""];
 
         public Dictionary<APICustomItem, List<Vector3>> APICustomItemsPickups = [];
-        public Dictionary<ICustomItem, List<Vector3>> CustomItemsPickups = [];
-        public Dictionary<Player, List<ICustomItem>> CustomItems = [];
+        public Dictionary<CustomItem, List<Vector3>> CustomItemsPickups = [];
+        public Dictionary<Player, List<CustomItem>> CustomItems = [];
         public Dictionary<Player, List<APICustomItem>> APICustomItems = [];
 
         private int ReloadedItems;
         private int ReloadedActions;
         private int ReloadedAPIItems;
 
-        public bool Execute(List<string> arguments, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (arguments.Count > 0)
             {
@@ -136,13 +135,13 @@ namespace UncomplicatedCustomItems.Commands.Admin
                     item.Destroy();
                 }
 
-                foreach (ICustomItem customItem in CustomItem.List.ToList())
+                foreach (CustomItem customItem in CustomItem.List.ToList())
                 {
                     CustomItem.Unregister(customItem.Id);
                     LogManager.Debug($"Unregistered {customItem.Name}.");
                 }
 
-                foreach (ICustomAction action in CustomAction.List.ToList())
+                foreach (CustomAction action in CustomAction.List.ToList())
                 {
                     CustomAction.Unregister(action.Id);
                     LogManager.Debug($"Unregistered action {action.Name}.");
@@ -177,12 +176,12 @@ namespace UncomplicatedCustomItems.Commands.Admin
 
                 ImportManager.Actor();
 
-                foreach (ICustomItem item in CustomItem.List)
+                foreach (CustomItem item in CustomItem.List)
                 {
                     ReloadedItems++;                    
                 }
 
-                foreach (ICustomAction action in CustomAction.List)
+                foreach (CustomAction action in CustomAction.List)
                 {
                     ReloadedActions++;                    
                 }
@@ -196,7 +195,7 @@ namespace UncomplicatedCustomItems.Commands.Admin
                 int NewActions = BeforeActions - ReloadedActions;
                 int NewApiItems = BeforeAPIItems - ReloadedAPIItems;
 
-                foreach (KeyValuePair<ICustomItem, List<Vector3>> entry in CustomItemsPickups)
+                foreach (KeyValuePair<CustomItem, List<Vector3>> entry in CustomItemsPickups)
                 {
                     foreach (Vector3 pos in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedCustomItem(entry.Key, pos));
@@ -208,9 +207,9 @@ namespace UncomplicatedCustomItems.Commands.Admin
                         Timing.CallDelayed(1f, () => new SummonedAPICustomItem(entry.Key, pos));
                 }
 
-                foreach (KeyValuePair<Player, List<ICustomItem>> entry in CustomItems)
+                foreach (KeyValuePair<Player, List<CustomItem>> entry in CustomItems)
                 {
-                    foreach (ICustomItem customItem in entry.Value)
+                    foreach (CustomItem customItem in entry.Value)
                         Timing.CallDelayed(1f, () => new SummonedCustomItem(customItem, entry.Key));
                 }
 

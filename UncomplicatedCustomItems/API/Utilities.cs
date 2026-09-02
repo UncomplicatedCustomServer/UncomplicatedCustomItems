@@ -1,7 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Interfaces;
 using UncomplicatedCustomItems.API.Features.SpecificData;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features.Manager;
@@ -20,12 +19,12 @@ namespace UncomplicatedCustomItems.API
     public static class Utilities
     {
         /// <summary>
-        /// Check if a <see cref="ICustomItem"/> is valid and can be registered
+        /// Check if a <see cref="CustomItem"/> is valid and can be registered
         /// </summary>
         /// <param name="item"></param>
         /// <param name="error"></param>
         /// <returns><see cref="bool"/> <see langword="false"/> if there's any problem. Every error will be outputted with <paramref name="error"/></returns>
-        public static bool CustomItemValidator(ICustomItem item, out string error)
+        public static bool CustomItemValidator(CustomItem item, out string error)
         {
             if (CustomItem.CustomItems.ContainsKey(item.Id))
             {
@@ -253,7 +252,7 @@ namespace UncomplicatedCustomItems.API
             return true;
         }
 
-        internal static bool CustomActionValidator(ICustomAction action, out string error)
+        internal static bool CustomActionValidator(CustomAction action, out string error)
         {
             if (CustomAction.CustomActions.ContainsKey(action.Id))
             {
@@ -269,12 +268,12 @@ namespace UncomplicatedCustomItems.API
         }
 
         /// <summary>
-        /// Check if a <see cref="ICustomItem"/> is valid and can be registered.
+        /// Check if a <see cref="CustomItem"/> is valid and can be registered.
         /// Does not return the error as text!
         /// </summary>
         /// <param name="item"></param>
         /// <returns><see cref="bool"/> <see langword="false"/> if there's any problem.</returns>
-        public static bool CustomItemValidator(ICustomItem item) => CustomItemValidator(item, out _);
+        public static bool CustomItemValidator(CustomItem item) => CustomItemValidator(item, out _);
 
         /// <summary>
         /// Parse a <see cref="object"/> as response to a <see cref="Player"/>
@@ -340,46 +339,46 @@ namespace UncomplicatedCustomItems.API
         public static bool IsSummonedCustomItem(ushort serial) => SummonedCustomItem.Get(serial) is not null;
 
         /// <summary>
-        /// Try to get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Id"/>
+        /// Try to get a <see cref="CustomItem"/> by it's <see cref="CustomItem.Id"/>
         /// </summary>
         /// <param name="id"></param>
         /// <param name="item"></param>
         /// <returns><see cref="bool"/> <see langword="true"/> if the item exists and <paramref name="item"/> is not <see langword="null"/> or <see langword="default"/></returns>
-        public static bool TryGetCustomItem(uint id, out ICustomItem item) => CustomItem.CustomItems.TryGetValue(id, out item);
+        public static bool TryGetCustomItem(uint id, out CustomItem item) => CustomItem.CustomItems.TryGetValue(id, out item);
 
         /// <summary>
-        /// Try to get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Name"/>
+        /// Try to get a <see cref="CustomItem"/> by it's <see cref="CustomItem.Name"/>
         /// </summary>
         /// <param name="Name"></param>
         /// <param name="item"></param>
         /// <returns><see cref="bool"/> <see langword="true"/> if the item exists and <paramref name="item"/> is not <see langword="null"/> or <see langword="default"/></returns>
-        public static bool TryGetCustomItemByName(string Name, out ICustomItem item)
+        public static bool TryGetCustomItemByName(string Name, out CustomItem item)
         {
             item = CustomItem.List.FirstOrDefault(i => i.Name == Name);
             return item != null;
         }
 
         /// <summary>
-        /// Get a <see cref="ICustomItem"/> by it's <see cref="ICustomItem.Id"/>
+        /// Get a <see cref="CustomItem"/> by it's <see cref="CustomItem.Id"/>
         /// </summary>
         /// <param name="id"></param>
-        /// <returns><see cref="ICustomItem"/> if it exists, otherwhise a <see langword="default"/> will be returned</returns>
-        public static ICustomItem GetCustomItem(uint id) => CustomItem.CustomItems[id];
+        /// <returns><see cref="CustomItem"/> if it exists, otherwhise a <see langword="default"/> will be returned</returns>
+        public static CustomItem GetCustomItem(uint id) => CustomItem.CustomItems[id];
 
         /// <summary>
-        /// Check if the given <see cref="ICustomItem.Id"/> is already registered as a <see cref="ICustomItem"/>
+        /// Check if the given <see cref="CustomItem.Id"/> is already registered as a <see cref="CustomItem"/>
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         public static bool IsCustomItem(uint id) => CustomItem.CustomItems.ContainsKey(id);
 
-        private static Dictionary<PedestalLocker, ICustomItem> UsedLockers { get; set; } = [];
+        private static Dictionary<PedestalLocker, CustomItem> UsedLockers { get; set; } = [];
 
         /// <summary>
         /// Summon a <see cref="CustomItem"/>
         /// </summary>
         /// <param name="customItem"></param>
-        internal static void SummonCustomItem(ICustomItem customItem, bool ignoreChance = false)
+        internal static void SummonCustomItem(CustomItem customItem, bool ignoreChance = false)
         {
             foreach (SpawnData spawn in customItem.Spawn.SpawnSettings)
             {
@@ -414,7 +413,7 @@ namespace UncomplicatedCustomItems.API
             }
         }
 
-        private static void SpawnAtCoordinate(ICustomItem customItem, SpawnData spawn)
+        private static void SpawnAtCoordinate(CustomItem customItem, SpawnData spawn)
         {
             if (spawn.Rotation != Vector3.zero)
             {
@@ -426,7 +425,7 @@ namespace UncomplicatedCustomItems.API
                 new SummonedCustomItem(customItem, spawn.Coords);
         }
 
-        private static void HandleDynamicSpawn(ICustomItem customItem, SpawnData spawn)
+        private static void HandleDynamicSpawn(CustomItem customItem, SpawnData spawn)
         {
             foreach (DynamicSpawn dynamicSpawn in spawn.DynamicSpawn)
             {
@@ -456,7 +455,7 @@ namespace UncomplicatedCustomItems.API
             return Room.List.GetByGameObjectName(room);
         }
 
-        private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, SpawnData spawn, ICustomItem customItem)
+        private static Vector3 GetDynamicSpawnPosition(Room room, DynamicSpawn dynamicSpawn, SpawnData spawn, CustomItem customItem)
         {
             if (spawn.ReplaceExistingPickup)
             {
@@ -473,7 +472,7 @@ namespace UncomplicatedCustomItems.API
             return room.Position;
         }
 
-        private static void HandleZoneSpawn(ICustomItem customItem, SpawnData spawn)
+        private static void HandleZoneSpawn(CustomItem customItem, SpawnData spawn)
         {
             FacilityZone zone = spawn.Zones.RandomItem();
 
@@ -491,13 +490,13 @@ namespace UncomplicatedCustomItems.API
             new SummonedCustomItem(customItem, randomRoom.Position);
         }
 
-        private static Pickup? FindTargetPickupInRoom(Room room, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FindTargetPickupInRoom(Room room, SpawnData spawn, CustomItem customItem)
         {
             List<Pickup> pickupsInRoom = Pickup.List.Where(pickup => pickup.Room == room && !IsSummonedCustomItem(pickup.Serial)).ToList();
             return FilterAndSelectPickup(pickupsInRoom, spawn, customItem);
         }
 
-        private static Pickup? FindTargetPickupInZone(FacilityZone zone, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FindTargetPickupInZone(FacilityZone zone, SpawnData spawn, CustomItem customItem)
         {
             List<Pickup> pickupsInZone = Pickup.List.Where(pickup => pickup.Room != null && pickup.Room.Zone == zone && !IsSummonedCustomItem(pickup.Serial)).ToList();
             if (!(spawn.ReplaceItemsInPedestals ?? false))
@@ -509,7 +508,7 @@ namespace UncomplicatedCustomItems.API
             return FilterAndSelectPickup(pickupsInZone, spawn, customItem);
         }
 
-        private static Pickup? FilterAndSelectPickup(List<Pickup> pickups, SpawnData spawn, ICustomItem customItem)
+        private static Pickup? FilterAndSelectPickup(List<Pickup> pickups, SpawnData spawn, CustomItem customItem)
         {
             if (spawn.ForceItem)
                 pickups = pickups.Where(pickup => pickup.Type == customItem.Item).ToList();

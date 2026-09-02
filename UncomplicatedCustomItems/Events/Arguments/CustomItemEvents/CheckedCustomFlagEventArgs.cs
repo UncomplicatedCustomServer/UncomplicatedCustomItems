@@ -1,15 +1,15 @@
+﻿using UncomplicatedCustomItems.API.Features;
 using System;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Events.Arguments.CustomItemEvents
 {
     public class CheckedCustomFlagEventArgs : EventArgs
     {
-        public ICustomItem CustomItem { get; }
+        public CustomItem CustomItem { get; }
         public Type Flag { get; }
         public bool Passed { get; }
 
-        public CheckedCustomFlagEventArgs(ICustomItem customItem, Type flag, bool passed)
+        public CheckedCustomFlagEventArgs(CustomItem customItem, Type flag, bool passed)
         {
             CustomItem = customItem;
             Flag = flag;

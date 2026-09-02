@@ -1,26 +1,25 @@
-﻿using CommandSystem;
-using System.Collections.Generic;
+﻿using System;
+using CommandSystem;
 using UncomplicatedCustomItems.API.Features;
 using UncomplicatedCustomItems.API.Features.CustomItemAPI;
-using UncomplicatedCustomItems.API.Interfaces;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    public class Summoned : ISubcommand
+    public class Summoned : Subcommand
     {
-        public string Name { get; } = "summoned";
+        public override string Name { get; } = "summoned";
 
-        public string Description { get; } = "Gets every summoned Custom Item";
+        public override string Description { get; } = "Gets every summoned Custom Item";
 
-        public string VisibleArgs { get; } = "";
+        public override string VisibleArgs { get; } = "";
 
-        public int RequiredArgsCount { get; } = 0;
+        public override int RequiredArgsCount { get; } = 0;
 
-        public string RequiredPermission { get; } = "uci.summoned";
+        public override string RequiredPermission { get; } = "uci.summoned";
 
-        public string[] Aliases { get; } = [];
+        public override string[] Aliases { get; } = [];
 
-        public bool Execute(List<string> arguments, ICommandSender player, out string response)
+        public override bool Execute(ArraySegment<string> arguments, ICommandSender player, out string response)
         {
             response = "List of every summoned Custom Item:\n\n Serial | Id | Status |    Name   | Owner";
 

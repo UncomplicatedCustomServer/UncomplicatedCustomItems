@@ -1,11 +1,10 @@
-using LabApi.Events.Arguments.Interfaces;
+﻿using LabApi.Events.Arguments.Interfaces;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Features.Wrappers;
 using System;
 using System.Collections.Generic;
 using UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules.Enums;
 using UncomplicatedCustomItems.API.Features;
-using UncomplicatedCustomItems.API.Interfaces;
 using YamlDotNet.Serialization;
 
 namespace UncomplicatedCustomItems.API.CustomModuleAPI
@@ -13,7 +12,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
     public abstract class CustomModuleBase
     {
         [YamlIgnore]
-        public ICustomItem? CustomItem { get; set; }
+        public CustomItem? CustomItem { get; set; }
 
         [YamlIgnore]
         public abstract string Name { get; }

@@ -1,9 +1,8 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-using UncomplicatedCustomItems.API.Interfaces;
 
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -252,13 +251,13 @@ namespace UncomplicatedCustomItems.API
         }
 
         /// <summary>
-        /// Convert a basic <see cref="YAMLCustomItem"/> Item into a fullified <see cref="ICustomItem"/>
+        /// Convert a basic <see cref="YAMLCustomItem"/> Item into a fullified <see cref="CustomItem"/>
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static ICustomItem Converter(YAMLCustomItem item)
+        public static CustomItem Converter(YAMLCustomItem item)
         {
-            ICustomItem NewItem = new CustomItem
+            CustomItem NewItem = new()
             {
                 Id = item.Id,
                 Name = item.Name,
@@ -280,13 +279,13 @@ namespace UncomplicatedCustomItems.API
         }
 
         /// <summary>
-        /// Convert a basic <see cref="YAMLCustomAction"/> Action into a fullified <see cref="ICustomAction"/>
+        /// Convert a basic <see cref="YAMLCustomAction"/> Action into a fullified <see cref="CustomAction"/>
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public static ICustomAction Converter(YAMLCustomAction action)
+        public static CustomAction Converter(YAMLCustomAction action)
         {
-            ICustomAction NewAction = new CustomAction
+            CustomAction NewAction = new()
             {
                 Id = action.Id,
                 Name = action.Name,

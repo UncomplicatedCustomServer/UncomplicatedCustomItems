@@ -1,3 +1,4 @@
+﻿using System;
 using CommandSystem;
 #if EXILED
 using Exiled.API.Interfaces;
@@ -5,21 +6,21 @@ using Exiled.API.Interfaces;
 using System.Collections.Generic;
 using System.Text;
 using UncomplicatedCustomItems.API.CustomModuleAPI;
-using UncomplicatedCustomItems.API.Interfaces;
+using UncomplicatedCustomItems.API.Features;
 using LabPlugin = LabApi.Loader.Features.Plugins.Plugin;
 
 namespace UncomplicatedCustomItems.Commands.Admin
 {
-    internal class CustomModuleInfo : ISubcommand
+    internal class CustomModuleInfo : Subcommand
     {
-        public string Name { get; } = "custommoduleinfo";
-        public string Description { get; } = "Gets info on all registered CustomModules";
-        public string VisibleArgs { get; } = "";
-        public int RequiredArgsCount { get; } = 0;
-        public string RequiredPermission { get; } = "uci.custommoduleinfo";
-        public string[] Aliases { get; } = ["cmi"];
+        public override string Name { get; } = "custommoduleinfo";
+        public override string Description { get; } = "Gets info on all registered CustomModules";
+        public override string VisibleArgs { get; } = "";
+        public override int RequiredArgsCount { get; } = 0;
+        public override string RequiredPermission { get; } = "uci.custommoduleinfo";
+        public override string[] Aliases { get; } = ["cmi"];
 
-        public bool Execute(List<string> args, ICommandSender sender, out string response)
+        public override bool Execute(ArraySegment<string> args, ICommandSender sender, out string response)
         {
             StringBuilder sb = new();
             if (CustomModuleManager.ModuleOwners.IsEmpty())
