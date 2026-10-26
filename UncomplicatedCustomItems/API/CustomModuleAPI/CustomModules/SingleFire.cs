@@ -49,9 +49,9 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                 }
             }
 
-            if (eventArgs is PlayerShotWeaponEventArgs ev)
+            if (eventArgs is PlayerShotWeaponEventArgs playerShot)
             {
-                if (ev.FirearmItem.MagazineControllerModule is MagazineModule magazine)
+                if (playerShot.FirearmItem.MagazineControllerModule is MagazineModule magazine)
                     magazine.AmmoStored = 0;
             }
         }

@@ -25,9 +25,9 @@ namespace UncomplicatedCustomItems.HarmonyElements.Patches
             if (data.ParameterModifiers is null)
                 return;
 
-            foreach (ParameterObject? paramobj in data.ParameterModifiers)
+            foreach (ParameterObject paramobj in data.ParameterModifiers)
             {
-                if (paramobj is null)
+                if (paramobj == null)
                     continue;
 
                 if (param != paramobj.Parameter)

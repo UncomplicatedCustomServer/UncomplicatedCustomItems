@@ -50,7 +50,11 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI.CustomModules
                     SummonedCustomItem summoned = new(customItem, position);
                     ApplyPhysics(ev.Player, summoned.Pickup);
                     if (summoned.Pickup is TimedGrenadeProjectile grenadePickup)
+                    {
                         grenadePickup.Base.ServerActivate();
+                        if (GrenadeExplodeOnImpact && grenadePickup.Base.Info.ItemId.GetItemBase() is InventorySystem.Items.ThrowableProjectiles.ThrowableItem throwableBase)
+                            grenadePickup.GameObject.AddComponent<CollisionHandler>().Init(grenadePickup.GameObject, throwableBase.Projectile);
+                    }
                         
                     return;
                 }

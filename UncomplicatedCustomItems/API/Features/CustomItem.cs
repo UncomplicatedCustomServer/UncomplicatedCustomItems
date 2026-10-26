@@ -40,6 +40,7 @@ namespace UncomplicatedCustomItems.API.Features
                 UnregisteredCustomItems.TryAdd(item.Id, item);
                 return;
             }
+            
             CustomItems.TryAdd(item.Id, item);
             LogManager.Silent($"Successfully registered CustomItem '{item.Name}' (Id: {item.Id}) into the plugin!");
         }

@@ -40,7 +40,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Item:
                     if (item.CustomData is null)
                     {
-                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'Data', found '{item.CustomData?.GetType().Name}' The CustomData formatting is incorrect. \n Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667038750244979";
+                        error = $"The item has been flagged as 'Item' but the CustomData class is not 'Data', found '{item.CustomData?.GetType().Name}' The CustomData formatting is incorrect. \n Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -49,7 +49,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Weapon:
                     if (item.CustomData is not WeaponData)
                     {
-                        error = $"The item has been flagged as 'Weapon' but the CustomData class is not 'WeaponData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339666579251793960";
+                        error = $"The item has been flagged as 'Weapon' but the CustomData class is not 'WeaponData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -64,7 +64,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Keycard:
                     if (item.CustomData is not KeycardData)
                     {
-                        error = $"The item has been flagged as 'Keycard' but the CustomData class is not 'KeycardData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667184435073074";
+                        error = $"The item has been flagged as 'Keycard' but the CustomData class is not 'KeycardData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -79,7 +79,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Armor:
                     if (item.CustomData is not ArmorData)
                     {
-                        error = $"The item has been flagged as 'Armor' but the CustomData class is not 'ArmorData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339666435491762197";
+                        error = $"The item has been flagged as 'Armor' but the CustomData class is not 'ArmorData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -94,7 +94,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.ExplosiveGrenade:
                     if (item.CustomData is not ExplosiveGrenadeData)
                     {
-                        error = $"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'ExplosiveGrenadeData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667358398152798";
+                        error = $"The item has been flagged as 'ExplosiveGrenade' but the CustomData class is not 'ExplosiveGrenadeData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -109,7 +109,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.FlashGrenade:
                     if (item.CustomData is not FlashGrenadeData)
                     {
-                        error = $"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'FlashGrenadeData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339666785313755156";
+                        error = $"The item has been flagged as 'FlashGrenade' but the CustomData class is not 'FlashGrenadeData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -124,7 +124,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Jailbird:
                     if (item.CustomData is not JailbirdData)
                     {
-                        error = $"The item has been flagged as 'Jailbird' but the CustomData class is not 'JailbirdData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1342257093629182002";
+                        error = $"The item has been flagged as 'Jailbird' but the CustomData class is not 'JailbirdData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -139,7 +139,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Medikit:
                     if (item.CustomData is not MedikitData)
                     {
-                        error = $"The item has been flagged as 'Medikit' but the CustomData class is not 'MedikitData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1339667529366372443";
+                        error = $"The item has been flagged as 'Medikit' but the CustomData class is not 'MedikitData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -154,7 +154,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Painkillers:
                     if (item.CustomData is not PainkillersData)
                     {
-                        error = $"The item has been flagged as 'Painkillers' but the CustomData class is not 'PainkillersData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/1354116780846612711";
+                        error = $"The item has been flagged as 'Painkillers' but the CustomData class is not 'PainkillersData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -169,7 +169,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Adrenaline:
                     if (item.CustomData is not AdrenalineData)
                     {
-                        error = $"The item has been flagged as 'Adrenaline' but the CustomData class is not 'AdrenalineData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
+                        error = $"The item has been flagged as 'Adrenaline' but the CustomData class is not 'AdrenalineData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -192,7 +192,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.MicroHID:
                     if (item.CustomData is not MicroHIDData)
                     {
-                        error = $"The item has been flagged as 'MicroHID' but the CustomData class is not 'MicroHIDData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
+                        error = $"The item has been flagged as 'MicroHID' but the CustomData class is not 'MicroHIDData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -207,7 +207,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.ParticleDisruptor:
                     if (item.CustomData is not ParticleDisruptorData)
                     {
-                        error = $"The item has been flagged as 'ParticalDisruptor' but the CustomData class is not 'ParticleDisruptorData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
+                        error = $"The item has been flagged as 'ParticalDisruptor' but the CustomData class is not 'ParticleDisruptorData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -222,7 +222,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Light:
                     if (item.CustomData is not FlashlightData)
                     {
-                        error = $"The item has been flagged as 'Light' but the CustomData class is not 'FlashlightData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/null";
+                        error = $"The item has been flagged as 'Light' but the CustomData class is not 'FlashlightData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -237,7 +237,7 @@ namespace UncomplicatedCustomItems.API
                 case CustomItemType.Candy:
                     if (item.CustomData is not CandyData)
                     {
-                        error = $"The item has been flagged as 'Candy' with SCP330 but the CustomData class is not 'CandyData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: https://discord.com/channels/1170301876990914631/[CANDY_DOCUMENTATION_LINK]";
+                        error = $"The item has been flagged as 'Candy' with SCP330 but the CustomData class is not 'CandyData', found '{item.CustomData.GetType().Name}' \n The CustomData formatting is incorrect. Please follow the format found here: {GetWikiPage(item)}";
                         return false;
                     }
 
@@ -250,6 +250,17 @@ namespace UncomplicatedCustomItems.API
 
             error = "";
             return true;
+        }
+
+        private static string GetWikiPage(CustomItem item)
+        {
+            string page = item.CustomItemType switch
+            {
+                CustomItemType.SCPItem => $"scp-items/{item.Item.ToString().ToKebabCase(separateNumbersAndLetters: true)}",
+                _ => item.CustomItemType.ToString().ToKebabCase(),
+            };
+
+            return $"https://docs.uci.ucserver.it/uncomplicatedcustomitems/api/custom-data/{page}";
         }
 
         internal static bool CustomActionValidator(CustomAction action, out string error)

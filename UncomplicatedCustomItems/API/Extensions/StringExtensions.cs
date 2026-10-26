@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System;
+using System.Text;
 using UnityEngine;
 using UncomplicatedCustomItems.API.Features.Manager;
 
@@ -13,6 +14,56 @@ namespace UncomplicatedCustomItems.API.Extensions
                 str += " ";
 
             return str;
+        }
+
+        /// <summary>
+        /// Converts a PascalCase/camelCase string to kebab case.
+        /// </summary>
+        /// <param name="str">The string to convert.</param>
+        /// <param name="separator">The separator to insert. Defaults to '-'.</param>
+        /// <param name="separateNumbersAndLetters">When true, also inserts the separator between a digit and a letter (e.g. "SCP127" becomes "scp-127")    .</param>
+        /// <returns>The kebab-case string.</returns>
+        public static string ToKebabCase(this string str, char separator = '-', bool separateNumbersAndLetters = false)
+        {
+            if (string.IsNullOrEmpty(str))
+                return str;
+
+            StringBuilder sb = new(str.Length + 5);
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                char c = str[i];
+
+                if (char.IsUpper(c))
+                {
+                    bool isFirst = sb.Length == 0;
+                    char prev = i > 0 ? str[i - 1] : '\0';
+                    char next = i + 1 < str.Length ? str[i + 1] : '\0';
+                    bool lowerToUpper = !isFirst && (char.IsLower(prev) || char.IsDigit(prev));
+                    bool acronymBoundary = !isFirst && char.IsUpper(prev) && char.IsUpper(c) && char.IsLower(next);
+
+                    if (lowerToUpper || acronymBoundary)
+                        sb.Append(separator);
+
+                    sb.Append(char.ToLowerInvariant(c));
+                }
+                else
+                {
+                    if (separateNumbersAndLetters && sb.Length > 0 && i > 0)
+                    {
+                        char prev = str[i - 1];
+                        bool letterToDigit = char.IsLetter(prev) && char.IsDigit(c);
+                        bool digitToLetter = char.IsDigit(prev) && char.IsLetter(c);
+
+                        if ((letterToDigit || digitToLetter) && sb[sb.Length - 1] != separator)
+                            sb.Append(separator);
+                    }
+
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>

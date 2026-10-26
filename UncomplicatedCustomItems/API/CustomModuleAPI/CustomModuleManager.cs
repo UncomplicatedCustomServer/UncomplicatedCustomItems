@@ -45,6 +45,7 @@ namespace UncomplicatedCustomItems.API.CustomModuleAPI
                 {
                     if (!type.IsClass || type.IsAbstract)
                         continue;
+                        
                     if (!typeof(CustomModuleBase).IsAssignableFrom(type))
                         continue;
 

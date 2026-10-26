@@ -50,17 +50,17 @@ namespace UncomplicatedCustomItems
 #endif
         public override string Author => "SpGerg, FoxWorn & Mr. Baguetter";
 #if EXILED
-        public override Version RequiredExiledVersion => new(9, 13, 1);
+        public override Version RequiredExiledVersion { get; } = new(9, 13, 1);
 #else
-        public override Version RequiredApiVersion => LabApiProperties.CurrentVersion;
+        public override Version RequiredApiVersion { get; } = LabApiProperties.CurrentVersion;
 #endif
-        public override Version Version => new(4, 2, 0);
+        public override Version Version { get; } = new(4, 2, 0);
 
-        public Assembly Assembly => Assembly.GetExecutingAssembly();
+        public Assembly Assembly { get; } = Assembly.GetExecutingAssembly();
 #if EXILED
-        public override PluginPriority Priority => PluginPriority.First;
+        public override PluginPriority Priority { get; } = PluginPriority.First;
 #else
-        public override LoadPriority Priority => LoadPriority.Highest;
+        public override LoadPriority Priority { get; } = LoadPriority.Highest;
 #endif
 
 #nullable disable

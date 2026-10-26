@@ -21,7 +21,6 @@ using UncomplicatedCustomItems.API.Extensions;
 using UncomplicatedCustomItems.API.Features.Manager;
 using UncomplicatedCustomItems.API.Features.Networking;
 using UncomplicatedCustomItems.API.Features.SpecificData;
-
 using UncomplicatedCustomItems.API.Wrappers;
 using UncomplicatedCustomItems.Commands;
 using UncomplicatedCustomItems.Events;
@@ -73,19 +72,6 @@ namespace UncomplicatedCustomItems.API.Features
         public Item? Item { get; internal set; }
 
         internal bool NameApplied { get; set; } = false;
-        
-        /// <summary>
-        /// Converts the Command custom data from items into a list to allow multiple commands.
-        /// </summary>
-        public static List<string?> CommandsList(List<ItemDataList> commands)
-        {
-            List<string?> result = new(commands.Count);
-
-            foreach (ItemDataList data in commands)
-                result.Add(data.Command);
-
-            return result;
-        }
 
         /// <summary>
         /// The <see cref="SummonedCustomItem"/> as a <see cref="LabApi.Features.Wrappers.Pickup"/>.
@@ -224,7 +210,7 @@ namespace UncomplicatedCustomItems.API.Features
                         using (new AutosyncRpc(jailbird.Base.ItemId, out NetworkWriter writer))
                         {
                             writer.WriteByte(0);
-                            writer.WriteByte((byte)jailbird.WearState);
+                            writer.WriteByte((byte)jbData.WearState);
                         }
                         break;
 
@@ -292,6 +278,10 @@ namespace UncomplicatedCustomItems.API.Features
 
                     case CustomItemType.Light:
                         HandlePickupLight();
+                        break;
+
+                    case CustomItemType.Jailbird when Pickup is LabApi.Features.Wrappers.JailbirdPickup jbPickup && CustomItem.CustomData is JailbirdData jbPickupData:
+                        jbPickup.WearState = jbPickupData.WearState;
                         break;
 
                     case CustomItemType.SCPItem:
@@ -502,7 +492,8 @@ namespace UncomplicatedCustomItems.API.Features
         public void CreateAndAttachLightToItem(Transform parentTransform, FlashlightData data, Vector3 localPos)
         {
             Light newLight = Light.Create(parentTransform);
-            ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+            if (!ColorUtility.TryParseHtmlString(data.HexColor, out Color color))
+                color = Color.white;
 
             newLight.Color = color;
             newLight.Type = data.LightType;
@@ -530,7 +521,9 @@ namespace UncomplicatedCustomItems.API.Features
                     return;
 
                 Light newLight = Light.Create(flashItem.gameObject.transform.position);
-                ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+                if (!ColorUtility.TryParseHtmlString(data.HexColor, out Color color))
+                    color = Color.white;
+
                 newLight.Color = color;
                 newLight.Type = data.LightType;
                 newLight.Range = data.Range;
@@ -553,7 +546,9 @@ namespace UncomplicatedCustomItems.API.Features
                     return;
 
                 Light newLight = Light.Create(lantern.gameObject.transform.position);
-                ColorUtility.TryParseHtmlString(data.HexColor, out Color color);
+                if (!ColorUtility.TryParseHtmlString(data.HexColor, out Color color))
+                    color = Color.white;
+
                 newLight.Color = color;
                 newLight.Type = data.LightType;
                 newLight.Range = data.Range;
@@ -621,7 +616,7 @@ namespace UncomplicatedCustomItems.API.Features
             if ((Pickup.Type == ItemType.SCP244a || Pickup.Type == ItemType.SCP244b) && CustomItem.CustomData is SCP244Data s244a)
             {
                 LogManager.Debug($"SCPItem is SCP-244");
-                Scp244Pickup? scp244Pickup = (Scp244Pickup?)Scp244Pickup.Create(CustomItem.Item, Pickup.Position);
+                Scp244Pickup? scp244Pickup = (Scp244Pickup?)Pickup.Create(CustomItem.Item, Pickup.Position, Pickup.Rotation);
                 if (scp244Pickup == null)
                     return;
 
@@ -639,7 +634,7 @@ namespace UncomplicatedCustomItems.API.Features
             if (Pickup.Type == ItemType.GunSCP127 && CustomItem.CustomData is SCP127Data s127)
             {
                 LogManager.Debug($"SCPItem is SCP-127");
-                var scpFirearmPickup = (LabApi.Features.Wrappers.FirearmPickup?)LabApi.Features.Wrappers.FirearmPickup.Create(CustomItem.Item, Pickup.Position);
+                var scpFirearmPickup = (LabApi.Features.Wrappers.FirearmPickup?)Pickup.Create(CustomItem.Item, Pickup.Position, Pickup.Rotation);
                 if (scpFirearmPickup == null)
                     return;
 

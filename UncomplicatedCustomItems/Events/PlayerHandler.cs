@@ -180,7 +180,7 @@ namespace UncomplicatedCustomItems.Events
 
         public static void OnJailbirdMessaging(PlayerProcessingJailbirdMessageEventArgs ev)
         {
-            if (ev.JailbirdItem == null || ev.JailbirdItem.Base == null || ev.Player == null)
+            if (ev.JailbirdItem == null || ev.JailbirdItem.Base == null)
                 return;
 
             if (Utilities.TryGetSummonedCustomItem(ev.JailbirdItem.Serial, out var item) && item != null && item.CustomItem.CustomItemType is CustomItemType.Jailbird && item.CustomItem.CustomData is JailbirdData data)
@@ -193,15 +193,14 @@ namespace UncomplicatedCustomItems.Events
 
                         break;
 
-                    case JailbirdMessageType.UpdateState:
-                        if (item.CustomItem.CustomData is JailbirdData jailbird && !jailbird.AllowWearStateChanges && item.CustomItem.CustomItemType is CustomItemType.Jailbird)
+                    case JailbirdMessageType.UpdateState or JailbirdMessageType.Broken:
+                        if (!data.AllowWearStateChanges)
                         {
-                            JailbirdDeteriorationTracker.ReceivedStates[ev.JailbirdItem.Serial] = jailbird.WearState;
-                            AutosyncRpc sync = new(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer);
+                            JailbirdDeteriorationTracker.ReceivedStates[ev.JailbirdItem.Serial] = data.WearState;
+                            using AutosyncRpc sync = new(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer);
                             writer.WriteByte(0);
-                            writer.WriteByte((byte)jailbird.WearState);
+                            writer.WriteByte((byte)data.WearState);
                             sync.Send();
-                            sync.Dispose();
                         }
 
                         break;
@@ -212,15 +211,14 @@ namespace UncomplicatedCustomItems.Events
             {
                 switch (ev.Message)
                 {
-                    case JailbirdMessageType.UpdateState:
+                    case JailbirdMessageType.UpdateState or JailbirdMessageType.Broken:
                         if (api.CustomItem is CustomJailbird jailbird && jailbird.LockWearState)
                         {
                             JailbirdDeteriorationTracker.ReceivedStates[ev.JailbirdItem.Serial] = jailbird.WearState;
-                            AutosyncRpc sync = new(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer);
+                            using AutosyncRpc sync = new(ev.JailbirdItem.Base.ItemId, out NetworkWriter writer);
                             writer.WriteByte(0);
                             writer.WriteByte((byte)jailbird.WearState);
                             sync.Send();
-                            sync.Dispose();
                         }
 
                         break;
@@ -1117,7 +1115,7 @@ namespace UncomplicatedCustomItems.Events
                 summonedItem.ResetBadge(ev.Player);
                 StopHumeShieldRegen(ev.Player);
 
-                if (ev.Pickup.GameObject != null && ev.Pickup.GameObject.transform != null)
+                if (!ev.Pickup.IsDestroyed)
                 {
                     ev.Pickup.GameObject.transform.localScale = summonedItem.CustomItem?.Scale ?? Vector3.one;
                 }
@@ -1137,7 +1135,7 @@ namespace UncomplicatedCustomItems.Events
 
             try
             {
-                if (ev.Pickup.GameObject != null && ev.Pickup.GameObject.transform != null)
+                if (!ev.Pickup.IsDestroyed)
                     ev.Pickup.GameObject.transform.localScale = summonedCustomItem.CustomItem.Scale;
                 
                 ev.Pickup.Weight = summonedCustomItem.CustomItem.Weight;
